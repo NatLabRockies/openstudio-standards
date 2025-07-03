@@ -830,6 +830,14 @@ class ACM179dASHRAE9012007
       # Set baseline DCV system
       model_set_baseline_demand_control_ventilation(model, climate_zone)
 
+      if !baseline_179d
+        # Force setting a motorized oa damper: sets the HVAC Operation Schedule
+        # as a Controller:OA's Minimum Outdoor AIr Schedule so that OA intake
+        # is turned off during nighttime
+        occ_threshold = air_loop_hvac_unoccupied_threshold
+        model.getAirLoopHVACs.sort.each { |air_loop_hvac| air_loop_hvac_add_motorized_oa_damper(air_loop_hvac, occ_threshold, air_loop_hvac.availabilitySchedule) }
+      end
+
       # Final sizing run and adjustements to values that need refinement
       model_refine_size_dependent_values(model, sizing_run_dir)
 
