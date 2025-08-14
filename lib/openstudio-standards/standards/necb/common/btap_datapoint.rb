@@ -384,8 +384,16 @@ class BTAPDatapoint
         self.output_timestep_data(model,@dp_temp_folder, @options[:datapoint_id])
       end
 
+      # Compile all the important attributes of the simulation into a singleton for reference.
+      if @options[:enable_costing] or @options[:enable_carbon]
+        BTAP::Attributes.set_model(model)
+      end
+
       @cost_result = nil
       if @options[:enable_costing]
+        attributes = BTAP::Attributes.instance
+        attributes.test_attributes
+        exit
         # Perform costing
         costs_path = File.absolute_path(File.join(__dir__, '..','..','..','btap','costing','common_resources', 'costs.csv'))
         local_cost_factors_path = File.absolute_path(File.join(__dir__, '..','..','..','btap','costing','common_resources', 'costs_local_factors.csv'))
@@ -398,8 +406,9 @@ class BTAPDatapoint
         puts "Wrote File cost_results.json in #{Dir.pwd} "
       end
 
+      @carbon_result = nil # TODO: put this in btap data
       if @options[:enable_carbon]
-        
+        attributes = BTAP::Attributes.instance
       end
       
       @qaqc[:options] = @options # This is options sent on the command line
