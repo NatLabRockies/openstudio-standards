@@ -1145,6 +1145,72 @@ class ACM179dASHRAE9012007
     'zone_dsoa_multiplier'
   end
 
+  # MARKED (TO-BE-DELETED-LATER): 
+  # ADD NEW METHOD TO CALCULATE MINIMUM/DESIGN OUTDOOR AIRFLOW RATES
+
+  # get minimum outdoor airflow rate from Controller:OutdoorAir
+  # get design outdoor airflow rate from Sizing:System
+  # only considering airloop outdoor airflow rates
+  # and not considering packaged terminal outdoor airflow rates
+  # @param model [object]
+  # @return [array] of airflow rates: [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
+  def get_minimum_and_design_outdoor_airflow_rates(model)
+    outdoor_airflow_rate_minimum_m_3_per_s = 0.0
+    outdoor_airflow_rate_design_m_3_per_s = 0.0
+
+    model.getAirLoopHVACs.each do |air_loop|
+      # Initialize values for this air loop
+      controller_minimum_oa_flow_rate = 0.0
+      design_supply_oa_flow_rate = 0.0
+
+      # Skip if no outdoor air system
+      next if air_loop.airLoopHVACOutdoorAirSystem.empty?
+
+      # Get the outdoor air system and controller
+      air_loop_hvac_oasys = air_loop.airLoopHVACOutdoorAirSystem.get
+      controller_oa = air_loop_hvac_oasys.getControllerOutdoorAir
+      controller_mv = controller_oa.controllerMechanicalVentilation
+
+      # Calculate controller minimum outdoor air flow rate
+      # Try hard-sized values first, then autosized
+      if controller_oa.minimumOutdoorAirFlowRate.is_initialized
+        controller_minimum_oa_flow_rate = controller_oa.minimumOutdoorAirFlowRate.get
+      elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
+        controller_minimum_oa_flow_rate = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
+      elsif controller_oa.isMinimumOutdoorAirFlowRateAutosized && controller_mv.demandControlledVentilation
+        # making it fail for now to test later
+        msg = "BASELINE: demand control ventilation activated in air loop hvac '#{air_loop_hvac.nameString}'."
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        raise msg
+      else
+        # making it fail for now to test later
+        msg = "BASELINE: Cannot get minimum outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        raise msg
+      end
+
+      # Calculate design outdoor air supply flow rate
+      # Try hard-sized values first, then autosized
+      sizing_system = air_loop.sizingSystem
+      if sizing_system.designOutdoorAirFlowRate.is_initialized
+        design_supply_oa_flow_rate = sizing_system.designOutdoorAirFlowRate.get
+      elsif sizing_system.autosizedDesignOutdoorAirFlowRate.is_initialized
+        design_supply_oa_flow_rate = sizing_system.autosizedDesignOutdoorAirFlowRate.get        
+      else
+        # making it fail for now to test later
+        msg = "BASELINE: Cannot get design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        raise msg
+      end
+
+      # Use the maximum of the two values for this air loop
+      outdoor_airflow_rate_minimum_m_3_per_s += controller_minimum_oa_flow_rate
+      outdoor_airflow_rate_design_m_3_per_s += design_supply_oa_flow_rate
+    end
+
+    return [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
+  end
+
   def mark_zone_dsoa_multiplier(model)
     total_oa_design_flow_rate = 0.0
 
