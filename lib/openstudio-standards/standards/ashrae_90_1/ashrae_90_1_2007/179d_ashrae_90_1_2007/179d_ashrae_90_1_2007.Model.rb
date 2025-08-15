@@ -753,46 +753,47 @@ class ACM179dASHRAE9012007
             outdoor_airflow_rate_minimum_m_3_per_s_baseline == 0.0 ? 0.0 : 100.0
           else
             (
-              outdoor_airflow_rate_minimum_m_3_per_s_baseline - outdoor_airflow_rate_minimum_m_3_per_s_proposed
-            ).abs / outdoor_airflow_rate_minimum_m_3_per_s_proposed * 100.0
+              outdoor_airflow_rate_minimum_m_3_per_s_proposed - outdoor_airflow_rate_minimum_m_3_per_s_baseline
+            ) / outdoor_airflow_rate_minimum_m_3_per_s_proposed * 100.0
           end
         pct_diff_design_outdoor_airflow_rate =
           if outdoor_airflow_rate_design_m_3_per_s_proposed == 0.0
             outdoor_airflow_rate_design_m_3_per_s_baseline == 0.0 ? 0.0 : 100.0
           else
             (
-              outdoor_airflow_rate_design_m_3_per_s_baseline - outdoor_airflow_rate_design_m_3_per_s_proposed
-            ).abs / outdoor_airflow_rate_design_m_3_per_s_proposed * 100.0
+              outdoor_airflow_rate_design_m_3_per_s_proposed - outdoor_airflow_rate_design_m_3_per_s_baseline
+            ) / outdoor_airflow_rate_design_m_3_per_s_proposed * 100.0
           end
 
+        # Difference threshold
+        diff_threshold_pcnt = 1.0
+
         # Adjust minimum outdoor airflow rate if difference between baseline/proposed is larger than 1%
-        if pct_diff_minimum_outdoor_airflow_rate > 1.0 # %
+        if pct_diff_minimum_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
           msg = "BASELINE: Minimum outdoor airflow rate for the baseline model is #{
               outdoor_airflow_rate_minimum_m_3_per_s_baseline.round(2)
-            } m3/s, which is more than 1% different from the proposed model's minimum outdoor airflow rate of #{
+            } m3/s, which is more than #{diff_threshold_pcnt}% different from the proposed model's minimum outdoor airflow rate of #{
               outdoor_airflow_rate_minimum_m_3_per_s_proposed.round(2)
             } m3/s. Adjusting baseline model minimum outdoor airflow rate to match the proposed model's minimum outdoor airflow rate."
           OpenStudio.logFree(
-            OpenStudio::Error,
+            OpenStudio::Info,
             'openstudio.standards.Model',
             msg
           )
-          raise msg
         end
 
         # Adjust design outdoor airflow rate if difference between baseline/proposed is larger than 1%
-        if pct_diff_design_outdoor_airflow_rate > 1.0 # %
+        if pct_diff_design_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
           msg = "BASELINE: Design outdoor airflow rate for the baseline model is #{
               outdoor_airflow_rate_design_m_3_per_s_baseline.round(2)
-            } m3/s, which is more than 1% different from the proposed model's design outdoor airflow rate of #{
+            } m3/s, which is more than #{diff_threshold_pcnt}% different from the proposed model's design outdoor airflow rate of #{
               outdoor_airflow_rate_design_m_3_per_s_proposed.round(2)
             } m3/s. Adjusting baseline model design outdoor airflow rate to match the proposed model's design outdoor airflow rate."
           OpenStudio.logFree(
-            OpenStudio::Error,
+            OpenStudio::Info,
             'openstudio.standards.Model',
             msg
           )
-          raise msg
         end
 
         #################################################################### EXISTING
