@@ -741,14 +741,18 @@ class ACM179dASHRAE9012007
         outdoor_airflow_rate_minimum_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_minimum_m_3_per_s').get
       else
         # making it fail to test later
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "cannot get outdoor_airflow_rate_minimum_m_3_per_s from additional properties")
+        msg = "cannot get outdoor_airflow_rate_minimum_m_3_per_s from additional properties"
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        raise msg
       end
       outdoor_airflow_rate_design_m_3_per_s = nil
       if model.getBuilding.additionalProperties.hasFeature('outdoor_airflow_rate_design_m_3_per_s')
         outdoor_airflow_rate_design_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_design_m_3_per_s').get
       else
         # making it fail to test later
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "cannot get outdoor_airflow_rate_design_m_3_per_s from additional properties")
+        msg = "cannot get outdoor_airflow_rate_design_m_3_per_s from additional properties"
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        raise msg
       end
 
       if baseline_179d
