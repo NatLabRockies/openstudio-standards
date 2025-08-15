@@ -757,7 +757,7 @@ class ACM179dASHRAE9012007
 
       if baseline_179d
 
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Baseline Adjust Design Outdoor Air Flow Rate to Proposed Levels if lower ***')
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Baseline Adjust Minimum/Design Outdoor Air Flow Rate to Proposed Levels if different ***')
         total_oa_design_flow_rate = 0.0
 
         model.getAirLoopHVACs.each do |air_loop_hvac|
