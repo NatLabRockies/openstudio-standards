@@ -568,7 +568,7 @@ class ACM179dASHRAE9012007
       # GRAB EXISTING/PROPOSED OA RATES FROM HERE
 
       # Get minimum and design outdoor airflow rates
-      outdoor_airflow_rates_proposed = get_minimum_and_design_outdoor_airflow_rates(model)
+      outdoor_airflow_rates_proposed = get_minimum_and_design_outdoor_airflow_rates(model, 'PROPOSED')
 
       # Remove all HVAC from model, excluding service water heating
       if baseline_179d
@@ -734,26 +734,6 @@ class ACM179dASHRAE9012007
       # MARKED (TO-BE-DELETED-LATER): 
       # THIS IS WHERE BASELINE OA ADJUST BASED ON PROPSOED SHOULD HAPPEN
       # ADJUST OA RATES IF NECESSARY BY COMPARING BASELINE AND PROPOSED OA RATES
-
-      # Get proposed minimum/design outdoor airflow rates
-      outdoor_airflow_rate_minimum_m_3_per_s = nil
-      if model.getBuilding.additionalProperties.hasFeature('outdoor_airflow_rate_minimum_m_3_per_s')
-        outdoor_airflow_rate_minimum_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_minimum_m_3_per_s').get
-      else
-        # making it fail to test later
-        msg = "cannot get outdoor_airflow_rate_minimum_m_3_per_s from additional properties"
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-        raise msg
-      end
-      outdoor_airflow_rate_design_m_3_per_s = nil
-      if model.getBuilding.additionalProperties.hasFeature('outdoor_airflow_rate_design_m_3_per_s')
-        outdoor_airflow_rate_design_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_design_m_3_per_s').get
-      else
-        # making it fail to test later
-        msg = "cannot get outdoor_airflow_rate_design_m_3_per_s from additional properties"
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-        raise msg
-      end
 
       if baseline_179d
 
@@ -1177,7 +1157,7 @@ class ACM179dASHRAE9012007
   # and not considering packaged terminal outdoor airflow rates
   # @param model [object]
   # @return [array] of airflow rates: [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
-  def get_minimum_and_design_outdoor_airflow_rates(model)
+  def get_minimum_and_design_outdoor_airflow_rates(model, scenario)
     outdoor_airflow_rate_minimum_m_3_per_s = 0.0
     outdoor_airflow_rate_design_m_3_per_s = 0.0
 
@@ -1202,12 +1182,12 @@ class ACM179dASHRAE9012007
         controller_minimum_oa_flow_rate = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
       elsif controller_oa.isMinimumOutdoorAirFlowRateAutosized && controller_mv.demandControlledVentilation
         # making it fail for now to test later
-        msg = "BASELINE: demand control ventilation activated in air loop hvac '#{air_loop_hvac.nameString}'."
+        msg = "#{scenario}: demand control ventilation activated in air loop hvac '#{air_loop_hvac.nameString}'."
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
         raise msg
       else
         # making it fail for now to test later
-        msg = "BASELINE: Cannot get minimum outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        msg = "#{scenario}: Cannot get minimum outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
         raise msg
       end
@@ -1221,7 +1201,7 @@ class ACM179dASHRAE9012007
         design_supply_oa_flow_rate = sizing_system.autosizedDesignOutdoorAirFlowRate.get        
       else
         # making it fail for now to test later
-        msg = "BASELINE: Cannot get design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        msg = "#{scenario}: Cannot get design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
         raise msg
       end
