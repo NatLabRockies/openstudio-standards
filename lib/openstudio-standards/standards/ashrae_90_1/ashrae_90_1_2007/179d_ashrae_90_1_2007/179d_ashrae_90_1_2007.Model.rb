@@ -735,6 +735,22 @@ class ACM179dASHRAE9012007
       # THIS IS WHERE BASELINE OA ADJUST BASED ON PROPSOED SHOULD HAPPEN
       # ADJUST OA RATES IF NECESSARY BY COMPARING BASELINE AND PROPOSED OA RATES
 
+      # Get proposed minimum/design outdoor airflow rates
+      outdoor_airflow_rate_minimum_m_3_per_s = nil
+      if model.getBuilding.additionalProperties.hasFeature('outdoor_airflow_rate_minimum_m_3_per_s')
+        outdoor_airflow_rate_minimum_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_minimum_m_3_per_s').get
+      else
+        # making it fail to test later
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "cannot get outdoor_airflow_rate_minimum_m_3_per_s from additional properties")
+      end
+      outdoor_airflow_rate_design_m_3_per_s = nil
+      if model.getBuilding.additionalProperties.hasFeature('outdoor_airflow_rate_design_m_3_per_s')
+        outdoor_airflow_rate_design_m_3_per_s = model.getBuilding.additionalProperties.getFeatureAsDouble('outdoor_airflow_rate_design_m_3_per_s').get
+      else
+        # making it fail to test later
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "cannot get outdoor_airflow_rate_design_m_3_per_s from additional properties")
+      end
+
       if baseline_179d
 
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Baseline Adjust Design Outdoor Air Flow Rate to Proposed Levels if lower ***')
