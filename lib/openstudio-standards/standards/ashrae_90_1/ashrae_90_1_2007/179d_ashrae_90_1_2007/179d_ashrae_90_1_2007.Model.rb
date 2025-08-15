@@ -557,10 +557,10 @@ class ACM179dASHRAE9012007
         model_add_apxg_dcv_properties(model)
         model_raise_user_model_dcv_errors(model)
 
-        # NOTE: 179D addition
-        # Should probably just store a HASH instead of using additionalProperties...
-        zone_dsoas = model.getThermalZones.map { |zone| [zone.nameString, thermal_zone_outdoor_airflow_rate(zone) *  zone.multiplier.to_f] }.to_h
-        mark_zone_dsoa_multiplier(model)
+        # # NOTE: 179D addition
+        # # Should probably just store a HASH instead of using additionalProperties...
+        # zone_dsoas = model.getThermalZones.map { |zone| [zone.nameString, thermal_zone_outdoor_airflow_rate(zone) *  zone.multiplier.to_f] }.to_h
+        # mark_zone_dsoa_multiplier(model)
       end
 
       # MARKED (TO-BE-DELETED-LATER): 
@@ -849,46 +849,46 @@ class ACM179dASHRAE9012007
 
         #################################################################### EXISTING
         #################################################################### EXISTING
-        model.getAirLoopHVACs.each do |air_loop_hvac|
-          next if air_loop_hvac.airLoopHVACOutdoorAirSystem.empty?
+        # model.getAirLoopHVACs.each do |air_loop_hvac|
+        #   next if air_loop_hvac.airLoopHVACOutdoorAirSystem.empty?
 
-          # total_dsoa = air_loop_hvac.thermalZones.sum { |zone| zone_dsoas[zone.nameString] }
+        #   # total_dsoa = air_loop_hvac.thermalZones.sum { |zone| zone_dsoas[zone.nameString] }
 
-          oa_design_flow_rate = nil
-          sizing_system = air_loop_hvac.sizingSystem
-          oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
-          controller_oa = oa_system.getControllerOutdoorAir
-          # controller_mv = controller_oa.controllerMechanicalVentilation
+        #   oa_design_flow_rate = nil
+        #   sizing_system = air_loop_hvac.sizingSystem
+        #   oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
+        #   controller_oa = oa_system.getControllerOutdoorAir
+        #   # controller_mv = controller_oa.controllerMechanicalVentilation
 
-          if sizing_system.designOutdoorAirFlowRate.is_initialized
-            oa_design_flow_rate = sizing_system.designOutdoorAirFlowRate.get
-          elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
-            oa_design_flow_rate = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
-          else
-            msg = "BASELINE: after PRM hvac applied, cannot get OA design supply flow rate from air loop hvac '#{air_loop_hvac.nameString}'."
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-            raise msg
-          end
+        #   if sizing_system.designOutdoorAirFlowRate.is_initialized
+        #     oa_design_flow_rate = sizing_system.designOutdoorAirFlowRate.get
+        #   elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
+        #     oa_design_flow_rate = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
+        #   else
+        #     msg = "BASELINE: after PRM hvac applied, cannot get OA design supply flow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        #     OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+        #     raise msg
+        #   end
 
-          total_oa_design_flow_rate += oa_design_flow_rate
+        #   total_oa_design_flow_rate += oa_design_flow_rate
 
-          new_oa = 0.0
+        #   new_oa = 0.0
 
-          air_loop_hvac.thermalZones.each do |zone|
-            dsoa_multiplier = zone.additionalProperties.hasFeature(zone_dsoa_multiplier_feature) ? zone.additionalProperties.getFeatureAsDouble(zone_dsoa_multiplier_feature).get : 1.0
-            new_oa += zone_dsoas[zone.nameString] * dsoa_multiplier
-          end
+        #   air_loop_hvac.thermalZones.each do |zone|
+        #     dsoa_multiplier = zone.additionalProperties.hasFeature(zone_dsoa_multiplier_feature) ? zone.additionalProperties.getFeatureAsDouble(zone_dsoa_multiplier_feature).get : 1.0
+        #     new_oa += zone_dsoas[zone.nameString] * dsoa_multiplier
+        #   end
 
-          if oa_design_flow_rate < new_oa
-            msg = "BASELINE: OA design flow rate (#{oa_design_flow_rate.round(2)}) is less than the total DSOA-adjusted from proposed multipliers (#{new_oa.round(2)}) for air loop hvac '#{air_loop_hvac.nameString}'. Adjusting SizingSystem::designOutdoorAirFlowRate to match the DSOA-adjusted total."
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', msg)
-            sizing_system.setDesignOutdoorAirFlowRate(new_oa)
-            if controller_oa.isMinimumOutdoorAirFlowRateAutosized
-              msg = "BASELINE: For air loop hvac '#{air_loop_hvac.nameString}', adjusting ControllerOutdoorAir::autosizedMinimumOutdoorAirFlowRate to match the DSOA-adjusted total."
-              controller_oa.setMinimumOutdoorAirFlowRate(new_oa)
-            end
-          end
-        end
+        #   if oa_design_flow_rate < new_oa
+        #     msg = "BASELINE: OA design flow rate (#{oa_design_flow_rate.round(2)}) is less than the total DSOA-adjusted from proposed multipliers (#{new_oa.round(2)}) for air loop hvac '#{air_loop_hvac.nameString}'. Adjusting SizingSystem::designOutdoorAirFlowRate to match the DSOA-adjusted total."
+        #     OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', msg)
+        #     sizing_system.setDesignOutdoorAirFlowRate(new_oa)
+        #     if controller_oa.isMinimumOutdoorAirFlowRateAutosized
+        #       msg = "BASELINE: For air loop hvac '#{air_loop_hvac.nameString}', adjusting ControllerOutdoorAir::autosizedMinimumOutdoorAirFlowRate to match the DSOA-adjusted total."
+        #       controller_oa.setMinimumOutdoorAirFlowRate(new_oa)
+        #     end
+        #   end
+        # end
         #################################################################### EXISTING
         #################################################################### EXISTING
 
@@ -1255,9 +1255,9 @@ class ACM179dASHRAE9012007
     return fan_sch_names
   end
 
-  def zone_dsoa_multiplier_feature
-    'zone_dsoa_multiplier'
-  end
+  # def zone_dsoa_multiplier_feature
+  #   'zone_dsoa_multiplier'
+  # end
 
   # MARKED (TO-BE-DELETED-LATER): 
   # ADD NEW METHOD TO CALCULATE MINIMUM/DESIGN OUTDOOR AIRFLOW RATES
@@ -1336,42 +1336,42 @@ class ACM179dASHRAE9012007
     return [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
   end
 
-  def mark_zone_dsoa_multiplier(model)
-    total_oa_design_flow_rate = 0.0
+  # def mark_zone_dsoa_multiplier(model)
+  #   total_oa_design_flow_rate = 0.0
 
-    model.getAirLoopHVACs.each do |air_loop_hvac|
-      next if air_loop_hvac.airLoopHVACOutdoorAirSystem.empty?
+  #   model.getAirLoopHVACs.each do |air_loop_hvac|
+  #     next if air_loop_hvac.airLoopHVACOutdoorAirSystem.empty?
 
-      # oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
-      # controller_oa = oa_sys.getControllerOutdoorAir
-      # controller_mv = controller_oa.controllerMechanicalVentilation
-      total_dsoa = air_loop_hvac.thermalZones.sum { |zone| thermal_zone_outdoor_airflow_rate(zone) *  zone.multiplier.to_f }
+  #     # oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
+  #     # controller_oa = oa_sys.getControllerOutdoorAir
+  #     # controller_mv = controller_oa.controllerMechanicalVentilation
+  #     total_dsoa = air_loop_hvac.thermalZones.sum { |zone| thermal_zone_outdoor_airflow_rate(zone) *  zone.multiplier.to_f }
 
-      sizing_system = air_loop_hvac.sizingSystem
-      unless sizing_system.designOutdoorAirFlowRate.is_initialized
-        msg = "BASELINE: Cannot get OA design supply flow rate from air loop hvac '#{air_loop_hvac.nameString}'."
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-        raise msg
-      end
+  #     sizing_system = air_loop_hvac.sizingSystem
+  #     unless sizing_system.designOutdoorAirFlowRate.is_initialized
+  #       msg = "BASELINE: Cannot get OA design supply flow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+  #       OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+  #       raise msg
+  #     end
 
-      oa_design_flow_rate = sizing_system.designOutdoorAirFlowRate.get
-      total_oa_design_flow_rate += oa_design_flow_rate
+  #     oa_design_flow_rate = sizing_system.designOutdoorAirFlowRate.get
+  #     total_oa_design_flow_rate += oa_design_flow_rate
 
-      next unless (oa_design_flow_rate / total_dsoa - 1).abs > 0.01
+  #     next unless (oa_design_flow_rate / total_dsoa - 1).abs > 0.01
 
-      dsoa_multiplier = oa_design_flow_rate / total_dsoa
+  #     dsoa_multiplier = oa_design_flow_rate / total_dsoa
 
-      # If the total DSOA is not equal to the OA design flow rate, then we have a problem.
-      msg = "BASELINE: Total DSOA (#{total_dsoa.round(2)}) is not equal to OA design flow rate (#{oa_design_flow_rate.round(2)}) (dsoa_multiplier=#{dsoa_multiplier.round(3)}) for air loop hvac '#{air_loop_hvac.nameString}'."
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', msg)
+  #     # If the total DSOA is not equal to the OA design flow rate, then we have a problem.
+  #     msg = "BASELINE: Total DSOA (#{total_dsoa.round(2)}) is not equal to OA design flow rate (#{oa_design_flow_rate.round(2)}) (dsoa_multiplier=#{dsoa_multiplier.round(3)}) for air loop hvac '#{air_loop_hvac.nameString}'."
+  #     OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', msg)
 
-      air_loop_hvac.thermalZones.each do |zone|
-        zone.additionalProperties.setFeature(zone_dsoa_multiplier_feature, dsoa_multiplier)
-      end
-    end
+  #     air_loop_hvac.thermalZones.each do |zone|
+  #       zone.additionalProperties.setFeature(zone_dsoa_multiplier_feature, dsoa_multiplier)
+  #     end
+  #   end
 
-    model.getBuilding.additionalProperties.setFeature('total_proposed_oa_design_flow_rate', total_oa_design_flow_rate)
-  end
+  #   model.getBuilding.additionalProperties.setFeature('total_proposed_oa_design_flow_rate', total_oa_design_flow_rate)
+  # end
 
   # https://github.com/NREL/openstudio-standards/blob/master/lib/openstudio-standards/standards/ashrae_90_1_prm/ashrae_90_1_prm.Model.rb#L1180
   # Add zone additional property "zone DCV implemented in user model":
