@@ -1268,11 +1268,11 @@ class ACM179dASHRAE9012007
 
     OpenStudio.logFree(
       OpenStudio::Info,
-      'openstudio.standards.Model', "#{scenario}: airloop = #{air_loop.nameString} | outdoor_airflow_rate_minimum_m_3_per_s = #{outdoor_airflow_rate_minimum_m_3_per_s}"
+      'openstudio.standards.Model', "#{scenario}: outdoor_airflow_rate_minimum_m_3_per_s = #{outdoor_airflow_rate_minimum_m_3_per_s}"
     )
     OpenStudio.logFree(
       OpenStudio::Info,
-      'openstudio.standards.Model', "#{scenario}: airloop = #{air_loop.nameString} | outdoor_airflow_rate_design_m_3_per_s = #{outdoor_airflow_rate_design_m_3_per_s}"
+      'openstudio.standards.Model', "#{scenario}: outdoor_airflow_rate_design_m_3_per_s = #{outdoor_airflow_rate_design_m_3_per_s}"
     )
 
     return [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
