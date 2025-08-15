@@ -1176,6 +1176,7 @@ class ACM179dASHRAE9012007
   # only considering airloop outdoor airflow rates
   # and not considering packaged terminal outdoor airflow rates
   # @param model [object]
+  # @return [array] of airflow rates: [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
   def get_minimum_and_design_outdoor_airflow_rates(model)
     outdoor_airflow_rate_minimum_m_3_per_s = 0.0
     outdoor_airflow_rate_design_m_3_per_s = 0.0
@@ -1230,8 +1231,7 @@ class ACM179dASHRAE9012007
       outdoor_airflow_rate_design_m_3_per_s += design_supply_oa_flow_rate
     end
 
-    model.getBuilding.additionalProperties.setFeature('outdoor_airflow_rate_minimum_m_3_per_s', outdoor_airflow_rate_minimum_m_3_per_s)
-    model.getBuilding.additionalProperties.setFeature('outdoor_airflow_rate_design_m_3_per_s', outdoor_airflow_rate_design_m_3_per_s)
+    return [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
   end
 
   def mark_zone_dsoa_multiplier(model)
