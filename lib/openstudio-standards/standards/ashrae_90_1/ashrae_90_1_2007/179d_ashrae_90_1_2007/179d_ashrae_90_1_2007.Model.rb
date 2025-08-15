@@ -811,7 +811,8 @@ class ACM179dASHRAE9012007
                 controller_oa.setMinimumOutdoorAirFlowRate(old_value * scaling_factor)
               else
                 msg = "BASELINE: Cannot adjust minimum outdoor airflow rate — no existing value found on air loop '#{air_loop.nameString}'."
-                OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', msg)
+                OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+                raise msg
               end
             end
           end
@@ -819,16 +820,31 @@ class ACM179dASHRAE9012007
 
         # Adjust design outdoor airflow rate if difference between baseline/proposed is larger than 1%
         if pct_diff_design_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
-          msg = "BASELINE: Design outdoor airflow rate for the baseline model is #{
-              outdoor_airflow_rate_design_m_3_per_s_baseline.round(2)
-            } m3/s, which is more than #{diff_threshold_pcnt}% different from the proposed model's design outdoor airflow rate of #{
-              outdoor_airflow_rate_design_m_3_per_s_proposed.round(2)
-            } m3/s. Adjusting baseline model design outdoor airflow rate to match the proposed model's design outdoor airflow rate."
-          OpenStudio.logFree(
-            OpenStudio::Info,
-            'openstudio.standards.Model',
-            msg
-          )
+          msg = "BASELINE: Design outdoor airflow rate for the baseline model is " \
+                "#{outdoor_airflow_rate_design_m_3_per_s_baseline.round(2)} m3/s, " \
+                "which is more than #{diff_threshold_pcnt}% different from the proposed model's design outdoor airflow rate of " \
+                "#{outdoor_airflow_rate_design_m_3_per_s_proposed.round(2)} m3/s. " \
+                "Adjusting baseline model design outdoor airflow rate to match the proposed model's design outdoor airflow rate."
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', msg)
+
+          # Proportionally adjust design outdoor airflow rate
+          scaling_factor = outdoor_airflow_rate_design_m_3_per_s_proposed / outdoor_airflow_rate_design_m_3_per_s_baseline
+          model.getAirLoopHVACs.sort.each do |air_loop|
+            sizing_system = air_loop.sizingSystem
+            old_value = nil
+            if sizing_system.designOutdoorAirFlowRate.is_initialized
+              old_value = sizing_system.designOutdoorAirFlowRate.get
+            elsif sizing_system.autosizedDesignOutdoorAirFlowRate.is_initialized
+              old_value = sizing_system.autosizedDesignOutdoorAirFlowRate.get
+            end
+            if old_value
+              sizing_system.setDesignOutdoorAirFlowRate(old_value * scaling_factor)
+            else
+              msg = "BASELINE: Cannot adjust design outdoor airflow rate — no existing value found on air loop '#{air_loop.nameString}'."
+              OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
+              raise msg
+            end
+          end
         end
 
         #################################################################### EXISTING
