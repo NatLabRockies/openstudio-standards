@@ -741,6 +741,8 @@ class ACM179dASHRAE9012007
         total_oa_design_flow_rate = 0.0
 
         # Get minimum and design outdoor airflow rates
+        outdoor_airflow_rate_minimum_m_3_per_s_proposed = outdoor_airflow_rates_proposed[0]
+        outdoor_airflow_rate_design_m_3_per_s_proposed = outdoor_airflow_rates_proposed[1]
         outdoor_airflow_rates_baseline = get_minimum_and_design_outdoor_airflow_rates(model, 'BASELINE')
         outdoor_airflow_rate_minimum_m_3_per_s_baseline = outdoor_airflow_rates_baseline[0]
         outdoor_airflow_rate_design_m_3_per_s_baseline = outdoor_airflow_rates_baseline[1]
