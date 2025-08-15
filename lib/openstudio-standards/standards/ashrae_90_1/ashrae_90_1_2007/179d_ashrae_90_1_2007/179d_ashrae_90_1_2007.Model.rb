@@ -621,7 +621,7 @@ class ACM179dASHRAE9012007
           # system_type[0] = "Electric_Furnace" ## force system type
           prm_system_types << system_type
           system_str = system_type.zip(['type', 'central_heating_fuel', 'zone_heating_fuel', 'cooling_fuel']).map { |v, k| "#{k} => #{v}" }.join("\n")
-          pp "179d - system_type: #{system_str}"
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "179d - system_type: #{system_str}")
 
           sys_group['zones'].sort.each_slice(5) do |zone_list|
             zone_names = []
@@ -765,30 +765,34 @@ class ACM179dASHRAE9012007
             ).abs / outdoor_airflow_rate_design_m_3_per_s_proposed * 100.0
           end
 
-        # Adjust minimum outdoor airflow rate if difference between baseline/proposed is larger than 5%
-        if pct_diff_minimum_outdoor_airflow_rate > 5.0 # %
-          OpenStudio.logFree(
-            OpenStudio::Info,
-            'openstudio.standards.Model',
-            "BASELINE: Minimum outdoor airflow rate for the baseline model is #{
+        # Adjust minimum outdoor airflow rate if difference between baseline/proposed is larger than 1%
+        if pct_diff_minimum_outdoor_airflow_rate > 1.0 # %
+          msg = "BASELINE: Minimum outdoor airflow rate for the baseline model is #{
               outdoor_airflow_rate_minimum_m_3_per_s_baseline.round(2)
-            } m3/s, which is more than 5% different from the proposed model's minimum outdoor airflow rate of #{
+            } m3/s, which is more than 1% different from the proposed model's minimum outdoor airflow rate of #{
               outdoor_airflow_rate_minimum_m_3_per_s_proposed.round(2)
             } m3/s. Adjusting baseline model minimum outdoor airflow rate to match the proposed model's minimum outdoor airflow rate."
+          OpenStudio.logFree(
+            OpenStudio::Error,
+            'openstudio.standards.Model',
+            msg
           )
+          raise msg
         end
 
-        # Adjust design outdoor airflow rate if difference between baseline/proposed is larger than 5%
-        if pct_diff_design_outdoor_airflow_rate > 5.0 # %
-          OpenStudio.logFree(
-            OpenStudio::Info,
-            'openstudio.standards.Model',
-            "BASELINE: Design outdoor airflow rate for the baseline model is #{
+        # Adjust design outdoor airflow rate if difference between baseline/proposed is larger than 1%
+        if pct_diff_design_outdoor_airflow_rate > 1.0 # %
+          msg = "BASELINE: Design outdoor airflow rate for the baseline model is #{
               outdoor_airflow_rate_design_m_3_per_s_baseline.round(2)
-            } m3/s, which is more than 5% different from the proposed model's design outdoor airflow rate of #{
+            } m3/s, which is more than 1% different from the proposed model's design outdoor airflow rate of #{
               outdoor_airflow_rate_design_m_3_per_s_proposed.round(2)
             } m3/s. Adjusting baseline model design outdoor airflow rate to match the proposed model's design outdoor airflow rate."
+          OpenStudio.logFree(
+            OpenStudio::Error,
+            'openstudio.standards.Model',
+            msg
           )
+          raise msg
         end
 
         #################################################################### EXISTING
