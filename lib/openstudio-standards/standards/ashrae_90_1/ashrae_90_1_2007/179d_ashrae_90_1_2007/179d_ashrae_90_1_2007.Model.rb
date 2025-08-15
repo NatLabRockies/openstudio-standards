@@ -563,6 +563,10 @@ class ACM179dASHRAE9012007
         mark_zone_dsoa_multiplier(model)
       end
 
+      # MARKED (TO-BE-DELETED-LATER): 
+      # MAYBE THIS IS THE PART WHERE OLD GETS REMOVED AND NEW GETS ADDED
+      # GRAB EXISTING/PROPOSED OA RATES FROM HERE
+
       # Remove all HVAC from model, excluding service water heating
       if baseline_179d
         model_remove_prm_hvac(model)
@@ -723,6 +727,10 @@ class ACM179dASHRAE9012007
       # If there are any multi-zone systems, reset damper positions to achieve a 60% ventilation effectiveness minimum for the system
       # following the ventilation rate procedure from 62.1
       model_apply_multizone_vav_outdoor_air_sizing(model)
+
+      # MARKED (TO-BE-DELETED-LATER): 
+      # THIS IS WHERE BASELINE OA ADJUST BASED ON PROPSOED SHOULD HAPPEN
+      # ADJUST OA RATES IF NECESSARY BY COMPARING BASELINE AND PROPOSED OA RATES
 
       if baseline_179d
 
