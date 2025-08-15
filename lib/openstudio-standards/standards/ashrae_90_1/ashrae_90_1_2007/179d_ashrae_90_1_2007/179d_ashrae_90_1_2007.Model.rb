@@ -568,7 +568,7 @@ class ACM179dASHRAE9012007
       # GRAB EXISTING/PROPOSED OA RATES FROM HERE
 
       # Get minimum and design outdoor airflow rates
-      get_minimum_and_design_outdoor_airflow_rates(model)
+      outdoor_airflow_rates_proposed = get_minimum_and_design_outdoor_airflow_rates(model)
 
       # Remove all HVAC from model, excluding service water heating
       if baseline_179d
