@@ -1145,9 +1145,8 @@ class ACM179dASHRAE9012007
 
     model.getAirLoopHVACs.each do |air_loop|
       # Initialize values for this air loop
-      controller_minimum_oa_flow_rate = 0.0
-      design_supply_oa_flow_rate = 0.0
-
+      value = 0.0
+      
       # Skip if no outdoor air system
       next if air_loop.airLoopHVACOutdoorAirSystem.empty?
 
