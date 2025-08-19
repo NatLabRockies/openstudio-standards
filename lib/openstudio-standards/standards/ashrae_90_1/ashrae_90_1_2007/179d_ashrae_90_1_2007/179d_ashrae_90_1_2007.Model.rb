@@ -753,7 +753,7 @@ class ACM179dASHRAE9012007
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', msg)
 
           # Proportionally adjust design outdoor airflow rate
-          scaling_factor = outdoor_airflow_rate_design_m_3_per_s_proposed / outdoor_airflow_rate_baseline_m_3_per_s
+          scaling_factor = outdoor_airflow_rate_proposed_m_3_per_s / outdoor_airflow_rate_baseline_m_3_per_s
           model.getAirLoopHVACs.sort.each do |air_loop|
             sizing_system = air_loop.sizingSystem
             old_value = nil
