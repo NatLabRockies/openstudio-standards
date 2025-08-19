@@ -1146,7 +1146,7 @@ class ACM179dASHRAE9012007
     model.getAirLoopHVACs.each do |air_loop|
       # Initialize values for this air loop
       value = 0.0
-      
+
       # Skip if no outdoor air system
       next if air_loop.airLoopHVACOutdoorAirSystem.empty?
 
@@ -1156,6 +1156,8 @@ class ACM179dASHRAE9012007
       sizing_system = air_loop.sizingSystem
 
       # Get minimum/design outdoor airflow rate
+      # sizing_system.autosizedDesignOutdoorAirFlowRate isn’t working correctly, so avoid using!
+      # controller_oa.minimumOutdoorAirFlowRate is zero when DCV is enabled, so avoid using!
       if sizing_system.designOutdoorAirFlowRate.is_initialized 
         value = sizing_system.designOutdoorAirFlowRate.get 
       elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized 
