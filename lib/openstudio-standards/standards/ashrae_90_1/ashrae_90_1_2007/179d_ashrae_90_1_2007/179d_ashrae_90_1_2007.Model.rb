@@ -1159,9 +1159,9 @@ class ACM179dASHRAE9012007
       # sizing_system.autosizedDesignOutdoorAirFlowRate isn’t working correctly, so avoid using!
       # controller_oa.minimumOutdoorAirFlowRate is zero when DCV is enabled, so avoid using!
       if sizing_system.designOutdoorAirFlowRate.is_initialized 
-        value = sizing_system.designOutdoorAirFlowRate.get 
+        value = sizing_system.designOutdoorAirFlowRate.get
       elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized 
-        value = controller_oa.autosizedMinimumOutdoorAirFlowRate.get 
+        value = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
       else
         # making it fail for now to test later
         msg = "#{scenario}: Cannot get minimum/design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
