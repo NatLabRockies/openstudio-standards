@@ -559,7 +559,7 @@ class ACM179dASHRAE9012007
       end
 
       # Get minimum and design outdoor airflow rates
-      outdoor_airflow_rates_proposed = get_minimum_and_design_outdoor_airflow_rates(model, 'PROPOSED')
+      outdoor_airflow_rate_proposed_m_3_per_s = get_minimum_and_design_outdoor_airflow_rates(model, 'PROPOSED')
 
       # Remove all HVAC from model, excluding service water heating
       if baseline_179d
@@ -728,92 +728,32 @@ class ACM179dASHRAE9012007
         total_oa_design_flow_rate = 0.0
 
         # Get minimum and design outdoor airflow rates
-        outdoor_airflow_rate_minimum_m_3_per_s_proposed = outdoor_airflow_rates_proposed[0]
-        outdoor_airflow_rate_design_m_3_per_s_proposed = outdoor_airflow_rates_proposed[1]
-        outdoor_airflow_rate_minimum_m_3_per_s_baseline,  outdoor_airflow_rate_design_m_3_per_s_baseline = get_minimum_and_design_outdoor_airflow_rates(model, 'BASELINE')
+        outdoor_airflow_rate_baseline_m_3_per_s = get_minimum_and_design_outdoor_airflow_rates(model, 'BASELINE')
 
         # Calculate % difference (relative to baseline)
         pct_diff_minimum_outdoor_airflow_rate =
-          if outdoor_airflow_rate_minimum_m_3_per_s_baseline == 0.0
-            outdoor_airflow_rate_minimum_m_3_per_s_proposed == 0.0 ? 0.0 : 100.0
+          if outdoor_airflow_rate_baseline_m_3_per_s == 0.0
+            outdoor_airflow_rate_proposed_m_3_per_s == 0.0 ? 0.0 : 100.0
           else
             (
-              outdoor_airflow_rate_minimum_m_3_per_s_proposed - outdoor_airflow_rate_minimum_m_3_per_s_baseline
-            ) / outdoor_airflow_rate_minimum_m_3_per_s_baseline * 100.0
-          end
-        pct_diff_design_outdoor_airflow_rate =
-          if outdoor_airflow_rate_design_m_3_per_s_baseline == 0.0
-            outdoor_airflow_rate_design_m_3_per_s_proposed == 0.0 ? 0.0 : 100.0
-          else
-            (
-              outdoor_airflow_rate_design_m_3_per_s_proposed - outdoor_airflow_rate_design_m_3_per_s_baseline
-            ) / outdoor_airflow_rate_design_m_3_per_s_baseline * 100.0
+              outdoor_airflow_rate_proposed_m_3_per_s - outdoor_airflow_rate_baseline_m_3_per_s
+            ) / outdoor_airflow_rate_baseline_m_3_per_s * 100.0
           end
 
         # Difference threshold
         diff_threshold_pcnt = 1.0
 
-        # Adjust minimum outdoor airflow rate if difference between baseline/proposed is larger than 1%
-        if pct_diff_minimum_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
-          msg = "BASELINE: Minimum outdoor airflow rate for the baseline model is " \
-                "#{outdoor_airflow_rate_minimum_m_3_per_s_baseline.round(2)} m3/s, " \
-                "which is more than #{diff_threshold_pcnt}% different from the proposed model's minimum outdoor airflow rate of " \
-                "#{outdoor_airflow_rate_minimum_m_3_per_s_proposed.round(2)} m3/s. " \
-                "Adjusting baseline model minimum outdoor airflow rate to match the proposed model's minimum outdoor airflow rate."
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', msg)
-
-          if outdoor_airflow_rate_minimum_m_3_per_s_baseline == 0.0
-            # Check if all airloops have DCV enabled
-            dcv_enabled_all_airloops = []
-            model.getAirLoopHVACs.sort.each do |air_loop|
-              oa_system = air_loop.airLoopHVACOutdoorAirSystem.get
-              controller_oa = oa_system.getControllerOutdoorAir
-              controller_mv = controller_oa.controllerMechanicalVentilation
-              dcv_enabled_all_airloops.append(controller_mv.demandControlledVentilation)
-            end
-
-            if dcv_enabled_all_airloops.all? { |v| v == true }
-              msg = "BASELINE: Baseline model air loops have DCV enabled. Skip adjusting minimum outdoor airflow rates."
-              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', msg)
-            else
-              msg = "BASELINE: Not all baseline model air loops have DCV enabled but outdoor_airflow_rate_minimum_m_3_per_s_baseline is zero."
-              OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-              raise msg
-            end
-          else
-            # Proportionally adjust minimum outdoor airflow rate
-            scaling_factor = outdoor_airflow_rate_minimum_m_3_per_s_proposed / outdoor_airflow_rate_minimum_m_3_per_s_baseline
-            model.getAirLoopHVACs.sort.each do |air_loop|
-              oa_system = air_loop.airLoopHVACOutdoorAirSystem.get
-              controller_oa = oa_system.getControllerOutdoorAir
-              old_value = nil
-              if controller_oa.minimumOutdoorAirFlowRate.is_initialized
-                old_value = controller_oa.minimumOutdoorAirFlowRate.get
-              elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
-                old_value = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
-              end
-              if old_value
-                controller_oa.setMinimumOutdoorAirFlowRate(old_value * scaling_factor)
-              else
-                msg = "BASELINE: Cannot adjust minimum outdoor airflow rate — no existing value found on air loop '#{air_loop.nameString}'."
-                OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-                raise msg
-              end
-            end
-          end
-        end
-
         # Adjust design outdoor airflow rate if difference between baseline/proposed is larger than 1%
-        if pct_diff_design_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
-          msg = "BASELINE: Design outdoor airflow rate for the baseline model is " \
-                "#{outdoor_airflow_rate_design_m_3_per_s_baseline.round(2)} m3/s, " \
-                "which is more than #{diff_threshold_pcnt}% different from the proposed model's design outdoor airflow rate of " \
-                "#{outdoor_airflow_rate_design_m_3_per_s_proposed.round(2)} m3/s. " \
+        if pct_diff_minimum_outdoor_airflow_rate.abs > diff_threshold_pcnt # %
+          msg = "BASELINE: Minimum/Design outdoor airflow rate for the baseline model is " \
+                "#{outdoor_airflow_rate_baseline_m_3_per_s.round(2)} m3/s, " \
+                "which is more than #{diff_threshold_pcnt}% different from the proposed model's minimum/design outdoor airflow rate of " \
+                "#{outdoor_airflow_rate_proposed_m_3_per_s.round(2)} m3/s. " \
                 "Adjusting baseline model design outdoor airflow rate to match the proposed model's design outdoor airflow rate."
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', msg)
 
           # Proportionally adjust design outdoor airflow rate
-          scaling_factor = outdoor_airflow_rate_design_m_3_per_s_proposed / outdoor_airflow_rate_design_m_3_per_s_baseline
+          scaling_factor = outdoor_airflow_rate_design_m_3_per_s_proposed / outdoor_airflow_rate_baseline_m_3_per_s
           model.getAirLoopHVACs.sort.each do |air_loop|
             sizing_system = air_loop.sizingSystem
             old_value = nil
@@ -1201,8 +1141,7 @@ class ACM179dASHRAE9012007
   # @param model [object]
   # @return [array] of airflow rates: [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
   def get_minimum_and_design_outdoor_airflow_rates(model, scenario)
-    outdoor_airflow_rate_minimum_m_3_per_s = 0.0
-    outdoor_airflow_rate_design_m_3_per_s = 0.0
+    minimum_design_outdoor_airflow_rate_m_3_per_s = 0.0
 
     model.getAirLoopHVACs.each do |air_loop|
       # Initialize values for this air loop
@@ -1217,55 +1156,29 @@ class ACM179dASHRAE9012007
       controller_oa = air_loop_hvac_oasys.getControllerOutdoorAir
       controller_mv = controller_oa.controllerMechanicalVentilation
 
-      # Calculate controller minimum outdoor air flow rate
-      # Try hard-sized values first, then autosized
-      if controller_oa.minimumOutdoorAirFlowRate.is_initialized
-        controller_minimum_oa_flow_rate = controller_oa.minimumOutdoorAirFlowRate.get
-      elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
-        controller_minimum_oa_flow_rate = controller_oa.autosizedMinimumOutdoorAirFlowRate.get
-      elsif controller_oa.isMinimumOutdoorAirFlowRateAutosized && controller_mv.demandControlledVentilation
-        # making it fail for now to test later
-        msg = "#{scenario}: demand control ventilation activated in air loop hvac '#{air_loop_hvac.nameString}'."
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-        raise msg
+      # Get minimum/design outdoor airflow rate
+      if sizing_system.designOutdoorAirFlowRate.is_initialized 
+        value = sizing_system.designOutdoorAirFlowRate.get 
+      elsif controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized 
+        value = controller_oa.autosizedMinimumOutdoorAirFlowRate.get 
       else
         # making it fail for now to test later
-        msg = "#{scenario}: Cannot get minimum outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
-        raise msg
-      end
-
-      # Calculate design outdoor air supply flow rate
-      # Try hard-sized values first, then autosized
-      sizing_system = air_loop.sizingSystem
-      if sizing_system.designOutdoorAirFlowRate.is_initialized
-        design_supply_oa_flow_rate = sizing_system.designOutdoorAirFlowRate.get
-      elsif sizing_system.autosizedDesignOutdoorAirFlowRate.is_initialized
-        design_supply_oa_flow_rate = sizing_system.autosizedDesignOutdoorAirFlowRate.get
-      else
-        # making it fail for now to test later
-        msg = "#{scenario}: Cannot get design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
+        msg = "#{scenario}: Cannot get minimum/design outdoor airflow rate from air loop hvac '#{air_loop_hvac.nameString}'."
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', msg)
         raise msg
       end
 
       # Use the maximum of the two values for this air loop
-      outdoor_airflow_rate_minimum_m_3_per_s += controller_minimum_oa_flow_rate
-      outdoor_airflow_rate_design_m_3_per_s += design_supply_oa_flow_rate
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "#{scenario}: airloop = #{air_loop.nameString} | controller_minimum_oa_flow_rate = #{controller_minimum_oa_flow_rate}")
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "#{scenario}: airloop = #{air_loop.nameString} | design_supply_oa_flow_rate = #{design_supply_oa_flow_rate}")
+      minimum_design_outdoor_airflow_rate_m_3_per_s += value
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "#{scenario}: airloop = #{air_loop.nameString} | minimum/design outdoor airflow rate = #{value} m3/s")
     end
 
     OpenStudio.logFree(
       OpenStudio::Info,
-      'openstudio.standards.Model', "#{scenario}: outdoor_airflow_rate_minimum_m_3_per_s = #{outdoor_airflow_rate_minimum_m_3_per_s}"
-    )
-    OpenStudio.logFree(
-      OpenStudio::Info,
-      'openstudio.standards.Model', "#{scenario}: outdoor_airflow_rate_design_m_3_per_s = #{outdoor_airflow_rate_design_m_3_per_s}"
+      'openstudio.standards.Model', "#{scenario}: minimum_design_outdoor_airflow_rate_m_3_per_s = #{minimum_design_outdoor_airflow_rate_m_3_per_s}"
     )
 
-    return [outdoor_airflow_rate_minimum_m_3_per_s, outdoor_airflow_rate_design_m_3_per_s]
+    return minimum_design_outdoor_airflow_rate_m_3_per_s
   end
 
   # https://github.com/NREL/openstudio-standards/blob/master/lib/openstudio-standards/standards/ashrae_90_1_prm/ashrae_90_1_prm.Model.rb#L1180
