@@ -1154,7 +1154,7 @@ class ACM179dASHRAE9012007
       # Get the outdoor air system and controller
       air_loop_hvac_oasys = air_loop.airLoopHVACOutdoorAirSystem.get
       controller_oa = air_loop_hvac_oasys.getControllerOutdoorAir
-      controller_mv = controller_oa.controllerMechanicalVentilation
+      sizing_system = air_loop.sizingSystem
 
       # Get minimum/design outdoor airflow rate
       if sizing_system.designOutdoorAirFlowRate.is_initialized 
