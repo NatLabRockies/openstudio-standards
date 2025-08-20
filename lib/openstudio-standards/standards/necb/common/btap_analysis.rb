@@ -32,7 +32,6 @@ class BTAPAnalysis
       f.write(JSON.pretty_generate(cost_result, allow_nan: true))
     end
     puts "Wrote File cost_results.json in #{@output_folder} "
-
     return cost_result
   end
 
