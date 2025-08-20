@@ -1,18 +1,12 @@
 class ACM179dASHRAE9012007
   # @!group AirLoopHVAC
 
-  def air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
-    return false  # TODO: for testing only
-  end
-
-# Check if an air loop in user model needs to have DCV per air loop related requiremends in ASHRAE 90.1-2019 6.4.3.8
+  # Check if an air loop in user model needs to have DCV per air loop related requiremends in ASHRAE 90.1-2019 6.4.3.8
   #
   # @author Xuechen (Jerry) Lei, PNNL
   # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
   # @return [Boolean] flag of whether air loop in user model is required to have DCV
   def user_model_air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac)
-    return false  # TODO: for testing only
-
     # all zones in the same airloop in user model are set with the same value, so use the first zone under the loop
     dcv_airloop_user_exception = air_loop_hvac.thermalZones[0].additionalProperties.getFeatureAsBoolean('airloop user specified DCV exception').get
     return false if dcv_airloop_user_exception
