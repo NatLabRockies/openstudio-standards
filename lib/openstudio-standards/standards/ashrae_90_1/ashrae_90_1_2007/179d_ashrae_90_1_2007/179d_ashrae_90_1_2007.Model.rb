@@ -718,14 +718,14 @@ class ACM179dASHRAE9012007
         air_loop_hvac_apply_minimum_vav_damper_positions(air_loop, false)
       end
 
+      # Force Sizing:System design outdoor airflow the same as Controller:OutdoorAir minimum OA airflow rate
+      consistent_outdoor_airflow_rate(model)
+
       # If there are any multi-zone systems, reset damper positions to achieve a 60% ventilation effectiveness minimum for the system
       # following the ventilation rate procedure from 62.1
       model_apply_multizone_vav_outdoor_air_sizing(model)
 
       if baseline_179d
-
-        # Force Sizing:System design outdoor airflow the same as Controller:OutdoorAir minimum OA airflow rate
-        consistent_outdoor_airflow_rate(model)
 
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Baseline Adjust Minimum/Design Outdoor Air Flow Rate to Proposed Levels if different ***')
         total_oa_design_flow_rate = 0.0
