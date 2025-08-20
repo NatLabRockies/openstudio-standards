@@ -721,10 +721,6 @@ class ACM179dASHRAE9012007
       # Force Sizing:System design outdoor airflow the same as Controller:OutdoorAir minimum OA airflow rate
       consistent_outdoor_airflow_rate(model)
 
-      # If there are any multi-zone systems, reset damper positions to achieve a 60% ventilation effectiveness minimum for the system
-      # following the ventilation rate procedure from 62.1
-      model_apply_multizone_vav_outdoor_air_sizing(model)
-
       if baseline_179d
 
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Baseline Adjust Minimum/Design Outdoor Air Flow Rate to Proposed Levels if different ***')
@@ -774,6 +770,10 @@ class ACM179dASHRAE9012007
             end
           end
         end
+      else
+        # If there are any multi-zone systems, reset damper positions to achieve a 60% ventilation effectiveness minimum for the system
+        # following the ventilation rate procedure from 62.1
+        model_apply_multizone_vav_outdoor_air_sizing(model)
       end
 
       # Set the baseline fan power for all air loops
