@@ -1,7 +1,7 @@
 class ACM179dASHRAE9012007
   # @!group AirLoopHVAC
 
-# Check if an air loop in user model needs to have DCV per air loop related requiremends in ASHRAE 90.1-2019 6.4.3.8
+  # Check if an air loop in user model needs to have DCV per air loop related requiremends in ASHRAE 90.1-2019 6.4.3.8
   #
   # @author Xuechen (Jerry) Lei, PNNL
   # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
@@ -146,6 +146,172 @@ class ACM179dASHRAE9012007
   # @return [string] name of appropriate curve for this code version
   def air_loop_hvac_set_vsd_curve_type
     return 'Multi Zone VAV with VSD and Fixed SP Setpoint'
+  end
+
+  # Apply all standard required controls to the airloop
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
+  # @return [Bool] returns true if successful, false if not
+  # @todo optimum start
+  # @todo night damper shutoff
+  # @todo nightcycle control
+  # @todo night fan shutoff
+  def air_loop_hvac_apply_standard_controls(air_loop_hvac, climate_zone, baseline_179d)
+    # Unoccupied shutdown
+    # Apply this before ERV because it modifies annual hours of operation which can impact ERV requirements
+    if air_loop_hvac_unoccupied_fan_shutoff_required?(air_loop_hvac)
+      occ_threshold = air_loop_hvac_unoccupied_threshold
+      air_loop_hvac_enable_unoccupied_fan_shutoff(air_loop_hvac, min_occ_pct = occ_threshold)
+    else
+      air_loop_hvac.setAvailabilitySchedule(air_loop_hvac.model.alwaysOnDiscreteSchedule)
+    end
+
+    # Energy Recovery Ventilation
+    if air_loop_hvac_energy_recovery_ventilator_required?(air_loop_hvac, climate_zone)
+      air_loop_hvac_apply_energy_recovery_ventilator(air_loop_hvac, climate_zone)
+    end
+
+    # Economizers
+    air_loop_hvac_apply_economizer_limits(air_loop_hvac, climate_zone)
+    air_loop_hvac_apply_economizer_integration(air_loop_hvac, climate_zone)
+
+    # Multizone VAV Systems
+    if air_loop_hvac_multizone_vav_system?(air_loop_hvac)
+
+      # VAV Reheat Control
+      air_loop_hvac_apply_vav_damper_action(air_loop_hvac)
+
+      # Multizone VAV Optimization
+      # This rule does not apply to two hospital and one outpatient systems
+      unless (@instvarbuilding_type == 'Hospital' && (air_loop_hvac.name.to_s.include?('VAV_ER') || air_loop_hvac.name.to_s.include?('VAV_ICU') ||
+             air_loop_hvac.name.to_s.include?('VAV_OR') || air_loop_hvac.name.to_s.include?('VAV_LABS') ||
+             air_loop_hvac.name.to_s.include?('VAV_PATRMS'))) ||
+             (@instvarbuilding_type == 'Outpatient' && air_loop_hvac.name.to_s.include?('Outpatient F1'))
+        if air_loop_hvac_multizone_vav_optimization_required?(air_loop_hvac, climate_zone)
+          air_loop_hvac_enable_multizone_vav_optimization(air_loop_hvac)
+        else
+          air_loop_hvac_disable_multizone_vav_optimization(air_loop_hvac)
+        end
+      end
+
+      # Static Pressure Reset
+      # Per 5.2.2.16 (Halverson et al 2014), all multiple zone VAV systems are assumed to have DDC for all years of DOE 90.1 prototypes, so the has_ddc is not used any more.
+      air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
+        if fan.to_FanVariableVolume.is_initialized
+          plr_req = fan_variable_volume_part_load_fan_power_limitation?(fan)
+          # Part Load Fan Pressure Control
+          if plr_req
+            vsd_curve_type = air_loop_hvac_set_vsd_curve_type
+            fan_variable_volume_set_control_type(fan, vsd_curve_type)
+          # No Part Load Fan Pressure Control
+          else
+            fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with discharge dampers')
+          end
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{fan}: This is not a multizone VAV fan system.")
+        end
+      end
+
+      ## # Static Pressure Reset
+      ## # assume no systems have DDC control of VAV terminals
+      ## has_ddc = false
+      ## spr_req = air_loop_hvac_static_pressure_reset_required?(air_loop_hvac, template, has_ddc)
+      ## air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
+      ##   if fan.to_FanVariableVolume.is_initialized
+      ##     plr_req = fan_variable_volume_part_load_fan_power_limitation?(fan, template)
+      ##     # Part Load Fan Pressure Control & Static Pressure Reset
+      ##     if plr_req && spr_req
+      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Static Pressure Reset')
+      ##     # Part Load Fan Pressure Control only
+      ##     elsif plr_req && !spr_req
+      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##     # Static Pressure Reset only
+      ##     elsif !plr_req && spr_req
+      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##     # No Control Required
+      ##     else
+      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with AF or BI Riding Curve')
+      ##     end
+      ##   else
+      ##     OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.AirLoopHVAC', "For #{name}: there is a constant volume fan on a multizone vav system.  Cannot apply static pressure reset controls.")
+      ##   end
+      ## end
+    end
+
+    # DCV
+    # only apply DCV in baseline
+    if baseline_179d
+      if air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
+        air_loop_hvac_enable_demand_control_ventilation(air_loop_hvac, climate_zone)
+        # For systems that require DCV,
+        # all individual zones that require DCV preserve
+        # both per-area and per-person OA requirements.
+        # Other zones have OA requirements converted
+        # to per-area values only so DCV performance is only
+        # based on the subset of zones that required DCV.
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
+        air_loop_hvac.thermalZones.sort.each do |zone|
+          unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
+            thermal_zone_convert_oa_req_to_per_area(zone)
+          end
+        end
+      end
+    end
+
+    # SAT reset
+    if air_loop_hvac_supply_air_temperature_reset_required?(air_loop_hvac, climate_zone)
+      reset_type = air_loop_hvac_supply_air_temperature_reset_type(air_loop_hvac)
+      case reset_type
+        when 'warmest_zone'
+          air_loop_hvac_enable_supply_air_temperature_reset_warmest_zone(air_loop_hvac)
+        when 'oa'
+          air_loop_hvac_enable_supply_air_temperature_reset_outdoor_temperature(air_loop_hvac)
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "No SAT reset for #{air_loop_hvac.name}.")
+      end
+    end
+
+    # Motorized OA damper
+    if air_loop_hvac_motorized_oa_damper_required?(air_loop_hvac, climate_zone)
+      # Assume that the availability schedule has already been
+      # set to reflect occupancy and use this for the OA damper.
+      occ_threshold = air_loop_hvac_unoccupied_threshold
+      air_loop_hvac_add_motorized_oa_damper(air_loop_hvac, occ_threshold, air_loop_hvac.availabilitySchedule)
+    else
+      air_loop_hvac_remove_motorized_oa_damper(air_loop_hvac)
+    end
+
+    # Optimum Start
+    air_loop_hvac_enable_optimum_start(air_loop_hvac) if air_loop_hvac_optimum_start_required?(air_loop_hvac)
+
+    # Single zone systems
+    if air_loop_hvac.thermalZones.size == 1
+      air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
+        if fan.to_FanVariableVolume.is_initialized
+          fan_variable_volume_set_control_type(fan, 'Single Zone VAV Fan')
+        end
+      end
+      air_loop_hvac_apply_single_zone_controls(air_loop_hvac, climate_zone)
+    end
+
+    # Standby mode occupancy control
+    unless air_loop_hvac.thermalZones.empty?
+      thermal_zones = air_loop_hvac.thermalZones
+
+      standby_mode_spaces = []
+      thermal_zones.sort.each do |thermal_zone|
+        thermal_zone.spaces.sort.each do |space|
+          if space_occupancy_standby_mode_required?(space)
+            standby_mode_spaces << space
+          end
+        end
+      end
+
+      if !standby_mode_spaces.empty?
+        air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces)
+      end
+    end
   end
 
 end
