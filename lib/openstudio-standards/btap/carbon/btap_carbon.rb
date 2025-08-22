@@ -87,6 +87,14 @@ class BTAPCarbon
             construction = surface.construction_hash
           end
 
+          # Get the carbon emissions for each material in the space.
+          if surface.construction_hash.nil?
+            # TODO: undefined space type
+            emissions = 0.0
+          else
+            emissions = carbon_from_construction(surface.construction_hash)
+          end
+
           # Calculate the carbon emissions
           @carbon_report["#{surface_type.underscore}_carbon"] = \
             (@carbon_report["#{surface_type.underscore}_carbon"] + emissions).round(2)
