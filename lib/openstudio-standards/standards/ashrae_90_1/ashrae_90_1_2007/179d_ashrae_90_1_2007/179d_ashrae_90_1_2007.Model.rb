@@ -675,10 +675,12 @@ class ACM179dASHRAE9012007
         end
       end
 
-      # Set the zone sizing SAT for each zone in the model
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Applying Baseline HVAC System Sizing Settings ***')
-      model.getThermalZones.each do |zone|
-        thermal_zone_apply_prm_baseline_supply_temperatures(zone)
+      if baseline_179d
+        # Set the zone sizing SAT for each zone in the model
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Applying Baseline HVAC System Sizing Settings ***')
+        model.getThermalZones.each do |zone|
+          thermal_zone_apply_prm_baseline_supply_temperatures(zone)
+        end
       end
 
       # Set the system sizing properties based on the zone sizing information
