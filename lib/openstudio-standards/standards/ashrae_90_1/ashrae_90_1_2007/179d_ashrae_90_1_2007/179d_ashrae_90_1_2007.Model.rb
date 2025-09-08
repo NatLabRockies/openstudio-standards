@@ -675,7 +675,7 @@ class ACM179dASHRAE9012007
         end
       end
 
-      if baseline_179d
+      unless building_type == 'PrimarySchool' || building_type == 'SecondarySchool'
         # Set the zone sizing SAT for each zone in the model
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Applying Baseline HVAC System Sizing Settings ***')
         model.getThermalZones.each do |zone|
