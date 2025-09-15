@@ -454,14 +454,13 @@ class ACM179dASHRAE9012007Test < Minitest::Test
 
       construction_name = construction_props['construction']
 
-      next if construction_name.downcase.include?('simple glazing')
-
       construction = standard.standards_data['constructions'].find { |x| x['name'] == construction_name }
       refute_nil(construction, "Construction '#{construction_name}' not found: #{construction_props}")
 
       # assert_equal(1, construction['materials'].size, "Construction '#{construction_name}' has more than one layer: #{construction_props}")
 
       construction['materials'].each do |material_name|
+        next if material_name.downcase.include?('simple glazing')
         material = standard.standards_data['materials'].find { |x| x['name'] == material_name }
         refute_nil(material, "Material '#{material_name}' not found")
       end
