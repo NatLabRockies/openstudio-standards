@@ -649,6 +649,9 @@ class ACM179dASHRAE9012007
         model_apply_baseline_swh_loops(model, building_type, swh_building_type)
       end
 
+      # system_type string
+      prm_system_types = []
+
       # Determine the baseline HVAC system type for each of the groups of zones and add that system type.
       if baseline_179d
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adding Baseline HVAC Systems ***')
@@ -1099,7 +1102,7 @@ class ACM179dASHRAE9012007
   #   matches the space's DesignSpecificationOutdoorAir
   def model_add_equivalent_zone_ventilation_for_heated_only_zones_with_dsoa(model, zones, ventilation_type: 'Natural', ensure_ddy_infiltration: true)
     zones.sort.each do |zone|
-      total_oa_m3_per_s = thermal_zone_outdoor_airflow_rate(zone)
+      total_oa_m3_per_s = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate(zone)
 
       total_oa_m3_per_m2s = total_oa_m3_per_s / zone.floorArea
 

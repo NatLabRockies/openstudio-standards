@@ -127,11 +127,11 @@ class ACM179dASHRAE9012007
     air_loop_hvac.thermalZones.each do |zone|
       zone.equipment.each do |equip|
         if equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
-          zone_oa = thermal_zone_outdoor_airflow_rate(zone)
+          zone_oa = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate(zone)
           vav_terminal = equip.to_AirTerminalSingleDuctVAVReheat.get
           air_terminal_single_duct_vav_reheat_apply_minimum_damper_position(vav_terminal, zone_oa, has_ddc)
         elsif equip.to_AirTerminalSingleDuctParallelPIUReheat.is_initialized
-          zone_oa = thermal_zone_outdoor_airflow_rate(zone)
+          zone_oa = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate(zone)
           fp_vav_terminal = equip.to_AirTerminalSingleDuctParallelPIUReheat.get
           air_terminal_single_duct_parallel_piu_reheat_apply_minimum_primary_airflow_fraction(fp_vav_terminal, zone_oa)
         end
