@@ -165,7 +165,7 @@ class ACM179dASHRAE9012007
     # If specified as SEER
     unless hp_props['minimum_seasonal_energy_efficiency_ratio'].nil?
       min_seer = hp_props['minimum_seasonal_energy_efficiency_ratio']
-      cop = seer_to_cop_cooling_no_fan(min_seer)
+      cop = seer_to_cop_no_fan(min_seer)
       coil_heating_dx_multi_speed.setName("#{coil_heating_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER")
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilHeatingDXMultiSpeed', "For #{template}: #{coil_heating_dx_multi_speed.name}: #{suppl_heating_type} #{subcategory} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
