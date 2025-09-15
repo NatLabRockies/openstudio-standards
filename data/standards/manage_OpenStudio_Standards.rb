@@ -237,12 +237,20 @@ def parse_units(unit)
   return unit_parsed
 end
 
+# List of columns that are boolean
+# (rubyXL returns 0 or 1, will translate to true/false)
+BOOL_COLS = [
+  'hx', 'data_center', 'under_8000_hours', 'nontransient_dwelling',
+  'u_value_includes_interior_film_coefficient',
+  'u_value_includes_exterior_film_coefficient'
+]
+
 # Exports spreadsheet data to data jsons, nested by the standards templates
 #
 # @param spreadsheet_titles
 # @param dataset_type [String] valid choices are 'os_stds' or 'data_lib'
 #   'os_stds' updates json files in openstudio standards, while 'data_lib' exports 90.1 jsons for the data library
-def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds')
+def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds', skip_templates: nil, schedules_notes_filter: nil)
   if dataset_type == 'data_lib'
     standards_dir = File.expand_path("#{__dir__}/../../data/standards/export")
     skip_list = exclusion_list['data_lib']
@@ -258,420 +266,24 @@ def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds')
     standards_dir = File.expand_path("#{__dir__}/../../lib/openstudio-standards/standards")
     skip_list = exclusion_list['os_stds']
     skip_list['templates'] = []
+    if !skip_templates.nil?
+      raise "skip_templates must be an array" unless skip_templates.is_a?(Array)
+      skip_list['templates'] = skip_templates
+    end
   end
   worksheets_to_skip = skip_list['worksheets']
   cols_to_skip = skip_list['columns']
   templates_to_skip = skip_list['templates']
 
-  # List of columns that are boolean
-  # (rubyXL returns 0 or 1, will translate to true/false)
-  bool_cols = []
-  bool_cols << 'hx'
-  bool_cols << 'data_center'
-  bool_cols << 'under_8000_hours'
-  bool_cols << 'nontransient_dwelling'
-  bool_cols << 'u_value_includes_interior_film_coefficient'
-  bool_cols << 'u_value_includes_exterior_film_coefficient'
+
+
 
   warnings = []
   duplicate_data = []
   spreadsheet_titles.each do |spreadsheet_title|
-
-    # Path to the xlsx file
-    xlsx_path = "#{__dir__}/#{spreadsheet_title}.xlsx"
-
-    unless File.exist?(xlsx_path)
-      warnings << "could not find spreadsheet called #{spreadsheet_title}"
-      next
-    end
-
-    puts "Parsing #{xlsx_path}"
-
-    # Open workbook
-    workbook = RubyXL::Parser.parse(xlsx_path)
-    puts "After parse workbook"
-
-    # Find all the template directories that match the search criteria embedded in the spreadsheet title
-    dirs = spreadsheet_title.gsub('OpenStudio_Standards-', '').gsub(/\(\w*\)/, '').split('-')
-    new_dirs = []
-    dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
-    glob_string = "#{standards_dir}/#{new_dirs.join('/')}"
-    puts "--spreadsheet title embedded search criteria: #{glob_string} yields:"
-    template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') && !f.include?('ashrae_90_1_prm') }
-    # template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') }
-    template_dirs.each do |template_dir|
-      puts "----#{template_dir}"
-    end
-
-    # Export each tab to a hash, where the key is the sheet name
-    # and the value is an array of objects
-    standards_data = {}
-    list_of_sheets = []
-    list_of_names = []
-    list_of_units = []
-    list_of_OS_okay_units = []
-    workbook.worksheets.each do |worksheet|
-      sheet_name = worksheet.sheet_name.snake_case
-
-      # Skip the specified worksheets
-      if worksheets_to_skip.include?(sheet_name)
-        puts "Skipping #{sheet_name}"
-        next
-      else
-        puts "Processing #{sheet_name}"
-      end
-
-      # All spreadsheets must have headers in row 3
-      # and data from roworksheet 4 onward.
-      header_row = 2 # Base 0
-
-      # Get all data
-      # extract_data was deprecated in rubyXL
-      # inputting the method here https://github.com/weshatheleopard/rubyXL/issues/201
-      all_data = worksheet.sheet_data.rows.map { |row|
-        row.cells.map { |c| c && c.value() } unless row.nil?
-      }
-
-      # Get the header row data
-      header_data = all_data[header_row]
-
-      # Format the headers and parse out units (in parentheses)
-      headers = []
-      header_data.each do |header_string|
-        break if header_string.nil?
-        header = {}
-        header["name"] = header_string.gsub(/\(.*\)/, '').strip.snake_case
-        header_unit_parens = header_string.scan(/\(.*\)/)[0]
-        list_of_sheets << sheet_name
-        list_of_names << header_string.gsub(/\(.*\)/, '').strip.snake_case
-        if header_unit_parens.nil?
-          header["units"] = nil
-          list_of_units << nil
-          list_of_OS_okay_units << nil
-        else
-          header["units"] = header_unit_parens.gsub(/\(|\)/, '').strip
-          list_of_units << header_unit_parens.gsub(/\(|\)/, '').strip
-          list_of_OS_okay_units << parse_units(header_unit_parens.gsub(/\(|\)/, '').strip)
-        end
-        headers << header
-      end
-      puts "--found #{headers.size} columns"
-
-      # Loop through all rows and export
-      # data for the row to a hash.
-      objs = []
-      for i in (header_row + 1)..(all_data.size - 1)
-        row = all_data[i]
-        # Stop when reach a blank row
-        break if row.nil?
-        # puts "------row #{i} = #{row}"
-        obj = {}
-
-        # Check if all cells in the row are null
-        all_null = true
-        for j in 0..headers.size - 1
-          # Flip the switch if a value is found
-          unless row[j].nil?
-            all_null = false
-          end
-        end
-
-        # Skip recording empty rows
-        next if all_null == true
-
-        # Store values from appropriate columns
-        for j in 0..headers.size - 1
-          val = row[j]
-          # Don't record nil values
-          # next if val.nil?
-          # Flip the switch if a value is found
-          unless val.nil?
-            all_null = false
-          end
-          # Skip specified columns
-          next if cols_to_skip.include?(headers[j]['name'])
-          # Convert specified columns to boolean
-          if bool_cols.include?(headers[j]['name'])
-            if val == 1
-              val = true
-            elsif val == 0
-              val = false
-            else
-              val = nil
-            end
-          end
-          # Convert date columns to standard format
-          if headers[j]['name'].include?('_date')
-            if val.is_a?(DateTime)
-              val = val.to_s
-            else
-              begin
-                val = DateTime.parse(val).to_s
-              rescue ArgumentError, TypeError
-                puts "ERROR - value '#{val}', class #{val.class} in #{sheet_name}, row #{i}, col #{j} is not a valid date"
-                return false
-              end
-            end
-          end
-
-          # Record the value
-          obj[headers[j]['name']] = val
-          # Skip recording units for unitless values
-          next if headers[j]['units'].nil?
-          # Record the units
-          # obj["#{headers[j]['name']}_units"] = headers[j]['units']
-        end
-
-        # Store the array of objects
-        # special cases for some types
-        if sheet_name == 'climate_zone_sets'
-          new_obj = {}
-          new_obj['name'] = obj['name']
-          items = []
-          obj.each do |key, val2|
-            # Skip the key
-            next if key == 'name'
-            # Skip blank climate zone values
-            next if val2.nil?
-            items << val2
-          end
-          new_obj['climate_zones'] = items
-          objs << new_obj
-        elsif sheet_name == 'constructions' or sheet_name == 'prm_constructions'
-          new_obj = {}
-          new_obj['name'] = obj['name']
-          items = []
-          obj.each do |key, val2|
-            # Skip the key
-            next if key == 'name'
-            # Put materials into an array,
-            # record other fields normally
-            if key.include?('material')
-              # Skip blank material values
-              next if val2.nil?
-              items << val2
-            else
-              new_obj[key] = val2
-            end
-          end
-          new_obj['materials'] = items
-          objs << new_obj
-        elsif sheet_name == 'schedules'
-          new_obj = {}
-          new_obj['name'] = obj['name']
-          items = []
-          obj.each do |key, val2|
-            # Skip the key
-            next if key == 'name'
-            # Put materials into an array,
-            # record other fields normally
-            if key.include?('hr')
-              # Skip blank hourly values
-              next if val2.nil?
-              items << val2
-            else
-              new_obj[key] = val2
-            end
-          end
-          new_obj['values'] = items
-          objs << new_obj
-        else
-          objs << obj
-        end
-
-      end
-
-      # Report how many objects were found
-      puts "--found #{objs.size} rows"
-
-      # Skip to the next sheet if no objects were found
-      if objs.empty?
-        warnings << "did not export #{sheet_name} in #{spreadsheet_title} because no rows were found"
-        next
-      end
-
-      # Save the objects to the hash
-      standards_data[sheet_name] = objs
-    end
-
-
-    filename_out = spreadsheet_title.gsub(/[()]/, '')
-    # CSV.open("metadata.csv", "wb") {|csv| headers.to_a.each {|elem| csv << elem} }
-    # list_metadata = [list_of_sheets, list_of_names, list_of_units, list_of_OS_okay_units].transpose
-    list_metadata = [list_of_sheets, list_of_names, list_of_units].transpose
-    list_metadata.insert(0, ['Sheet', 'Name', 'Unit']) # [1, 2, 2.5, 3, 4]
-    File.write("data/standards/metadata_units_#{filename_out}.csv", list_metadata.map(&:to_csv).join)
-    # Check for duplicate data in space_types_* sheets
-    standards_data.each_pair do |sheet_name, objs|
-      skip_duplicate_check = []
-      next if skip_duplicate_check.include?(sheet_name)
-
-      # Defines the set of properties that should be unique across all objects of the same type
-      unique_props = unique_properties(sheet_name)
-      # Ensure that a set of properties was defined
-      if unique_props.empty?
-        puts "--ERROR no unique set of properties was defined for #{sheet_name}, cannot check for duplicates"
-        return false
-      end
-
-      # Check for duplicates using unique property set
-      puts "Checking #{sheet_name} for duplicates based on columns: #{unique_props.join(', ')}"
-      found_objs = {}
-      objs.each_with_index do |obj, i|
-        unique_aspects = []
-        unique_props.each { |prop| unique_aspects << obj[prop] }
-        unique_aspect = unique_aspects.join('|')
-        if found_objs.include?(unique_aspect)
-          status = 'different'
-          status = 'same' if obj.to_s == found_objs[unique_aspect]
-          duplicate_data << [spreadsheet_title, sheet_name, i, status, unique_aspect]
-        end
-        found_objs[unique_aspect] = obj.to_s
-      end
-    end
-
-    # Merge all space_types_* sheets into a single space_types sheet
-    space_types = {}
-    standards_data.each_pair do |sheet_name, objs|
-      next unless sheet_name.include?('space_types_')
-      puts "Merging #{sheet_name} into space_types"
-      objs.each do |obj|
-        name = "#{obj['template']}|#{obj['building_type']}|#{obj['space_type']}"
-        if space_types[name].nil?
-          space_types[name] = obj
-        else
-          space_types[name].merge!(obj)
-        end
-      end
-
-      # Remove space_types_* from the standards_data
-      standards_data.delete(sheet_name)
-    end
-    standards_data['space_types'] = space_types.values unless space_types.empty?
-
-    # Export each set of objects to a JSON file
-    standards_data.each_pair do |sheet_name, objs|
-      puts "Writing #{sheet_name} which has #{objs.size} objects"
-
-      # Record the number of files that were exported for error checking
-      jsons_written = 0
-
-      # Split template-specific datasets into separate files.
-      # Store common/shared datasets under a higher-level folder
-      parent_dir = standard_parent_directory_from_spreadsheet_title(spreadsheet_title)
-      if objs.first.has_key?('template')
-        puts '--template-specific, writing a file for each template with just that templates objects'
-
-        # Split objects by template
-        templates_to_objects = {}
-        objs.each do |obj|
-          temp = obj['template']
-          if templates_to_objects[temp]
-            templates_to_objects[temp] << obj
-          else
-            templates_to_objects[temp] = [obj]
-          end
-        end
-
-        # Write out a file for each template with the objects for that template.
-        templates_to_objects.each_pair do |template, objs|
-          next if template == 'Any'
-          next if templates_to_skip.include?(template)
-          template_dir_name = standard_directory_name_from_template(template)
-          # Sort the objects
-          sorted_objs = {sheet_name => objs}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
-
-          # Also check directly underneath the parent directory
-          if /prm/.match(template_dir_name) && !/prm/.match(parent_dir)
-            child_dir = "#{standards_dir}/#{parent_dir}_prm/#{template_dir_name}"
-          else
-            child_dir = "#{standards_dir}/#{parent_dir}/#{template_dir_name}"
-          end
-          additional_dirs = []
-          additional_dirs << child_dir if Dir.exist?(child_dir)
-          possible_template_dirs = template_dirs + additional_dirs
-          puts "Additional dir = #{child_dir}"
-
-          wrote_json = false
-          possible_template_dirs.each do |template_dir|
-            last_dir = template_dir.split('/').last
-            next unless last_dir == template_dir_name
-            data_dir = "#{template_dir}/data"
-            Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
-            json_path = "#{data_dir}/#{template_dir_name}.#{shorten_sheet_name(sheet_name)}.json"
-            if json_path.size > 256
-              puts "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
-              return false
-            end
-            File.open(json_path, 'w:UTF-8') do |file|
-              file << JSON.pretty_generate(sorted_objs)
-            end
-            puts "--successfully generated #{json_path}"
-            jsons_written += 1
-            wrote_json = true
-          end
-
-          unless wrote_json
-            warnings << "did not export data for template #{template} from #{sheet_name} in #{spreadsheet_title} because there was no valid directory matching '#{template_dir_name}' based on the spreadsheet title embedded search criteria"
-          end
-        end
-
-        # Stop if no objects on this sheet list the template called 'Any'
-        next if templates_to_objects['Any'].nil?
-
-        # Sort the objects
-        sorted_objs = {sheet_name => templates_to_objects['Any']}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
-
-        # Write all objects that use the 'Any' template to the parent directories
-        wrote_any_template_json = false
-        template_dirs.uniq.each do |template_dir|
-          data_dir = "#{template_dir}/data"
-          Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
-          json_path = "#{data_dir}/Any.#{shorten_sheet_name(sheet_name)}.json"
-          if json_path.size > 256
-            puts "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
-            return false
-          end
-          File.open(json_path, 'w:UTF-8') do |file|
-            file << JSON.pretty_generate(sorted_objs)
-          end
-          puts "--successfully generated #{json_path}"
-          jsons_written += 1
-          wrote_any_template_json = true
-        end
-
-        unless wrote_any_template_json
-          warnings << "did not export data for template 'Any' from #{sheet_name} in #{spreadsheet_title} because there was no valid directory to store 'Any' template data."
-        end
-      else
-        puts '--not template-specific, writing a file with all objects for each template specified by search criteria'
-
-        # Sort the objects
-        sorted_objs = {sheet_name => objs}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
-
-        # Write out a file for each template with all objects on the sheet
-        template_dirs.each do |template_dir|
-          data_dir = "#{template_dir}/data"
-          Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
-          json_path = "#{data_dir}/#{parent_dir}.#{shorten_sheet_name(sheet_name)}.json"
-          if json_path.size > 256
-            puts "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
-            return false
-          end
-          File.open(json_path, 'w:UTF-8') do |file|
-            file << JSON.pretty_generate(sorted_objs)
-          end
-          puts "--successfully generated #{json_path}"
-          jsons_written += 1
-        end
-      end
-
-      # Confirm that at least 1 JSON file was written per sheet
-      if jsons_written.zero?
-        puts "--ERROR no JSON files were written for #{sheet_name} even though objects were found.  Check sheet contents or delete rows."
-        # return false
-      end
-    end
+    this_warnings, this_duplicate_data = process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter)
+    warnings += this_warnings
+    duplicate_data += this_duplicate_data
   end
 
   # Print out all the warnings in one place
@@ -698,4 +310,450 @@ def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds')
   end
 
   return true
+end
+
+def spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip, schedules_notes_filter)
+
+  puts "Parsing #{xlsx_path}"
+
+  # Open workbook
+  workbook = RubyXL::Parser.parse(xlsx_path)
+  puts "After parse workbook"
+
+  # Export each tab to a hash, where the key is the sheet name
+  # and the value is an array of objects
+  standards_data = {}
+  list_of_sheets = []
+  list_of_names = []
+  list_of_units = []
+  list_of_OS_okay_units = []
+  warnings = []
+  workbook.worksheets.each do |worksheet|
+    sheet_name = worksheet.sheet_name.snake_case
+
+    # Skip the specified worksheets
+    if worksheets_to_skip.include?(sheet_name)
+      puts "Skipping #{sheet_name}"
+      next
+    else
+      puts "Processing #{sheet_name}"
+    end
+
+    # All spreadsheets must have headers in row 3
+    # and data from roworksheet 4 onward.
+    header_row = 2 # Base 0
+
+    # Get all data
+    # extract_data was deprecated in rubyXL
+    # inputting the method here https://github.com/weshatheleopard/rubyXL/issues/201
+    all_data = worksheet.sheet_data.rows.map { |row|
+      row.cells.map { |c| c && c.value() } unless row.nil?
+    }
+
+    # Get the header row data
+    header_data = all_data[header_row]
+
+    # Format the headers and parse out units (in parentheses)
+    headers = []
+    header_data.each do |header_string|
+      break if header_string.nil?
+      header = {}
+      header["name"] = header_string.gsub(/\(.*\)/, '').strip.snake_case
+      header_unit_parens = header_string.scan(/\(.*\)/)[0]
+      list_of_sheets << sheet_name
+      list_of_names << header_string.gsub(/\(.*\)/, '').strip.snake_case
+      if header_unit_parens.nil?
+        header["units"] = nil
+        list_of_units << nil
+        list_of_OS_okay_units << nil
+      else
+        header["units"] = header_unit_parens.gsub(/\(|\)/, '').strip
+        list_of_units << header_unit_parens.gsub(/\(|\)/, '').strip
+        list_of_OS_okay_units << parse_units(header_unit_parens.gsub(/\(|\)/, '').strip)
+      end
+      headers << header
+    end
+    puts "--found #{headers.size} columns"
+
+    # Loop through all rows and export
+    # data for the row to a hash.
+    objs = []
+    for i in (header_row + 1)..(all_data.size - 1)
+      row = all_data[i]
+      # Stop when reach a blank row
+      break if row.nil?
+      # puts "------row #{i} = #{row}"
+      obj = {}
+
+      # Check if all cells in the row are null
+      all_null = true
+      for j in 0..headers.size - 1
+        # Flip the switch if a value is found
+        unless row[j].nil?
+          all_null = false
+        end
+      end
+
+      # Skip recording empty rows
+      next if all_null == true
+
+      # Store values from appropriate columns
+      for j in 0..headers.size - 1
+        val = row[j]
+        # Don't record nil values
+        # next if val.nil?
+        # Flip the switch if a value is found
+        unless val.nil?
+          all_null = false
+        end
+        # Skip specified columns
+        next if cols_to_skip.include?(headers[j]['name'])
+        # Convert specified columns to boolean
+        if BOOL_COLS.include?(headers[j]['name'])
+          if val == 1
+            val = true
+          elsif val == 0
+            val = false
+          else
+            val = nil
+          end
+        end
+        # Convert date columns to standard format
+        if headers[j]['name'].include?('_date')
+          if val.is_a?(DateTime)
+            val = val.to_s
+          else
+            begin
+              val = DateTime.parse(val).to_s
+            rescue ArgumentError, TypeError
+              puts "ERROR - value '#{val}', class #{val.class} in #{sheet_name}, row #{i}, col #{j} is not a valid date"
+              return false
+            end
+          end
+        end
+
+        # Record the value
+        obj[headers[j]['name']] = val
+        # Skip recording units for unitless values
+        next if headers[j]['units'].nil?
+        # Record the units
+        # obj["#{headers[j]['name']}_units"] = headers[j]['units']
+      end
+
+      # Store the array of objects
+      # special cases for some types
+      if sheet_name == 'climate_zone_sets'
+        new_obj = {}
+        new_obj['name'] = obj['name']
+        items = []
+        obj.each do |key, val2|
+          # Skip the key
+          next if key == 'name'
+          # Skip blank climate zone values
+          next if val2.nil?
+          items << val2
+        end
+        new_obj['climate_zones'] = items
+        objs << new_obj
+      elsif sheet_name == 'constructions' or sheet_name == 'prm_constructions'
+        new_obj = {}
+        new_obj['name'] = obj['name']
+        items = []
+        obj.each do |key, val2|
+          # Skip the key
+          next if key == 'name'
+          # Put materials into an array,
+          # record other fields normally
+          if key.include?('material')
+            # Skip blank material values
+            next if val2.nil?
+            items << val2
+          else
+            new_obj[key] = val2
+          end
+        end
+        new_obj['materials'] = items
+        objs << new_obj
+      elsif sheet_name == 'schedules'
+        new_obj = {}
+        new_obj['name'] = obj['name']
+        if !schedules_notes_filter.nil?
+          skip = true
+          schedules_notes_filter.each do |regex, template|
+            if regex.match(obj['notes'])
+              new_obj['template'] = template
+              skip = false
+              break
+            end
+          end
+          if skip
+            next
+          end
+        end
+
+        items = []
+        obj.each do |key, val2|
+          # Skip the key
+          next if key == 'name'
+          # Put materials into an array,
+          # record other fields normally
+          if key.include?('hr')
+            # Skip blank hourly values
+            next if val2.nil?
+            items << val2
+          else
+            new_obj[key] = val2
+          end
+        end
+        new_obj['values'] = items
+        objs << new_obj
+      else
+        objs << obj
+      end
+
+    end
+
+    # Report how many objects were found
+    puts "--found #{objs.size} rows"
+
+    # Skip to the next sheet if no objects were found
+    if objs.size.zero?
+      warnings << "did not export #{sheet_name} in #{xlsx_path} because no rows were found"
+      next
+    end
+
+    # Save the objects to the hash
+    standards_data[sheet_name] = objs
+  end
+
+
+  filename_out = (xlsx_path.basename.sub_ext '').to_s.gsub(/[()]/, '')
+  # CSV.open("metadata.csv", "wb") {|csv| headers.to_a.each {|elem| csv << elem} }
+  # list_metadata = [list_of_sheets, list_of_names, list_of_units, list_of_OS_okay_units].transpose
+  list_metadata = [list_of_sheets, list_of_names, list_of_units].transpose
+  list_metadata.insert(0, ['Sheet', 'Name', 'Unit']) # [1, 2, 2.5, 3, 4]
+  File.write("#{__dir__}/metadata_units_#{filename_out}.csv", list_metadata.map(&:to_csv).join)
+
+  return standards_data, warnings
+end
+
+def ensure_unicity(standards_data)
+  duplicate_data = []
+
+  # Check for duplicate data in space_types_* sheets
+  standards_data.each_pair do |sheet_name, objs|
+    skip_duplicate_check = []
+    next if skip_duplicate_check.include?(sheet_name)
+
+    # Defines the set of properties that should be unique across all objects of the same type
+    unique_props = unique_properties(sheet_name)
+    # Ensure that a set of properties was defined
+    if unique_props.empty?
+      raise "--ERROR no unique set of properties was defined for #{sheet_name}, cannot check for duplicates"
+    end
+
+    # Check for duplicates using unique property set
+    puts "Checking #{sheet_name} for duplicates based on columns: #{unique_props.join(', ')}"
+    found_objs = {}
+    objs.each_with_index do |obj, i|
+      unique_aspects = []
+      unique_props.each { |prop| unique_aspects << obj[prop] }
+      unique_aspect = unique_aspects.join('|')
+      if found_objs.include?(unique_aspect)
+        status = 'different'
+        status = 'same' if obj.to_s == found_objs[unique_aspect]
+        duplicate_data << [spreadsheet_title, sheet_name, i, status, unique_aspect]
+      end
+      found_objs[unique_aspect] = obj.to_s
+    end
+  end
+
+  return duplicate_data
+end
+
+def merge_space_types(standards_data)
+  # Merge all space_types_* sheets into a single space_types sheet
+  space_types = {}
+  standards_data.each_pair do |sheet_name, objs|
+    next unless sheet_name.include?('space_types_')
+    puts "Merging #{sheet_name} into space_types"
+    objs.each do |obj|
+      name = "#{obj['template']}|#{obj['building_type']}|#{obj['space_type']}"
+      if space_types[name].nil?
+        space_types[name] = obj
+      else
+        space_types[name].merge!(obj)
+      end
+    end
+
+    # Remove space_types_* from the standards_data
+    standards_data.delete(sheet_name)
+  end
+  standards_data['space_types'] = space_types.values unless space_types.empty?
+end
+
+def process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter = nil)
+  # Path to the xlsx file
+  xlsx_path = Pathname.new("#{__dir__}/#{spreadsheet_title}.xlsx")
+
+  unless File.exist?(xlsx_path)
+    warnings = ["could not find spreadsheet called #{spreadsheet_title}"]
+    return warnings, []
+  end
+
+
+  standards_data, warnings = spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip, schedules_notes_filter)
+  duplicate_data = ensure_unicity(standards_data)
+  merge_space_types(standards_data)
+
+  ws = write_standards_hash_to_json(standards_data, spreadsheet_title, standards_dir, templates_to_skip)
+  warnings += ws
+
+  return warnings, duplicate_data
+end
+
+def get_template_dirs(spreadsheet_title, standards_dir)
+    # Find all the template directories that match the search criteria embedded in the spreadsheet title
+  dirs = spreadsheet_title.gsub('OpenStudio_Standards-', '').gsub(/\(\w*\)/, '').split('-')
+  new_dirs = []
+  dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
+  glob_string = "#{standards_dir}/#{new_dirs.join('/')}"
+  puts "--spreadsheet title embedded search criteria: #{glob_string} yields:"
+  # template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') && !f.include?('prm')}
+  template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data')}
+  template_dirs.each do |template_dir|
+    puts "----#{template_dir}"
+  end
+  template_dirs
+end
+
+def write_standards_hash_to_json(standards_data, spreadsheet_title, standards_dir, templates_to_skip)
+  warnings = []
+
+  template_dirs = get_template_dirs(spreadsheet_title, standards_dir)
+
+  # Export each set of objects to a JSON file
+  standards_data.each_pair do |sheet_name, objs|
+    puts "Writing #{sheet_name} which has #{objs.size} objects"
+
+    # Record the number of files that were exported for error checking
+    jsons_written = 0
+
+    # Split template-specific datasets into separate files.
+    # Store common/shared datasets under a higher-level folder
+    parent_dir = standard_parent_directory_from_spreadsheet_title(spreadsheet_title)
+    if objs.first.has_key?('template')
+      puts '--template-specific, writing a file for each template with just that templates objects'
+
+      # Split objects by template
+      templates_to_objects = {}
+      objs.each do |obj|
+        temp = obj['template']
+        if templates_to_objects[temp]
+          templates_to_objects[temp] << obj
+        else
+          templates_to_objects[temp] = [obj]
+        end
+      end
+
+      # Write out a file for each template with the objects for that template.
+      templates_to_objects.each_pair do |template, objs|
+        next if template == 'Any'
+        next if templates_to_skip.include?(template)
+        template_dir_name = standard_directory_name_from_template(template)
+        # Sort the objects
+        sorted_objs = {sheet_name => objs}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
+
+        # Also check directly underneath the parent directory
+        if /prm/.match(template_dir_name) && !/prm/.match(parent_dir)
+          child_dir = "#{standards_dir}/#{parent_dir}_prm/#{template_dir_name}"
+        else
+          child_dir = "#{standards_dir}/#{parent_dir}/#{template_dir_name}"
+        end
+        additional_dirs = []
+        additional_dirs << child_dir if Dir.exist?(child_dir)
+        possible_template_dirs = template_dirs + additional_dirs
+        puts "Additional dir = #{child_dir}"
+
+        wrote_json = false
+        possible_template_dirs.each do |template_dir|
+          last_dir = template_dir.split('/').last
+          next unless last_dir == template_dir_name
+          data_dir = "#{template_dir}/data"
+          Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
+          json_path = "#{data_dir}/#{template_dir_name}.#{shorten_sheet_name(sheet_name)}.json"
+          if json_path.size > 256
+            raise "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
+          end
+          File.open(json_path, 'w:UTF-8') do |file|
+            file << JSON.pretty_generate(sorted_objs)
+          end
+          puts "--successfully generated #{json_path}"
+          jsons_written += 1
+          wrote_json = true
+        end
+
+        unless wrote_json
+          warnings << "did not export data for template #{template} from #{sheet_name} in #{spreadsheet_title} because there was no valid directory matching '#{template_dir_name}' based on the spreadsheet title embedded search criteria"
+        end
+      end
+
+      # Stop if no objects on this sheet list the template called 'Any'
+      next if templates_to_objects['Any'].nil?
+
+      # Sort the objects
+      sorted_objs = {sheet_name => templates_to_objects['Any']}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
+
+      # Write all objects that use the 'Any' template to the parent directories
+      wrote_any_template_json = false
+      template_dirs.uniq.each do |template_dir|
+        data_dir = "#{template_dir}/data"
+        Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
+        json_path = "#{data_dir}/Any.#{shorten_sheet_name(sheet_name)}.json"
+        if json_path.size > 256
+          raise  "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
+        end
+        File.open(json_path, 'w:UTF-8') do |file|
+          file << JSON.pretty_generate(sorted_objs)
+        end
+        puts "--successfully generated #{json_path}"
+        jsons_written += 1
+        wrote_any_template_json = true
+      end
+
+      unless wrote_any_template_json
+        warnings << "did not export data for template 'Any' from #{sheet_name} in #{spreadsheet_title} because there was no valid directory to store 'Any' template data."
+      end
+    else
+      puts '--not template-specific, writing a file with all objects for each template specified by search criteria'
+
+      # Sort the objects
+      sorted_objs = {sheet_name => objs}.sort_by_key_updated(true) {|x, y| x.to_s <=> y.to_s}
+
+      # Write out a file for each template with all objects on the sheet
+      template_dirs.each do |template_dir|
+        data_dir = "#{template_dir}/data"
+        Dir.mkdir(data_dir) unless Dir.exist?(data_dir)
+        json_path = "#{data_dir}/#{parent_dir}.#{shorten_sheet_name(sheet_name)}.json"
+        if json_path.size > 256
+          puts "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
+          return false
+        end
+        File.open(json_path, 'w:UTF-8') do |file|
+          file << JSON.pretty_generate(sorted_objs)
+        end
+        puts "--successfully generated #{json_path}"
+        jsons_written += 1
+      end
+    end
+
+    # Confirm that at least 1 JSON file was written per sheet
+    if jsons_written.zero?
+      puts "--ERROR no JSON files were written for #{sheet_name} even though objects were found.  Check sheet contents or delete rows."
+      # return false
+    end
+  end
+
+
+  return warnings
 end

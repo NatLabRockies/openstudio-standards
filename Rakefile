@@ -1,6 +1,8 @@
 require 'bundler/gem_tasks'
-require 'json'
 require 'fileutils'
+require 'json'
+require 'pathname'
+
 begin
   Bundler.setup
 rescue Bundler::BundlerError => e
@@ -169,6 +171,42 @@ namespace :data do
   task 'export:jsons' do
     export_spreadsheet_to_json(spreadsheets_ashrae, dataset_type: 'data_lib')
   end
+
+  desc 'Generate 179D JSONs from OpenStudio_Standards spreadsheets'
+  task 'update:179d' do
+
+    # The spreadsheet OpenStudio_Standards-ashrae_90_1(space_types).xlsx must
+    # be downloaded from the 179d_external folder in the data/standards folder
+
+    # I guess the spreadsheet should be named OpenStudio_Standards-ashrae_90_1-ALL-179d(space_types).xlsx
+    # but rather than fight it, I'll just move things around
+    d = Pathname.new("#{__dir__}/lib/openstudio-standards/standards/ashrae_90_1/179d_ashrae_90_1_2007")
+    FileUtils.mkdir_p(d)
+
+    schedules_notes_filter = [
+      # Regex, template assignment
+      [/ACM/i, '179d-90.1-2007'],
+      [/179D/i, '179d-90.1-2007']
+    ]
+    export_spreadsheet_to_json(
+      ['OpenStudio_Standards-ashrae_90_1(space_types)'],
+      dataset_type: 'os_stds',
+      skip_templates: ['90.1-2007'],
+      schedules_notes_filter: schedules_notes_filter
+    )
+
+    proper_dir = Pathname.new("#{__dir__}/lib/openstudio-standards/standards/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007")
+    FileUtils.mkdir_p(proper_dir)
+    d.glob('**/*.json').each do |f|
+      target_f = proper_dir / f.relative_path_from(d)
+      FileUtils.mkdir_p(target_f.parent)
+      FileUtils.mv(f, target_f)
+    end
+    FileUtils.rm_f(d)
+    puts "Moved files to #{proper_dir}"
+    puts proper_dir.glob("**/*.json")
+  end
+
 end
 
 # Tasks to export libraries packaged with
