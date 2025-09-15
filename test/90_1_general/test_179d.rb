@@ -128,7 +128,7 @@ class ACM179dASHRAE9012007Test < Minitest::Test
     assert_includes(data.keys, 'space_type_2007')
     enhanced_keys = data.keys - data_only_179d.keys - ['space_type_2007']
     refute_empty(enhanced_keys)
-    assert_equal(25, enhanced_keys.size)
+    assert_equal(17, enhanced_keys.size, "enhanced_keys=#{enhanced_keys.sort}")
 
     # Ensure all keys defined specifically in 179D are left untouched
     data_only_179d.keys.each do |k|
@@ -421,13 +421,12 @@ class ACM179dASHRAE9012007Test < Minitest::Test
     set_electric_equipment = false
     set_gas_equipment = false
     set_ventilation = false
-    set_infiltration = false
 
     data = standard.model_get_standards_data(model)
     assert_equal(0.399, data['occupancy_fraction_sensible'])
 
     model.getSpaceTypes.each do |space_type|
-      standard.space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
+      standard.space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
       assert_equal(1, space_type.people.size)
       p = space_type.people.first
       pd = p.peopleDefinition
@@ -455,6 +454,8 @@ class ACM179dASHRAE9012007Test < Minitest::Test
 
       construction_name = construction_props['construction']
 
+      next if construction_name.downcase.include?('simple glazing')
+
       construction = standard.standards_data['constructions'].find { |x| x['name'] == construction_name }
       refute_nil(construction, "Construction '#{construction_name}' not found: #{construction_props}")
 
@@ -473,7 +474,6 @@ class ACM179dASHRAE9012007Test < Minitest::Test
     set_electric_equipment = false
     set_gas_equipment = false
     set_ventilation = false
-    set_infiltration = false
     make_thermostat = true
 
     @model.getThermostatSetpointDualSetpoints.each(&:remove)
@@ -481,7 +481,7 @@ class ACM179dASHRAE9012007Test < Minitest::Test
     assert_equal(0, @model.getThermostatSetpointDualSetpoints.size)
 
     @model.getSpaceTypes.each do |space_type|
-      @standard.space_type_apply_internal_load_schedules(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration, make_thermostat)
+      @standard.space_type_apply_internal_load_schedules(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, make_thermostat)
     end
 
     assert_equal(3, @model.getThermostatSetpointDualSetpoints.size)

@@ -45,8 +45,8 @@ class ACM179dASHRAE9012007
   end
 
   # NOTE: 179D overrides it to set the people fraction sensible per ACM rules instead of letting E+ AutoCalculate it
-  def space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
-    super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
+  def space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
+    super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
 
     if set_people
       data = space_type_get_standards_data(space_type, extend_with_2007: false, throw_if_not_found: true)
@@ -61,17 +61,17 @@ class ACM179dASHRAE9012007
   # NOTE: 179D overrides it for Warehouse - Office only, so that the Thermostat
   # Cooling schedule is not Warehouse_Cool_Sch (which is 110F), but the Nonres_Cool_Sch
   # Otherwise, these spaces get a UnitHeater because they are deemed 'heatedonly'
-  def space_type_apply_internal_load_schedules(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration, make_thermostat)
+  def space_type_apply_internal_load_schedules(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, make_thermostat)
     primary_building_type = model_get_primary_building_type(space_type.model)
     standards_space_type = if space_type.standardsSpaceType.is_initialized
                              space_type.standardsSpaceType.get
                            end
     if !make_thermostat || primary_building_type != 'Warehouse' || standards_space_type != 'Office'
-      return super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration, make_thermostat)
+      return super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, make_thermostat)
     end
 
     # Do the super one, Except the make_thermostat
-    super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration, false)
+    super(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, false)
 
     # Make thermostat
     space_type_properties = space_type_get_standards_data(space_type)

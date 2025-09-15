@@ -49,7 +49,13 @@ class ACM179dASHRAE9012007WindowPropsTest < Minitest::Test
     template = '179D 90.1-2007'
     standard = Standard.build(template)
 
-    standard.model_add_design_days_and_weather_file(model, 'ASHRAE 169-2013-3A')
+    climate_zone = 'ASHRAE 169-2013-3A'
+    weather_file_path = OpenstudioStandards::Weather.climate_zone_representative_weather_file_path(climate_zone)
+    # set the model weather file, site information, climate zone, and design days
+    OpenstudioStandards::Weather.model_set_weather_file_and_design_days(model,
+                                                                        weather_file_path: weather_file_path,
+                                                                        climate_zone: climate_zone,
+                                                                        ddy_list: nil)
 
     output_folder = "#{__dir__}/output/sub_surface_get_window_property"
     FileUtils.rm_rf(output_folder)

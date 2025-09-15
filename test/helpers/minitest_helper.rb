@@ -34,17 +34,17 @@ require 'minitest/reporters'
 require 'minitest/reporters/base_reporter'
 require 'minitest/reporters/spec_reporter'
 
-if File.exist? '/usr/local/openstudio-3.6.1'
-  require '/usr/local/openstudio-3.6.1/Ruby/openstudio'
-elsif File.exist? '/Applications/OpenStudio-3.6.1'
-  require '/Applications/OpenStudio-3.6.1/Ruby/openstudio'
-elsif File.exist? 'C:/openstudio-3.6.1'
-  require 'C:/openstudio-3.6.1/Ruby/openstudio'
+if File.exist? '/usr/local/openstudio-3.10.0'
+  require '/usr/local/openstudio-3.10.0/Ruby/openstudio'
+elsif File.exist? '/Applications/OpenStudio-3.10.0'
+  require '/Applications/OpenStudio-3.10.0/Ruby/openstudio'
+elsif File.exist? 'C:/openstudio-3.10.0'
+  require 'C:/openstudio-3.10.0/Ruby/openstudio'
 else
   require 'openstudio'
 end
-if OpenStudio::VersionString.new(OpenStudio::openStudioVersion) != OpenStudio::VersionString.new("3.6.1")
-  raise "OpenStudio found is #{OpenStudio::openStudioVersion}, not 3.6.1"
+if OpenStudio::VersionString.new(OpenStudio::openStudioVersion) != OpenStudio::VersionString.new("3.10.0")
+  raise "OpenStudio found is #{OpenStudio::openStudioVersion}, not 3.10.0"
 end
 
 require 'openstudio/measure/ShowRunnerOutput'

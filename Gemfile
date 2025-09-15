@@ -4,7 +4,7 @@ source 'http://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'iruby', '~> 0.7.4'
-  gem 'pry', '~> 0.14.2'
-  gem 'pry-byebug', '~> 3.10'
+  gem 'iruby'
+  gem 'pry'
+  gem 'pry-byebug'
 end

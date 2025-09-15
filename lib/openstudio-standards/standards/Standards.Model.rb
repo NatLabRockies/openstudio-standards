@@ -273,8 +273,8 @@ class Standard
 
       # Run a sizing run to calculate VLT for layer-by-layer windows.
       if model_create_prm_baseline_building_requires_vlt_sizing_run(model) && (model_run_sizing_run(model, "#{sizing_run_dir}/SRVLT") == false)
-          return false
-        end
+        return false
+      end
 
       # Add or remove daylighting controls to each space
       # Add daylighting controls for 90.1-2013 and prior

@@ -278,16 +278,16 @@ class ACM179dASHRAE9012007
 
   # Creates a Performance Rating Method (aka Appendix G aka LEED) baseline building model
   # Method used for 90.1-2013 and prior
-  # @param user_model [OpenStudio::model::Model] User specified OpenStudio model
+  # @param model [OpenStudio::Model::Model] User specified OpenStudio model
   # @param building_type [String] the building type
   # @param climate_zone [String] the climate zone
   # @param custom [String] the custom logic that will be applied during baseline creation.  Valid choices are 'Xcel Energy CO EDA' or '90.1-2007 with addenda dn'.
   #   If nothing is specified, no custom logic will be applied; the process will follow the template logic explicitly.
   # @param sizing_run_dir [String] the directory where the sizing runs will be performed
-  # @param debug [Boolean] If true, will report out more detailed debugging output
+  # @param debug [Boolean] if true, will report out more detailed debugging output
   # @param baseline_179d [Boolean] NOTE: 179D addition, True for the baseline, false for the proposed
   def model_create_prm_baseline_building(model, building_type, climate_zone, custom = nil, sizing_run_dir = Dir.pwd, debug = false, baseline_179d = true, unmet_load_hours_check = false)
-    model_create_prm_any_baseline_building(model, building_type, climate_zone, 'All others', 'All others', 'All others', false, custom, sizing_run_dir, false, unmet_load_hours_check, debug, baseline_179d)
+    model_create_prm_any_baseline_building(model, building_type, climate_zone, 'All others', 'All others', 'All others', false, false, custom, sizing_run_dir, false, unmet_load_hours_check, debug, baseline_179d)
   end
 
   # Creates a Performance Rating Method (aka Appendix G aka LEED) baseline building model
@@ -295,7 +295,7 @@ class ACM179dASHRAE9012007
   #
   # @note Per 90.1, the Performance Rating Method "does NOT offer an alternative compliance path for minimum standard compliance."
   # This means you can't use this method for code compliance to get a permit.
-  # @param user_model [OpenStudio::model::Model] User specified OpenStudio model
+  # @param user_model [OpenStudio::Model::Model] User specified OpenStudio model
   # @param building_type [String] the building type
   # @param climate_zone [String] the climate zone
   # @param hvac_building_type [String] the building type for baseline HVAC system determination (90.1-2016 and onward)
@@ -307,8 +307,8 @@ class ACM179dASHRAE9012007
   # @param sizing_run_dir [String] the directory where the sizing runs will be performed
   # @param run_all_orients [Boolean] indicate weather a baseline model should be created for all 4 orientations: same as user model, +90 deg, +180 deg, +270 deg
   # @param debug [Boolean] If true, will report out more detailed debugging output
-  # @return [Bool] returns true if successful, false if not
-  def model_create_prm_any_baseline_building(user_model, building_type, climate_zone, hvac_building_type = 'All others', wwr_building_type = 'All others', swh_building_type = 'All others', model_deep_copy = false, custom = nil, sizing_run_dir = Dir.pwd, run_all_orients = false, unmet_load_hours_check = true, debug = false, baseline_179d = true)
+  # @return [Boolean] returns true if successful, false if not
+  def model_create_prm_any_baseline_building(user_model, building_type, climate_zone, hvac_building_type = 'All others', wwr_building_type = 'All others', swh_building_type = 'All others', model_deep_copy = false, create_proposed_model = false, custom = nil, sizing_run_dir = Dir.pwd, run_all_orients = false, unmet_load_hours_check = true, debug = false, baseline_179d = true)
     args = {
       # "user_model"   => user_model,
       'building_type' => building_type,
@@ -317,6 +317,7 @@ class ACM179dASHRAE9012007
       'wwr_building_type' => wwr_building_type,
       'swh_building_type' => swh_building_type,
       'model_deep_copy' => model_deep_copy,
+      'create_proposed_model' => create_proposed_model,
       'custom' => custom,
       'sizing_run_dir' => sizing_run_dir,
       'run_all_orients' => run_all_orients,
@@ -327,29 +328,89 @@ class ACM179dASHRAE9012007
     if debug
       args.each { |k, v| OpenStudio.logFree(OpenStudio::Info, 'openstudio.prm.179d', "179d - model_create_prm_any_baseline_building inputs: #{k} - #{v}") }
     end
-    # system_type string
-    prm_system_types = []
-
-    # Check proposed model unmet load hours
-    if unmet_load_hours_check
-      # Run proposed model; need annual simulation to get unmet load hours
-      if model_run_simulation_and_log_errors(user_model, run_dir = "#{sizing_run_dir}/PROP")
-        umlh = model_get_unmet_load_hours(user_model)
-        if umlh > 300
-          OpenStudio.logFree(OpenStudio::Error, 'prm.log', "Proposed model unmet load hours exceed 300. Baseline model(s) won't be created.")
-          raise "Proposed model unmet load hours exceed 300. Baseline model(s) won't be created."
-        end
-      else
-        OpenStudio.logFree(OpenStudio::Error, 'prm.log', 'Simulation failed. Check the model to make sure no severe errors.')
-        raise 'Simulation on proposed model failed. Baseline generation is stopped.'
-      end
-    end
 
     # User data process
     # bldg_type_hvac_zone_hash could be an empty hash if all zones in the models are unconditioned
+    # TODO - move this portion to the top of the function
     bldg_type_hvac_zone_hash = {}
-    ## Note for 179: replace from local to prm methods
-    handle_user_input_data(user_model, climate_zone, hvac_building_type, wwr_building_type, swh_building_type, bldg_type_hvac_zone_hash)
+    handle_user_input_data(user_model, climate_zone, sizing_run_dir, hvac_building_type, wwr_building_type, swh_building_type, bldg_type_hvac_zone_hash)
+
+    # enforce the user model to be a non-leap year, defaulting to 2009 if the model year is a leap year
+    if user_model.yearDescription.is_initialized
+      year_description = user_model.yearDescription.get
+      if year_description.isLeapYear
+        OpenStudio.logFree(OpenStudio::Warn, 'prm.log',
+                           "The user model year #{year_description.assumedYear} is a leap year. Changing to 2009, a non-leap year, as required by PRM guidelines.")
+        year_description.setCalendarYear(2009)
+      end
+    end
+
+    if create_proposed_model
+      # Perform a user model design day run only to make sure
+      # that the user model is valid, i.e. can run without major
+      # errors
+      if !model_run_sizing_run(user_model, "#{sizing_run_dir}/USER-SR")
+        OpenStudio.logFree(OpenStudio::Warn, 'prm.log',
+                           "The user model is not a valid OpenStudio model. Baseline and proposed model(s) won't be created.")
+        prm_raise(false,
+                  sizing_run_dir,
+                  "The user model is not a valid OpenStudio model. Baseline and proposed model(s) won't be created.")
+      end
+
+      # Check if proposed HVAC system is autosized
+      if model_is_hvac_autosized(user_model)
+        OpenStudio.logFree(OpenStudio::Warn, 'prm.log',
+                           "The user model's HVAC system is partly autosized.")
+      end
+
+      # Generate proposed model from the user-provided model
+      proposed_model = model_create_prm_proposed_building(user_model)
+    end
+
+    # Check proposed model unmet load hours
+    if unmet_load_hours_check
+      # Set proposed model export data in json format
+      OpenStudioStandards::RulesetChecking.export_json_output(proposed_model)
+
+      # Run user model; need annual simulation to get unmet load hours
+      if model_run_simulation_and_log_errors(proposed_model, run_dir = "#{sizing_run_dir}/PROP")
+        umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
+        if umlh > 300
+          OpenStudio.logFree(OpenStudio::Warn, 'prm.log',
+                             "Proposed model unmet load hours (#{umlh}) exceed 300. Baseline model(s) won't be created.")
+          prm_raise(false,
+                    sizing_run_dir,
+                    "Proposed model unmet load hours exceed 300. Baseline model(s) won't be created.")
+        end
+      else
+        OpenStudio.logFree(OpenStudio::Error, 'prm.log',
+                           'Simulation failed. Check the model to make sure no severe errors.')
+        prm_raise(false,
+                  sizing_run_dir,
+                  'Simulation on proposed model failed. Baseline generation is stopped.')
+      end
+    end
+    if create_proposed_model
+      # Make the run directory if it doesn't exist
+      FileUtils.mkdir_p(sizing_run_dir)
+
+      # Save proposed model
+      proposed_model.save(OpenStudio::Path.new("#{sizing_run_dir}/proposed_final.osm"), true)
+      forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+      idf = forward_translator.translateModel(proposed_model)
+
+      proposed_model.getSpaces.sort.each do |space|
+        space_cond_type = space_conditioning_category(space)
+        next if space_cond_type == 'Unconditioned'
+        OpenStudioStandards::RulesetChecking.tag_spaces(idf, space)
+      end
+      idf_path = OpenStudio::Path.new("#{sizing_run_dir}/proposed_final.idf")
+      idf.save(idf_path, true)
+
+      # export to epjson
+      OpenStudioStandards::RulesetChecking.export_epjson(proposed_model, sizing_run_dir, 'proposed_final')
+    end
+
     # Define different orientation from original orientation
     # for each individual baseline models
     # Need to run proposed model sizing simulation if no sql data is available
@@ -437,7 +498,7 @@ class ACM179dASHRAE9012007
       end
 
       # Assign building stories to spaces in the building where stories are not yet assigned.
-      model_assign_spaces_to_stories(model)
+      OpenstudioStandards::Geometry.model_assign_spaces_to_building_stories(model)
 
       # Modify the internal loads in each space type, keeping user-defined schedules.
       if baseline_179d
@@ -448,16 +509,21 @@ class ACM179dASHRAE9012007
           set_electric_equipment = false
           set_gas_equipment = false
           set_ventilation = false
-          set_infiltration = false
           # For PRM, it only applies lights for now.
-          space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
+          space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
         end
       end
 
-      # # Modify the lighting schedule to handle lighting occupancy sensors
-      # # Modify the upper limit value of fractional schedule to avoid the fatal error caused by schedule value higher than 1
+      # Modify the lighting schedule to handle lighting occupancy sensors
+      # Modify the upper limit value of fractional schedule to avoid the fatal error caused by schedule value higher than 1
       # NOTE: 179D Disable: No light schedule change as it fixed wth ACM schedules
       # space_type_light_sch_change(model)
+
+      # Modify electric equipment computer room schedule
+      model.getSpaces.sort.each do |space|
+        space_add_prm_computer_room_equipment_schedule(space)
+      end
+
       # NOTE: 179D Disable: No exterior lighting schedule required
       # model_apply_baseline_exterior_lighting(model)
 
@@ -465,9 +531,11 @@ class ACM179dASHRAE9012007
       # NOTE: 179D Disable: no need for 90.1-2007
       # model_add_prm_elevators(model)
 
-      # # Calculate infiltration as per 90.1 PRM rules
-      # NOTE: 179D Disable: return True for 90.1-2007 template
-      # model_baseline_apply_infiltration_standard(model, climate_zone)
+      # Calculate infiltration as per 90.1 PRM rules
+      model_apply_standard_infiltration(model, infiltration_rate: prm_building_envelope_infiltration_rate)
+
+      # Apply user outdoor air specs as per 90.1 PRM rules exceptions
+      model_apply_userdata_outdoor_air(model)
 
       # If any of the lights are missing schedules, assign an always-off schedule to those lights.
       # This is assumed to be the user's intent in the proposed model.
@@ -477,30 +545,27 @@ class ACM179dASHRAE9012007
         end
       end
 
-      # OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adding Daylighting Controls ***')
 
       # Run a sizing run to calculate VLT for layer-by-layer windows.
       # TODO check if not required for 90.1-2007 full appendix (only required for 90.1-2010)
       if baseline_179d
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adding Daylighting Controls ***')
         if model_create_prm_baseline_building_requires_vlt_sizing_run(model) && (model_run_sizing_run(model, "#{sizing_run_dir}/SRVLT") == false)
           return false
         end
-      end
 
-      # # Add or remove daylighting controls to each space
-      # # Add daylighting controls for 90.1-2013 and prior
-      # # Remove daylighting control for 90.1-PRM-2019 and onward
-      # NOTE: check how daylighting required for 90.1-2007
-      if baseline_179d
+        # Add or remove daylighting controls to each space
+        # Add daylighting controls for 90.1-2013 and prior
+        # Remove daylighting control for 90.1-PRM-2019 and onward
+        # NOTE: check how daylighting required for 90.1-2007
         model.getSpaces.sort.each do |space|
-          space_set_baseline_daylighting_controls(space, false, false)
+          space_set_baseline_daylighting_controls(space, true, false)
         end
       end
 
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Applying Baseline Constructions ***')
-
       # Modify some of the construction types as necessary
       if baseline_179d
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Applying Baseline Constructions ***')
         model_apply_prm_construction_types(model)
       end
 
@@ -521,7 +586,7 @@ class ACM179dASHRAE9012007
 
       # Set the construction properties of all the surfaces in the model
       if baseline_179d
-        model_apply_constructions(model, climate_zone, wwr_building_type, wwr_info)
+        model_apply_standard_constructions(model, climate_zone, wwr_building_type: wwr_building_type, wwr_info: wwr_info)
       end
 
       # Update ground temperature profile (for F/C-factor construction objects)
@@ -551,11 +616,7 @@ class ACM179dASHRAE9012007
 
       # Compute and marke DCV related information before deleting proposed model HVAC systems
       if baseline_179d
-        model_mark_zone_dcv_existence(model)
-        model_add_dcv_user_exception_properties(model)
-        model_add_dcv_requirement_properties(model)
-        model_add_apxg_dcv_properties(model)
-        model_raise_user_model_dcv_errors(model)
+        model_evaluate_dcv_requirements(model)
       end
 
       # Get minimum and design outdoor airflow rates
@@ -585,7 +646,7 @@ class ACM179dASHRAE9012007
       # Modify the service water heating loops per the baseline rules
       if baseline_179d
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Cleaning up Service Water Heating Loops ***')
-        model_apply_baseline_swh_loops(model, building_type)
+        model_apply_baseline_swh_loops(model, building_type, swh_building_type)
       end
 
       # Determine the baseline HVAC system type for each of the groups of zones and add that system type.
@@ -859,15 +920,21 @@ class ACM179dASHRAE9012007
       # @todo: turn off self shading
       # Set Solar Distribution to MinimalShadowing... problem is when you also have detached shading such as surrounding buildings etc
       # It won't be taken into account, while it should: only self shading from the building itself should be turned off but to my knowledge there isn't a way to do this in E+
-
-      model_status = degs > 0 ? "final_#{degs}" : 'final'
+      model_status = degs > 0 ? "baseline_final_#{degs}" : 'baseline_final'
+      OpenStudioStandards::RulesetChecking.export_json_output(model)
       model.save(OpenStudio::Path.new("#{sizing_run_dir}/#{model_status}.osm"), true)
 
       # Translate to IDF and save for debugging
       forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
       idf = forward_translator.translateModel(model)
+      model.getSpaces.sort.each do |space|
+        space_cond_type = space_conditioning_category(space)
+        next if space_cond_type == 'Unconditioned'
+        OpenStudioStandards::RulesetChecking.tag_spaces(idf, space)
+      end
       idf_path = OpenStudio::Path.new("#{sizing_run_dir}/#{model_status}.idf")
       idf.save(idf_path, true)
+      OpenStudioStandards::RulesetChecking.export_epjson(model, sizing_run_dir, "#{model_status}")
 
       prm_system_type_str = prm_system_types.uniq.map { |x| x[0] }.uniq.join('***')
       model.getBuilding.additionalProperties.setFeature('prm_baseline_system_type', prm_system_type_str)
@@ -904,16 +971,16 @@ class ACM179dASHRAE9012007
           # the PRM-RM; Note that the PRM-RM only suggest to increase
           # air zone air flow, but the zone sizing factor in EnergyPlus
           # increase both air flow and load.
-          unmet_load_hours = model_get_unmet_load_hours(model)
-          if unmet_load_hours <= 300
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "#{nb_adjustments} rounds of zone sizing factor adjustments were needed for the unmet load hours to be < 300 for the baseline model (#{degs} degree of rotation): final = #{unmet_load_hours} unmet load hours")
+          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
+          if umlh <= 300
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "#{nb_adjustments} rounds of zone sizing factor adjustments were needed for the unmet load hours to be < 300 for the baseline model (#{degs} degree of rotation): final = #{umlh} unmet load hours")
             break
           end
 
           nb_adjustments += 1
           # Limit the number of zone sizing factor adjustment to 8
           if nb_adjustments > max_adjustments
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "After #{max_adjustments} rounds of zone sizing factor adjustments the unmet load hours for the baseline model (#{degs} degree of rotation) still exceed 300 hours: final = #{unmet_load_hours} unmet load hours. Please open an issue on GitHub (https://github.com/NREL/openstudio-standards/issues) and share your user model with the developers.")
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "After #{max_adjustments} rounds of zone sizing factor adjustments the unmet load hours for the baseline model (#{degs} degree of rotation) still exceed 300 hours: final = #{umlh} unmet load hours. Please open an issue on GitHub (https://github.com/NREL/openstudio-standards/issues) and share your user model with the developers.")
             break
           end
 
@@ -923,7 +990,7 @@ class ACM179dASHRAE9012007
 
           model.getThermalZones.each do |thermal_zone|
             # Cooling adjustments
-            clg_umlh = thermal_zone_get_unmet_load_hours(thermal_zone, 'Cooling')
+            clg_umlh = OpenstudioStandards::SqlFile.thermal_zone_get_annual_occupied_unmet_cooling_hours(thermal_zone)
             if clg_umlh > 50
               # Get zone cooling sizing factor
               sizing_factor = 1.0
@@ -940,7 +1007,7 @@ class ACM179dASHRAE9012007
             end
 
             # Heating adjustments
-            htg_umlh = thermal_zone_get_unmet_load_hours(thermal_zone, 'Heating')
+            htg_umlh = OpenstudioStandards::SqlFile.thermal_zone_get_annual_occupied_unmet_heating_hours(thermal_zone)
             if htg_umlh > 50
               sizing_factor = 1.0
               # Get zone heating sizing factor
@@ -1227,6 +1294,19 @@ class ACM179dASHRAE9012007
         " | old value = #{minimum_outdoor_airflow_rate_m_3_per_s_old} | new value = #{minimum_outdoor_airflow_rate_m_3_per_s}")
       sizing_system.setDesignOutdoorAirFlowRate(minimum_outdoor_airflow_rate_m_3_per_s)
     end
+  end
+
+  # Template method for evaluate DCV requirements in the user model
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model
+  # @return [Boolean] returns true if successful, false if not
+  def model_evaluate_dcv_requirements(model)
+    model_mark_zone_dcv_existence(model)
+    model_add_dcv_user_exception_properties(model)
+    model_add_dcv_requirement_properties(model)
+    model_add_apxg_dcv_properties(model)
+    model_raise_user_model_dcv_errors(model)
+    return true
   end
 
   # https://github.com/NREL/openstudio-standards/blob/master/lib/openstudio-standards/standards/ashrae_90_1_prm/ashrae_90_1_prm.Model.rb#L1180
