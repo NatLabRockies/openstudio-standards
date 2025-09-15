@@ -111,7 +111,7 @@ class ACM179dASHRAE9012007
   # Building object
   def model_get_building_properties(model, remap_office = true)
     # get climate zone from model
-    climate_zone = model_standards_climate_zone(model)
+    climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(model)
 
     # get building type from model
     building_type = model_get_primary_building_type(model, remap_office: remap_office)
