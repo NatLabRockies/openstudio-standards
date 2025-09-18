@@ -974,7 +974,7 @@ class ACM179dASHRAE9012007
           # the PRM-RM; Note that the PRM-RM only suggest to increase
           # air zone air flow, but the zone sizing factor in EnergyPlus
           # increase both air flow and load.
-          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
+          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(model)
           if umlh <= 300
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "#{nb_adjustments} rounds of zone sizing factor adjustments were needed for the unmet load hours to be < 300 for the baseline model (#{degs} degree of rotation): final = #{umlh} unmet load hours")
             break
