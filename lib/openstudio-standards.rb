@@ -337,6 +337,9 @@ module OpenstudioStandards
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.ThermalZone"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.ZoneHVACComponent"
 
+  # Temporary patches until new SDK is released
+  require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.Model_backport_ground_condition"
+
   # 90.1-2010
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2010/ashrae_90_1_2010.AirLoopHVAC"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2010/ashrae_90_1_2010.BoilerHotWater"
