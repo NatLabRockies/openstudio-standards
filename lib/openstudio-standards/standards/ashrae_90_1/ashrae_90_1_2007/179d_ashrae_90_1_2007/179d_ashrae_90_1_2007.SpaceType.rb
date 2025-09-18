@@ -91,4 +91,80 @@ class ACM179dASHRAE9012007
 
     return true
   end
+
+  def space_type_apply_standard_infiltration(space_type)
+    if space_type.name.get.to_s.downcase.include?('plenum')
+      return false
+    end
+
+    if space_type.standardsSpaceType.is_initialized && space_type.standardsSpaceType.get.downcase.include?('plenum')
+      return false
+    end
+
+    # Get the standards data
+    space_type_properties = space_type_get_standards_data(space_type)
+
+    infiltration_have_info = false
+    infiltration_per_area_ext = space_type_properties['infiltration_per_exterior_area'].to_f
+    infiltration_per_area_ext_wall = space_type_properties['infiltration_per_exterior_wall_area'].to_f
+    infiltration_ach = space_type_properties['infiltration_air_changes'].to_f
+    if infiltration_per_area_ext.zero? && infiltration_per_area_ext_wall.zero? && infiltration_ach.zero?
+      return
+    end
+
+    # Remove all but the first instance
+    instances = space_type.spaceInfiltrationDesignFlowRates.sort
+    if instances.size.zero?
+      instance = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(space_type.model)
+      instance.setName("#{space_type.name} Infiltration")
+      instance.setSpaceType(space_type)
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} had no infiltration objects, one has been created.")
+      instances << instance
+    elsif instances.size > 1
+      instances.each_with_index do |inst, i|
+        next if i.zero?
+
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "Removed #{inst.name} from #{space_type.name}.")
+        inst.remove
+      end
+    end
+
+    # Modify each instance
+    space_type.spaceInfiltrationDesignFlowRates.sort.each do |inst|
+      unless infiltration_per_area_ext.zero?
+        inst.setFlowperExteriorSurfaceArea(OpenStudio.convert(infiltration_per_area_ext.to_f, 'ft^3/min*ft^2', 'm^3/s*m^2').get.round(13))
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set infiltration to #{ventilation_ach} per ft^2 exterior surface area.")
+      end
+      unless infiltration_per_area_ext_wall.zero?
+        inst.setFlowperExteriorWallArea(OpenStudio.convert(infiltration_per_area_ext_wall.to_f, 'ft^3/min*ft^2', 'm^3/s*m^2').get)
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set infiltration to #{infiltration_per_area_ext_wall} per ft^2 exterior wall area.")
+      end
+      unless infiltration_ach.zero?
+        inst.setAirChangesperHour(infiltration_ach)
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set infiltration to #{ventilation_ach} ACH.")
+      end
+    end
+  end
+
+  def space_type_apply_standard_infiltration_schedule(space_type)
+    # Get the standards data
+    space_type_properties = space_type_get_standards_data(space_type)
+
+    # Get the default schedule set
+    # or create a new one if none exists.
+    default_sch_set = nil
+    if space_type.defaultScheduleSet.is_initialized
+      default_sch_set = space_type.defaultScheduleSet.get
+    else
+      default_sch_set = OpenStudio::Model::DefaultScheduleSet.new(space_type.model)
+      default_sch_set.setName("#{space_type.name} Schedule Set")
+      space_type.setDefaultScheduleSet(default_sch_set)
+    end
+    infiltration_sch = space_type_properties['infiltration_schedule']
+    unless infiltration_sch.nil?
+      default_sch_set.setInfiltrationSchedule(model_add_schedule(space_type.model, infiltration_sch))
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set infiltration schedule to #{infiltration_sch}.")
+    end
+  end
+
 end
