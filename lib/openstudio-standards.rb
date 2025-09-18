@@ -332,6 +332,7 @@ module OpenstudioStandards
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.PlanarSurface"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.PlantLoop"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.SpaceType"
+  require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.ServiceWaterHeating"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.SubSurface"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.ThermalZone"
   require_relative "#{stds}/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007/179d_ashrae_90_1_2007.ZoneHVACComponent"
