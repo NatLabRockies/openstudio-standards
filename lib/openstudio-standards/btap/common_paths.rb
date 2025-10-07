@@ -28,10 +28,6 @@ class CommonPaths
   attr_reader :carbon_opaque_path
   attr_reader :carbon_glazing_path
   attr_reader :carbon_frame_path
-
-  # Embodied carbon data
-  attr_reader :carbon_data_path
-
   # Other
   attr_reader :error_log
   attr_reader :cost_output_file
