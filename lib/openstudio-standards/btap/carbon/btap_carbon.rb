@@ -72,6 +72,9 @@ class BTAPCarbon
       @carbon_report["#{surface_type.underscore}_carbon"]  = 0.0
     end
 
+    require 'csv'
+    csv_report = CSV.open("/home/osdev/carbon_testing/carbon_report.csv", "w")
+    csv_report << ["Surface Name", "Construction Description", "Material Descriptions", "Construction Type", "Embodied Carbon (A-C)", "Surface Area"]
     @attributes.spaces.each do |space|
       @attributes.surface_types.each do |surface_type|
         space.surfaces_hash[surface_type].each do |surface|
@@ -93,6 +96,9 @@ class BTAPCarbon
             emissions = 0.0
           else
             emissions = carbon_from_construction(surface.construction_hash)
+            construction = surface.construction_hash
+            material_descriptions = construction["type"] == "opaque" ? construction["material_desciptions"] : construction["component"]
+            csv_report << [surface.name.to_s, construction["description"], material_descriptions, construction["type"], emissions * surfArea, surfArea]
           end
 
           # Calculate the carbon emissions
