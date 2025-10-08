@@ -66,6 +66,8 @@ class BTAPCarbon
     end
   end
 
+  carbon_frame = 
+
   def audit_embodied_carbon
     @attributes.surface_types.each do |surface_type|
       @carbon_report["#{surface_type.underscore}_area_m2"] = 0.0
@@ -98,7 +100,7 @@ class BTAPCarbon
             emissions = carbon_from_construction(surface.construction_hash)
             construction = surface.construction_hash
             material_descriptions = construction["type"] == "opaque" ? construction["material_desciptions"] : construction["component"]
-            csv_report << [surface.name.to_s, construction["description"], material_descriptions, construction["type"], emissions * surfArea, surfArea]
+            csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions * surfArea, surfArea]
           end
 
           # Calculate the carbon emissions
