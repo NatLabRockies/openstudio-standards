@@ -64,9 +64,25 @@ class BTAPCarbon
 
       @carbon_database["frame"] << item
     end
-  end
 
-  carbon_frame = 
+    carbon_frame = CSV.read(@cp.carbon_frame_path)
+    @carbon_database["frame"] = Array.new
+
+    1.upto carbon_frame.length - 1 do |i|
+      row   = carbon_frame[i]
+      index = row.each
+      item  = Hash.new
+
+      item["materials_glazing_id"]    = index.next
+      item["description"]             = index.next
+      item["per m2"]                  = index.next.to_f
+      item["Embodied Carbon (A1-A5)"] = index.next.to_f
+      item["Embodied Carbon (A-C)"]   = index.next.to_f
+      item["Environmental Product Declaration (EPD)"] = index.next
+
+      @carbon_database["frame"] << item
+    end
+  end
 
   def audit_embodied_carbon
     @attributes.surface_types.each do |surface_type|
@@ -86,21 +102,13 @@ class BTAPCarbon
 
           # Get the carbon emissions for each material in the space.
           if surface.construction_hash.nil?
-            emissions = 0.0
-          else
-            emissions = get_carbon_emissions(surface.construction_hash, surface, surface_area) 
-            construction = surface.construction_hash
-          end
-
-          # Get the carbon emissions for each material in the space.
-          if surface.construction_hash.nil?
             # TODO: undefined space type
             emissions = 0.0
           else
-            emissions = carbon_from_construction(surface.construction_hash)
+            emissions = carbon_from_construction(surface, surface_area)
             construction = surface.construction_hash
             material_descriptions = construction["type"] == "opaque" ? construction["material_desciptions"] : construction["component"]
-            csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions * surfArea, surfArea]
+            csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions * surface_area, surface_area]
           end
 
           # Calculate the carbon emissions
