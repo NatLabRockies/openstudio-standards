@@ -105,7 +105,7 @@ class BTAPCarbon
             # TODO: undefined space type
             emissions = 0.0
           else
-            emissions = carbon_from_construction(surface, surface_area)
+            emissions = get_carbon_emissions(surface.construction_hash, surface, surface_area)
             construction = surface.construction_hash
             material_descriptions = construction["type"] == "opaque" ? construction["material_desciptions"] : construction["component"]
             csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions * surface_area, surface_area]
