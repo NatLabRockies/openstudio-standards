@@ -26,9 +26,7 @@ class BTAPAnalysis
       @qaqc[:costing_information] = cost_result
     end
 
-    # disable openstudio-version; for debugging only
-    # cost_result["openstudio-version"] = OpenstudioStandards::VERSION
-    File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f|
+    File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f| 
       f.write(JSON.pretty_generate(cost_result, allow_nan: true))
     end
     puts "Wrote File cost_results.json in #{@output_folder} "
