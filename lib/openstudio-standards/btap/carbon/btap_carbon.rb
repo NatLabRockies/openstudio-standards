@@ -116,13 +116,11 @@ class BTAPCarbon
         end
       end
     end
-
     # Get the total emissions from all the surface types.
     total_emissions = 0
     @attributes.surface_types.each do |surface_type|
       total_emissions += @carbon_report["#{surface_type.underscore}_carbon"]
     end
-
     @carbon_report["total"] = total_emissions
     return @carbon_report
   end
