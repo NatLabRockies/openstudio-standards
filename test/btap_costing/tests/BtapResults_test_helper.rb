@@ -3,6 +3,8 @@ require 'fileutils'
 # BTAPResultsHelper
 #   Helper methods for the BtapResults suite of tests.
 class BTAPResultsHelper
+  @@cached = !(ENV["RERUN_CACHED"] == "true")
+  puts "BTAP Results caching #{@@cached ? "enabled" : "disabled"}."
   attr_reader :model_cached_path
   attr_reader :sql_cached_path
 
@@ -24,5 +26,11 @@ class BTAPResultsHelper
       output_folder: output_folder,
       template:      template,
       datapoint_id:  'test_run')
+  end
+
+  class << self
+    def cached
+      return @@cached
+    end
   end
 end
