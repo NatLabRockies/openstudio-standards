@@ -8,11 +8,11 @@ class BTAPResultsHelper < Minitest::Test
   puts "BTAP Results caching #{@@cached ? "enabled" : "disabled"}."
 
   def initialize(test_path:, model_name:, run_dir:)
-    @test_path             = test_path 
-    @test_file             = File.basename(test_path, '.rb')
+    @test_path             = File.expand_path(test_path) 
+    @test_filename         = File.basename(test_path, '.rb')
     @model_name            = model_name
-    @run_dir               = run_dir
-    cached_folder          = "#{__dir__}/cache/#{@test_file}"
+    @run_dir               = File.expand_path(run_dir)
+    cached_folder          = "#{__dir__}/cache/#{@test_filename}"
     @model_cached_path     = cached_folder + "/output.osm"
     @sql_cached_path       = cached_folder + "/eplusout.sql"
   end
@@ -31,21 +31,19 @@ class BTAPResultsHelper < Minitest::Test
       datapoint_id:  'test_run')
   end
 
-  def evaluate_regression_files(test_instance:)
+  def evaluate_regression_files(test_instance:, cost_result:)
     cost_result_json_path = "#{@run_dir}/cost_results.json"
     cost_list_json_path   = "#{@run_dir}/btap_items.json"
     test_instance.assert(File.exist?(cost_result_json_path), "Could not find costing json at this path:#{cost_result_json_path}")
-    regression_files_folder = "#{File.dirname(@test_file)}/regression_files"
+    regression_files_folder = "#{File.dirname(@test_path)}/regression_files"
     expected_result_filename = "#{regression_files_folder}/#{@model_name}_expected_result.cost.json"
     test_result_filename = "#{regression_files_folder}/#{@model_name}_test_result.cost.json"
+
     FileUtils.rm(test_result_filename) if File.exist?(test_result_filename)
     if File.exist?(expected_result_filename)
       unless FileUtils.compare_file(cost_result_json_path, expected_result_filename)
         FileUtils.cp(cost_result_json_path, test_result_filename)
-        if cost_result["openstudio-version"] != OpenstudioStandards::VERSION
-          puts("OpenStudio Standards version differs. Rerun this test with RERUN_CACHED=true bundle exec ruby ./#{@test_file} to run an annual simulation and update the cache.")
-        end
-        test_instance.assert(false, "Regression test for #{@model_name} produces differences. Examine expected and test result differences in the #{File.dirname(@test_file)}/regression_files folder ")
+        test_instance.assert(false, "Regression test for #{@model_name} produces differences. Examine expected and test result differences in the #{File.dirname(@test_filename)}/regression_files folder ")
       end
     else
       puts "No expected test file...Generating expected file #{expected_result_filename}. Please verify."
