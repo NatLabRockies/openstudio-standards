@@ -190,6 +190,7 @@ class BTAPResults_Test < Minitest::Test
       post_analysis = helper.get_analysis(output_folder: run_dir, template: template)
     end
 
+    # Run costing and compare the output of the regression test.
     cost_result = post_analysis.run_costing
     helper.evaluate_regression_files(test_instance: self, cost_result: cost_result)
   end
