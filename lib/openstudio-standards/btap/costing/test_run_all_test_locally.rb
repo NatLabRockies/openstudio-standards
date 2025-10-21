@@ -10,7 +10,6 @@ require_relative '../btap_test_helper' # Required for the cached switch
 # simulation and update the cache, pass the RERUN_CACHED=true environment
 # variable pair to the test file, for example:
 # RERUN_CACHED=true bundle exec ruby [test_file]
-# TODO: This only runs given the correct directory, fix this.
 class RunAllTests < Minitest::Test
   def test_all()
     full_file_list = nil
