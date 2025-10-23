@@ -92,7 +92,7 @@ class BTAPCarbon
 
     require 'csv' # TODO: csv_report is temporary, remove this eventually
     csv_report = CSV.open("/home/osdev/carbon_testing/carbon_report.csv", "w")
-    csv_report << ["Surface Name", "Construction Description", "Material Descriptions", "Construction Type", "Embodied Carbon (A-C)", "Surface Area", "Perimeter"]
+    csv_report << ["Surface Name", "Construction Description", "Material Descriptions", "Construction Type", "Embodied Carbon (A-C)", "Surface Area", "Perimeter", "Calculation", "Construction Layers"]
     @attributes.spaces.each do |space|
       @attributes.surface_types.each do |surface_type|
         space.surfaces_hash[surface_type].each do |surface|
@@ -104,10 +104,10 @@ class BTAPCarbon
           if surface.construction_hash.nil?
             emissions = 0.0
           else
-            emissions, perimeter = get_carbon_emissions(surface.construction_hash, surface, surface_area) # TODO: perimeter for carbon report
+            emissions, perimeter, calc, layers = get_carbon_emissions(surface.construction_hash, surface, surface_area) # TODO: perimeter for carbon report
             construction = surface.construction_hash
             material_descriptions = construction["type"] == "opaque" ? construction["material_desciptions"] : construction["component"] # TODO: temp. for carbon report
-            csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions, surface_area, perimeter]
+            csv_report << [surface.nameString, construction["description"], material_descriptions, construction["type"], emissions, surface_area, perimeter, calc, layers]
           end
 
           # Calculate the carbon emissions
@@ -131,7 +131,6 @@ class BTAPCarbon
     materials_file   = "materials_#{construction["type"]}"
     id_column        = materials_file + "_id"
     id_layers_column = "material_#{construction["type"]}_id_layers"
-
     construction[id_layers_column].split(',').each do |material_id|
 
       # Locate the material entry in the carbon database
@@ -193,6 +192,6 @@ class BTAPCarbon
       total_emissions += material_carbon * surface_area
     end
 
-    return total_emissions, perimeter # TODO: perimeter is for the carbon report remove this after
+    return total_emissions, perimeter, calc[..-4], construction[id_layers_column] # TODO: perimeter and calc and id layers is for the carbon report remove this after
   end
 end
