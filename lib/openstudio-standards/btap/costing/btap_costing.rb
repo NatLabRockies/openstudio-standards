@@ -95,6 +95,7 @@ class BTAPCosting
                      ventilation_costing: true,
                      zone_system_costing: true,
                      renewables_costing: true,
+                     thermal_bridging_costing: true,
                      template_type: nil
   )
     # Create a Hash to collect costing data.
@@ -143,7 +144,7 @@ class BTAPCosting
     ventCost = ventilation_costing ? self.ventilation_costing(model, prototype_creator,template_type, mech_room, cond_spaces) : 0.0
     zonalSystemCost = zone_system_costing ? self.zonalsys_costing(model, prototype_creator, mech_room, cond_spaces) : 0.0
     pvGroundCost = renewables_costing ? self.cost_audit_pv_ground(model, prototype_creator) : 0.0
-    thermalBridgingCost = 0.0
+    thermalBridgingCost = thermal_bridging_costing ? self.cost_thermal_bridging(model, prototype_creator) : 0.0
 
     @costing_report["totals"] = {
       'envelope' => envCost.round(0),
