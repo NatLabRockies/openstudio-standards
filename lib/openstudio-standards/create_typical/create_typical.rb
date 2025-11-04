@@ -211,9 +211,6 @@ module OpenstudioStandards
         runperiodctrl_daylightsaving.setEndDate(end_date)
       end
 
-      # set space type additional properties
-      standard.prototype_space_type_map(model, reset_standards_space_type: false, set_additional_properties: true)
-
       # add internal loads to space types
       if add_space_type_loads
 
@@ -242,7 +239,8 @@ module OpenstudioStandards
           end
 
           # apply internal load schedules
-          standard.space_type_apply_internal_load_schedules(space_type)
+          # the last bool test it to make thermostat schedules. They are now added in HVAC section instead of here
+          standard.space_type_apply_internal_load_schedules(space_type, make_thermostat: false)
 
           # extend space type name to include the template. Consider this as well for load defs
           space_type.setName("#{space_type.name} - #{template}")
@@ -583,7 +581,28 @@ module OpenstudioStandards
           model.getThermostatSetpointDualSetpoints.each(&:remove)
         end
 
-        OpenstudioStandards::ThermalZone.thermal_zones_set_thermostat_schedules(model.getThermalZones)
+        model.getSpaceTypes.sort.each do |space_type|
+          # create thermostat schedules
+          # skip un-recognized space types
+          next if standard.space_type_get_standards_data(space_type).empty?
+
+          # the last bool test it to make thermostat schedules. They are added to the model but not assigned
+          standard.space_type_apply_internal_load_schedules(space_type, set_people: false, set_lights: false, set_electric_equipment: false, set_gas_equipment: false, set_ventilation: false, make_thermostat: true)
+
+          # identify thermal thermostat and apply to zones (apply_internal_load_schedules names )
+          model.getThermostatSetpointDualSetpoints.sort.each do |thermostat|
+            next if thermostat.name.to_s != "#{space_type.name} Thermostat"
+            next if !thermostat.coolingSetpointTemperatureSchedule.is_initialized
+            next if !thermostat.heatingSetpointTemperatureSchedule.is_initialized
+
+            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Assigning #{thermostat.name} to thermal zones with #{space_type.name} assigned.")
+            space_type.spaces.sort.each do |space|
+              next if !space.thermalZone.is_initialized
+
+              space.thermalZone.get.setThermostatSetpointDualSetpoint(thermostat)
+            end
+          end
+        end
       end
 
       # add internal mass
@@ -922,7 +941,7 @@ module OpenstudioStandards
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Could not add loads for #{space_type.name}. Not expected for #{template} #{lookup_building_type}")
           end
 
-          # assign internal load schedules
+          # the last bool test it to make thermostat schedules. They are added to the model but not assigned
           standard.space_type_apply_internal_load_schedules(space_type)
 
           # assign colors
@@ -992,7 +1011,7 @@ module OpenstudioStandards
         end
 
         # set climate zone
-        os_climate_zone = climate_zone.gsub(/ASHRAE .*-.*-/, '')
+        os_climate_zone = climate_zone.gsub('ASHRAE 169-2013-', '')
         # trim off letter from climate zone 7 or 8
         if (os_climate_zone[0] == '7') || (os_climate_zone[0] == '8')
           os_climate_zone = os_climate_zone[0]
