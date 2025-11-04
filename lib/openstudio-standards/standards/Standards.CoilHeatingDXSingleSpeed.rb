@@ -9,11 +9,13 @@ class Standard
   # @param rename [Boolean] if true, object will be renamed to include capacity and efficiency level
   # @param necb_ref_hp [Boolean] for compatability with NECB ruleset only.
   # @param equipment_type [Boolean] indicate that equipment_type should be in the search criteria.
+  # @param equipment_type [Boolean] indicate that equipment_type should be in the search criteria.
   # @return [Double] full load efficiency (COP)
   def coil_heating_dx_single_speed_standard_minimum_cop(coil_heating_dx_single_speed, rename = false, necb_ref_hp = false, equipment_type = false)
     coil_efficiency_data = standards_data['heat_pumps_heating']
 
     # Get the capacity
+    capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_dx_single_speed)
     capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_dx_single_speed)
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
