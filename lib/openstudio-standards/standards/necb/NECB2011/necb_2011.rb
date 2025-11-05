@@ -483,18 +483,31 @@ class NECB2011 < Standard
     self.fuel_type_set = SystemFuels.new()
     self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: primary_heating_fuel)
     clean_and_scale_model(model: model, rotation_degrees: rotation_degrees, scale_x: scale_x, scale_y: scale_y, scale_z: scale_z)
-    fdwr_set = convert_arg_to_f(variable: fdwr_set, default: -1)
-    srr_set = convert_arg_to_f(variable: srr_set, default: -1)
-    srr_opt = convert_arg_to_string(variable: srr_opt, default: '')
-    construction_opt = convert_arg_to_string(variable: construction_opt, default: '')
-    massive = construction_opt == 'structure'
-    tbd_option = convert_arg_to_string(variable: tbd_option, default: 'none')
-    tbd_interpolate = convert_arg_to_bool(variable: tbd_interpolate, default: true)
-    necb_hdd = convert_arg_to_bool(variable: necb_hdd, default: true)
-    boiler_fuel = convert_arg_to_string(variable: boiler_fuel, default: nil)
-    boiler_cap_ratio = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
-    swh_fuel = convert_arg_to_string(variable: swh_fuel, default: nil)
+
+    ext_floor_cond           = convert_arg_to_f(variable: ext_floor_cond, default: nil)
+    ext_roof_cond            = convert_arg_to_f(variable: ext_roof_cond, default: nil)
+    ext_wall_cond            = convert_arg_to_f(variable: ext_wall_cond, default: nil)
+    ground_floor_cond        = convert_arg_to_f(variable: ground_floor_cond, default: nil)
+    ground_roof_cond         = convert_arg_to_f(variable: ground_roof_cond, default: nil)
+    ground_wall_cond         = convert_arg_to_f(variable: ground_wall_cond, default: nil)
+    door_construction_cond   = convert_arg_to_f(variable: door_construction_cond, default: nil)
+    fixed_window_cond        = convert_arg_to_f(variable: fixed_window_cond, default: nil)
+    fixed_wind_solar_trans   = convert_arg_to_f(variable: fixed_wind_solar_trans, default: nil)
+    skylight_solar_trans     = convert_arg_to_f(variable: skylight_solar_trans, default: nil)
+    glass_door_solar_trans   = convert_arg_to_f(variable: glass_door_solar_trans, default: nil)
+    fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
+    srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
+    srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
+    construction_opt         = convert_arg_to_string(variable: construction_opt, default: '')
+    tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
+    tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
+    necb_hdd                 = convert_arg_to_bool(variable: necb_hdd, default: true)
+    boiler_fuel              = convert_arg_to_string(variable: boiler_fuel, default: nil)
+    boiler_cap_ratio         = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
+    swh_fuel                 = convert_arg_to_string(variable: swh_fuel, default: nil)
     airloop_fancoils_heating = convert_arg_to_bool(variable: airloop_fancoils_heating, default: false)
+
+    massive = construction_opt == 'structure'
 
     # Check if custom systems are assigned to dwelling units, washrooms, corridors, and storage rooms.  If they are, set
     # them to be the same as the primary system type.  If no primary system type is defined then set them to be nil.
