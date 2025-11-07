@@ -136,7 +136,7 @@ class BTAPCosting
     mech_room, cond_spaces = prototype_creator.find_mech_room(model)
 
     envCost = envelope_costing ? self.cost_audit_envelope(model, prototype_creator) : 0.0
-    thermalBridgingCost = thermal_bridging_costing ? self.cost_thermal_bridging(model, prototype_creator) : 0.0
+    thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(model, prototype_creator) : 0.0
     lgtCost = lighting_costing ? self.cost_audit_lighting(model, prototype_creator) : 0.0
     boilerCost = boilers_costing ? self.boiler_costing(model, prototype_creator) : 0.0
     chillerCost = chillers_costing ? self.chiller_costing(model, prototype_creator) : 0.0

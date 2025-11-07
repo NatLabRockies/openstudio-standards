@@ -29,6 +29,9 @@ class CommonPaths
   attr_reader :carbon_glazing_path
   attr_reader :carbon_frame_path
 
+  # Thermal bridging data
+  attr_reader :thermal_bridging_path
+
   # Other
   attr_reader :error_log
   attr_reader :cost_output_file
@@ -74,6 +77,8 @@ class CommonPaths
     @carbon_glazing_path = "#{dir_database}/carbon_glazing.csv"
     @carbon_frame_path   = "#{dir_database}/carbon_frame.csv"
 
+    @thermal_bridging_path = "#{__dir__}/../../../data/inventory/thermal_bridging.csv"
+    
     @error_log             = "#{__dir__}/errors.json"
     @cost_output_file      = "#{__dir__}/cost_output.json"
     @mech_sizing_data_file = "#{__dir__}/costing/mech_sizing.json"
