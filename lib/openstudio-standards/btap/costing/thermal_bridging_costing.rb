@@ -1,39 +1,7 @@
 class BTAPCosting
   def cost_audit_thermal_bridging(model, prototype_creator)
-    cp                  = CommonPaths.instance
-    csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
-    tbd                 = prototype_creator.tbd
     total_tbd_cost      = 0.0
-    tally_edges         = tbd.tally[:edges].transform_keys(&:to_s)
-    material_quantities = {} # Opaque IDs to quantities
-
-    # Retrive the material quantities associated with each edge
-    tally_edges.each do |edge_type, value|
-      value.each do |wall_reference_and_quality, quantity|
-
-        result = csv.find do |row| 
-          row['construction_type'] == edge_type &&
-          row['wall_reference']    == wall_reference_and_quality
-        end
-
-        if result.nil?
-          puts("Wall with type #{edge_type} and reference #{wall_reference_and_quality}" \
-               " could not be found in the thermal bridging database")
-          next
-        end
-
-        material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
-        id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
-
-        material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
-          if material_quantities[id].nil?
-            material_quantities[id] = 0.0
-          end
-
-          material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
-        end
-      end
-    end
+    material_quantities = prototype_creator.tbd.get_material_quantities # Opaque IDs to quantities
 
     # Calculate the cost associated from each of the ID-quantity pairs
     material_quantities.each do |id, tbd_quantity|
@@ -50,7 +18,8 @@ class BTAPCosting
                           equipment_cost) * (tbd_quantity / material["quantity"].to_f)).round(2)
       end
     end
-   
+
+    puts "\nThermal bridging costing data successfully generated. Total TBD costs: $#{total_tbd_cost.to_f.round(2)}"
     return total_tbd_cost
   end
 end

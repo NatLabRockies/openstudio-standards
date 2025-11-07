@@ -1129,6 +1129,39 @@ module BTAP
 
       true
     end
+
+    def get_material_quantities
+      cp                  = CommonPaths.instance
+      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+      material_quantities = {}
+      tally_edges         = @tally[:edges].transform_keys(&:to_s)
+      tally_edges.each do |edge_type, value|
+        value.each do |wall_reference_and_quality, quantity|
+          result = csv.find do |row| 
+            row['construction_type'] == edge_type &&
+            row['wall_reference']    == wall_reference_and_quality
+          end
+
+          if result.nil?
+            puts("Wall with type #{edge_type} and reference #{wall_reference_and_quality}" \
+                 " could not be found in the thermal bridging database")
+            next
+          end
+
+          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
+          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
+          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
+            if material_quantities[id].nil?
+              material_quantities[id] = 0.0
+            end
+
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
+          end
+        end
+      end
+
+      return material_quantities
+    end
   end
 end
 
