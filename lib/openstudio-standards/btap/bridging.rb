@@ -1129,57 +1129,6 @@ module BTAP
 
       true
     end
-
-    # def get_material_quantities()
-    #   material_quantities = {}
-    #   csv = CSV.read("#{File.dirname(__FILE__)}/../../../data/inventory/thermal_bridging.csv", headers: true)
-    #   tally_edges = @tally[:edges].transform_keys(&:to_s)
-    #
-    #   tally_edges.each do |edge_type_full, value|
-    #     edge_type = edge_type_full.delete_suffix('convex')
-    #     edge_type = 'fenestration' if ['head', 'jamb', 'sill'].include?(edge_type)
-    #
-    #     value.each do |wall_ref_and_quality, quantity|
-    #       /(.*)\s(.*)/ =~ wall_ref_and_quality
-    #       wall_reference = $1
-    #       quality = $2
-    #
-    #       if wall_reference =='BTAP-ExteriorWall-SteelFramed-1'
-    #         wall_reference = 'BTAP-ExteriorWall-SteelFramed-2'
-    #       end
-    #
-    #       next if edge_type == 'transition'
-    #
-    #       result = csv.find { |row| row['edge_type'] == edge_type &&
-    #         row['quality'] == quality &&
-    #         row['wall_reference'] == wall_reference
-    #       }
-    #
-    #       if result.nil?
-    #         puts ("#{edge_type}-#{wall_reference}-#{quality}")
-    #         puts "not found in tb database"
-    #         next
-    #       end
-    #
-    #       # Split
-    #       material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
-    #       id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
-    #
-    #       material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
-    #         material_quantities[id] = 0.0 if material_quantities[id].nil?
-    #         material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
-    #       end
-    #     end
-    #   end
-    #
-    #   material_opaque_id_quantities = []
-    #
-    #   material_quantities.each do |id,quantity|
-    #     material_opaque_id_quantities << { 'materials_opaque_id' => id, 'quantity' => quantity, 'domain'=> 'thermal_bridging' }
-    #   end
-    #
-    #   return material_opaque_id_quantities
-    # end
   end
 end
 
