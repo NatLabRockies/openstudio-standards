@@ -127,6 +127,8 @@ class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
         standard: standard,
         qaqc: nil)
     else
+      puts "Using cached results from #{run_dir}"
+      puts "Template: #{template}"
       post_analysis = helper.get_analysis(output_folder: run_dir, template: template)
     end
 
