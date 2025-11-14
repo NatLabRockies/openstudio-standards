@@ -367,6 +367,9 @@ Standard.class_eval do
 
       # Schedules
       space_type_apply_internal_load_schedules(space_type)
+
+      # Thermostat Schedules
+      space_type_apply_thermostat_schedules(space_type)
     end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying space types (loads)')

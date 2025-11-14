@@ -441,11 +441,8 @@ class Standard
   # @param set_lights [Boolean] if true, set the lighting schedule
   # @param set_electric_equipment [Boolean] if true, set the electric schedule schedule
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
-  # @param make_thermostat [Boolean] if true, makes a thermostat for this space type from the
-  #   schedules listed for the space type.  This thermostat is not hooked to any zone by this method,
-  #   but may be found and used later.
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true, make_thermostat: true)
+  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
     # Get the standards data
     space_type_properties = space_type_get_standards_data(space_type)
 
@@ -473,7 +470,6 @@ class Standard
         default_sch_set.setPeopleActivityLevelSchedule(model_add_schedule(space_type.model, occupancy_activity_sch))
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set occupant activity schedule to #{occupancy_activity_sch}.")
       end
-
     end
 
     # Lights
@@ -499,22 +495,31 @@ class Standard
       end
     end
 
-    # Thermostat
-    if make_thermostat
-      thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(space_type.model)
-      thermostat.setName("#{space_type.name} Thermostat")
+    return true
+  end
 
-      heating_setpoint_sch = space_type_properties['heating_setpoint_schedule']
-      unless heating_setpoint_sch.nil?
-        thermostat.setHeatingSetpointTemperatureSchedule(model_add_schedule(space_type.model, heating_setpoint_sch))
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set heating setpoint schedule to #{heating_setpoint_sch}.")
-      end
+  # Makes a thermostat for this space type from the schedules listed for the space type.
+  # This thermostat is not hooked to any zone by this method,but may be found and used later.
+  #
+  # @param space_type [OpenStudio::Model::SpaceType] space type object
+  # @return [Boolean] returns true if successful, false if not
+  def space_type_apply_thermostat_schedules(space_type)
+    # Get the standards data
+    space_type_properties = space_type_get_standards_data(space_type)
 
-      cooling_setpoint_sch = space_type_properties['cooling_setpoint_schedule']
-      unless cooling_setpoint_sch.nil?
-        thermostat.setCoolingSetpointTemperatureSchedule(model_add_schedule(space_type.model, cooling_setpoint_sch))
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set cooling setpoint schedule to #{cooling_setpoint_sch}.")
-      end
+    thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(space_type.model)
+    thermostat.setName("#{space_type.name} Thermostat")
+
+    heating_setpoint_sch = space_type_properties['heating_setpoint_schedule']
+    unless heating_setpoint_sch.nil?
+      thermostat.setHeatingSetpointTemperatureSchedule(model_add_schedule(space_type.model, heating_setpoint_sch))
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set heating setpoint schedule to #{heating_setpoint_sch}.")
+    end
+
+    cooling_setpoint_sch = space_type_properties['cooling_setpoint_schedule']
+    unless cooling_setpoint_sch.nil?
+      thermostat.setCoolingSetpointTemperatureSchedule(model_add_schedule(space_type.model, cooling_setpoint_sch))
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set cooling setpoint schedule to #{cooling_setpoint_sch}.")
     end
 
     return true

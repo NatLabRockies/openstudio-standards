@@ -32,7 +32,7 @@ class NECB2011 < Standard
     return default
   end
 
-  # This method converts arguments to bool.  
+  # This method converts arguments to bool.
   #   If variable undefined set to the default
   #   If already a bool then return it
   #   If variable is a string then convert to a bool, using the default if 'NECB_Default'
@@ -48,7 +48,7 @@ class NECB2011 < Standard
     return default
   end
 
-  # This method checks if a variable is a string.  
+  # This method checks if a variable is a string.
   #   If variable undefined set to the default
   #   If variable is a string then return it, using the default if 'NECB_Default'
   #   If that all fails then return the default.
@@ -198,6 +198,22 @@ class NECB2011 < Standard
     min_distance = 100000000000000.0
     necb_closest = nil
     weather_file_path = model.weatherFile.get.path.get.to_s
+
+    # Check if weather file exists at the specified path
+    unless File.exist?(weather_file_path)
+      # Try to find the file in the data/weather folder
+      weather_file_name = File.basename(weather_file_path)
+      data_weather_path = File.absolute_path(File.join(__FILE__, '..', '..', '..', '..', '..', '..', 'data', 'weather', weather_file_name))
+
+      if File.exist?(data_weather_path)
+        weather_file_path = data_weather_path
+        # Update the model's weather file path to point to the found file
+        OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      else
+        raise "Weather file not found at #{weather_file_path} or #{data_weather_path}"
+      end
+    end
+
     epw_file = model.weatherFile.get.file.get
     stat_file_path = weather_file_path.gsub('.epw', '.stat')
     stat_file = OpenstudioStandards::Weather::StatFile.new(stat_file_path)
@@ -2115,6 +2131,7 @@ class NECB2011 < Standard
 
       # Schedules
       space_type_apply_internal_load_schedules(space_type)
+      space_type_apply_thermostat_schedules(space_type)
     end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying space types (loads)')

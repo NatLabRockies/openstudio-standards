@@ -740,6 +740,7 @@ class NECB2011
         new_spacetype.setName("#{space.spaceType.get.standardsBuildingType.get} #{new_spacetype_name}")
         space_type_apply_internal_loads(space_type: new_spacetype, lights_type: lights_type, lights_scale: lights_scale)
         space_type_apply_internal_load_schedules(new_spacetype)
+        space_type_apply_thermostat_schedules(new_spacetype)
       end
       space.setSpaceType(new_spacetype)
       # sanity check.

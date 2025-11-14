@@ -31,7 +31,9 @@ module OpenstudioStandards
         end
 
         space_type_properties = space_types_data.find { |s| s[:space_type_name] == space_type_name }
-        if !space_type_properties.nil?
+        if space_type_properties.nil?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', "No space type properties found for space type #{space_type.name} with standards space type '#{space_type_name}' in building #{model.getBuilding.name}")
+        else
           lighting_space_type_name = space_type_properties[:lighting_space_type_name].nil? ? 'na' : space_type_properties[:lighting_space_type_name]
           space_type.additionalProperties.setFeature('lighting_space_type', lighting_space_type_name)
           electric_equipment_space_type_name = space_type_properties[:electric_equipment_space_type_name].nil? ? 'na' : space_type_properties[:electric_equipment_space_type_name]
@@ -42,8 +44,6 @@ module OpenstudioStandards
           space_type.additionalProperties.setFeature('ventilation_space_type', ventilation_space_type_name)
           schedule_set_name = space_type_properties[:schedule_set_name].nil? ? 'na' : space_type_properties[:schedule_set_name]
           space_type.additionalProperties.setFeature('schedule_set', schedule_set_name)
-        else
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', "No space type properties found for space type #{space_type.name} with standards space type '#{space_type_name}' in building #{model.getBuilding.name}")
         end
       end
 

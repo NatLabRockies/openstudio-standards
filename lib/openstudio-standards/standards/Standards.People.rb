@@ -5,8 +5,9 @@ class Standard
   # Create a DesignSpecificationOutdoorAir air object and assign it to the SpaceType
   #
   # @param space_type [OpenStudio::Model::SpaceType] OpenStudio SpaceType object to apply people to
+  # @param thermal_comfort_models [Array<String>] optional argument to determine which thermal comfort model to use. Can select multiple with an array. Options are Fanger, Pierce, KSU, AdaptiveASH55, AdaptiveCEN15251, CoolingEffectASH55, and AnkleDraftASH55.
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_people(space_type)
+  def space_type_apply_people(space_type, thermal_comfort_models: ['AdaptiveASH55'])
     # Skip plenums
     if space_type.name.get.to_s.downcase.include?('plenum')
       return false
@@ -41,6 +42,7 @@ class Standard
         instance = OpenStudio::Model::People.new(definition)
         instance.setName("#{space_type.name} People")
         instance.setSpaceType(space_type)
+        thermal_comfort_models.each { |m| definition.pushThermalComfortModelType(m)}
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} had no people, one has been created.")
         instances << instance
       elsif instances.size > 1
