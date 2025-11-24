@@ -10,7 +10,7 @@ require 'optparse'
 # simulation and update the cache, pass the RERUN_CACHED=true environment
 # variable pair to the test file, for example:
 # RERUN_CACHED=true bundle exec ruby [test_file]
-class BTAPResults_Test < Minitest::Test
+class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
   def test_qaqc()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
