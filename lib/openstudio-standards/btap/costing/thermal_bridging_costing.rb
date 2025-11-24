@@ -1,7 +1,7 @@
 class BTAPCosting
   def cost_audit_thermal_bridging(model, prototype_creator)
     total_tbd_cost      = 0.0
-    material_quantities = prototype_creator.tbd.get_material_quantities # Opaque IDs to quantities
+    material_quantities = prototype_creator.tbd.get_material_quantities_for_edges # Opaque IDs to quantities
 
     # Calculate the cost associated from each of the ID-quantity pairs
     material_quantities.each do |id, tbd_quantity|
@@ -9,13 +9,20 @@ class BTAPCosting
         regional_material, regional_installation = \
           get_regional_cost_factors(@cost_items["Province"], @cost_items["City"], material)
 
-        costing_data    = @costing_database["costs"].find { |data| data["id"] == material["id"] }
-        material_cost   = costing_data["baseCosts"]["materialOpCost"] * material["material_mult"].to_f
-        labour_cost     = costing_data["baseCosts"]["laborOpCost"] * material["labour_mult"].to_f
-        equipment_cost  = costing_data["baseCosts"]["equipmentOpCost"]
+        costing_data      = @costing_database["costs"].find { |data| data["id"] == material["id"] }
+        material_cost     = costing_data["baseCosts"]["materialOpCost"] * material["material_mult"].to_f
+        labour_cost       = costing_data["baseCosts"]["laborOpCost"] * material["labour_mult"].to_f
+        equipment_cost    = costing_data["baseCosts"]["equipmentOpCost"]
+        material_quantity = Math.sqrt(material["quantity"].to_f) # Convert from ft^2 to ft
+
+        # Calculate the total cost. Notable units and conversion factors: 
+        # tbd_quantity:      Converted from meters to feet in bridging.rb
+        # material_quantity: Square feet converted to feet. Some material
+        #                    entries have varying units but those are just for
+        #                    reference to RSMeans. TODO: verify this
         total_tbd_cost += (((material_cost * regional_material / 100.0) + \
                           (labour_cost * regional_installation / 100.0) + \
-                          equipment_cost) * (tbd_quantity / material["quantity"].to_f)).round(2)
+                          equipment_cost) * (tbd_quantity / material_quantity)).round(2)
       end
     end
 
