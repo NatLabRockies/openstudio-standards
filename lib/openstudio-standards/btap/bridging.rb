@@ -1130,7 +1130,10 @@ module BTAP
       true
     end
 
-    def get_material_quantities
+    # Retrieve the material quantities for the values in the tbd.edges
+    # parameter.
+    # @return [Hash] IDs mapped to their quantities in feet.
+    def get_material_quantities_for_edges
       cp                  = CommonPaths.instance
       csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
       material_quantities = {}
@@ -1155,7 +1158,11 @@ module BTAP
               material_quantities[id] = 0.0
             end
 
-            material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
+            # Note that "quantity" is in meters but the "scale" is in $ / feet. 
+            # Since RSMeans is used to cost materials, convert the quantity to 
+            # feet.
+            quantity = OpenStudio.convert(quantity.to_f, "m", "ft").get
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity 
           end
         end
       end
