@@ -1,11 +1,10 @@
 require 'simplecov'
 
 SimpleCov.start do
-  add_group "NECB", "lib/openstudio-standards/standards/necb/"
-  add_filter '/test/'
+  merge_timeout 9999999
+  command_name("#{File.basename($0)}:#{Process.pid}")
   add_filter '/vendor/'
 end
-SimpleCov.command_name("Test:#{Process.pid}")
 
 $LOAD_PATH.unshift File.expand_path('../../../lib', __FILE__)
 require 'minitest/autorun'
