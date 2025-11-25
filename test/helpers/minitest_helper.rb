@@ -4,6 +4,8 @@ SimpleCov.start do
   merge_timeout 9999999
   command_name("#{File.basename($0)}:#{Process.pid}")
   add_filter '/vendor/'
+  add_filter '/test/'
+  add_group 'NECB', 'lib/openstudio-standards/standards/necb/'
 end
 
 $LOAD_PATH.unshift File.expand_path('../../../lib', __FILE__)
