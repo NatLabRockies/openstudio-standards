@@ -20,6 +20,15 @@ class CommonPaths
   attr_reader :hvac_vent_ahu_path
   attr_reader :materials_hvac_path
 
+  # Construction data
+  attr_reader :constructions_door_path
+  attr_reader :constructions_door_glass_path
+  attr_reader :constructions_floor_path
+  attr_reader :constructions_roof_path
+  attr_reader :constructions_skylight_path
+  attr_reader :constructions_wall_path
+  attr_reader :constructions_window_path
+
   # Costing data
   attr_accessor :costs_path
   attr_accessor :costs_local_factors_path
@@ -69,6 +78,14 @@ class CommonPaths
       @hvac_vent_ahu_path,
       @materials_hvac_path
     ]
+
+    @constructions_door_path       = "#{dir_database}/constructions_door.json"
+    @constructions_door_glass_path = "#{dir_database}/constructions_door_glass.json"
+    @constructions_floor_path      = "#{dir_database}/constructions_floor.json"
+    @constructions_roof_path       = "#{dir_database}/constructions_roof.json"
+    @constructions_skylight_path   = "#{dir_database}/constructions_skylight.json"
+    @constructions_wall_path       = "#{dir_database}/constructions_wall.json"
+    @constructions_window_path     = "#{dir_database}/constructions_window.json"
 
     @costs_path               = "#{dir_database}/costs.csv"
     @costs_local_factors_path = "#{dir_database}/costs_local_factors.csv"

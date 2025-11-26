@@ -10,13 +10,14 @@ class CostingDatabase
     @cp = CommonPaths.instance # Stores paths
     @db = Hash.new             # Stores the costing database
 
-    # Load the database from the individual CSV files
-    # Load costing data
-    @db['costs'] = []                # Costing data
-    @db['localization_factors'] = [] # Local costing factors
-    @db['raw'] = {}                  # Raw data
-    @db['db_errors'] = []
+    # Load the database from the individual CSV/JSON files
+    @db["costs"]                = []
+    @db["localization_factors"] = [] # Local costing factors
+    @db["raw"]                  = {}                
+    @db["constructions"]        = {}
+    @db["db_errors"]            = []
 
+    # Load costing data
     data_costs = CSV.read(@cp.costs_path)
 
     1.upto data_costs.length - 1 do |i|
@@ -57,6 +58,15 @@ class CostingDatabase
 
       @db["localization_factors"] << item
     end
+
+    # Load the construction data
+    @db["constructions"]["door"]       = File.open(@cp.constructions_door_path)       { |file| JSON.load(file)}
+    @db["constructions"]["door_glass"] = File.open(@cp.constructions_door_glass_path) { |file| JSON.load(file)}
+    @db["constructions"]["floor"]      = File.open(@cp.constructions_floor_path)      { |file| JSON.load(file)}
+    @db["constructions"]["roof"]       = File.open(@cp.constructions_roof_path)       { |file| JSON.load(file)}
+    @db["constructions"]["skylight"]   = File.open(@cp.constructions_skylight_path)   { |file| JSON.load(file)}
+    @db["constructions"]["wall"]       = File.open(@cp.constructions_wall_path)       { |file| JSON.load(file)}
+    @db["constructions"]["window"]     = File.open(@cp.constructions_window_path)     { |file| JSON.load(file)}
 
     # Load the raw data
     raw_data_names = [
