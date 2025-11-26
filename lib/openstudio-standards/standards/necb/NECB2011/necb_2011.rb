@@ -2834,47 +2834,84 @@ class NECB2011 < Standard
         errs = errs.get
       end
       # Get error and get any DX coils with issues
-      coil_errs = errs.select { |err| err.to_s.downcase.include?("coilcoolingdx") || err.to_s.downcase.include?("coilheatingdx") }
-      issue_coil_names = []
-      coil_errs.each { |err| issue_coil_names << err.to_s.split('"')[1] }
-      issue_coil_names.uniq!
 
       issue_coils = []
-      issue_coil_names.each do |coil_name|
-        heating_coil = model.getCoilHeatingDXSingleSpeeds.select { |coil| coil.name.to_s.downcase == coil_name.to_s.downcase }[0]
-        unless heating_coil.nil?
+      errs.each do |err|
+        # Find any DX heating coil names that are in the error message
+        error_heating_coils = model.getCoilHeatingDXSingleSpeeds.select { |coil| err.to_s.downcase.include?(coil.name.to_s.downcase) }
+        # If more the DX heating coil name appears more than one time in the error message, only select the one without a number at the end of the name.
+        if error_heating_coils.length > 1
+          error_heating_coils.each do |coil|
+            if coil.name.to_s.downcase.match(/\d/)
+              # Skip coils if there is another number in the error message after the name of the coil (e.g. coilheatingdx 1 appears but so does coilheatingdx 10 or coilheatingdx 13).
+              error_index = err.to_s.downcase.index(coil.name.to_s.downcase) + coil.name.to_s.length
+              next if err.to_s[error_index].match(/\d/)
+              heating_coil_element = {}
+              heating_coil_element[:heating_coil] = coil
+              heating_coil_element[:is_autosized] = true if coil.isRatedTotalHeatingCapacityAutosized
+              heating_coil_element[:is_autosized] = false unless coil.isRatedTotalHeatingCapacityAutosized
+              heating_coil_element[:capacity] = coil.ratedTotalHeatingCapacity.to_f
+              issue_coils << heating_coil_element
+            end
+          end
+        elsif error_heating_coils.length == 1
           heating_coil_element = {}
-          heating_coil_element[:heating_coil] = heating_coil
-          heating_coil_element[:is_autosized] = true if heating_coil.isRatedTotalHeatingCapacityAutosized
-          heating_coil_element[:is_autosized] = false unless heating_coil.isRatedTotalHeatingCapacityAutosized
-          heating_coil_element[:capacity] = heating_coil.ratedTotalHeatingCapacity.get
+          heating_coil_element[:heating_coil] = error_heating_coils[0]
+          heating_coil_element[:is_autosized] = true if error_heating_coils[0].isRatedTotalHeatingCapacityAutosized
+          heating_coil_element[:is_autosized] = false unless error_heating_coils[0].isRatedTotalHeatingCapacityAutosized
+          heating_coil_element[:capacity] = error_heating_coils[0].ratedTotalHeatingCapacity.to_f
           issue_coils << heating_coil_element
         end
-        cooling_coil = model.getCoilCoolingDXSingleSpeeds.select { |coil| coil.name.to_s.downcase == coil_name.to_s.downcase }[0]
-        unless cooling_coil.nil?
+        # Find any DX cooling coil names that are in the error message
+        error_cooling_coils = model.getCoilCoolingDXSingleSpeeds.select { |coil| err.to_s.downcase.include?(coil.name.to_s.downcase) }
+        # If more the DX cooling coil name appears more than one time in the error message, only select the one without a number at the end of the name.
+        if error_cooling_coils.length > 1
+          error_cooling_coils.each do |coil|
+            if coil.name.to_s.downcase.match(/\d/)
+              # Skip coils if there is another number in the error message after the name of the coil (e.g. coilcoolingdx 1 appears but so does coilcoolingdx 10 or coilcoolingdx 13).
+              error_index = err.to_s.downcase.index(coil.name.to_s.downcase) + coil.name.to_s.downcase.length
+              next if err.to_s[error_index].match(/\d/)
+              cooling_coil_element = {}
+              cooling_coil_element[:cooling_coil] = coil
+              cooling_coil_element[:is_autosized] = true if coil.isRatedTotalCoolingCapacityAutosized
+              cooling_coil_element[:is_autosized] = false unless coil.isRatedTotalCoolingCapacityAutosized
+              cooling_coil_element[:capacity] = coil.ratedTotalCoolingCapacity.to_f
+              issue_coils << cooling_coil_element
+            end
+          end
+        elsif error_cooling_coils.length == 1
           cooling_coil_element = {}
-          cooling_coil_element[:cooling_coil] = cooling_coil
-          cooling_coil_element[:is_autosized] = true if cooling_coil.isRatedTotalCoolingCapacityAutosized
-          cooling_coil_element[:is_autosized] = false unless cooling_coil.isRatedTotalCoolingCapacityAutosized
-          cooling_coil_element[:capacity] = cooling_coil.ratedTotalCoolingCapacity.get
+          cooling_coil_element[:cooling_coil] = error_cooling_coils[0]
+          cooling_coil_element[:is_autosized] = true if error_cooling_coils[0].isRatedTotalCoolingCapacityAutosized
+          cooling_coil_element[:is_autosized] = false unless error_cooling_coils[0].isRatedTotalCoolingCapacityAutosized
+          cooling_coil_element[:capacity] = error_cooling_coils[0].ratedTotalCoolingCapacity.to_f
           issue_coils << cooling_coil_element
         end
       end
+      issue_coils.uniq!
 
       # Adjust the capacity of DX coils with issues.  This resolves most sizing run issues.
       issue_coils.each do |issue_coil|
+        # If the coil is autosized and has a capacity less than 1.0 kW, resize the coil (and similar coils) to 1.0 kW
         if issue_coil[:is_autosized] == true && issue_coil[:capacity].to_f < 1.0
           if issue_coil.key?(:heating_coil)
-            issue_coil[:heating_coil].setRatedTotalHeatingCapacity(1.0)
-            dx_coil_changed = true
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
-            puts "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
-          else
-            issue_coil[:cooling_coil].setRatedTotalCoolingCapacity(1.0)
-            dx_coil_changed = true
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
-            puts "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
+            resize_coils = model.getCoilHeatingDXSingleSpeeds.select { |coil| coil.isRatedTotalHeatingCapacityAutosized && coil.ratedTotalHeatingCapacity.to_f < 1.0 }
+            resize_coils.each do |coil|
+              coil.setRatedTotalHeatingCapacity(1.0)
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
+              puts "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
+              dx_coil_changed = true
+            end
+          elsif issue_coil.key?(:cooling_coil)
+            resize_coils = model.getCoilCoolingDXSingleSpeeds.select { |coil| coil.isRatedTotalCoolingCapacityAutosized && coil.ratedTotalCoolingCapacity.to_f < 1.0 }
+            resize_coils.each do |coil|
+              coil.setRatedTotalCoolingCapacity(1.0)
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
+              puts "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
+              dx_coil_changed = true
+            end
           end
+        # If the coil is not autosized, or has a capacity larger than 1 kW, increase the capacity by 1% to avoid sizing run issues with rounding
         else
           if issue_coil.key?(:heating_coil)
             cooling_coil_name = issue_coil[:heating_coil].name.to_s.gsub('CoilHeatingDX','CoilCoolingDX')
