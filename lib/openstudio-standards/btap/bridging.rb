@@ -1139,7 +1139,8 @@ module BTAP
       material_quantities = {}
 
       # The "convex/concave" suffix on tally edges can be safely ignored since
-      # they currently aren't supported by BTAP.
+      # they currently aren't relevant to any NECB standard, but they are to
+      # ASHRAE 90.1.
       tally_edges = @tally[:edges].transform_keys{ |key| key.to_s.gsub(/concave|convex/, '') }
       tally_edges.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
