@@ -1165,19 +1165,19 @@ module BTAP
       # The "convex/concave" suffix on tally edges can be safely ignored since
       # they currently aren't relevant to any NECB standard, but they are to
       # ASHRAE 90.1.
-require 'pry-byebug'; binding.pry
 
       tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
       tally_edges.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
 
-          # Transition edges aren't considered.
+          # "transition" edges aren't considered.
           if edge_type == "transition"
             next
 
-          # Jamb, sill, and head may all be grouped under fenestration when
-          # referencing the thermal bridging CSV.
-          elsif edge_type == "jamb" or edge_type == "sill" or edge_type == "head" 
+          # "jamb", "sill", and "head" may all be grouped under fenestration 
+          # when referencing the thermal bridging CSV. Same for "skylightjamb",
+          # "skylightsill", and "skylighthead".
+          elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
             edge_type = "fenestration"
           end
 
