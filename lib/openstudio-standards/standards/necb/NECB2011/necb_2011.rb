@@ -7,10 +7,10 @@ class NECB2011 < Standard
   @template = new.class.name
   register_standard(@template)
   attr_reader :template
-  attr_reader :tbd
   attr_reader :osut
   attr_reader :activity
   attr_reader :structure
+  attr_accessor :tbd
   attr_accessor :standards_data
   attr_accessor :space_type_map
   attr_accessor :space_multiplier_map

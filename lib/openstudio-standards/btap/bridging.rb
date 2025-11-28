@@ -18,6 +18,7 @@
 # **************************************************************************** /
 
 require 'tbd'
+require 'json'
 
 module BTAP
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
@@ -574,13 +575,30 @@ module BTAP
     # @option argh [Hash] roofs exterior roof parameters e.g. :uo, :ut
     # @option argh [:good, :bad] quality derating option (if not uprating)
     # @option argh [Boolean] interpolate if TBD interpolates among Uo (uprate)
-    def initialize(model = nil, argh = {})
+    # @option path [String] File path for a no-simulation analysis
+    def initialize(model = nil, argh = {}, path: nil)
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
       lgs       = @feedback[:logs]
+
+      # Load the `tbd` file from a JSON file if doing a run without a full
+      # simulation.
+      if path
+        File.open(path, "r") do |file|
+          hash = JSON.load(file).deeply_symbolize_keys
+
+          # Match the handles to their surfaces in the model
+          hash[:takeoffs].transform_keys do |key|
+            model.getSurfaces.each { |surface| surface.handle.to_s == key.to_s }
+          end
+
+          @tally = hash
+        end
+        return
+      end
 
       # Populate and validate BTAP/TBD & OpenStudio model parameters. This does
       # a safe TBD trial run, returning true if successful. If false, TBD leaves
@@ -1064,6 +1082,7 @@ module BTAP
     # @return [Boolean] true if valid BTAP/TBD model
     def gen_feedback
       lgs = @feedback[:logs]
+      @tally[:takeoffs] = {}
       return false unless @model.key?(:complies) # all model constructions
       return false unless @model.key?(:comply)   # surface type specific ...
       return false unless @model.key?(:argh)     # BTAP/TBD inputs + ouputs
@@ -1106,11 +1125,13 @@ module BTAP
         next unless id.include?(" c tbd")
 
         rsi  = TBD.rsi(lc, s.filmResistance)
-        usi  = format("%.3f", 1/rsi)
-        rsi  = format("%.1f", rsi)
-        area = format("%.1f", lc.getNetArea) + " m2"
+        usi  = 1 / rsi
+        area = lc.getNetArea
 
-        lgs << "~ '#{id}' derated Rsi: #{rsi} [Usi #{usi} x #{area}]"
+        # Log the PSI factors of each surface and write it to a data structure
+        # as well for future reference.
+        @tally[:takeoffs][s] = {usi: usi, rsi: rsi}
+        lgs << "~ '#{id}' derated Rsi: #{format("%.1f", rsi)} [Usi #{format("%.3f", usi)} x #{format("%.1f", area)} m2]"
       end
 
       # Log PSI factor tallies (per thermal bridge type).
@@ -1121,8 +1142,7 @@ module BTAP
           lgs << "# '#{type}' (#{e.size}x):"
 
           e.each do |psi, length|
-            l = format("%.2f", length)
-            lgs << "... PSI set '#{psi}' : #{l} m"
+            lgs << "... PSI set '#{psi}' : #{format("%.2f", length)} m"
           end
         end
       end
@@ -1141,7 +1161,7 @@ module BTAP
       # The "convex/concave" suffix on tally edges can be safely ignored since
       # they currently aren't relevant to any NECB standard, but they are to
       # ASHRAE 90.1.
-      tally_edges = @tally[:edges].transform_keys{ |key| key.to_s.gsub(/concave|convex/, '') }
+      tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
       tally_edges.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
 
@@ -1180,6 +1200,29 @@ module BTAP
 
       return material_quantities
     end
+
+    # Write useful attributes from the `tbd` hash to a JSON file. Not everything 
+    # is exported since there's a lot of information.
+    # This is used to perform costing and carbon analysis without having to 
+    # re-run a full anunual simulation.
+    # See `btap_analysis.rb` for more info.
+    # @param file [String] File path to save to
+    def write(path)
+      File.open(path, "w") do |file|
+        hash = {}
+
+        # Symbols in ruby aren't in the JSON standard, so they need to be
+        # converted back once from strings loaded again.
+        hash["edges"] = @tally[:edges]
+
+        # For the takeoffs, which contains OpenStudio Surface objects, only save
+        # the UUID (handle) so that they may be matched later when # loaded 
+        # again. 
+        hash["takeoffs"] = @tally[:takeoffs].transform_keys { |key| key.handle}
+        file.write(JSON.pretty_generate(hash, allow_nan: true))
+      end
+    end
+
   end
 end
 

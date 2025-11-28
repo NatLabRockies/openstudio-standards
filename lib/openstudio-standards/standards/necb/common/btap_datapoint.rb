@@ -262,12 +262,18 @@ class BTAPDatapoint
                                   oerd_utility_pricing: @oerd_utility_pricing,
                                   utility_pricing_year: @utility_pricing_year).btap_data
 
-        # Write Files
-        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') { |f| f.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true)) }
-        puts "Wrote File btap_data.json in #{Dir.pwd} "
+        # Write files
+        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') do |file| 
+          file.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true))
+          puts "Wrote File btap_data.json in #{Dir.pwd} "
+        end
 
-        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') { |f| f.write(JSON.pretty_generate(@qaqc, allow_nan: true)) }
-        puts "Wrote File qaqc.json in #{Dir.pwd} "
+        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') do |file| 
+          file.write(JSON.pretty_generate(@qaqc, allow_nan: true)) 
+          puts "Wrote File qaqc.json in #{Dir.pwd} "
+        end
+
+        @standard.tbd.write(File.join(@dp_temp_folder, 'tbd_data.json')) 
 
         #output hourly data
         self.output_hourly_data(model,@dp_temp_folder, @options[:datapoint_id])
