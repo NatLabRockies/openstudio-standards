@@ -595,6 +595,10 @@ module BTAP
             model.getSurfaces.each { |surface| surface.handle.to_s == key.to_s }
           end
 
+          # Un-stringify the edge values. 
+          # TODO: Symbols are way more of a hassle than they're worth, these 
+          #       should all be kept as strings eventually.
+          hash[:edges].transform_values { |v| v.transform_keys!(&:to_s) }
           @tally = hash
         end
         return
