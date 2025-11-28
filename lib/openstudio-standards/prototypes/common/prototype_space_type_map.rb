@@ -17,14 +17,14 @@ class Standard
 
       if !standards_space_type.nil? && !standards_building_type.nil?
         mapping = space_types_data.find { |s| s[:standards_building_type] == standards_building_type && s[:standards_space_type] == standards_space_type }
-        if !mapping.nil?
+        if mapping.nil?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Prototypes', "No mapping found for standards building type '#{standards_building_type}' and standards space type '#{standards_space_type}'")
+        else
           new_standards_space_type_name = mapping[:new_standards_space_type]
           space_type.additionalProperties.setFeature('standards_space_type', new_standards_space_type_name)
           if reset_standards_space_type
             space_type.setStandardsSpaceType(new_standards_space_type_name)
           end
-        else
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Prototypes', "No mapping found for standards building type '#{standards_building_type}' and standards space type '#{standards_space_type}'")
         end
       else
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Prototypes', "Space type '#{space_type.name}' is missing either Standards Space Type or Building Type")

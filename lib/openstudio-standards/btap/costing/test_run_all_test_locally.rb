@@ -4,7 +4,7 @@ require 'open3'
 require 'minitest/autorun'
 require 'json'
 require_relative './parallel_tests'
-require_relative './btap_results/tests/BtapResults_test_helper' # Required for the cached switch
+require_relative '../btap_test_helper' # Required for the cached switch
 
 class RunAllTests < Minitest::Test
   def test_all()

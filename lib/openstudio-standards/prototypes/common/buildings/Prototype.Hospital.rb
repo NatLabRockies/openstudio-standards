@@ -25,10 +25,10 @@ module Hospital
     end
 
     unless transformer_efficiency.nil?
-      model_add_transformer(model,
-                            wired_lighting_frac: 0.022,
-                            transformer_size: 500000,
-                            transformer_efficiency: transformer_efficiency)
+      OpenstudioStandards::Equipment.create_transformer(model,
+                                                        wired_lighting_frac: 0.022,
+                                                        transformer_size: 500000,
+                                                        transformer_efficiency: transformer_efficiency)
     end
 
     # add extra equipment for kitchen

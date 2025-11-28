@@ -25,10 +25,10 @@ module PrimarySchool
     end
     return true if transformer_efficiency.nil?
 
-    model_add_transformer(model,
-                          wired_lighting_frac: 0.0119,
-                          transformer_size: 112500,
-                          transformer_efficiency: transformer_efficiency)
+    OpenstudioStandards::Equipment.create_transformer(model,
+                                                      wired_lighting_frac: 0.0119,
+                                                      transformer_size: 112500,
+                                                      transformer_efficiency: transformer_efficiency)
 
     # add extra equipment for kitchen
     add_extra_equip_kitchen(model)
