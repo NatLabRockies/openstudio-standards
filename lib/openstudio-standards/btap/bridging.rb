@@ -591,8 +591,8 @@ module BTAP
           hash = JSON.load(file).deeply_symbolize_keys
 
           # Match the handles to their surfaces in the model
-          hash[:takeoffs].transform_keys do |key|
-            model.getSurfaces.each { |surface| surface.handle.to_s == key.to_s }
+          hash[:takeoffs].transform_keys! do |key|
+            model.getSurfaces.each.find { |surface| surface.handle.to_s == key.to_s }
           end
 
           # Un-stringify the edge values. 
