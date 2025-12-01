@@ -1210,29 +1210,6 @@ module BTAP
 
       return material_quantities
     end
-
-    # Write useful attributes from the `tbd` hash to a JSON file. Not everything 
-    # is exported since there's a lot of information.
-    # This is used to perform costing and carbon analysis without having to 
-    # re-run a full anunual simulation.
-    # See `btap_analysis.rb` for more info.
-    # @param file [String] File path to save to
-    def write(path)
-      File.open(path, "w") do |file|
-        hash = {}
-
-        # Symbols in ruby aren't in the JSON standard, so they need to be
-        # converted back once from strings loaded again.
-        hash["edges"] = @tally[:edges]
-
-        # For the takeoffs, which contains OpenStudio Surface objects, only save
-        # the UUID (handle) so that they may be matched later when # loaded 
-        # again. 
-        hash["takeoffs"] = @tally[:takeoffs].transform_keys { |key| key.handle}
-        file.write(JSON.pretty_generate(hash, allow_nan: true))
-      end
-    end
-
   end
 end
 
