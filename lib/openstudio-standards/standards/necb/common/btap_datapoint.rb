@@ -226,6 +226,7 @@ class BTAPDatapoint
         # Attach the sql file from the run to the sizing model
         model.setSqlFile(sql)
 
+        post_analysis = nil
         if @options[:enable_costing] or @options[:enable_carbon]
           @cp = CommonPaths.instance
           post_analysis = BTAPDatapointAnalysis.new(
@@ -273,7 +274,9 @@ class BTAPDatapoint
           puts "Wrote File qaqc.json in #{Dir.pwd} "
         end
 
-        @standard.tbd.write(File.join(@dp_temp_folder, 'tbd_data.json')) 
+        if post_analysis
+          post_analysis.write(File.join(@dp_temp_folder, 'tbd_data.json')) 
+        end
 
         #output hourly data
         self.output_hourly_data(model,@dp_temp_folder, @options[:datapoint_id])
