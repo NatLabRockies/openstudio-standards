@@ -43,9 +43,9 @@ module BTAP
     attr_reader :spaces
     attr_reader :surface_types
     
-    def initialize(model, prototype_creator)
+    def initialize(model, standard)
       @model             = model
-      @prototype_creator = prototype_creator
+      @standard          = standard
       @costing_database  = CostingDatabase.instance
 
       # Surfaces considered for envelope costing and carbon.
@@ -72,10 +72,10 @@ module BTAP
       self.compile
     end
 
-    # Compile all the pertinent data into the data structures of this class while also appending
-    # to the exisitng OpenStudio ones. 
+    # Compile all the pertinent data into the data structures of this class 
+    # while also appending to the exisitng OpenStudio ones. 
     def compile
-      template_type = @prototype_creator.template
+      template_type = @standard.template
       num_of_above_ground_stories = @model.getBuilding.standardsNumberOfAboveGroundStories.to_i
       
       # Iterate through the data structures while also saving their sorted order later for reference.
