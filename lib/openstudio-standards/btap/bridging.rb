@@ -576,33 +576,13 @@ module BTAP
     # @option argh [:good, :bad] quality derating option (if not uprating)
     # @option argh [Boolean] interpolate if TBD interpolates among Uo (uprate)
     # @option path [String] File path for a no-simulation analysis
-    def initialize(model = nil, argh = {}, path: nil)
+    def initialize(model = nil, argh = {})
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
       lgs       = @feedback[:logs]
-
-      # Load the `tbd` file from a JSON file if doing a run without a full
-      # simulation.
-      if path
-        File.open(path, "r") do |file|
-          hash = JSON.load(file).deeply_symbolize_keys
-
-          # Match the handles to their surfaces in the model
-          hash[:takeoffs].transform_keys! do |key|
-            model.getSurfaces.each.find { |surface| surface.handle.to_s == key.to_s }
-          end
-
-          # Un-stringify the edge values. 
-          # TODO: Symbols are way more of a hassle than they're worth, these 
-          #       should all be kept as strings eventually.
-          hash[:edges].transform_values { |v| v.transform_keys!(&:to_s) }
-          @tally = hash
-        end
-        return
-      end
 
       # Populate and validate BTAP/TBD & OpenStudio model parameters. This does
       # a safe TBD trial run, returning true if successful. If false, TBD leaves
@@ -1209,6 +1189,18 @@ module BTAP
       end
 
       return material_quantities
+    end
+
+    # Remove most instance variables from this TBD object. This is a temporary
+    # workaround for getting caching to work since the TBD object has lots of
+    # member attributes and freezes, possibly due to a recurisve attribute
+    # somewhere. This prevents inspecting the object without a file pager or
+    # writing it to a file.
+    def shorten_instance_variables
+      self.instance_variables.filter {|variable| variable != :@tally}.each do |variable|
+        remove_instance_variable(variable)
+      end
+      @tally.delete(:constructions)
     end
   end
 end

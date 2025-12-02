@@ -274,8 +274,10 @@ class BTAPDatapoint
           puts "Wrote File qaqc.json in #{Dir.pwd} "
         end
 
+        # Write cache files to be able to re-run this analysis without an annual
+        # simulation.
         if post_analysis
-          post_analysis.write(File.join(@dp_temp_folder, 'tbd_data.json')) 
+          post_analysis.write_cache(File.join(@dp_temp_folder, 'btap_cache.marshal')) 
         end
 
         #output hourly data
