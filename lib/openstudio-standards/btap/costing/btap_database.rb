@@ -3,12 +3,12 @@ require 'json'
 require 'csv'
 
 # Singleton class to centralize all database operations
-class CostingDatabase
+class BTAPDatabase
   include Singleton
 
   def initialize
     @cp = CommonPaths.instance # Stores paths
-    @db = Hash.new             # Stores the costing database
+    @db = Hash.new             # Stores all database information
 
     # Load the database from the individual CSV/JSON files
     @db["costs"]                = []
@@ -67,6 +67,9 @@ class CostingDatabase
     @db["constructions"]["skylight"]   = File.open(@cp.constructions_skylight_path)   { |file| JSON.load(file)}
     @db["constructions"]["wall"]       = File.open(@cp.constructions_wall_path)       { |file| JSON.load(file)}
     @db["constructions"]["window"]     = File.open(@cp.constructions_window_path)     { |file| JSON.load(file)}
+    @db["constructions"]["bg_roof"]    = File.open(@cp.constructions_bg_roof_path)    { |file| JSON.load(file)}
+    @db["constructions"]["bg_wall"]    = File.open(@cp.constructions_bg_wall_path)    { |file| JSON.load(file)}
+    @db["constructions"]["slab"]       = File.open(@cp.constructions_slab_path)       { |file| JSON.load(file)}
 
     # Load the raw data
     raw_data_names = [
