@@ -61,30 +61,13 @@ class BTAPAnalysis
     return carbon_result
   end
 
-  # Write useful attributes to a JSON file. These attributes are:
-  # tbd:       Thermal bridging edges and material takeoffs.
-  # structure: Defines building category dictating kinds of materials to be 
-  #            used.
+  # Write the cache by interfacing with the BTAPStandardCache attribute.
   #
   # @param file [String] File path to save to.
   def write_cache(path)
-    File.open(path, "w") do |file|
-      hash              = {}
-      hash["tbd"]       = {}
-      hash["structure"] = {}
-
-      # Symbols in ruby aren't in the JSON standard, so they need to be
-      # converted back once from strings loaded again.
-      hash["tbd"]["edges"] = @standard.tbd.tally[:edges]
-
-      # For the takeoffs, which contains OpenStudio Surface objects, only save
-      # the UUID (handle) so that they may be matched later when # loaded 
-      # again. 
-      hash["tbd"]["takeoffs"] = @standard.tbd.tally[:takeoffs].transform_keys { |key| key.handle}
-
-      hash["structure"] = @standard.structure
-      file.write(JSON.pretty_generate(hash, allow_nan: true))
-    end
+    @standard.tbd.shorten_instance_variables
+    cache = BTAPStandardCache.new(@standard.tbd, @standard.structure)
+    cache.write_cache(path)
   end
 end
 
@@ -119,15 +102,22 @@ class BTAPNoSimAnalysis < BTAPAnalysis
     analysis_id: SecureRandom.uuid)
 
     super(output_folder: output_folder, template: template)
-    @model        = BTAP::FileIO.load_osm(model_path)
-    @template     = template
-    @standard     = Standard.build(template)
-    @standard.tbd = BTAP::Bridging.new(@model, path: cache_file_path)
-    @datapoint_id = datapoint_id
-    @analysis_id  = analysis_id
-    @attributes   = BTAP::Attributes.new(@model, @standard)
+    @model              = BTAP::FileIO.load_osm(model_path)
+    @template           = template
+    @standard           = Standard.build(template)
+    @standard.load_standard_cache(self.load_cache(cache_file_path, @model))
+    @datapoint_id       = datapoint_id
+    @analysis_id        = analysis_id
+    @attributes         = BTAP::Attributes.new(@model, @standard)
     @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
     @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
+  end
+
+  # Load the cache by interfacing with the BTAPStandardCache attribute.
+  #
+  # @param file [String] File path to load from.
+  def load_cache(path, model)
+    return BTAPStandardCache.load_cache(path, model)
   end
 end
 
@@ -146,5 +136,54 @@ class BTAPDatapointAnalysis < BTAPAnalysis
     @standard   = standard
     @qaqc       = qaqc
     @attributes = BTAP::Attributes.new(@model, @standard)
+  end
+end
+
+# BTAP Standard Cache
+#
+# Wrapper class that contains useful instance variables of the `Standard`
+# object.
+# These attributes are:
+# tbd:       Thermal bridging edges and material takeoffs.
+# structure: Defines building category dictating kinds of materials to be 
+#            used.
+class BTAPStandardCache
+  attr_reader :tbd
+  attr_reader :structure
+
+  # @param tbd      [BTAP::Bridging]
+  # @param standard [BTAP::Structure]
+  def initialize(tbd, structure)
+    @tbd       = tbd
+    @structure = structure
+  end
+
+  # Write useful attributes to a binary file using Marshal. 
+  #
+  # @param file [String] File path to save to.
+  def write_cache(path)
+    File.open(path, "w") do |file|
+
+      # For the takeoffs, which contains OpenStudio Surface objects, only save
+      # the UUID (handle) so that they may be matched later when loaded again. 
+      @tbd.tally[:takeoffs].transform_keys! { |key| key.handle.to_s}
+      file.write(Marshal.dump(self))
+    end
+  end
+
+  # Load the binary cache file.
+  #
+  # @param file  [String] File path to load from.
+  # @param model [OpenStudio::Model::Model] Required to match surfaces.
+  def self.load_cache(path, model)
+    cache = File.open(path, "r") { |file| Marshal.load(file) }
+
+    # Convert the surface handles back into OpenStudio objects by matching them
+    # by their handles.
+    cache.tbd.tally[:takeoffs].transform_keys! do |key|
+      model.getSurfaces.each.find { |surface| surface.handle.to_s == key }
+    end
+
+    return cache
   end
 end
