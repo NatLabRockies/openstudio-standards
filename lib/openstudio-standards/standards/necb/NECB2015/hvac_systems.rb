@@ -13,7 +13,7 @@ class NECB2015
     compressor_type = search_criteria['compressor_type']
 
     # Get the chiller capacity
-    capacity_w = chiller_electric_eir_find_capacity(chiller_electric_eir)
+    capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(chiller_electric_eir)
 
     # All chillers must be modulating down to 25% of their capacity
     chiller_electric_eir.setChillerFlowMode('LeavingSetpointModulated')
@@ -95,7 +95,7 @@ class NECB2015
     cop = nil
     if chlr_props['minimum_full_load_efficiency']
       kw_per_ton = chlr_props['minimum_full_load_efficiency']
-      cop = kw_per_ton_to_cop(kw_per_ton)
+      cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(kw_per_ton)
       chiller_electric_eir.setReferenceCOP(cop)
     else
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name}, cannot find minimum full load efficiency, will not be set.")

@@ -191,7 +191,7 @@ class ASHRAE901PRM < Standard
   # Set fan curve for stable baseline to be VSD with fixed static pressure setpoint
   # @return [String name of appropriate curve for this code version
   def air_loop_hvac_set_vsd_curve_type
-    return 'Multi Zone VAV with VSD and Fixed SP Setpoint'
+    return 'Multi Zone VAV with Fixed Static Pressure Setpoint'
   end
 
   # Determines if optimum start control is required.

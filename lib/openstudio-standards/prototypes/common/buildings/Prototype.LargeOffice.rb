@@ -32,11 +32,11 @@ module LargeOffice
       end
     end
 
-    model_add_transformer(model,
-                          wired_lighting_frac: 0.0281,
-                          transformer_size: 500000,
-                          transformer_efficiency: transformer_efficiency,
-                          excluded_interiorequip_meter: 'DataCenterPlugLoads:InteriorEquipment:Electricity')
+    OpenstudioStandards::Equipment.create_transformer(model,
+                                                      wired_lighting_frac: 0.0281,
+                                                      transformer_size: 500000,
+                                                      transformer_efficiency: transformer_efficiency,
+                                                      excluded_interiorequip_meter: 'DataCenterPlugLoads:InteriorEquipment:Electricity')
 
     system_to_space_map = define_hvac_system_map(building_type, climate_zone)
 

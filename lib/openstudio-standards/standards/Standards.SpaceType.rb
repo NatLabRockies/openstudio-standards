@@ -23,7 +23,7 @@ class Standard
     # lookup space type properties
     space_type_properties = model_find_object(standards_data['space_types'], search_criteria)
 
-    if space_type_properties.nil?
+    if space_type_properties.nil? || space_type_properties.empty?
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', "Space type properties lookup failed: #{search_criteria}.")
       space_type_properties = {}
     end
@@ -97,7 +97,7 @@ class Standard
   # loads directly assigned to spaces.  This method skips plenums.
   #
   # @param space_type [OpenStudio::Model::SpaceType] space type object
-  # @param set_people [Boolean] if true, set the people density.
+  # @param set_people [Boolean] if true, set the people density. occupancy values are in the ventilation standard.
   #   Also, assign reasonable clothing, air velocity, and work efficiency inputs
   #   to allow reasonable thermal comfort metrics to be calculated.
   # @param set_lights [Boolean] if true, set the lighting density, lighting fraction
@@ -106,10 +106,8 @@ class Standard
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
   # @param set_ventilation [Boolean] if true, set the ventilation rates (per-person and per-area)
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
+  def space_type_apply_internal_loads(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
     # Skip plenums
-    # Check if the space type name
-    # contains the word plenum.
     if space_type.name.get.to_s.downcase.include?('plenum')
       return false
     end
@@ -126,87 +124,9 @@ class Standard
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} was not found in the standards data.")
       return false
     end
+
     # People
-    people_have_info = false
-    occupancy_per_area = space_type_properties['occupancy_per_area'].to_f
-    people_have_info = true unless occupancy_per_area.zero?
-
-    if set_people && people_have_info
-
-      # Remove all but the first instance
-      instances = space_type.people.sort
-      if instances.empty?
-        # Create a new definition and instance
-        definition = OpenStudio::Model::PeopleDefinition.new(space_type.model)
-        definition.setName("#{space_type.name} People Definition")
-        instance = OpenStudio::Model::People.new(definition)
-        instance.setName("#{space_type.name} People")
-        instance.setSpaceType(space_type)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} had no people, one has been created.")
-        instances << instance
-      elsif instances.size > 1
-        instances.each_with_index do |inst, i|
-          next if i.zero?
-
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "Removed #{inst.name} from #{space_type.name}.")
-          inst.remove
-        end
-      end
-
-      # Modify the definition of the instance
-      space_type.people.sort.each do |inst|
-        definition = inst.peopleDefinition
-        unless occupancy_per_area.zero?
-          definition.setPeopleperSpaceFloorArea(OpenStudio.convert(occupancy_per_area / 1000, 'people/ft^2', 'people/m^2').get)
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set occupancy to #{occupancy_per_area} people/1000 ft^2.")
-        end
-
-        # set fraction radiant  ##
-        definition.setFractionRadiant(0.3)
-
-        # Clothing schedule for thermal comfort metrics
-        clothing_sch = space_type.model.getScheduleRulesetByName('Clothing Schedule')
-        if clothing_sch.is_initialized
-          clothing_sch = clothing_sch.get
-        else
-          clothing_sch = OpenStudio::Model::ScheduleRuleset.new(space_type.model)
-          clothing_sch.setName('Clothing Schedule')
-          clothing_sch.defaultDaySchedule.setName('Clothing Schedule Default Winter Clothes')
-          clothing_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
-          sch_rule = OpenStudio::Model::ScheduleRule.new(clothing_sch)
-          sch_rule.daySchedule.setName('Clothing Schedule Summer Clothes')
-          sch_rule.daySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.5)
-          sch_rule.setStartDate(OpenStudio::Date.new(OpenStudio::MonthOfYear.new(5), 1))
-          sch_rule.setEndDate(OpenStudio::Date.new(OpenStudio::MonthOfYear.new(9), 30))
-        end
-        inst.setClothingInsulationSchedule(clothing_sch)
-
-        # Air velocity schedule for thermal comfort metrics
-        air_velo_sch = space_type.model.getScheduleRulesetByName('Air Velocity Schedule')
-        if air_velo_sch.is_initialized
-          air_velo_sch = air_velo_sch.get
-        else
-          air_velo_sch = OpenStudio::Model::ScheduleRuleset.new(space_type.model)
-          air_velo_sch.setName('Air Velocity Schedule')
-          air_velo_sch.defaultDaySchedule.setName('Air Velocity Schedule Default')
-          air_velo_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.2)
-        end
-        inst.setAirVelocitySchedule(air_velo_sch)
-
-        # Work efficiency schedule for thermal comfort metrics
-        work_efficiency_sch = space_type.model.getScheduleRulesetByName('Work Efficiency Schedule')
-        if work_efficiency_sch.is_initialized
-          work_efficiency_sch = work_efficiency_sch.get
-        else
-          work_efficiency_sch = OpenStudio::Model::ScheduleRuleset.new(space_type.model)
-          work_efficiency_sch.setName('Work Efficiency Schedule')
-          work_efficiency_sch.defaultDaySchedule.setName('Work Efficiency Schedule Default')
-          work_efficiency_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0)
-        end
-        inst.setWorkEfficiencySchedule(work_efficiency_sch)
-      end
-
-    end
+    space_type_apply_people(space_type) if set_people
 
     # Lights
     lights_have_info = false
@@ -388,53 +308,7 @@ class Standard
     end
 
     # Ventilation
-    ventilation_have_info = false
-    ventilation_per_area = space_type_properties['ventilation_per_area'].to_f
-    ventilation_per_person = space_type_properties['ventilation_per_person'].to_f
-    ventilation_ach = space_type_properties['ventilation_air_changes'].to_f
-    ventilation_have_info = true unless ventilation_per_area.zero?
-    ventilation_have_info = true unless ventilation_per_person.zero?
-    ventilation_have_info = true unless ventilation_ach.zero?
-
-    # Get the design OA or create a new one if none exists
-    ventilation = space_type.designSpecificationOutdoorAir
-    if ventilation.is_initialized
-      ventilation = ventilation.get
-    else
-      ventilation = OpenStudio::Model::DesignSpecificationOutdoorAir.new(space_type.model)
-      ventilation.setName("#{space_type.name} Ventilation")
-      space_type.setDesignSpecificationOutdoorAir(ventilation)
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} had no ventilation specification, one has been created.")
-    end
-
-    if set_ventilation && ventilation_have_info
-
-      # Modify the ventilation properties
-      ventilation_method = model_ventilation_method(space_type.model)
-      ventilation.setOutdoorAirMethod(ventilation_method)
-      unless ventilation_per_area.zero?
-        ventilation.setOutdoorAirFlowperFloorArea(OpenStudio.convert(ventilation_per_area.to_f, 'ft^3/min*ft^2', 'm^3/s*m^2').get)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation per area to #{ventilation_per_area} cfm/ft^2.")
-      end
-      unless ventilation_per_person.zero?
-        ventilation.setOutdoorAirFlowperPerson(OpenStudio.convert(ventilation_per_person.to_f, 'ft^3/min*person', 'm^3/s*person').get)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation per person to #{ventilation_per_person} cfm/person.")
-      end
-      unless ventilation_ach.zero?
-        ventilation.setOutdoorAirFlowAirChangesperHour(ventilation_ach)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation to #{ventilation_ach} ACH.")
-      end
-
-    elsif set_ventilation && !ventilation_have_info
-
-      # All space types must have a design spec OA
-      # object for ventilation controls to work correctly,
-      # even if the values are all zero.
-      ventilation.setOutdoorAirFlowperFloorArea(0)
-      ventilation.setOutdoorAirFlowperPerson(0)
-      ventilation.setOutdoorAirFlowAirChangesperHour(0)
-
-    end
+    space_type_apply_ventilation(space_type) if set_ventilation
 
     return true
   end
@@ -567,11 +441,8 @@ class Standard
   # @param set_lights [Boolean] if true, set the lighting schedule
   # @param set_electric_equipment [Boolean] if true, set the electric schedule schedule
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
-  # @param make_thermostat [Boolean] if true, makes a thermostat for this space type from the
-  #   schedules listed for the space type.  This thermostat is not hooked to any zone by this method,
-  #   but may be found and used later.
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_load_schedules(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, make_thermostat)
+  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
     # Get the standards data
     space_type_properties = space_type_get_standards_data(space_type)
 
@@ -599,14 +470,11 @@ class Standard
         default_sch_set.setPeopleActivityLevelSchedule(model_add_schedule(space_type.model, occupancy_activity_sch))
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set occupant activity schedule to #{occupancy_activity_sch}.")
       end
-
     end
 
     # Lights
     if set_lights
-
       apply_lighting_schedule(space_type, space_type_properties, default_sch_set)
-
     end
 
     # Electric Equipment
@@ -627,22 +495,31 @@ class Standard
       end
     end
 
-    # Thermostat
-    if make_thermostat
-      thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(space_type.model)
-      thermostat.setName("#{space_type.name} Thermostat")
+    return true
+  end
 
-      heating_setpoint_sch = space_type_properties['heating_setpoint_schedule']
-      unless heating_setpoint_sch.nil?
-        thermostat.setHeatingSetpointTemperatureSchedule(model_add_schedule(space_type.model, heating_setpoint_sch))
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set heating setpoint schedule to #{heating_setpoint_sch}.")
-      end
+  # Makes a thermostat for this space type from the schedules listed for the space type.
+  # This thermostat is not hooked to any zone by this method,but may be found and used later.
+  #
+  # @param space_type [OpenStudio::Model::SpaceType] space type object
+  # @return [Boolean] returns true if successful, false if not
+  def space_type_apply_thermostat_schedules(space_type)
+    # Get the standards data
+    space_type_properties = space_type_get_standards_data(space_type)
 
-      cooling_setpoint_sch = space_type_properties['cooling_setpoint_schedule']
-      unless cooling_setpoint_sch.nil?
-        thermostat.setCoolingSetpointTemperatureSchedule(model_add_schedule(space_type.model, cooling_setpoint_sch))
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set cooling setpoint schedule to #{cooling_setpoint_sch}.")
-      end
+    thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(space_type.model)
+    thermostat.setName("#{space_type.name} Thermostat")
+
+    heating_setpoint_sch = space_type_properties['heating_setpoint_schedule']
+    unless heating_setpoint_sch.nil?
+      thermostat.setHeatingSetpointTemperatureSchedule(model_add_schedule(space_type.model, heating_setpoint_sch))
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set heating setpoint schedule to #{heating_setpoint_sch}.")
+    end
+
+    cooling_setpoint_sch = space_type_properties['cooling_setpoint_schedule']
+    unless cooling_setpoint_sch.nil?
+      thermostat.setCoolingSetpointTemperatureSchedule(model_add_schedule(space_type.model, cooling_setpoint_sch))
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set cooling setpoint schedule to #{cooling_setpoint_sch}.")
     end
 
     return true

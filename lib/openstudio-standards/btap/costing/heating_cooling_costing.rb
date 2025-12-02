@@ -1147,7 +1147,7 @@ class BTAPCosting
       volume = model.building.get.airVolume()
       flrArea = 0.0
       if model.building.get.conditionedFloorArea.empty?
-        model.getThermalZones.sort.each do |tz|
+        model.getThermalZonesSorted.each do |tz|
           tz.spaces.sort.each do |tz_space|
             flrArea += tz_space.floorArea.to_f if ( (space_mod.space_cooled?(tz_space)) || (space_mod.space_heated?(tz_space)) )
           end
@@ -1244,7 +1244,7 @@ class BTAPCosting
       vrfFloors: []
     }
 
-    model.getThermalZones.sort.each do |zone|
+    model.getThermalZonesSorted.each do |zone|
       numZones += 1
       zone.equipment.each do |equipment|
         obj_type = equipment.iddObjectType.valueName.to_s
@@ -1810,7 +1810,7 @@ class BTAPCosting
     # Get perimeter distribution piping cost
     extWallArea = 0.0
     perimPipingCost = 0.0
-    zone.spaces.sort.each do |space|
+    zone.getSpacesSorted.each do |space|
       if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
         raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space for costing.")
       end
@@ -1833,7 +1833,7 @@ class BTAPCosting
     # Get perimeter distribution wiring cost
     extWallArea = 0.0
     perimWiringCost = 0.0
-    zone.spaces.sort.each do |space|
+    zone.getSpacesSorted.each do |space|
       if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
         raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space for costing.")
       end

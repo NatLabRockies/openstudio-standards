@@ -237,13 +237,8 @@ class Standard
       # Modify the internal loads in each space type, keeping user-defined schedules.
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Changing Lighting Loads ***')
       model.getSpaceTypes.sort.each do |space_type|
-        set_people = false
-        set_lights = true
-        set_electric_equipment = false
-        set_gas_equipment = false
-        set_ventilation = false
-        # For PRM, it only applies lights for now.
-        space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation)
+        # For PRM, only apply lights for now
+        space_type_apply_internal_loads(space_type, set_people: false, set_lights: true, set_electric_equipment: false, set_gas_equipment: false, set_ventilation: false)
       end
 
       # Modify the lighting schedule to handle lighting occupancy sensors
@@ -555,7 +550,7 @@ class Standard
           # the PRM-RM; Note that the PRM-RM only suggest to increase
           # air zone air flow, but the zone sizing factor in EnergyPlus
           # increase both air flow and load.
-          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
+          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(model)
           if umlh > 300
             model.getThermalZones.each do |thermal_zone|
               # Cooling adjustments
@@ -774,10 +769,10 @@ class Standard
       end
 
       # This is only used for the stable baseline (2016 and later)
-if !applicable_zones.nil? && !applicable_zones.include?(zone)
-          # This zone is not part of the current hvac_building_type
-          next
-        end
+      if !applicable_zones.nil? && !applicable_zones.include?(zone)
+        # This zone is not part of the current hvac_building_type
+        next
+      end
 
       # Skip unconditioned zones
       heated = OpenstudioStandards::ThermalZone.thermal_zone_heated?(zone)
@@ -3054,11 +3049,24 @@ if !applicable_zones.nil? && !applicable_zones.include?(zone)
   # @return [OpenStudio::Model::Construction] construction object
   # @todo make return an OptionalConstruction
   def model_add_construction(model, construction_name, construction_props = nil, surface = nil)
+    intended_surface_type = construction_props&.[]('intended_surface_type') || ''
+
     # First check model and return construction if it already exists
     model.getConstructions.sort.each do |construction|
       if construction.name.get.to_s == construction_name
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Model', "Already added construction: #{construction_name}")
-        return construction
+        valid = true
+        if !surface.nil?
+          if intended_surface_type == 'GroundContactFloor' && construction.iddObjectType.valueName != 'OS_Construction_FfactorGroundFloor'
+            valid = false
+          elsif intended_surface_type == 'GroundContactWall' && construction.iddObjectType.valueName != 'OS_Construction_CfactorUndergroundWall'
+            valid = false
+          end
+        end
+        if valid
+          return construction
+        end
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Already added construction: '#{construction_name}' but its type '#{construction.iddObjectType.valueName}' is not valid for the intended surface type '#{intended_surface_type}'. A new construction will be created.")
       end
     end
 
@@ -3076,12 +3084,31 @@ if !applicable_zones.nil? && !applicable_zones.include?(zone)
       return OpenStudio::Model::OptionalConstruction.new
     end
 
+    intended_surface_type = data["intended_surface_type"]
+    intended_surface_type ||= ''
+
     # Make a new construction and set the standards details
-    if data['intended_surface_type'] == 'GroundContactFloor' && !surface.nil?
-      construction = OpenStudio::Model::FFactorGroundFloorConstruction.new(model)
-    elsif data['intended_surface_type'] == 'GroundContactWall' && !surface.nil?
-      construction = OpenStudio::Model::CFactorUndergroundWallConstruction.new(model)
-    else
+    is_layered_construction = true
+
+    if intended_surface_type == 'GroundContactFloor' && !surface.nil?
+      if construction_props
+        construction = OpenStudio::Model::FFactorGroundFloorConstruction.new(model)
+        is_layered_construction = false
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Construction properties not specified for '#{construction_name}', cannot create F-Factor Ground Floor Construction.  A regular construction will be created instead, and Surface '#{surface.name}' will be set to use the 'Ground' outside boundary condition (previously '#{surface.outsideBoundaryCondition}').")
+        surface.setOutsideBoundaryCondition('Ground')
+      end
+    elsif intended_surface_type == 'GroundContactWall' && !surface.nil?
+      if construction_props
+        construction = OpenStudio::Model::CFactorUndergroundWallConstruction.new(model)
+        is_layered_construction = false
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Construction properties not specified for '#{construction_name}', cannot create C-Factor Underground Wall Construction.  A regular construction will be created instead, and Surface '#{surface.name}' will be set to use the 'Ground' outside boundary condition (previously '#{surface.outsideBoundaryCondition}').")
+        surface.setOutsideBoundaryCondition('Ground')
+      end
+    end
+
+    if is_layered_construction
       construction = OpenStudio::Model::Construction.new(model)
       # Add the material layers to the construction
       layers = OpenStudio::Model::MaterialVector.new
@@ -3096,8 +3123,6 @@ if !applicable_zones.nil? && !applicable_zones.include?(zone)
     construction.setName(construction_name)
     standards_info = construction.standardsInformation
 
-    intended_surface_type = data['intended_surface_type']
-    intended_surface_type ||= ''
     standards_info.setIntendedSurfaceType(intended_surface_type)
 
     standards_construction_type = data['standards_construction_type']

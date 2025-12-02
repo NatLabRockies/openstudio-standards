@@ -48,8 +48,8 @@ module NecbHelper
 
   # Hold an array of the instantiated standards (to save recreating them all the time).
   @@standards = []
-
-  # Default to treu for PERFORM_STANDARDS in testing.
+  
+  # Default to true for PERFORM_STANDARDS in testing.
   PERFORM_STANDARDS = true
 
   # Standard path definitions for NECB testing.
@@ -106,7 +106,6 @@ module NecbHelper
 
   # Create a simple geometry for use in tests.
   def make_test_geometry
-
     # Create new model for testing.
     model = OpenStudio::Model::Model.new
 

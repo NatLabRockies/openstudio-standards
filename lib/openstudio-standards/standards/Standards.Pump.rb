@@ -81,7 +81,7 @@ module Pump
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Pump', "For #{pump.name}: motor nameplate = #{nominal_hp}HP, motor eff = #{(motor_efficiency * 100).round(2)}%; #{target_w_per_gpm.round} W/gpm translates to a pressure rise of #{pressure_rise_ft_h2o.round(2)} ftH2O.")
 
     # Calculate the W/gpm for verification
-    calculated_w = pump_pumppower(pump)
+    calculated_w = OpenstudioStandards::HVAC.pump_get_power(pump)
 
     calculated_w_per_gpm = calculated_w / flow_gpm
 
@@ -97,7 +97,7 @@ module Pump
   # @return [Boolean] returns true if successful, false if not
   def pump_apply_standard_minimum_motor_efficiency(pump)
     # Get the horsepower
-    bhp = pump_brake_horsepower(pump)
+    bhp = OpenstudioStandards::HVAC.pump_get_brake_horsepower(pump)
 
     # Find the motor efficiency
     motor_eff, nominal_hp = pump_standard_minimum_motor_efficiency_and_size(pump, bhp)
@@ -179,150 +179,5 @@ module Pump
     end
 
     return [motor_eff, nominal_hp]
-  end
-
-  # Determines the pump power (W) based on flow rate, pressure rise,
-  # and total pump efficiency(impeller eff * motor eff).
-  # Uses the E+ default assumption of 0.78 impeller efficiency.
-  #
-  # @param pump [OpenStudio::Model::StraightComponent] pump object, allowable types:
-  #   PumpConstantSpeed, PumpVariableSpeed
-  # @return [Double] pump power in watts
-  def pump_pumppower(pump)
-    # Get flow rate (whether autosized or hard-sized)
-    flow_m3_per_s = 0
-    flow_m3_per_s = if pump.to_PumpVariableSpeed.is_initialized || pump.to_PumpConstantSpeed.is_initialized
-                      if pump.ratedFlowRate.is_initialized
-                        pump.ratedFlowRate.get
-                      elsif pump.autosizedRatedFlowRate.is_initialized
-                        pump.autosizedRatedFlowRate.get
-                      end
-                    elsif pump.to_HeaderedPumpsVariableSpeed.is_initialized || pump.to_HeaderedPumpsConstantSpeed.is_initialized
-                      if pump.totalRatedFlowRate.is_initialized
-                        pump.totalRatedFlowRate.get
-                      elsif pump.autosizedTotalRatedFlowRate.is_initialized
-                        pump.autosizedTotalRatedFlowRate.get
-                      end
-                    end
-
-    # E+ default impeller efficiency
-    # http://bigladdersoftware.com/epx/docs/8-4/engineering-reference/component-sizing.html#pump-sizing
-    impeller_eff = 0.78
-
-    # Get the motor efficiency
-    motor_eff = pump.motorEfficiency
-
-    # Calculate the total efficiency
-    # which includes both motor and
-    # impeller efficiency.
-    pump_total_eff = impeller_eff * motor_eff
-
-    # Get the pressure rise (Pa)
-    pressure_rise_pa = pump.ratedPumpHead
-
-    # Calculate the pump power (W)
-    pump_power_w = pressure_rise_pa * flow_m3_per_s / pump_total_eff
-
-    return pump_power_w
-  end
-
-  # Determines the brake horsepower of the pump based on flow rate,
-  # pressure rise, and impeller efficiency.
-  #
-  # @param pump [OpenStudio::Model::StraightComponent] pump object, allowable types:
-  #   PumpConstantSpeed, PumpVariableSpeed
-  # @return [Double] brake horsepower
-  def pump_brake_horsepower(pump)
-    # Get flow rate (whether autosized or hard-sized)
-    # Get flow rate (whether autosized or hard-sized)
-    flow_m3_per_s = 0
-    flow_m3_per_s = if pump.to_PumpVariableSpeed.is_initialized || pump.to_PumpConstantSpeed.is_initialized
-                      if pump.ratedFlowRate.is_initialized
-                        pump.ratedFlowRate.get
-                      elsif pump.autosizedRatedFlowRate.is_initialized
-                        pump.autosizedRatedFlowRate.get
-                      end
-                    elsif pump.to_HeaderedPumpsVariableSpeed.is_initialized || pump.to_HeaderedPumpsConstantSpeed.is_initialized
-                      if pump.totalRatedFlowRate.is_initialized
-                        pump.totalRatedFlowRate.get
-                      elsif pump.autosizedTotalRatedFlowRate.is_initialized
-                        pump.autosizedTotalRatedFlowRate.get
-                      end
-                    end
-
-    # E+ default impeller efficiency
-    # http://bigladdersoftware.com/epx/docs/8-4/engineering-reference/component-sizing.html#pump-sizing
-    impeller_eff = 0.78
-
-    # Get the pressure rise (Pa)
-    pressure_rise_pa = pump.ratedPumpHead
-
-    # Calculate the pump power (W)
-    pump_power_w = pressure_rise_pa * flow_m3_per_s / impeller_eff
-
-    # Convert to HP
-    pump_power_hp = pump_power_w / 745.7 # 745.7 W/HP
-
-    return pump_power_hp
-  end
-
-  # Determines the horsepower of the pump motor, including motor efficiency and pump impeller efficiency.
-  #
-  # @param pump [OpenStudio::Model::StraightComponent] pump object, allowable types:
-  #   PumpConstantSpeed, PumpVariableSpeed
-  # @return [Double] motor horsepower
-  def pump_motor_horsepower(pump)
-    # Get the pump power
-    pump_power_w = pump_pumppower(pump)
-
-    # Convert to HP
-    pump_hp = pump_power_w / 745.7 # 745.7 W/HP
-
-    return pump_hp
-  end
-
-  # Determines the rated watts per GPM of the pump
-  #
-  # @param pump [OpenStudio::Model::StraightComponent] pump object, allowable types:
-  #   PumpConstantSpeed, PumpVariableSpeed
-  # @return [Double] rated power consumption per flow in watts per gpm, W*min/gal
-  def pump_rated_w_per_gpm(pump)
-    # Get design power (whether autosized or hard-sized)
-    rated_power_w = 0
-    if pump.ratedPowerConsumption.is_initialized
-      rated_power_w = pump.ratedPowerConsumption.get
-    elsif pump.autosizedRatedPowerConsumption.is_initialized
-      rated_power_w = pump.autosizedRatedPowerConsumption.get
-    else
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Pump', "For #{pump.name}, could not find rated pump power consumption, cannot determine w per gpm correctly.")
-      return 0.0
-    end
-
-    rated_m3_per_s = 0
-    if pump.to_PumpVariableSpeed.is_initialized || pump.to_PumpConstantSpeed.is_initialized
-      if pump.ratedFlowRate.is_initialized
-        rated_m3_per_s = pump.ratedFlowRate.get
-      elsif pump.autosizedRatedFlowRate.is_initialized
-        rated_m3_per_s = pump.autosizedRatedFlowRate.get
-      else
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Pump', "For #{pump.name}, could not find rated pump Flow Rate, cannot determine w per gpm correctly.")
-        return 0.0
-      end
-    elsif pump.to_HeaderedPumpsVariableSpeed.is_initialized || pump.to_HeaderedPumpsConstantSpeed.is_initialized
-      if pump.totalRatedFlowRate.is_initialized
-        rated_m3_per_s = pump.totalRatedFlowRate.get
-      elsif pump.autosizedTotalRatedFlowRate.is_initialized
-        rated_m3_per_s = pump.autosizedTotalRatedFlowRate.get
-      else
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Pump', "For #{pump.name}, could not find rated pump Flow Rate, cannot determine w per gpm correctly.")
-        return 0.0
-      end
-    end
-
-    rated_w_per_m3s = rated_power_w / rated_m3_per_s
-
-    rated_w_per_gpm = OpenStudio.convert(rated_w_per_m3s, 'W*s/m^3', 'W*min/gal').get
-
-    return rated_w_per_gpm
   end
 end

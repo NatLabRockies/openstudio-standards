@@ -1588,6 +1588,18 @@ module BTAP
         end
         return area
       end
+
+      # Calculate the perimeter from a set of OpenStudio vertices.
+      # Calculated by iterating through vertex pairs, subtracting the difference, and getting the length of the returned
+      # Vector3d object.
+      def self.getSurfacePerimeterFromVertices(vertices:)
+        perimeter = 0.0
+        return 0.0 if vertices.size < 2
+        (vertices.size - 1).times do |i|
+          perimeter += (vertices[i] - vertices[(i + 1) % vertices.size]).length
+        end
+        return perimeter
+      end 
     end #Module Surfaces
   end #module Geometry
 end

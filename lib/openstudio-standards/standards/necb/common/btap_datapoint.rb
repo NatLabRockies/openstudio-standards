@@ -162,7 +162,6 @@ class BTAPDatapoint
                                        skylight_solar_trans: @options[:skylight_solar_trans],
                                        fdwr_set: @options[:fdwr_set],
                                        srr_set: @options[:srr_set],
-                                       srr_opt: @options[:srr_opt],
                                        rotation_degrees: @options[:rotation_degrees],
                                        scale_x: @options[:scale_x],
                                        scale_y: @options[:scale_y],
@@ -186,9 +185,7 @@ class BTAPDatapoint
                                        airloop_economizer_type: @options[:airloop_economizer_type],
                                        shw_scale: @options[:shw_scale],
                                        baseline_system_zones_map_option: @options[:baseline_system_zones_map_option],
-                                       construction_opt: @options[:construction_option],
                                        tbd_option: @options[:tbd_option],
-                                       tbd_interpolate: @options[:tbd_interpolate],
                                        necb_hdd: @options[:necb_hdd],
                                        boiler_fuel: @options[:boiler_fuel],
                                        boiler_cap_ratio: @options[:boiler_cap_ratio],
@@ -210,30 +207,7 @@ class BTAPDatapoint
         #Check if sql file was create.. if not we can't get much output.
         raise('no sql file found,simulation probably could not start due to error...see error logs.') if model.sqlFile.empty?
         # Create qaqc file and save it.
-        @qaqc = @standard.init_qaqc(model)
-        command = "SELECT Value
-                  FROM TabularDataWithStrings
-                  WHERE ReportName='LEEDsummary'
-                  AND ReportForString='Entire Facility'
-                  AND TableName='Sec1.1A-General Information'
-                  AND RowName = 'Principal Heating Source'
-                  AND ColumnName='Data'"
-        value = model.sqlFile.get.execAndReturnFirstString(command)
-        # make sure all the data are available
-        @qaqc[:building][:principal_heating_source] = 'unknown'
-        unless value.empty?
-          @qaqc[:building][:principal_heating_source] = value.get
-        end
-
-        if @qaqc[:building][:principal_heating_source] == 'Additional Fuel'
-          model.getPlantLoops.sort.each do |iplantloop|
-            boilers = iplantloop.components.select { |icomponent| icomponent.to_BoilerHotWater.is_initialized }
-            @qaqc[:building][:principal_heating_source] = 'FuelOilNo2' unless boilers.select { |boiler| boiler.to_BoilerHotWater.get.fuelType.to_s == 'FuelOilNo2' }.empty?
-          end
-        end
-
-        @qaqc[:aws_datapoint_id] = @options[:datapoint_id]
-        @qaqc[:aws_analysis_id] = @options[:analysis_id]
+        @qaqc = BTAPDatapoint.build_qaqc(model, @standard, @options[:datapoint_id], @options[:analysis_id])
 
         # Load the sql file into model
         sql_path = OpenStudio::Path.new(File.join(@run_dir, 'run/eplusout.sql'))
@@ -249,18 +223,26 @@ class BTAPDatapoint
         # Attach the sql file from the run to the sizing model
         model.setSqlFile(sql)
 
+        if @options[:enable_costing] or @options[:enable_carbon]
+          @cp = CommonPaths.instance
+          post_analysis = BTAPDatapointAnalysis.new(
+            model: model,
+            output_folder: @dp_temp_folder,
+            template: @options[:template],
+            standard: @standard,
+            qaqc: @qaqc)
+        end
+
         @cost_result = nil
         if @options[:enable_costing]
-          # Perform costing
-          costs_path = File.absolute_path(File.join(__dir__, '..','..','..','btap','costing','common_resources', 'costs.csv'))
-          local_cost_factors_path = File.absolute_path(File.join(__dir__, '..','..','..','btap','costing','common_resources', 'costs_local_factors.csv'))
-          costing = BTAPCosting.new(costs_csv: costs_path, factors_csv: local_cost_factors_path)
-          costing.load_database
+          @cost_result = post_analysis.run_costing(
+            costs_csv: @cp.costs_path,
+            factors_csv: @cp.costs_local_factors_path)
+        end
 
-          @cost_result, @btap_items = costing.cost_audit_all(model: model, prototype_creator: @standard, template_type: @options[:template])
-          @qaqc[:costing_information] = @cost_result
-          File.open(File.join(@dp_temp_folder, 'cost_results.json'), 'w') { |f| f.write(JSON.pretty_generate(@cost_result, allow_nan: true)) }
-          puts "Wrote File cost_results.json in #{Dir.pwd} "
+        @carbon_result = nil
+        if @options[:enable_carbon]
+          @carbon_result = post_analysis.run_carbon
         end
 
         @qaqc[:options] = @options # This is options sent on the command line
@@ -268,6 +250,7 @@ class BTAPDatapoint
         @btap_data = BTAPData.new(model: model,
                                   runner: nil,
                                   cost_result: @cost_result,
+                                  carbon_result: @carbon_result,
                                   qaqc: @qaqc,
                                   npv_start_year: @npv_start_year,
                                   npv_end_year: @npv_end_year,
@@ -312,9 +295,46 @@ class BTAPDatapoint
       # clean temp/cache folder up.
       FileUtils.rm_rf(input_folder_cache)
       FileUtils.rm_rf(@dp_temp_folder)
-      if @failed == true
+      # Do not fail container if running on AWS, handle error on AWS instead to avoid isuses with large analyses.
+      unless @failed == false || (@dp_output_folder.start_with?('s3://'))
+      #if @failed == true
         raise(@bang)
       end
+    end
+  end
+
+  class << self
+
+    # Initializes the qaqc data structure.
+    # Scoped inside of the class so that it can be used in the intialization of
+    # this class as well as in BTAPAnalysis.
+    def build_qaqc(model, standard, datapoint_id, analysis_id)
+      qaqc = standard.init_qaqc(model)
+      command = "SELECT Value
+                FROM TabularDataWithStrings
+                WHERE ReportName='LEEDsummary'
+                AND ReportForString='Entire Facility'
+                AND TableName='Sec1.1A-General Information'
+                AND RowName = 'Principal Heating Source'
+                AND ColumnName='Data'"
+      value = model.sqlFile.get.execAndReturnFirstString(command)
+      # make sure all the data are available
+      qaqc[:building][:principal_heating_source] = 'unknown'
+      unless value.empty?
+        qaqc[:building][:principal_heating_source] = value.get
+      end
+
+      if qaqc[:building][:principal_heating_source] == 'Additional Fuel'
+        model.getPlantLoops.sort.each do |iplantloop|
+          boilers = iplantloop.components.select { |icomponent| icomponent.to_BoilerHotWater.is_initialized }
+          qaqc[:building][:principal_heating_source] = 'FuelOilNo2' unless boilers.select { |boiler| boiler.to_BoilerHotWater.get.fuelType.to_s == 'FuelOilNo2' }.empty?
+        end
+      end
+
+      qaqc[:aws_datapoint_id] = datapoint_id
+      qaqc[:aws_analysis_id]  = analysis_id
+
+      return qaqc
     end
   end
 
@@ -322,15 +342,15 @@ class BTAPDatapoint
     require 'aws-sdk-core'
     require 'aws-sdk-s3'
     Aws.use_bundled_cert!
-    s3_resource = Aws::S3::Resource.new(region: 'ca-central-1')
+    s3_client = Aws::S3::Client.new(region: 'ca-central-1')
+    # Using transfer manager class instead of depricated method
+    transfer_manager = Aws::S3::TransferManager.new(client: s3_client)
 
     puts("Copying File to S3. source_file:#{source_file} bucket:#{bucket_name} target_folder:#{target_file}")
     response = nil
     begin
-      obj = s3_resource.bucket(bucket_name).object(target_file)
-
-      # passing the TempFile object's path is massively faster than passing the TempFile object itself
-      result = obj.upload_file(source_file)
+      # Using upload_file from transfer manager class instead of depricated method from older class structure
+      result = transfer_manager.upload_file(source_file, bucket: bucket_name, key: target_file)
 
       if result == true
         puts "Object '#{source_file}' uploaded to bucket '#{bucket_name}'."

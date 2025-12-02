@@ -1,5 +1,74 @@
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000001},  !- Handle
+  {00000000-0000-0000-0085-000000000003},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  unconditioned;                           !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0085-000000000001},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  nonresconditioned;                       !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000003},  !- Handle
+  {00000000-0000-0000-0085-000000000002},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  nonresconditioned;                       !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000004},  !- Handle
+  {00000000-0000-0000-0010-000000000001};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000005},  !- Handle
+  {00000000-0000-0000-0033-000000000002},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.17999999999999999,                     !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  7.5,                                     !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  70,                                      !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62.1-2016 Occupancy,              !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Restaurant dinng rooms;                  !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000006},  !- Handle
+  {00000000-0000-0000-0033-000000000003},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.12,                                    !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  7.5,                                     !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  20,                                      !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62.1-2016 Occupancy,              !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Kitchen (cooking);                       !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000007},  !- Handle
   {00000000-0000-0000-0067-000000000021},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -15,7 +84,7 @@ OS:AdditionalProperties,
   2024-01-01 01:00:00 UTC;                 !- Feature Value 4
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0001-000000000008},  !- Handle
   {00000000-0000-0000-0067-000000000020},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -31,7 +100,7 @@ OS:AdditionalProperties,
   2024-01-01 01:00:00 UTC;                 !- Feature Value 4
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000003},  !- Handle
+  {00000000-0000-0000-0001-000000000009},  !- Handle
   {00000000-0000-0000-0012-000000000002};  !- Object Name
 
 OS:AirLoopHVAC,
@@ -2388,7 +2457,7 @@ OS:Controller:WaterCoil,
   ,                                        !- Actuator Variable
   ,                                        !- Sensor Node Name
   ,                                        !- Actuator Node Name
-  0.0001,                                  !- Controller Convergence Tolerance {deltaC}
+  ,                                        !- Controller Convergence Tolerance {deltaC}
   ,                                        !- Maximum Actuated Flow {m3/s}
   ;                                        !- Minimum Actuated Flow {m3/s}
 
@@ -2401,7 +2470,7 @@ OS:Controller:WaterCoil,
   ,                                        !- Actuator Variable
   ,                                        !- Sensor Node Name
   ,                                        !- Actuator Node Name
-  0.0001,                                  !- Controller Convergence Tolerance {deltaC}
+  ,                                        !- Controller Convergence Tolerance {deltaC}
   ,                                        !- Maximum Actuated Flow {m3/s}
   ;                                        !- Minimum Actuated Flow {m3/s}
 
@@ -2874,7 +2943,7 @@ OS:DistrictCooling,
   DistrictCooling GLHX,                    !- Name
   {00000000-0000-0000-0016-000000000186},  !- Chilled Water Inlet Node Name
   {00000000-0000-0000-0016-000000000187},  !- Chilled Water Outlet Node Name
-  18079.7697574303,                        !- Nominal Capacity {W}
+  18079.7697541719,                        !- Nominal Capacity {W}
   {00000000-0000-0000-0064-000000000002};  !- Capacity Fraction Schedule
 
 OS:DistrictHeating:Water,
@@ -2882,7 +2951,7 @@ OS:DistrictHeating:Water,
   DistrictHeating GLHX,                    !- Name
   {00000000-0000-0000-0016-000000000177},  !- Hot Water Inlet Node Name
   {00000000-0000-0000-0016-000000000178},  !- Hot Water Outlet Node Name
-  18675.2467701116,                        !- Nominal Capacity {W}
+  18675.2467701304,                        !- Nominal Capacity {W}
   {00000000-0000-0000-0064-000000000002};  !- Capacity Fraction Schedule
 
 OS:ElectricEquipment,

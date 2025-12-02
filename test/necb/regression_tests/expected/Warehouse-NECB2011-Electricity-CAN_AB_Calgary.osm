@@ -1,5 +1,71 @@
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000001},  !- Handle
+  {00000000-0000-0000-0028-000000000001},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0,                                       !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  20,                                      !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  7,                                       !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62-2001 Table 2,                  !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Offices-Office space;                    !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0028-000000000002},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.050000000000000003,                    !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  0,                                       !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  5,                                       !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62-2001 Table 2,                  !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Retail Stores&#44 Sales floors&#44 and Show Room Floors-Warehouses; !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000003},  !- Handle
+  {00000000-0000-0000-0028-000000000003},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.050000000000000003,                    !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  0,                                       !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  5,                                       !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62-2001 Table 2,                  !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Retail Stores&#44 Sales floors&#44 and Show Room Floors-Warehouses; !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000004},  !- Handle
   {00000000-0000-0000-0057-000000000019},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -15,7 +81,7 @@ OS:AdditionalProperties,
   2024-01-01 01:00:00 UTC;                 !- Feature Value 4
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0001-000000000005},  !- Handle
   {00000000-0000-0000-0057-000000000021},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -31,7 +97,7 @@ OS:AdditionalProperties,
   2024-01-01 01:00:00 UTC;                 !- Feature Value 4
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000003},  !- Handle
+  {00000000-0000-0000-0001-000000000006},  !- Handle
   {00000000-0000-0000-0057-000000000020},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -371,7 +437,7 @@ OS:Coil:Cooling:DX:SingleSpeed,
 
 OS:Coil:Cooling:DX:SingleSpeed,
   {00000000-0000-0000-0012-000000000003},  !- Handle
-  CoilCoolingDXSingleSpeed_dx 57kBtu/hr 14.0SEER, !- Name
+  CoilCoolingDXSingleSpeed_dx 56kBtu/hr 14.0SEER, !- Name
   {00000000-0000-0000-0054-000000000001},  !- Availability Schedule Name
   autosize,                                !- Rated Total Cooling Capacity {W}
   autosize,                                !- Rated Sensible Heat Ratio
@@ -1529,8 +1595,8 @@ OS:Controller:OutdoorAir,
   ,                                        !- Time of Day Economizer Control Schedule Name
   No,                                      !- High Humidity Control
   ,                                        !- Humidistat Control Zone Name
-  1,                                       !- High Humidity Outdoor Air Flow Ratio
-  Yes,                                     !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+  ,                                        !- High Humidity Outdoor Air Flow Ratio
+  ,                                        !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
   BypassWhenWithinEconomizerLimits,        !- Heat Recovery Bypass Control Type
   InterlockedWithMechanicalCooling;        !- Economizer Operation Staging
 
@@ -1559,8 +1625,8 @@ OS:Controller:OutdoorAir,
   ,                                        !- Time of Day Economizer Control Schedule Name
   No,                                      !- High Humidity Control
   ,                                        !- Humidistat Control Zone Name
-  1,                                       !- High Humidity Outdoor Air Flow Ratio
-  Yes,                                     !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+  ,                                        !- High Humidity Outdoor Air Flow Ratio
+  ,                                        !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
   BypassWhenWithinEconomizerLimits,        !- Heat Recovery Bypass Control Type
   InterlockedWithMechanicalCooling;        !- Economizer Operation Staging
 
@@ -1589,8 +1655,8 @@ OS:Controller:OutdoorAir,
   ,                                        !- Time of Day Economizer Control Schedule Name
   No,                                      !- High Humidity Control
   ,                                        !- Humidistat Control Zone Name
-  1,                                       !- High Humidity Outdoor Air Flow Ratio
-  Yes,                                     !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+  ,                                        !- High Humidity Outdoor Air Flow Ratio
+  ,                                        !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
   BypassWhenWithinEconomizerLimits,        !- Heat Recovery Bypass Control Type
   InterlockedWithMechanicalCooling;        !- Economizer Operation Staging
 
@@ -2098,41 +2164,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0032-000000000001},  !- Handle
   ems_sys_4_mixed_shr_none_sc_dx_sh_c_e_ssf_cv_zh_b_e_zc_none_srf_none__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}<23.9 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}>1.7, !- Program Line 1
-  SET {a106b0b1-7cff-4b26-89f7-997e3c317880} = 29.4, !- Program Line 2
-  SET {dd2b532e-66cb-490e-abd4-c4be8771cb7b} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}<23.9 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}>1.7, !- Program Line 4
-  SET {a106b0b1-7cff-4b26-89f7-997e3c317880} = 29.4, !- Program Line 5
-  SET {dd2b532e-66cb-490e-abd4-c4be8771cb7b} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}<23.9 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}>1.7, !- Program Line 7
-  SET {a106b0b1-7cff-4b26-89f7-997e3c317880} = 29.4, !- Program Line 8
-  SET {dd2b532e-66cb-490e-abd4-c4be8771cb7b} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}<23.9 && {bd1abb55-a214-4439-bae7-6af2ee5a36e6}>1.7, !- Program Line 10
-  SET {a106b0b1-7cff-4b26-89f7-997e3c317880} = 29.4, !- Program Line 11
-  SET {dd2b532e-66cb-490e-abd4-c4be8771cb7b} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}<23.9 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}>1.7, !- Program Line 1
+  SET {a6bf4369-42c9-4543-a6a0-0138972970cf} = 29.4, !- Program Line 2
+  SET {78deae57-8770-465f-9f40-7ddfef7bc8b2} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}<23.9 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}>1.7, !- Program Line 4
+  SET {a6bf4369-42c9-4543-a6a0-0138972970cf} = 29.4, !- Program Line 5
+  SET {78deae57-8770-465f-9f40-7ddfef7bc8b2} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}<23.9 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}>1.7, !- Program Line 7
+  SET {a6bf4369-42c9-4543-a6a0-0138972970cf} = 29.4, !- Program Line 8
+  SET {78deae57-8770-465f-9f40-7ddfef7bc8b2} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}<23.9 && {2bd8f449-ffb6-4a18-917b-f6ba5215e484}>1.7, !- Program Line 10
+  SET {a6bf4369-42c9-4543-a6a0-0138972970cf} = 29.4, !- Program Line 11
+  SET {78deae57-8770-465f-9f40-7ddfef7bc8b2} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {a106b0b1-7cff-4b26-89f7-997e3c317880} = NULL, !- Program Line 14
-  SET {dd2b532e-66cb-490e-abd4-c4be8771cb7b} = NULL, !- Program Line 15
+  SET {a6bf4369-42c9-4543-a6a0-0138972970cf} = NULL, !- Program Line 14
+  SET {78deae57-8770-465f-9f40-7ddfef7bc8b2} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0032-000000000002},  !- Handle
   ems_sys_4_mixed_shr_none_sc_dx_sh_c_e_ssf_cv_zh_b_e_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}<23.9 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}>1.7, !- Program Line 1
-  SET {86d06ece-67e6-4e2f-9aaf-cd3f3922ab64} = 29.4, !- Program Line 2
-  SET {fd4e309d-1b2c-41ca-a12d-a57b6345987c} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}<23.9 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}>1.7, !- Program Line 4
-  SET {86d06ece-67e6-4e2f-9aaf-cd3f3922ab64} = 29.4, !- Program Line 5
-  SET {fd4e309d-1b2c-41ca-a12d-a57b6345987c} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}<23.9 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}>1.7, !- Program Line 7
-  SET {86d06ece-67e6-4e2f-9aaf-cd3f3922ab64} = 29.4, !- Program Line 8
-  SET {fd4e309d-1b2c-41ca-a12d-a57b6345987c} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}<23.9 && {62a0e2e9-4879-4ba5-a47d-7e068e9e0965}>1.7, !- Program Line 10
-  SET {86d06ece-67e6-4e2f-9aaf-cd3f3922ab64} = 29.4, !- Program Line 11
-  SET {fd4e309d-1b2c-41ca-a12d-a57b6345987c} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}<23.9 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}>1.7, !- Program Line 1
+  SET {1bc6f5c3-3853-49e9-820b-8524cd832c6c} = 29.4, !- Program Line 2
+  SET {b307411a-5789-460d-88f4-9f453188f742} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}<23.9 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}>1.7, !- Program Line 4
+  SET {1bc6f5c3-3853-49e9-820b-8524cd832c6c} = 29.4, !- Program Line 5
+  SET {b307411a-5789-460d-88f4-9f453188f742} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}<23.9 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}>1.7, !- Program Line 7
+  SET {1bc6f5c3-3853-49e9-820b-8524cd832c6c} = 29.4, !- Program Line 8
+  SET {b307411a-5789-460d-88f4-9f453188f742} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}<23.9 && {17dd7789-b50c-4e63-8c9a-fdef8b7baf7d}>1.7, !- Program Line 10
+  SET {1bc6f5c3-3853-49e9-820b-8524cd832c6c} = 29.4, !- Program Line 11
+  SET {b307411a-5789-460d-88f4-9f453188f742} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {86d06ece-67e6-4e2f-9aaf-cd3f3922ab64} = NULL, !- Program Line 14
-  SET {fd4e309d-1b2c-41ca-a12d-a57b6345987c} = NULL, !- Program Line 15
+  SET {1bc6f5c3-3853-49e9-820b-8524cd832c6c} = NULL, !- Program Line 14
+  SET {b307411a-5789-460d-88f4-9f453188f742} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -2858,7 +2924,7 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0045-000000000020},  !- Handle
-  CoilCoolingDXSingleSpeed_dx 57kBtu/hr 14.0SEER Outlet Air Node, !- Name
+  CoilCoolingDXSingleSpeed_dx 56kBtu/hr 14.0SEER Outlet Air Node, !- Name
   {00000000-0000-0000-0014-000000000018},  !- Inlet Port
   {00000000-0000-0000-0014-000000000019};  !- Outlet Port
 
@@ -3196,7 +3262,7 @@ OS:PlantLoop,
   ,                                        !- Primary Plant Equipment Operation Scheme
   {00000000-0000-0000-0045-000000000025},  !- Loop Temperature Setpoint Node Name
   60,                                      !- Maximum Loop Temperature {C}
-  51.6666666666667,                        !- Minimum Loop Temperature {C}
+  10,                                      !- Minimum Loop Temperature {C}
   ,                                        !- Maximum Loop Flow Rate {m3/s}
   ,                                        !- Minimum Loop Flow Rate {m3/s}
   Autocalculate,                           !- Plant Loop Volume {m3}
@@ -4838,9 +4904,9 @@ OS:SetpointManager:SingleZone:Reheat,
 
 OS:SimulationControl,
   {00000000-0000-0000-0061-000000000001},  !- Handle
-  Yes,                                     !- Do Zone Sizing Calculation
-  Yes,                                     !- Do System Sizing Calculation
-  Yes,                                     !- Do Plant Sizing Calculation
+  ,                                        !- Do Zone Sizing Calculation
+  ,                                        !- Do System Sizing Calculation
+  ,                                        !- Do Plant Sizing Calculation
   No,                                      !- Run Simulation for Sizing Periods
   Yes,                                     !- Run Simulation for Weather File Run Periods
   ,                                        !- Loads Convergence Tolerance Value {W}
@@ -5098,14 +5164,7 @@ OS:Sizing:Zone,
   0.005,                                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
   HumidityRatioDifference,                 !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
   ,                                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  0.005,                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
-  ,                                        !- Zone Humidistat Dehumidification Set Point Schedule Name
-  ,                                        !- Zone Humidistat Humidification Set Point Schedule Name
-  ,                                        !- Design Zone Air Distribution Effectiveness in Cooling Mode
-  ,                                        !- Design Zone Air Distribution Effectiveness in Heating Mode
-  ,                                        !- Design Zone Secondary Recirculation Fraction {dimensionless}
-  ,                                        !- Design Minimum Zone Ventilation Efficiency {dimensionless}
-  Coincident;                              !- Sizing Option
+  0.005;                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 OS:Sizing:Zone,
   {00000000-0000-0000-0071-000000000002},  !- Handle
@@ -5140,14 +5199,7 @@ OS:Sizing:Zone,
   0.005,                                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
   HumidityRatioDifference,                 !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
   ,                                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  0.005,                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
-  ,                                        !- Zone Humidistat Dehumidification Set Point Schedule Name
-  ,                                        !- Zone Humidistat Humidification Set Point Schedule Name
-  ,                                        !- Design Zone Air Distribution Effectiveness in Cooling Mode
-  ,                                        !- Design Zone Air Distribution Effectiveness in Heating Mode
-  ,                                        !- Design Zone Secondary Recirculation Fraction {dimensionless}
-  ,                                        !- Design Minimum Zone Ventilation Efficiency {dimensionless}
-  Coincident;                              !- Sizing Option
+  0.005;                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 OS:Sizing:Zone,
   {00000000-0000-0000-0071-000000000003},  !- Handle
@@ -5182,14 +5234,7 @@ OS:Sizing:Zone,
   0.005,                                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
   HumidityRatioDifference,                 !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
   ,                                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  0.005,                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
-  ,                                        !- Zone Humidistat Dehumidification Set Point Schedule Name
-  ,                                        !- Zone Humidistat Humidification Set Point Schedule Name
-  ,                                        !- Design Zone Air Distribution Effectiveness in Cooling Mode
-  ,                                        !- Design Zone Air Distribution Effectiveness in Heating Mode
-  ,                                        !- Design Zone Secondary Recirculation Fraction {dimensionless}
-  ,                                        !- Design Minimum Zone Ventilation Efficiency {dimensionless}
-  Coincident;                              !- Sizing Option
+  0.005;                                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 OS:SizingPeriod:DesignDay,
   {00000000-0000-0000-0072-000000000001},  !- Handle
@@ -6487,7 +6532,7 @@ OS:Timestep,
 
 OS:Version,
   {00000000-0000-0000-0086-000000000001},  !- Handle
-  3.9.0;                                   !- Version Identifier
+  3.7.0;                                   !- Version Identifier
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0087-000000000001},  !- Handle
@@ -6539,7 +6584,7 @@ OS:WaterHeater:Sizing,
   {00000000-0000-0000-0087-000000000001},  !- WaterHeater Name
   PeakDraw,                                !- Design Mode
   0.538503,                                !- Time Storage Can Meet Peak Draw {hr}
-  1,                                       !- Time for Tank Recovery {hr}
+  0,                                       !- Time for Tank Recovery {hr}
   1;                                       !- Nominal Tank Volume for Autosizing Plant Connections {m3}
 
 OS:WaterUse:Connections,

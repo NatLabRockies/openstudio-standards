@@ -24,7 +24,7 @@ class Standard
     search_criteria = coil_heating_gas_additional_search_criteria(coil_heating_gas, search_criteria)
 
     # Get the capacity, but return false if not available
-    capacity_w = coil_heating_gas_find_capacity(coil_heating_gas)
+    capacity_w = OpenstudioStandards::HVAC.coil_heating_gas_get_capacity(coil_heating_gas)
 
     # Return false if the coil does not have a heating capacity associated with it. Cannot apply the standard if without
     # it.
@@ -56,7 +56,7 @@ class Standard
       # If specified as AFUE
       unless furnace_props['minimum_annual_fuel_utilization_efficiency'].nil?
         min_afue = furnace_props['minimum_annual_fuel_utilization_efficiency']
-        thermal_eff = afue_to_thermal_eff(min_afue)
+        thermal_eff = OpenstudioStandards::HVAC.afue_to_thermal_eff(min_afue)
         new_comp_name = "#{coil_heating_gas.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_afue} AFUE"
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilHeatingGas', "For #{template}: #{coil_heating_gas.name}: = #{capacity_kbtu_per_hr.round}kBtu/hr; AFUE = #{min_afue}")
       end
@@ -64,7 +64,7 @@ class Standard
       # If specified as combustion efficiency
       unless furnace_props['minimum_combustion_efficiency'].nil?
         min_comb_eff = furnace_props['minimum_combustion_efficiency']
-        thermal_eff = combustion_eff_to_thermal_eff(min_comb_eff)
+        thermal_eff = OpenstudioStandards::HVAC.combustion_eff_to_thermal_eff(min_comb_eff)
         new_comp_name = "#{coil_heating_gas.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_comb_eff} Combustion Eff"
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilHeatingGas', "For #{template}: #{coil_heating_gas.name}: = #{capacity_kbtu_per_hr.round}kBtu/hr; Combustion Efficiency = #{min_comb_eff}")
       end
@@ -84,25 +84,5 @@ class Standard
     end
 
     return successfully_set_all_properties
-  end
-
-  # Retrieves the capacity of an OpenStudio::Model::CoilHeatingGas in watts
-  #
-  # @param coil_heating_gas [OpenStudio::Model::CoilHeatingGas] the gas heating coil
-  # @return [Double, false] a double representing the capacity of the CoilHeatingGas object in watts. If unsuccessful in
-  #   determining the capacity, this function returns false.
-  def coil_heating_gas_find_capacity(coil_heating_gas)
-    capacity_w = nil
-    if coil_heating_gas.nominalCapacity.is_initialized
-      capacity_w = coil_heating_gas.nominalCapacity.get
-    elsif coil_heating_gas.autosizedNominalCapacity.is_initialized
-      capacity_w = coil_heating_gas.autosizedNominalCapacity.get
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingGas', "For #{coil_heating_gas.name} capacity is not available, cannot apply efficiency standard.")
-      successfully_set_all_properties = false
-      return successfully_set_all_properties
-    end
-
-    return capacity_w
   end
 end

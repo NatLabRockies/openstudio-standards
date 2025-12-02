@@ -38,7 +38,7 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
       search_criteria = std.coil_dx_find_search_criteria(coil, true)
       sub_category = search_criteria['subcategory']
       suppl_heating_type = search_criteria['heating_type']
-      capacity_w = std.coil_heating_dx_single_speed_find_capacity(coil, true)
+      capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil)
       capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
       capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
       ac_props = std.model_find_object(std.standards_data['heat_pumps_heating'], search_criteria, capacity_btu_per_hr, Date.today)
@@ -109,45 +109,45 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
     std = Standard.build('90.1-2019')
     # SEER conversions
     seer = 15
-    cop_nf = std.seer_to_cop_no_fan(seer)
-    new_seer = std.cop_no_fan_to_seer(cop_nf)
+    cop_nf = OpenstudioStandards::HVAC.seer_to_cop_no_fan(seer)
+    new_seer = OpenstudioStandards::HVAC.cop_no_fan_to_seer(cop_nf)
     assert(seer == new_seer)
 
     # COP conversions
-    cop = std.seer_to_cop(seer)
-    new_seer = std.cop_to_seer(cop)
+    cop = OpenstudioStandards::HVAC.seer_to_cop(seer)
+    new_seer = OpenstudioStandards::HVAC.cop_to_seer(cop)
     assert(seer == new_seer)
 
     # EER conversions
     eer = 11
-    cop_nf = std.eer_to_cop_no_fan(eer)
-    cop = std.eer_to_cop(eer)
-    new_err = std.cop_no_fan_to_eer(cop_nf)
+    cop_nf =OpenstudioStandards::HVAC.eer_to_cop_no_fan(eer)
+    cop = OpenstudioStandards::HVAC.eer_to_cop(eer)
+    new_err = OpenstudioStandards::HVAC.cop_no_fan_to_eer(cop_nf)
     assert(cop_nf > cop)
     assert(new_err == eer)
 
     # HSPF conversions
     hspf = 9
-    cop_nf = std.hspf_to_cop_no_fan(hspf)
-    cop = std.hspf_to_cop(hspf)
+    cop_nf = OpenstudioStandards::HVAC.hspf_to_cop_no_fan(hspf)
+    cop = OpenstudioStandards::HVAC.hspf_to_cop(hspf)
     assert(cop_nf > cop)
 
     # kW/ton conversions
     cop = 5
-    kwpton = std.cop_to_kw_per_ton(5)
-    new_cop = std.kw_per_ton_to_cop(kwpton)
+    kwpton = OpenstudioStandards::HVAC.cop_to_kw_per_ton(5)
+    new_cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(kwpton)
     assert(cop == new_cop)
 
     # AFUE conversions
     afue = 0.93
-    te = std.afue_to_thermal_eff(afue)
-    new_afue = std.thermal_eff_to_afue(te)
+    te = OpenstudioStandards::HVAC.afue_to_thermal_eff(afue)
+    new_afue = OpenstudioStandards::HVAC.thermal_eff_to_afue(te)
     assert (afue == new_afue)
 
     # Combustion efficiency conversions
     tc = 0.8
-    te = std.combustion_eff_to_thermal_eff(tc)
-    new_tc = std.thermal_eff_to_comb_eff(te)
+    te = OpenstudioStandards::HVAC.combustion_eff_to_thermal_eff(tc)
+    new_tc = OpenstudioStandards::HVAC.thermal_eff_to_comb_eff(te)
     assert(tc == new_tc)
   end
 
@@ -164,22 +164,22 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
       # PTAC
       std = Standard.build('90.1-2019')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.eer_to_cop_no_fan(14 - 0.3 * 10)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(14 - 0.3 * 10)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('90.1-2004')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.eer_to_cop_no_fan(12.5 - 0.213 * 10)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(12.5 - 0.213 * 10)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('DEER 1985')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, false)
-      expected_cop = std.seer_to_cop_no_fan(9.7)
+      expected_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(9.7)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('DOE Ref 1980-2004')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, false)
-      expected_cop = std.eer_to_cop_no_fan(10.0 - 0.16 * 10)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(10.0 - 0.16 * 10)
       assert_in_delta(expected_cop, cop, 0.05, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       # Single-speed Unitary AC
@@ -189,32 +189,32 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
       unitary.setCoolingCoil(coil_cooling_dx_single_speed)
       std = Standard.build('90.1-2019')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.seer_to_cop_no_fan(13.4)
+      expected_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(13.4)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       coil_cooling_dx_single_speed.setRatedTotalCoolingCapacity(780000 / 3.412) #780 kBtu/h
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.ieer_to_cop_no_fan(12.5)
+      expected_cop = OpenstudioStandards::HVAC.ieer_to_cop_no_fan(12.5)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('90.1-2004')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.eer_to_cop_no_fan(9.2)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(9.2)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       coil_cooling_dx_single_speed.setRatedTotalCoolingCapacity(10000 / 3.412) #10 kBtu/h
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, true)
-      expected_cop = std.seer_to_cop_no_fan(12)
+      expected_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(12)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('DEER 1985')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, false)
-      expected_cop = std.seer_to_cop_no_fan(9.7)
+      expected_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(9.7)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       std = Standard.build('DOE Ref 1980-2004')
       cop = std.coil_cooling_dx_single_speed_standard_minimum_cop(coil_cooling_dx_single_speed, false, false, false)
-      expected_cop = std.seer_to_cop_no_fan(9.7)
+      expected_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(9.7)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       # Two-speed Unitary AC
@@ -224,7 +224,7 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
       coil_cooling_dx_two_speed.setRatedHighSpeedTotalCoolingCapacity(780000 / 3.412) #780 kBtu/h
       unitary_2.setCoolingCoil(coil_cooling_dx_two_speed)
       cop = std.coil_cooling_dx_two_speed_standard_minimum_cop(coil_cooling_dx_two_speed)
-      expected_cop = std.eer_to_cop_no_fan(9.2)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(9.2)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
 
       # Multi-speed Unitary AC
@@ -236,7 +236,7 @@ class TestApplyHVACEfficiencyStandard < Minitest::Test
       coil_cooling_dx_multi_speed.setStages([stage_1])
       unitary_3.setCoolingCoil(coil_cooling_dx_multi_speed)
       cop, new_name = std.coil_cooling_dx_multi_speed_standard_minimum_cop(coil_cooling_dx_multi_speed)
-      expected_cop = std.eer_to_cop_no_fan(9.2)
+      expected_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(9.2)
       assert_in_delta(expected_cop, cop, 0.01, "Expected COP #{cop} to match #{std.template} COP of #{expected_cop}")
   end
 end

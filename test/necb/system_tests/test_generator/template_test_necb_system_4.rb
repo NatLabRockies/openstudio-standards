@@ -44,12 +44,15 @@ class NECB_HVAC_System_4_Test < Minitest::Test
     name = "<%=system[:name] %>_Boiler-#{boiler_fueltype}_HeatingCoilType#-#{heating_coil}_BaseboardType-#{baseboard_type}"
     puts "***************************************#{name}*******************************************************\n"
     model = BTAP::FileIO::load_osm(template_osm_file)
+      boiler_fueltype = standard.validate_primary_heating_fuel(primary_heating_fuel: boiler_fueltype, model: model)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file)
     OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
     hw_loop = nil
     if (baseboard_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys4_single_zone_make_up_air_unit_with_baseboard_heating(
         model: model,

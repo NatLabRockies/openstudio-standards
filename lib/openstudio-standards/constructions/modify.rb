@@ -347,7 +347,8 @@ module OpenstudioStandards
         return false
       end
       # Change construction name
-      construction.setName("#{construction.name}_#{surface.name}_#{target_f_factor_ip}")
+      construction_name = "Foundation F #{f_factor_si.round(2)}W/m*K Perim #{perimeter.round(2)}m Area #{area.round(2)}m2"
+      construction.setName(construction_name)
       construction.setFFactor(f_factor_si)
       construction.setArea(area)
       construction.setPerimeterExposed(perimeter)

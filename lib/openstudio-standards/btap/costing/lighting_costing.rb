@@ -24,11 +24,11 @@ class BTAPCosting
     #Create Zonal report.
     @costing_report["lighting"]["fixture_report"] = []
     @costing_report["lighting"]["space_report"] = []
-    model.getThermalZones.sort.each do |zone|
+    model.getThermalZonesSorted.each do |zone|
       # Iterate through spaces.
       spaceNum = 0  # Counting number of spaces for reporting
       total_with_region = 0
-      zone.spaces.sort.each do |space|
+      zone.getSpacesSorted.each do |space|
         spaceNum += 1  # Counting number of spaces for reporting
         # Get SpaceType defined for space.. if not defined it will skip the spacetype. May have to deal with Attic spaces.
         if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?

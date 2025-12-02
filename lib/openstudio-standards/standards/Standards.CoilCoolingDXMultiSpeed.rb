@@ -81,7 +81,7 @@ class Standard
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
     # Get efficiencies data depending on whether it is a unitary AC or a heat pump
-    coil_efficiency_data = if coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
+    coil_efficiency_data = if OpenstudioStandards::HVAC.coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
                              standards_data['heat_pumps']
                            else
                              standards_data['unitary_acs']
@@ -89,7 +89,7 @@ class Standard
 
     # Additional search criteria
     if (coil_efficiency_data[0].keys.include?('equipment_type') || ((template == 'NECB2011') || (template == 'NECB2015') || (template == 'NECB2017') || (template == 'NECB2020') || (template == 'BTAPPRE1980') ||
-      (template == 'BTAP1980TO2010'))) && !coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
+      (template == 'BTAP1980TO2010'))) && !OpenstudioStandards::HVAC.coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
       search_criteria['equipment_type'] = 'Air Conditioners'
     end
     if coil_efficiency_data[0].keys.include?('region')
@@ -194,7 +194,7 @@ class Standard
       capacity_btu_per_hr = 7000 if capacity_btu_per_hr < 7000
       capacity_btu_per_hr = 15_000 if capacity_btu_per_hr > 15_000
       ptac_eer = ptac_eer_coeff_1 + (ptac_eer_coeff_2 * capacity_btu_per_hr)
-      cop = eer_to_cop_no_fan(ptac_eer)
+      cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(ptac_eer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{ptac_eer}EER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{subcategory} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{ptac_eer}")
     end
@@ -220,31 +220,6 @@ class Standard
     return sql_db_vars_map
   end
 
-  # Finds capacity in W
-  #
-  # @param coil_cooling_dx_multi_speed [OpenStudio::Model::CoilCoolingDXMultiSpeed] coil cooling dx multi speed object
-  # @return [Double] capacity in W to be used for find object
-  def coil_cooling_dx_multi_speed_find_capacity(coil_cooling_dx_multi_speed)
-    capacity_w = nil
-    clg_stages = coil_cooling_dx_multi_speed.stages
-    if clg_stages.last.grossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = clg_stages.last.grossRatedTotalCoolingCapacity.get
-    elsif (clg_stages.size == 1) && coil_cooling_dx_multi_speed.stages[0].autosizedSpeedRatedTotalCoolingCapacity.is_initialized
-      capacity_w = coil_cooling_dx_multi_speed.stages[0].autosizedSpeedRatedTotalCoolingCapacity.get
-    elsif (clg_stages.size == 2) && coil_cooling_dx_multi_speed.stages[1].autosizedGrossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = coil_cooling_dx_multi_speed.stages[1].autosizedGrossRatedTotalCoolingCapacity.get
-    elsif (clg_stages.size == 3) && coil_cooling_dx_multi_speed.stages[2].autosizedGrossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = coil_cooling_dx_multi_speed.stages[2].autosizedSpeedRatedTotalCoolingCapacity.get
-    elsif (clg_stages.size == 4) && coil_cooling_dx_multi_speed.stages[3].autosizedGrossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = coil_cooling_dx_multi_speed.stages[3].autosizedGrossRatedTotalCoolingCapacity.get
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{coil_cooling_dx_multi_speed.name} capacity is not available, cannot apply efficiency standard.")
-      return false
-    end
-
-    return capacity_w
-  end
-
   # Finds lookup object in standards and return efficiency
   #
   # @param coil_cooling_dx_multi_speed [OpenStudio::Model::CoilCoolingDXMultiSpeed] coil cooling dx multi speed object
@@ -254,14 +229,14 @@ class Standard
     search_criteria = coil_dx_find_search_criteria(coil_cooling_dx_multi_speed)
     cooling_type = search_criteria['cooling_type']
     heating_type = search_criteria['heating_type']
-    capacity_w = coil_cooling_dx_multi_speed_find_capacity(coil_cooling_dx_multi_speed)
+    capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_multi_speed_get_capacity(coil_cooling_dx_multi_speed)
 
     # Convert capacity to Btu/hr
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
     # Define database
-    if coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
+    if OpenstudioStandards::HVAC.coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
       database = standards_data['heat_pumps']
     else
       database = standards_data['unitary_acs']
@@ -269,7 +244,7 @@ class Standard
 
     # Additional search criteria
     if (database[0].keys.include?('equipment_type') || ((template == 'NECB2011') || (template == 'NECB2015') || (template == 'NECB2017') || (template == 'NECB2020') || (template == 'BTAPPRE1980') ||
-      (template == 'BTAP1980TO2010'))) && !coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
+      (template == 'BTAP1980TO2010'))) && !OpenstudioStandards::HVAC.coil_dx_heat_pump?(coil_cooling_dx_multi_speed)
       search_criteria['equipment_type'] = 'Air Conditioners'
     end
     if database[0].keys.include?('region')
@@ -286,41 +261,41 @@ class Standard
     # If specified as SEER
     unless ac_props['minimum_seasonal_energy_efficiency_ratio'].nil?
       min_seer = ac_props['minimum_seasonal_energy_efficiency_ratio']
-      cop = seer_to_cop_no_fan(min_seer)
+      cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(min_seer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
 
     # If specified as SEER2
     # TODO: assumed to be the same as SEER for now
     unless ac_props['minimum_seasonal_energy_efficiency_ratio_2'].nil?
       min_seer = ac_props['minimum_seasonal_energy_efficiency_ratio_2']
-      cop = seer_to_cop_no_fan(min_seer)
+      cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(min_seer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXTwoSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXTwoSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
 
     # If specified as EER
     unless ac_props['minimum_energy_efficiency_ratio'].nil?
       min_eer = ac_props['minimum_energy_efficiency_ratio']
-      cop = eer_to_cop_no_fan(min_eer)
+      cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(min_eer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_eer}EER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
     end
 
     # If specified as EER2
     # TODO: assumed to be the same as EER for now
     unless ac_props['minimum_energy_efficiency_ratio_2'].nil?
       min_eer = ac_props['minimum_energy_efficiency_ratio_2']
-      cop = eer_to_cop_no_fan(min_eer)
+      cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(min_eer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_eer}EER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXTwoSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXTwoSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
     end
 
     # If specific as IEER
     if !ac_props['minimum_integrated_energy_efficiency_ratio'].nil? && cop.nil?
       min_ieer = ac_props['minimum_integrated_energy_efficiency_ratio']
-      cop = ieer_to_cop_no_fan(min_ieer)
+      cop = OpenstudioStandards::HVAC.ieer_to_cop_no_fan(min_ieer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_ieer}IEER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXTwoSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{sub_category} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; IEER = #{min_ieer}")
     end
@@ -328,17 +303,17 @@ class Standard
     # if specified as SEER (heat pump)
     unless ac_props['minimum_seasonal_efficiency'].nil?
       min_seer = ac_props['minimum_seasonal_efficiency']
-      cop = seer_to_cop_no_fan(min_seer)
+      cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(min_seer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
 
     # If specified as EER (heat pump)
     unless ac_props['minimum_full_load_efficiency'].nil?
       min_eer = ac_props['minimum_full_load_efficiency']
-      cop = eer_to_cop_no_fan(min_eer)
+      cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(min_eer)
       new_comp_name = "#{coil_cooling_dx_multi_speed.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_eer}EER"
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoilCoolingDXMultiSpeed', "For #{template}: #{coil_cooling_dx_multi_speed.name}: #{cooling_type} #{heating_type} #{OpenstudioStandards::HVAC.coil_dx_subcategory(coil_cooling_dx_multi_speed)} Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
     end
 
     return cop, new_comp_name

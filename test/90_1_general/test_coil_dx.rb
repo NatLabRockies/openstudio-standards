@@ -21,8 +21,8 @@ class TestCoilDX < Minitest::Test
 
     # Minimum EER = 11.0
     correct_eer = 11.0
-    correct_min_cop = standard.eer_to_cop_no_fan(correct_eer)
-    
+    correct_min_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(correct_eer)
+
     # Check the lookup against the truth
     assert_in_delta(min_cop, correct_min_cop, 0.1, "Expected #{correct_eer} EER AKA #{correct_min_cop.round(2)} COP.  Got #{min_cop} COP instead.")
 
@@ -47,8 +47,8 @@ class TestCoilDX < Minitest::Test
 
     # Minimum EER = 11.0
     correct_eer = 11.0
-    correct_min_cop = standard.eer_to_cop_no_fan(correct_eer)
-    
+    correct_min_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(correct_eer)
+
     # Check the lookup against the truth
     assert_in_delta(min_cop, correct_min_cop, 0.1, "Expected #{correct_eer} EER AKA #{correct_min_cop.round(2)} COP.  Got #{min_cop} COP instead.")
 
@@ -68,7 +68,7 @@ class TestCoilDX < Minitest::Test
     # and an electric heating coil
     # to a unitary system
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    
+
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
     clg_cap_tons = 7
     clg_cap_watts = OpenStudio.convert(clg_cap_tons,"ton","W").get
@@ -93,8 +93,8 @@ class TestCoilDX < Minitest::Test
 
     # Minimum COPH = 3.3
     correct_coph = 3.3
-    correct_min_cop = standard.cop_heating_to_cop_heating_no_fan(correct_coph, clg_cap_watts)
-    
+    correct_min_cop = OpenstudioStandards::HVAC.cop_heating_to_cop_heating_no_fan(correct_coph, clg_cap_watts)
+
     # Check the lookup against the truth
     assert_in_delta(min_cop, correct_min_cop, 0.1, "Expected #{correct_coph} COPH AKA #{correct_min_cop.round(2)} COP.  Got #{min_cop} COP instead.")
 
@@ -112,7 +112,7 @@ class TestCoilDX < Minitest::Test
     # and an electric heating coil
     # to a unitary system
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    
+
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
     clg_cap_tons = 1
     clg_cap_watts = OpenStudio.convert(clg_cap_tons,"ton","W").get
@@ -136,8 +136,8 @@ class TestCoilDX < Minitest::Test
     min_eff = standard.coil_heating_dx_single_speed_standard_minimum_cop(htg_coil, true, equipment_type = true)
 
     # HSPF 6.7
-    correct_min_eff = standard.hspf_to_cop_no_fan(6.7)
-    
+    correct_min_eff =  OpenstudioStandards::HVAC.hspf_to_cop_no_fan(6.7)
+
     # Check the lookup against the truth
     assert_in_delta(min_eff, correct_min_eff, 0.1, "Expected #{correct_min_eff} COPH AKA #{correct_min_eff.round(2)} COP.  Got #{min_eff} COP instead.")
 

@@ -30,7 +30,7 @@ module OpenstudioStandards
       end
 
       # warn if incorrect control option
-      unless OpenStudio::Model::ExteriorLights::validControlOptionValues.include? control_option
+      unless OpenStudio::Model::ExteriorLights.validControlOptionValues.include? control_option
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ExteriorLighting', "Invalid control option #{control_option}. Use either ScheduleNameOnly' or 'AstronomicalClock'. Defaulting to 'AstronomicalClock'.")
         control_option = 'AstronomicalClock'
       end
@@ -65,19 +65,19 @@ module OpenstudioStandards
     # @param control_option [String] Options are 'ScheduleNameOnly' and 'AstronomicalClock'.
     #   'ScheduleNameOnly' will follow the schedule. 'AstronomicalClock' will follow the schedule, but turn off lights when the sun is up.
     # @return [Array<OpenStudio::Model::ExteriorLights>] Array of OpenStudio ExteriorLights object
-    def self.model_create_typical_exterior_lighting(model,
-                                                    standard: nil,
-                                                    lighting_generation: 'default',
-                                                    lighting_zone: 3,
-                                                    onsite_parking_fraction: 1.0,
-                                                    add_base_site_allowance: false,
-                                                    use_model_for_entries_and_canopies: false,
-                                                    control_option: 'AstronomicalClock')
+    def self.create_typical_exterior_lighting(model,
+                                              standard: nil,
+                                              lighting_generation: 'default',
+                                              lighting_zone: 3,
+                                              onsite_parking_fraction: 1.0,
+                                              add_base_site_allowance: false,
+                                              use_model_for_entries_and_canopies: false,
+                                              control_option: 'AstronomicalClock')
       exterior_lights = []
       installed_power = 0.0
       # get the exterior lighting properties from standard or the lighting_generation
       if standard.nil?
-        exterior_lighting_properties = OpenstudioStandards::ExteriorLighting.model_get_exterior_lighting_properties(lighting_generation: lighting_generation)
+        exterior_lighting_properties = OpenstudioStandards::ExteriorLighting.exterior_lighting_properties(lighting_generation: lighting_generation)
         lookup_key = lighting_generation
       else
         lookup_key = standard.template
@@ -106,7 +106,7 @@ module OpenstudioStandards
       shuttoff = false
       setback = false
 
-      if exterior_lighting_properties.has_key?('building_facade_and_landscape_automatic_shut_off')
+      if exterior_lighting_properties.key?('building_facade_and_landscape_automatic_shut_off')
         if exterior_lighting_properties['building_facade_and_landscape_automatic_shut_off'] == 1
           facade_automatic_shut_off = true
         else
@@ -138,7 +138,7 @@ module OpenstudioStandards
       end
 
       occupancy_setback_reduction = 0.0
-      if exterior_lighting_properties.has_key?('occupancy_setback_reduction')
+      if exterior_lighting_properties.key?('occupancy_setback_reduction')
         if !exterior_lighting_properties['occupancy_setback_reduction'].nil? && (exterior_lighting_properties['occupancy_setback_reduction'] > 0.0)
           occupancy_setback_reduction = exterior_lighting_properties['occupancy_setback_reduction']
         end
@@ -165,7 +165,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:parking_area_and_drives_area] * onsite_parking_fraction
 
         # get power
-        if exterior_lighting_properties.has_key?('parking_areas_and_drives')
+        if exterior_lighting_properties.key?('parking_areas_and_drives')
           power = exterior_lighting_properties['parking_areas_and_drives']
         else
           search_criteria = {
@@ -196,7 +196,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:building_facades]
 
         # get power
-        if exterior_lighting_properties.has_key?('building_facades')
+        if exterior_lighting_properties.key?('building_facades')
           power = exterior_lighting_properties['building_facades']
         else
           search_criteria = {
@@ -218,7 +218,7 @@ module OpenstudioStandards
                                                                                         multiplier: multiplier,
                                                                                         schedule: ext_lights_sch_facade_and_landscape,
                                                                                         control_option: control_option)
-        exterior_lights <<  ext_lights
+        exterior_lights << ext_lights
         installed_power += power * multiplier
       end
 
@@ -228,7 +228,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:main_entries]
 
         # get power
-        if exterior_lighting_properties.has_key?('main_entries')
+        if exterior_lighting_properties.key?('main_entries')
           power = exterior_lighting_properties['main_entries']
         else
           search_criteria = {
@@ -268,7 +268,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:other_doors]
 
         # get power
-        if exterior_lighting_properties.has_key?('other_doors')
+        if exterior_lighting_properties.key?('other_doors')
           power = exterior_lighting_properties['other_doors']
         else
           search_criteria = {
@@ -308,7 +308,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:canopy_entry_area]
 
         # get power
-        if exterior_lighting_properties.has_key?('entry_canopies')
+        if exterior_lighting_properties.key?('entry_canopies')
           power = exterior_lighting_properties['entry_canopies']
         else
           search_criteria = {
@@ -348,7 +348,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:canopy_emergency_area]
 
         # get power
-        if exterior_lighting_properties.has_key?('loading_areas_for_emergency_vehicles')
+        if exterior_lighting_properties.key?('loading_areas_for_emergency_vehicles')
           power = exterior_lighting_properties['loading_areas_for_emergency_vehicles']
         else
           search_criteria = {
@@ -379,7 +379,7 @@ module OpenstudioStandards
         multiplier = area_length_count_hash[:drive_through_windows]
 
         # get power
-        if exterior_lighting_properties.has_key?('drive_through_windows_and_doors')
+        if exterior_lighting_properties.key?('drive_through_windows_and_doors')
           power = exterior_lighting_properties['drive_through_windows_and_doors']
         else
           search_criteria = {
@@ -407,7 +407,7 @@ module OpenstudioStandards
       # add base site allowance
       if add_base_site_allowance
         # lighting values
-        if exterior_lighting_properties.has_key?('base_site_allowance_power')
+        if exterior_lighting_properties.key?('base_site_allowance_power')
           if !exterior_lighting_properties['base_site_allowance_power'].nil?
             power = exterior_lighting_properties['base_site_allowance_power']
           elsif !exterior_lighting_properties['base_site_allowance_fraction'].nil?

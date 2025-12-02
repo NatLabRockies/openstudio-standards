@@ -5,10 +5,22 @@ class BTAPData
   attr_accessor :sqlite_file
   attr_accessor :btap_data
 
-  def initialize(model:, runner: nil, cost_result:, baseline_cost_equipment_total_cost_per_m_sq: -1.0,
-                 baseline_cost_utility_neb_total_cost_per_m_sq: -1.0, baseline_energy_eui_total_gj_per_m_sq: -1.0, qaqc:,
-                 npv_start_year: 2022, npv_end_year: 2041, npv_discount_rate: 0.03, npv_discount_rate_carbon: 0.03, oerd_utility_pricing: nil,
-                 utility_pricing_year: 2020)
+  def initialize(
+    model:, 
+    runner: nil, 
+    cost_result:, 
+    carbon_result:,
+    baseline_cost_equipment_total_cost_per_m_sq: -1.0,
+    baseline_cost_utility_neb_total_cost_per_m_sq: -1.0, 
+    baseline_energy_eui_total_gj_per_m_sq: -1.0, 
+    qaqc:,
+    npv_start_year: 2022, 
+    npv_end_year: 2041, 
+    npv_discount_rate: 0.03, 
+    npv_discount_rate_carbon: 0.03, 
+    oerd_utility_pricing: nil,
+    utility_pricing_year: 2020)
+
     @model = model
     @error_warning = []
     # sets sql file.

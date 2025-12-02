@@ -5,7 +5,8 @@ class BTAPCosting
     # NOTE: Number of daylighting sensors is based on how many a daylighted space needs sensors as per Mike Lubun's costing spec, rather than daylighting sensor control measure.
     standards_template = model.building.get.standardsTemplate.to_s
     if standards_template.include?('NECB')
-      standards_template = standards_template.gsub(/(?<=\p{L})(?=\d)/, ' ') #insert a space between NECB and 2011/2015/2017
+      # insert a space between NECB and 2011/2015/2017
+      standards_template = standards_template.gsub(/NECB(\d)/, 'NECB \1')
     end
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -13,7 +14,7 @@ class BTAPCosting
     all_tz_primary_sidelighted_quatity = 0.0
     all_tz_skylight_quatity = 0.0
     #-------------------------------------------------------------------------------------------------------------------
-    model.getThermalZones.sort.each do |tz|
+    model.getThermalZonesSorted.each do |tz|
       if tz.primaryDaylightingControl.is_initialized
         tz_cost_primary_sidelighted = 0.0
         tz_cost_skylight = 0.0
@@ -326,7 +327,7 @@ class BTAPCosting
         }
 
       end #tz.primaryDaylightingControl.is_initialized
-    end #model.getThermalZones.sort.each do |tz|
+    end #model.getThermalZonesSorted.each do |tz|
     #-------------------------------------------------------------------------------------------------------------------
 
     puts "\nDaylighting sensor controls costing data successfully generated. Total DSC costs: $#{dsc_cost_total.round(2)}"

@@ -462,8 +462,7 @@ module OpenstudioStandards
 
       # add EMS for overriding HPWH setpoints schedules (for upper/lower heating element in water tank and compressor in heat pump)
       if heat_pump_type == 'WrappedCondenser' && use_ems_control
-        std = Standard.build('90.1-2013')
-        hpwh_name_ems_friendly = std.ems_friendly_name(hpwh.name)
+        hpwh_name_ems_friendly = OpenstudioStandards::HVAC.ems_friendly_name(hpwh.name)
 
         # create an ambient temperature sensor for the air that blows through the HPWH evaporator
         if water_heater_thermal_zone.nil?

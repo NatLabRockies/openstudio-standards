@@ -145,7 +145,7 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     end
     # Convert efficiency depending on the metric being used.
     if efficiency_metric == 'annual fuel utilization efficiency'
-      test_efficiency_value = standard.thermal_eff_to_afue(test_efficiency_value)
+      test_efficiency_value = OpenstudioStandards::HVAC.thermal_eff_to_afue(test_efficiency_value)
     elsif efficiency_metric == 'thermal efficiency'
       test_efficiency_value = test_efficiency_value
     end
@@ -372,12 +372,12 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     heating_coil_type = test_pars[:heating_coil_type]
     baseboard_type = test_pars[:baseboard_type]
     vintage = test_pars[:vintage]
- 
+
     # Test specific values.
     cap = test_case[:capacity_kW]
 
     # Set up remaining parameters for test.
-    
+
     name = "#{vintage}_sys3_Furnace-#{heating_coil_type}_cap-#{cap}kW_Baseboard-#{baseboard_type}"
     name_short = "Furnace-#{cap}kW"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
@@ -385,7 +385,7 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     logger.info "Starting individual test: #{name}"
     results = Array.new
     begin
-    
+
       # Load model and set climate file.
       model = BTAP::FileIO.load_osm(File.join(@resources_folder, "5ZoneNoHVAC.osm"))
       weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')

@@ -13,5 +13,5 @@ module OpenstudioStandards
     end
     return 'git-not-found-on-this-system'
   end
-  VERSION = '0.8.3'.freeze
+  VERSION = '0.8.4'.freeze
 end

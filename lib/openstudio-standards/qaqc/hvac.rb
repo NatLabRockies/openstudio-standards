@@ -737,7 +737,7 @@ module OpenstudioStandards
           motor_eff = component.motorEfficiency
 
           # get eff values from standards
-          motor_bhp = std.pump_brake_horsepower(component)
+          motor_bhp = OpenstudioStandards::HVAC.pump_get_brake_horsepower(component)
           next if motor_bhp < 0.0001 # less than 1 watt
 
           standard_minimum_motor_efficiency_and_size = std.pump_standard_minimum_motor_efficiency_and_size(component, motor_bhp)[0]
@@ -758,7 +758,7 @@ module OpenstudioStandards
           motor_eff = component.motorEfficiency
 
           # get eff values from standards
-          motor_bhp = std.pump_brake_horsepower(component)
+          motor_bhp = OpenstudioStandards::HVAC.pump_get_brake_horsepower(component)
           next if motor_bhp < 0.0001 # less than 1 watt
 
           standard_minimum_motor_efficiency_and_size = std.pump_standard_minimum_motor_efficiency_and_size(component, motor_bhp)[0]
@@ -868,7 +868,7 @@ module OpenstudioStandards
           end
 
           # lookup chiller
-          capacity_w = std.chiller_electric_eir_find_capacity(component)
+          capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(component)
           capacity_tons = OpenStudio.convert(capacity_w, 'W', 'ton').get
           chlr_props = std.model_find_object(std.standards_data['chillers'], search_criteria, capacity_tons, Date.today)
           if chlr_props.nil?
@@ -912,9 +912,9 @@ module OpenstudioStandards
 
           # find ac properties
           search_criteria = std.coil_dx_find_search_criteria(component)
-          capacity_w = std.coil_cooling_dx_single_speed_find_capacity(component)
+          capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_single_speed_get_capacity(component)
           capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
-          if std.coil_dx_heat_pump?(component)
+          if OpenstudioStandards::HVAC.coil_dx_heat_pump?(component)
             ac_props = std.model_find_object(std.standards_data['heat_pumps'], search_criteria, capacity_btu_per_hr, Date.today)
           else
             ac_props = std.model_find_object(std.standards_data['unitary_acs'], search_criteria, capacity_btu_per_hr, Date.today)
@@ -955,7 +955,7 @@ module OpenstudioStandards
 
           # find ac properties
           search_criteria = std.coil_dx_find_search_criteria(component)
-          capacity_w = std.coil_cooling_dx_two_speed_find_capacity(component)
+          capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_two_speed_get_capacity(component)
           capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
           ac_props = std.model_find_object(std.standards_data['unitary_acs'], search_criteria, capacity_btu_per_hr, Date.today)
 
@@ -994,7 +994,7 @@ module OpenstudioStandards
 
           # find ac properties
           search_criteria = std.coil_dx_find_search_criteria(component)
-          capacity_w = std.coil_heating_dx_single_speed_find_capacity(component)
+          capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(component)
           capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
           ac_props = std.model_find_object(std.standards_data['heat_pumps_heating'], search_criteria, capacity_btu_per_hr, Date.today)
           if ac_props.nil?
@@ -1070,7 +1070,7 @@ module OpenstudioStandards
 
           # get target coefs
           target_fan = OpenStudio::Model::FanVariableVolume.new(model_temp)
-          std.fan_variable_volume_set_control_type(target_fan, 'Multi Zone VAV with VSD and Static Pressure Reset')
+          OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(target_fan, control_type: 'Multi Zone VAV with Static Pressure Setpoint Reset')
 
           # get coeficents for fan
           target_fan_coefs = []
@@ -1416,13 +1416,13 @@ module OpenstudioStandards
             obj_type = component.iddObjectType.valueName.to_s
             case obj_type
             when 'OS_Pump_ConstantSpeed'
-              actual_w_per_gpm = std.pump_rated_w_per_gpm(component.to_PumpConstantSpeed.get)
+              actual_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(component.to_PumpConstantSpeed.get)
             when 'OS_Pump_VariableSpeed'
-              actual_w_per_gpm = std.pump_rated_w_per_gpm(component.to_PumpVariableSpeed.get)
+              actual_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(component.to_PumpVariableSpeed.get)
             when 'OS_HeaderedPumps_ConstantSpeed'
-              actual_w_per_gpm = std.pump_rated_w_per_gpm(component.to_HeaderedPumpsConstantSpeed.get)
+              actual_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(component.to_HeaderedPumpsConstantSpeed.get)
             when 'OS_HeaderedPumps_VariableSpeed'
-              actual_w_per_gpm = std.pump_rated_w_per_gpm(component.to_HeaderedPumpsVariableSpeed.get)
+              actual_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(component.to_HeaderedPumpsVariableSpeed.get)
             else
               next # Skip non-pump objects
             end

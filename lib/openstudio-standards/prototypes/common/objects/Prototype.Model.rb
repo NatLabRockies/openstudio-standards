@@ -105,8 +105,8 @@ Standard.class_eval do
     model_update_exhaust_fan_efficiency(model)
     model_update_fan_efficiency(model)
     # rename air loop and plant loop nodes for readability
-    rename_air_loop_nodes(model)
-    rename_plant_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_air_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_plant_loop_nodes(model)
     # remove unused objects
     model_remove_unused_resource_objects(model)
     # Add output variables for debugging
@@ -116,6 +116,28 @@ Standard.class_eval do
 
     model_replace_model(measure_model, model)
     return measure_model
+  end
+
+  # Loads a JSON file containing the space type map into a hash
+  #
+  # @param hvac_map_file [String] path to JSON file, relative to the /data folder
+  # @return [Hash] returns a hash that contains the space type map
+  def load_hvac_map(hvac_map_file)
+    # Load the geometry .osm from relative to the data folder
+    rel_path_to_hvac_map = "../../../../../data/#{hvac_map_file}"
+
+    # Load the JSON depending on whether running from normal gem location
+    # or from the embedded location in the OpenStudio CLI
+    if File.dirname(__FILE__)[0] == ':'
+      # running from embedded location in OpenStudio CLI
+      hvac_map_string = load_resource_relative(rel_path_to_hvac_map)
+      hvac_map = JSON.parse(hvac_map_string)
+    else
+      abs_path = File.join(File.dirname(__FILE__), rel_path_to_hvac_map)
+      hvac_map = JSON.parse(File.read(abs_path)) if File.exist?(abs_path)
+    end
+
+    return hvac_map
   end
 
   # Replaces the contents of 'model_to_replace' with the contents of 'new_model.'
@@ -183,6 +205,105 @@ Standard.class_eval do
     return true
   end
 
+
+  # load a model into OS & version translates, exiting and erroring if a problem is found
+  #
+  # @param model_path_string [String] file path to OpenStudio model file
+  # @return [OpenStudio::Model::Model] OpenStudio model object
+  def safe_load_model(model_path_string)
+    model_path = OpenStudio::Path.new(model_path_string)
+    if OpenStudio.exists(model_path)
+      version_translator = OpenStudio::OSVersion::VersionTranslator.new
+      model = version_translator.loadModel(model_path)
+      if model.empty?
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Version translation failed for #{model_path_string}")
+        return false
+      else
+        model = model.get
+      end
+    else
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "#{model_path_string} couldn't be found")
+      return false
+    end
+    return model
+  end
+
+  # Remove all resource objects in the model
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @return [OpenStudio::Model::Model] OpenStudio model object
+  def strip_model(model)
+    # remove all materials
+    model.getMaterials.each(&:remove)
+
+    # remove all constructions
+    model.getConstructions.each(&:remove)
+
+    # remove performance curves
+    model.getCurves.each do |curve|
+      model.removeObject(curve.handle)
+    end
+
+    # remove all zone equipment
+    model.getThermalZones.sort.each do |zone|
+      zone.equipment.each(&:remove)
+    end
+
+    # remove all thermostats
+    model.getThermostatSetpointDualSetpoints.each(&:remove)
+
+    # remove all people
+    model.getPeoples.each(&:remove)
+    model.getPeopleDefinitions.each(&:remove)
+
+    # remove all lights
+    model.getLightss.each(&:remove)
+    model.getLightsDefinitions.each(&:remove)
+
+    # remove all electric equipment
+    model.getElectricEquipments.each(&:remove)
+    model.getElectricEquipmentDefinitions.each(&:remove)
+
+    # remove all gas equipment
+    model.getGasEquipments.each(&:remove)
+    model.getGasEquipmentDefinitions.each(&:remove)
+
+    # remove all outdoor air
+    model.getDesignSpecificationOutdoorAirs.each(&:remove)
+
+    # remove all infiltration
+    model.getSpaceInfiltrationDesignFlowRates.each(&:remove)
+
+    # Remove all internal mass
+    model.getInternalMasss.each(&:remove)
+
+    # Remove all internal mass defs
+    model.getInternalMassDefinitions.each(&:remove)
+
+    # Remove all thermal zones
+    model.getThermalZones.each(&:remove)
+
+    # Remove all schedules
+    model.getSchedules.each(&:remove)
+
+    # Remove all schedule type limits
+    model.getScheduleTypeLimitss.each(&:remove)
+
+    # Remove the sizing parameters
+    model.getSizingParameters.remove
+
+    # Remove the design days
+    model.getDesignDays.each(&:remove)
+
+    # Remove the rendering colors
+    model.getRenderingColors.each(&:remove)
+
+    # Remove the daylight controls
+    model.getDaylightingControls.each(&:remove)
+
+    return model
+  end
+
   # Read the space type to space map from the model
   # instead of relying on an externally-defined mapping.
   def get_space_type_maps_from_model(model)
@@ -242,10 +363,13 @@ Standard.class_eval do
       space_type_apply_rendering_color(space_type)
 
       # Loads
-      space_type_apply_internal_loads(space_type, true, true, true, true, true)
+      space_type_apply_internal_loads(space_type)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type, true, true, true, true, true, true)
+      space_type_apply_internal_load_schedules(space_type)
+
+      # Thermostat Schedules
+      space_type_apply_thermostat_schedules(space_type)
     end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying space types (loads)')
@@ -1421,17 +1545,8 @@ Standard.class_eval do
     model.getFanOnOffs.sort.each { |obj| prototype_fan_apply_prototype_fan_efficiency(obj) }
     model.getFanZoneExhausts.sort.each { |obj| prototype_fan_apply_prototype_fan_efficiency(obj) }
 
-    # Gas Heating Coil
-    model.getCoilHeatingGass.sort.each { |obj| coil_heating_gas_apply_prototype_efficiency(obj) }
-
     # Add Economizers
     apply_economizers(climate_zone, model)
-
-    # @todo What is the logic behind hard-sizing hot water coil convergence tolerances?
-    model.getControllerWaterCoils.sort.each { |obj| controller_water_coil_set_convergence_limits(obj) }
-
-    # Adjust defrost curve limits for coil heating dx single speed
-    model.getCoilHeatingDXSingleSpeeds.sort.each { |obj| coil_heating_dx_single_speed_apply_defrost_eir_curve_limits(obj) }
 
     # Pump part load performances
     model.getPumpVariableSpeeds.sort.each { |obj| pump_variable_speed_control_type(obj) }

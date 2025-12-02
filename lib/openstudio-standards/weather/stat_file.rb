@@ -285,7 +285,7 @@ module OpenstudioStandards
 
         # parse design temperatures
         # TMYx stat file format is different than TMY3, cf #1948
-        is_tmyx = @text.include?("Wind Shelter Factor")
+        is_tmyx = @text.include?('Wind Shelter Factor')
         temperature_info = [
           { name: 'Heating Design Temperatures', regex: /Heating(\s*\d+.*)\n/, container: @heating_design_info, size: is_tmyx ? 16 : 15 },
           { name: 'Cooling Design Temperatures', regex: /Cooling(\s*\d+.*)\n/, container: @cooling_design_info, size: 32 },
@@ -294,7 +294,7 @@ module OpenstudioStandards
         ]
         temperature_info.each { |temp_info| parse_design_temp_info(temp_info) }
         if is_tmyx
-          @heating_design_info.pop() # remove the last value, which is the Wind Shelter Factor
+          @heating_design_info.pop # remove the last value, which is the Wind Shelter Factor
           # There is no WBmax in TMYx files, so add a nil
           @extremes_design_info.insert(3, nil)
         end

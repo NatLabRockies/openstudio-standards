@@ -1,7 +1,6 @@
 require 'singleton'
 require 'json'
 require 'csv'
-require_relative 'common_paths.rb'
 
 # Singleton class to centralize all database operations
 class CostingDatabase
@@ -10,11 +9,8 @@ class CostingDatabase
   def initialize
     @cp = CommonPaths.instance # Stores paths
     @db = Hash.new             # Stores the costing database
-  end
 
-  # Load the database from the individual CSV files
-  def load_database
-
+    # Load the database from the individual CSV files
     # Load costing data
     @db['costs'] = []                # Costing data
     @db['localization_factors'] = [] # Local costing factors

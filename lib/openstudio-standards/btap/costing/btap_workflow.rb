@@ -3,43 +3,6 @@ require_relative '../../../../lib/openstudio-standards.rb'
 class BTAPWorkflow
   attr_accessor :workflow
 
-
-  def self.create_measure_table(measure_folder)
-
-  end
-
-  # =============================================================================================================================
-  # Get the full path to the weather file that is specified in the model.
-  #
-  # @return [OpenStudio::OptionalPath]
-  def model_get_full_weather_file_path(model:)
-    full_epw_path = OpenStudio::OptionalPath.new
-
-    if model.weatherFile.is_initialized
-      epw_path = model.weatherFile.get.path
-      if epw_path.is_initialized
-        if File.exist?(epw_path.get.to_s)
-          full_epw_path = OpenStudio::OptionalPath.new(epw_path.get)
-        else
-          # If this is an always-run Measure, need to check a different path
-          alt_weath_path = File.expand_path(File.join(Dir.pwd, '../../resources'))
-          alt_epw_path = File.expand_path(File.join(alt_weath_path, epw_path.get.to_s))
-          if File.exist?(alt_epw_path)
-            full_epw_path = OpenStudio::OptionalPath.new(OpenStudio::Path.new(alt_epw_path))
-          else
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "Model has been assigned a weather file, but the file is not in the specified location of '#{epw_path.get}'.")
-          end
-        end
-      else
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', 'Model has a weather file assigned, but the weather file path has been deleted.')
-      end
-    else
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', 'Model has not been assigned a weather file.')
-    end
-
-    return full_epw_path
-  end
-
   def initialize(measures_folder: File.join(__dir__, '../../measures'))
     @model = nil
     @run_dir = nil

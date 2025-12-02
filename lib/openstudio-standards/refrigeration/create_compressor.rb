@@ -33,9 +33,6 @@ module OpenstudioStandards
       pc = compressor_properties.select { |r| r[:curve_type] == 'Power' }[0]
       cc = compressor_properties.select { |r| r[:curve_type] == 'Capacity' }[0]
 
-      # TODO: replace with curve data once curves are refactored
-      std = Standard.build('90.1-2013')
-
       # create power curve
       power_coeffs = []
       power_coeffs << pc[:coefficient1]
@@ -48,7 +45,7 @@ module OpenstudioStandards
       power_coeffs << pc[:coefficient8]
       power_coeffs << pc[:coefficient9]
       power_coeffs << pc[:coefficient10]
-      power_curve = std.create_curve_bicubic(model, power_coeffs, pc[:curve_name], pc[:min_val_x], pc[:max_val_x], pc[:min_val_y], pc[:max_val_y], nil, nil)
+      power_curve = OpenstudioStandards::HVAC.create_curve_bicubic(model, power_coeffs, name: pc[:curve_name], min_x: pc[:min_val_x], max_x: pc[:max_val_x], min_y: pc[:min_val_y], max_y: pc[:max_val_y])
 
       # create capacity curve
       capacity_coeffs = []
@@ -62,7 +59,7 @@ module OpenstudioStandards
       capacity_coeffs << cc[:coefficient8]
       capacity_coeffs << cc[:coefficient9]
       capacity_coeffs << cc[:coefficient10]
-      capacity_curve = std.create_curve_bicubic(model, capacity_coeffs, cc[:curve_name], cc[:min_val_x], cc[:max_val_x], cc[:min_val_y], cc[:max_val_y], nil, nil)
+      capacity_curve = OpenstudioStandards::HVAC.create_curve_bicubic(model, capacity_coeffs, name: cc[:curve_name], min_x: cc[:min_val_x], max_x: cc[:max_val_x], min_y: cc[:min_val_y], max_y: cc[:max_val_y])
 
       # Make the compressor
       compressor = OpenStudio::Model::RefrigerationCompressor.new(model)

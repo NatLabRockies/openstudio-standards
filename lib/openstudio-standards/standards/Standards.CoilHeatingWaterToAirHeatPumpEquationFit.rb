@@ -1,90 +1,6 @@
 class Standard
   # @!group CoilHeatingWaterToAirHeatPumpEquationFit
 
-  # Finds capacity in W.
-  # This is the cooling capacity of the paired cooling coil.
-  #
-  # @param coil_heating_water_to_air_heat_pump [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit] coil heating object
-  # @return [Double] capacity in W to be used for find object
-  def coil_heating_water_to_air_heat_pump_find_capacity(coil_heating_water_to_air_heat_pump)
-    capacity_w = nil
-
-    # Get the paired cooling coil
-    clg_coil = nil
-
-    # Unitary and zone equipment
-    if coil_heating_water_to_air_heat_pump.airLoopHVAC.empty?
-      if coil_heating_water_to_air_heat_pump.containingHVACComponent.is_initialized
-        containing_comp = coil_heating_water_to_air_heat_pump.containingHVACComponent.get
-        if containing_comp.to_AirLoopHVACUnitaryHeatPumpAirToAir.is_initialized
-          clg_coil = containing_comp.to_AirLoopHVACUnitaryHeatPumpAirToAir.get.coolingCoil
-        elsif containing_comp.to_AirLoopHVACUnitarySystem.is_initialized
-          unitary = containing_comp.to_AirLoopHVACUnitarySystem.get
-          if unitary.coolingCoil.is_initialized
-            clg_coil = unitary.coolingCoil.get
-          end
-        end
-      elsif coil_heating_water_to_air_heat_pump.containingZoneHVACComponent.is_initialized
-        containing_comp = coil_heating_water_to_air_heat_pump.containingZoneHVACComponent.get
-        # PTHP
-        if containing_comp.to_ZoneHVACPackagedTerminalHeatPump.is_initialized
-          clg_coil = containing_comp.to_ZoneHVACPackagedTerminalHeatPump.get.coolingCoil
-        # WSHP
-        elsif containing_comp.to_ZoneHVACWaterToAirHeatPump.is_initialized
-          clg_coil = containing_comp.to_ZoneHVACWaterToAirHeatPump.get.coolingCoil
-        end
-      end
-    end
-
-    # On AirLoop directly
-    if coil_heating_water_to_air_heat_pump.airLoopHVAC.is_initialized
-      air_loop = coil_heating_water_to_air_heat_pump.airLoopHVAC.get
-      # Check for the presence of any other type of cooling coil
-      clg_types = ['OS:Coil:Cooling:DX:SingleSpeed',
-                   'OS:Coil:Cooling:DX:TwoSpeed',
-                   'OS:Coil:Cooling:DX:MultiSpeed']
-      clg_types.each do |ct|
-        coils = air_loop.supplyComponents(ct.to_IddObjectType)
-        next if coils.empty?
-
-        clg_coil = coils[0]
-        break # Stop on first cooling coil found
-      end
-    end
-
-    # If no paired cooling coil was found,
-    # throw an error and fall back to the heating capacity of the heating coil
-    if clg_coil.nil?
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name}, the paired cooling coil could not be found to determine capacity. Efficiency will incorrectly be based on coil's heating capacity.")
-      if coil_heating_water_to_air_heat_pump.ratedTotalHeatingCapacity.is_initialized
-        capacity_w = coil_heating_water_to_air_heat_pump.ratedTotalHeatingCapacity.get
-      elsif coil_heating_water_to_air_heat_pump.autosizedRatedTotalHeatingCapacity.is_initialized
-        capacity_w = coil_heating_water_to_air_heat_pump.autosizedRatedTotalHeatingCapacity.get
-      else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name} capacity is not available, cannot apply efficiency standard to paired heating coil.")
-        return 0.0
-      end
-      return capacity_w
-    end
-
-    # If a coil was found, cast to the correct type
-    if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
-      clg_coil = clg_coil.to_CoilCoolingDXSingleSpeed.get
-      capacity_w = coil_cooling_dx_single_speed_find_capacity(clg_coil)
-    elsif clg_coil.to_CoilCoolingDXTwoSpeed.is_initialized
-      clg_coil = clg_coil.to_CoilCoolingDXTwoSpeed.get
-      capacity_w = coil_cooling_dx_two_speed_find_capacity(clg_coil)
-    elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-      clg_coil = clg_coil.to_CoilCoolingDXMultiSpeed.get
-      capacity_w = coil_cooling_dx_multi_speed_find_capacity(clg_coil)
-    elsif clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
-      clg_coil = clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.get
-      capacity_w = coil_cooling_water_to_air_heat_pump_find_capacity(clg_coil)
-    end
-
-    return capacity_w
-  end
-
   # Finds lookup object in standards and return efficiency
   #
   # @param coil_heating_water_to_air_heat_pump [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit] coil heating object
@@ -93,7 +9,7 @@ class Standard
   def coil_heating_water_to_air_heat_pump_standard_minimum_cop(coil_heating_water_to_air_heat_pump, rename = false)
     search_criteria = {}
     search_criteria['template'] = template
-    capacity_w = coil_heating_water_to_air_heat_pump_find_capacity(coil_heating_water_to_air_heat_pump)
+    capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_water_to_air_heat_pump)
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
@@ -136,7 +52,7 @@ class Standard
     # Get the search criteria
     search_criteria = {}
     search_criteria['template'] = template
-    capacity_w = coil_heating_water_to_air_heat_pump_find_capacity(coil_heating_water_to_air_heat_pump)
+    capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_water_to_air_heat_pump)
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Look up the efficiency characteristics

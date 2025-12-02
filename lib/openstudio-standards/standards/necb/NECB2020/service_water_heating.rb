@@ -20,6 +20,7 @@ class NECB2020
     else
       capacity_w = capacity_w.get
     end
+    capacity_kw = capacity_w/1000.0
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
@@ -35,6 +36,7 @@ class NECB2020
     end
     volume_gal = OpenStudio.convert(volume_m3, 'm^3', 'gal').get
     volume_litre = OpenStudio.convert(volume_m3, 'm^3', 'L').get
+    
     # Get the heater fuel type
     fuel_type = water_heater_mixed.heaterFuelType
     unless fuel_type == 'NaturalGas' || fuel_type == 'Electricity' || fuel_type == 'FuelOilNo2'
@@ -47,12 +49,12 @@ class NECB2020
     # From PNNL http://www.energycodes.gov/sites/default/files/documents/PrototypeModelEnhancements_2014_0.pdf
     # Appendix A: Service Water Heating
 	  # and modified by PCF 1630 as noted below.
-
     water_heater_eff = nil
     ua_btu_per_hr_per_f = nil
     sl_btu_per_hr = nil
     q_load_btu_per_hr = nil
     uef = nil
+
     case fuel_type
     when 'Electricity'
       volume_litre_per_s = volume_m3 * 1000
@@ -89,55 +91,57 @@ class NECB2020
       #   AND
       #
       #   PNNL http://www.energycodes.gov/sites/default/files/documents/PrototypeModelEnhancements_2014_0.pdf
+      #
+      # Updated reference links:
+      #  https://www.pnnl.gov/main/publications/external/technical_reports/PNNL-23269.pdf - Equations may have typos, also for EF which is at diff test T.
+      #  https://www.nrel.gov/docs/fy21osti/71633.pdf
+      #  https://ases.org/wp-content/uploads/2021/11/Using-Simple-Algebraic-Models-and-Rating-Test-Data-to-Predict-Water-Heater-Energy-Consumption-Under-Off-Test-Conditions-.pdf
+      #  https://www.ecfr.gov/current/title-10/chapter-II/subchapter-D/part-430/subpart-B/appendix-Appendix%20E%20to%20Subpart%20B%20of%20Part%20430 
+      #  
 
-      # Assume fhr = peak demand flow
-      tank_param = auto_size_shw_capacity(model:water_heater_mixed.model, shw_scale: 'NECB_Default')
-      fhr_L_per_hr = tank_param['loop_peak_flow_rate_SI']
-      fhr_L_per_hr = fhr_L_per_hr * 3600000
+      # Assume first hour rating.
+      # Rule of thumb is FHR is 70% tank_volume + ~40 Gal
+      #  Ref: https://www.waterheaterpros.com/first-hour-rating#:~:text=To%20find%20a%20water%20heater%27s,can%20deliver%20at%20peak%20hours.
+      fhr_L_per_hr = 0.7*volume_litre + 151.0
+
       if capacity_w <= 22000 and volume_litre >= 76 and volume_litre < 208
-        if fhr_L_per_hr < 68
+        if fhr_L_per_hr < 68 # 18 US Gal - UEF draw pattern very small usage
           uef = 0.3456 - 0.00053*volume_litre
-          q_load_btu_per_hr = 5561
-          volume_drawn_gal = 10
-        elsif fhr_L_per_hr >= 68 and fhr_L_per_hr < 193
+          volume_drawn_gal = 10 # 37.85L
+        elsif fhr_L_per_hr >= 68 and fhr_L_per_hr < 193 # 51 US Gal - UEF draw pattern low usage
           uef = 0.5982 - 0.00050*volume_litre
-          q_load_btu_per_hr = 21131
-          volume_drawn_gal = 38
-        elsif fhr_L_per_hr >= 193 and fhr_L_per_hr < 284
+          volume_drawn_gal = 38 # 143.8L
+        elsif fhr_L_per_hr >= 193 and fhr_L_per_hr < 284 # 75 US Gal - UEF draw pattern medium usage
           uef = 0.6483 - 0.00045*volume_litre
-          q_load_btu_per_hr = 30584
-          volume_drawn_gal = 55
-        elsif fhr_L_per_hr >= 284 
+          volume_drawn_gal = 55 # 208.2L
+        elsif fhr_L_per_hr >= 284 # 75 US Gal - UEF draw pattern high usage
           uef = 0.6920 - 0.00034*volume_litre
-          q_load_btu_per_hr = 46710
-          volume_drawn_gal = 84
+          volume_drawn_gal = 84 # 318.0L
         end
 
-        # Assume burner efficiency  (PNNL)
+        # Assume burner efficiency  (PNNL-23269)
         water_heater_eff = 0.82
 
         # Estimate recovery efficiency (RE) and UA (Maguire and Robers, 2020)
-        q_load_btu = volume_drawn_gal*8.30074*0.99826*(125-58) #water properties at 91.5F
+        q_load_btu = volume_drawn_gal*8.30074*0.99826*(125.0-58.0) # water properties at 91.5F; derived from UEF test.
         capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
+
+        # From PNNL-23269?
         re = water_heater_eff + q_load_btu*(uef-water_heater_eff)/(24*capacity_btu_per_hr*uef)
         ua_btu_per_hr_per_f = (water_heater_eff-re)*capacity_btu_per_hr/(125-67.5)  
 
       elsif capacity_w <= 22000 and volume_litre >= 208 and volume_litre < 380
         if fhr_L_per_hr < 68
           uef = 0.6470 - 0.00016*volume_litre
-          q_load_btu_per_hr = 5561
           volume_drawn_gal = 10
         elsif fhr_L_per_hr >= 68 and fhr_L_per_hr < 193
           uef = 0.7689 - 0.00013*volume_litre
-          q_load_btu_per_hr = 21131
           volume_drawn_gal = 38
         elsif fhr_L_per_hr >= 193 and fhr_L_per_hr < 284
           uef = 0.7897 - 0.00011*volume_litre
-          q_load_btu_per_hr = 30584
           volume_drawn_gal = 55
         elsif fhr_L_per_hr >= 284 
           uef = 0.8072 - 0.00008*volume_litre
-          q_load_btu_per_hr = 46710
           volume_drawn_gal = 84
         end
 
@@ -147,7 +151,8 @@ class NECB2020
         # Estimate recovery efficiency (RE) and UA (Maguire and Robers, 2020)
         q_load_btu = volume_drawn_gal*8.30074*0.99826*(125-58) #water properties at 91.5F
         capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
-        # Estimate recovery efficiency (RE) and UA (Maguire and Robers, 2020)
+
+        # Estimate recovery efficiency (RE) and UA (Maguire and Robers, 2020); Note tank at 125F for UEF, previously 135F for EF test
         re = water_heater_eff + q_load_btu*(uef-water_heater_eff)/(24*capacity_btu_per_hr*uef)
         ua_btu_per_hr_per_f = (water_heater_eff-re)*capacity_btu_per_hr/(125-67.5)      
 
@@ -163,16 +168,12 @@ class NECB2020
         # Estimate recovery efficiency (RE) and UA (Maguire and Robers, 2020)
         capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
         if fhr_L_per_hr < 68
-          q_load_btu_per_hr = 5561
           volume_drawn_gal = 10
         elsif fhr_L_per_hr >= 68 and fhr_L_per_hr < 193
-          q_load_btu_per_hr = 21131
           volume_drawn_gal = 38
         elsif fhr_L_per_hr >= 193 and fhr_L_per_hr < 284
-          q_load_btu_per_hr = 30584
           volume_drawn_gal = 55
-        elsif fhr_L_per_hr >= 284 
-          q_load_btu_per_hr = 46710
+        elsif fhr_L_per_hr >= 284
           volume_drawn_gal = 84
         end
         q_load_btu = volume_drawn_gal*8.30074*0.99826*(125-58) #water properties at 91.5F
@@ -182,7 +183,6 @@ class NECB2020
         ua_btu_per_hr_per_f = (water_heater_eff-re)*capacity_btu_per_hr/(125-67.5)      
         
       else # all other water heaters
-        capacity_kw = capacity_w/1000
         capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
         # thermal efficiency (NECB2020)
         et = 0.9
