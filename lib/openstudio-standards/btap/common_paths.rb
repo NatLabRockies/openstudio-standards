@@ -28,6 +28,9 @@ class CommonPaths
   attr_reader :constructions_skylight_path
   attr_reader :constructions_wall_path
   attr_reader :constructions_window_path
+  attr_reader :constructions_bg_roof_path
+  attr_reader :constructions_bg_wall_path
+  attr_reader :constructions_slab_path
 
   # Costing data
   attr_accessor :costs_path
@@ -86,6 +89,9 @@ class CommonPaths
     @constructions_skylight_path   = "#{dir_database}/constructions_skylight.json"
     @constructions_wall_path       = "#{dir_database}/constructions_wall.json"
     @constructions_window_path     = "#{dir_database}/constructions_window.json"
+    @constructions_bg_roof_path    = "#{dir_database}/constructions_bg_roof.json"
+    @constructions_bg_wall_path    = "#{dir_database}/constructions_bg_wall.json"
+    @constructions_slab_path       = "#{dir_database}/constructions_slab.json"
 
     @costs_path               = "#{dir_database}/costs.csv"
     @costs_local_factors_path = "#{dir_database}/costs_local_factors.csv"

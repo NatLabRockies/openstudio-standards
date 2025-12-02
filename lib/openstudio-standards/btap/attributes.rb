@@ -54,7 +54,7 @@ module BTAP
     def initialize(model, standard)
       @model             = model
       @standard          = standard
-      @costing_database  = CostingDatabase.instance
+      @costing_database  = BTAPDatabase.instance
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [ 

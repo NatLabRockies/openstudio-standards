@@ -1,5 +1,5 @@
 require 'json'
-require_relative 'costing_database_wrapper'
+require_relative 'btap_database'
 
 class SimpleLinearRegression
   #https://gist.github.com/rweald/3516193#file-full-slr-class-snippet-rb
@@ -42,7 +42,7 @@ class BTAPCosting
   #   factors_csv: Path to custom localization factors
   def initialize(costs_csv: nil, factors_csv: nil, attributes:)
     @cp               = CommonPaths.instance
-    @costing_database = CostingDatabase.instance
+    @costing_database = BTAPDatabase.instance
     @attributes       = attributes
 
     # If the path for custom costing is defined, use custom costing.
