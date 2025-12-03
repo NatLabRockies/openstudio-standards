@@ -52,9 +52,9 @@ module BTAP
     # @param model    [OpenStudio::Model::Model]
     # @param standard [Standard]
     def initialize(model, standard)
-      @model             = model
-      @standard          = standard
-      @costing_database  = BTAPDatabase.instance
+      @model            = model
+      @standard         = standard
+      @costing_database = BTAPDatabase.instance
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [ 
@@ -88,11 +88,6 @@ module BTAP
 
       @zones  = [] 
       @spaces = [] 
-    
-      @surface_types_to_assemblies = @surface_type_tbd_map.keys.map { |surface| 
-        # TODO: Need tbd.model[:perform] attribute in the TBD cache 
-        [surface, @standard.tbd.costed_assembly(@standard.structure, @surface_type_tbd_map[surface], :lp)] 
-      }.to_h
       self.compile_model
       self.compile_constructions((not @standard.tbd.nil?))
     end
@@ -101,23 +96,36 @@ module BTAP
     #
     # @param use_tbd [Bool] Use TBD takeoffs for surfaces where available.
     def compile_constructions(use_tbd)
+
+      # Create a hash of surface types referencing construction type names.
+      # These references are shared across all surfaces of the same type because
+      # the `costed_assembly` method assigns assemblies according to building
+      # categories.
+      if use_tbd
+        @surface_types_to_assemblies = @surface_type_tbd_map.keys.map { |surface_type| 
+          [surface_type, @standard.tbd.costed_assembly(
+            @standard.structure, 
+            @surface_type_tbd_map[surface_type], 
+            @standard.tbd.model[:perform])]}.to_h
+      end
+
       @spaces.each do |space|
         @surface_types.each do |surface_type|
           space.surfaces_hash[surface_type].each do |surface|
-            if @standard.tbd.tally[:takeoffs].has_key?(surface) and @surface_type_tbd_map.has_key?(surface_type)
+            if @surface_type_tbd_map.has_key?(surface_type)
               compile_construction_tbd(surface, surface_type)
             else
               puts "[BTAP Attributes] Surface takeoff for #{surface.handle} with surface type #{surface_type} unavailable, defaulting to legacy takeoff."
-              compile_construction(space, surface)
+              next
             end
           end
         end
       end
     end
 
-    # Get the construction for a given surface using the TBD-defined takeoffs.
-    # Retrieve the construction by finding the closest PSI factor to each of the
-    # possible assemblies in a construction set.
+    # Get the construction for a given surface using BTAP::Structure and
+    # BTAP::Bridging classes. Retrieve the construction by finding the closest
+    # RSI factor to each of the possible assemblies in a construction set.
     # 
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
@@ -125,25 +133,26 @@ module BTAP
       tbd_surface_type        = @surface_type_tbd_map[surface_type]
       construction_name       = @surface_types_to_assemblies[surface_type]
       construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["psi"]
-      target_psi              = @standard.tbd.tally[:takeoffs][surface][:usi]
-      closest_psi             = construction_candidates.keys.map(&:to_f).min_by { |psi| (target_psi - psi).abs }.to_s
-      construction            = construction_candidates[closest_psi]
+      target_rsi              = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
+      closest_rsi             = construction_candidates.keys.map(&:to_f).min_by { |rsi| (target_rsi - rsi).abs }.to_s
+      construction            = construction_candidates[closest_rsi]
 
       # Compress the ID layers hash so it only contains a list of IDs without
       # the description of each material. Since ruby doesn't make deep copies,
       # check to make sure it wasn't modified yet.
+      # TODO: fix this in the actual database to prevent doing this
       if construction["material_opaque_id_layers"].first.is_a?(Hash)
         construction["material_opaque_id_layers"].map! { |entry| entry["id"] }
       end
 
-      surface.instance_variable_set(:@construction_set, construction)
+      surface.instance_variable_set(:@construction_hash, construction)
     end
 
     # Get the construction for a given surface using legacy takeoffs.
     # 
     # @param space   [OpenStudio::Model::Space]
     # @param surface [OpenStudio::Model::Surface]
-    def compile_construction(space, surface)
+    def compile_construction_legacy(space, surface)
       construction_set = @costing_database["raw"]["construction_sets"].select { |data|
         data["template"].to_s.gsub(/\s*/, "") == @standard.template                                          and
         data["building_type"].to_s.downcase   == space.spaceType.get.standardsBuildingType.to_s.downcase     and
