@@ -164,10 +164,6 @@ class BTAPStandardCache
   # @param file [String] File path to save to.
   def write_cache(path)
     File.open(path, "w") do |file|
-
-      # For the takeoffs, which contains OpenStudio Surface objects, only save
-      # the UUID (handle) so that they may be matched later when loaded again. 
-      @tbd.tally[:takeoffs].transform_keys! { |key| key.handle.to_s}
       file.write(Marshal.dump(self))
     end
   end
@@ -177,14 +173,6 @@ class BTAPStandardCache
   # @param file  [String] File path to load from.
   # @param model [OpenStudio::Model::Model] Required to match surfaces.
   def self.load_cache(path, model)
-    cache = File.open(path, "r") { |file| Marshal.load(file) }
-
-    # Convert the surface handles back into OpenStudio objects by matching them
-    # by their handles.
-    cache.tbd.tally[:takeoffs].transform_keys! do |key|
-      model.getSurfaces.each.find { |surface| surface.handle.to_s == key }
-    end
-
-    return cache
+    return File.open(path, "r") { |file| Marshal.load(file) }
   end
 end

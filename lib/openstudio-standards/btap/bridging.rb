@@ -1066,7 +1066,6 @@ module BTAP
     # @return [Boolean] true if valid BTAP/TBD model
     def gen_feedback
       lgs = @feedback[:logs]
-      @tally[:takeoffs] = {}
       return false unless @model.key?(:complies) # all model constructions
       return false unless @model.key?(:comply)   # surface type specific ...
       return false unless @model.key?(:argh)     # BTAP/TBD inputs + ouputs
@@ -1109,13 +1108,11 @@ module BTAP
         next unless id.include?(" c tbd")
 
         rsi  = TBD.rsi(lc, s.filmResistance)
-        usi  = 1 / rsi
-        area = lc.getNetArea
+        usi  = format("%.3f", 1/rsi)
+        rsi  = format("%.1f", rsi)
+        area = format("%.1f", lc.getNetArea) + " m2"
 
-        # Log the PSI factors of each surface and write it to a data structure
-        # as well for future reference.
-        @tally[:takeoffs][s] = {usi: usi, rsi: rsi}
-        lgs << "~ '#{id}' derated Rsi: #{format("%.1f", rsi)} [Usi #{format("%.3f", usi)} x #{format("%.1f", area)} m2]"
+        lgs << "~ '#{id}' derated Rsi: #{rsi} [Usi #{usi} x #{area}]"
       end
 
       # Log PSI factor tallies (per thermal bridge type).
@@ -1197,8 +1194,11 @@ module BTAP
     # somewhere. This prevents inspecting the object without a file pager or
     # writing it to a file.
     def shorten_instance_variables
-      self.instance_variables.filter {|variable| variable != :@tally}.each do |variable|
+      self.instance_variables.filter {|variable| variable != :@tally and variable != :@model}.each do |variable|
         remove_instance_variable(variable)
+      end
+      @model.keys.filter { |value| value != :perform}.each do |value|
+        @model.delete(value)
       end
       @tally.delete(:constructions)
     end

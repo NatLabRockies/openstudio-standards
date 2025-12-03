@@ -23,31 +23,26 @@ class BTAPCosting
     totEnvCost = 0
 
     @attributes.spaces.each do |space|
+
       # Get SpaceType defined for space.. if not defined it will skip the spacetype. May have to deal with Attic spaces.
       if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
         raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space for costing.")
       end
 
       @attributes.surface_types.each do |surface_type|
-        # Get Costs for this construction type. This will get the cost for the particular construction type
-        # for all rsi levels for this location. This has been collected by the API costs data. Note that a space_type
-        # of "- undefined -" will create a nil construction_set!
 
-        if space.construction_set.nil?
-          cost_range_hash = {}
-        else
-          cost_range_hash = @costing_database['constructions_costs'].select { |construction|
-            construction['construction_type_name'] == space.construction_set[surface_type] &&
-            construction['province_state']         == @costing_report["province_state"]    &&
-            construction['city']                   == @costing_report["city"]
-          }
-        end
+        # Get Costs for this construction type. This will get the cost for the
+        # particular construction type for all rsi levels for this location.
+        # This has been collected by the API costs data. Note that a space_type
+        # of "- undefined -" will create a nil construction_set!
 
         # We don't need all the information, just the rsi and cost. However, for windows rsi = 1/u_w_per_m2_k
         surfaceIsGlazing = (
           surface_type == 'ExteriorFixedWindow'         || surface_type == 'ExteriorOperableWindow'          ||
           surface_type == 'ExteriorSkylight'            || surface_type == 'ExteriorTubularDaylightDiffuser' ||
           surface_type == 'ExteriorTubularDaylightDome' || surface_type == 'ExteriorGlassDoor')
+        cost_range_hash = {}
+
         if surfaceIsGlazing
           cost_range_array = cost_range_hash.map { |cost|
             [
@@ -67,21 +62,19 @@ class BTAPCosting
         cost_range_array.sort! { |a, b| a[0] <=> b[0] }
 
         # Iterate through actual surfaces in the model of surface_type.
-        numSurfType = 0
+        num_surface_types = 0
         space.surfaces_hash[surface_type].each do |surface|
-          numSurfType = numSurfType + 1
+          if surface.construction_hash.nil?
+            next
+          end
 
-          # Get RSI of existing model surface (actually returns rsi for glazings too!).
-          # Make an array of constructions to use with surfaces_get_conductance method which replaces the get_rsi
-          # method
-          rsi = 1 / (OpenstudioStandards::Constructions.construction_get_conductance(OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get))
+          num_surface_types += 1
+          rsi          = surface.construction_hash[:rsi]
+          surface_area = surface.construction_hash[:surface_area]
 
-
-          #Check to see if it is in range
-
-
-          # Use the cost_range_array to interpolate the estimated cost for the given rsi.
-          # Note that window costs in the API data use U-value, which was converted to rsi for cost_range_array above
+          # Use the cost_range_array to interpolate the estimated cost
+          # for the given rsi. Note that window costs in the API data use
+          # U-value, which was converted to rsi for cost_range_array above
           exterpolate_percentage_range = 30.0
           cost = interpolate(x_y_array: cost_range_array, x2: rsi, exterpolate_percentage_range: exterpolate_percentage_range)
 
@@ -137,13 +130,13 @@ class BTAPCosting
           end
           row = @costing_report["envelope"]["construction_costs"].detect { |row| (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / rsi).round(3))) }
           if row.nil?
-            @costing_report["envelope"]["construction_costs"] << {'name' => name, 'conductance' => ((1.0 / rsi).round(3)), 'area' => (surfArea.round(2)), 'cost' => (surfCost.round(2)), 'cost_per_area' => (surfCost / surfArea).round(2), 'note' => "Surf ##{numSurfType}: #{notes}"}
+            @costing_report["envelope"]["construction_costs"] << {'name' => name, 'conductance' => ((1.0 / rsi).round(3)), 'area' => (surfArea.round(2)), 'cost' => (surfCost.round(2)), 'cost_per_area' => (surfCost / surfArea).round(2), 'note' => "Surf ##{num_surface_types}: #{notes}"}
           else
             # Not using += for @costing_report additions so that output can be properly rounded
             row['area'] = (row['area'] + surfArea).round(2)
             row['cost'] = (row['cost'] + surfCost).round(2)
             row['cost_per_area'] = ((row['cost'] / row['area']).to_f.round(2))
-            row['note'] += " / #{numSurfType}: #{notes}"
+            row['note'] += " / #{num_surface_types}: #{notes}"
           end
           # Not using += for @costing_report additions so that output can be properly rounded
           @costing_report["envelope"]["#{surface_type.underscore}_cost"] = (@costing_report["envelope"]["#{surface_type.underscore}_cost"] + surfCost).round(2)
