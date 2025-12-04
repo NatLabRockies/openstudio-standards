@@ -136,15 +136,6 @@ module BTAP
       target_rsi              = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       closest_rsi             = construction_candidates.keys.map(&:to_f).min_by { |rsi| (target_rsi - rsi).abs }.to_s
       construction            = construction_candidates[closest_rsi]
-
-      # Compress the ID layers hash so it only contains a list of IDs without
-      # the description of each material. Since ruby doesn't make deep copies,
-      # check to make sure it wasn't modified yet.
-      # TODO: fix this in the actual database to prevent doing this
-      if construction["material_opaque_id_layers"].first.is_a?(Hash)
-        construction["material_opaque_id_layers"].map! { |entry| entry["id"] }
-      end
-
       surface.instance_variable_set(:@construction_hash, construction)
     end
 
