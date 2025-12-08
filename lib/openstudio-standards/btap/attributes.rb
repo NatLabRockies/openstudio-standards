@@ -32,14 +32,17 @@ module BTAP
     attr_reader :surfaces_hash
   end
 
+  # For surfaces and subsurfaces, BTAP Costing and Carbon require a list of
+  # constructions for each RSI value in order to perform a linear regression to
+  # best estimate the respective cost and carbon emissions per surface.
   class OpenStudio::Model::Surface
     attr_reader :rsi # [Float]
-    attr_reader :btap_construction # [BTAP::Construction]
+    attr_reader :btap_constructions # [Array[BTAP::Construction]]
   end
 
   class OpenStudio::Model::SubSurface
     attr_reader :rsi # [Float]
-    attr_reader :btap_construction # [BTAP::Construction]
+    attr_reader :btap_constructions # [Array[BTAP::Construction]]
   end
 
   # Wrapper class for construction parameters. Note the "cost" and "carbon"
@@ -56,9 +59,9 @@ module BTAP
 
     # @param name        [String]
     # @param description [String]
-    # @param type        [String] Either "opaque" or "glazing".
+    # @param type        [String] Material type, either "opaque" or "glazing".
     # @param id_layers   [Array[Integer]]
-    # @param psi         [Float]
+    # @param rsi         [Float]
     # @param cost        [Float]
     # @param carbon      [Float]
     def initialize(name, id, description, type, id_layers, rsi)
@@ -162,36 +165,38 @@ module BTAP
       end
     end
 
-    # Get the construction for a given surface using BTAP::Structure and
-    # BTAP::Bridging classes. Retrieve the construction by finding the closest
-    # RSI factor to each of the possible assemblies in a construction set. 
-    # A reference to a wrapper class [BTAP::Construction] is assigned to each
-    # surface.
+    # Get the RSI and constructions for each RSI value for a given surface
+    # using the BTAP::Structure and BTAP::Bridging classes. The calculated RSI
+    # and a reference to a wrapper class [BTAP::Construction] is assigned to
+    # each surface.
     #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_construction_tbd(surface, surface_type)
       tbd_surface_type        = @surface_type_tbd_map[surface_type]
       construction_name       = @surface_types_to_assemblies[surface_type]
-      construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["psi"]
-      target_rsi              = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
-      closest_rsi             = construction_candidates.keys.map(&:to_f).min_by { |rsi| (target_rsi - rsi).abs }.to_s
-      construction_hash       = construction_candidates[closest_rsi]
+      construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
+      rsi                     = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
+      btap_constructions      = []
 
-      # Hash a list of constructions by their ID. If a construction was already
-      # initialized, assign the reference of the already created one.
-      unless @constructions.has_key?(construction_hash["id"])
-        @constructions[construction_hash["id"]] = BTAP::Construction.new(
-          construction_name,
-          construction_hash["id"],
-          construction_hash["description"],
-          construction_hash["type"],
-          construction_hash["id_layers"],
-          closest_rsi)
+      construction_candidates.values.each do |construction_hash|
+
+        # Hash a list of constructions by their ID. If a construction was already
+        # initialized, assign the reference of the already created one.
+        unless @constructions.has_key?(construction_hash["id"])
+          @constructions[construction_hash["id"]] = BTAP::Construction.new(
+            construction_name,
+            construction_hash["id"],
+            construction_hash["description"],
+            construction_hash["type"],
+            construction_hash["id_layers"],
+            closest_rsi)
+        end
+        btap_constructions << @constructions[construction_hash["id"]]
       end
 
-      surface.instance_variable_set(:@btap_construction, @constructions[construction_hash["id"]])
-      surface.instance_variable_set(:@rsi, target_rsi)
+      surface.instance_variable_set(:@btap_constructions, @constructions[construction_hash["id"]])
+      surface.instance_variable_set(:@rsi, rsi)
     end
 
     # Get the construction for a given surface using legacy takeoffs. Currently
