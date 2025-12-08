@@ -14,9 +14,9 @@ class BTAPCosting
     # Populate the `costing_report` hash to report costing details per surface
     # type.
     @attributes.surface_types.each do |surface_type|
-      @costing_report["envelope"]["#{surface_type.underscore}_cost"] = 0.00
-      @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] = 0.0
-      @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = 0.00
+      @costing_report["envelope"]["#{surface_type.underscore}_cost"]        = 0.0
+      @costing_report["envelope"]["#{surface_type.underscore}_area_m2"]     = 0.0
+      @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = 0.0
     end
 
     # Cost all the constructions found by BTAP Attributes.
@@ -30,9 +30,13 @@ class BTAPCosting
 
     @attributes.spaces.each do |space|
 
-      # Get SpaceType defined for space.. if not defined it will skip the spacetype. May have to deal with Attic spaces.
-      if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
-        raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space for costing.")
+      # Get SpaceType defined for space. If not defined it will skip the
+      # spacetype. May have to deal with Attic spaces.
+      if space.spaceType.empty? or 
+         space.spaceType.get.standardsSpaceType.empty? or 
+         space.spaceType.get.standardsBuildingType.empty?
+        raise("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this" \
+              "space for costing.")
       end
 
       @attributes.surface_types.each do |surface_type|
@@ -40,27 +44,33 @@ class BTAPCosting
         # Iterate through actual surfaces in the model of surface_type.
         num_surface_types = 0
         space.surfaces_hash[surface_type].each do |surface|
-          if surface.btap_construction.nil?
+          if surface.btap_constructions.nil?
             next
           end
 
           num_surface_types += 1
+          surface_is_glazing = surface.btap_constructions.first.type == "glazing"
+          construction_name  = surface.btap_constructions.first.name
 
-          # We don't need all the information, just the rsi and cost.
-          cost_range_array = [surface.rsi, surface.btap_construction.cost]
+          # We don't need all the information, just the rsi and cost. Window
+          # costs from the API data use U-value, which was converted to rsi for
+          # cost_range_array above
           cost_range_hash = {}
-          if surface.btap_construction.type == "glazing"
-            cost_range_array = [1 / surface.rsi, surface.btap_construction.cost]
+          if surface_is_glazing
+            cost_range_array = surface.btap_constructions.map do |construction|
+              [1 / surface.rsi, construction.cost]
+            end
           else
-            cost_range_array = [surface.rsi, surface.btap_construction.cost]
+            cost_range_array = surface.btap_constructions.map do |construction|
+              [surface.rsi, construction.cost]
+            end
           end
 
           # Sorted based on rsi.
           cost_range_array.sort! { |a, b| a[0] <=> b[0] }
 
-          # Use the cost_range_array to interpolate the estimated cost
-          # for the given rsi. Note that window costs in the API data use
-          # U-value, which was converted to rsi for cost_range_array above
+          # Use the cost_range_array to interpolate the estimated cost for the
+          # given rsi.
           exterpolate_percentage_range = 30.0
           cost = interpolate(
             x_y_array: cost_range_array, 
@@ -71,7 +81,7 @@ class BTAPCosting
           if cost.nil?
             unless cost_range_array.empty?
               notes = "Warning! RSI out of the range (#{'%.2f' % surface.rsi}) or cost is 0!. Range for " \
-                      "#{surface.btap_construction.name} is " \
+                      "#{construction_name} is " \
                       "#{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}."
               cost = 0.0
             else
@@ -79,16 +89,16 @@ class BTAPCosting
               cost = 0.0
             end
           elsif cost.nan?
-            raise("The values for cost and conductance for #{surface.btap_construction.name} cannot be interpolated. " \
-                  "Cannot create an equation of a line from #{cost_range_array.sort.uniq}. Check the construction " \
-                  "database and either eliminate the errant row, or set the x value to an appropriate number.")
+            raise("The values for cost and conductance for #{construction_name} cannot be interpolated. Cannot " \
+                  "create an equation of a line from #{cost_range_array.sort.uniq}. Check the construction database " \
+                  "and either eliminate the errant row, or set the x value to an appropriate number.")
           else
 
             # Tell user if we are extrapolating outside of library.
             array = cost_range_array.sort { |a, b| a[0] <=> b[0] }
             if surface.rsi < (array.first[0].to_f) || surface.rsi > (array.last[0].to_f)
               notes = "RSI out of the range (#{'%.2f' % surface.rsi}). Range for " \
-                      "#{space.construction_set[surface_type]} is " \
+                      "#{construction_name} is " \
                       "#{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}. " \
                       "Using extrapolation up to +/-30% of library boundaries."
             else
@@ -98,7 +108,7 @@ class BTAPCosting
 
           # Calculate SHGC/film cost.
           film_cost = 0.0
-          if surfaceIsGlazing
+          if surface_is_glazing
 
             # Get SHGC from surface.
             shgc = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
@@ -122,19 +132,17 @@ class BTAPCosting
               cost * region_factor / 100.0 }.inject(0, :+)
           end
 
-          testSurfName  = surface.name.to_s
-          testSpaceName = space.name.to_s
-          surfArea      = surface.netArea * space.thermalZone.get.multiplier
-          surfAreaft    = (OpenStudio.convert(surfArea, "m^2", "ft^2").get).to_f
-          surfCost      = (cost + film_cost) * surfAreaft
-          totEnvCost    = totEnvCost + surfCost
-          name          = ""
+          surfArea   = surface.netArea * space.thermalZone.get.multiplier
+          surfAreaft = (OpenStudio.convert(surfArea, "m^2", "ft^2").get).to_f
+          surfCost   = (cost + film_cost) * surfAreaft
+          totEnvCost = totEnvCost + surfCost
+          name       = ""
 
           # Bin the costing by construction standard type and rsi.
-          if space.construction_set.nil?
-            name = "undefined space type_#{(1.0 / surface.rsi).round(3)}"
+          if surface.btap_constructions.nil?
+            name = "undefined surface construction_#{(1.0 / surface.rsi).round(3)}"
           else
-            name = "#{space.construction_set[surface_type]}"
+            name = "#{construction_name}"
           end
           row = @costing_report["envelope"]["construction_costs"].detect { |row| 
             (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / surface.rsi).round(3))) }
@@ -159,9 +167,13 @@ class BTAPCosting
           end
 
           # Not using += for @costing_report additions so that output can be properly rounded
-          @costing_report["envelope"]["#{surface_type.underscore}_cost"] = (@costing_report["envelope"]["#{surface_type.underscore}_cost"] + surfCost).round(2)
-          @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] = (@costing_report["envelope"]["#{surface_type.underscore}_area_m2"] + surfArea).round(2)
-          @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = (@costing_report["envelope"]["#{surface_type.underscore}_cost"] / @costing_report["envelope"]["#{surface_type.underscore}_area_m2"]).round(2)
+          @costing_report["envelope"]["#{surface_type.underscore}_cost"] = (
+            @costing_report["envelope"]["#{surface_type.underscore}_cost"] + surfCost).round(2)
+          @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] = (
+            @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] + surfArea).round(2)
+          @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = (
+            @costing_report["envelope"]["#{surface_type.underscore}_cost"] / \
+            @costing_report["envelope"]["#{surface_type.underscore}_area_m2"]).round(2)
         end # surfaces of surface type
       end # surface_type
     end # spaces

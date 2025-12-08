@@ -176,10 +176,10 @@ module BTAP
       tbd_surface_type        = @surface_type_tbd_map[surface_type]
       construction_name       = @surface_types_to_assemblies[surface_type]
       construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
-      rsi                     = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
+      surface_rsi             = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       btap_constructions      = []
 
-      construction_candidates.values.each do |construction_hash|
+      construction_candidates.each do |construction_rsi, construction_hash|
 
         # Hash a list of constructions by their ID. If a construction was already
         # initialized, assign the reference of the already created one.
@@ -190,13 +190,13 @@ module BTAP
             construction_hash["description"],
             construction_hash["type"],
             construction_hash["id_layers"],
-            closest_rsi)
+            construction_rsi)
         end
         btap_constructions << @constructions[construction_hash["id"]]
       end
 
-      surface.instance_variable_set(:@btap_constructions, @constructions[construction_hash["id"]])
-      surface.instance_variable_set(:@rsi, rsi)
+      surface.instance_variable_set(:@btap_constructions, btap_constructions)
+      surface.instance_variable_set(:@rsi, surface_rsi)
     end
 
     # Get the construction for a given surface using legacy takeoffs. Currently
