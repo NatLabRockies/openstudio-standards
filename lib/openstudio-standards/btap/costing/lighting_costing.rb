@@ -5,10 +5,6 @@ class BTAPCosting
     num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
 
     template_type = prototype_creator.template
-
-    closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
-    generate_construction_cost_database_for_city(@costing_report["city"],@costing_report["province_state"])
-
     totLgtCost = 0
 
     # daylighting sensor control costing

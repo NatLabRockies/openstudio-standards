@@ -8,7 +8,6 @@
 require "openstudio"
 
 module BTAP
-
   class OpenStudio::Model::Model
     def getThermalZonesSorted
       return @zones_sorted
@@ -30,16 +29,45 @@ module BTAP
   end
 
   class OpenStudio::Model::Space
-    attr_reader :construction_set
     attr_reader :surfaces_hash
   end
 
   class OpenStudio::Model::Surface
-    attr_reader :construction_hash # Stores the construction for this surface.
+    attr_reader :rsi # [Float]
+    attr_reader :btap_construction # [BTAP::Construction]
   end
 
   class OpenStudio::Model::SubSurface
-    attr_reader :construction_hash # Same as the previous.
+    attr_reader :rsi # [Float]
+    attr_reader :btap_construction # [BTAP::Construction]
+  end
+
+  # Wrapper class for construction parameters. Note the "cost" and "carbon"
+  # parameters, these aren't populated until costing or carbon is done.
+  class Construction
+    attr_reader :name
+    attr_reader :description
+    attr_reader :id
+    attr_reader :id_layers
+    attr_reader :psi
+    attr_reader :cost
+    attr_reader :carbon
+
+    # @param name        [String]
+    # @param description [String]
+    # @param id_layers   [Array[Integer]]
+    # @param psi         [Float]
+    # @param cost        [Float]
+    # @param carbon      [Float]
+    def initialize(name, description, id, id_layers, psi)
+      @name        = name
+      @description = description
+      @id          = id
+      @id_layers   = id_layers
+      @psi         = psi
+      @cost        = nil
+      @carbon      = nil
+    end
   end
 
   # Class for accessing and pre-processing model attributes.
@@ -48,6 +76,7 @@ module BTAP
     attr_reader :zones
     attr_reader :spaces
     attr_reader :surface_types
+    attr_reader :surface_types_to_assemblies
     
     # @param model    [OpenStudio::Model::Model]
     # @param standard [Standard]
@@ -86,10 +115,18 @@ module BTAP
         "ExteriorFloor" => :floors
       }
 
-      @zones  = [] 
-      @spaces = [] 
+      @zones         = [] 
+      @spaces        = [] 
+      @constructions = {}
+
       self.compile_model
       self.compile_constructions((not @standard.tbd.nil?))
+      require 'pry-byebug'; binding.pry; exit;
+    end
+
+    # Helper method which retrieves all compiled constructions.
+    def get_constructions
+      return @constructions.values
     end
 
     # Compile all the constructions associated with each surface and subsurface.
@@ -115,8 +152,8 @@ module BTAP
             if @surface_type_tbd_map.has_key?(surface_type)
               compile_construction_tbd(surface, surface_type)
             else
-              puts "[BTAP Attributes] Surface takeoff for #{surface.handle} with surface type #{surface_type} unavailable, defaulting to legacy takeoff."
-              next
+              puts "[BTAP Attributes] Surface takeoff for #{surface.handle}" \
+                   "with surface type #{surface_type} unavailable."
             end
           end
         end
@@ -125,8 +162,10 @@ module BTAP
 
     # Get the construction for a given surface using BTAP::Structure and
     # BTAP::Bridging classes. Retrieve the construction by finding the closest
-    # RSI factor to each of the possible assemblies in a construction set.
-    # 
+    # RSI factor to each of the possible assemblies in a construction set. 
+    # A reference to a wrapper class [BTAP::Construction] is assigned to each
+    # surface.
+    #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_construction_tbd(surface, surface_type)
@@ -135,8 +174,21 @@ module BTAP
       construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["psi"]
       target_rsi              = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       closest_rsi             = construction_candidates.keys.map(&:to_f).min_by { |rsi| (target_rsi - rsi).abs }.to_s
-      construction            = construction_candidates[closest_rsi]
-      surface.instance_variable_set(:@construction_hash, construction)
+      construction_hash       = construction_candidates[closest_rsi]
+
+      # Hash a list of constructions by their ID. If a construction was already
+      # initialized, assign the reference of the already created one.
+      unless @constructions.has_key?(construction_hash["id"])
+        @constructions[construction_hash["id"]] = BTAP::Construction.new(
+          construction_name,
+          construction_hash["description"],
+          construction_hash["id"],
+          construction_hash["id_layers"],
+          closest_rsi)
+      end
+
+      surface.instance_variable_set(:@btap_construction, @constructions[construction_hash["id"]])
+      surface.instance_variable_set(:@rsi, target_rsi)
     end
 
     # Get the construction for a given surface using legacy takeoffs.
