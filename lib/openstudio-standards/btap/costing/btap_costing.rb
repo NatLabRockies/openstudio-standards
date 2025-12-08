@@ -37,9 +37,13 @@ end
 
 
 class BTAPCosting
-  # May be initialized with custom databases:
-  #   costs_csv:   Path to custom costing
-  #   factors_csv: Path to custom localization factors
+
+  # Class to initialize BTAP Costing.
+  # @param costs_csv   [String] Path to custom costing.
+  # @param factors_csv [String] Path to custom localization factors.
+  # @param attributes  [BTAP::Atributes] Methods and helpers for model
+  #                                      attributes, mostly envelopes and
+  #                                      constructions.         
   def initialize(costs_csv: nil, factors_csv: nil, attributes:)
     @cp               = CommonPaths.instance
     @costing_database = BTAPDatabase.instance
