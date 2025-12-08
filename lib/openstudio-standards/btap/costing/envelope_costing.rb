@@ -18,8 +18,6 @@ class BTAPCosting
 
     @costing_report["envelope"]["construction_costs"] = []
 
-    generate_construction_cost_database_for_city(@costing_report["city"], @costing_report["province_state"])
-
     totEnvCost = 0
 
     @attributes.spaces.each do |space|
@@ -69,20 +67,16 @@ class BTAPCosting
           end
 
           num_surface_types += 1
-          rsi          = surface.construction_hash[:rsi]
-          surface_area = surface.construction_hash[:surface_area]
-
           # Use the cost_range_array to interpolate the estimated cost
           # for the given rsi. Note that window costs in the API data use
           # U-value, which was converted to rsi for cost_range_array above
           exterpolate_percentage_range = 30.0
-          cost = interpolate(x_y_array: cost_range_array, x2: rsi, exterpolate_percentage_range: exterpolate_percentage_range)
-
+          cost = interpolate(x_y_array: cost_range_array, x2: surface.rsi, exterpolate_percentage_range: exterpolate_percentage_range)
 
           # If the cost is nil, that means the rsi is out of range. Flag in the report.
           if cost.nil?
             if !cost_range_array.empty?
-              notes = "Warning! RSI out of the range (#{'%.2f' % rsi}) or cost is 0!. Range for #{space.construction_set[surface_type]} is #{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}."
+              notes = "Warning! RSI out of the range (#{'%.2f' % surface.rsi}) or cost is 0!. Range for #{space.construction_set[surface_type]} is #{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}."
               cost = 0.0
             else
               notes = "No cost found for this! So Cost is set to 0.0!"
@@ -93,8 +87,8 @@ class BTAPCosting
           else
             #Tell user if we are extrapolating outside of library.
             array = cost_range_array.sort { |a, b| a[0] <=> b[0] }
-            if rsi < (array.first[0].to_f) || rsi > (array.last[0].to_f)
-              notes = "RSI out of the range (#{'%.2f' % rsi}). Range for #{space.construction_set[surface_type]} is #{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}.Using extrapolation up to +/-30% of library boundaries. "
+            if surface.rsi < (array.first[0].to_f) || surface.rsi > (array.last[0].to_f)
+              notes = "RSI out of the range (#{'%.2f' % surface.rsi}). Range for #{space.construction_set[surface_type]} is #{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}.Using extrapolation up to +/-30% of library boundaries. "
             else
               notes = "OK"
             end
@@ -124,13 +118,13 @@ class BTAPCosting
 
           # Bin the costing by construction standard type and rsi
           if space.construction_set.nil?
-            name = "undefined space type_#{(1.0 / rsi).round(3)}"
+            name = "undefined space type_#{(1.0 / surface.rsi).round(3)}"
           else
             name = "#{space.construction_set[surface_type]}"
           end
-          row = @costing_report["envelope"]["construction_costs"].detect { |row| (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / rsi).round(3))) }
+          row = @costing_report["envelope"]["construction_costs"].detect { |row| (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / surface.rsi).round(3))) }
           if row.nil?
-            @costing_report["envelope"]["construction_costs"] << {'name' => name, 'conductance' => ((1.0 / rsi).round(3)), 'area' => (surfArea.round(2)), 'cost' => (surfCost.round(2)), 'cost_per_area' => (surfCost / surfArea).round(2), 'note' => "Surf ##{num_surface_types}: #{notes}"}
+            @costing_report["envelope"]["construction_costs"] << {'name' => name, 'conductance' => ((1.0 / surface.rsi).round(3)), 'area' => (surfArea.round(2)), 'cost' => (surfCost.round(2)), 'cost_per_area' => (surfCost / surfArea).round(2), 'note' => "Surf ##{num_surface_types}: #{notes}"}
           else
             # Not using += for @costing_report additions so that output can be properly rounded
             row['area'] = (row['area'] + surfArea).round(2)

@@ -60,30 +60,6 @@ class BTAPCosting
     @costing_database.validate_database
   end
 
-  def generate_construction_cost_database_for_all_cities()
-    result = Array.new
-    @costing_database['raw']['locations'].each do |location|
-      province_state = location["province_state"]
-      city = location['city']
-      result.concat(generate_construction_cost_database_for_city(city, province_state))
-    end
-    return result
-  end
-
-  def generate_construction_cost_database_for_city(city, province_state)
-    @costing_database['constructions_costs'] = Array.new
-    puts "Costing for: #{province_state},#{city}"
-    @costing_database["raw"]['constructions_opaque'].each do |construction|
-      cost_construction(construction, {"province_state" => province_state, "city" => city}, 'opaque')
-    end
-    @costing_database["raw"]['constructions_glazing'].each do |construction|
-      cost_construction(construction, {"province_state" => province_state, "city" => city}, 'glazing')
-    end
-    puts "#{@costing_database['constructions_costs'].size} Costed Constructions for #{province_state},#{city}."
-    return @costing_database['constructions_costs']
-  end
-
-
   def cost_audit_all(model:,
                      prototype_creator:,
                      envelope_costing: true,
