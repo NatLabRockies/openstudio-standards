@@ -45,26 +45,29 @@ module BTAP
   # Wrapper class for construction parameters. Note the "cost" and "carbon"
   # parameters, these aren't populated until costing or carbon is done.
   class Construction
-    attr_reader :name
-    attr_reader :description
-    attr_reader :id
-    attr_reader :id_layers
-    attr_reader :psi
-    attr_reader :cost
-    attr_reader :carbon
+    attr_reader   :name
+    attr_reader   :id
+    attr_reader   :description
+    attr_reader   :type
+    attr_reader   :id_layers
+    attr_reader   :rsi
+    attr_accessor :cost
+    attr_accessor :carbon
 
     # @param name        [String]
     # @param description [String]
+    # @param type        [String] Either "opaque" or "glazing".
     # @param id_layers   [Array[Integer]]
     # @param psi         [Float]
     # @param cost        [Float]
     # @param carbon      [Float]
-    def initialize(name, description, id, id_layers, psi)
+    def initialize(name, id, description, type, id_layers, rsi)
       @name        = name
-      @description = description
       @id          = id
+      @description = description
+      @type        = type
       @id_layers   = id_layers
-      @psi         = psi
+      @rsi         = rsi
       @cost        = nil
       @carbon      = nil
     end
@@ -121,7 +124,6 @@ module BTAP
 
       self.compile_model
       self.compile_constructions((not @standard.tbd.nil?))
-      require 'pry-byebug'; binding.pry; exit;
     end
 
     # Helper method which retrieves all compiled constructions.
@@ -152,8 +154,8 @@ module BTAP
             if @surface_type_tbd_map.has_key?(surface_type)
               compile_construction_tbd(surface, surface_type)
             else
-              puts "[BTAP Attributes] Surface takeoff for #{surface.handle}" \
-                   "with surface type #{surface_type} unavailable."
+              puts "[BTAP Attributes] Surface takeoff for #{surface.handle} " \
+                   "with surface type #{surface_type} is unavailable."
             end
           end
         end
@@ -181,8 +183,9 @@ module BTAP
       unless @constructions.has_key?(construction_hash["id"])
         @constructions[construction_hash["id"]] = BTAP::Construction.new(
           construction_name,
-          construction_hash["description"],
           construction_hash["id"],
+          construction_hash["description"],
+          construction_hash["type"],
           construction_hash["id_layers"],
           closest_rsi)
       end
@@ -191,8 +194,9 @@ module BTAP
       surface.instance_variable_set(:@rsi, target_rsi)
     end
 
-    # Get the construction for a given surface using legacy takeoffs.
-    # 
+    # Get the construction for a given surface using legacy takeoffs. Currently
+    # not being used.
+    #
     # @param space   [OpenStudio::Model::Space]
     # @param surface [OpenStudio::Model::Surface]
     def compile_construction_legacy(space, surface)

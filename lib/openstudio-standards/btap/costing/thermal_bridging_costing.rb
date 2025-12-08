@@ -1,5 +1,7 @@
 class BTAPCosting
-  def cost_audit_thermal_bridging(model, prototype_creator)
+
+  # @param prototype_creator [Standard]
+  def cost_audit_thermal_bridging(prototype_creator)
     total_tbd_cost      = 0.0
     material_quantities = prototype_creator.tbd.get_material_quantities_for_edges # Opaque IDs to quantities
 
@@ -19,7 +21,7 @@ class BTAPCosting
         # tbd_quantity:      Converted from meters to feet in bridging.rb
         # material_quantity: Square feet converted to feet. Some material
         #                    entries have varying units but those are just for
-        #                    reference to RSMeans. TODO: verify this
+        #                    reference to RSMeans.
         total_tbd_cost += (((material_cost * regional_material / 100.0) + \
                           (labour_cost * regional_installation / 100.0) + \
                           equipment_cost) * (tbd_quantity / material_quantity)).round(2)

@@ -111,8 +111,10 @@ class BTAPCosting
     # Find the mechanical room
     mech_room, cond_spaces = prototype_creator.find_mech_room(model)
 
-    envCost = envelope_costing ? self.cost_audit_envelope(model, prototype_creator) : 0.0
-    thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(model, prototype_creator) : 0.0
+    thermal_bridging_costing = false ? prototype_creator.tbd.nil? : true
+
+    envCost = envelope_costing ? self.cost_audit_envelope : 0.0
+    thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(prototype_creator) : 0.0
     lgtCost = lighting_costing ? self.cost_audit_lighting(model, prototype_creator) : 0.0
     boilerCost = boilers_costing ? self.boiler_costing(model, prototype_creator) : 0.0
     chillerCost = chillers_costing ? self.chiller_costing(model, prototype_creator) : 0.0
@@ -137,17 +139,16 @@ class BTAPCosting
     return @costing_report, @cost_items
   end
 
-  def get_regional_cost_factors(provinceState, city, material)
+  def get_regional_cost_factors(province_state, city, material)
     @costing_database['localization_factors'].select { |code|
-      code['province_state'] == provinceState && code['city'] == city }.each do |code|
+      code['province_state'] == province_state && code['city'] == city }.each do |code|
       prefix_id = material['id'][0..1]
       prefix_stored = code['code_prefix']
       if prefix_id == prefix_stored
         return code['material'], code['installation'], code['total']
       end
-
     end
-    error = [material, "Could not find regional adjustment factor for material used in #{city}, #{provinceState}."]
+    error = [material, "Could not find regional adjustment factor for material used in #{city}, #{province_state}."]
     @costing_database['db_errors'] << error unless @costing_database['db_errors'].include?(error)
     return 100.0, 100.0, 100.0
   end
