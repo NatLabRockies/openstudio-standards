@@ -51,8 +51,11 @@ module BTAP
     attr_reader :btap_constructions        # [Array[BTAP::Construction]]
   end
 
-  # Wrapper class for construction parameters. Note the "cost" and "carbon"
-  # parameters, these aren't populated until costing or carbon is done.
+  # Wrapper class for construction parameters. Note the "cost"  parameter, these
+  # aren't populated until costing is done. Carbon emissions aren't stored
+  # per-construction since they vary per surface due to window perimeter
+  # differences, and this class is stored as a reference in the Surface and
+  # SubSurfaces classes.
   class Construction
     attr_reader   :name
     attr_reader   :id
@@ -61,7 +64,6 @@ module BTAP
     attr_reader   :id_layers
     attr_reader   :rsi
     attr_accessor :cost
-    attr_accessor :carbon
 
     # @param name        [String]
     # @param description [String]
@@ -78,7 +80,15 @@ module BTAP
       @id_layers   = id_layers
       @rsi         = rsi
       @cost        = nil
-      @carbon      = nil
+    end
+
+    # Fenestration-related accessor methods.
+    # TODO: implement these
+    def get_fenestration_type
+    end
+    def get_frame_material
+    end
+    def get_number_of_panes
     end
   end
 
