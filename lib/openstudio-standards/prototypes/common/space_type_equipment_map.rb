@@ -25,7 +25,7 @@ templates = [
 ]
 
 prototype_map = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/prototype_space_type_map.json"), symbolize_names: true)
-new_space_types_additional_properties = JSON.parse(File.read("#{File.dirname(__FILE__)}/../../../openstudio-standards/space_type/data/level_1_space_types.json"), symbolize_names: true)
+new_space_types_additional_properties = JSON.parse(File.read("#{File.dirname(__FILE__)}/../../../openstudio-standards/space_type/data/space_types.json"), symbolize_names: true)
 
 # loop through space types and store equipment data
 all_data_json = []

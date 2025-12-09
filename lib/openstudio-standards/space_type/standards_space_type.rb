@@ -11,7 +11,7 @@ module OpenstudioStandards
     # @return [Boolean] returns true if successful, false if not
     def self.set_standards_space_type_additional_properties(model, space_type_field: 'StandardsSpaceType', reset_standards_space_type: false)
       # load space types data
-      space_types_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/level_1_space_types.json"), symbolize_names: true)
+      space_types_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/space_types.json"), symbolize_names: true)
 
       # set additional properties for each space type
       model.getSpaceTypes.each do |space_type|
