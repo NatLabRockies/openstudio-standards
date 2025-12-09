@@ -14,7 +14,7 @@ module OpenstudioStandards
                                 make_up_air_source_zone: nil,
                                 make_up_air_fraction: 0.5)
       # load exhaust fan data
-      data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_exhaust.json"), symbolize_names: true)
+      exhaust_fan_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_exhaust.json"), symbolize_names: true)
 
       # loop through spaces to get standards space information
       space_type_hash = {}
@@ -26,18 +26,33 @@ module OpenstudioStandards
         if space_type_hash.key?(space_type)
           space_type_hash[space_type][:floor_area_m2] += space.floorArea * space.multiplier
         else
-          next unless space_type.standardsBuildingType.is_initialized
-          next unless space_type.standardsSpaceType.is_initialized
 
+          # get exhaust space type from the object
+          next unless space_type.additionalProperties.hasFeature('ventilation_space_type')
 
-          standards_space_type = space_type.standardsSpaceType.get
-          standards_building_type = space_type.standardsBuildingType.get
+          ventilation_space_type = space_type.additionalProperties.getFeatureAsString('ventilation_space_type').to_s
 
-          exhaust_fan_properties = data[:space_types].select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
+          # skip spaces types with no ventilation space type defined
+          next if ventilation_space_type.nil?
+
+          # skip spaces type with with no exhaust fan in this ventilation space type
+          exhaust_fan_properties = exhaust_fan_data.select { |hash| hash[:ventilation_space_type] == ventilation_space_type }
+          next if exhaust_fan_properties.nil?
+
+          # get standards building type and use specific standards building type information if present
+          if space_type.standardsBuildingType.is_initialized
+            standards_building_type = space_type.standardsBuildingType.get
+            building_type_specific_properties = exhaust_fan_data.select { |hash| (hash[:ventilation_space_type] == ventilation_space_type) && (hash[:standards_building_type] == standards_building_type) }
+            unless building_type_specific_properties.empty?
+              exhaust_fan_properties = building_type_specific_properties
+            end
+          end
 
           # skip spaces with no exhaust fan information defined
-          next if exhaust_fan_properties.empty?
-
+          if exhaust_fan_properties.empty?
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HVAC.exhaust', "Space type '#{space_type.name}' has ventilation space type #{ventilation_space_type} but unable to find exhaust fan properties for this ventilation space type.")
+            next
+          end
           exhaust_fan_properties = exhaust_fan_properties[0]
 
           space_type_hash[space_type] = {}
