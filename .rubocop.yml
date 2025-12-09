@@ -5,6 +5,7 @@
 # Where a Cop is not listed, it uses the Rubocop defaults.
 
 AllCops:
+  TargetRubyVersion: 3.2
   Exclude:
     - 'data/**/*'
     - 'test/**/*'
@@ -34,4 +35,7 @@ Style/HashSyntax:
   EnforcedShorthandSyntax: either
 
 Style/HashEachMethods:
+  Enabled: false
+
+Naming/PredicateMethod:
   Enabled: false
