@@ -14,6 +14,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
     args['bldg_type_a'] = 'SuperMarket'
     result = @geo.create_bar_from_building_type_ratios(model, args)
 
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     # equipment list
     result = @refrig.typical_refrigeration_equipment_list(model)
     assert_equal(8, result[:cases].size)
@@ -28,6 +32,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
     args['bldg_type_a'] = 'SecondarySchool'
     result = @geo.create_bar_from_building_type_ratios(model, args)
 
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     # equipment list
     result = @refrig.typical_refrigeration_equipment_list(model)
     assert_equal(0, result[:cases].size)
@@ -36,6 +44,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
 
   def test_typical_refrigeration_equipment_list_deer_ese
     model = OpenStudio::Model::Model.new
+
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     args = {}
     args['total_bldg_floor_area'] = 50000.0
@@ -56,6 +68,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
     args['bldg_type_a'] = 'SuperMarket'
     result = @geo.create_bar_from_building_type_ratios(model, args)
 
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     # default refrigeration system
     result = @refrig.create_typical_refrigeration(model)
     assert(result)
@@ -68,6 +84,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
     args['total_bldg_floor_area'] = 5000.0
     args['bldg_type_a'] = 'SuperMarket'
     result = @geo.create_bar_from_building_type_ratios(model, args)
+
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # default refrigeration system
     result = @refrig.create_typical_refrigeration(model)
@@ -82,6 +102,10 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
     args['total_bldg_floor_area'] = 50000.0
     args['bldg_type_a'] = 'PrimarySchool'
     result = @geo.create_bar_from_building_type_ratios(model, args)
+
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # default refrigeration system
     result = @refrig.create_typical_refrigeration(model)

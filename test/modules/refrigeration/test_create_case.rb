@@ -13,6 +13,11 @@ class TestRefrigerationCreateCase < Minitest::Test
     args['bldg_type_a'] = 'SuperMarket'
     args['bar_division_method'] = 'Multiple Space Types - Simple Sliced'
     result = @geo.create_bar_from_building_type_ratios(model, args)
+
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     zone = model.getThermalZoneByName('Zone SuperMarket Sales A  - Story ground').get
 
     # default case

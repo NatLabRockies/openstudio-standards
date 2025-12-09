@@ -28,12 +28,27 @@ module OpenstudioStandards
         next if space_type.empty?
 
         space_type = space_type.get
-        next if space_type.standardsSpaceType.empty?
-        next if space_type.standardsBuildingType.empty?
 
-        stds_spc_type = space_type.standardsSpaceType.get
-        stds_bldg_type = space_type.standardsBuildingType.get
-        cases = cases_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
+        # get refrigeration space type from the object
+        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
+
+        # skip spaces types with no refrigeration space type defined
+        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
+        next if refrigeration_space_type.nil?
+
+        # skip spaces type with no refrigeration called out in the refrigeration space type
+        cases = cases_hsh.select { |hash| hash[:refrigeration_space_type] == refrigeration_space_type }
+        next if cases.empty?
+
+        # get standards building type and use specific standards building type information if present
+        if space_type.standardsBuildingType.is_initialized
+          standards_building_type = space_type.standardsBuildingType.get
+          building_type_specific_properties = cases_hsh.select { |hash| (r[:standards_building_type] == standards_building_type) && (r[:refrigeration_space_type] == refrigeration_space_type) }
+          unless building_type_specific_properties.empty?
+            cases = building_type_specific_properties
+          end
+        end
+
         unless cases.empty?
           if zone.floorArea > display_case_zone_area_m2
             display_case_zone = zone
@@ -89,12 +104,27 @@ module OpenstudioStandards
         next if space_type.empty?
 
         space_type = space_type.get
-        next if space_type.standardsSpaceType.empty?
-        next if space_type.standardsBuildingType.empty?
 
-        stds_spc_type = space_type.standardsSpaceType.get
-        stds_bldg_type = space_type.standardsBuildingType.get
-        walkins = walkins_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
+        # get refrigeration space type from the object
+        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
+
+        # skip spaces types with no refrigeration space type defined
+        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
+        next if refrigeration_space_type.nil?
+
+        # skip spaces type with no refrigeration called out in the refrigeration space type
+        walkins = walkins_hsh.select { |hash| hash[:refrigeration_space_type] == refrigeration_space_type }
+        next if walkins.empty?
+
+        # get standards building type and use specific standards building type information if present
+        if space_type.standardsBuildingType.is_initialized
+          standards_building_type = space_type.standardsBuildingType.get
+          building_type_specific_properties = walkins_hsh.select { |hash| (r[:standards_building_type] == standards_building_type) && (r[:refrigeration_space_type] == refrigeration_space_type) }
+          unless building_type_specific_properties.empty?
+            walkins = building_type_specific_properties
+          end
+        end
+
         unless walkins.empty?
           if zone.floorArea > walkin_zone_area_m2
             walkin_zone = zone

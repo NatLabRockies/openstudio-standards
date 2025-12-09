@@ -35,9 +35,9 @@ module OpenstudioStandards
           # skip spaces types with no ventilation space type defined
           next if ventilation_space_type.nil?
 
-          # skip spaces type with with no exhaust fan in this ventilation space type
+          # skip spaces type with no exhaust fan in this ventilation space type
           exhaust_fan_properties = exhaust_fan_data.select { |hash| hash[:ventilation_space_type] == ventilation_space_type }
-          next if exhaust_fan_properties.nil?
+          next if exhaust_fan_properties.empty?
 
           # get standards building type and use specific standards building type information if present
           if space_type.standardsBuildingType.is_initialized

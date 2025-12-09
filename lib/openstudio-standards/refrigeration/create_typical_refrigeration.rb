@@ -127,14 +127,30 @@ module OpenstudioStandards
         total_space_floor_area_m2 = space_type.floorArea
         total_space_floor_area_ft2 = OpenStudio.convert(total_space_floor_area_m2, 'm^2', 'ft^2').get
 
-        next unless space_type.standardsSpaceType.is_initialized
-        next unless space_type.standardsBuildingType.is_initialized
+        # get refrigeration space type from the object
+        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
 
-        standards_space_type = space_type.standardsSpaceType.get
-        standards_building_type = space_type.standardsBuildingType.get
+        # skip spaces types with no refrigeration space type defined
+        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
+        next if refrigeration_space_type.nil?
+
+        cases = cases_hsh.select { |hash| hash[:refrigeration_space_type] == refrigeration_space_type }
+        ref_walkins = walkins_hsh.select { |hash| hash[:refrigeration_space_type] == refrigeration_space_type }
+
+        # get standards building type and use specific standards building type information if present
+        if space_type.standardsBuildingType.is_initialized
+          standards_building_type = space_type.standardsBuildingType.get
+          building_type_specific_properties = cases_hsh.select { |hash| (r[:standards_building_type] == standards_building_type) && (r[:refrigeration_space_type] == refrigeration_space_type) }
+          unless building_type_specific_properties.empty?
+            cases = building_type_specific_properties
+          end
+          building_type_specific_properties = walkins_hsh.select { |hash| (r[:standards_building_type] == standards_building_type) && (r[:refrigeration_space_type] == refrigeration_space_type) }
+          unless building_type_specific_properties.empty?
+            ref_walkins = building_type_specific_properties
+          end
+        end
 
         # create list of cases
-        ref_cases = cases_hsh.select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
         ref_cases.each do |ref_case|
           length_modifier = total_space_floor_area_ft2 / ref_case[:reference_space_type_area_ft2]
           case_length = OpenStudio.convert(ref_case[:length_ft] * length_modifier, 'ft', 'm').get
@@ -142,7 +158,6 @@ module OpenstudioStandards
         end
 
         # create list of walkins
-        ref_walkins = walkins_hsh.select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
         ref_walkins.each do |ref_walkin|
           area_modifier = total_space_floor_area_ft2 / ref_walkin[:reference_space_type_area_ft2]
           # round to the nearest 120 ft2, with a minimum size of 80 ft2 and maximum size of 480 ft2

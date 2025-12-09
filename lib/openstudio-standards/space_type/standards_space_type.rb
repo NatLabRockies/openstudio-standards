@@ -40,6 +40,10 @@ module OpenstudioStandards
           space_type.additionalProperties.setFeature('electric_equipment_space_type', electric_equipment_space_type_name)
           natural_gas_equipment_space_type_name = space_type_properties[:natural_gas_equipment_space_type_name].nil? ? 'na' : space_type_properties[:natural_gas_equipment_space_type_name]
           space_type.additionalProperties.setFeature('natural_gas_equipment_space_type', natural_gas_equipment_space_type_name)
+          refrigeration_space_type_name = space_type_properties[:refrigeration_space_type_name].nil? ? 'na' : space_type_properties[:refrigeration_space_type_name]
+          space_type.additionalProperties.setFeature('refrigeration_space_type', refrigeration_space_type_name)
+          service_water_space_type_name = space_type_properties[:service_water_space_type_name].nil? ? 'na' : space_type_properties[:service_water_space_type_name]
+          space_type.additionalProperties.setFeature('service_water_space_type', service_water_space_type_name)
           ventilation_space_type_name = space_type_properties[:ventilation_space_type_name].nil? ? 'na' : space_type_properties[:ventilation_space_type_name]
           space_type.additionalProperties.setFeature('ventilation_space_type', ventilation_space_type_name)
           schedule_set_name = space_type_properties[:schedule_set_name].nil? ? 'na' : space_type_properties[:schedule_set_name]
