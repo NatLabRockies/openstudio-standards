@@ -27,6 +27,7 @@ def convert_space_type_data_to_json(input_csv = 'space_types.csv',
   CSV.foreach(input_csv, headers: true, header_converters: :symbol) do |row|
     space_type_hash = {
       space_type_name: row[:space_type_name],
+      description: row[:description],
       annotation: row[:annotation],
       lighting_space_type_name: row[:lighting_space_type_name],
       electric_equipment_space_type_name: row[:electric_equipment_space_type_name],
@@ -55,6 +56,7 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
   # Prepare the CSV headers
   headers = [
     :space_type_name,
+    :description,
     :annotation,
     :lighting_space_type_name,
     :electric_equipment_space_type_name,
@@ -70,6 +72,7 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
     data.each do |space_type_entry|
       csv << [
         space_type_entry[:space_type_name],
+        space_type_entry[:description],
         space_type_entry[:annotation],
         space_type_entry[:lighting_space_type_name],
         space_type_entry[:electric_equipment_space_type_name],
