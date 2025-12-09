@@ -1,4 +1,10 @@
+# Calculates embodied carbon emissions currently accounting only for building
+# envelopes.
+
 class BTAPCarbon
+
+  # @param attributes     [BTAP::Attributes]
+  # @param standards_data [Hash] Required for window frame conversions.
   def initialize(attributes:, standards_data:)
     @carbon_database  = {}
     @costing_database = BTAPDatabase.instance
@@ -98,11 +104,13 @@ class BTAPCarbon
             (@carbon_report["#{surface_type.underscore}_area_m2"] + surface_area).round(2)
 
           # Get the carbon emissions for each material in the space.
-          if surface.construction_hash.nil?
+          if surface.btap_construction_closest.nil?
             emissions = 0.0
           else
-            emissions = get_carbon_emissions(surface.construction_hash, surface, surface_area) 
-            construction = surface.construction_hash
+
+            # Note that the carbon tallying method must be called per-surface
+            # to account for the perimeter values for each surface.
+            emissions = get_carbon_emissions(surface.btap_construction_closest, surface.vertices, surface_area)
           end
 
           # Calculate the carbon emissions
@@ -117,29 +125,42 @@ class BTAPCarbon
       total_emissions += @carbon_report["#{surface_type.underscore}_carbon"]
     end
 
+    puts "\nEmbodied carbon data successfully generated. Total emboded carbon emissions is " \
+         "#{total_emissions.to_f.round(2)} kg/m^2"
     @carbon_report["total"] = total_emissions
     return @carbon_report
   end
 
-  # Retrieve the carbon emissions given a surface, its construction, and its area.
-  def get_carbon_emissions(construction, surface, surface_area)
+  # Retrieve the carbon emissions given a surface, its construction, and its
+  # area. Surface vertice are required to calculate the perimeter of window
+  # frames.
+  # 
+  # @param construction [BTAP::Construction]
+  # @param vertices     [Array[OpenStudio::Point3d]]
+  # @param surface_area [Float]
+  def get_carbon_emissions(construction, vertices, surface_area)
     total_emissions  = 0.0
-    materials_file   = "materials_#{construction["type"]}"
+    materials_file   = "materials_#{construction.type}"
     id_column        = materials_file + "_id"
     id_layers_column = "material_#{construction["type"]}_id_layers"
     construction[id_layers_column].split(',').each do |material_id|
 
       # Locate the material entry in the carbon database
-      material_carbon = @carbon_database[construction["type"]].find { |row| 
-        row[id_column] == material_id }["Embodied Carbon (A-C)"]
+      material_entry = @carbon_database[construction.type].find { |row| 
+        row[id_column] == material_id }
 
-      if material_carbon.nil?
-        raise("Error: Could not find material with ID #{material_id} in the carbon database.")
+      if material_entry.nil?
+        puts "Error: Could not find material with ID #{material_id} in the carbon database. Skipping."
+        next
       end
 
-      # If the material is glazing, the frame must be calculated by retrieving the perimeter of the window
-      # and converting according to the correct attributes of the window.
-      if construction["type"] == "glazing"
+      material_carbon = material_entry["Embodied Carbon (A-C)"]
+
+
+      # If the material is glazing, the frame must be calculated by retrieving
+      # the perimeter of the window and converting according to the correct
+      # attributes of the window.
+      if construction.type == "glazing"
         fenestration_type = construction["fenestration_type"]
 
         # Skip skylights and doors since we don't have the data for them.
@@ -162,7 +183,7 @@ class BTAPCarbon
         fenestration_number_of_panes = material_costing["fenestration_number_of_panes"]
 
         # Try to get the correct frame material. 
-        frame_material = nil
+        frame_material           = nil
         construction_component   = construction["component"].downcase
         construction_description = construction["description"].downcase
         ["vinyl-wood", "plastic", "aluminum"].each do |material|
@@ -181,7 +202,7 @@ class BTAPCarbon
 
         # Get the conversion factor for the window frame and add it to the total emissions.
         conversion_factor = @frame_m_to_kg[frame_material][fenestration_type][fenestration_number_of_panes] 
-        perimeter = BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
+        perimeter = BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: vertices)
         total_emissions += material_frame * perimeter * conversion_factor
       end
 
