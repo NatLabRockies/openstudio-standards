@@ -45,9 +45,6 @@ def entryways_csv_to_json(input_csv = 'entryways.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-entryways_csv_to_json
-
 def entryways_json_to_csv(input_json = 'entryways.json',
                           output_csv = 'entryways.csv')
   # Read the JSON file

@@ -173,9 +173,6 @@ def lighting_technology_csv_to_json(input_csv = 'lighting_technology.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-lighting_technology_csv_to_json
-
 def lighting_technology_json_to_csv(input_json = 'lighting_technology.json',
                                     output_csv = 'lighting_technology.csv')
   # Read the JSON file

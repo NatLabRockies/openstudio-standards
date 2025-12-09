@@ -39,9 +39,6 @@ def parking_csv_to_json(input_csv = 'parking.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-parking_csv_to_json
-
 def parking_json_to_csv(input_json = 'parking.json',
                         output_csv = 'parking.csv')
   # Read the JSON file

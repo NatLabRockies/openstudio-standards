@@ -33,9 +33,6 @@ def typical_exhaust_csv_to_json(input_csv = 'typical_exhaust.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-typical_exhaust_csv_to_json
-
 def typical_exhaust_json_to_csv(input_json = 'typical_exhaust.json',
                                 output_csv = 'typical_exhaust.csv')
   # Read the JSON file

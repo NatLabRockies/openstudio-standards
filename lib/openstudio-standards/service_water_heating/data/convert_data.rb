@@ -70,9 +70,6 @@ def csv_to_json(input_csv = 'typical_water_use_equipment.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-csv_to_json
-
 def json_to_csv(input_json = 'typical_water_use_equipment.json',
                 output_csv = 'typical_water_use_equipment_converted.csv')
   # Read the JSON file
