@@ -32,17 +32,23 @@ module BTAP
     attr_reader :surfaces_hash
   end
 
-  # For surfaces and subsurfaces, BTAP Costing and Carbon require a list of
-  # constructions for each RSI value in order to perform a linear regression to
-  # best estimate the respective cost and carbon emissions per surface.
+  # For surfaces and subsurfaces, BTAP Costing requires a list of constructions
+  # for each RSI value in order to perform a linear regression to best estimate
+  # the respective cost and carbon emissions per surface. BTAP Carbon requires
+  # only the construction with the closest RSI value since constructions
+  # have to be calculated per-surface to account for window frame perimeters.
+  # TODO: BTAP Carbon could use the same regression technique as BTAP Costing,
+  # but that isn't implemented yet.
   class OpenStudio::Model::Surface
-    attr_reader :rsi # [Float]
-    attr_reader :btap_constructions # [Array[BTAP::Construction]]
+    attr_reader :rsi                       # [Float]
+    attr_reader :btap_construction_closest # [BTAP::Construction]
+    attr_reader :btap_constructions        # [Array[BTAP::Construction]]
   end
 
   class OpenStudio::Model::SubSurface
-    attr_reader :rsi # [Float]
-    attr_reader :btap_constructions # [Array[BTAP::Construction]]
+    attr_reader :rsi                       # [Float]
+    attr_reader :btap_construction_closest # [BTAP::Construction]
+    attr_reader :btap_constructions        # [Array[BTAP::Construction]]
   end
 
   # Wrapper class for construction parameters. Note the "cost" and "carbon"
@@ -169,20 +175,39 @@ module BTAP
     # using the BTAP::Structure and BTAP::Bridging classes. The calculated RSI
     # and a reference to a wrapper class [BTAP::Construction] is assigned to
     # each surface.
-    #
+    # TODO: If surface types always have the same constructions, this should be
+    # refactored and separated to be simpler.
+    # 
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_construction_tbd(surface, surface_type)
-      tbd_surface_type        = @surface_type_tbd_map[surface_type]
-      construction_name       = @surface_types_to_assemblies[surface_type]
-      construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
-      surface_rsi             = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
-      btap_constructions      = []
+      tbd_surface_type          = @surface_type_tbd_map[surface_type]
+      construction_name         = @surface_types_to_assemblies[surface_type]
+      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
+      surface_rsi               = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
+      closest_rsi               = construction_candidates.keys.map(&:to_f).min_by { |rsi| 
+                                    (surface_rsi - rsi).abs }.to_s
+      btap_constructions        = []
+      construction_hash_closest = construction_candidates[closest_rsi]
+
+      # Initialize the construction with the closest RSI if it doesn't exist
+      # yet.
+      unless @constructions.has_key?(construction_hash_closest["id"])
+        @constructions[construction_hash_closest["id"]] = BTAP::Construction.new(
+          construction_name,
+          construction_hash_closest["id"],
+          construction_hash_closest["description"],
+          construction_hash_closest["type"],
+          construction_hash_closest["id_layers"],
+          closest_rsi)
+
+        btap_construction_closest = @constructions[construction_hash_closest["id"]]
+      end
 
       construction_candidates.each do |construction_rsi, construction_hash|
 
-        # Hash a list of constructions by their ID. If a construction was already
-        # initialized, assign the reference of the already created one.
+        # Hash a list of constructions by their ID. If a construction was
+        # already initialized, assign the reference of the already created one.
         unless @constructions.has_key?(construction_hash["id"])
           @constructions[construction_hash["id"]] = BTAP::Construction.new(
             construction_name,
@@ -195,6 +220,7 @@ module BTAP
         btap_constructions << @constructions[construction_hash["id"]]
       end
 
+      surface.instance_variable_set(:@btap_construction_closest, btap_construction_closest)
       surface.instance_variable_set(:@btap_constructions, btap_constructions)
       surface.instance_variable_set(:@rsi, surface_rsi)
     end
