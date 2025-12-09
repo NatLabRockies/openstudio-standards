@@ -157,12 +157,11 @@ class BTAPCarbon
 
       material_carbon = material_entry["Embodied Carbon (A-C)"]
 
-
       # If the material is glazing, the frame must be calculated by retrieving
       # the perimeter of the window and converting according to the correct
       # attributes of the window.
       if construction.type == "glazing"
-        fenestration_type = construction["fenestration_type"]
+        fenestration_type = construction.get_fenestration_type
 
         # Skip skylights and doors since we don't have the data for them.
         # Only consider fixed and operable windows.
@@ -170,6 +169,9 @@ class BTAPCarbon
           puts "Fenestration type #{fenestration_type} is not defined for carbon calculation, skipping this component."
           next
         end
+
+        fenestration_number_of_panes = construction.get_number_of_panes
+        frame_material               = construction.get_frame_material
 
         material_frame = @carbon_database["frame"].find { |row|
           row[id_column] == material_id }["Embodied Carbon (A-C)"]
@@ -180,8 +182,6 @@ class BTAPCarbon
         if material_costing.nil?
           raise("Error: Could not find material with ID #{material_id} in the costing database.")
         end
-
-        fenestration_number_of_panes = material_costing["fenestration_number_of_panes"]
 
         # Try to get the correct frame material. 
         frame_material           = nil
