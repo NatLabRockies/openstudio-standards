@@ -13,6 +13,7 @@ require 'json'
 # lighting_space_type_name: The lighting typical to this space type
 # electric_equipment_space_type_name: The electric equipment typical to this space type
 # natural_gas_equipment_space_type_name: The natural gas equipment typical to this space type
+# refrigeration_space_type_name: The refrigeration typical to this space type
 # service_water_space_type_name: The service water typical to this space type
 # ventilation_space_type_name: The ventilation typical to this space type.
 # schedule_set_name: The schedule set typical to this space type.
@@ -29,7 +30,8 @@ def convert_space_type_data_to_json(input_csv = 'space_types.csv',
       annotation: row[:annotation],
       lighting_space_type_name: row[:lighting_space_type_name],
       electric_equipment_space_type_name: row[:electric_equipment_space_type_name],
-      natural_gas_equipment_space_type_name: row[:atural_gas_equipment_space_type_name],
+      natural_gas_equipment_space_type_name: row[:natural_gas_equipment_space_type_name],
+      refrigeration_space_type_name: row[:refrigeration_space_type_name],
       service_water_space_type_name: row[:service_water_space_type_name],
       ventilation_space_type_name: row[:ventilation_space_type_name],
       schedule_set_name: row[:schedule_set_name]
@@ -57,6 +59,7 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
     :lighting_space_type_name,
     :electric_equipment_space_type_name,
     :natural_gas_equipment_space_type_name,
+    :refrigeration_space_type_name,
     :service_water_space_type_name,
     :ventilation_space_type_name,
     :schedule_set_name
@@ -71,7 +74,8 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
         space_type_entry[:lighting_space_type_name],
         space_type_entry[:electric_equipment_space_type_name],
         space_type_entry[:natural_gas_equipment_space_type_name],
-        nil,
+        space_type_entry[:refrigeration_space_type_name],
+        space_type_entry[:service_water_space_type_name],
         space_type_entry[:ventilation_space_type_name],
         space_type_entry[:schedule_set_name]
       ]
