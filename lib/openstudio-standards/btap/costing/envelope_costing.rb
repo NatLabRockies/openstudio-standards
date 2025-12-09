@@ -200,12 +200,12 @@ class BTAPCosting
     total_with_op = 0.0
     material_cost_pairs = []
     construction.id_layers.each do |material_index|
-      material = materials_database.find { |data| data[material_id].to_s == material_index.to_s }
+      material = materials_database.find { |data| data[material_id] == material_index }
       if material.nil?
         puts "Material ID #{material_index} was not found in the materials_#{construction.type} database. " \
              "Skipping. This construction will be inaccurate."
       else
-        costing_data = @costing_database['costs'].detect { |data| data['id'].to_s == material['id'].to_s }
+        costing_data = @costing_database['costs'].detect { |data| data['id'] == material['id'] }
         if costing_data.nil?
           puts "Material ID #{material_index} was not found in the costing database. Skipping. This construction " \
                "will be inaccurate."
@@ -219,13 +219,13 @@ class BTAPCosting
           if construction.type == 'glazing' and material['quantity'].to_f == 0.0
             material['quantity'] = '1.0'
           end
-          material_cost  = costing_data['baseCosts']['materialOpCost'].to_f * material['material_mult'].to_f
-          labour_cost    = costing_data['baseCosts']['laborOpCost'].to_f    * material['labour_mult'].to_f
-          equipment_cost = costing_data['baseCosts']['equipmentOpCost'].to_f
+          material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult']
+          labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult']
+          equipment_cost = costing_data['baseCosts']['equipmentOpCost']
           layer_cost     = (((material_cost * regional_material / 100.0) + \
                            (labour_cost * regional_installation / 100.0) + equipment_cost) * \
                            material['quantity'].to_f).round(2)
-          material_cost_pairs << {material_id.to_s => material_index, 'cost' => layer_cost}
+          material_cost_pairs << {material_id => material_index, 'cost' => layer_cost}
           total_with_op += layer_cost
         end
       end

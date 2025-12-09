@@ -150,7 +150,8 @@ class BTAPCarbon
         row[id_column] == material_id }
 
       if material_entry.nil?
-        puts "Error: Could not find material with ID #{material_id} in the carbon database. Skipping."
+        puts "Error: Could not find #{construction.type} material with ID #{material_id} in the carbon database. " \
+             "Skipping."
         next
       end
 
