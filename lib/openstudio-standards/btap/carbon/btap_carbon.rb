@@ -167,24 +167,6 @@ class BTAPCarbon
           raise("Error: Could not find material with ID #{material_id} in the costing database.")
         end
 
-        # Try to get the correct frame material. 
-        frame_material           = nil
-        construction_component   = construction["component"].downcase
-        construction_description = construction["description"].downcase
-        ["vinyl-wood", "plastic", "aluminum"].each do |material|
-          if material in construction_component
-            frame_material = material
-            break
-          elsif material in construction_description
-            frame_material = material
-            break
-          end
-        end
-
-        if frame_material.nil?
-          raise("Error: Could not find frame material for glazing ID #{material_id} in constructions_glazing.csv.")
-        end
-
         # Get the conversion factor for the window frame and add it to the total emissions.
         conversion_factor = @frame_m_to_kg[frame_material][fenestration_type][fenestration_number_of_panes] 
         perimeter = BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: vertices)
