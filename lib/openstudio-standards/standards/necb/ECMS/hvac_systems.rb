@@ -2738,7 +2738,10 @@ class ECMS
     search_criteria['name'] = eqpt_name
     # Get the capacity
     capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = [1.0,capacity_w].max
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedTotalCoolingCapacity(capacity_w)
+    end
+    capacity_w = [1.0, capacity_w].max
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Lookup performance curves
@@ -2869,7 +2872,10 @@ class ECMS
     search_criteria['name'] = eqpt_name
     # Get the capacity
     capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_heating_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = [1.0,capacity_w].max
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedHeatingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedHeatingCapacity(capacity_w)
+    end
+    capacity_w = [1.0, capacity_w].max
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Lookup performance curves
@@ -3267,6 +3273,9 @@ class ECMS
                                                                rename = false)
 
     capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedTotalCoolingCapacity(capacity_w)
+    end
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
@@ -3336,6 +3345,9 @@ class ECMS
                                                                rename = false)
 
     capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_heating_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedHeatingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedHeatingCapacity(capacity_w)
+    end
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
