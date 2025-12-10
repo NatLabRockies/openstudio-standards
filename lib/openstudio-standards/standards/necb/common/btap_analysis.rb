@@ -1,10 +1,10 @@
 require 'openstudio'
 
 # BTAP Analysis:
-#   Class to instantiate post-analysis mechanisms like costing or carbon 
+#   Class to instantiate post-analysis mechanisms like costing or carbon
 #   calculation.
-#   Can be done during a simulation or without one given an OSM file and its SQL 
-#   file, along with a few other parameters. 
+#   Can be done during a simulation or without one given an OSM file and its SQL
+#   file, along with a few other parameters.
 
 # Abstract class, only instantiate BTAPNoSimAnalysis or BTAPDatapointAnalysis.
 class BTAPAnalysis
@@ -18,20 +18,21 @@ class BTAPAnalysis
     costing = BTAPCosting.new(costs_csv: costs_csv, factors_csv: factors_csv, attributes: @attributes)
 
     cost_result, btap_items = costing.cost_audit_all(
-      model: @model, 
-      prototype_creator: @standard, 
+      model: @model,
+      prototype_creator: @standard,
       template_type: @template)
 
     if not @qaqc.nil?
       @qaqc[:costing_information] = cost_result
     end
 
-    cost_result["openstudio-version"] = OpenstudioStandards::VERSION
-    File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f| 
+    # disable openstudio-version; for debugging only
+    # cost_result["openstudio-version"] = OpenstudioStandards::VERSION
+    File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f|
       f.write(JSON.pretty_generate(cost_result, allow_nan: true))
     end
     puts "Wrote File cost_results.json in #{@output_folder} "
-    
+
     return cost_result
   end
 
@@ -42,11 +43,11 @@ class BTAPAnalysis
     if not @qaqc.nil?
       @qaqc[:carbon_information] = carbon_result
     end
-    
-    File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f| 
+
+    File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f|
       f.write(JSON.pretty_generate(carbon_result, allow_nan: true))
     end
-    puts "Wrote File carbon_results.json in #{@output_folder} "    
+    puts "Wrote File carbon_results.json in #{@output_folder} "
 
     return carbon_result
   end
@@ -63,7 +64,7 @@ class BTAPNoSimAnalysis < BTAPAnalysis
     @analysis_id  = analysis_id
     @attributes   = BTAP::Attributes.new(@model, @standard)
     @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
-    @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)             
+    @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
   end
 end
 

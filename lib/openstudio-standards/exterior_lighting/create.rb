@@ -217,7 +217,7 @@ module OpenstudioStandards
                                                                                         units: 'W/ft^2',
                                                                                         multiplier: multiplier,
                                                                                         schedule: ext_lights_sch_facade_and_landscape,
-                                                                                        control_option: control_option)
+                                                                                        control_option: 'ScheduleNameOnly')
         exterior_lights << ext_lights
         installed_power += power * multiplier
       end
