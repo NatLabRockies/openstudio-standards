@@ -37,7 +37,7 @@ class BTAPCosting
       if space.spaceType.empty? or 
          space.spaceType.get.standardsSpaceType.empty? or 
          space.spaceType.get.standardsBuildingType.empty?
-        raise("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this" \
+        raise("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this " \
               "space for costing.")
       end
 

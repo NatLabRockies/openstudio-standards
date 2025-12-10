@@ -73,6 +73,8 @@ module BTAP
     # @param cost        [Float]
     # @param carbon      [Float]
     def initialize(name, id, description, type, id_layers, rsi)
+      @@costing_database = BTAPDatabase.instance
+
       @name        = name
       @id          = id
       @description = description
@@ -82,13 +84,28 @@ module BTAP
       @cost        = nil
     end
 
-    # Fenestration-related accessor methods.
-    # TODO: implement these
+    # Fenestration-related accessor methods. Not stored explicitly since these
+    # are required only for exterior windows when running BTAP Carbon.
     def get_fenestration_type
+      fenestration_type = @@costing_database["constructions"]["window"][@name][@rsi]["fenestration_type"]
+      if fenestration_type.nil?
+        raise("Could not find fenestration type for construction #{@name}, RSI = #{@rsi}") 
+      end
+      return fenestration_type
     end
     def get_frame_material
+      frame_material = @@costing_database["constructions"]["window"][@name][@rsi]["frame_material"]
+      if fenestration_type.nil?
+        raise("Could not find frame material for construction #{@name}, RSI = #{@rsi}") 
+      end
+      return frame_material
     end
     def get_number_of_panes
+      number_of_panes = @@costing_database["constructions"]["window"][@name][@rsi]["fenestration_number_of_panes"]
+      if fenestration_type.nil?
+        raise("Could not find number of panes for construction #{@name}, RSI = #{@rsi}") 
+      end
+      return number_of_panes
     end
   end
 
