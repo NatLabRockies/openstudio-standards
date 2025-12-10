@@ -9,7 +9,9 @@ class String
 end
 
 class BTAPCosting
-  def cost_audit_envelope
+
+  # @param prototype_creator [Standard]
+  def cost_audit_envelope(prototype_creator)
 
     # Populate the `costing_report` hash to report costing details per surface
     # type.
@@ -157,9 +159,6 @@ class BTAPCosting
               'note'          => "Surf ##{num_surface_types}: #{notes}"
             }
           else
-
-            # Not using += for @costing_report additions so that output can be
-            # properly rounded.
             row['area']          = (row['area'] + surfArea).round(2)
             row['cost']          = (row['cost'] + surfCost).round(2)
             row['cost_per_area'] = ((row['cost'] / row['area']).to_f.round(2))
@@ -177,6 +176,23 @@ class BTAPCosting
         end # surfaces of surface type
       end # surface_type
     end # spaces
+
+    # Parapets aren't explicitly modeled in an OpenStudio model. If TBD was run,
+    # account for parapets by taking the calculated parapet length and multiply
+    # it by 1m to factor it into the total cost. So, take the average cost of
+    # the exterior walls and multiply it buy the total parapet length.
+    if @attributes.use_tbd
+      number_of_walls = 0
+      @attributes.spaces.each do |space|
+        space.surfaces_hash["ExteriorWall"].each do |surface|
+          number_of_walls += 1
+        end
+      end        
+      average_wall_cost = @costing_report["envelope"]["exterior_wall_cost"] / number_of_walls
+      parapet_cost_per_m2 = prototype_creator.tbd.tally[:edges][:parapet].values.first * average_wall_cost
+      @costing_report["envelope"]["parapet_cost"] = parapet_cost_per_m2.round(2)
+      totEnvCost += parapet_cost_per_m2
+    end
 
     @costing_report["envelope"]["total_envelope_cost"] = totEnvCost.to_f.round(2)
     puts "\nEnvelope costing data successfully generated. Total envelope cost is $#{totEnvCost.to_f.round(2)}"
@@ -219,8 +235,8 @@ class BTAPCosting
           if construction.type == 'glazing' and material['quantity'].to_f == 0.0
             material['quantity'] = '1.0'
           end
-          material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult']
-          labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult']
+          material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult'].to_f
+          labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult'].to_f
           equipment_cost = costing_data['baseCosts']['equipmentOpCost']
           layer_cost     = (((material_cost * regional_material / 100.0) + \
                            (labour_cost * regional_installation / 100.0) + equipment_cost) * \

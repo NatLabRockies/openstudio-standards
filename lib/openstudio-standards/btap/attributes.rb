@@ -2,8 +2,8 @@
 # and parameters for convenience. Additionally, it also houses methods
 # involving the pre-processing of an OpenStudio model for shared use in one
 # of BTAP's facilities, for now BTAP Costing and BTAP Carbon. Currently,
-# this pre-processing only involves retrieving the correct constructions for
-# envelopes.
+# this pre-processing involves retrieving the correct constructions for
+# envelopes and a few attributes for thermal bridging.
 
 require "openstudio"
 
@@ -99,6 +99,7 @@ module BTAP
     attr_reader :spaces
     attr_reader :surface_types
     attr_reader :surface_types_to_assemblies
+    attr_reader :use_tbd
     
     # @param model    [OpenStudio::Model::Model]
     # @param standard [Standard]
@@ -141,8 +142,10 @@ module BTAP
       @spaces        = [] 
       @constructions = {}
 
+      @use_tbd = !(@standard.tbd.nil?)
+
       self.compile_model
-      self.compile_constructions((not @standard.tbd.nil?))
+      self.compile_constructions(@use_tbd)
     end
 
     # Helper method which retrieves all compiled constructions.

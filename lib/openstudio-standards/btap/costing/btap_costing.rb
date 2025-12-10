@@ -75,7 +75,7 @@ class BTAPCosting
                      ventilation_costing: true,
                      zone_system_costing: true,
                      renewables_costing: true,
-                     thermal_bridging_costing: true,
+                     thermal_bridging_costing: @attributes.use_tbd,
                      template_type: nil
   )
     # Create a Hash to collect costing data.
@@ -115,9 +115,7 @@ class BTAPCosting
     # Find the mechanical room
     mech_room, cond_spaces = prototype_creator.find_mech_room(model)
 
-    thermal_bridging_costing = false ? prototype_creator.tbd.nil? : true
-
-    envCost = envelope_costing ? self.cost_audit_envelope : 0.0
+    envCost = envelope_costing ? self.cost_audit_envelope(prototype_creator) : 0.0
     thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(prototype_creator) : 0.0
     lgtCost = lighting_costing ? self.cost_audit_lighting(model, prototype_creator) : 0.0
     boilerCost = boilers_costing ? self.boiler_costing(model, prototype_creator) : 0.0
