@@ -179,19 +179,13 @@ class BTAPCosting
 
     # Parapets aren't explicitly modeled in an OpenStudio model. If TBD was run,
     # account for parapets by taking the calculated parapet length and multiply
-    # it by 1m to factor it into the total cost. So, take the average cost of
-    # the exterior walls and multiply it buy the total parapet length.
+    # it by 1m to factor it into the total cost. So, take the cost of the
+    # exterior walls per m^2 and multiply it buy the total parapet length.
     if @attributes.use_tbd
-      number_of_walls = 0
-      @attributes.spaces.each do |space|
-        space.surfaces_hash["ExteriorWall"].each do |surface|
-          number_of_walls += 1
-        end
-      end        
-      average_wall_cost = @costing_report["envelope"]["exterior_wall_cost"] / number_of_walls
-      parapet_cost_per_m2 = prototype_creator.tbd.tally[:edges][:parapet].values.first * average_wall_cost
-      @costing_report["envelope"]["parapet_cost"] = parapet_cost_per_m2.round(2)
-      totEnvCost += parapet_cost_per_m2
+      wall_cost_per_m2 = @costing_report["envelope"]["exterior_wall_cost_per_m2"]
+      parapet_cost = prototype_creator.tbd.tally[:edges][:parapet].values.first * wall_cost_per_m2
+      @costing_report["envelope"]["parapet_cost"] = parapet_cost.round(2)
+      totEnvCost += parapet_cost
     end
 
     @costing_report["envelope"]["total_envelope_cost"] = totEnvCost.to_f.round(2)
