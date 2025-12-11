@@ -140,13 +140,13 @@ module OpenstudioStandards
         # get standards building type and use specific standards building type information if present
         if space_type.standardsBuildingType.is_initialized
           standards_building_type = space_type.standardsBuildingType.get
-          building_type_specific_properties = cases_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
+          building_type_specific_properties = ref_cases.select { |h| (h[:standards_building_type] == standards_building_type) }
           if building_type_specific_properties.empty?
             ref_cases = ref_cases.select { |h| h[:standards_building_type] == nil }
           else
             ref_cases = building_type_specific_properties
           end
-          building_type_specific_properties = walkins_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
+          building_type_specific_properties = ref_walkins.select { |h| (h[:standards_building_type] == standards_building_type) }
           if building_type_specific_properties.empty?
             ref_walkins = ref_walkins.select { |h| h[:standards_building_type] == nil }
           else
