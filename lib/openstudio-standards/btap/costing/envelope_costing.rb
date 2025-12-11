@@ -56,7 +56,7 @@ class BTAPCosting
 
           # We don't need all the information, just the rsi and cost. Window
           # costs from the API data use U-value, which was converted to rsi for
-          # cost_range_array above
+          # cost_range_array above.
           cost_range_hash = {}
           if surface_is_glazing
             cost_range_array = surface.btap_constructions.map do |construction|
@@ -165,7 +165,8 @@ class BTAPCosting
             row['note']         += " / #{num_surface_types}: #{notes}"
           end
 
-          # Not using += for @costing_report additions so that output can be properly rounded
+          # Not using += for @costing_report additions so that output can be
+          # properly rounded.
           @costing_report["envelope"]["#{surface_type.underscore}_cost"] = (
             @costing_report["envelope"]["#{surface_type.underscore}_cost"] + surfCost).round(2)
           @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] = (
