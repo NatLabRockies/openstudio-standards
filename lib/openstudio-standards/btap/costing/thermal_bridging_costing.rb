@@ -15,6 +15,7 @@ class BTAPCosting
         material_cost     = costing_data["baseCosts"]["materialOpCost"] * material["material_mult"].to_f
         labour_cost       = costing_data["baseCosts"]["laborOpCost"] * material["labour_mult"].to_f
         equipment_cost    = costing_data["baseCosts"]["equipmentOpCost"]
+        tbd_quantity      = OpenStudio.convert(tbd_quantity, "m", "ft").get # Convert from m to ft
         material_quantity = Math.sqrt(material["quantity"].to_f) # Convert from ft^2 to ft
 
         # Calculate the total cost. Notable units and conversion factors: 

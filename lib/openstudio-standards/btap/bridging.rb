@@ -1176,10 +1176,6 @@ module BTAP
               material_quantities[id] = 0.0
             end
 
-            # Note that "quantity" is in meters but the "scale" is in $ / feet. 
-            # Since RSMeans is used to cost materials, convert the quantity to 
-            # feet.
-            quantity = OpenStudio.convert(quantity.to_f, "m", "ft").get
             material_quantities[id] = material_quantities[id] + scale.to_f * quantity 
           end
         end
