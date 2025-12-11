@@ -2737,8 +2737,11 @@ class ECMS
     search_criteria = {}
     search_criteria['name'] = eqpt_name
     # Get the capacity
-    capacity_w = airconditioner_variablerefrigerantflow_cooling_find_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = [1.0,capacity_w].max
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedTotalCoolingCapacity(capacity_w)
+    end
+    capacity_w = [1.0, capacity_w].max
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Lookup performance curves
@@ -2868,8 +2871,11 @@ class ECMS
     search_criteria = {}
     search_criteria['name'] = eqpt_name
     # Get the capacity
-    capacity_w = airconditioner_variablerefrigerantflow_heating_find_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = [1.0,capacity_w].max
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_heating_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedHeatingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedHeatingCapacity(capacity_w)
+    end
+    capacity_w = [1.0, capacity_w].max
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Lookup performance curves
@@ -3266,7 +3272,10 @@ class ECMS
                                                                search_criteria,
                                                                rename = false)
 
-    capacity_w = airconditioner_variablerefrigerantflow_cooling_find_capacity(airconditioner_variablerefrigerantflow)
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedTotalCoolingCapacity(capacity_w)
+    end
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
@@ -3335,7 +3344,10 @@ class ECMS
                                                                search_criteria,
                                                                rename = false)
 
-    capacity_w = airconditioner_variablerefrigerantflow_heating_find_capacity(airconditioner_variablerefrigerantflow)
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_heating_capacity(airconditioner_variablerefrigerantflow)
+    if airconditioner_variablerefrigerantflow.autosizedGrossRatedHeatingCapacity.is_initialized
+      airconditioner_variablerefrigerantflow.setGrossRatedHeatingCapacity(capacity_w)
+    end
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
@@ -3420,40 +3432,6 @@ class ECMS
       capacity_w = coil_heating_dx_variable_speed.autosizedRatedHeatingCapacityAtSelectedNominalSpeedLevel.get
     else
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingDXVariableSpeed', "For #{coil_heating_dx_variable_speed.name} capacity is not available.")
-      return 0.0
-    end
-
-    return capacity_w
-  end
-
-  # =============================================================================================================================
-  # Find cooling capacity for "AirConditionerVariableRefrigerantFlow" object
-  def airconditioner_variablerefrigerantflow_cooling_find_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = nil
-    if airconditioner_variablerefrigerantflow.ratedTotalCoolingCapacity.is_initialized
-      capacity_w = airconditioner_variablerefrigerantflow.ratedTotalCoolingCapacity.get
-    elsif airconditioner_variablerefrigerantflow.autosizedRatedTotalCoolingCapacity.is_initialized
-      capacity_w = airconditioner_variablerefrigerantflow.autosizedRatedTotalCoolingCapacity.get
-      airconditioner_variablerefrigerantflow.setRatedTotalCoolingCapacity(capacity_w)
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{airconditioner_variablerefrigerantflow.name} cooling capacity is not available.")
-      return 0.0
-    end
-
-    return capacity_w
-  end
-
-  # =============================================================================================================================
-  # Find heating capacity for "AirConditionerVariableRefrigerantFlow" object
-  def airconditioner_variablerefrigerantflow_heating_find_capacity(airconditioner_variablerefrigerantflow)
-    capacity_w = nil
-    if airconditioner_variablerefrigerantflow.ratedTotalHeatingCapacity.is_initialized
-      capacity_w = airconditioner_variablerefrigerantflow.ratedTotalHeatingCapacity.get
-    elsif airconditioner_variablerefrigerantflow.autosizedRatedTotalHeatingCapacity.is_initialized
-      capacity_w = airconditioner_variablerefrigerantflow.autosizedRatedTotalHeatingCapacity.get
-      airconditioner_variablerefrigerantflow.setRatedTotalHeatingCapacity(capacity_w)
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{airconditioner_variablerefrigerantflow.name} heating capacity is not available.")
       return 0.0
     end
 
