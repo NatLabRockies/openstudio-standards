@@ -34,15 +34,30 @@ module OpenstudioStandards
         total_space_floor_area_ft2 = OpenStudio.convert(total_space_floor_area_m2, 'm^2', 'ft^2').get
         space_type = space.spaceType.get
 
-        next unless space_type.standardsSpaceType.is_initialized
-        next unless space_type.standardsBuildingType.is_initialized
 
-        standards_space_type = space_type.standardsSpaceType.get
-        standards_building_type = space_type.standardsBuildingType.get
+        # get refrigeration space type from the object
+        next unless space_type.additionalProperties.hasFeature('service_water_space_type')
+
+        # skip spaces types with no refrigeration space type defined
+        service_water_space_type = space_type.additionalProperties.getFeatureAsString('service_water_space_type').to_s
+        next if service_water_space_type.nil?
 
         # load typical water use equipment data
         data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_water_use_equipment.json"), symbolize_names: true)
-        space_type_properties = data[:space_types].select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
+        space_type_properties = data[:service_water_space_types].select { |hash| (hash[:service_water_space_type] == service_water_space_type) }
+
+        # get standards building type and use specific standards building type information if present
+        if space_type.standardsBuildingType.is_initialized
+          standards_building_type = space_type.standardsBuildingType.get
+          building_type_specific_properties = space_type_properties.select { |h| (h[:standards_building_type] == standards_building_type) }
+          if building_type_specific_properties.empty?
+            space_type_properties = space_type_properties.select { |h| h[:standards_building_type] == nil }
+          else
+            space_type_properties = building_type_specific_properties
+          end
+        else
+          space_type_properties = space_type_properties.select { |h| h[:standards_building_type] == nil }
+        end
 
         # skip spaces with no equipment defined
         next if space_type_properties.empty?

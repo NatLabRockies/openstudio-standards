@@ -27,13 +27,13 @@ def csv_to_json(input_csv = 'typical_water_use_equipment.csv',
                 output_json = 'typical_water_use_equipment.json')
   # Initialize the structure
   result = {
-    space_types: []
+    service_water_space_types: []
   }
 
   # Read the CSV file
   CSV.foreach(input_csv, headers: true, header_converters: :symbol) do |row|
-    space_type = row[:space_type]
-    building_type = row[:building_type]
+    service_water_space_type = row[:service_water_space_type]
+    standards_building_type = row[:standards_building_type]
 
     # Add water_use_equipment entry
     water_use_entry = {
@@ -48,17 +48,17 @@ def csv_to_json(input_csv = 'typical_water_use_equipment.csv',
     }
 
     # Initialize a new space_type entry if it doesn't exist
-    space_type_hash = result[:space_types].select { |hash| (hash[:space_type] == space_type) && (hash[:building_type] == building_type) }
+    space_type_hash = result[:service_water_space_types].select { |hash| (hash[:service_water_space_type] == service_water_space_type) && (hash[:standards_building_type] == standards_building_type) }
     space_type_hash = space_type_hash[0]
 
     if space_type_hash.nil?
       space_type_hash = {
-        space_type: space_type,
-        building_type: building_type,
+        service_water_space_type: service_water_space_type,
+        standards_building_type: standards_building_type,
         water_use_equipment: [water_use_entry]
       }
       # Add the space_type_hash to the result array
-      result[:space_types] << space_type_hash
+      result[:service_water_space_types] << space_type_hash
     else
       space_type_hash[:water_use_equipment] << water_use_entry
     end
@@ -71,14 +71,14 @@ def csv_to_json(input_csv = 'typical_water_use_equipment.csv',
 end
 
 def json_to_csv(input_json = 'typical_water_use_equipment.json',
-                output_csv = 'typical_water_use_equipment_converted.csv')
+                output_csv = 'typical_water_use_equipment.csv')
   # Read the JSON file
   data = JSON.parse(File.read(input_json), symbolize_names: true)
 
   # Prepare the CSV headers
   headers = [
-    :space_type,
-    :building_type,
+    :service_water_space_type,
+    :standards_building_type,
     :equipment_name,
     :peak_flow_rate_gph,
     :peak_flow_rate_gph_per_floor_area_ft2,
@@ -91,14 +91,14 @@ def json_to_csv(input_json = 'typical_water_use_equipment.json',
 
   # Write the CSV file
   CSV.open(output_csv, 'w', write_headers: true, headers: headers) do |csv|
-    data[:space_types].each do |space_type_entry|
-      space_type = space_type_entry[:space_type]
-      building_type = space_type_entry[:building_type]
+    data[:service_water_space_types].each do |space_type_entry|
+      service_water_space_type = space_type_entry[:service_water_space_type]
+      standards_building_type = space_type_entry[:standards_building_type]
 
       space_type_entry[:water_use_equipment].each do |equipment|
         csv << [
-          space_type,
-          building_type,
+          service_water_space_type,
+          standards_building_type,
           equipment[:equipment_name],
           equipment[:peak_flow_rate_gph],
           equipment[:peak_flow_rate_gph_per_floor_area_ft2],

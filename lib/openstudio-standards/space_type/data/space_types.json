@@ -1,5 +1,17 @@
 [
   {
+    "space_type_name": "apartment",
+    "description": null,
+    "annotation": null,
+    "lighting_space_type_name": "living_quarters_lighting",
+    "electric_equipment_space_type_name": "apartment_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "refrigeration_space_type_name": null,
+    "service_water_space_type_name": "apartment",
+    "ventilation_space_type_name": "apartment_ventilation",
+    "schedule_set_name": "apartment"
+  },
+  {
     "space_type_name": "atrium",
     "description": null,
     "annotation": null,
@@ -199,7 +211,7 @@
     "electric_equipment_space_type_name": "emergency_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "emergency_room",
     "ventilation_space_type_name": "emergency_room_ventilation",
     "schedule_set_name": "emergency_room"
   },
@@ -223,7 +235,7 @@
     "electric_equipment_space_type_name": "exam_treatment_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "exam_treatment",
     "ventilation_space_type_name": "exam_treatment_ventilation",
     "schedule_set_name": "exam_treatment"
   },
@@ -235,7 +247,7 @@
     "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "exercise area",
     "ventilation_space_type_name": "exercise_area_ventilation",
     "schedule_set_name": "gymnasium_exercise_area"
   },
@@ -271,9 +283,21 @@
     "electric_equipment_space_type_name": "guest_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "guest_room",
     "ventilation_space_type_name": "guest_room_ventilation",
     "schedule_set_name": "guest_room"
+  },
+  {
+    "space_type_name": "guest room vacant",
+    "description": null,
+    "annotation": null,
+    "lighting_space_type_name": "guest_room_lighting",
+    "electric_equipment_space_type_name": "guest_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "refrigeration_space_type_name": null,
+    "service_water_space_type_name": "guest_room",
+    "ventilation_space_type_name": "guest_room_ventilation",
+    "schedule_set_name": "guest_room_vacant"
   },
   {
     "space_type_name": "imaging",
@@ -319,7 +343,7 @@
     "electric_equipment_space_type_name": "kitchen_electric_equipment",
     "natural_gas_equipment_space_type_name": "kitchen",
     "refrigeration_space_type_name": "kitchen",
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "kitchen",
     "ventilation_space_type_name": "food_preparation_ventilation",
     "schedule_set_name": "kitchen"
   },
@@ -331,7 +355,7 @@
     "electric_equipment_space_type_name": "laboratory_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "laboratory",
     "ventilation_space_type_name": "laboratory_ventilation",
     "schedule_set_name": "laboratory"
   },
@@ -343,7 +367,7 @@
     "electric_equipment_space_type_name": "laundry_washing_electric_equipment",
     "natural_gas_equipment_space_type_name": "laundry",
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "laundry_washing",
     "ventilation_space_type_name": "laundry_washing_ventilation",
     "schedule_set_name": "laundry_washing"
   },
@@ -415,7 +439,7 @@
     "electric_equipment_space_type_name": "lounge_breakroom_all_other_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "lounge_breakroom",
     "ventilation_space_type_name": "lounge_breakroom_ventilation",
     "schedule_set_name": "lounge_breakroom_all_other"
   },
@@ -511,7 +535,7 @@
     "electric_equipment_space_type_name": "operating_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "operating_room",
     "ventilation_space_type_name": "operating_room_ventilation",
     "schedule_set_name": "operating_room"
   },
@@ -523,7 +547,7 @@
     "electric_equipment_space_type_name": "patient_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "patient_room",
     "ventilation_space_type_name": "patient_room_ventilation",
     "schedule_set_name": "patient_room"
   },
@@ -547,7 +571,7 @@
     "electric_equipment_space_type_name": "physical_therapy_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "physical_therapy",
     "ventilation_space_type_name": "physical_therapy_ventilation",
     "schedule_set_name": "physical_therapy"
   },
@@ -595,7 +619,7 @@
     "electric_equipment_space_type_name": "patient_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "recovery",
     "ventilation_space_type_name": "recovery_ventilation",
     "schedule_set_name": "patient_room"
   },
@@ -619,7 +643,7 @@
     "electric_equipment_space_type_name": "restroom_all_other_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "restroom",
     "ventilation_space_type_name": "restroom_ventilation",
     "schedule_set_name": "restroom_all_other"
   },
