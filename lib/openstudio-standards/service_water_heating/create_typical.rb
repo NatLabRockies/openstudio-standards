@@ -98,7 +98,7 @@ module OpenstudioStandards
 
           # If there is no SWH schedule, assume no SWH use for this space type.
           unless flow_rate_schedule
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating', "No service water heating schedule was specified for space type #{space_type.name} with standards space type #{standards_space_type}. Assuming an always off schedule.")
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating', "No service water heating schedule was specified for space type #{space_type.name} with service water space type #{service_water_space_type}. Assuming an always off schedule.")
             flow_rate_schedule = model.alwaysOffDiscreteSchedule
           end
 
