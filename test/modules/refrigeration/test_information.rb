@@ -27,6 +27,6 @@ class TestRefrigerationInformation < Minitest::Test
 
     # get case zone
     zone = @refrig.refrigeration_walkin_zone(model)
-    assert_equal('Zone SuperMarket DryStorage B  - Story ground', zone.name.to_s)
+    assert_equal('Zone SuperMarket Sales B  - Story ground', zone.name.to_s)
   end
 end

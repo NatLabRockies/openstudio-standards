@@ -141,13 +141,20 @@ module OpenstudioStandards
         if space_type.standardsBuildingType.is_initialized
           standards_building_type = space_type.standardsBuildingType.get
           building_type_specific_properties = cases_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
-          unless building_type_specific_properties.empty?
+          if building_type_specific_properties.empty?
+            ref_cases = ref_cases.select { |h| h[:standards_building_type] == nil }
+          else
             ref_cases = building_type_specific_properties
           end
           building_type_specific_properties = walkins_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
-          unless building_type_specific_properties.empty?
+          if building_type_specific_properties.empty?
+            ref_walkins = ref_walkins.select { |h| h[:standards_building_type] == nil }
+          else
             ref_walkins = building_type_specific_properties
           end
+        else
+          ref_cases = ref_cases.select { |h| h[:standards_building_type] == nil }
+          ref_walkins = ref_walkins.select { |h| h[:standards_building_type] == nil }
         end
 
         # create list of cases

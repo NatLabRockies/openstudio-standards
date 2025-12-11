@@ -20,6 +20,7 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
 
     # equipment list
     result = @refrig.typical_refrigeration_equipment_list(model)
+    puts result
     assert_equal(8, result[:cases].size)
     assert_equal(14, result[:walkins].size)
   end
@@ -45,14 +46,15 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
   def test_typical_refrigeration_equipment_list_deer_ese
     model = OpenStudio::Model::Model.new
 
-    # set add space types and set additional properties
-    std = Standard.build('90.1-2013')
-    std.prototype_space_type_map(model, set_additional_properties: true)
-
     args = {}
     args['total_bldg_floor_area'] = 50000.0
     args['bldg_type_a'] = 'ESe'
+    args['template'] = 'DEER 2011'
     result = @geo.create_bar_from_building_type_ratios(model, args)
+
+    # set add space types and set additional properties
+    std = Standard.build('DEER 2011')
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # equipment list
     result = @refrig.typical_refrigeration_equipment_list(model)
