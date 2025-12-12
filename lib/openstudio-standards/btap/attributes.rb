@@ -41,72 +41,14 @@ module BTAP
   # but that isn't implemented yet.
   class OpenStudio::Model::Surface
     attr_reader :rsi                       # [Float]
-    attr_reader :btap_construction_closest # [BTAP::Construction]
-    attr_reader :btap_constructions        # [Array[BTAP::Construction]]
+    attr_reader :btap_construction_closest # [Hash]
+    attr_reader :btap_constructions        # [Array[Hash]]
   end
 
   class OpenStudio::Model::SubSurface
     attr_reader :rsi                       # [Float]
-    attr_reader :btap_construction_closest # [BTAP::Construction]
-    attr_reader :btap_constructions        # [Array[BTAP::Construction]]
-  end
-
-  # Wrapper class for construction parameters. Note the "cost"  parameter, these
-  # aren't populated until costing is done. Carbon emissions aren't stored
-  # per-construction since they vary per surface due to window perimeter
-  # differences, and this class is stored as a reference in the Surface and
-  # SubSurfaces classes.
-  class Construction
-    attr_reader   :name
-    attr_reader   :id
-    attr_reader   :description
-    attr_reader   :type
-    attr_reader   :id_layers
-    attr_reader   :rsi
-    attr_accessor :cost
-
-    # @param name        [String]
-    # @param description [String]
-    # @param type        [String] Material type, either "opaque" or "glazing".
-    # @param id_layers   [Array[Integer]]
-    # @param rsi         [Float]
-    # @param cost        [Float]
-    # @param carbon      [Float]
-    def initialize(name, id, description, type, id_layers, rsi)
-      @@costing_database = BTAPDatabase.instance
-
-      @name        = name
-      @id          = id
-      @description = description
-      @type        = type
-      @id_layers   = id_layers
-      @rsi         = rsi
-      @cost        = nil
-    end
-
-    # Fenestration-related accessor methods. Not stored explicitly since these
-    # are required only for exterior windows when running BTAP Carbon.
-    def get_fenestration_type
-      fenestration_type = @@costing_database["constructions"]["window"][@name][@rsi]["fenestration_type"]
-      if fenestration_type.nil?
-        raise("Could not find fenestration type for construction #{@name}, RSI = #{@rsi}") 
-      end
-      return fenestration_type
-    end
-    def get_frame_material
-      frame_material = @@costing_database["constructions"]["window"][@name][@rsi]["frame_material"]
-      if fenestration_type.nil?
-        raise("Could not find frame material for construction #{@name}, RSI = #{@rsi}") 
-      end
-      return frame_material
-    end
-    def get_number_of_panes
-      number_of_panes = @@costing_database["constructions"]["window"][@name][@rsi]["fenestration_number_of_panes"]
-      if fenestration_type.nil?
-        raise("Could not find number of panes for construction #{@name}, RSI = #{@rsi}") 
-      end
-      return number_of_panes
-    end
+    attr_reader :btap_construction_closest # [Hash]
+    attr_reader :btap_constructions        # [Array[Hash]]
   end
 
   # Class for accessing and pre-processing model attributes.
@@ -191,7 +133,7 @@ module BTAP
         @surface_types.each do |surface_type|
           space.surfaces_hash[surface_type].each do |surface|
             if @surface_type_tbd_map.has_key?(surface_type)
-              compile_construction_tbd(surface, surface_type)
+              compile_subsurface_or_ground_construction(surface, surface_type)
             else
               puts "[BTAP Attributes] Surface takeoff for #{surface.handle} " \
                    "with surface type #{surface_type} is unavailable."
@@ -203,14 +145,12 @@ module BTAP
 
     # Get the RSI and constructions for each RSI value for a given surface
     # using the BTAP::Structure and BTAP::Bridging classes. The calculated RSI
-    # and a reference to a wrapper class [BTAP::Construction] is assigned to
-    # each surface.
-    # TODO: If surface types always have the same constructions, this should be
-    # refactored and separated to be simpler.
+    # and a reference to a hash containing construction attributes is assigned
+    # to each surface.
     # 
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
-    def compile_construction_tbd(surface, surface_type)
+    def compile_subsurface_or_ground_construction(surface, surface_type)
       tbd_surface_type          = @surface_type_tbd_map[surface_type]
       construction_name         = @surface_types_to_assemblies[surface_type]
       construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
@@ -218,34 +158,43 @@ module BTAP
       closest_rsi               = construction_candidates.keys.map(&:to_f).min_by { |rsi| 
                                     (surface_rsi - rsi).abs }.to_s
       btap_constructions        = []
-      construction_hash_closest = construction_candidates[closest_rsi]
+      btap_construction_closest = construction_candidates[closest_rsi]
 
       # Initialize the construction with the closest RSI if it doesn't exist
-      # yet.
-      unless @constructions.has_key?(construction_hash_closest["id"])
-        @constructions[construction_hash_closest["id"]] = BTAP::Construction.new(
-          construction_name,
-          construction_hash_closest["id"],
-          construction_hash_closest["description"],
-          construction_hash_closest["type"],
-          construction_hash_closest["id_layers"],
-          closest_rsi)
+      # yet. 
+      unless @constructions.has_key?(btap_construction_closest["id"])
 
-        btap_construction_closest = @constructions[construction_hash_closest["id"]]
+        # Process each construction into a hash. Eventually this will also
+        # store the cost for the construction in `envelope_costing.rb`. Carbon
+        # emissions aren't stored per-construction since they vary per surface
+        # due to window perimeter differences, and this class is stored as a
+        # reference in the Surface and SubSurfaces classes. Here are a list
+        # of parameters of the hash:
+        #
+        # @param name        [String]
+        # @param description [String]
+        # @param type        [String] Material type, either "opaque" or 
+        #                             "glazing".
+        # @param id_layers   [Array[Integer]]
+        # @param rsi         [Float]
+        # @param fenestration_number_of_panes [String] ExteriorWindow only.
+        # @param frame_material               [String] ExteriorWindow only.
+        # @param fenestration_type            [String] ExteriorWindow only.
+        btap_construction_closest["name"]               = construction_name
+        btap_construction_closest["rsi"]                = closest_rsi
+        @constructions[btap_construction_closest["id"]] = btap_construction_closest
+
+        btap_construction_closest = @constructions[btap_construction_closest["id"]]
       end
 
       construction_candidates.each do |construction_rsi, construction_hash|
 
-        # Hash a list of constructions by their ID. If a construction was
-        # already initialized, assign the reference of the already created one.
+        # Store all candidate constructions for reference when doing linear
+        # regression for construction takeoffs.
         unless @constructions.has_key?(construction_hash["id"])
-          @constructions[construction_hash["id"]] = BTAP::Construction.new(
-            construction_name,
-            construction_hash["id"],
-            construction_hash["description"],
-            construction_hash["type"],
-            construction_hash["id_layers"],
-            construction_rsi)
+          construction_hash["name"]               = construction_name
+          construction_hash["rsi"]                = closest_rsi
+          @constructions[construction_hash["id"]] = construction_hash
         end
         btap_constructions << @constructions[construction_hash["id"]]
       end
@@ -253,48 +202,6 @@ module BTAP
       surface.instance_variable_set(:@btap_construction_closest, btap_construction_closest)
       surface.instance_variable_set(:@btap_constructions, btap_constructions)
       surface.instance_variable_set(:@rsi, surface_rsi)
-    end
-
-    # Get the construction for a given surface using legacy takeoffs. Currently
-    # not being used.
-    #
-    # @param space   [OpenStudio::Model::Space]
-    # @param surface [OpenStudio::Model::Surface]
-    def compile_construction_legacy(space, surface)
-      construction_set = @costing_database["raw"]["construction_sets"].select { |data|
-        data["template"].to_s.gsub(/\s*/, "") == @standard.template                                          and
-        data["building_type"].to_s.downcase   == space.spaceType.get.standardsBuildingType.to_s.downcase     and
-        data["space_type"].to_s.downcase      == space.spaceType.get.standardsSpaceType.to_s.downcase        and
-        data["min_stories"].to_i              <= @model.getBuilding.standardsNumberOfAboveGroundStories.to_i and
-        data["max_stories"].to_i              >= @model.getBuilding.standardsNumberOfAboveGroundStories.to_i
-      }.first
-      space.instance_variable_set(:@construction_set, construction_set)
-
-      if construction_set.nil?
-        return
-      end
-
-      @surface_types.each do |surface_type|
-        space.surfaces_hash[surface_type].each do |surface|
-
-          # Search for a matching opaque or glazing construction and append the type to the hash.
-          construction_hash = @costing_database["raw"]["constructions_opaque"].find { |construction|
-            construction["construction_type_name"] == construction_set[surface_type]
-          }
-          if not construction_hash.nil?
-            construction_hash["type"] = "opaque"
-            surface.instance_variable_set(:@construction_hash, construction_hash)
-          else
-            construction_hash = @costing_database["raw"]["constructions_glazing"].find { |construction|
-              construction["construction_type_name"] == construction_set[surface_type]
-            }
-            if not construction_hash.nil?
-              construction_hash["type"] = "glazing"
-              surface.instance_variable_set(:@construction_hash, construction_hash)
-            end
-          end
-        end
-      end
     end
 
     # Compile all the pertinent OpenStudio-related data into the data structures

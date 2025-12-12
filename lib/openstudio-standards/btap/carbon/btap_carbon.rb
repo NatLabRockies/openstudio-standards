@@ -135,22 +135,22 @@ class BTAPCarbon
   # area. Surface vertice are required to calculate the perimeter of window
   # frames.
   # 
-  # @param construction [BTAP::Construction]
+  # @param construction [Hash]
   # @param vertices     [Array[OpenStudio::Point3d]]
   # @param surface_area [Float]
   def get_carbon_emissions(construction, vertices, surface_area)
     total_emissions  = 0.0
-    materials_file   = "materials_#{construction.type}"
+    materials_file   = "materials_#{construction["type"]}"
     id_column        = materials_file + "_id"
-    id_layers_column = "material_#{construction["type"]}_id_layers"
-    construction[id_layers_column].split(',').each do |material_id|
+
+    construction["id_layers"].each do |material_id|
 
       # Locate the material entry in the carbon database
-      material_entry = @carbon_database[construction.type].find { |row| 
+      material_entry = @carbon_database[construction["type"]].find { |row| 
         row[id_column] == material_id }
 
       if material_entry.nil?
-        puts "Error: Could not find #{construction.type} material with ID #{material_id} in the carbon database. " \
+        puts "Error: Could not find #{construction["type"]} material with ID #{material_id} in the carbon database. " \
              "Skipping."
         next
       end
@@ -160,8 +160,8 @@ class BTAPCarbon
       # If the material is glazing, the frame must be calculated by retrieving
       # the perimeter of the window and converting according to the correct
       # attributes of the window.
-      if construction.type == "glazing"
-        fenestration_type = construction.get_fenestration_type
+      if construction["type"] == "glazing"
+        fenestration_type = construction["fenestration_type"]
 
         # Skip skylights and doors since we don't have the data for them.
         # Only consider fixed and operable windows.
@@ -170,8 +170,8 @@ class BTAPCarbon
           next
         end
 
-        fenestration_number_of_panes = construction.get_number_of_panes
-        frame_material               = construction.get_frame_material
+        fenestration_number_of_panes = construction["fenestration_number_of_panes"]
+        frame_material               = construction["frame_material"]
 
         material_frame = @carbon_database["frame"].find { |row|
           row[id_column] == material_id }["Embodied Carbon (A-C)"]
