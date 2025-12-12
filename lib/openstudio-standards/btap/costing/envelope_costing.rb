@@ -51,19 +51,19 @@ class BTAPCosting
           end
 
           num_surface_types += 1
-          surface_is_glazing = surface.btap_constructions.first.type == "glazing"
-          construction_name  = surface.btap_constructions.first.name
+          surface_is_glazing = surface.btap_constructions.first["type"] == "glazing"
+          construction_name  = surface.btap_constructions.first["name"]
 
           # We don't need all the information, just the rsi and cost. Window
           # costs from the API data use U-value, which was converted to rsi for
           # cost_range_array above.
           if surface_is_glazing
             cost_range_array = surface.btap_constructions.map do |construction|
-              [1 / surface.rsi, construction.cost]
+              [1 / surface.rsi, construction["cost"]]
             end
           else
             cost_range_array = surface.btap_constructions.map do |construction|
-              [surface.rsi, construction.cost]
+              [surface.rsi, construction["cost"]]
             end
           end
 
@@ -194,24 +194,24 @@ class BTAPCosting
     return totEnvCost
   end
 
-  # Assign the "cost" parameter of a BTAP Construction by calculating the cost
-  # from each layer from either the opaque (materials_opaque.csv) or glazing
-  # (materials_glazing.csv) while also accounting for regional and installation
-  # factors.
+  # Append the "cost" key-value pair to a construction hash by calculating
+  # the cost from each layer from either the opaque (materials_opaque.csv)
+  # or glazing (materials_glazing.csv) while also accounting for regional and
+  # installation factors.
   #
-  # @param construction   [BTAP::Construction]
+  # @param construction   [Hash]
   # @param province_state [String]
   # @param city           [String]
   def cost_construction(construction, province_state, city)
-    material_id = "materials_#{construction.type}_id"
-    materials_database = @costing_database["raw"]["materials_#{construction.type}"]
+    material_id = "materials_#{construction["type"]}_id"
+    materials_database = @costing_database["raw"]["materials_#{construction["type"]}"]
 
     total_with_op = 0.0
     material_cost_pairs = []
-    construction.id_layers.each do |material_index|
+    construction["id_layers"].each do |material_index|
       material = materials_database.find { |data| data[material_id] == material_index }
       if material.nil?
-        puts "Material ID #{material_index} was not found in the materials_#{construction.type} database. " \
+        puts "Material ID #{material_index} was not found in the materials_#{construction["type"]} database. " \
              "Skipping. This construction will be inaccurate."
       else
         costing_data = @costing_database['costs'].detect { |data| data['id'] == material['id'] }
@@ -225,7 +225,7 @@ class BTAPCosting
           # Note that "glazing" types don't have a 'quantity' hash entry!
           # Don't need "and" below but using in-case this hash field is added in 
           # the future.
-          if construction.type == 'glazing' and material['quantity'].to_f == 0.0
+          if construction["type"] == 'glazing' and material['quantity'].to_f == 0.0
             material['quantity'] = '1.0'
           end
           material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult'].to_f
@@ -240,6 +240,6 @@ class BTAPCosting
       end
     end
 
-    construction.cost = total_with_op
+    construction["cost"] = total_with_op
   end
 end
