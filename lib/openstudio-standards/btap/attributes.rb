@@ -302,9 +302,7 @@ module BTAP
     # adds accessors for zones, spaces, and surfaces while keeping them sorted
     # for future accesses.
     def compile_model
-      template_type = @standard.template
-      num_of_above_ground_stories = @model.getBuilding.standardsNumberOfAboveGroundStories.to_i
-      
+
       # Iterate through the data structures while also saving their sorted order later for reference.
       @model.instance_variable_set(:@zones_sorted, [])
 

@@ -57,7 +57,6 @@ class BTAPCosting
           # We don't need all the information, just the rsi and cost. Window
           # costs from the API data use U-value, which was converted to rsi for
           # cost_range_array above.
-          cost_range_hash = {}
           if surface_is_glazing
             cost_range_array = surface.btap_constructions.map do |construction|
               [1 / surface.rsi, construction.cost]
@@ -204,7 +203,6 @@ class BTAPCosting
   # @param province_state [String]
   # @param city           [String]
   def cost_construction(construction, province_state, city)
-    material_layers = "material_#{construction.type}_id_layers"
     material_id = "materials_#{construction.type}_id"
     materials_database = @costing_database["raw"]["materials_#{construction.type}"]
 

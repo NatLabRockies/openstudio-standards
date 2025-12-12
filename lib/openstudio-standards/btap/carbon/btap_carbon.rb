@@ -125,7 +125,6 @@ class BTAPCarbon
     total_emissions  = 0.0
     materials_file   = "materials_#{construction.type}"
     id_column        = materials_file + "_id"
-    id_layers_column = "material_#{construction.type}_id_layers"
 
     construction.id_layers.each do |material_id|
 
