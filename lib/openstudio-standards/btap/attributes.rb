@@ -33,10 +33,11 @@ module BTAP
   end
 
   # For surfaces and subsurfaces, BTAP Costing requires a list of constructions
-  # for each RSI value in order to perform a linear regression to best estimate
+  # for each U-value in order to perform a linear regression to best estimate
   # the respective cost and carbon emissions per surface. BTAP Carbon requires
-  # only the construction with the closest RSI value since constructions
-  # have to be calculated per-surface to account for window frame perimeters.
+  # only the construction with the closest U-value since constructions have to
+  # be calculated per-surface to account for window frame perimeters. Also,
+  # store the R-value of each surface.
   # TODO: BTAP Carbon could use the same regression technique as BTAP Costing,
   # but that isn't implemented yet.
   class OpenStudio::Model::Surface
@@ -153,14 +154,15 @@ module BTAP
     def compile_subsurface_or_ground_construction(surface, surface_type)
       tbd_surface_type          = @surface_type_tbd_map[surface_type]
       construction_name         = @surface_types_to_assemblies[surface_type]
-      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"]
+      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
       surface_rsi               = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
-      closest_rsi               = construction_candidates.keys.map(&:to_f).min_by { |rsi| 
-                                    (surface_rsi - rsi).abs }.to_s
+      surface_usi               = 1 / surface_rsi
+      closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi| 
+                                    (surface_usi - usi).abs }.to_s
       btap_constructions        = []
-      btap_construction_closest = construction_candidates[closest_rsi]
+      btap_construction_closest = construction_candidates[closest_usi]
 
-      # Initialize the construction with the closest RSI if it doesn't exist
+      # Initialize the construction with the closest U-value if it doesn't exist
       # yet. 
       unless @constructions.has_key?(btap_construction_closest["id"])
 
@@ -176,24 +178,24 @@ module BTAP
         # @param type        [String] Material type, either "opaque" or 
         #                             "glazing".
         # @param id_layers   [Array[Integer]]
-        # @param rsi         [Float]
+        # @param usi         [Float]
         # @param fenestration_number_of_panes [String] ExteriorWindow only.
         # @param frame_material               [String] ExteriorWindow only.
         # @param fenestration_type            [String] ExteriorWindow only.
         btap_construction_closest["name"]               = construction_name
-        btap_construction_closest["rsi"]                = closest_rsi
+        btap_construction_closest["usi"]                = closest_usi
         @constructions[btap_construction_closest["id"]] = btap_construction_closest
 
         btap_construction_closest = @constructions[btap_construction_closest["id"]]
       end
 
-      construction_candidates.each do |construction_rsi, construction_hash|
+      construction_candidates.each do |construction_usi, construction_hash|
 
         # Store all candidate constructions for reference when doing linear
         # regression for construction takeoffs.
         unless @constructions.has_key?(construction_hash["id"])
           construction_hash["name"]               = construction_name
-          construction_hash["rsi"]                = closest_rsi
+          construction_hash["usi"]                = closest_usi
           @constructions[construction_hash["id"]] = construction_hash
         end
         btap_constructions << @constructions[construction_hash["id"]]
