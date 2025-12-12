@@ -27,9 +27,9 @@ class BTAPAnalysis
   def run_costing(costs_csv: @cp.costs_path, factors_csv: @cp.costs_local_factors_path)
     costing = BTAPCosting.new(costs_csv: costs_csv, factors_csv: factors_csv, attributes: @attributes)
 
-    cost_result, btap_items = costing.cost_audit_all(
-      model: @model,
-      prototype_creator: @standard,
+    cost_result, _ = costing.cost_audit_all(
+      model: @model, 
+      prototype_creator: @standard, 
       template_type: @template)
 
     if not @qaqc.nil?
