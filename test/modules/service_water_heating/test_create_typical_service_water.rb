@@ -243,6 +243,27 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
     assert_equal(0, created_loops.size, 'Expected 0 loops for strip mall space type.')
   end
 
+  def test_create_typical_service_water_heating_supermarket
+    # set output directory
+    output_dir = "#{__dir__}/output/#{__method__}"
+    FileUtils.mkdir_p output_dir
+
+    # gather inputs
+    template = '90.1-2004'
+    climate_zone = 'ASHRAE 169-2013-4A'
+    std = Standard.build(template)
+
+    model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESuperMarket.osm")
+    OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+    # add new standards space types and set additional properties
+    std.prototype_space_type_map(model, set_additional_properties: true)
+    model.save("#{output_dir}/in.osm", true)
+
+    # create typical service water loops
+    created_loops = @swh.create_typical_service_water_heating(model)
+    model.save("#{output_dir}/out.osm", true)
+  end
+
   def test_create_typical_service_water_heating_multiuse
     # set output directory
     output_dir = "#{__dir__}/output/#{__method__}"
