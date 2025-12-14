@@ -579,6 +579,7 @@ module BTAP
     def initialize(model = nil, argh = {})
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
+      tag       = "uprated_Uo"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
@@ -621,7 +622,7 @@ module BTAP
 
       return false if args[:io_path].nil?
 
-      args[:option ] = ""
+      args[:option] = ""
 
       loop do
         if initial
@@ -659,9 +660,6 @@ module BTAP
         mdl = OpenStudio::Model::Model.new
         mdl.addObjects(model.toIdfFile.objects)
         TBD.clean!
-
-        # fil = File.join("/Users/rd2/Desktop/test.osm")
-        # mdl.save(fil, true)
 
         res = TBD.process(mdl, args)
 
@@ -734,6 +732,17 @@ module BTAP
           next unless v[:stypes] == stypes
 
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
+
+          # Maintain initial uprated Uo as AdditionalProperty.
+          v[:surfaces].each do |id|
+            surface = model.getSurfaceByName(id)
+            next if surface.empty?
+
+            surface = surface.get
+            next unless surface.additionalProperties.getFeatureAsDouble(tag).empty?
+
+            surface.additionalProperties.setFeature(tag, v[:uo])
+          end
         end
       end
 
@@ -1151,14 +1160,14 @@ module BTAP
           if edge_type == "transition"
             next
 
-          # "jamb", "sill", and "head" may all be grouped under fenestration 
+          # "jamb", "sill", and "head" may all be grouped under fenestration
           # when referencing the thermal bridging CSV. Same for "skylightjamb",
           # "skylightsill", and "skylighthead".
           elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
             edge_type = "fenestration"
           end
 
-          result = csv.find do |row| 
+          result = csv.find do |row|
             row["edge_type"]      == edge_type &&
             row["wall_reference"] == wall_reference_and_quality
           end
@@ -1176,7 +1185,7 @@ module BTAP
               material_quantities[id] = 0.0
             end
 
-            material_quantities[id] = material_quantities[id] + scale.to_f * quantity 
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
           end
         end
       end

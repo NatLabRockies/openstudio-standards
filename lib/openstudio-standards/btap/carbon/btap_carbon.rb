@@ -110,6 +110,23 @@ class BTAPCarbon
 
             # Note that the carbon tallying method must be called per-surface
             # to account for the perimeter values for each surface.
+
+            # rd2: Reiterating a note in envelope_costing.rb:
+            #
+            #      For NECB 2017, 2020, etc., a surface-specific construction's RSi
+            #      is the end result of TBD 'derating' calculations based on linear
+            #      thermal bridging - done strictly for OpenStudio modelling
+            #      purposes. These end-of-the-line, surface-specific 'derated'
+            #      construction RSi values are unsuitable for BTAP's costing or
+            #      embodied carbon calculations, as they do not reflect the initial
+            #      'uprated' (real-world) clear-field constructions. Better to rely
+            #      on TBD-reported 'uprated' Uo-factors.
+            #
+            #      In btap/bridging.rb, I added (to each 'derated' surface in the
+            #      OSM) an AdditionalProperty ("uprated_Uo"). This provides
+            #      post-simulation processes like BTAP costing and embodied GHG
+            #      calculations, a reliable way to retrieve the initial, clear-field
+            #      Uo factors. This is demonstrated in the NECB unit test_NECB_TBD.
             emissions = get_carbon_emissions(surface.btap_construction_closest, surface.vertices, surface_area)
           end
 
@@ -134,7 +151,7 @@ class BTAPCarbon
   # Retrieve the carbon emissions given a surface, its construction, and its
   # area. Surface vertice are required to calculate the perimeter of window
   # frames.
-  # 
+  #
   # @param construction [Hash]
   # @param vertices     [Array[OpenStudio::Point3d]]
   # @param surface_area [Float]
@@ -146,7 +163,7 @@ class BTAPCarbon
     construction["id_layers"].each do |material_id|
 
       # Locate the material entry in the carbon database
-      material_entry = @carbon_database[construction["type"]].find { |row| 
+      material_entry = @carbon_database[construction["type"]].find { |row|
         row[id_column] == material_id }
 
       if material_entry.nil?
@@ -184,7 +201,7 @@ class BTAPCarbon
         end
 
         # Get the conversion factor for the window frame and add it to the total emissions.
-        conversion_factor = @frame_m_to_kg[frame_material][fenestration_type][fenestration_number_of_panes] 
+        conversion_factor = @frame_m_to_kg[frame_material][fenestration_type][fenestration_number_of_panes]
         perimeter = BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: vertices)
         total_emissions += material_frame * perimeter * conversion_factor
       end
