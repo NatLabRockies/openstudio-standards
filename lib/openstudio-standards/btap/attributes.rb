@@ -60,7 +60,7 @@ module BTAP
     attr_reader :surface_types
     attr_reader :surface_types_to_assemblies
     attr_reader :use_tbd
-    
+
     # @param model    [OpenStudio::Model::Model]
     # @param standard [Standard]
     def initialize(model, standard)
@@ -69,7 +69,7 @@ module BTAP
       @costing_database = BTAPDatabase.instance
 
       # Surfaces considered for envelope costing and carbon.
-      @surface_types = [ 
+      @surface_types = [
         "ExteriorWall",
         "ExteriorRoof",
         "ExteriorFloor",
@@ -98,8 +98,8 @@ module BTAP
         "ExteriorFloor" => :floors
       }
 
-      @zones         = [] 
-      @spaces        = [] 
+      @zones         = []
+      @spaces        = []
       @constructions = {}
 
       @use_tbd = !(@standard.tbd.nil?)
@@ -123,10 +123,10 @@ module BTAP
       # the `costed_assembly` method assigns assemblies according to building
       # categories.
       if use_tbd
-        @surface_types_to_assemblies = @surface_type_tbd_map.keys.map { |surface_type| 
+        @surface_types_to_assemblies = @surface_type_tbd_map.keys.map { |surface_type|
           [surface_type, @standard.tbd.costed_assembly(
-            @standard.structure, 
-            @surface_type_tbd_map[surface_type], 
+            @standard.structure,
+            @surface_type_tbd_map[surface_type],
             @standard.tbd.model[:perform])]}.to_h
       end
 
@@ -148,7 +148,7 @@ module BTAP
     # using the BTAP::Structure and BTAP::Bridging classes. The calculated RSI
     # and a reference to a hash containing construction attributes is assigned
     # to each surface.
-    # 
+    #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_subsurface_or_ground_construction(surface, surface_type)
@@ -157,13 +157,13 @@ module BTAP
       construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
       surface_rsi               = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       surface_usi               = 1 / surface_rsi
-      closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi| 
+      closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
                                     (surface_usi - usi).abs }.to_s
       btap_constructions        = []
       btap_construction_closest = construction_candidates[closest_usi]
 
       # Initialize the construction with the closest U-value if it doesn't exist
-      # yet. 
+      # yet.
       unless @constructions.has_key?(btap_construction_closest["id"])
 
         # Process each construction into a hash. Eventually this will also
@@ -175,7 +175,7 @@ module BTAP
         #
         # @param name        [String]
         # @param description [String]
-        # @param type        [String] Material type, either "opaque" or 
+        # @param type        [String] Material type, either "opaque" or
         #                             "glazing".
         # @param id_layers   [Array[Integer]]
         # @param usi         [Float]
@@ -221,16 +221,22 @@ module BTAP
         zone.instance_variable_set(:@spaces_sorted, [])
 
         zone.spaces.sort.each do |space|
-          if space.spaceType.empty? or 
-             space.spaceType.get.standardsSpaceType.empty? or 
+          if space.spaceType.empty? or
+             space.spaceType.get.standardsSpaceType.empty? or
              space.spaceType.get.standardsBuildingType.empty?
             raise (
               "standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space.")
           end
           zone    << space
           @spaces << space
-          
+
           surfaces_hash = {}
+
+          # rd2: Friendly reminder: models with attic spaces (maybe even future
+          #      3rd-party models with unconditioned crawlspaces) will have
+          #      interzone surfaces with insulated constructions. Examples:
+          #        - insulated attic floors
+          #        - insulated skylight well walls (through attic spaces)
 
           # Exterior
           exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")

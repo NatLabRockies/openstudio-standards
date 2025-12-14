@@ -34,8 +34,12 @@ class BTAPCosting
 
       # Get SpaceType defined for space. If not defined it will skip the
       # spacetype. May have to deal with Attic spaces.
-      if space.spaceType.empty? or 
-         space.spaceType.get.standardsSpaceType.empty? or 
+      #
+      # rd2: Once BTAP finally switches over to the 'structure'-based
+      #      construction assignment approach, spacetypes will no longer be
+      #      required. Check may no longer be necessary?
+      if space.spaceType.empty? or
+         space.spaceType.get.standardsSpaceType.empty? or
          space.spaceType.get.standardsBuildingType.empty?
         raise("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this " \
               "space for costing.")
@@ -44,6 +48,21 @@ class BTAPCosting
       @attributes.surface_types.each do |surface_type|
 
         # Iterate through actual surfaces in the model of surface_type.
+        #
+        # rd2: For NECB 2017, 2020, etc., a surface-specific construction's RSi
+        #      is the end result of TBD 'derating' calculations based on linear
+        #      thermal bridging - done strictly for OpenStudio modelling
+        #      purposes. These end-of-the-line, surface-specific 'derated'
+        #      construction RSi values are unsuitable for BTAP's costing or
+        #      embodied carbon calculations, as they do not reflect the initial
+        #      'uprated' (real-world) clear-field constructions. Better to rely
+        #      on TBD-reported 'uprated' Uo-factors.
+        #
+        #      In btap/bridging.rb, I added (to each 'derated' surface in the
+        #      OSM) an AdditionalProperty ("uprated_Uo"). This provides
+        #      post-simulation processes like BTAP costing and embodied GHG
+        #      calculations, a reliable way to retrieve the initial, clear-field
+        #      Uo factors. This is demonstrated in the NECB unit test_NECB_TBD.
         num_surface_types = 0
         space.surfaces_hash[surface_type].each do |surface|
           if surface.btap_constructions.nil?
@@ -74,8 +93,8 @@ class BTAPCosting
           # given rsi.
           exterpolate_percentage_range = 30.0
           cost = interpolate(
-            x_y_array: cost_range_array, 
-            x2: surface.rsi, 
+            x_y_array: cost_range_array,
+            x2: surface.rsi,
             exterpolate_percentage_range: exterpolate_percentage_range)
 
           # If the cost is nil, that means the rsi is out of range. Flag in the report.
@@ -84,9 +103,17 @@ class BTAPCosting
               notes = "Warning! RSI out of the range (#{'%.2f' % surface.rsi}) or cost is 0!. Range for " \
                       "#{construction_name} is " \
                       "#{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}."
+
+              # rd2: Shouldn't default to 0$ if beyond range in database.
+              #      Should instead retain the $ of the highest RSi on file.
+              #      This will happen frequently for NECB 2017, 2020, etc.
               cost = 0.0
             else
               notes = "No cost found for this! So Cost is set to 0.0!"
+
+              # rd2: Shouldn't default to 0$ if beyond range in database.
+              #      Should simply retain the $ of the highest RSi on file.
+              #      This will happen frequently for NECB 2017, 2020, etc.
               cost = 0.0
             end
           elsif cost.nan?
@@ -116,20 +143,20 @@ class BTAPCosting
               surface.construction.get.to_Construction.get)
 
             # Get the closest value in materials_glazing sheet of SolarFilms.
-            material_row = @costing_database["raw"]["materials_glazing"].select { |row| 
-              row['material_type'] == 'Solarfilms' }.min_by {|row| 
+            material_row = @costing_database["raw"]["materials_glazing"].select { |row|
+              row['material_type'] == 'Solarfilms' }.min_by {|row|
                 (shgc.to_f - row['solar_heat_gain_coefficient'].to_f).abs}
 
             standard_film_cost = getCost(material_row['description'], material_row, 1.0)
             regional_factors   = get_regional_cost_factors(
-              @costing_report['province_state'], 
-              @costing_report['city'], 
+              @costing_report['province_state'],
+              @costing_report['city'],
               material_row)
 
             # Multiply regional cost and sum costs. Zip adds the arrays
             # together, map multiplies each row and divides by 100.0 since the
             # regional factor is a percentage.
-            film_cost = standard_film_cost.zip(regional_factors).map { |cost,region_factor| 
+            film_cost = standard_film_cost.zip(regional_factors).map { |cost,region_factor|
               cost * region_factor / 100.0 }.inject(0, :+)
           end
 
@@ -145,16 +172,16 @@ class BTAPCosting
           else
             name = "#{construction_name}"
           end
-          row = @costing_report["envelope"]["construction_costs"].detect { |row| 
+          row = @costing_report["envelope"]["construction_costs"].detect { |row|
             (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / surface.rsi).round(3))) }
 
           if row.nil?
             @costing_report["envelope"]["construction_costs"] << {
-              'name'          => name, 
-              'conductance'   => ((1.0 / surface.rsi).round(3)), 
-              'area'          => (surfArea.round(2)), 
-              'cost'          => (surfCost.round(2)), 
-              'cost_per_area' => (surfCost / surfArea).round(2), 
+              'name'          => name,
+              'conductance'   => ((1.0 / surface.rsi).round(3)),
+              'area'          => (surfArea.round(2)),
+              'cost'          => (surfCost.round(2)),
+              'cost_per_area' => (surfCost / surfArea).round(2),
               'note'          => "Surf ##{num_surface_types}: #{notes}"
             }
           else
@@ -223,7 +250,7 @@ class BTAPCosting
 
           # Get cost information from lookup.
           # Note that "glazing" types don't have a 'quantity' hash entry!
-          # Don't need "and" below but using in-case this hash field is added in 
+          # Don't need "and" below but using in-case this hash field is added in
           # the future.
           if construction["type"] == 'glazing' and material['quantity'].to_f == 0.0
             material['quantity'] = '1.0'
