@@ -134,7 +134,7 @@ module BTAP
         @surface_types.each do |surface_type|
           space.surfaces_hash[surface_type].each do |surface|
             if @surface_type_tbd_map.has_key?(surface_type)
-              compile_subsurface_or_ground_construction(surface, surface_type)
+              compile_surface_construction(surface, surface_type)
             else
               puts "[BTAP Attributes] Surface takeoff for #{surface.handle} " \
                    "with surface type #{surface_type} is unavailable."
@@ -144,19 +144,29 @@ module BTAP
       end
     end
 
-    # Get the RSI and constructions for each RSI value for a given surface
-    # using the BTAP::Structure and BTAP::Bridging classes. The calculated RSI
-    # and a reference to a hash containing construction attributes is assigned
-    # to each surface.
+    # Get the RSI and constructions for each RSI value for a given surface using
+    # the BTAP::Structure and BTAP::Bridging classes. The calculated RSI and a
+    # reference to a hash containing construction attributes is assigned to each
+    # surface. If the surface was targeted by TBD (which is the case for all
+    # non-ground-contact walls/roofs/floors) then retrieve the stored initial
+    # U-value which TBD stores as an AdditionalProperty in an OpenStudio model.
     #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
-    def compile_subsurface_or_ground_construction(surface, surface_type)
-      tbd_surface_type          = @surface_type_tbd_map[surface_type]
-      construction_name         = @surface_types_to_assemblies[surface_type]
-      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
-      surface_rsi               = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
-      surface_usi               = 1 / surface_rsi
+    def compile_surface_construction(surface, surface_type)
+      surface_is_derated      = surface_type.match?(/ExteriorWall|ExteriorRoof|ExteriorFloor/)
+      tbd_surface_type        = @surface_type_tbd_map[surface_type]
+      construction_name       = @surface_types_to_assemblies[surface_type]
+      construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
+
+      if surface_is_derated
+        surface_usi = surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
+        surface_rsi = 1 / surface_usi
+      else
+        surface_rsi = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
+        surface_usi = 1 / surface_rsi
+      end
+
       closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
                                     (surface_usi - usi).abs }.to_s
       btap_constructions        = []
@@ -238,8 +248,13 @@ module BTAP
           #        - insulated attic floors
           #        - insulated skylight well walls (through attic spaces)
 
-          # Exterior
-          exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
+          # Exterior Surfaces
+          # Note that only TBD-derated exterior surfaces should be filtered. A
+          # surface with the "c tbd" substring in its construction means that
+          # it was targeted by TBD. Subsurfaces and ground-contact surfaces
+          # are unaffected by TBD.
+          derated_surfaces = space.surfaces.filter { |surface| surface.construction.get.nameString.include?("c tbd")}
+          exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(derated_surfaces, "Outdoors")
           surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
           surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
           surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
