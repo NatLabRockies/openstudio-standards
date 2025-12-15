@@ -167,6 +167,10 @@ module BTAP
         surface_usi = 1 / surface_rsi
       end
 
+      # Only consider insulated surfaces for further analysis. If the RSI of a
+      # surface is less than 1, then skip it.
+      return if surface_rsi < 1.0
+
       closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
                                     (surface_usi - usi).abs }.to_s
       btap_constructions        = []
