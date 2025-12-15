@@ -21,15 +21,6 @@ module OpenstudioStandards
         return true
       end
 
-      # Find the thermal zones most suited for holding the display cases
-      unless ref_equip_list[:cases].empty?
-        thermal_zone_case = OpenstudioStandards::Refrigeration.refrigeration_case_zone(model)
-        if thermal_zone_case.nil?
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Refrigeration', 'Attempted to add display cases to the model, but could find no thermal zone to put them into.')
-          return false
-        end
-      end
-
       # create cases
       medium_temperature_cases = []
       low_temperature_cases = []
@@ -39,20 +30,11 @@ module OpenstudioStandards
                                                                case_type: ref_case[:case_type],
                                                                case_length: ref_case[:length],
                                                                defrost_start_hour: index,
-                                                               thermal_zone: thermal_zone_case)
+                                                               thermal_zone: ref_case[:case_zone])
         if case_.caseOperatingTemperature > -3.0
           medium_temperature_cases << case_
         else
           low_temperature_cases << case_
-        end
-      end
-
-      # Find the thermal zones most suited for holding the walkins
-      unless ref_equip_list[:walkins].empty?
-        thermal_zone_walkin = OpenstudioStandards::Refrigeration.refrigeration_walkin_zone(model)
-        if thermal_zone_walkin.nil?
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Refrigeration', 'Attempted to add walkins to the model, but could find no thermal zone to put them into.')
-          return false
         end
       end
 
@@ -65,7 +47,7 @@ module OpenstudioStandards
                                                                       template: template,
                                                                       walkin_type: walkin[:walkin_type],
                                                                       defrost_start_hour: index,
-                                                                      thermal_zone: thermal_zone_walkin)
+                                                                      thermal_zone: walkin[:walkin_zone])
         if ref_walkin.operatingTemperature > -3.0
           medium_temperature_walkins << ref_walkin
         else
@@ -134,6 +116,8 @@ module OpenstudioStandards
         refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
         next if refrigeration_space_type.nil?
 
+        ref_thermal_zone = OpenstudioStandards::SpaceType.space_type_get_largest_thermal_zone(space_type)
+
         ref_cases = cases_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
         ref_walkins = walkins_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
 
@@ -161,7 +145,7 @@ module OpenstudioStandards
         ref_cases.each do |ref_case|
           length_modifier = total_space_floor_area_ft2 / ref_case[:reference_space_type_area_ft2]
           case_length = OpenStudio.convert(ref_case[:length_ft] * length_modifier, 'ft', 'm').get
-          cases_list << { case_type: ref_case[:case_type], length: case_length }
+          cases_list << { case_type: ref_case[:case_type], length: case_length, case_zone: ref_thermal_zone }
         end
 
         # create list of walkins
@@ -171,7 +155,7 @@ module OpenstudioStandards
           walkin_size_ft2 = (120.0 * ((ref_walkin[:size_ft2] * area_modifier) / 120.0).round).clamp(80.0, 480.0).to_int
           walkin_lookup_name = "#{ref_walkin[:walkin_type]} - #{walkin_size_ft2}SF"
           walkin_lookup_name = "#{walkin_lookup_name} with no glass door" if walkin_lookup_name.include? 'Cooler'
-          walkins_list << { walkin_name: ref_walkin[:walkin_name], walkin_type: walkin_lookup_name }
+          walkins_list << { walkin_name: ref_walkin[:walkin_name], walkin_type: walkin_lookup_name, walkin_zone: ref_thermal_zone }
         end
       end
 
