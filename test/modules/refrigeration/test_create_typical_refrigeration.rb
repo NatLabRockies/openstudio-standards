@@ -20,7 +20,6 @@ class TestRefrigerationCreateTypicalRefrigeration < Minitest::Test
 
     # equipment list
     result = @refrig.typical_refrigeration_equipment_list(model)
-    puts result
     assert_equal(8, result[:cases].size)
     assert_equal(14, result[:walkins].size)
   end

@@ -106,8 +106,8 @@ module OpenstudioStandards
       cases_list = []
       walkins_list = []
       model.getSpaceTypes.sort.each do |space_type|
-        total_space_floor_area_m2 = space_type.floorArea
-        total_space_floor_area_ft2 = OpenStudio.convert(total_space_floor_area_m2, 'm^2', 'ft^2').get
+        total_space_type_floor_area_m2 = space_type.floorArea
+        total_space_type_floor_area_ft2 = OpenStudio.convert(total_space_type_floor_area_m2, 'm^2', 'ft^2').get
 
         # get refrigeration space type from the object
         next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
@@ -143,14 +143,14 @@ module OpenstudioStandards
 
         # create list of cases
         ref_cases.each do |ref_case|
-          length_modifier = total_space_floor_area_ft2 / ref_case[:reference_space_type_area_ft2]
+          length_modifier = total_space_type_floor_area_ft2 / ref_case[:reference_space_type_area_ft2]
           case_length = OpenStudio.convert(ref_case[:length_ft] * length_modifier, 'ft', 'm').get
           cases_list << { case_type: ref_case[:case_type], length: case_length, case_zone: ref_thermal_zone }
         end
 
         # create list of walkins
         ref_walkins.each do |ref_walkin|
-          area_modifier = total_space_floor_area_ft2 / ref_walkin[:reference_space_type_area_ft2]
+          area_modifier = total_space_type_floor_area_ft2 / ref_walkin[:reference_space_type_area_ft2]
           # round to the nearest 120 ft2, with a minimum size of 80 ft2 and maximum size of 480 ft2
           walkin_size_ft2 = (120.0 * ((ref_walkin[:size_ft2] * area_modifier) / 120.0).round).clamp(80.0, 480.0).to_int
           walkin_lookup_name = "#{ref_walkin[:walkin_type]} - #{walkin_size_ft2}SF"

@@ -243,12 +243,22 @@ class TestCreateTypical < Minitest::Test
   end
 
   def test_create_typical_comstock_supermarket
+    model = OpenStudio::Model::Model.new
+
+    args = {}
+    args['total_bldg_floor_area'] = 50000.0
+    args['bldg_type_a'] = 'SuperMarket'
+    args['bar_division_method'] = 'Multiple Space Types - Simple Sliced'
+    result = OpenstudioStandards::Geometry.create_bar_from_building_type_ratios(model, args)
+
     # load model and set up weather file
-    template = 'ComStock 90.1-2013'
     climate_zone = 'ASHRAE 169-2013-4A'
-    std = Standard.build(template)
-    model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESuperMarket.osm")
     OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+
+    # set space types and set additional properties
+    template = 'ComStock 90.1-2013'
+    std = Standard.build(template)
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # set output directory
     output_dir = "#{__dir__}/output/#{__method__}"
