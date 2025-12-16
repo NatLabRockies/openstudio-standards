@@ -2,7 +2,7 @@ require 'openstudio'
 require 'securerandom'
 require 'optparse'
 require 'yaml'
-# require 'git-revision'
+require 'git-revision'
 # resource_folder = File.join(__dir__, '..', '..', 'measures/btap_results/resources')
 # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
