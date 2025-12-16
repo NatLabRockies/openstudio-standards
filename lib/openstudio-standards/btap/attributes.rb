@@ -73,6 +73,8 @@ module BTAP
         "ExteriorWall",
         "ExteriorRoof",
         "ExteriorFloor",
+        "InterzonalAtticFloor",
+        "InterzonalSkylightWalls",
         "ExteriorFixedWindow",
         "ExteriorOperableWindow",
         "ExteriorSkylight",
@@ -86,16 +88,14 @@ module BTAP
         "GroundContactFloor"
       ]
 
-      # Surface type map for converting between surface type strings and TBD
-      # `stypes`.
-      # TODO: This is a work-in-progress--most of the construction files
-      # are not being used and of the constructions only a small subset. The
-      # `costed_assembly` function in the TBD module needs to be updated as
-      # such.
+      # Surface type map for converting between surface type strings and the TBD
+      # `stypes` parameter.
       @surface_type_tbd_map = {
-        "ExteriorWall"  => :walls,
-        "ExteriorRoof"  => :roofs,
-        "ExteriorFloor" => :floors
+        "ExteriorWall"            => :walls,
+        "ExteriorRoof"            => :roofs,
+        "ExteriorFloor"           => :floors,
+        "InterzonalAtticFloor"    => :floors,
+        "InterzonalSkylightWalls" => :walls
       }
 
       @zones         = []
@@ -144,33 +144,23 @@ module BTAP
       end
     end
 
-    # Get the RSI and constructions for each RSI value for a given surface using
-    # the BTAP::Structure and BTAP::Bridging classes. The calculated RSI and a
-    # reference to a hash containing construction attributes is assigned to each
-    # surface. If the surface was targeted by TBD (which is the case for all
-    # non-ground-contact walls/roofs/floors) then retrieve the stored initial
-    # U-value which TBD stores as an AdditionalProperty in an OpenStudio model.
+    # Get the constructions for each RSI value for a given surface using the
+    # BTAP::Structure and BTAP::Bridging classes. A reference to a hash and
+    # a list of hashes containing construction attributes is assigned to each
+    # surface.
     #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_surface_construction(surface, surface_type)
-      surface_is_derated      = surface_type.match?(/ExteriorWall|ExteriorRoof|ExteriorFloor/)
-      tbd_surface_type        = @surface_type_tbd_map[surface_type]
-      construction_name       = @surface_types_to_assemblies[surface_type]
-      construction_candidates = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
-
-      if surface_is_derated
-        surface_usi = surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
-        surface_rsi = 1 / surface_usi
-      else
-        surface_rsi = TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
-        surface_usi = 1 / surface_rsi
-      end
 
       # Only consider insulated surfaces for further analysis. If the RSI of a
       # surface is less than 1, then skip it.
-      return if surface_rsi < 1.0
+      return if surface.rsi < 1.0
 
+      tbd_surface_type          = @surface_type_tbd_map[surface_type]
+      construction_name         = @surface_types_to_assemblies[surface_type]
+      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
+      surface_usi               = 1 / surface.rsi
       closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
                                     (surface_usi - usi).abs }.to_s
       btap_constructions        = []
@@ -180,12 +170,12 @@ module BTAP
       # yet.
       unless @constructions.has_key?(btap_construction_closest["id"])
 
-        # Process each construction into a hash. Eventually this will also
-        # store the cost for the construction in `envelope_costing.rb`. Carbon
-        # emissions aren't stored per-construction since they vary per surface
-        # due to window perimeter differences, and this class is stored as a
-        # reference in the Surface and SubSurfaces classes. Here are a list
-        # of parameters of the hash:
+        # Process each construction into a hash. This hash will also store the
+        # cost for the construction in `envelope_costing.rb`. Carbon emissions
+        # aren't stored per-construction since they vary per surface due to
+        # window perimeter differences, and this class is stored as a reference
+        # in the Surface and SubSurfaces classes. Here are a list of parameters
+        # of the hash:
         #
         # @param name        [String]
         # @param description [String]
@@ -217,13 +207,13 @@ module BTAP
 
       surface.instance_variable_set(:@btap_construction_closest, btap_construction_closest)
       surface.instance_variable_set(:@btap_constructions, btap_constructions)
-      surface.instance_variable_set(:@rsi, surface_rsi)
     end
 
     # Compile all the pertinent OpenStudio-related data into the data structures
     # of this class while also appending to the exisitng OpenStudio ones. This
     # adds accessors for zones, spaces, and surfaces while keeping them sorted
-    # for future accesses.
+    # for future accesses. Also, store the RSI for each surface since retrieving
+    # them is different for each category of surfaces.
     def compile_model
 
       # Iterate through the data structures while also saving their sorted order later for reference.
@@ -243,25 +233,43 @@ module BTAP
           end
           zone    << space
           @spaces << space
-
           surfaces_hash = {}
 
-          # rd2: Friendly reminder: models with attic spaces (maybe even future
-          #      3rd-party models with unconditioned crawlspaces) will have
-          #      interzone surfaces with insulated constructions. Examples:
-          #        - insulated attic floors
-          #        - insulated skylight well walls (through attic spaces)
+          # The following surfaces are the ones considered for costing/carbon
+          # analysis. Filter them each into categories by boundary condition and
+          # store their RSI as an instance variable for future reference.
 
           # Exterior Surfaces
           # Note that only TBD-derated exterior surfaces should be filtered. A
           # surface with the "c tbd" substring in its construction means that
           # it was targeted by TBD. Subsurfaces and ground-contact surfaces
           # are unaffected by TBD.
-          derated_surfaces = space.surfaces.filter { |surface| surface.construction.get.nameString.include?("c tbd")}
+          derated_surfaces  = space.surfaces.filter { |surface| surface.construction.get.nameString.include?("c tbd")}
           exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(derated_surfaces, "Outdoors")
           surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
           surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
           surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
+          exterior_surfaces.each do |surface|
+            surface.instance_variable_set(:@rsi, 1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get)
+          end
+
+          # Interzonal Surfaces
+          # In models with attics, roofs may be unconditioned and as a result
+          # will not be considered for further analysis. However, attic floors
+          # and skylight well walls will be insulated and these surfaces will
+          # need to be filtered.
+          # TODO: Eventually crawlspaces should also be considered, however they
+          # are not present in any of the NECB template buildings.
+          unless surfaces_hash["ExteriorRoof"].empty?
+            if surfaces_hash["ExteriorRoof"].first.rsi < 1.0
+              surfaces_hash["InterzonalAtticFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+                exterior_surfaces, "Floor").sort
+              surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+                exterior_surfaces, "Wall").sort
+            end
+          end
+          surfaces_hash["InterzonalAtticFloor"]    = [] unless surfaces_hash.has_key?("InterzonalAtticFloor")
+          surfaces_hash["InterzonalSkylightWalls"] = [] unless surfaces_hash.has_key?("InterzonalSkylightWalls")
 
           # Exterior Subsurfaces
           exterior_subsurfaces = exterior_surfaces.flat_map(&:subSurfaces)
@@ -273,6 +281,10 @@ module BTAP
           surfaces_hash["ExteriorDoor"]                    = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["Door"]).sort
           surfaces_hash["ExteriorGlassDoor"]               = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["GlassDoor"]).sort
           surfaces_hash["ExteriorOverheadDoor"]            = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["OverheadDoor"]).sort
+          exterior_subsurfaces.each do |surface|
+            surface.instance_variable_set(:@rsi, OpenstudioStandards::Constructions.construction_get_conductance(
+              OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get))
+          end
 
           # Ground Surfaces
           ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
@@ -280,6 +292,10 @@ module BTAP
           surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Wall").sort
           surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "RoofCeiling").sort
           surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Floor").sort
+          ground_surfaces.each do |surface|
+            surface.instance_variable_set(:@rsi, TBD.rsi(
+              surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
+          end
 
           space.instance_variable_set(:@surfaces_hash, surfaces_hash)
         end
