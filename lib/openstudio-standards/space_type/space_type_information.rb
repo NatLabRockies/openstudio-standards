@@ -4,6 +4,7 @@ module OpenstudioStandards
     # @!group SpaceType
 
     # Return the largest thermal zone in a space type
+    # If multiple zones of the same size exist, the first one alphabetically will be returned.
     #
     # @param space_type [OpenStudio::Model::Space Type] OpenStudio space type  object
     # @return [OpenStudio::Model::ThermalZone] returns the largest thermal zone in the space type
@@ -17,7 +18,14 @@ module OpenstudioStandards
       if thermal_zones.empty?
         return nil
       else
-        largest_thermal_zone = thermal_zones.sort_by { |zone| -zone.floorArea }.first
+        max_floor_area = 0.0
+        largest_thermal_zone = nil
+        thermal_zones.sort_by { |zone| zone.name.to_s }.each do |zone|
+          if zone.floorArea > max_floor_area
+            largest_thermal_zone = zone
+            max_floor_area = zone.floorArea
+          end
+        end
         return largest_thermal_zone
       end
     end
