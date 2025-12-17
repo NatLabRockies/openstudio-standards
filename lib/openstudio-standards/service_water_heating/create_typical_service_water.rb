@@ -34,7 +34,6 @@ module OpenstudioStandards
         total_space_floor_area_ft2 = OpenStudio.convert(total_space_floor_area_m2, 'm^2', 'ft^2').get
         space_type = space.spaceType.get
 
-
         # get refrigeration space type from the object
         next unless space_type.additionalProperties.hasFeature('service_water_space_type')
 
