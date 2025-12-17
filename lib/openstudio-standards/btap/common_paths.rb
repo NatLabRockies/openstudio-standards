@@ -8,9 +8,7 @@ class CommonPaths
 
   attr_reader :locations_path
   attr_reader :construction_sets_path
-  attr_reader :constructions_opaque_path
   attr_reader :materials_opaque_path
-  attr_reader :constructions_glazing_path
   attr_reader :materials_glazing_path
   attr_reader :constructions_path
   attr_reader :construction_properties_path
@@ -54,9 +52,7 @@ class CommonPaths
 
     @locations_path               = "#{dir_database}/locations.csv"
     @construction_sets_path       = "#{dir_database}/construction_sets.csv"
-    @constructions_opaque_path    = "#{dir_database}/constructions_opaque.csv"
     @materials_opaque_path        = "#{dir_database}/materials_opaque.csv"
-    @constructions_glazing_path   = "#{dir_database}/constructions_glazing.csv"
     @materials_glazing_path       = "#{dir_database}/materials_glazing.csv"
     @constructions_path           = "#{dir_database}/Constructions.csv"
     @construction_properties_path = "#{dir_database}/ConstructionProperties.csv"
@@ -69,9 +65,7 @@ class CommonPaths
     @raw_paths = [
       @locations_path,
       @construction_sets_path,
-      @constructions_opaque_path,
       @materials_opaque_path,
-      @constructions_glazing_path,
       @materials_glazing_path,
       @constructions_path,
       @construction_properties_path,

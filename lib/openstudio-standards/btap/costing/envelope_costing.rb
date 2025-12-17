@@ -249,12 +249,11 @@ class BTAPCosting
           regional_material, regional_installation = get_regional_cost_factors(province_state, city, material)
 
           # Get cost information from lookup.
-          # Note that "glazing" types don't have a 'quantity' hash entry!
-          # Don't need "and" below but using in-case this hash field is added in
-          # the future.
+          # TODO: Fix the database so this isn't necessary.
           if construction["type"] == 'glazing' and material['quantity'].to_f == 0.0
             material['quantity'] = '1.0'
           end
+
           material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult'].to_f
           labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult'].to_f
           equipment_cost = costing_data['baseCosts']['equipmentOpCost']

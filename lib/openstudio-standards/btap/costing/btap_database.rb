@@ -75,9 +75,7 @@ class BTAPDatabase
     raw_data_names = [
       'locations',
       'construction_sets',
-      'constructions_opaque',
       'materials_opaque',
-      'constructions_glazing',
       'materials_glazing',
       'Constructions',
       'ConstructionProperties',
