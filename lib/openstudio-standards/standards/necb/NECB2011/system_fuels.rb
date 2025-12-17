@@ -20,6 +20,7 @@ class SystemFuels
   attr_accessor :swh_fueltype
   attr_accessor :force_boiler
   attr_accessor :force_airloop_hot_water
+  attr_accessor :apply_ventilation_efficiency
 
   def set_defaults(standards_data:, primary_heating_fuel:)
     # Get fuelset.
@@ -119,5 +120,9 @@ class SystemFuels
     @swh_fueltype = init_fuel_type[:swh_fueltype]
     @force_boiler = init_fuel_type[:force_boiler]
     @force_airloop_hot_water = init_fuel_type[:force_airloop_hot_water]
+  end
+
+  def set_ventilation_efficiency(apply_ventilation_efficiency:)
+    @apply_ventilation_efficiency = apply_ventilation_efficiency
   end
 end

@@ -191,7 +191,8 @@ class BTAPDatapoint
                                        boiler_cap_ratio: @options[:boiler_cap_ratio],
                                        swh_fuel: @options[:swh_fuel],
                                        airloop_fancoils_heating: @options[:airloop_fancoils_heating],
-                                       oerd_utility_pricing: @oerd_utility_pricing
+                                       oerd_utility_pricing: @oerd_utility_pricing,
+                                       apply_ventilation_efficiency: @options[:apply_ventilation_efficiency]
                                        )
       end
 

@@ -81,9 +81,14 @@ class NECB2011
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
+        #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
+        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
+
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)
         oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('ZoneSum')
+        oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
 
@@ -118,6 +123,7 @@ class NECB2011
           sizing_zone.setZoneHeatingDesignSupplyAirTemperatureDifference(system_data[:ZoneHeatingDesignSupplyAirTemperatureDifference])
           sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
           sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+          sizing_zone.setDesignZoneAirDistributionEffectivenessinHeatingMode(0.8) if self.fuel_type_set.apply_ventilation_efficiency
 
           if heating_coil_type == 'Hot Water'
             reheat_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
@@ -138,6 +144,7 @@ class NECB2011
           vav_terminal.setFixedMinimumAirFlowRate(system_data[:ZoneVAVMinFlowFactorPerFloorArea] * zone.floorArea)
           vav_terminal.setMaximumReheatAirTemperature(system_data[:ZoneVAVMaxReheatTemp])
           vav_terminal.setDamperHeatingAction(system_data[:ZoneVAVDamperAction])
+          vav_terminal.setControlForOutdoorAir(true) if self.fuel_type_set.apply_ventilation_efficiency
         end
         sys_name_pars = {}
         sys_name_pars['sys_hr'] = 'none'
@@ -350,6 +357,9 @@ class NECB2011
         return_fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
         return_fan.setName('Sys6 Return Fan')
 
+        #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
+        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+
         htg_coil = add_onespeed_htg_DX_coil(model, always_on)
         htg_coil.setName('CoilHeatingDXSingleSpeed_ashp')
 
@@ -359,9 +369,13 @@ class NECB2011
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
+        #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
+        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)
         oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('ZoneSum')
+        oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
         oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
 
         # Add the components to the air loop
@@ -398,6 +412,7 @@ class NECB2011
           sizing_zone.setZoneHeatingDesignSupplyAirTemperatureDifference(system_data[:ZoneHeatingDesignSupplyAirTemperatureDifference])
           sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneDXCoolingSizingFactor])
           sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneDXHeatingSizingFactor])
+          sizing_zone.setDesignZoneAirDistributionEffectivenessinHeatingMode(0.8) if self.fuel_type_set.apply_ventilation_efficiency
 
           # Set zone baseboards
           add_zone_baseboards(model: model,

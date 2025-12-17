@@ -314,7 +314,8 @@ class NECB2011 < Standard
                                    boiler_fuel: nil,
                                    boiler_cap_ratio: nil,
                                    airloop_fancoils_heating: nil,
-                                   oerd_utility_pricing: nil)
+                                   oerd_utility_pricing: nil,
+                                   apply_ventilation_efficiency: nil)
     model = load_building_type_from_library(building_type: building_type)
     return model_apply_standard(model: model,
                                 construction_opt: construction_opt,
@@ -385,7 +386,8 @@ class NECB2011 < Standard
                                 boiler_fuel: boiler_fuel,
                                 boiler_cap_ratio: boiler_cap_ratio,
                                 airloop_fancoils_heating: airloop_fancoils_heating,
-                                oerd_utility_pricing: oerd_utility_pricing
+                                oerd_utility_pricing: oerd_utility_pricing,
+                                apply_ventilation_efficiency: apply_ventilation_efficiency
                                 )
   end
 
@@ -473,7 +475,8 @@ class NECB2011 < Standard
                            boiler_fuel: nil,
                            boiler_cap_ratio: nil,
                            airloop_fancoils_heating: nil,
-                           oerd_utility_pricing: nil)
+                           oerd_utility_pricing: nil,
+                           apply_ventilation_efficiency: nil)
 
     apply_weather_data(model: model,
                        epw_file: epw_file,
@@ -490,6 +493,8 @@ class NECB2011 < Standard
     massive = construction_opt == 'structure'
     tbd_option = convert_arg_to_string(variable: tbd_option, default: 'none')
     tbd_interpolate = convert_arg_to_bool(variable: tbd_interpolate, default: true)
+    apply_ventilation_efficiency = convert_arg_to_bool(variable: apply_ventilation_efficiency, default: false)
+    self.fuel_type_set.set_ventilation_efficiency(apply_ventilation_efficiency: apply_ventilation_efficiency)
     necb_hdd = convert_arg_to_bool(variable: necb_hdd, default: true)
     boiler_fuel = convert_arg_to_string(variable: boiler_fuel, default: nil)
     boiler_cap_ratio = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
