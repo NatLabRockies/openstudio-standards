@@ -575,7 +575,6 @@ module OpenstudioStandards
   require_relative "#{proto}/common/objects/Prototype.FanConstantVolume"
   require_relative "#{proto}/common/objects/Prototype.FanOnOff"
   require_relative "#{proto}/common/objects/Prototype.FanVariableVolume"
-  require_relative "#{proto}/common/objects/Prototype.FanZoneExhaust"
   require_relative "#{proto}/common/objects/Prototype.HeatExchangerAirToAirSensibleAndLatent"
   require_relative "#{proto}/common/objects/Prototype.hvac_systems"
   require_relative "#{proto}/common/objects/Prototype.Model.elevators"

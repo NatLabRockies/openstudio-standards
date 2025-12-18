@@ -902,9 +902,6 @@ Standard.class_eval do
 
           zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone, make_up_air_source_zone: makeup_thermal_zone)
           unless zone_exhaust_fan.nil?
-            # set fan pressure rise
-            fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
-
             # update efficiency and pressure rise
             prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
 
@@ -926,9 +923,6 @@ Standard.class_eval do
 
       zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone)
       unless zone_exhaust_fan.nil?
-        # set fan pressure rise
-        fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
-
         # update efficiency and pressure rise
         prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
 
@@ -1537,7 +1531,6 @@ Standard.class_eval do
     model.getFanConstantVolumes.sort.each { |obj| fan_constant_volume_apply_prototype_fan_pressure_rise(obj) }
     model.getFanVariableVolumes.sort.each { |obj| fan_variable_volume_apply_prototype_fan_pressure_rise(obj) }
     model.getFanOnOffs.sort.each { |obj| fan_on_off_apply_prototype_fan_pressure_rise(obj) }
-    model.getFanZoneExhausts.sort.each { |obj| fan_zone_exhaust_apply_prototype_fan_pressure_rise(obj) }
 
     # Fan motor efficiency
     model.getFanConstantVolumes.sort.each { |obj| prototype_fan_apply_prototype_fan_efficiency(obj) }

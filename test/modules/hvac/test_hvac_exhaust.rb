@@ -24,9 +24,6 @@ class TestHVACExhaust < Minitest::Test
     assert(0, model.getZoneMixings.size)
     zone_exhaust_fan = @hvac.create_exhaust_fan(exhaust_zone, make_up_air_source_zone: makeup_zone)
 
-    # set fan pressure rise
-    std.fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
-
     # update efficiency and pressure rise
     std.prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
 
@@ -50,9 +47,6 @@ class TestHVACExhaust < Minitest::Test
     # apply create exhaust fan
     exhaust_zone = model.getThermalZoneByName('TZ-Floor 1 Anesthesia').get
     zone_exhaust_fan = @hvac.create_exhaust_fan(exhaust_zone)
-
-    # set fan pressure rise
-    std.fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
 
     # update efficiency and pressure rise
     std.prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)

@@ -73,6 +73,10 @@ module OpenstudioStandards
       zone_exhaust_fan.setEndUseSubcategory('Zone Exhaust Fans')
       zone_exhaust_fan.addToThermalZone(exhaust_zone)
 
+      # set default exhaust fan pressure rise of 0.5 in w.c.
+      pressure_rise_pa = OpenStudio.convert(0.5, 'inH_{2}O', 'Pa').get
+      zone_exhaust_fan.setPressureRise(pressure_rise_pa)
+
       # add objects to account for makeup air
       unless make_up_air_source_zone.nil?
         # add balanced exhaust schedule to zone_exhaust_fan
