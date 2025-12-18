@@ -82,7 +82,7 @@ class NECB2011
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
         #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
-        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        #air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
         air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
@@ -358,7 +358,7 @@ class NECB2011
         return_fan.setName('Sys6 Return Fan')
 
         #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
-        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        #air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
 
         htg_coil = add_onespeed_htg_DX_coil(model, always_on)
         htg_coil.setName('CoilHeatingDXSingleSpeed_ashp')
@@ -370,7 +370,8 @@ class NECB2011
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
         #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
-        air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        #air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)
