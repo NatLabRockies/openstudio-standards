@@ -575,7 +575,6 @@ module BTAP
     # @option argh [Hash] roofs exterior roof parameters e.g. :uo, :ut
     # @option argh [:good, :bad] quality derating option (if not uprating)
     # @option argh [Boolean] interpolate if TBD interpolates among Uo (uprate)
-    # @option path [String] File path for a no-simulation analysis
     def initialize(model = nil, argh = {})
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"

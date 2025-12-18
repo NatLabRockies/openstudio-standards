@@ -43,7 +43,7 @@ class BTAPCosting
   # @param factors_csv [String] Path to custom localization factors.
   # @param attributes  [BTAP::Atributes] Methods and helpers for model
   #                                      attributes, mostly envelopes and
-  #                                      constructions.         
+  #                                      constructions.
   def initialize(costs_csv: nil, factors_csv: nil, attributes:)
     @cp               = CommonPaths.instance
     @costing_database = BTAPDatabase.instance
