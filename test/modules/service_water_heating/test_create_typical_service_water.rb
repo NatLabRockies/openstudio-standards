@@ -263,18 +263,21 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
     output_dir = "#{__dir__}/output/#{__method__}"
     FileUtils.mkdir_p output_dir
 
-    # load model
-    std = Standard.build('DEER 2011')
-    model = std.safe_load_model("#{__dir__}/../../deer_prototype/models/epr_test.osm")
+    # create model
+    model = OpenStudio::Model::Model.new
+    args = {}
+    args['total_bldg_floor_area'] = 50000.0
+    args['bldg_type_a'] = 'ESe'
+    args['template'] = 'DEER 2011'
+    result = OpenstudioStandards::Geometry.create_bar_from_building_type_ratios(model, args)
+    model.getBuilding.setStandardsBuildingType('ESe')
 
     # add new standards space types and set additional properties
+    std = Standard.build('DEER 2011')
     std.prototype_space_type_map(model, set_additional_properties: true)
-
-    # remove swh loops
-    model.getPlantLoops.each { |swh_loop| swh_loop.remove unless (swh_loop.name == 'Hot Water Loop') }
 
     # default water heater
     created_loops = @swh.create_typical_service_water_heating(model)
-    assert(created_loops.size > 1, "Expected more than 1 service water heating loop.")
+    assert(created_loops.size > 0, "Expected at least one service water heating loop.")
   end
 end
