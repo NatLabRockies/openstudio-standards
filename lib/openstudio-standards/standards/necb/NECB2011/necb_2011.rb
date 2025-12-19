@@ -725,7 +725,7 @@ class NECB2011 < Standard
     # Apply airloop economizer
     ecm.add_airloop_economizer(model: model, airloop_economizer_type: airloop_economizer_type)
     # Perform a second sizing run if needed
-    if (!unitary_cop.nil? && unitary_cop != 'NECB_Default') || !model.getPlantLoops.empty?
+    if (!unitary_cop.nil? && unitary_cop != 'NECB_Default') || !model.getPlantLoops.empty? || self.fuel_type_set.apply_ventilation_efficiency
       # Do a sizing run
       try_sizing_run(model: model, sizing_run_dir: sizing_run_dir, sizing_run_subdir: 'SR2')
       #end
