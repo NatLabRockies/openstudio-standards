@@ -1,0 +1,113 @@
+{
+  "title": "ASHRAE 90.1 PRM Electric Equipment User Data",
+  "definitions": {
+    "UserDataElectricEquipmentData": {
+      "type": "object",
+      "properties": {
+        "userdata_electric_equipment": {
+          "type": "array",
+          "description": "List of userdata_electric_equipment rows",
+          "items": {
+            "$ref": "#/definitions/UserDataElectricEquipment"
+          }
+        }
+      }
+    },
+    "UserDataElectricEquipment": {
+      "type": "object",
+      "description": "User data electric equipment object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Identifier or name for the Electric Equipment object"
+        },
+        "fraction_of_controlled_receptacles": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Percentage of all controlled receptacles as a fraction."
+        },
+        "receptacle_power_savings": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Input the receptacle power savings directly."
+        },
+        "motor_horsepower": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Horsepower of the motor."
+        },
+        "motor_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.0,
+          "description": "Efficiency of the motor as a percentage."
+        },
+        "motor_is_exempt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set to true if the motor is exempt, false otherwise."
+        },
+        "elevator_weight_of_car": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight of the elevator car in pounds."
+        },
+        "elevator_rated_load": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Proposed design elevator load at which to operate, in pounds."
+        },
+        "elevator_counter_weight_of_car": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Counterweight of the elevator car in pounds."
+        },
+        "elevator_speed_of_car": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Speed of the proposed elevator, in feet per minute."
+        },
+        "elevator_number_of_stories": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories (including basement) that is covered by the elevator."
+        },
+        "elevator_number_of_lifts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of elevators."
+        },
+        "elevator_area_ft2": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Area of the elevator, in square feet."
+        },
+        "elevator_ventilation_cfm": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Elevator ventilation fan specification, in Watt per cfm."
+        },
+        "refrigeration_equipment_class": {
+          "type": "string",
+          "description": "Class of the refrigeration equipment as per Table G3.10.2.",
+          "$comment": "Not implemented yet"
+        },
+        "refrigeration_equipment_volume": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Volume of the chiller or frozen compartment, in cubic feet.",
+          "$comment": "Not implemented yet"
+        },
+        "refrigeration_equipment_total_display_area": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total display area of the refrigeration equipment.",
+          "$comment": "Not implemented yet"
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  }
+}

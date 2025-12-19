@@ -1243,110 +1243,6 @@ class Standard
     return [sensor_1_frac, sensor_2_frac, sensor_1_window, sensor_2_window]
   end
 
-  # Set the infiltration rate for this space to include the impact of air leakage requirements in the standard.
-  #
-  # @param space [OpenStudio::Model::Space] space object
-  # @return [Double] true if successful, false if not
-  # @todo handle doors and vestibules
-  def space_apply_infiltration_rate(space)
-    # data center keeps positive pressure all the time, so no infiltration
-    if space.spaceType.is_initialized && space.spaceType.get.standardsSpaceType.is_initialized
-      std_space_type = space.spaceType.get.standardsSpaceType.get
-      if std_space_type.downcase.include?('data center') || std_space_type.downcase.include?('datacenter')
-        return true
-      end
-
-      if space.spaceType.get.standardsBuildingType.is_initialized
-        std_bldg_type = space.spaceType.get.standardsBuildingType.get
-        if std_bldg_type.downcase.include?('datacenter') && std_space_type.downcase.include?('computerroom')
-          return true
-        end
-      end
-    end
-
-    # Determine the total building baseline infiltration rate in cfm per ft2 of exterior above grade wall area at 75 Pa
-    # exterior above grade envelope area includes any surface with boundary condition 'Outdoors' in OpenStudio/EnergyPlus
-    basic_infil_rate_cfm_per_ft2 = space_infiltration_rate_75_pa(space)
-
-    # Do nothing if no infiltration
-    return true if basic_infil_rate_cfm_per_ft2.zero?
-
-    # Conversion factor
-    # 1 m^3/s*m^2 = 196.85 cfm/ft2
-    conv_fact = 196.85
-
-    # Adjust the infiltration rate to the average pressure for the prototype buildings.
-    adj_infil_rate_cfm_per_ft2 = OpenstudioStandards::Infiltration.adjust_infiltration_to_prototype_building_conditions(basic_infil_rate_cfm_per_ft2)
-    adj_infil_rate_m3_per_s_per_m2 = adj_infil_rate_cfm_per_ft2 / conv_fact
-    # Get the exterior wall area
-    exterior_wall_and_window_area_m2 =  OpenstudioStandards::Geometry.space_get_exterior_wall_and_subsurface_area(space)
-
-    # Don't create an object if there is no exterior wall area
-    if exterior_wall_and_window_area_m2 <= 0.0
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Space', "For #{space.name}, no exterior wall area was found, no infiltration will be added.")
-      return true
-    end
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Space', "For #{space.name}, set infiltration rate to #{adj_infil_rate_cfm_per_ft2.round(3)} cfm/ft2 exterior wall area (aka #{basic_infil_rate_cfm_per_ft2} cfm/ft2 @75Pa).")
-
-    # Calculate the total infiltration, assuming
-    # that it only occurs through exterior walls
-    tot_infil_m3_per_s = adj_infil_rate_m3_per_s_per_m2 * exterior_wall_and_window_area_m2
-
-    # Now spread the total infiltration rate over all
-    # exterior surface areas (for the E+ input field)
-    all_ext_infil_m3_per_s_per_m2 = tot_infil_m3_per_s / space.exteriorArea
-
-    OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Space', "For #{space.name}, adj infil = #{all_ext_infil_m3_per_s_per_m2.round(8)} m^3/s*m^2.")
-
-    # Get any infiltration schedule already assigned to this space or its space type
-    # If not, the always on schedule will be applied.
-    infil_sch = nil
-    unless space.spaceInfiltrationDesignFlowRates.empty?
-      old_infil = space.spaceInfiltrationDesignFlowRates[0]
-      if old_infil.schedule.is_initialized
-        infil_sch = old_infil.schedule.get
-      end
-    end
-
-    if infil_sch.nil? && space.spaceType.is_initialized
-      space_type = space.spaceType.get
-      unless space_type.spaceInfiltrationDesignFlowRates.empty?
-        old_infil = space_type.spaceInfiltrationDesignFlowRates[0]
-        if old_infil.schedule.is_initialized
-          infil_sch = old_infil.schedule.get
-        end
-      end
-    end
-
-    if infil_sch.nil?
-      infil_sch = space.model.alwaysOnDiscreteSchedule
-    end
-
-    # Create an infiltration rate object for this space
-    infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(space.model)
-    infiltration.setName("#{space.name} Infiltration")
-    # infiltration.setFlowperExteriorWallArea(adj_infil_rate_m3_per_s_per_m2)
-    infiltration.setFlowperExteriorSurfaceArea(all_ext_infil_m3_per_s_per_m2.round(13))
-    infiltration.setSchedule(infil_sch)
-    infiltration.setConstantTermCoefficient(0.0)
-    infiltration.setTemperatureTermCoefficient 0.0
-    infiltration.setVelocityTermCoefficient(0.224)
-    infiltration.setVelocitySquaredTermCoefficient(0.0)
-
-    infiltration.setSpace(space)
-
-    return true
-  end
-
-  # Baseline infiltration rate
-  #
-  # @param space [OpenStudio::Model::Space] space object
-  # @return [Double] the baseline infiltration rate, in cfm/ft^2 exterior above grade wall area at 75 Pa
-  def space_infiltration_rate_75_pa(space = nil)
-    basic_infil_rate_cfm_per_ft2 = 1.8
-    return basic_infil_rate_cfm_per_ft2
-  end
-
   # Determines whether the space is conditioned per 90.1, which is based on heating and cooling loads.
   #
   # @param space [OpenStudio::Model::Space] space object
@@ -1358,6 +1254,9 @@ class Standard
 
     # Get climate zone
     climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(space.model)
+    if climate_zone.empty?
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Space', 'Model has no climate zone assigned, cannot determine space conditioning category.')
+    end
 
     # Get the zone this space is inside
     zone = space.thermalZone
@@ -1378,7 +1277,7 @@ class Standard
     space.model.getAirLoopHVACReturnPlenums.each do |return_air_plenum|
       if return_air_plenum.thermalZone.get.name.to_s == zone.get.name.to_s
         # Determine if residential
-        res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get) ? true : false
+        res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get)
 
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Standards.ThermalZone', "Zone #{zone.get.name} is (indirectly) conditioned (return air plenum).")
         cond_cat = res ? 'ResConditioned' : 'NonResConditioned'
@@ -1391,7 +1290,7 @@ class Standard
     space.model.getAirLoopHVACSupplyPlenums.each do |supply_air_plenum|
       if supply_air_plenum.thermalZone.get.name.to_s == zone.get.name.to_s
         # Determine if residential
-        res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get) ? true : false
+        res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get)
 
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Standards.ThermalZone', "Zone #{zone.get.name} is (indirectly) conditioned (supply air plenum).")
         cond_cat = res ? 'ResConditioned' : 'NonResConditioned'
@@ -1454,7 +1353,7 @@ class Standard
       end
 
       # Determine if residential
-      res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get) ? true : false
+      res = OpenstudioStandards::ThermalZone.thermal_zone_residential?(zone.get)
 
       return cond_cat unless cond_ua > otr_ua
 

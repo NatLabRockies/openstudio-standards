@@ -47,12 +47,15 @@ module OpenstudioStandards
 
       # create service water heating loop
       service_water_loop = OpenStudio::Model::PlantLoop.new(model)
-      service_water_loop.setMinimumLoopTemperature(10.0)
       if service_water_temperature > 60.0
         service_water_loop.setMaximumLoopTemperature(service_water_temperature)
       else
         service_water_loop.setMaximumLoopTemperature(60.0)
       end
+
+      # set minimum temperature of 125F for legionella growth risk
+      swh_loop_min_c = OpenStudio.convert(125.0, 'F', 'C').get
+      service_water_loop.setMinimumLoopTemperature(swh_loop_min_c)
 
       if system_name.nil?
         system_name = 'Service Water Loop'
@@ -61,7 +64,7 @@ module OpenstudioStandards
 
       # service water heating loop controls
       swh_temp_f = OpenStudio.convert(service_water_temperature, 'C', 'F').get
-      swh_delta_t_r = 9.0 # 9F delta-T
+      swh_delta_t_r = 9.0 # default to 9 R temperature difference
       swh_delta_t_k = OpenStudio.convert(swh_delta_t_r, 'R', 'K').get
       swh_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
                                                                                      service_water_temperature,
@@ -119,19 +122,19 @@ module OpenstudioStandards
                                                                               use_ems_control: false)
       else
         OpenstudioStandards::ServiceWaterHeating.create_water_heater(model,
-                                                                      water_heater_capacity: water_heater_capacity,
-                                                                      water_heater_volume: water_heater_volume,
-                                                                      water_heater_fuel: water_heater_fuel,
-                                                                      on_cycle_parasitic_fuel_consumption_rate: on_cycle_parasitic_fuel_consumption_rate,
-                                                                      off_cycle_parasitic_fuel_consumption_rate: off_cycle_parasitic_fuel_consumption_rate,
-                                                                      service_water_temperature: service_water_temperature,
-                                                                      service_water_temperature_schedule: swh_temp_sch,
-                                                                      set_peak_use_flowrate: false,
-                                                                      peak_flowrate: 0.0,
-                                                                      flowrate_schedule: nil,
-                                                                      water_heater_thermal_zone: water_heater_thermal_zone,
-                                                                      number_of_water_heaters: number_of_water_heaters,
-                                                                      service_water_loop: service_water_loop)
+                                                                     water_heater_capacity: water_heater_capacity,
+                                                                     water_heater_volume: water_heater_volume,
+                                                                     water_heater_fuel: water_heater_fuel,
+                                                                     on_cycle_parasitic_fuel_consumption_rate: on_cycle_parasitic_fuel_consumption_rate,
+                                                                     off_cycle_parasitic_fuel_consumption_rate: off_cycle_parasitic_fuel_consumption_rate,
+                                                                     service_water_temperature: service_water_temperature,
+                                                                     service_water_temperature_schedule: swh_temp_sch,
+                                                                     set_peak_use_flowrate: false,
+                                                                     peak_flowrate: 0.0,
+                                                                     flowrate_schedule: nil,
+                                                                     water_heater_thermal_zone: water_heater_thermal_zone,
+                                                                     number_of_water_heaters: number_of_water_heaters,
+                                                                     service_water_loop: service_water_loop)
       end
 
       # add pipe losses if requested
@@ -166,6 +169,7 @@ module OpenstudioStandards
     # Creates a booster water heater on its own loop and attaches it to the main service water heating loop.
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
+    # @param system_name [String] the name of the system. nil results in the default.
     # @param water_heater_capacity [Double] water heater capacity, in W. Defaults to 8 kW / 27.283 kBtu/hr
     # @param water_heater_volume [Double] water heater volume, in m^3. Defaults to 0.0227 m^3 / 6 gal
     # @param water_heater_fuel [String] water heating fuel. Valid choices are 'NaturalGas', 'Electricity'.
@@ -179,6 +183,7 @@ module OpenstudioStandards
     # @param service_water_loop [OpenStudio::Model::PlantLoop] if provided, add the water heater to this loop
     # @return [OpenStudio::Model::PlantLoop] The booster water loop OpenStudio PlantLoop object
     def self.create_booster_water_heating_loop(model,
+                                               system_name: 'Booster Water Loop',
                                                water_heater_capacity: 8000.0,
                                                water_heater_volume: OpenStudio.convert(6.0, 'gal', 'm^3').get,
                                                water_heater_fuel: 'Electricity',
@@ -189,7 +194,7 @@ module OpenstudioStandards
                                                water_heater_thermal_zone: nil,
                                                service_water_loop: nil)
       if service_water_loop.nil?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.ServiceWaterHeating', "#{_method_} requires the service_water_loop argument to couple the booster water heating loop with a heat exchanger.")
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.ServiceWaterHeating', "#{__method__} requires the service_water_loop argument to couple the booster water heating loop with a heat exchanger.")
         return nil
       else
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ServiceWaterHeating', "Adding booster water heater to #{service_water_loop.name}")
@@ -201,6 +206,16 @@ module OpenstudioStandards
       # Booster water heating loop
       booster_service_water_loop = OpenStudio::Model::PlantLoop.new(model)
       booster_service_water_loop.setName('Booster Service Water Loop')
+
+      if service_water_temperature > 82.2
+        service_water_loop.setMaximumLoopTemperature(service_water_temperature)
+      else
+        service_water_loop.setMaximumLoopTemperature(82.2)
+      end
+
+      # set minimum temperature of 125F for legionella growth risk
+      swh_loop_min_c = OpenStudio.convert(125.0, 'F', 'C').get
+      service_water_loop.setMinimumLoopTemperature(swh_loop_min_c)
 
       # create and add booster water heater to loop
       booster_water_heater = OpenstudioStandards::ServiceWaterHeating.create_water_heater(model,
@@ -218,7 +233,7 @@ module OpenstudioStandards
 
       # Service water heating loop controls
       swh_temp_f = OpenStudio.convert(service_water_temperature, 'C', 'F').get
-      swh_delta_t_r = 9.0 # 9F delta-T
+      swh_delta_t_r = 9.0 # default to 9 R temperature difference
       swh_delta_t_k = OpenStudio.convert(swh_delta_t_r, 'R', 'K').get
       swh_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
                                                                                      service_water_temperature,

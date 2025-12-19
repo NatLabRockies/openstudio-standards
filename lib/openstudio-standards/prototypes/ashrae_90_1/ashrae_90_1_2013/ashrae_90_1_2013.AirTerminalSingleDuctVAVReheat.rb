@@ -8,7 +8,7 @@ class ASHRAE9012013 < ASHRAE901
   # @param zone_oa_per_area [Double] the zone outdoor air per area in m^3/s*m^2
   # @return [Boolean] returns true if successful, false if not
   def air_terminal_single_duct_vav_reheat_apply_initial_prototype_damper_position(air_terminal_single_duct_vav_reheat, zone_oa_per_area)
-    min_damper_position = case air_terminal_single_duct_vav_reheat_reheat_type(air_terminal_single_duct_vav_reheat)
+    min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(air_terminal_single_duct_vav_reheat)
                           when 'Electricity', 'NaturalGas'
                             0.3
                           else # 'HotWater', other

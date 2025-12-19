@@ -2,7 +2,7 @@
   "tables": {
     "chillers": {
       "refs": [
-        "assumption"
+        "NECB 2020 Table 5.2.12.1.-K, Path B"
       ],
       "table": [
         {
@@ -12,15 +12,15 @@
           "absorption_type": null,
           "variable_speed_drive": null,
           "minimum_capacity": 0.0,
-          "maximum_capacity": 74.99,
+          "maximum_capacity": 75.07,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.779,
+          "minimum_full_load_efficiency": 0.77927,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
           "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -28,16 +28,16 @@
           "compressor_type": "Scroll",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 75.0,
-          "maximum_capacity": 149.99,
+          "minimum_capacity": 75.07,
+          "maximum_capacity": 150.13,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.749,
+          "minimum_full_load_efficiency": 0.74922,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
           "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           
@@ -46,16 +46,16 @@
           "compressor_type": "Scroll",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 150.0,
-          "maximum_capacity": 299.99,
+          "minimum_capacity": 150.13,
+          "maximum_capacity": 299.98,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.679,
+          "minimum_full_load_efficiency": 0.67932,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
           "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -63,16 +63,16 @@
           "compressor_type": "Scroll",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 300.0,
-          "maximum_capacity": 599.99,
+          "minimum_capacity": 299.98,
+          "maximum_capacity": 599.97,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.624,
+          "minimum_full_load_efficiency": 0.62433,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
           "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -80,16 +80,16 @@
           "compressor_type": "Scroll",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 600.0,
+          "minimum_capacity": 599.97,
           "maximum_capacity": 9999.0,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.584,
+          "minimum_full_load_efficiency": 0.58439,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
           "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -98,15 +98,15 @@
           "absorption_type": null,
           "variable_speed_drive": null,
           "minimum_capacity": 0.0,
-          "maximum_capacity": 74.99,
+          "maximum_capacity": 75.07,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.779,
+          "minimum_full_load_efficiency": 0.77927,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
           "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -114,16 +114,16 @@
           "compressor_type": "Reciprocating",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 75.0,
-          "maximum_capacity": 149.99,
+          "minimum_capacity": 75.07,
+          "maximum_capacity": 150.13,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.749,
+          "minimum_full_load_efficiency": 0.74922,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
           "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -131,16 +131,16 @@
           "compressor_type": "Reciprocating",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 150.0,
-          "maximum_capacity": 299.99,
+          "minimum_capacity": 150.13,
+          "maximum_capacity": 299.98,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.679,
+          "minimum_full_load_efficiency": 0.67932,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
           "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -148,16 +148,16 @@
           "compressor_type": "Reciprocating",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 300.0,
-          "maximum_capacity": 599.99,
+          "minimum_capacity": 299.98,
+          "maximum_capacity": 599.97,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.624,
+          "minimum_full_load_efficiency": 0.62433,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
           "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -165,16 +165,16 @@
           "compressor_type": "Reciprocating",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 600.0,
+          "minimum_capacity": 599.97,
           "maximum_capacity": 9999.0,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.584,
+          "minimum_full_load_efficiency": 0.58439,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
           "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -183,15 +183,15 @@
           "absorption_type": null,
           "variable_speed_drive": null,
           "minimum_capacity": 0.0,
-          "maximum_capacity": 74.99,
+          "maximum_capacity": 75.07,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.779,
+          "minimum_full_load_efficiency": 0.77927,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Screw_CAPFT_NECB2011",
           "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -199,16 +199,16 @@
           "compressor_type": "Rotary Screw",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 75.0,
-          "maximum_capacity": 149.99,
+          "minimum_capacity": 75.07,
+          "maximum_capacity": 150.13,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.749,
+          "minimum_full_load_efficiency": 0.74922,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Screw_CAPFT_NECB2011",
           "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -216,16 +216,16 @@
           "compressor_type": "Rotary Screw",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 150.0,
-          "maximum_capacity": 299.99,
+          "minimum_capacity": 150.13,
+          "maximum_capacity": 299.98,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.679,
+          "minimum_full_load_efficiency": 0.67932,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Screw_CAPFT_NECB2011",
           "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -233,16 +233,16 @@
           "compressor_type": "Rotary Screw",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 300.0,
-          "maximum_capacity": 599.99,
+          "minimum_capacity": 299.98,
+          "maximum_capacity": 599.97,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.624,
+          "minimum_full_load_efficiency": 0.62433,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Screw_CAPFT_NECB2011",
           "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -250,16 +250,16 @@
           "compressor_type": "Rotary Screw",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 600.0,
+          "minimum_capacity": 599.97,
           "maximum_capacity": 9999.0,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.584,
+          "minimum_full_load_efficiency": 0.58439,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Screw_CAPFT_NECB2011",
           "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
 		{
           "cooling_type": "WaterCooled",
@@ -268,15 +268,15 @@
           "absorption_type": null,
           "variable_speed_drive": null,
           "minimum_capacity":  0.0,
-          "maximum_capacity": 149.99,
+          "maximum_capacity": 150.13,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.694,
+          "minimum_full_load_efficiency": 0.69434,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
           "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -284,16 +284,16 @@
           "compressor_type": "Centrifugal",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 150.0,
-          "maximum_capacity": 299.99,
+          "minimum_capacity": 150.13,
+          "maximum_capacity": 299.98,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.634,
+          "minimum_full_load_efficiency": 0.63435,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
           "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -301,16 +301,16 @@
           "compressor_type": "Centrifugal",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 300.0,
-          "maximum_capacity": 399.99,
+          "minimum_capacity": 299.98,
+          "maximum_capacity": 400.07,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.594,
+          "minimum_full_load_efficiency": 0.59436,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
           "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "WaterCooled",
@@ -318,16 +318,16 @@
           "compressor_type": "Centrifugal",
           "absorption_type": null,
           "variable_speed_drive": null,
-          "minimum_capacity": 400.0,
+          "minimum_capacity": 400.07,
           "maximum_capacity": 9999.0,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 0.584,
+          "minimum_full_load_efficiency": 0.58439,
           "minimum_integrated_part_load_value": null,
           "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
           "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
           "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         },
         {
           "cooling_type": "AirCooled",
@@ -339,12 +339,12 @@
           "maximum_capacity": 9999.0,
           "start_date": "9/9/1919",
           "end_date": "2999-09-09T00:00:00+00:00",
-          "minimum_full_load_efficiency": 1.227,
+          "minimum_full_load_efficiency": 1.22709,
           "minimum_integrated_part_load_value": null,
           "capft": null,
           "eirft": null,
           "eirfplr": null,
-          "notes": "capacity in ton"
+          "notes": "capacity in ton, full load eff in kW/ton"
         }
       ]
     }

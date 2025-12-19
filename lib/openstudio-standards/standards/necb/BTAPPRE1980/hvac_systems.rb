@@ -23,13 +23,13 @@ class BTAPPRE1980
     compressor_type = search_criteria['compressor_type']
 
     # Get the chiller capacity
-    capacity_w = chiller_electric_eir_find_capacity(chiller_electric_eir)
+    capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(chiller_electric_eir)
 
     # All chillers must be modulating down to 25% of their capacity
     chiller_electric_eir.setChillerFlowMode('LeavingSetpointModulated')
     chiller_electric_eir.setMinimumPartLoadRatio(0.25)
     chiller_electric_eir.setMinimumUnloadingRatio(0.25)
-  
+
     chiller_capacity = capacity_w
     if (capacity_w / 1000.0) <= 700.0
       # As per MNECB if chiller capacity <= 700 kW the compressor should be reciprocating so change the type here in
@@ -106,11 +106,11 @@ class BTAPPRE1980
     cop = nil
     if chlr_props['cop']
       cop = chlr_props['cop']
-      kw_per_ton = cop_to_kw_per_ton(cop)
+      kw_per_ton = OpenstudioStandards::HVAC.cop_to_kw_per_ton(cop)
       chiller_electric_eir.setReferenceCOP(cop)
     elsif !chlr_props['cop'] && chlr_props['minimum_full_load_efficiency']
       kw_per_ton = chlr_props['minimum_full_load_efficiency']
-      cop = kw_per_ton_to_cop(kw_per_ton)
+      cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(kw_per_ton)
       chiller_electric_eir.setReferenceCOP(cop)
     else
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name}, cannot find minimum full load efficiency, will not be set.")

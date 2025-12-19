@@ -190,7 +190,8 @@ class Standard
                                                          stds_type,
                                                          occ_type,
                                                          wwr_building_type: surface_std_wwr_type,
-                                                         wwr_info: wwr_info)
+                                                         wwr_info: wwr_info,
+                                                         surface: planar_surface)
       if !new_construction == false
         previous_construction_map[type] = new_construction
       end

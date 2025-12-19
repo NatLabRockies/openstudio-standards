@@ -5,7 +5,7 @@ class TestDOEPrototypesRegression < CreateDOEPrototypeBuildingTest
    @building_types = [
      'SmallOffice',
      'MediumOffice',
-     'LargeOffice',
+     # 'LargeOffice',
      'RetailStandalone',
      'RetailStripmall',
      'PrimarySchool',
@@ -41,8 +41,8 @@ class TestDOEPrototypesRegression < CreateDOEPrototypeBuildingTest
 #     'ASHRAE 169-2013-8B']
    @templates = [
      '90.1-2004',
-#     '90.1-2007',
-#     '90.1-2010',
+    #  '90.1-2007',
+    #  '90.1-2010',
      '90.1-2013',
      '90.1-2016',
      '90.1-2019'

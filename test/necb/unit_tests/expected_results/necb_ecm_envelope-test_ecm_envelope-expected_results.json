@@ -1,0 +1,330 @@
+{
+  "VarType": "vintage",
+  "Reference": "ECM test - setting specific thermal transmittance values (W/m2K)",
+  "BTAPPRE1980": {
+    "VarType": "TestCase",
+    "high values": {
+      "standard": "BTAPPRE1980",
+      "wall_cond": 0.278,
+      "roof_cond": 0.162,
+      "ground_floor_cond": 0.758,
+      "surfaces": [
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.758
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_South",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "attic",
+          "surface_name": "east-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.758
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_North",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "attic",
+          "surface_name": "north-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "attic",
+          "surface_name": "south-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "attic",
+          "surface_name": "west-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        }
+      ]
+    },
+    "low values": {
+      "standard": "BTAPPRE1980",
+      "wall_cond": 0.183,
+      "roof_cond": 0.121,
+      "ground_floor_cond": 0.379,
+      "surfaces": [
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.379
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_South",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "attic",
+          "surface_name": "east-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.379
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_North",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "attic",
+          "surface_name": "north-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "attic",
+          "surface_name": "south-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "attic",
+          "surface_name": "west-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        }
+      ]
+    }
+  },
+  "NECB2020": {
+    "VarType": "TestCase",
+    "high values": {
+      "standard": "NECB2020",
+      "wall_cond": 0.278,
+      "roof_cond": 0.162,
+      "ground_floor_cond": 0.758,
+      "surfaces": [
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.758
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_South",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "attic",
+          "surface_name": "east-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.758
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_North",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.278
+        },
+        {
+          "space": "attic",
+          "surface_name": "north-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "attic",
+          "surface_name": "south-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        },
+        {
+          "space": "attic",
+          "surface_name": "west-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.162
+        }
+      ]
+    },
+    "low values": {
+      "standard": "NECB2020",
+      "wall_cond": 0.183,
+      "roof_cond": 0.121,
+      "ground_floor_cond": 0.379,
+      "surfaces": [
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.379
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_South",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Dining",
+          "surface_name": "Dining_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "attic",
+          "surface_name": "east-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Floor",
+          "outside_boundary_condition": "Foundation",
+          "thermal_conductance": 0.379
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_East",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_North",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "Kitchen",
+          "surface_name": "Kitchen_Wall_West",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.183
+        },
+        {
+          "space": "attic",
+          "surface_name": "north-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "attic",
+          "surface_name": "south-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        },
+        {
+          "space": "attic",
+          "surface_name": "west-roof",
+          "outside_boundary_condition": "Outdoors",
+          "thermal_conductance": 0.121
+        }
+      ]
+    }
+  }
+}

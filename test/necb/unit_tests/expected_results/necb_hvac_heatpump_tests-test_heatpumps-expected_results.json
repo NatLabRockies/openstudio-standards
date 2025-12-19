@@ -1,0 +1,1573 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2011 p3: Table 5.2.12.1. (page 5-13); Table 8.4.4.21.-E",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "SEER": 14.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "COP (with fan)": 3.3,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "COP (with fan)": 3.3,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2015 p1: Table 5.2.12.1. (page 5-14); Table 8.4.4.21.-E",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "SEER": 14.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "heating COP (with fan)": 3.3,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2017 p2: Table 5.2.12.1. (page 5-16); Table 8.4.4.21.-E",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "SEER": 14.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "heating COP (with fan)": 3.3,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "heating COP (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2020 p1: Table 5.2.12.1.-A; 8.4.5.7.",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "HSPF": 7.4,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "COP_h (with fan)": 3.3,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "COP_h (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "COP_h (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "COP_h (with fan)": 3.2,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "SEER": 10.7,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "Small single package (CSA-C656)": {
+        "test_capacity_kW": 9.5,
+        "test_capacity_btu_per_hr": 32400,
+        "SEER": 10.7,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium single package (CSA-C746)": {
+        "test_capacity_kW": 29.5,
+        "test_capacity_btu_per_hr": 101000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Medium large single package (CSA-C746)": {
+        "test_capacity_kW": 47.5,
+        "test_capacity_btu_per_hr": 162000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Large single package (CSA-C746)": {
+        "test_capacity_kW": 147,
+        "test_capacity_btu_per_hr": 500000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      },
+      "Extra large single package (AHRI 340/360)": {
+        "test_capacity_kW": 300,
+        "test_capacity_btu_per_hr": 1020000,
+        "COP (with fan)": 3.0,
+        "curves": {
+          "DXHEAT-NECB2011-REF-CAPFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "7.29009E-01",
+            "coefficient2x": "3.19275E-02",
+            "coefficient3xPOW2": "1.36404E-04",
+            "coefficient4xPOW3": "-8.74800E-06"
+          },
+          "DXHEAT-NECB2011-REF-EIRFT": {
+            "curve_type": "cubic",
+            "minimumValueofx": "-2.00000E+01",
+            "maximumValueofx": "2.00000E+01",
+            "coefficient1Constant": "1.21830E+00",
+            "coefficient2x": "-3.61200E-02",
+            "coefficient3xPOW2": "1.42000E-03",
+            "coefficient4xPOW3": "-2.68000E-05"
+          },
+          "DXHEAT-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "cubic",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00",
+            "coefficient1Constant": "8.40000E-01",
+            "coefficient2x": "1.60000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "coefficient4xPOW3": "0.00000E+00"
+          },
+          "DXHEAT-NECB2011-REF-EIRFFLOW": {
+            "curve_type": "quadratic",
+            "minimumValueofx": "0.00000E+00",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "1.38240E+00",
+            "coefficient2x": "-4.33600E-01",
+            "coefficient3xPOW2": "5.12000E-02"
+          },
+          "DXHEAT-NECB2011-REF-PLFFPLR": {
+            "curve_type": "cubic",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00",
+            "coefficient1Constant": "3.69600E-01",
+            "coefficient2x": "2.33620E+00",
+            "coefficient3xPOW2": "-2.95770E+00",
+            "coefficient4xPOW3": "1.25960E+00"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+{
+	"name": "Standards DevContainer",
+	"image":"canmet/os_sdk_container:3.9.0",
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+	"containerEnv": {
+		"VSCODE": "TRUE"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"castwide.solargraph",
+				"ms-azuretools.vscode-docker",
+				"KoichiSasada.vscode-rdbg",
+				"karyfoundation.idf",
+				"ms-python.python",
+				"janisdd.vscode-edit-csv",
+				"qwtel.sqlite-viewer",
+				"moshfeu.compare-folders",
+				"GitHub.copilot-chat"
+			]
+		}
+	},
+    // This is set as a env variable in the container, but it is also used to set the default shell in the container, just in case. 
+    "runArgs": [
+        "--env", "LANG=en_US.UTF-8"
+    ],
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+	"mounts": [
+		"source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,readonly",
+		"source=${localEnv:USERPROFILE}/.aws,target=/home/vscode/.aws,type=bind,readonly"
+	]
+}

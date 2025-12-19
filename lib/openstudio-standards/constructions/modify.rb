@@ -336,11 +336,19 @@ module OpenstudioStandards
         return false
       end
 
-      # Change construction name
-      construction.setName("#{construction.name}_#{surface.name}_#{target_f_factor_ip}")
-
       # Set properties
       f_factor_si = target_f_factor_ip * OpenStudio.convert(1.0, 'Btu/ft*h*R', 'W/m*K').get
+
+      # Exception alert on tiny piece of outdoor ground floors in a space
+      # data is taken out from Eplus - Area / Perimeter > (R_concrete + R_film_in + R_film_out) * Ffactor
+      # where R_concrete = 0.15 / 1.95, R_film_in = 0.135, R_film_out = 0.03
+      unless area / perimeter >= ((0.15 / 1.95) + 0.135 + 0.03) * f_factor_si
+        OpenStudio.logFree(OpenStudio::Warn, 'OpenstudioStandards::Construction', 'The calculated area to exposed perimeter ratio is smaller than the threshold set in EnergyPlus.')
+        return false
+      end
+      # Change construction name
+      construction_name = "Foundation F #{f_factor_si.round(2)}W/m*K Perim #{perimeter.round(2)}m Area #{area.round(2)}m2"
+      construction.setName(construction_name)
       construction.setFFactor(f_factor_si)
       construction.setArea(area)
       construction.setPerimeterExposed(perimeter)

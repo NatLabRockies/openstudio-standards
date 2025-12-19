@@ -65,23 +65,6 @@ class Standard
     return search_criteria
   end
 
-  # Finds capacity in W
-  #
-  # @param chiller_electric_eir [OpenStudio::Model::ChillerElectricEIR] chiller object
-  # @return [Double] capacity in W to be used for find object
-  def chiller_electric_eir_find_capacity(chiller_electric_eir)
-    if chiller_electric_eir.referenceCapacity.is_initialized
-      capacity_w = chiller_electric_eir.referenceCapacity.get
-    elsif chiller_electric_eir.autosizedReferenceCapacity.is_initialized
-      capacity_w = chiller_electric_eir.autosizedReferenceCapacity.get
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name} capacity is not available, cannot apply efficiency standard.")
-      return false
-    end
-
-    return capacity_w
-  end
-
   # Finds lookup object in standards and return full load efficiency
   #
   # @param chiller_electric_eir [OpenStudio::Model::ChillerElectricEIR] chiller object
@@ -89,7 +72,7 @@ class Standard
   def chiller_electric_eir_standard_minimum_full_load_efficiency(chiller_electric_eir)
     # Get the chiller properties
     search_criteria = chiller_electric_eir_find_search_criteria(chiller_electric_eir)
-    capacity_w = chiller_electric_eir_find_capacity(chiller_electric_eir)
+    capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(chiller_electric_eir)
     return nil unless capacity_w
 
     capacity_tons = OpenStudio.convert(capacity_w, 'W', 'ton').get
@@ -107,9 +90,9 @@ class Standard
       if !chlr_props['minimum_coefficient_of_performance'].nil?
         cop = chlr_props['minimum_coefficient_of_performance']
       elsif !chlr_props['minimum_energy_efficiency_ratio'].nil?
-        cop = eer_to_cop(chlr_props['minimum_energy_efficiency_ratio'])
+        cop = OpenstudioStandards::HVAC.eer_to_cop(chlr_props['minimum_energy_efficiency_ratio'])
       elsif !chlr_props['minimum_kilowatts_per_tons'].nil?
-        cop = kw_per_ton_to_cop(chlr_props['minimum_kilowatts_per_tons'])
+        cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(chlr_props['minimum_kilowatts_per_tons'])
       end
       if cop.nil?
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name}, cannot find minimum full load efficiency.")
@@ -218,7 +201,7 @@ class Standard
     compliance_path = search_criteria['compliance_path']
 
     # Get the chiller capacity
-    capacity_w = chiller_electric_eir_find_capacity(chiller_electric_eir)
+    capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(chiller_electric_eir)
 
     # Convert capacity to tons
     capacity_tons = OpenStudio.convert(capacity_w, 'W', 'ton').get
@@ -238,9 +221,9 @@ class Standard
       if !chlr_props['minimum_coefficient_of_performance'].nil?
         cop = chlr_props['minimum_coefficient_of_performance']
       elsif !chlr_props['minimum_energy_efficiency_ratio'].nil?
-        cop = eer_to_cop(chlr_props['minimum_energy_efficiency_ratio'])
+        cop = OpenstudioStandards::HVAC.eer_to_cop(chlr_props['minimum_energy_efficiency_ratio'])
       elsif !chlr_props['minimum_kilowatts_per_tons'].nil?
-        cop = kw_per_ton_to_cop(chlr_props['minimum_kilowatts_per_tons'])
+        cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(chlr_props['minimum_kilowatts_per_tons'])
       end
       if cop.nil?
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name}, cannot find minimum full load efficiency.")
@@ -299,7 +282,7 @@ class Standard
       successfully_set_all_properties = false
     else
       chiller_electric_eir.setReferenceCOP(cop)
-      kw_per_ton = cop_to_kw_per_ton(cop)
+      kw_per_ton = OpenstudioStandards::HVAC.cop_to_kw_per_ton(cop)
     end
 
     # Append the name with size and kw/ton

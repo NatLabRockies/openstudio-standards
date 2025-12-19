@@ -1,0 +1,120 @@
+{
+    "title": "ASHRAE 90.1 PRM Exterior Lights User Data",
+    "definitions": {
+      "UserDataExteriorLightsData": {
+        "type": "object",
+        "properties": {
+          "userdata_exterior_lights": {
+            "type": "array",
+            "description": "List of userdata_exterior_lights rows",
+            "items": {
+              "$ref": "#/definitions/UserDataExteriorLights"
+            }
+          }
+        }
+      },
+      "UserDataExteriorLights": {
+        "type": "object",
+        "description": "User data exterior lights",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the exterior lights object in the model."
+          },
+          "num_ext_lights_subcats": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of subcategories for exterior lights."
+          },
+          "end_use_subcategory_01": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_01": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_02": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_02": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_03": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_03": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_04": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_04": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_05": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_05": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_06": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_06": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_07": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_07": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_08": {
+            "$ref": "#/definitions/EndUseCategory"
+          },
+          "end_use_measurement_value_08": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_use_subcategory_09": {
+            "$ref": "#/definitions/EndUseCategory"
+          }
+        },
+        "required": ["name", "num_ext_lights_subcats"],
+        "additionalProperties": false
+      },
+      "EndUseCategory": {
+        "type": "string",
+        "enum": [
+          "parking_lots_and_drives_area",
+          "walkways_less_than_10_ft_wide_perim",
+          "walkways_10_ft_wide_or_greater_area",
+          "plaza_areas_area",
+          "special_feature_areas_area",
+          "stairways_area",
+          "main_entries_area",
+          "other_doors_perim",
+          "canopies_area",
+          "open_areas_including_vehicle_sales_lots_area",
+          "street_frontage_for_vehicle_sales_perim",
+          "nontradeable_general_qty",
+          "building_facades_area",
+          "building_facades_perim",
+          "automated_teller_machines_per_location_qty",
+          "automated_teller_machines_per_machine_qty",
+          "entries_and_gates_area",
+          "loading_areas_for_emergency_vehicles_area",
+          "drive_through_windows_and_doors_qty",
+          "parking_near_24_hour_entrances_qty",
+          "roadway_parking_qty"
+        ]
+      }
+    }
+  }

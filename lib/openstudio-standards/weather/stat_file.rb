@@ -212,7 +212,7 @@ module OpenstudioStandards
 
           # check info size
           if match_info_raw.size != temp_info[:size]
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Weather.StatFile', "Expected to find #{temp_info[:size]} #{temp_info[:name]} but found #{match_info_raw.size}. Check data source.")
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Weather.StatFile', "Expected to find #{temp_info[:size]} #{temp_info[:name]} but found #{match_info_raw.size}. Check data source.")
           end
 
           match_info_raw.each do |val|
@@ -284,13 +284,20 @@ module OpenstudioStandards
         degree_day_info.each { |dd_info| parse_dd_info(dd_info) }
 
         # parse design temperatures
+        # TMYx stat file format is different than TMY3, cf #1948
+        is_tmyx = @text.include?('Wind Shelter Factor')
         temperature_info = [
-          { name: 'Heating Design Temperatures', regex: /Heating(\s*\d+.*)\n/, container: @heating_design_info, size: 15 },
+          { name: 'Heating Design Temperatures', regex: /Heating(\s*\d+.*)\n/, container: @heating_design_info, size: is_tmyx ? 16 : 15 },
           { name: 'Cooling Design Temperatures', regex: /Cooling(\s*\d+.*)\n/, container: @cooling_design_info, size: 32 },
-          { name: 'Extreme Design Temperatures', regex: /\s*Extremes\s*(.*)\n/, container: @extremes_design_info, size: 16 },
+          { name: 'Extreme Design Temperatures', regex: /\s*Extremes\s*(.*)\n/, container: @extremes_design_info, size: is_tmyx ? 15 : 16 },
           { name: 'Monthly Dry Bulb Temperatures', regex: /Daily Avg(.*)\n/, container: @monthly_dry_bulb, size: 12 }
         ]
         temperature_info.each { |temp_info| parse_design_temp_info(temp_info) }
+        if is_tmyx
+          @heating_design_info.pop # remove the last value, which is the Wind Shelter Factor
+          # There is no WBmax in TMYx files, so add a nil
+          @extremes_design_info.insert(3, nil)
+        end
 
         # parse undisturbed ground temps at 0.5 and 4.0 m depth
         regex = /Monthly.*Calculated.*undisturbed*.*Ground.*Temperatures.*\n.*Jan.*Feb.*Mar.*Apr.*May.*Jun.*Jul.*Aug.*Sep.*Oct.*Nov.*Dec.*\n(.*)\n(.*)\n(.*)/
@@ -342,7 +349,9 @@ module OpenstudioStandards
         # week periods
         regex = /Typical Week Period selected:(.*?)C/
         match_data = @text.scan(regex)
-        if match_data.nil? || match_data.empty?
+        if @text.include?('No discernible dry period')
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Weather.stat_file', "Can't find typical weather weeks in the .stat file because it has no discernible dry period .")
+        elsif match_data.nil? || match_data.size < 2
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Weather.stat_file', "Can't find typical weather weeks in the .stat file.")
         else
           @typical_summer_wet_week = Date.parse("#{match_data[0][0].split(':')[0]} 2000")

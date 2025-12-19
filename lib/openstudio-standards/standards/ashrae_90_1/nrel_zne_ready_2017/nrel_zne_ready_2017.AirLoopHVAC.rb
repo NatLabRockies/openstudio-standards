@@ -26,42 +26,17 @@ class NRELZNEReady2017 < ASHRAE901
       OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name} no economizer")
       return [nil, nil, nil]
     when 'FixedDryBulb'
-      case climate_zone
-      when 'ASHRAE 169-2006-0B',
-           'ASHRAE 169-2006-1B',
-           'ASHRAE 169-2006-2B',
-           'ASHRAE 169-2006-3B',
-           'ASHRAE 169-2006-3C',
-           'ASHRAE 169-2006-4B',
-           'ASHRAE 169-2006-4C',
-           'ASHRAE 169-2006-5B',
-           'ASHRAE 169-2006-5C',
-           'ASHRAE 169-2006-6B',
-           'ASHRAE 169-2006-7A',
-           'ASHRAE 169-2006-7B',
-           'ASHRAE 169-2006-8A',
-           'ASHRAE 169-2006-8B',
-           'ASHRAE 169-2013-0B',
-           'ASHRAE 169-2013-1B',
-           'ASHRAE 169-2013-2B',
-           'ASHRAE 169-2013-3B',
-           'ASHRAE 169-2013-3C',
-           'ASHRAE 169-2013-4B',
-           'ASHRAE 169-2013-4C',
-           'ASHRAE 169-2013-5B',
-           'ASHRAE 169-2013-5C',
-           'ASHRAE 169-2013-6B',
-           'ASHRAE 169-2013-7A',
-           'ASHRAE 169-2013-7B',
-           'ASHRAE 169-2013-8A',
-           'ASHRAE 169-2013-8B'
-        drybulb_limit_f = 75.0
-      when 'ASHRAE 169-2006-5A',
-           'ASHRAE 169-2006-6A',
-           'ASHRAE 169-2013-5A',
-           'ASHRAE 169-2013-6A'
-        drybulb_limit_f = 70.0
-      end
+      # Process climate zone:
+      # Moisture regime is not needed for climate zone 8
+      climate_zone = climate_zone.split('-')[-1]
+      climate_zone = '8' if climate_zone.include?('8')
+
+      search_criteria = {
+        'template' => template,
+        'climate_zone' => climate_zone
+      }
+      econ_limits = model_find_object(standards_data['economizers'], search_criteria)
+      drybulb_limit_f = econ_limits['fixed_dry_bulb_high_limit_shutoff_temp']
     when 'FixedEnthalpy'
       enthalpy_limit_btu_per_lb = 28.0
     when 'FixedDewPointAndDryBulb'
@@ -493,226 +468,53 @@ class NRELZNEReady2017 < ASHRAE901
       avail_sch = avail_sch.to_ScheduleRuleset.get
       ann_op_hrs = OpenstudioStandards::Schedules.schedule_ruleset_get_hours_above_value(avail_sch, 0.0)
     else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: could not determine annual operating hours. Assuming less than 8,000 for ERV determination.")
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.nrel_zne_ready_2017.AirLoopHVAC', "For #{air_loop_hvac.name}: could not determine annual operating hours. Assuming less than 8,000 for ERV determination.")
     end
 
+    # Process climate zone:
+    # Moisture regime is not needed for climate zone 8
+    climate_zone = climate_zone.split('-')[-1]
+    climate_zone = '8' if climate_zone.include?('8')
+
+    # Check annual operating hours
     if ann_op_hrs < 8000.0
-      # Table 6.5.6.1-1, less than 8000 hrs
-      case climate_zone
-      when 'ASHRAE 169-2006-3B',
-           'ASHRAE 169-2006-3C',
-           'ASHRAE 169-2006-4B',
-           'ASHRAE 169-2006-4C',
-           'ASHRAE 169-2006-5B',
-           'ASHRAE 169-2013-3B',
-           'ASHRAE 169-2013-3C',
-           'ASHRAE 169-2013-4B',
-           'ASHRAE 169-2013-4C',
-           'ASHRAE 169-2013-5B'
-        erv_cfm = nil
-      when 'ASHRAE 169-2006-0B',
-           'ASHRAE 169-2006-1B',
-           'ASHRAE 169-2006-2B',
-           'ASHRAE 169-2006-5C',
-           'ASHRAE 169-2013-0B',
-           'ASHRAE 169-2013-1B',
-           'ASHRAE 169-2013-2B',
-           'ASHRAE 169-2013-5C'
-        if pct_oa < 0.5
-          erv_cfm = nil
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 26_000
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 12_000
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 5000
-        elsif pct_oa >= 0.8
-          erv_cfm = 4000
-        end
-      when 'ASHRAE 169-2006-6B',
-           'ASHRAE 169-2013-6B'
-        if pct_oa < 0.1
-          erv_cfm = nil
-        elsif pct_oa >= 0.1 && pct_oa < 0.2
-          erv_cfm = 28_000
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 26_500
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 11_000
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 5500
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 4500
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 3500
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 2500
-        elsif pct_oa >= 0.8
-          erv_cfm = 1500
-        end
-      when 'ASHRAE 169-2006-0A',
-           'ASHRAE 169-2006-1A',
-           'ASHRAE 169-2006-2A',
-           'ASHRAE 169-2006-3A',
-           'ASHRAE 169-2006-4A',
-           'ASHRAE 169-2006-5A',
-           'ASHRAE 169-2006-6A',
-           'ASHRAE 169-2013-0A',
-           'ASHRAE 169-2013-1A',
-           'ASHRAE 169-2013-2A',
-           'ASHRAE 169-2013-3A',
-           'ASHRAE 169-2013-4A',
-           'ASHRAE 169-2013-5A',
-           'ASHRAE 169-2013-6A'
-        if pct_oa < 0.1
-          erv_cfm = nil
-        elsif pct_oa >= 0.1 && pct_oa < 0.2
-          erv_cfm = 26_000
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 16_000
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 5500
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 4500
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 3500
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 2000
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 1000
-        elsif pct_oa >= 0.8
-          erv_cfm = 120
-        end
-      when 'ASHRAE 169-2006-7A',
-           'ASHRAE 169-2006-7B',
-           'ASHRAE 169-2006-8A',
-           'ASHRAE 169-2006-8B',
-           'ASHRAE 169-2013-7A',
-           'ASHRAE 169-2013-7B',
-           'ASHRAE 169-2013-8A',
-           'ASHRAE 169-2013-8B'
-        if pct_oa < 0.1
-          erv_cfm = nil
-        elsif pct_oa >= 0.1 && pct_oa < 0.2
-          erv_cfm = 4500
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 4000
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 2500
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 1000
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 140
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 120
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 100
-        elsif pct_oa >= 0.8
-          erv_cfm = 80
-        end
-      end
+      under_8000_hours = true
+      string_for_log = 'under'
     else
-      # Table 6.5.6.1-2, above 8000 hrs
-      case climate_zone
-      when 'ASHRAE 169-2006-3C',
-           'ASHRAE 169-2013-3C'
-        erv_cfm = nil
-      when 'ASHRAE 169-2006-0B',
-           'ASHRAE 169-2006-1B',
-           'ASHRAE 169-2006-2B',
-           'ASHRAE 169-2006-3B',
-           'ASHRAE 169-2006-4C',
-           'ASHRAE 169-2006-5C',
-           'ASHRAE 169-2013-0B',
-           'ASHRAE 169-2013-1B',
-           'ASHRAE 169-2013-2B',
-           'ASHRAE 169-2013-3B',
-           'ASHRAE 169-2013-4C',
-           'ASHRAE 169-2013-5C'
-        if pct_oa < 0.2
-          erv_cfm = nil
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 19_500
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 9000
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 5000
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 4000
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 3000
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 1500
-        elsif pct_oa >= 0.8
-          erv_cfm = 120
-        end
-      when 'ASHRAE 169-2006-0A',
-           'ASHRAE 169-2006-1A',
-           'ASHRAE 169-2006-2A',
-           'ASHRAE 169-2006-3A',
-           'ASHRAE 169-2006-4B',
-           'ASHRAE 169-2006-5B',
-           'ASHRAE 169-2013-0A',
-           'ASHRAE 169-2013-1A',
-           'ASHRAE 169-2013-2A',
-           'ASHRAE 169-2013-3A',
-           'ASHRAE 169-2013-4B',
-           'ASHRAE 169-2013-5B'
-        if pct_oa < 0.1
-          erv_cfm = nil
-        elsif pct_oa >= 0.1 && pct_oa < 0.2
-          erv_cfm = 2500
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 2000
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 1000
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 500
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 140
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 120
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 100
-        elsif pct_oa >= 0.8
-          erv_cfm = 80
-        end
-      when 'ASHRAE 169-2006-4A',
-           'ASHRAE 169-2006-5A',
-           'ASHRAE 169-2006-6A',
-           'ASHRAE 169-2006-6B',
-           'ASHRAE 169-2006-7A',
-           'ASHRAE 169-2006-7B',
-           'ASHRAE 169-2006-8A',
-           'ASHRAE 169-2006-8B',
-           'ASHRAE 169-2013-4A',
-           'ASHRAE 169-2013-5A',
-           'ASHRAE 169-2013-6A',
-           'ASHRAE 169-2013-6B',
-           'ASHRAE 169-2013-7A',
-           'ASHRAE 169-2013-7B',
-           'ASHRAE 169-2013-8A',
-           'ASHRAE 169-2013-8B'
-        if pct_oa < 0.1
-          erv_cfm = nil
-        elsif pct_oa >= 0.1 && pct_oa < 0.2
-          erv_cfm = 200
-        elsif pct_oa >= 0.2 && pct_oa < 0.3
-          erv_cfm = 130
-        elsif pct_oa >= 0.3 && pct_oa < 0.4
-          erv_cfm = 100
-        elsif pct_oa >= 0.4 && pct_oa < 0.5
-          erv_cfm = 80
-        elsif pct_oa >= 0.5 && pct_oa < 0.6
-          erv_cfm = 70
-        elsif pct_oa >= 0.6 && pct_oa < 0.7
-          erv_cfm = 60
-        elsif pct_oa >= 0.7 && pct_oa < 0.8
-          erv_cfm = 50
-        elsif pct_oa >= 0.8
-          erv_cfm = 40
-        end
-      end
+      under_8000_hours = false
+      string_for_log = 'over'
+    end
+
+    # Search database
+    search_criteria = {
+      'template' => template,
+      'climate_zone' => climate_zone,
+      'under_8000_hours' => under_8000_hours
+    }
+    energy_recovery_limits = model_find_object(standards_data['energy_recovery'], search_criteria)
+    if energy_recovery_limits.nil?
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.ashrae_90_1_2013.AirLoopHVAC', "Cannot find energy recovery limits for template '#{template}', climate zone '#{climate_zone}', and #{string_for_log} 8000 hours, assuming no energy recovery required.")
+      return nil
+    end
+
+    if pct_oa < 0.1
+      erv_cfm = nil
+    elsif pct_oa >= 0.1 && pct_oa < 0.2
+      erv_cfm = energy_recovery_limits['percent_oa_10_to_20']
+    elsif pct_oa >= 0.2 && pct_oa < 0.3
+      erv_cfm = energy_recovery_limits['percent_oa_20_to_30']
+    elsif pct_oa >= 0.3 && pct_oa < 0.4
+      erv_cfm = energy_recovery_limits['percent_oa_30_to_40']
+    elsif pct_oa >= 0.4 && pct_oa < 0.5
+      erv_cfm = energy_recovery_limits['percent_oa_40_to_50']
+    elsif pct_oa >= 0.5 && pct_oa < 0.6
+      erv_cfm = energy_recovery_limits['percent_oa_50_to_60']
+    elsif pct_oa >= 0.6 && pct_oa < 0.7
+      erv_cfm = energy_recovery_limits['percent_oa_60_to_70']
+    elsif pct_oa >= 0.7 && pct_oa < 0.8
+      erv_cfm = energy_recovery_limits['percent_oa_70_to_80']
+    elsif pct_oa >= 0.8
+      erv_cfm = energy_recovery_limits['percent_oa_greater_than_80']
     end
 
     return erv_cfm
@@ -775,51 +577,93 @@ class NRELZNEReady2017 < ASHRAE901
   # @param heat_exchanger_type [String] heat exchanger type Rotary or Plate
   # @return [OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent] erv to apply efficiency values
   def air_loop_hvac_apply_energy_recovery_ventilator_efficiency(erv, erv_type: 'ERV', heat_exchanger_type: 'Rotary')
-    if heat_exchanger_type == 'Plate'
-      # based on Zehnder ComfoAir
-      if erv_type == 'HRV'
-        erv.setSensibleEffectivenessat100HeatingAirFlow(0.865)
-        erv.setLatentEffectivenessat100HeatingAirFlow(0.0)
-        erv.setSensibleEffectivenessat100CoolingAirFlow(0.865)
-        erv.setLatentEffectivenessat100CoolingAirFlow(0.0)
-        erv.setSensibleEffectivenessat75HeatingAirFlow(0.887)
-        erv.setSensibleEffectivenessat75CoolingAirFlow(0.887)
-        if erv.model.version < OpenStudio::VersionString.new('3.8.0')
+    if erv.model.version < OpenStudio::VersionString.new('3.8.0')
+      if heat_exchanger_type == 'Plate'
+        # based on Zehnder ComfoAir
+        if erv_type == 'HRV'
+          erv.setSensibleEffectivenessat100HeatingAirFlow(0.865)
+          erv.setLatentEffectivenessat100HeatingAirFlow(0.0)
+          erv.setSensibleEffectivenessat100CoolingAirFlow(0.865)
+          erv.setLatentEffectivenessat100CoolingAirFlow(0.0)
+          erv.setSensibleEffectivenessat75HeatingAirFlow(0.887)
+          erv.setSensibleEffectivenessat75CoolingAirFlow(0.887)
           erv.setLatentEffectivenessat75HeatingAirFlow(0.0)
           erv.setLatentEffectivenessat75CoolingAirFlow(0.0)
+        else
+          erv.setSensibleEffectivenessat100HeatingAirFlow(0.755)
+          erv.setLatentEffectivenessat100HeatingAirFlow(0.564)
+          erv.setSensibleEffectivenessat75HeatingAirFlow(0.791)
+          erv.setLatentEffectivenessat75HeatingAirFlow(0.625)
+          erv.setSensibleEffectivenessat100CoolingAirFlow(0.755)
+          erv.setLatentEffectivenessat100CoolingAirFlow(0.564)
+          erv.setSensibleEffectivenessat75CoolingAirFlow(0.791)
+          erv.setLatentEffectivenessat75CoolingAirFlow(0.625)
         end
       else
-        erv.setSensibleEffectivenessat100HeatingAirFlow(0.755)
-        erv.setLatentEffectivenessat100HeatingAirFlow(0.564)
-        erv.setSensibleEffectivenessat75HeatingAirFlow(0.791)
-        erv.setLatentEffectivenessat75HeatingAirFlow(0.625)
-        erv.setSensibleEffectivenessat100CoolingAirFlow(0.755)
-        erv.setLatentEffectivenessat100CoolingAirFlow(0.564)
-        erv.setSensibleEffectivenessat75CoolingAirFlow(0.791)
-        erv.setLatentEffectivenessat75CoolingAirFlow(0.625)
+        if erv_type == 'HRV'
+          erv.setSensibleEffectivenessat100HeatingAirFlow(0.75)
+          erv.setLatentEffectivenessat100HeatingAirFlow(0.0)
+          erv.setSensibleEffectivenessat75HeatingAirFlow(0.79)
+          erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
+          erv.setLatentEffectivenessat100CoolingAirFlow(0.0)
+          erv.setSensibleEffectivenessat75CoolingAirFlow(0.78)
+          erv.setLatentEffectivenessat75HeatingAirFlow(0.0)
+          erv.setLatentEffectivenessat75CoolingAirFlow(0.0)
+        else
+          erv.setSensibleEffectivenessat100HeatingAirFlow(0.75)
+          erv.setLatentEffectivenessat100HeatingAirFlow(0.74)
+          erv.setSensibleEffectivenessat75HeatingAirFlow(0.79)
+          erv.setLatentEffectivenessat75HeatingAirFlow(0.79)
+          erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
+          erv.setLatentEffectivenessat100CoolingAirFlow(0.74)
+          erv.setSensibleEffectivenessat75CoolingAirFlow(0.78)
+          erv.setLatentEffectivenessat75CoolingAirFlow(0.78)
+        end
       end
     else
-      if erv_type == 'HRV'
-        erv.setSensibleEffectivenessat100HeatingAirFlow(0.75)
-        erv.setLatentEffectivenessat100HeatingAirFlow(0.0)
-        erv.setSensibleEffectivenessat75HeatingAirFlow(0.79)
-        erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
-        erv.setLatentEffectivenessat100CoolingAirFlow(0.0)
-        erv.setSensibleEffectivenessat75CoolingAirFlow(0.78)
-        if erv.model.version < OpenStudio::VersionString.new('3.8.0')
-          erv.setLatentEffectivenessat75HeatingAirFlow(0.0)
-          erv.setLatentEffectivenessat75CoolingAirFlow(0.0)
+      values = Hash.new{ |hash, key| hash[key] = {} }
+      if heat_exchanger_type == 'Plate'
+        if erv_type == 'HRV'
+          values['Sensible Heating'][0.75] = 0.887
+          values['Sensible Heating'][1.0] = 0.865
+          values['Latent Heating'][0.75] = 0.0
+          values['Latent Heating'][1.0] = 0.0
+          values['Sensible Cooling'][0.75] = 0.887
+          values['Sensible Cooling'][1.0] = 0.865
+          values['Latent Cooling'][0.75] = 0.0
+          values['Latent Cooling'][1.0] = 0.0
+        else
+          values['Sensible Heating'][0.75] = 0.791
+          values['Sensible Heating'][1.0] = 0.755
+          values['Latent Heating'][0.75] = 0.625
+          values['Latent Heating'][1.0] = 0.564
+          values['Sensible Cooling'][0.75] = 0.791
+          values['Sensible Cooling'][1.0] = 0.755
+          values['Latent Cooling'][0.75] = 0.625
+          values['Latent Cooling'][1.0] = 0.564
         end
       else
-        erv.setSensibleEffectivenessat100HeatingAirFlow(0.75)
-        erv.setLatentEffectivenessat100HeatingAirFlow(0.74)
-        erv.setSensibleEffectivenessat75HeatingAirFlow(0.79)
-        erv.setLatentEffectivenessat75HeatingAirFlow(0.79)
-        erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
-        erv.setLatentEffectivenessat100CoolingAirFlow(0.74)
-        erv.setSensibleEffectivenessat75CoolingAirFlow(0.78)
-        erv.setLatentEffectivenessat75CoolingAirFlow(0.78)
+        if erv_type == 'HRV'
+          values['Sensible Heating'][0.75] = 0.79
+          values['Sensible Heating'][1.0] = 0.75
+          values['Latent Heating'][0.75] = 0.0
+          values['Latent Heating'][1.0] = 0.0
+          values['Sensible Cooling'][0.75] = 0.78
+          values['Sensible Cooling'][1.0] = 0.75
+          values['Latent Cooling'][0.75] = 0.0
+          values['Latent Cooling'][1.0] = 0.0
+        else
+          values['Sensible Heating'][0.75] = 0.79
+          values['Sensible Heating'][1.0] = 0.75
+          values['Latent Heating'][0.75] = 0.74
+          values['Latent Heating'][1.0] = 0.79
+          values['Sensible Cooling'][0.75] = 0.78
+          values['Sensible Cooling'][1.0] = 0.75
+          values['Latent Cooling'][0.75] = 0.78
+          values['Latent Cooling'][1.0] = 0.74
+        end
       end
+      OpenstudioStandards::HVAC.heat_exchanger_air_to_air_set_effectiveness_values(erv, defaults: false, values: values)
     end
 
     return erv

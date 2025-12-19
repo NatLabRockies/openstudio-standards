@@ -35,16 +35,14 @@ module OpenstudioStandards
       end
 
       case model_building_type
-      when 'Office'
-        # map office building type to small medium or large
+      when 'Office', 'SmallOffice', 'SmallOfficeDetailed', 'MediumOffice', 'MediumOfficeDetailed', 'LargeOffice', 'LargeOfficeDetailed', 'Outpatient', 'OfS', 'OfL', 'SmallDataCenterLowITE', 'SmallDataCenterHighITE', 'LargeDataCenterLowITE', 'LargeDataCenterHighITE'
+        # map office or data center building type to small, medium or large
         floor_area = model.getBuilding.floorArea
         if floor_area < 2750.0
           nist_building_type = 'SmallOffice'
         else
           nist_building_type = 'MediumOffice'
         end
-      when 'LargeOffice', 'Outpatient', 'OfL'
-        nist_building_type = 'MediumOffice'
       when 'Retail'
         # map retal building type to RetailStripmall or RetailStandalone based on building name
         building_name = model.getBuilding.name.get
@@ -53,27 +51,38 @@ module OpenstudioStandards
         else
           nist_building_type = 'RetailStripmall'
         end
-      when 'StripMall', 'Warehouse', 'QuickServiceRestaurant', 'FullServiceRestaurant', 'RtS', 'RSD', 'RFF', 'SCn', 'SUn', 'WRf'
+      when 'RetailStripmall', 'StripMall', 'Warehouse', 'QuickServiceRestaurant', 'FullServiceRestaurant', 'RtS', 'RSD', 'RFF', 'SCn', 'SUn', 'WRf', 'Asm', 'MLI'
         nist_building_type = 'RetailStripmall'
-      when 'SuperMarket', 'RtL'
+      when 'RetailStandalone', 'SuperMarket', 'RtL', 'Rt3', 'Gro'
         nist_building_type = 'RetailStandalone'
-      when 'EPr'
+      when 'PrimarySchool', 'EPr', 'ERC'
         nist_building_type = 'PrimarySchool'
-      when 'ESe'
+      when 'SecondarySchool', 'ESe'
         nist_building_type = 'SecondarySchool'
-      when 'Mtl'
+      when 'SmallHotel', 'Mtl'
         nist_building_type = 'SmallHotel'
-      when 'Htl'
+      when 'LargeHotel', 'Htl'
         nist_building_type = 'LargeHotel'
-      when 'Hsp'
+      when 'Hospital', 'Hsp', 'Nrs'
         nist_building_type = 'Hospital'
-      when 'OfS'
-        nist_building_type = 'SmallOffice'
+      when 'MidriseApartment', 'MFm'
+        nist_building_type = 'MidriseApartment'
+      when 'HighriseApartment'
+        nist_building_type = 'HighriseApartment'
+      when 'TallBuilding', 'SuperTallBuilding'
+        nist_building_type = 'LargeHotel'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', "NIST coefficients aren't available for model building type #{model_building_type}. Since the building type is for a tall building, using nist building type #{nist_building_type} to best represent infiltration coefficients.")
+      when 'College', 'Laboratory', 'EUn', 'ECC', 'MBT'
+        nist_building_type = 'SecondarySchool'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', "NIST coefficients aren't available for model building type #{model_building_type}. Since the building may involve complex geometry, using nist building type #{nist_building_type} to best represent infiltration coefficients.")
+      when 'Courthouse'
+        nist_building_type = 'MediumOffice'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', "NIST coefficients aren't available for model building type #{model_building_type}. Using nist building type #{nist_building_type} to best represent infiltration coefficients.")
       else
         nist_building_type = model_building_type
       end
 
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "Using building type #{nist_building_type} for model building type #{model_building_type}.")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "Using building type #{nist_building_type} for model building type #{model_building_type}.")
 
       return nist_building_type
     end
@@ -103,18 +112,18 @@ module OpenstudioStandards
                                          nist_building_type: nil)
       # validate airtightness value and pressure
       if airtightness_value < 0.0
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', 'Airtightness value must be postive.')
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', 'Airtightness value must be postive.')
         return false
       end
 
       if airtightness_pressure < 0.0
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', 'Airtightness pressure must be postive.')
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', 'Airtightness pressure must be postive.')
         return false
       end
 
       # calculate infiltration design value at 4 Pa
       airtightness_value_4pa_per_hr = airtightness_value * ((4.0 / airtightness_pressure)**0.65)
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "User-inputed airtightness design value #{airtightness_value} (m^3/h-m^2) at #{airtightness_pressure} Pa converts to #{airtightness_value_4pa_per_hr.round(7)} (m^3/h-m^2) at 4 Pa")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "User-inputed airtightness design value #{airtightness_value} (m^3/h-m^2) at #{airtightness_pressure} Pa converts to #{airtightness_value_4pa_per_hr.round(7)} (m^3/h-m^2) at 4 Pa")
 
       # convert to m^3/s-m^2
       airtightness_value_4pa_per_s = airtightness_value_4pa_per_hr / 3600.0
@@ -141,19 +150,19 @@ module OpenstudioStandards
       five_sided_area = exterior_wall_area + ground_wall_area + exterior_roof_area + ground_roof_area
       six_sided_area = exterior_wall_area + ground_wall_area + exterior_roof_area + ground_roof_area + exterior_floor_area + ground_floor_area
       energy_plus_area = exterior_wall_area + exterior_roof_area
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "4-sided area = #{four_sided_area.round(2)} m^2, 5-sided area = #{five_sided_area.round(2)} m^2, 6-sided area = #{six_sided_area.round(2)} m^2.")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "4-sided area = #{four_sided_area.round(2)} m^2, 5-sided area = #{five_sided_area.round(2)} m^2, 6-sided area = #{six_sided_area.round(2)} m^2.")
 
       # The SpaceInfiltrationDesignFlowRate object FlowperExteriorSurfaceArea method only counts surfaces with the 'Outdoors' boundary conditions towards exterior surface area, not surfaces with the 'Ground' boundary conditions.  That means all values need to be normalized to exterior wall and roof area.
       case airtightness_area_covered
       when '4-sided'
         design_infiltration_4pa = airtightness_value_4pa_per_s * (four_sided_area / energy_plus_area)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 4-sided area #{four_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 4-sided area #{four_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
       when '5-sided'
         design_infiltration_4pa = airtightness_value_4pa_per_s * (five_sided_area / energy_plus_area)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 5-sided area #{five_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 5-sided area #{five_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
       when '6-sided'
         design_infiltration_4pa = airtightness_value_4pa_per_s * (six_sided_area / energy_plus_area)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 6-sided area #{six_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "#{airtightness_area_covered} infiltration design value #{airtightness_value_4pa_per_s.round(7)} (m^3/s-m^2) converted to #{design_infiltration_4pa.round(7)} (m^3/s-m^2) based on 6-sided area #{six_sided_area.round(2)} m^2 and 5-sided area #{energy_plus_area.round(2)} m^2 excluding ground boundary surfaces for energyplus.")
       end
 
       # validate hvac schedule
@@ -162,7 +171,7 @@ module OpenstudioStandards
       else
         hvac_schedule = model.getScheduleByName(hvac_schedule_name)
         unless hvac_schedule.is_initialized
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "HVAC schedule argument #{hvac_schedule} not found in the model. It may have been removed by another measure.")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "HVAC schedule argument #{hvac_schedule} not found in the model. It may have been removed by another measure.")
           return false
         end
         hvac_schedule = hvac_schedule.get
@@ -171,16 +180,16 @@ module OpenstudioStandards
         elsif hvac_schedule.to_ScheduleConstant.is_initialized
           hvac_schedule = hvac_schedule.to_ScheduleConstant.get
         else
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "HVAC schedule argument #{hvac_schedule} is not a Schedule Constant or Schedule Ruleset object.")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "HVAC schedule argument #{hvac_schedule} is not a Schedule Constant or Schedule Ruleset object.")
           return false
         end
 
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "Using HVAC schedule #{hvac_schedule.name} from user arguments to determine infiltration on/off schedule.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "Using HVAC schedule #{hvac_schedule.name} from user arguments to determine infiltration on/off schedule.")
       end
 
       # creating infiltration schedules based on hvac schedule
       if hvac_schedule.nil?
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration', 'Unable to determine the building HVAC schedule. Treating the building as if there is no HVAC system with outdoor air. This may be appropriate for design sizing, particularly heating design sizing. If this is not the case, input a schedule argument, or assign one to an air loop in the model.')
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', 'Unable to determine the building HVAC schedule. Treating the building as if there is no HVAC system with outdoor air. This may be appropriate for design sizing, particularly heating design sizing. If this is not the case, input a schedule argument, or assign one to an air loop in the model.')
         on_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         on_schedule.setName('Infiltration HVAC On Schedule')
         on_schedule.setValue(0.0)
@@ -209,6 +218,9 @@ module OpenstudioStandards
       # get climate zone number
       climate_zone_number = OpenstudioStandards::Weather.model_get_ashrae_climate_zone_number(model)
 
+      # there is no data for climate zone 0, so use data for climate zone 1
+      climate_zone_number = 1 if climate_zone_number == 0
+
       # get nist building type
       if nist_building_type.nil?
         nist_building_type = model_infer_nist_building_type(model)
@@ -216,26 +228,26 @@ module OpenstudioStandards
 
       # check that model building type is supported
       unless nist_building_types.include? nist_building_type
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "NIST coefficients are not available for model building type #{nist_building_type}.")
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "NIST coefficients are not available for model building type #{nist_building_type}.")
         return false
       end
 
       # remove existing infiltration objects
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "The modeled started with #{model.getSpaceInfiltrationDesignFlowRates.size} infiltration objects and #{model.getSpaceInfiltrationEffectiveLeakageAreas.size} effective leakage area objects.")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "The modeled started with #{model.getSpaceInfiltrationDesignFlowRates.size} infiltration objects and #{model.getSpaceInfiltrationEffectiveLeakageAreas.size} effective leakage area objects.")
       model.getSpaceInfiltrationDesignFlowRates.each(&:remove)
       model.getSpaceInfiltrationEffectiveLeakageAreas.each(&:remove)
 
       # load NIST infiltration correlations file and convert to hash table
-      nist_infiltration_correlations_csv = "#{__dir__}/data/NISTInfiltrationCorrelations.csv"
-      unless File.exist?(nist_infiltration_correlations_csv)
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "Unable to find file: #{nist_infiltration_correlations_csv}")
+      nist_infiltration_correlations_json = "#{File.dirname(__FILE__)}/data/NISTInfiltrationCorrelations.json"
+      unless File.file?(nist_infiltration_correlations_json)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "Unable to find file: #{nist_infiltration_correlations_json}")
         return false
       end
-      coefficients_tbl = CSV.table(nist_infiltration_correlations_csv, encoding: "ISO8859-1:utf-8" )
-      coefficients_hsh = coefficients_tbl.map(&:to_hash)
+      coefficients_hsh = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/NISTInfiltrationCorrelations.json"), symbolize_names: true)
+      coefficients_hsh = coefficients_hsh[:infiltration]
 
       # select down to building type and climate zone
-      coefficients = coefficients_hsh.select { |r| (r[:building_type] == nist_building_type) && (r[:climate_zone] == climate_zone_number) }
+      coefficients = coefficients_hsh.select { |r| (r[:building_type] == nist_building_type) && (r[:climate_zone].to_i == climate_zone_number) }
 
       # filter by air barrier
       if air_barrier
@@ -246,14 +258,14 @@ module OpenstudioStandards
 
       # determine coefficients
       # if no off coefficients are defined, use 0 for a and the on coefficients for b and d
-      on_coefficients = coefficients.select { |r| r[:hvac_status] == 'on' }
-      off_coefficients = coefficients.select { |r| r[:hvac_status] == 'off' }
-      a_on = on_coefficients[0][:a]
-      b_on = on_coefficients[0][:b]
-      d_on = on_coefficients[0][:d]
-      a_off = off_coefficients[0][:a].nil? ? on_coefficients[0][:a] : off_coefficients[0][:a]
-      b_off = off_coefficients[0][:b].nil? ? on_coefficients[0][:b] : off_coefficients[0][:b]
-      d_off = off_coefficients[0][:d].nil? ? on_coefficients[0][:d] : off_coefficients[0][:d]
+      on_coefficients = coefficients.select { |r| r[:hvac_status] == 'on' }[0]
+      off_coefficients = coefficients.select { |r| r[:hvac_status] == 'off' }[0]
+      a_on = on_coefficients[:a]
+      b_on = on_coefficients[:b]
+      d_on = on_coefficients[:d]
+      a_off = off_coefficients[:a].nil? ? on_coefficients[:a] : off_coefficients[:a]
+      b_off = off_coefficients[:b].nil? ? on_coefficients[:b] : off_coefficients[:b]
+      d_off = off_coefficients[:d].nil? ? on_coefficients[:d] : off_coefficients[:d]
 
       # add new infiltration objects
       # define infiltration as flow per exterior area
@@ -281,7 +293,7 @@ module OpenstudioStandards
         hvac_off_infiltration.setSchedule(off_schedule)
       end
 
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "The modeled finished with #{model.getSpaceInfiltrationDesignFlowRates.size} infiltration objects.")
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "The modeled finished with #{model.getSpaceInfiltrationDesignFlowRates.size} infiltration objects.")
 
       return true
     end
@@ -303,7 +315,7 @@ module OpenstudioStandards
         hvac_schedule = OpenstudioStandards::Schedules.model_get_hvac_schedule(model)
       else
         unless hvac_schedule.to_Schedule.is_initialized
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "HVAC schedule argument #{hvac_schedule} not found in the model or is not a Schedule object. It may have been removed by another measure.")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "HVAC schedule argument #{hvac_schedule} not found in the model or is not a Schedule object. It may have been removed by another measure.")
           return false
         end
         hvac_schedule = hvac_schedule.to_Schedule.get
@@ -312,16 +324,16 @@ module OpenstudioStandards
         elsif hvac_schedule.to_ScheduleConstant.is_initialized
           hvac_schedule = hvac_schedule.to_ScheduleConstant.get
         else
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration', "HVAC schedule argument #{hvac_schedule} is not a Schedule Constant or Schedule Ruleset object.")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Infiltration.nist_infiltration', "HVAC schedule argument #{hvac_schedule} is not a Schedule Constant or Schedule Ruleset object.")
           return false
         end
 
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "Using HVAC schedule #{hvac_schedule.name} from user arguments to determine infiltration on/off schedule.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.nist_infiltration', "Using HVAC schedule #{hvac_schedule.name} from user arguments to determine infiltration on/off schedule.")
       end
 
       # creating infiltration schedules based on hvac schedule
       if hvac_schedule.nil?
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration', 'Unable to determine the HVAC schedule. Treating the building as if there is no HVAC system with outdoor air.  If this is not the case, input a schedule argument, or assign one to an air loop in the model.')
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', 'Unable to determine the HVAC schedule. Treating the building as if there is no HVAC system with outdoor air.  If this is not the case, input a schedule argument, or assign one to an air loop in the model.')
         on_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         on_schedule.setName('Infiltration HVAC On Schedule')
         on_schedule.setValue(0.0)

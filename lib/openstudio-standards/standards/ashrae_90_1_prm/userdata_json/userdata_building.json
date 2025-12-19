@@ -1,0 +1,121 @@
+{
+    "title": "ASHRAE 90.1 PRM Building Type User Data",
+    "definitions": {
+      "UserDataBuildingData": {
+        "type": "object",
+        "properties": {
+          "userdata_building": {
+            "type": "array",
+            "description": "List of userdata_building rows",
+            "items": {
+              "$ref": "#/definitions/UserDataBuilding"
+            }
+          }
+        }
+      },
+      "UserDataBuilding": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Identifier or name for the building object"
+          },
+          "building_type_for_hvac": {
+            "type": ["null","string"],
+            "enum": [
+              null,
+              "heated-only storage",
+              "hospital",
+              "other nonresidential",
+              "public assembly",
+              "residential",
+              "retail",
+              "unconditioned"
+            ],
+            "default": null,
+            "description": "Building type for HVAC",
+            "$comment": "This field is used to determine the baseline model HVAC system. It can be overwritten at the zone level (see the documentation for userdata_thermal_zone.json). It should be set to one of the following values that best describes the proposed model building type."
+          },
+          "building_type_for_swh": {
+            "type": ["null","string"],
+            "enum": [
+              null,
+              "All others",
+              "Automotive facility",
+              "Convenience store",
+              "Convention center",
+              "Courthouse",
+              "Dining: Bar lounge/leisure",
+              "Dining: Cafeteria/fast food",
+              "Dining: Family",
+              "Dormitory",
+              "Exercise center",
+              "Fire station",
+              "Grocery store",
+              "Gymnasium",
+              "Health-care clinic",
+              "Hospital and outpatient surgery center",
+              "Hotel",
+              "Library",
+              "Manufacturing facility",
+              "Motel",
+              "Motion picture theater",
+              "Multifamily",
+              "Museum",
+              "Office",
+              "Parking garage",
+              "Penitentiary",
+              "Performing arts theater",
+              "Police station",
+              "Post office",
+              "Religious facility",
+              "Retail",
+              "School/university",
+              "Sports arena",
+              "Town hall",
+              "Transportation",
+              "Warehouse",
+              "Workshop"
+            ],
+            "default": null,
+            "description": "Building type for SWH",
+            "$comment": "This field is used to determine the baseline model service water heating system. It should be set to one of the following values that best describes the proposed model building type."
+          },
+          "building_type_for_wwr": {
+            "type": ["null", "string"],
+            "enum": [
+              null,
+              "All others",
+              "Grocery store",
+              "Healthcare (outpatient)",
+              "Hospital",
+              "Hotel/motel <= 75 rooms",
+              "Hotel/motel > 75 rooms",
+              "Office 5,000 to 50,000 sq ft",
+              "Office <= 5,000 sq ft",
+              "Office > 50,000 sq ft",
+              "Restaurant (full service)",
+              "Restaurant (quick service)",
+              "Retail (stand alone)",
+              "Retail (strip mall)",
+              "School (primary)",
+              "School (secondary and university)",
+              "Warehouse (nonrefrigerated)"
+            ],
+            "default": null,
+            "description": "Building type for Window to wall ratio",
+            "$comment": "This field is used to determine the baseline model’s window-to-wall ratio. It should be set to one of the following values that best described the proposed models building type."
+          },
+          "is_exempt_from_rotations": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is exempted from rotation requirements",
+            "$comment": "Set this field to true if it can be demonstrated to the satisfaction of the rating authority that the building orientation is dictated by site considerations. If it doesnt apply, leave this field blank or set to false."
+          }
+        },
+        "description": "User data building object",
+        "required": ["name"],
+        "additionalProperties": false
+      }
+    }
+  }

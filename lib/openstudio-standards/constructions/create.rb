@@ -5,15 +5,49 @@ module OpenstudioStandards
     # Methods to create Constructions
 
     # This will create a deep copy of the construction, meaning it will clone and create new material objects as well
+    # This function will clone
     #
     # @param construction [OpenStudio::Model::Construction] OpenStudio Construction object object
     # @return [OpenStudio::Model::Construction] New OpenStudio Construction object
     def self.construction_deep_copy(construction)
-      new_construction = construction.clone.to_Construction.get
-      (0..new_construction.layers.length - 1).each do |layer_number|
-        cloned_layer = new_construction.getLayer(layer_number).clone.to_Material.get
-        new_construction.setLayer(layer_number, cloned_layer)
+      cons_obj_type = construction.iddObjectType.valueName.to_s
+      case cons_obj_type
+      when 'OS_Construction_FfactorGroundFloor'
+        new_construction = construction.clone.to_FFactorGroundFloorConstruction.get
+        f_const = construction.to_FFactorGroundFloorConstruction.get
+        new_construction.setFFactor(f_const.fFactor)
+        new_construction.setArea(f_const.area)
+        new_construction.setPerimeterExposed(f_const.perimeterExposed)
+      when 'OS_Construction_CfactorUndergroundWall'
+        c_const = construction.to_CFactorUndergroundWallConstruction.get
+        new_construction = c_const.clone.to_CFactorUndergroundWallConstruction.get
+        new_construction.setCFactor(c_const.cFactor)
+        new_construction.setHeight(c_const.height)
+      when 'OS_Construction_AirBoundary'
+        a_const = construction.to_ConstructionAirBoundary.get
+        new_construction = a_const.clone.to_ConstructionAirBoundary.get
+        new_construction.setAirExchangeMethod(a_const.airExchangeMethod)
+        new_construction.setSimpleMixingAirChangesPerHour(a_const.simpleMixingAirChangesPerHour)
+        new_construction.setSimpleMixingSchedule(a_const.simpleMixingSchedule)
+      else
+        # Layer by layer construction
+        if cons_obj_type == 'OS_Construction_InternalSource'
+          new_construction = construction.clone.to_ConstructionWithInternalSource.get
+          i_const = construction.to_ConstructionWithInternalSource.get
+          new_construction.setSourcePresentAfterLayerNumber(i_const.sourcePresentAfterLayerNumber)
+          new_construction.setTemperatureCalculationRequestedAfterLayerNumber(i_const.temperatureCalculationRequestedAfterLayerNumber)
+          new_construction.setDimensionsForTheCTFCalculation(i_const.dimensionsForTheCTFCalculation)
+          new_construction.setTubeSpacing(i_const.tubeSpacing)
+          new_construction.setTwoDimensionalTemperatureCalculationPosition(i_const.twoDimensionalTemperatureCalculationPosition)
+        else
+          new_construction = construction.clone.to_Construction.get
+        end
+        (0..new_construction.layers.length - 1).each do |layer_number|
+          cloned_layer = new_construction.getLayer(layer_number).clone.to_Material.get
+          new_construction.setLayer(layer_number, cloned_layer)
+        end
       end
+
       return new_construction
     end
 

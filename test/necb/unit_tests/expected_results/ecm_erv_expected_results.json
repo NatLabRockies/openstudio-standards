@@ -2,7 +2,21 @@
   {
     "building_type": "FullServiceRestaurant",
     "erv_package": "NECB_Default",
-    "number_of_ervs": 0
+    "number_of_ervs": 1,
+    "heatExchangerType": "Rotary",
+    "sensibleEffectivenessat100HeatingAirFlow": 0.5,
+    "latentEffectivenessat100HeatingAirFlow": 0.5,
+    "sensibleEffectivenessat75HeatingAirFlow": 0.5,
+    "latentEffectivenessat75HeatingAirFlow": 0.5,
+    "sensibleEffectivenessat100CoolingAirFlow": 0.5,
+    "latentEffectivenessat100CoolingAirFlow": 0.5,
+    "sensibleEffectivenessat75CoolingAirFlow": 0.5,
+    "latentEffectivenessat75CoolingAirFlow": 0.5,
+    "supplyAirOutletTemperatureControl": true,
+    "frostControlType": "ExhaustOnly",
+    "economizerLockout": true,
+    "thresholdTemperature": -23.3,
+    "initialDefrostTimeFraction": 0.167
   },
   {
     "building_type": "FullServiceRestaurant",
@@ -45,7 +59,21 @@
   {
     "building_type": "FullServiceRestaurant",
     "erv_package": "Plate-Existing",
-    "number_of_ervs": 0
+    "number_of_ervs": 1,
+    "heatExchangerType": "Plate",
+    "sensibleEffectivenessat100HeatingAirFlow": 0.755,
+    "latentEffectivenessat100HeatingAirFlow": 0.564,
+    "sensibleEffectivenessat75HeatingAirFlow": 0.791,
+    "latentEffectivenessat75HeatingAirFlow": 0.625,
+    "sensibleEffectivenessat100CoolingAirFlow": 0.755,
+    "latentEffectivenessat100CoolingAirFlow": 0.564,
+    "sensibleEffectivenessat75CoolingAirFlow": 0.791,
+    "latentEffectivenessat75CoolingAirFlow": 0.625,
+    "supplyAirOutletTemperatureControl": true,
+    "frostControlType": "ExhaustOnly",
+    "economizerLockout": true,
+    "thresholdTemperature": -23.3,
+    "initialDefrostTimeFraction": 0.167
   },
   {
     "building_type": "FullServiceRestaurant",

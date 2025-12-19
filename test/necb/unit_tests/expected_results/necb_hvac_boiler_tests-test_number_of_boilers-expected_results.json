@@ -1,0 +1,286 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2011 p3 8.4.4.10.(6) clauses b,c,d",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.83 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.9 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.9 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.9 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.9 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "Single_Small_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 100.0,
+          "total_capacity_kW": 100.0,
+          "number_of_boilers": 1
+        }
+      },
+      "Two_Equal_Sized_Boilers": {
+        "Boiler-1": {
+          "name": "Secondary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "Boiler-2": {
+          "name": "Primary Boiler 341kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 100.0,
+          "minimum_part_load_ratio": 0.0
+        },
+        "All": {
+          "tested_capacity_kW": 200.0,
+          "total_capacity_kW": 200.0,
+          "number_of_boilers": 2
+        }
+      },
+      "Single_Large_Boiler": {
+        "Boiler-1": {
+          "name": "Primary Boiler 1365kBtu/hr 0.8 Thermal Eff",
+          "boiler_capacity_kW": 400.0,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 400.0,
+          "total_capacity_kW": 400.0,
+          "number_of_boilers": 1
+        }
+      }
+    }
+  }
+}

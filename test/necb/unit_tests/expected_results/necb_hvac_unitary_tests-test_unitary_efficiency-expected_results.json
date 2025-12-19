@@ -1,0 +1,3301 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "unitary_heating_types",
+    "Reference": "NECB 2011 p3:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-13)",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.13,
+            "EER": 9.7
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 3.09,
+            "EER": 9.7
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          }
+        ]
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "unitary_heating_types",
+    "Reference": "NECB 2015 p1:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-14)",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          }
+        ]
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "unitary_heating_types",
+    "Reference": "NECB 2017 p2:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-15)",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.44EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.28,
+            "COP_with_fan": 3.05,
+            "EER": 9.44
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.95,
+            "EER": 9.26
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.39EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.93,
+            "COP_with_fan": 2.58,
+            "EER": 8.39
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 8.12EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.84,
+            "COP_with_fan": 2.39,
+            "EER": 8.12
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 14.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.82,
+            "COP_with_fan": 3.59,
+            "SEER": 14.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 9.26EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.22,
+            "COP_with_fan": 2.99,
+            "EER": 9.26
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 9.08EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.16,
+            "COP_with_fan": 2.9,
+            "EER": 9.08
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 8.21EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.87,
+            "COP_with_fan": 2.53,
+            "EER": 8.21
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.94EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.78,
+            "COP_with_fan": 2.34,
+            "EER": 7.94
+          }
+        ]
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "unitary_heating_types",
+    "Reference": "NECB 2020 p1:Table 5.2.12.1-A",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 11.2EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.87,
+            "COP_with_fan": 3.59,
+            "EER": 11.2
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 11.2EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.87,
+            "COP_with_fan": 3.59,
+            "EER": 11.2
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 11.2EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.87,
+            "COP_with_fan": 3.59,
+            "EER": 11.2
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 11.2EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.87,
+            "COP_with_fan": 3.59,
+            "EER": 11.2
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 11.2EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.87,
+            "COP_with_fan": 3.59,
+            "EER": 11.2
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.49,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.49,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.49,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.49,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.49,
+            "EER": 11.0
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 10.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.47,
+            "COP_with_fan": 3.05,
+            "EER": 10.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 10.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.47,
+            "COP_with_fan": 3.05,
+            "EER": 10.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 10.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.47,
+            "COP_with_fan": 3.05,
+            "EER": 10.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 10.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.47,
+            "COP_with_fan": 3.05,
+            "EER": 10.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 10.0EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.47,
+            "COP_with_fan": 3.05,
+            "EER": 10.0
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 2.83,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 2.83,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 2.83,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 2.83,
+            "EER": 9.7
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 9.7EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.37,
+            "COP_with_fan": 2.83,
+            "EER": 9.7
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 15.0SEER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 3.98,
+            "COP_with_fan": 3.73,
+            "SEER": 15.0
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.53,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.53,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.53,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.53,
+            "EER": 11.0
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 11.0EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 3.8,
+            "COP_with_fan": 3.53,
+            "EER": 11.0
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 10.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.73,
+            "COP_with_fan": 3.43,
+            "EER": 10.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 10.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.73,
+            "COP_with_fan": 3.43,
+            "EER": 10.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 10.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.73,
+            "COP_with_fan": 3.43,
+            "EER": 10.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 10.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.73,
+            "COP_with_fan": 3.43,
+            "EER": 10.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 10.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 3.73,
+            "COP_with_fan": 3.43,
+            "EER": 10.8
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 9.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.4,
+            "COP_with_fan": 2.99,
+            "EER": 9.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 9.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.4,
+            "COP_with_fan": 2.99,
+            "EER": 9.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 9.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.4,
+            "COP_with_fan": 2.99,
+            "EER": 9.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 9.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.4,
+            "COP_with_fan": 2.99,
+            "EER": 9.8
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 9.8EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 3.4,
+            "COP_with_fan": 2.99,
+            "EER": 9.8
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 9.5EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.3,
+            "COP_with_fan": 2.77,
+            "EER": 9.5
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 9.5EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.3,
+            "COP_with_fan": 2.77,
+            "EER": 9.5
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 9.5EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.3,
+            "COP_with_fan": 2.77,
+            "EER": 9.5
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 9.5EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.3,
+            "COP_with_fan": 2.77,
+            "EER": 9.5
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 9.5EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 3.3,
+            "COP_with_fan": 2.77,
+            "EER": 9.5
+          }
+        ]
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "unitary_heating_types",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          }
+        ]
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "unitary_heating_types",
+    "Electric Resistance": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Electric",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          }
+        ]
+      }
+    },
+    "All Other": {
+      "VarType": "TestCase",
+      "Small single package system": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 32kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 9.5,
+            "test_capacity_btu_per_hr": 32400,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.55,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium single package (All phases)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 101kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 29.5,
+            "test_capacity_btu_per_hr": 101000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.53,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Medium large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 188kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 55.0,
+            "test_capacity_btu_per_hr": 188000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.5,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 500kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 147,
+            "test_capacity_btu_per_hr": 500000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.4,
+            "EER": 7.77
+          }
+        ]
+      },
+      "Extra large single package (All phases, split and single packages)": {
+        "coils": [
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 1 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 2 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 3 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 4 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          },
+          {
+            "name": "CoilCoolingDXSingleSpeed_dx 863kBtu/hr 7.7726EER",
+            "speed": "single",
+            "heating_coil_type": "Gas",
+            "test_capacity_kW": 253,
+            "test_capacity_btu_per_hr": 863000,
+            "rated_COP": 2.72,
+            "COP_with_fan": 2.29,
+            "EER": 7.77
+          }
+        ]
+      }
+    }
+  }
+}

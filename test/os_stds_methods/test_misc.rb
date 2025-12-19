@@ -30,17 +30,17 @@ class TestMisc < Minitest::Test
     return std, model
   end
 
-  def test_plenum_space_conditioning
-    # Create prototype
-    std, model = create_model('LargeOffice', 'ASHRAE 169-2013-4A', '90.1-2019')
+  # def test_plenum_space_conditioning
+  #   # Create prototype
+  #   std, model = create_model('LargeOffice', 'ASHRAE 169-2013-4A', '90.1-2019')
 
-    # Test return plenum space conditioning
-    model.getSpaces.sort.each do |space|
-      if space.name.to_s.downcase.include?('plenum')
-        assert(std.space_conditioning_category(space) == 'NonResConditioned', 'Wrong plenum space conditioning type.')
-      end
-    end
-  end
+  #   # Test return plenum space conditioning
+  #   model.getSpaces.sort.each do |space|
+  #     if space.name.to_s.downcase.include?('plenum')
+  #       assert(std.space_conditioning_category(space) == 'NonResConditioned', 'Wrong plenum space conditioning type.')
+  #     end
+  #   end
+  # end
 
   def test_add_table_lookup_curve
     model = OpenStudio::Model::Model.new

@@ -1,0 +1,730 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "swh_capacity_kW",
+    "Reference": "NECB 2011 xxx",
+    "10.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.057,
+              "on_cycle_UA_WperK": 2.057
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 34kBtu/hr 0.82 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 10.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 3.243,
+              "on_cycle_UA_WperK": 3.243
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.78,
+              "on_cycle_UA_WperK": 2.78
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 34kBtu/hr 0.82 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 10.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 4.27,
+              "on_cycle_UA_WperK": 4.27
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 5.207,
+              "on_cycle_UA_WperK": 5.207
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 34kBtu/hr 0.82 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 10.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 7.06,
+              "on_cycle_UA_WperK": 7.06
+            }
+          }
+        }
+      }
+    },
+    "20.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.068,
+              "on_cycle_UA_WperK": 2.068
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 68kBtu/hr 0.82 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 20.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 6.487,
+              "on_cycle_UA_WperK": 6.487
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.499,
+              "on_cycle_UA_WperK": 2.499
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 68kBtu/hr 0.82 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 20.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 8.539,
+              "on_cycle_UA_WperK": 8.539
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 3.182,
+              "on_cycle_UA_WperK": 3.182
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 68kBtu/hr 0.82 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 20.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 14.12,
+              "on_cycle_UA_WperK": 14.12
+            }
+          }
+        }
+      }
+    },
+    "30.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.068,
+              "on_cycle_UA_WperK": 2.068
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 102kBtu/hr 0.807 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 30.0,
+              "efficiency": 0.807,
+              "off_cycle_UA_WperK": 5.592,
+              "on_cycle_UA_WperK": 5.592
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.499,
+              "on_cycle_UA_WperK": 2.499
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 102kBtu/hr 0.809 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 30.0,
+              "efficiency": 0.809,
+              "off_cycle_UA_WperK": 6.675,
+              "on_cycle_UA_WperK": 6.675
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 3.182,
+              "on_cycle_UA_WperK": 3.182
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 102kBtu/hr 0.811 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 30.0,
+              "efficiency": 0.811,
+              "off_cycle_UA_WperK": 8.393,
+              "on_cycle_UA_WperK": 8.393
+            }
+          }
+        }
+      }
+    },
+    "40.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.068,
+              "on_cycle_UA_WperK": 2.068
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 136kBtu/hr 0.806 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 40.0,
+              "efficiency": 0.806,
+              "off_cycle_UA_WperK": 5.849,
+              "on_cycle_UA_WperK": 5.849
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.499,
+              "on_cycle_UA_WperK": 2.499
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 136kBtu/hr 0.807 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 40.0,
+              "efficiency": 0.807,
+              "off_cycle_UA_WperK": 6.932,
+              "on_cycle_UA_WperK": 6.932
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 3.182,
+              "on_cycle_UA_WperK": 3.182
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 136kBtu/hr 0.808 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 40.0,
+              "efficiency": 0.808,
+              "off_cycle_UA_WperK": 8.65,
+              "on_cycle_UA_WperK": 8.65
+            }
+          }
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "swh_capacity_kW",
+    "10.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.057,
+              "on_cycle_UA_WperK": 2.057
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 34kBtu/hr 0.82 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 10.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 5.6,
+              "on_cycle_UA_WperK": 5.6
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 2.78,
+              "on_cycle_UA_WperK": 2.78
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 34kBtu/hr 0.82 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 10.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 0.8376,
+              "on_cycle_UA_WperK": 0.8376
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 34kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 10.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 5.207,
+              "on_cycle_UA_WperK": 5.207
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 34kBtu/hr 0.929 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 10.0,
+              "efficiency": 0.929,
+              "off_cycle_UA_WperK": 7.446,
+              "on_cycle_UA_WperK": 7.446
+            }
+          }
+        }
+      }
+    },
+    "20.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.02085,
+              "on_cycle_UA_WperK": 0.02085
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 68kBtu/hr 0.82 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 20.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 5.6,
+              "on_cycle_UA_WperK": 5.6
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01647,
+              "on_cycle_UA_WperK": 0.01647
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 68kBtu/hr 0.82 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 20.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 0.8376,
+              "on_cycle_UA_WperK": 0.8376
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 68kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 20.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01297,
+              "on_cycle_UA_WperK": 0.01297
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 68kBtu/hr 0.915 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 20.0,
+              "efficiency": 0.915,
+              "off_cycle_UA_WperK": 7.689,
+              "on_cycle_UA_WperK": 7.689
+            }
+          }
+        }
+      }
+    },
+    "30.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.02085,
+              "on_cycle_UA_WperK": 0.02085
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 102kBtu/hr 0.82 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 30.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 1.19,
+              "on_cycle_UA_WperK": 1.19
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01647,
+              "on_cycle_UA_WperK": 0.01647
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 102kBtu/hr 0.82 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 30.0,
+              "efficiency": 0.82,
+              "off_cycle_UA_WperK": 1.724,
+              "on_cycle_UA_WperK": 1.724
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 102kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 30.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01297,
+              "on_cycle_UA_WperK": 0.01297
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 102kBtu/hr 0.91 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 30.0,
+              "efficiency": 0.91,
+              "off_cycle_UA_WperK": 7.932,
+              "on_cycle_UA_WperK": 7.932
+            }
+          }
+        }
+      }
+    },
+    "40.0": {
+      "VarType": "swh_volume_L",
+      "200.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.02085,
+              "on_cycle_UA_WperK": 0.02085
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "53gal NaturalGas Water Heater - 136kBtu/hr 0.905 Therm Eff",
+              "volume_L": 200,
+              "capacity_kW": 40.0,
+              "efficiency": 0.905,
+              "off_cycle_UA_WperK": 5.527,
+              "on_cycle_UA_WperK": 5.527
+            }
+          }
+        }
+      },
+      "300.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01647,
+              "on_cycle_UA_WperK": 0.01647
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "79gal NaturalGas Water Heater - 136kBtu/hr 0.906 Therm Eff",
+              "volume_L": 300,
+              "capacity_kW": 40.0,
+              "efficiency": 0.906,
+              "off_cycle_UA_WperK": 6.551,
+              "on_cycle_UA_WperK": 6.551
+            }
+          }
+        }
+      },
+      "500.0": {
+        "VarType": "swh_fuel",
+        "Electricity": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal Electricity Water Heater - 136kBtu/hr 1 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 40.0,
+              "efficiency": 1.0,
+              "off_cycle_UA_WperK": 0.01297,
+              "on_cycle_UA_WperK": 0.01297
+            }
+          }
+        },
+        "NaturalGas": {
+          "VarType": "TestCase",
+          "Case 1": {
+            "SWH_unit-1": {
+              "name": "132gal NaturalGas Water Heater - 136kBtu/hr 0.908 Therm Eff",
+              "volume_L": 500,
+              "capacity_kW": 40.0,
+              "efficiency": 0.908,
+              "off_cycle_UA_WperK": 8.175,
+              "on_cycle_UA_WperK": 8.175
+            }
+          }
+        }
+      }
+    }
+  }
+}

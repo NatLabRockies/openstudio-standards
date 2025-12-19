@@ -1,0 +1,24 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "TestCase",
+    "Reference": "NECB 2011 p3: 8.4.4.19.(3)",
+    "cav_fan": {
+      "Fan Constant Volume 1": {
+        "fan_power_kW": 16.01,
+        "pressure_rise_Pa": 640.0,
+        "max_flow_L_s": 10000,
+        "motor_efficiency": 0.62,
+        "total_efficiency": 0.4
+      },
+      "system": {
+        "power_demand_per_flow": 1.6
+      },
+      "sys_1|doas|shr>none|sc>dx|sh>c-hw|ssf>cv|zh>b-hw|zc>ptac|srf>none|": {
+        "OA_system": "Air Loop HVAC Outdoor Air System 1",
+        "OC_control": "Controller Outdoor Air 1",
+        "economizer": "NoEconomizer"
+      }
+    }
+  }
+}

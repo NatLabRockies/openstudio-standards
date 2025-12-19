@@ -40,7 +40,8 @@ def compare_osm_files(model_true, model_compare, look_for_renamed_objects = fals
     'OS:StandardsInformation:Construction',
     'OS:SimulationControl', # Sizing run and weather run may be different
     'OS:AdditionalProperties', # Does not impact simulation results
-    'OS:Output:Variable' # Does not impact simulation results
+    'OS:Output:Variable', # Does not impact simulation results
+    'OS:Table:Lookup' # ERV table independent variable name lists are not deterministic
   ]
 
   # Fill model object lists with all object types to be compared

@@ -15,7 +15,7 @@ class NECB_PVground_Tests < Minitest::Test
     # File paths.
     @output_folder = File.join(__dir__, 'output/test_pv_ground')
     @expected_results_file = File.join(__dir__, '../expected_results/pv_ground_expected_results.json')
-    @test_results_file = File.join(__dir__, '../expected_results/pv_ground_test_results.json')
+    @test_results_file = File.join(__dir__, '../expected_results/pv_ground-test_results.json')
     @sizing_run_dir = File.join(@output_folder, 'sizing_folder')
 
     # Initial test condition

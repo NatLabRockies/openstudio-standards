@@ -1,0 +1,2065 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "chiller_types",
+    "Reference": "NECB 2011 p3: Section 8.4.4.12.",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2011_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 18.1,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2011_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 70.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2011_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1180,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2011_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.86,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4680,
+            "number_of_cells": 3,
+            "fan_power_kW": 70.2,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2011_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 18.1,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2011_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 70.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2011_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 18.1,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2011_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 70.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "chiller_types",
+    "Reference": "NECB 2015 p3: Section 8.4.4.11. Table 5.2.12.2.",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2015_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2015_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2015_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1180,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2015_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.86,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4680,
+            "number_of_cells": 3,
+            "fan_power_kW": 60.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2015_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2015_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2015_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2015_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "chiller_types",
+    "Reference": "NECB 2017 p2: Section 8.4.4.11. Table 5.2.12.2.",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2017_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2017_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2017_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1180,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2017_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.86,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4680,
+            "number_of_cells": 3,
+            "fan_power_kW": 60.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2017_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2017_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2017_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 4.9,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1200,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.7,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2017_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.5,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4730,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.4,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "chiller_types",
+    "Reference": "NECB 2020 p1: Section 8.4.4.11. Table 5.2.12.2.",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2020_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.18,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2020_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.63,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4710,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.2,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2020_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.54,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1180,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.3,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2020_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 6.02,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4660,
+            "number_of_cells": 3,
+            "fan_power_kW": 60.6,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2020_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.18,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2020_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.63,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4710,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.2,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_NECB2020_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.18,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 15.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_NECB2020_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.013",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.63,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4710,
+            "number_of_cells": 3,
+            "fan_power_kW": 61.2,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "chiller_types",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAPPRE1980_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "chiller_types",
+    "Scroll": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Scroll-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Scroll-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Centrifugal-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Centrifugal-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Rotary Screw-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Rotary Screw-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "One Cell": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Reciprocating-1000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 1000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 1190,
+            "number_of_cells": 1,
+            "fan_power_kW": 17.9,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      },
+      "Three Cells": {
+        "name": "sys6_BTAP1980TO2010_ChillerType_Reciprocating-4000kW_clgtowerFanPowerFr_0.015",
+        "outlet_temp": [
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0,
+          29.0
+        ],
+        "reference_COP": 5.2,
+        "tested_capacity_kW": 4000,
+        "tower_results": {
+          "Cooling Tower Single Speed 1": {
+            "tower_capacity_kW": 4770,
+            "number_of_cells": 3,
+            "fan_power_kW": 71.5,
+            "design_inlet_wet_bulb_degC": 24.0,
+            "design_inlet_dry_bulb_degC": 35.0,
+            "design_approach_T_degC": 5.0
+          }
+        }
+      }
+    }
+  }
+}

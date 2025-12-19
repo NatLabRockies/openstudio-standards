@@ -90,10 +90,10 @@ def unique_properties(sheet_name)
            ['template']
          when 'materials'
            ['name', 'code_category']
-         when 'space_types', 'space_types_lighting', 'space_types_rendering_color', 'space_types_ventilation', 'space_types_occupancy', 'space_types_infiltration', 'space_types_equipment', 'space_types_thermostats', 'space_types_swh', 'space_types_exhaust'
+         when 'space_types', 'space_types_lighting', 'space_types_rendering_color', 'space_types_ventilation', 'space_types_occupancy', 'space_types_infiltration', 'space_types_equipment', 'space_types_thermostats', 'space_types_swh'
            ['template', 'building_type', 'space_type']
          when 'exterior_lighting'
-           ['exterior_lighting_zone_number', 'template']
+           ['lighting_zone', 'template']
          when 'schedules'
            ['name', 'day_types', 'start_date', 'end_date']
          when 'construction_properties'
@@ -116,6 +116,8 @@ def unique_properties(sheet_name)
            ['template', 'cooling_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
          when 'unitary_acs'
            ['template', 'cooling_type', 'heating_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
+          when 'computer_room_acs'
+            ['template', 'cooling_type', 'heating_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
          when 'water_heaters'
            ['template', 'equipment_type', 'fuel_type', 'minimum_capacity', 'maximum_capacity', 'minimum_storage', 'maximum_storage', 'minimum_capacity_per_storage', 'maximum_capacity_per_storage', 'draw_profile', 'start_date', 'end_date']
          when 'elevators'
@@ -131,9 +133,7 @@ def unique_properties(sheet_name)
          when 'refrigeration_compressors'
            ['template', 'compressor_name', 'compressor_type']
          when 'economizers'
-           ['template', 'climate_zone', 'data_center']
-         when 'prm_economizers'
-           ['template', 'climate_ID']
+           ['climate_zone', 'data_center', 'minimum_capacity', 'fan_cooling_application', 'minimum_water_cooled_chilled_water_capacity_no_fan_cooling', 'minimum_air_cooled_chilled_water_or_district_chilled_water_capacity_no_fan_cooling', 'fixed_dry_bulb_is_allowed', 'differential_dry_bulb_is_allowed', 'electronic_enthalpy_is_allowed', 'differential_enthalpy_is_allowed', 'dew_point_dry_bulb_is_allowed', 'fixed_enthalpy_is_allowed', 'fixed_enthalpy_fixed_dry_bulb_is_allowed', 'differential_enthalpy_fixed_dry_bulb_is_allowed', 'fixed_dry_bulb_high_limit_shutoff_temp', 'fixed_enthalpy_high_limit_shutoff_enthalpy', 'dew_point_dry_bulb_high_limit_shutoff_dew_point_temp', 'dew_point_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'fixed_enthalpy_fixed_dry_bulb_high_limit_shutoff_enthalpy', 'fixed_enthalpy_fixed_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'differential_enthalpy_fixed_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'percent_increase_cooling_efficiency_eliminate_requirement', 'heat_recovery_exempted']
          when 'motors'
            ['template', 'number_of_poles', 'type', 'synchronous_speed', 'minimum_capacity', 'maximum_capacity']
          when 'ground_temperatures'
@@ -151,7 +151,7 @@ def unique_properties(sheet_name)
          when 'climate_zones'
            ['name', 'standard']
          when 'energy_recovery'
-           ['template', 'climate_zone', 'under_8000_hours', 'nontransient_dwelling', 'enthalpy_recovery_ratio_design_conditions']
+           ['climate_zone', 'under_8000_hours', 'nontransient_dwelling', 'percent_oa_0_to_10', 'percent_oa_10_to_20 ', 'percent_oa_20_to_30', 'percent_oa_30_to_40', 'percent_oa_40_to_50', 'percent_oa_50_to_60', 'percent_oa_60_to_70', 'percent_oa_70_to_80', 'percent_oa_greater_than_80', 'design_conditions', 'energy_recovery_effectiveness', 'enthalpy_recovery_ratio', 'sensible_energy_recovery_ratio']
          when 'space_types_lighting_control'
            ['template', 'building_type', 'space_type']
          when 'prm_hvac_bldg_type'

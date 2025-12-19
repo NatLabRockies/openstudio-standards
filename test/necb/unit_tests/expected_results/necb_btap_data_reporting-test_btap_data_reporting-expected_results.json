@@ -1,0 +1,637 @@
+{
+  "VarType": "vintage",
+  "Reference": "BTAP test - checking creation of btap_data report",
+  "NECB2011": {
+    "VarType": "TestCase",
+    "case 1": {
+      "simulation_btap_data_version": "test",
+      "simulation_os_standards_revision": "test",
+      "simulation_os_standards_version": "test",
+      "simulation_date": "test",
+      "bldg_name": "FullServiceRestaurant",
+      "bldg_conditioned_floor_area_m_sq": 511.15,
+      "bldg_exterior_area_m_sq": 845.2233291753421,
+      "bldg_volume_m_cu": 2414.663171732126,
+      "bldg_standards_template": "NECB2011",
+      "bldg_standards_building_type": "FullServiceRestaurant",
+      "bldg_standards_number_of_stories": 1,
+      "bldg_standards_number_of_above_ground_stories": 1,
+      "bldg_standards_number_of_living_units": null,
+      "bldg_nominal_floor_to_ceiling_height": null,
+      "bldg_nominal_floor_to_floor_height": null,
+      "bldg_surface_to_volume_ratio": 0.35003777714016837,
+      "bldg_fdwr": 40.0,
+      "bldg_srr": 0.0,
+      "location_necb_hdd": 3890.0,
+      "location_weather_file": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
+      "location_epw_cdd": 346.0,
+      "location_epw_hdd": 3579.0,
+      "location_necb_climate_zone": "5",
+      "location_city": "Toronto Intl AP",
+      "location_state_province_region": "ON",
+      "location_country": "CAN",
+      "location_latitude": 43.68,
+      "location_longitude": -79.63,
+      "shw_total_nominal_occupancy": 44.152477477477476,
+      "shw_electricity_per_year": 0.0,
+      "shw_electricity_per_day": 0.0,
+      "shw_electricity_per_day_per_occupant": 0.0,
+      "shw_natural_gas_per_year": 97.78,
+      "shw_additional_fuel_per_year": -1,
+      "shw_water_m_cu_per_year": 379.87,
+      "shw_water_m_cu_per_day": 1.0393160054719561,
+      "shw_water_m_cu_per_day_per_occupant": 0.02353924547047489,
+      "energy_eui_fans_gj_per_m_sq": 0.20297368678470118,
+      "energy_eui_heating_gj_per_m_sq": 1.921627702240047,
+      "energy_eui_cooling_gj_per_m_sq": 0.07868531742150053,
+      "energy_eui_interior equipment_gj_per_m_sq": 0.06716228113078353,
+      "energy_eui_natural_gas_gj_per_m_sq": 2.1129218429032575,
+      "energy_eui_pumps_gj_per_m_sq": 0.002523721021226646,
+      "energy_eui_total_gj_per_m_sq": 2.6567543773843294,
+      "energy_eui_heat recovery_gj_per_m_sq": 0.0,
+      "energy_eui_water systems_gj_per_m_sq": 0.19129414066321043,
+      "energy_eui_interior lighting_gj_per_m_sq": 0.1924875281228602,
+      "energy_eui_electricity_gj_per_m_sq": 0.5438325344810722,
+      "energy_eui_additional_fuel_gj_per_m_sq": 0.0,
+      "energy_eui_district_cooling_gj_per_m_sq": 0.0,
+      "energy_eui_district_heating_gj_per_m_sq": 0.0,
+      "total_site_eui_gj_per_m_sq": 2.6567543773843294,
+      "net_site_eui_gj_per_m_sq": 2.6567199707031253,
+      "energy_principal_heating_source": "Natural Gas",
+      "energy_peak_electric_w_per_m_sq": 66.677218037758,
+      "energy_peak_natural_gas_w_per_m_sq": 411.4764941797907,
+      "heating_peak_w_per_m_sq": 401.1088966056931,
+      "cooling_peak_w_per_m_sq": 45.010408515112985,
+      "energy_peak_water_systems_w_per_m_sq": 15.022615785178031,
+      "energy_peak_electric_w_per_m_sq_winter": 21.86089555541118,
+      "energy_peak_electric_heating_w_per_m_sq_winter": 0,
+      "energy_peak_electric_water_systems_w_per_m_sq_winter": 0,
+      "cost_utility_neb_total_cost_per_m_sq": 41.04138902474811,
+      "cost_utility_ghg_total_kg_per_m_sq": 109.2952847211294,
+      "cost_utility_neb_natural gas_cost_per_m_sq": 13.860638951384132,
+      "cost_utility_ghg_natural gas_kg_per_m_sq": 105.6395215726733,
+      "cost_utility_neb_electricity_cost_per_m_sq": 27.180750073363985,
+      "cost_utility_ghg_electricity_kg_per_m_sq": 3.655763148456096,
+      "cost_utility_neb_oil_cost_per_m_sq": 0.0,
+      "cost_utility_ghg_oil_kg_per_m_sq": 0.0,
+      "unmet_hours_cooling": 76.5,
+      "unmet_hours_heating": 0.0,
+      "unmet_hours_cooling_during_occupied": 64.5,
+      "unmet_hours_heating_during_occupied": 0.0,
+      "airloops_total_outdoor_air_mechanical_ventilation_m3": 57355091.25,
+      "airloops_total_outdoor_air_natural_ventilation_m3": 0.0,
+      "airloops_total_outdoor_air_mechanical_ventilation_ach_1_per_hr": 2.711510624976208,
+      "airloops_total_outdoor_air_natural_ventilation_ach_1_per_hr": 0.0,
+      "airloops_total_outdoor_air_mechanical_ventilation_flow_per_conditioned_floor_area_m3_per_s_m2": 0.0035580906050031035,
+      "airloops_total_outdoor_air_natural_ventilation_flow_per_conditioned_floor_area_m3_per_s_m2": 0.0,
+      "airloops_total_outdoor_air_mechanical_ventilation_flow_per_exterior_area_m3_per_s_m2": 0.002151760309931107,
+      "airloops_total_outdoor_air_natural_ventilation_flow_per_exterior_area_m3_per_s_m2": 0.0,
+      "zones_total_outdoor_air_mechanical_ventilation_m3": 57355091.25,
+      "zones_total_outdoor_air_natural_ventilation_m3": 0.0,
+      "zones_total_outdoor_air_infiltration_m3": 554507.84375,
+      "zones_total_outdoor_air_mechanical_ventilation_ach_1_per_hr": 2.711510624976208,
+      "zones_total_outdoor_air_natural_ventilation_ach_1_per_hr": 0.0,
+      "zones_total_outdoor_air_infiltration_ach_1_per_hr": 0.02621482900980952,
+      "zones_total_outdoor_air_mechanical_ventilation_flow_per_conditioned_floor_area_m3_per_s_m2": 0.0035580906050031035,
+      "zones_total_outdoor_air_natural_ventilation_flow_per_conditioned_floor_area_m3_per_s_m2": 0.0,
+      "zones_total_outdoor_air_infiltration_flow_per_conditioned_floor_area_m3_per_s_m2": 0.000034399546862326785,
+      "zones_total_outdoor_air_mechanical_ventilation_flow_per_exterior_area_m3_per_s_m2": 0.002151760309931107,
+      "zones_total_outdoor_air_natural_ventilation_flow_per_exterior_area_m3_per_s_m2": 0.0,
+      "zones_total_outdoor_air_infiltration_flow_per_exterior_area_m3_per_s_m2": 0.000020803174464947433,
+      "envelope_exterior_surface_table": [
+        {
+          "name": "DINING_WALL_EAST_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 20.05,
+          "area_of_one_opening_m2": 20.05,
+          "area_of_multiplied_openings_m2": 20.05,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "DINING_WALL_EAST",
+          "azimuth_deg": 90.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "E",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "DINING_WALL_SOUTH_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 27.57,
+          "area_of_one_opening_m2": 27.57,
+          "area_of_multiplied_openings_m2": 27.57,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "DINING_WALL_SOUTH",
+          "azimuth_deg": 180.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "S",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "DINING_WALL_WEST_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 20.05,
+          "area_of_one_opening_m2": 20.05,
+          "area_of_multiplied_openings_m2": 20.05,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "DINING_WALL_WEST",
+          "azimuth_deg": 270.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "W",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "KITCHEN_WALL_EAST_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 7.52,
+          "area_of_one_opening_m2": 7.52,
+          "area_of_multiplied_openings_m2": 7.52,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "KITCHEN_WALL_EAST",
+          "azimuth_deg": 90.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "E",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "KITCHEN_WALL_NORTH_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 27.57,
+          "area_of_one_opening_m2": 27.57,
+          "area_of_multiplied_openings_m2": 27.57,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "KITCHEN_WALL_NORTH",
+          "tilt_deg": 90.0,
+          "cardinal_direction": "N",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "KITCHEN_WALL_WEST_FIXEDWINDOW",
+          "construction": "BTAP-EXT-FIXEDWINDOW:U=0.220 SHGC=0.600",
+          "glass_area_m2": 7.52,
+          "area_of_one_opening_m2": 7.52,
+          "area_of_multiplied_openings_m2": 7.52,
+          "glass_u-factor_W/m2-K": 2.201,
+          "glass_shgc": 0.601,
+          "glass_visible_transmittance": 0.211,
+          "shade_control": "No",
+          "parent_surface": "KITCHEN_WALL_WEST",
+          "azimuth_deg": 270.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "W",
+          "os_type": "FixedWindow",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "EAST-ROOF",
+          "construction": "BTAP-EXT-ROOF-METAL:U-0.183",
+          "zone": "ALL_ST=- UNDEFINED -_FL=BUILDING STORY 2_SCH=A",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.179,
+          "u-factor_no_film_W/m2-K": 0.183,
+          "gross_area_m2": 224.5,
+          "net_area_m2": 224.5,
+          "azimuth_deg": 90.0,
+          "tilt_deg": 18.44,
+          "os_type": "RoofCeiling",
+          "boundary_condition": "Outdoors",
+          "space_name": "attic"
+        },
+        {
+          "name": "NORTH-ROOF",
+          "construction": "BTAP-EXT-ROOF-METAL:U-0.183",
+          "zone": "ALL_ST=- UNDEFINED -_FL=BUILDING STORY 2_SCH=A",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.179,
+          "u-factor_no_film_W/m2-K": 0.183,
+          "gross_area_m2": 60.26,
+          "net_area_m2": 60.26,
+          "tilt_deg": 45.0,
+          "os_type": "RoofCeiling",
+          "boundary_condition": "Outdoors",
+          "space_name": "attic"
+        },
+        {
+          "name": "SOUTH-ROOF",
+          "construction": "BTAP-EXT-ROOF-METAL:U-0.183",
+          "zone": "ALL_ST=- UNDEFINED -_FL=BUILDING STORY 2_SCH=A",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.179,
+          "u-factor_no_film_W/m2-K": 0.183,
+          "gross_area_m2": 60.26,
+          "net_area_m2": 60.26,
+          "azimuth_deg": 180.0,
+          "tilt_deg": 45.0,
+          "os_type": "RoofCeiling",
+          "boundary_condition": "Outdoors",
+          "space_name": "attic"
+        },
+        {
+          "name": "WEST-ROOF",
+          "construction": "BTAP-EXT-ROOF-METAL:U-0.183",
+          "zone": "ALL_ST=- UNDEFINED -_FL=BUILDING STORY 2_SCH=A",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.179,
+          "u-factor_no_film_W/m2-K": 0.183,
+          "gross_area_m2": 224.5,
+          "net_area_m2": 224.5,
+          "azimuth_deg": 270.0,
+          "tilt_deg": 18.44,
+          "os_type": "RoofCeiling",
+          "boundary_condition": "Outdoors",
+          "space_name": "attic"
+        },
+        {
+          "name": "DINING_WALL_EAST",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 50.13,
+          "net_area_m2": 30.08,
+          "azimuth_deg": 90.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "E",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "DINING_WALL_SOUTH",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 68.93,
+          "net_area_m2": 41.36,
+          "azimuth_deg": 180.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "S",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "DINING_WALL_WEST",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 50.13,
+          "net_area_m2": 30.08,
+          "azimuth_deg": 270.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "W",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Dining"
+        },
+        {
+          "name": "DINING_FLOOR",
+          "construction": "BTAP-GRND-FLOOR-MASS:U-0.757_STD",
+          "zone": "ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.674,
+          "u-factor_no_film_W/m2-K": 0.757,
+          "gross_area_m2": 371.75,
+          "net_area_m2": 371.75,
+          "tilt_deg": 180.0,
+          "os_type": "Floor",
+          "boundary_condition": "Foundation",
+          "space_name": "Dining"
+        },
+        {
+          "name": "KITCHEN_WALL_EAST",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 18.8,
+          "net_area_m2": 11.28,
+          "azimuth_deg": 90.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "E",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "KITCHEN_WALL_NORTH",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 68.93,
+          "net_area_m2": 41.36,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "N",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "KITCHEN_WALL_WEST",
+          "construction": "BTAP-EXT-WALL-MASS:U-0.278",
+          "zone": "ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.267,
+          "u-factor_no_film_W/m2-K": 0.278,
+          "gross_area_m2": 18.8,
+          "net_area_m2": 11.28,
+          "azimuth_deg": 270.0,
+          "tilt_deg": 90.0,
+          "cardinal_direction": "W",
+          "os_type": "Wall",
+          "boundary_condition": "Outdoors",
+          "space_name": "Kitchen"
+        },
+        {
+          "name": "KITCHEN_FLOOR",
+          "construction": "BTAP-GRND-FLOOR-MASS:U-0.757_STD",
+          "zone": "ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B",
+          "reflectance": 0.3,
+          "u-factor_with_film_W/m2-K": 0.674,
+          "u-factor_no_film_W/m2-K": 0.757,
+          "gross_area_m2": 139.41,
+          "net_area_m2": 139.41,
+          "tilt_deg": 180.0,
+          "os_type": "Floor",
+          "boundary_condition": "Foundation",
+          "space_name": "Kitchen"
+        }
+      ],
+      "space_table": [
+        {
+          "thermal_zone_name": "ALL_ST=- undefined -_FL=Building Story 2_SCH=A",
+          "space_name": "attic",
+          "multiplier": 1,
+          "volume": 856.2589428564542,
+          "exterior_wall_area": 0.0,
+          "space_type_name": "- undefined -",
+          "breathing_zone_outdoor_airflow_vbz": -1,
+          "infiltration_flow_per_m_sq": 0.00025,
+          "floor_area_m2": 511.15331569,
+          "building_type": "Space Function",
+          "is_conditioned": "No",
+          "shw_peak_flow_rate_m_cu_per_s": 0,
+          "shw_peak_flow_rate_per_floor_area_m_cu_per_s_per_m_sq": 0
+        },
+        {
+          "thermal_zone_name": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+          "space_name": "Dining",
+          "multiplier": 1,
+          "volume": 1133.3855203587118,
+          "exterior_wall_area": 169.19041208,
+          "space_type_name": "Dining - family space",
+          "breathing_zone_outdoor_airflow_vbz": -1,
+          "infiltration_flow_per_m_sq": 0.00025,
+          "floor_area_m2": 371.74807149,
+          "building_type": "Space Function",
+          "is_conditioned": "Yes",
+          "shw_peak_flow_rate_m_cu_per_s": 0.0000239515451281452,
+          "shw_peak_flow_rate_per_floor_area_m_cu_per_s_per_m_sq": 0.00000006442950741383873,
+          "shw_watts_per_person": 119.86600070216548
+        },
+        {
+          "thermal_zone_name": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+          "space_name": "Kitchen",
+          "multiplier": 1,
+          "volume": 425.01870851696003,
+          "exterior_wall_area": 106.52720615999999,
+          "space_type_name": "Food preparation",
+          "breathing_zone_outdoor_airflow_vbz": -1,
+          "infiltration_flow_per_m_sq": 0.00025,
+          "floor_area_m2": 139.4052442,
+          "building_type": "Space Function",
+          "is_conditioned": "Yes",
+          "shw_peak_flow_rate_m_cu_per_s": 0.00000449574007408925,
+          "shw_peak_flow_rate_per_floor_area_m_cu_per_s_per_m_sq": 0.00000003224943293840053,
+          "shw_watts_per_person": 119.86600971356044
+        }
+      ],
+      "space_type_table": [
+        {
+          "name": "Space Function - undefined -",
+          "floor_m_sq": 0,
+          "percent_area": 0.0,
+          "occ_per_m_sq": 0.0,
+          "occ_schedule": null,
+          "lighting_w_per_m_sq": 0.0,
+          "electric_w_per_m_sq": 0.0,
+          "gas_w_per_m_sq": 0.0
+        },
+        {
+          "name": "Space Function Dining - family space",
+          "floor_m_sq": 371.74807149,
+          "percent_area": 72.73,
+          "occ_per_m_sq": 0.0999967277712333,
+          "occ_schedule": "NECB-B-Occupancy",
+          "lighting_w_per_m_sq": 9.59992009949298,
+          "electric_w_per_m_sq": 0.999991679497248,
+          "gas_w_per_m_sq": 0.0
+        },
+        {
+          "name": "Space Function Food preparation",
+          "floor_m_sq": 139.4052442,
+          "percent_area": 27.27,
+          "occ_per_m_sq": 0.0500521834377002,
+          "occ_schedule": "NECB-B-Occupancy",
+          "lighting_w_per_m_sq": 10.6999109501691,
+          "electric_w_per_m_sq": 9.99991677344466,
+          "gas_w_per_m_sq": 0.0
+        }
+      ],
+      "zone_equip_table": [
+        {
+          "air_loop_name": "None",
+          "thermal_zone_name": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+          "zone_equipment_name": "Air Terminal Single Duct Constant Volume No Reheat 1",
+          "type": "OpenStudio::Model::AirTerminalSingleDuctConstantVolumeNoReheat"
+        },
+        {
+          "air_loop_name": "None",
+          "thermal_zone_name": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+          "zone_equipment_name": "Zone HVAC Baseboard Convective Water 1",
+          "type": "OpenStudio::Model::ZoneHVACBaseboardConvectiveWater"
+        },
+        {
+          "air_loop_name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
+          "thermal_zone_name": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+          "zone_equipment_name": "Air Terminal Single Duct Constant Volume No Reheat 2",
+          "type": "OpenStudio::Model::AirTerminalSingleDuctConstantVolumeNoReheat"
+        },
+        {
+          "air_loop_name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
+          "thermal_zone_name": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+          "zone_equipment_name": "Zone HVAC Baseboard Convective Water 2",
+          "type": "OpenStudio::Model::ZoneHVACBaseboardConvectiveWater"
+        }
+      ],
+      "eplusout_err_table": [
+        {
+          "error_type": "warning",
+          "message": "ProcessScheduleInput: Schedule:Day:Interval=\"ECONOMIZER MAX OA FRACTION 100 PCT DEFAULT\", Blank Schedule Type Limits Name input -- will not be validated."
+        },
+        {
+          "error_type": "warning",
+          "message": "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 1\", Blank Schedule Type Limits Name input -- will not be validated."
+        },
+        {
+          "error_type": "warning",
+          "message": "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 2\", Blank Schedule Type Limits Name input -- will not be validated."
+        },
+        {
+          "error_type": "warning",
+          "message": "ProcessScheduleInput: Schedule:Year=\"ECONOMIZER MAX OA FRACTION 100 PCT\", Blank Schedule Type Limits Name input -- will not be validated."
+        },
+        {
+          "error_type": "warning",
+          "message": "CheckUsedConstructions: There are 30 nominally unused constructions in input.  For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;"
+        },
+        {
+          "error_type": "warning",
+          "message": "GetInternalHeatGains: People=\"SPACE FUNCTION DINING - FAMILY SPACE PEOPLE\" has comfort related schedules but no thermal comfort model selected.  If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort  thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.  To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input."
+        },
+        {
+          "error_type": "warning",
+          "message": "GetInternalHeatGains: People=\"SPACE FUNCTION FOOD PREPARATION PEOPLE\" has comfort related schedules but no thermal comfort model selected.  If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort  thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.  To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input."
+        },
+        {
+          "error_type": "warning",
+          "message": "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 1\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling."
+        },
+        {
+          "error_type": "warning",
+          "message": "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 2\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling."
+        },
+        {
+          "error_type": "warning",
+          "message": "GetDXCoils: Coil:Cooling:DX:SingleSpeed=\"COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER\", invalid  ...Part Load Fraction Correlation Curve Name = DXCOOL-NECB2011-REF-COOLPLFFPLR has out of range value.  ...Curve maximum must be <= 1.0, curve max at PLR = 0.99 is 1.015  ...Setting curve maximum to 1.0 and simulation continues."
+        },
+        {
+          "error_type": "warning",
+          "message": "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance."
+        },
+        {
+          "error_type": "warning",
+          "message": "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 1 33KBTU/HR 14.0SEER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance."
+        },
+        {
+          "error_type": "warning",
+          "message": "Output:Meter: invalid Key Name=\"DISTRICTHEATINGWATER:FACILITY\" - not found."
+        },
+        {
+          "error_type": "warning",
+          "message": "Output:Meter: invalid Key Name=\"DISTRICTCOOLING:FACILITY\" - not found."
+        },
+        {
+          "error_type": "warning",
+          "message": "Output:Meter:MeterFileOnly requested for \"Electricity:Facility\" (TimeStep), already on \"Output:Meter\". Will report to both eplusout.eso and eplusout.mtr"
+        },
+        {
+          "error_type": "warning",
+          "message": "CalcEquipmentFlowRates: \"DINING SERVICE WATER USE 0.3796GPM 140F\" - Target water temperature is greater than the hot water temperature by (1.40 C)   Environment=RUN PERIOD 1, at Simulation time=01/01 00:00 - 00:10  ...target water temperature     = 60.00 C  ...hot water temperature        = 58.60 C  ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules."
+        },
+        {
+          "error_type": "warning",
+          "message": "CalcEquipmentFlowRates: \"KITCHEN SERVICE WATER USE 0.0713GPM 140F\" - Target water temperature is greater than the hot water temperature by (1.40 C)   Environment=RUN PERIOD 1, at Simulation time=01/01 00:00 - 00:10  ...target water temperature     = 60.00 C  ...hot water temperature        = 58.60 C  ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules."
+        },
+        {
+          "error_type": "warning",
+          "message": "Processing Monthly Tabular Reports: Variable names not valid for this simulation  ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual variables."
+        },
+        {
+          "error_type": "warning",
+          "message": "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 1 33KBTU/HR 14.0SEER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -0.40 C.   ...Occurrence info = RUN PERIOD 1, 01/01 01:02 - 01:03  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 13.898 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs."
+        },
+        {
+          "error_type": "warning",
+          "message": "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 1 33KBTU/HR 14.0SEER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -0.87   ... Occurrence info = RUN PERIOD 1, 01/02 08:01 - 08:03  ... Operation at low ambient temperatures may require special performance curves."
+        },
+        {
+          "error_type": "warning",
+          "message": "Temperature out of range [-100. to 200.] (PsyPsatFnTemp)   Routine=PsyTwbFnTdbWPb, Environment=RUN PERIOD 1, at Simulation time=02/27 14:10 - 14:20   Input Temperature=-122.03"
+        },
+        {
+          "error_type": "warning",
+          "message": "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.98 C.   ...Occurrence info = RUN PERIOD 1, 04/17 14:50 - 15:00  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 20.400 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs."
+        },
+        {
+          "error_type": "warning",
+          "message": "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-ELECTRICITY\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
+        },
+        {
+          "error_type": "warning",
+          "message": "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-DISTILLATE OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
+        },
+        {
+          "error_type": "warning",
+          "message": "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-RESIDUAL OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
+        },
+        {
+          "error_type": "warning",
+          "message": "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-NATURAL GAS\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
+        },
+        {
+          "error_type": "warning",
+          "message": "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-COAL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
+        }
+      ],
+      "phius_annual_heating_demand_kwh_per_m_sq": 14.382922191952515,
+      "phius_annual_cooling_demand_kwh_per_m_sq": 16.86422208858488,
+      "phius_peak_heating_load_w_per_m_sq": -20.672034770775845,
+      "phius_peak_cooling_load_w_per_m_sq": 12.737418949418604,
+      "peak_heating_load_w_per_m_sq_necb": 401.1088966056931,
+      "peak_cooling_load_w_per_m_sq_necb": 45.010408515112985,
+      "phius_necb_meet_heating_demand": "False",
+      "phius_necb_meet_cooling_demand": "False",
+      "phius_necb_meet_heating_peak_load": "False",
+      "phius_necb_meet_cooling_peak_load": "False",
+      "bc_step_code_tedi_kwh_per_m_sq": 388.535634835359,
+      "bc_step_code_meui_kwh_per_m_sq": 665.8623657226563,
+      "cost_utility_oerd_electricity_peak_annual_cost_per_m_sq": 0.0,
+      "cost_utility_oerd_electricity_energy_annual_cost_per_m_sq": 0.0,
+      "env_outdoor_walls_average_conductance-w_per_m_sq_k": 0.278,
+      "env_outdoor_roofs_average_conductance-w_per_m_sq_k": 0.183,
+      "env_outdoor_floors_average_conductance-w_per_m_sq_k": null,
+      "env_ground_walls_average_conductance-w_per_m_sq_k": null,
+      "env_ground_roofs_average_conductance-w_per_m_sq_k": null,
+      "env_ground_floors_average_conductance-w_per_m_sq_k": 0.757,
+      "env_outdoor_windows_average_conductance-w_per_m_sq_k": 2.2,
+      "env_outdoor_doors_average_conductance-w_per_m_sq_k": null,
+      "env_outdoor_overhead_doors_average_conductance-w_per_m_sq_k": null,
+      "env_skylights_average_conductance-w_per_m_sq_k": null,
+      "env_fdwr": 40.0,
+      "env_srr": 0.0
+    }
+  }
+}

@@ -1,4 +1,5 @@
 require 'csv'
+require 'json-schema'
 
 # This abstract class holds methods that many versions of ASHRAE 90.1 share.
 # If a method in this class is redefined by a subclass,
@@ -112,14 +113,38 @@ class ASHRAE901PRM < Standard
     return json_path
   end
 
+  def load_schemas
+    schemas = {}
+    schema_folder_path = File.expand_path('./userdata_json', __dir__)
+    Dir.glob(File.join(schema_folder_path, '*.json')).each do |file_path|
+      filename = File.basename(file_path)
+      schema = JSON.parse(File.read(file_path))
+      schemas[filename] = schema
+    end
+    schemas
+  end
+
   # Load user data from project folder into standards database data structure
   # Each user data object type is a new item in the @standards_data hash
   # @author Doug Maddox, PNNL
   # @param json_path [String path to folder containing json files
   def load_userdata_to_standards_database(json_path)
     files = Dir.glob("#{json_path}/*.json").select { |e| File.file? e }
+    # load json schema
+    schemas = load_schemas
     files.each do |file|
+      file_name = File.basename(file)
       data = JSON.parse(File.read(file))
+      # schema validation
+      begin
+        schema = schemas[file_name]
+        JSON::Validator.validate!(schema, data)
+      rescue JSON::Schema::ValidationError => e
+        puts "Validation error #{file_name} failed due to: #{e.message}"
+      rescue StandardError => e
+        puts "Error, cannot read the file. #{e.message}"
+      end
+
       data.each_pair do |key, objs|
         # Override the template in inherited files to match the instantiated template
         if @standards_data[key].nil?
@@ -128,12 +153,40 @@ class ASHRAE901PRM < Standard
           OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Overriding #{key} with #{File.basename(file)}")
         end
         @standards_data[key] = objs
+
+        next if objs.empty?
+      end
+    end
+  end
+
+  # Convert user csv data raw value to appropriate type
+  def convert_value(hash_value)
+    hash_value.transform_values do |value|
+      next nil if value.nil? || value.strip.empty?
+
+      # Trim white space and convert to lower case
+      value = value.strip
+      lower_case_value = value.downcase
+
+      # Convert types
+      case lower_case_value
+      when /^\d+$/
+        lower_case_value.to_i
+      when /^\d+\.\d+$/
+        lower_case_value.to_f
+      when 'true'
+        true
+      when 'false'
+        false
+      else
+        # preserve the case
+        value
       end
     end
   end
 
   # Perform user data preprocessing
-  # @param [CSV::ROW] row 2D array for each row.
+  # @param [CSV::ROW] row 2D array for each row. The row is limited to 2 indexes, representing key and value.
   def user_data_preprocessor(row)
     new_array = []
 
@@ -142,8 +195,8 @@ class ASHRAE901PRM < Standard
       new_array << sub_array.collect { |e| e ? e.strip : e }
     end
     # @todo Future expansion can added to here.
-    # Convert the 2d array to hash
-    return new_array.to_h
+    # Convert the 2d array to hash and return
+    convert_value(new_array.to_h)
   end
 
   # Perform user data validation

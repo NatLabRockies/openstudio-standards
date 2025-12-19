@@ -1,0 +1,69 @@
+{
+  "title": "ASHRAE 90.1 PRM Building Type for Service Water Heating User Data",
+  "definitions": {
+    "UserDataWaterUseEquipmentData": {
+      "type": "object",
+      "properties": {
+        "userdata_wateruse_equipment": {
+          "type": "array",
+          "description": "List of userdata_wateruse_equipment rows",
+          "items": {
+            "$ref": "#/definitions/UserDataWaterUseEquipment"
+          }
+        }
+      }
+    },
+    "UserDataWaterUseEquipment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the building type object."
+        },
+        "building_type_swh": {
+          "type": "string",
+          "enum": [
+            "All others",
+            "Automotive facility",
+            "Convenience store",
+            "Convention center",
+            "Courthouse",
+            "Dining: Bar lounge/leisure",
+            "Dining: Cafeteria/fast food",
+            "Dining: Family",
+            "Dormitory",
+            "Exercise center",
+            "Fire station",
+            "Grocery store",
+            "Gymnasium",
+            "Health-care clinic",
+            "Hospital and outpatient surgery center",
+            "Hotel",
+            "Library",
+            "Manufacturing facility",
+            "Motel",
+            "Motion picture theater",
+            "Multifamily",
+            "Museum",
+            "Office",
+            "Parking garage",
+            "Penitentiary",
+            "Performing arts theater",
+            "Police station",
+            "Post office",
+            "Religious facility",
+            "Retail",
+            "School/university",
+            "Sports arena",
+            "Town hall",
+            "Transportation",
+            "Warehouse",
+            "Workshop"
+          ]
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  }
+}

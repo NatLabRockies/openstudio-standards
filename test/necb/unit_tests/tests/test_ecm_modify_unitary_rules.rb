@@ -22,7 +22,7 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
     save_intermediate_models = false
 
     # Generate the osm files for all relevant cases to generate the test data for system 3.
-    boiler_fueltype = 'NaturalGas'
+    fuel_type = 'NaturalGas'
     baseboard_type = 'Hot Water'
     unitary_heating_types = ['Electric Resistance', 'All Other']
     unitary_ecms = ['Carrier WeatherExpert','Lennox Model L Ultra High Efficiency']
@@ -96,7 +96,7 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
 
               hw_loop = OpenStudio::Model::PlantLoop.new(model)
               always_on = model.alwaysOnDiscreteSchedule
-              standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, always_on)
+              standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
               case speed
               when 'single'
                 standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(model: model,
@@ -115,7 +115,7 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
               # Run sizing.
               sql_db_vars_map = {}
               ecm.modify_unitary_cop(model: model, unitary_cop: "#{unitary_ecm}", sizing_done: false, sql_db_vars_map: sql_db_vars_map)
-              run_sizing(model: model, template: template, test_name: name, sql_db_vars_map: sql_db_vars_map, save_model_versions: save_intermediate_models)
+              run_sizing(model: model, template: template, save_model_versions: save_intermediate_models, output_dir: output_folder)
               ecm.modify_unitary_cop(model: model, unitary_cop: "#{unitary_ecm}", sizing_done: true, sql_db_vars_map: sql_db_vars_map)
 
               case speed
@@ -134,10 +134,10 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
             for int in 0..heating_type_cap[heating_type].size - 1
               output_line_text += "#{heating_type},#{heating_type_min_cap[heating_type][int]},#{heating_type_max_cap[heating_type][int]},"
               if efficiency_type[heating_type][int] == 'Seasonal Energy Efficiency Ratio (SEER)'
-                actual_unitary_eff[heating_type][int] = (standard.cop_no_fan_to_seer(actual_unitary_cop[heating_type][int].to_f) + 0.001).round(2)
+                actual_unitary_eff[heating_type][int] = (OpenstudioStandards::HVAC.cop_no_fan_to_seer(actual_unitary_cop[heating_type][int].to_f) + 0.001).round(2)
                 output_line_text += "#{actual_unitary_eff[heating_type][int]},,\n"
               elsif efficiency_type[heating_type][int] == 'Energy Efficiency Ratio (EER)'
-                actual_unitary_eff[heating_type][int] = (standard.cop_no_fan_to_eer(actual_unitary_cop[heating_type][int].to_f) + 0.001).round(2)
+                actual_unitary_eff[heating_type][int] = (OpenstudioStandards::HVAC.cop_no_fan_to_eer(actual_unitary_cop[heating_type][int].to_f) + 0.001).round(2)
                 output_line_text += ",#{actual_unitary_eff[heating_type][int]},\n"
               elsif efficiency_type[heating_type][int] == 'Coefficient of Performance (COP)'
                 actual_unitary_eff[heating_type][int] = sprintf('%.2f', actual_unitary_cop[heating_type][int].to_f)
@@ -148,7 +148,7 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
           end
 
           # Write actual results file
-          test_result_file = File.join(@test_results_folder, "ecm_modify_unitary_#{unitary_ecm.downcase.gsub(' ','_')}_test_results.csv")
+          test_result_file = File.join(@test_results_folder, "ecm_modify_unitary_#{unitary_ecm.downcase.gsub(' ','_')}-test_results.csv")
           File.open(test_result_file, 'w') {|f| f.write(unitary_res_file_output_text.chomp)}
           # Test that the values are correct by doing a file compare.
           b_result = FileUtils.compare_file(unitary_expected_result_file, test_result_file)

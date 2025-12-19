@@ -267,12 +267,12 @@ class Standard
         htg_dsgn_sup_air_temp = system['heating_design_supply_air_temperature'] || 70.0
 
         # for boolean input, this makes sure we get the correct input translation
-        if system['include_exhaust_fan'].nil? || true?(system['include_exhaust_fan'])
+        if system['include_exhaust_fan'].nil? || (system['include_exhaust_fan'].to_s.downcase == 'true')
           include_exhaust_fan = true
         else
           include_exhaust_fan = false
         end
-        if true?(system['demand_control_ventilation'])
+        if (system['demand_control_ventilation'].to_s.downcase == 'true')
           demand_control_ventilation = true
         else
           demand_control_ventilation = false
@@ -421,7 +421,7 @@ class Standard
                                 system['condenser_fan_pwr_curve_name'],
                                 thermal_zones[0])
 
-      # When multiple cases and walk-ins asssigned to a system
+      # When multiple cases and walk-ins assigned to a system
       when 'Refrigeration_system'
         model_add_refrigeration_system(model,
                                        system['compressor_type'],

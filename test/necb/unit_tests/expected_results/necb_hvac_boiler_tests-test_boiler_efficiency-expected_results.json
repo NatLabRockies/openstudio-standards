@@ -1,0 +1,328 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2011 p3 Table 5.2.12.1",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2011_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2011_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.85
+      },
+      "case-2": {
+        "name": "NECB2011_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.83
+      },
+      "case-3": {
+        "name": "NECB2011_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.833
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2011_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.847
+      },
+      "case-2": {
+        "name": "NECB2011_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.834
+      },
+      "case-3": {
+        "name": "NECB2011_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.858
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2015_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2015_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.85
+      },
+      "case-2": {
+        "name": "NECB2015_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.83
+      },
+      "case-3": {
+        "name": "NECB2015_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.833
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2015_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.847
+      },
+      "case-2": {
+        "name": "NECB2015_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.834
+      },
+      "case-3": {
+        "name": "NECB2015_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.858
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2017_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2017_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.85
+      },
+      "case-2": {
+        "name": "NECB2017_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.83
+      },
+      "case-3": {
+        "name": "NECB2017_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.833
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2017_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.847
+      },
+      "case-2": {
+        "name": "NECB2017_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.834
+      },
+      "case-3": {
+        "name": "NECB2017_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.858
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2020_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2020_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.9
+      },
+      "case-2": {
+        "name": "NECB2020_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.9
+      },
+      "case-3": {
+        "name": "NECB2020_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.9
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "NECB2020_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.86
+      },
+      "case-2": {
+        "name": "NECB2020_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.87
+      },
+      "case-3": {
+        "name": "NECB2020_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.88
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAPPRE1980_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAPPRE1980_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-2": {
+        "name": "BTAPPRE1980_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-3": {
+        "name": "BTAPPRE1980_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.807
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAPPRE1980_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-2": {
+        "name": "BTAPPRE1980_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-3": {
+        "name": "BTAPPRE1980_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.807
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "fuel_type",
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAP1980TO2010_sys1_Boiler-Electricity_cap-10kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 10.0,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 1.0
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAP1980TO2010_sys1_Boiler-NaturalGas_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-2": {
+        "name": "BTAP1980TO2010_sys1_Boiler-NaturalGas_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-3": {
+        "name": "BTAP1980TO2010_sys1_Boiler-NaturalGas_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.807
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "name": "BTAP1980TO2010_sys1_Boiler-FuelOilNo2_cap-43kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 43.96,
+        "efficiency_metric": "annual fuel utilization efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-2": {
+        "name": "BTAP1980TO2010_sys1_Boiler-FuelOilNo2_cap-410kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 410.3,
+        "efficiency_metric": "thermal efficiency",
+        "efficiency_value": 0.8
+      },
+      "case-3": {
+        "name": "BTAP1980TO2010_sys1_Boiler-FuelOilNo2_cap-2510kW_MAU-true_MauCoil-Hot Water_Baseboard-Hot Water",
+        "tested_capacity_kW": 2510,
+        "efficiency_metric": "combustion efficiency",
+        "efficiency_value": 0.807
+      }
+    }
+  }
+}

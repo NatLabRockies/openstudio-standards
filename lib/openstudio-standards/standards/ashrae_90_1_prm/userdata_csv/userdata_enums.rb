@@ -21,13 +21,28 @@ class UserData
   # @param another [String] another UserDataType enum
   # @return [Boolean] if the two enums or strings are the same
   def self.compare(one, another)
-    return one && another && !one.empty? && !another.empty? && one.downcase.strip == another.downcase.strip
+    return false if one.nil? || another.nil?
+
+    one_value = boolean_to_string(one)
+    another_value = boolean_to_string(another)
+
+    if one_value.is_a?(String) && another_value.is_a?(String)
+      return one_value.strip.downcase == another_value.strip.downcase
+    else
+      return one_value == another_value
+    end
+  end
+
+  def self.boolean_to_string(value)
+    return value if value.nil? || value.is_a?(Numeric) # For consistency in further comparison
+
+    value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value.to_s : value
   end
 end
 
 class UserDataBoolean < UserData
-  TRUE = 'true'.freeze
-  FALSE = 'false'.freeze
+  TRUE = true
+  FALSE = false
 end
 
 class UserDataHVACBldgType < UserData

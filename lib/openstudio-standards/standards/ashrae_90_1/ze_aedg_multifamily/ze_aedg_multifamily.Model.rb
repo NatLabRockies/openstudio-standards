@@ -80,4 +80,15 @@ class ZEAEDGMultifamily < ASHRAE901
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.ze_aedg_multifamily.Model', "Finished applying HVAC efficiency standards for #{template} template.")
   end
+
+  # Default 5-sided (exterior walls and roof) airtightness design value (m^3/h-m^2) from a building pressurization test at 75 Pascals.
+  def default_airtightness
+    airtightness_value = 5.0
+    return airtightness_value
+  end
+
+  # Buildings built to this standard are assumed to have an air barrier
+  def default_air_barrier
+    return true
+  end
 end

@@ -1,6 +1,6 @@
 require_relative '../../helpers/minitest_helper'
 
-class TestCreateWaterHeater < Minitest::Test
+class TestServiceWaterHeatingCreateWaterHeater < Minitest::Test
   def setup
     @swh = OpenstudioStandards::ServiceWaterHeating
 
@@ -11,8 +11,7 @@ class TestCreateWaterHeater < Minitest::Test
     @model = @std.safe_load_model("#{File.dirname(__FILE__)}/../../os_stds_methods/models/QuickServiceRestaurant_2A_2010.osm")
 
     # create output directory
-    output_dir = "#{__dir__}/output"
-    FileUtils.mkdir output_dir unless Dir.exist? output_dir
+    FileUtils.mkdir_p "#{__dir__}/output"
   end
 
   def test_create_water_heater

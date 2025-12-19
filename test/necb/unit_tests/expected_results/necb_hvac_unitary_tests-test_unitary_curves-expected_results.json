@@ -1,0 +1,363 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 9.7EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 9.08EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 9.08EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 10.8EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  },
+  "BTAPPRE1980": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 7.7726EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  },
+  "BTAP1980TO2010": {
+    "VarType": "fuel_type",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "CoilCoolingDXSingleSpeed_dx 181kBtu/hr 7.7726EER": {
+          "DXCOOL-NECB2011-REF-CAPFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "8.67905E-01",
+            "coefficient2x": "1.42459E-02",
+            "coefficient3xPOW2": "5.54360E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "-7.55750E-03",
+            "coefficient5yPOW2": "3.30000E-05",
+            "coefficient6xTIMESY": "-1.91800E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFT": {
+            "curve_type": "biquadratic",
+            "coefficient1Constant": "1.14171E-01",
+            "coefficient2x": "2.81822E-02",
+            "coefficient3xPOW2": "-4.19900E-04",
+            "minimumValueofx": "1.30000E+01",
+            "maximumValueofx": "2.40000E+01",
+            "coefficient4y": "2.14108E-02",
+            "coefficient5yPOW2": "1.61028E-04",
+            "coefficient6xTIMESY": "-6.79104E-04",
+            "minimumValueofy": "2.40000E+01",
+            "maximumValueofy": "4.60000E+01"
+          },
+          "DXCOOL-NECB2011-REF-CAPFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "8.00000E-01",
+            "coefficient2x": "2.00000E-01",
+            "coefficient3xPOW2": "0.00000E+00",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLEIRFFLOW": {
+            "curve_type": "quadratic",
+            "coefficient1Constant": "1.15520E+00",
+            "coefficient2x": "-1.80800E-01",
+            "coefficient3xPOW2": "2.56000E-02",
+            "minimumValueofx": "5.00000E-01",
+            "maximumValueofx": "1.50000E+00"
+          },
+          "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+            "curve_type": "cubic",
+            "coefficient1Constant": "2.77000E-02",
+            "coefficient2x": "4.91510E+00",
+            "coefficient3xPOW2": "-8.18400E+00",
+            "minimumValueofx": "7.00000E-01",
+            "maximumValueofx": "1.00000E+00"
+          }
+        }
+      }
+    }
+  }
+}

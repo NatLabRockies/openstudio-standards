@@ -1,0 +1,127 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "TestCase",
+    "Reference": "NECB 2011 p3: 8.4.4.19.(4); 8.4.4.18.",
+    "small": {
+      "Sys6 Return Fan": {
+        "fan_power_kW": 0.8334,
+        "pressure_rise_Pa": 250.0,
+        "max_flow_L_s": 1000.0,
+        "min_flow_fraction": 0.68,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.46,
+        "total_efficiency": 0.3,
+        "power_coefficients": [
+          -2.4176,
+          9.587,
+          -11.559,
+          5.401
+        ]
+      },
+      "Sys6 Supply Fan": {
+        "fan_power_kW": 1.818,
+        "pressure_rise_Pa": 1000.0,
+        "max_flow_L_s": 1000.0,
+        "min_flow_fraction": 0.68,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.85,
+        "total_efficiency": 0.55,
+        "power_coefficients": [
+          -2.4176,
+          9.587,
+          -11.559,
+          5.401
+        ]
+      },
+      "system": {
+        "power_demand_per_flow": 2.65
+      },
+      "sys_6|mixed|shr>none|sh>c-e|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv|": {
+        "OA_system": "Air Loop HVAC Outdoor Air System 1",
+        "OC_control": "Controller Outdoor Air 1",
+        "economizer": "DifferentialEnthalpy"
+      }
+    },
+    "medium": {
+      "Sys6 Return Fan": {
+        "fan_power_kW": 8.334,
+        "pressure_rise_Pa": 250.0,
+        "max_flow_L_s": 10000,
+        "min_flow_fraction": 0.5,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.46,
+        "total_efficiency": 0.3,
+        "power_coefficients": [
+          -4.1457,
+          16.8,
+          -19.471,
+          7.849
+        ]
+      },
+      "Sys6 Supply Fan": {
+        "fan_power_kW": 18.18,
+        "pressure_rise_Pa": 1000.0,
+        "max_flow_L_s": 10000,
+        "min_flow_fraction": 0.5,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.85,
+        "total_efficiency": 0.55,
+        "power_coefficients": [
+          -4.1457,
+          16.8,
+          -19.471,
+          7.849
+        ]
+      },
+      "system": {
+        "power_demand_per_flow": 2.65
+      },
+      "sys_6|mixed|shr>none|sh>c-e|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv|": {
+        "OA_system": "Air Loop HVAC Outdoor Air System 1",
+        "OC_control": "Controller Outdoor Air 1",
+        "economizer": "DifferentialEnthalpy"
+      }
+    },
+    "large": {
+      "Sys6 Return Fan": {
+        "fan_power_kW": 33.34,
+        "pressure_rise_Pa": 250.0,
+        "max_flow_L_s": 40000,
+        "min_flow_fraction": 0.22,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.46,
+        "total_efficiency": 0.3,
+        "power_coefficients": [
+          -0.3477,
+          4.098,
+          -5.0024,
+          2.268
+        ]
+      },
+      "Sys6 Supply Fan": {
+        "fan_power_kW": 72.73,
+        "pressure_rise_Pa": 1000.0,
+        "max_flow_L_s": 40000,
+        "min_flow_fraction": 0.22,
+        "power_min_flow_rate": 0,
+        "motor_efficiency": 0.85,
+        "total_efficiency": 0.55,
+        "power_coefficients": [
+          -0.3477,
+          4.098,
+          -5.0024,
+          2.268
+        ]
+      },
+      "system": {
+        "power_demand_per_flow": 2.65
+      },
+      "sys_6|mixed|shr>none|sh>c-e|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv|": {
+        "OA_system": "Air Loop HVAC Outdoor Air System 1",
+        "OC_control": "Controller Outdoor Air 1",
+        "economizer": "DifferentialEnthalpy"
+      }
+    }
+  }
+}

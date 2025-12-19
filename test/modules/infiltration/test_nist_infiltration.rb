@@ -118,6 +118,12 @@ class TestInfiltration < Minitest::Test
     result = @infiltration.model_set_nist_infiltration(model,
                                                        hvac_schedule_name: 'Complex HVAC Schedule' )
     assert(result)
+
+    # test climate zone 0
+    climate_zone = 'ASHRAE 169-2013-0A'
+    OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+    result = @infiltration.model_set_nist_infiltration(model)
+    assert(result)
   end
 
   def test_model_set_nist_infiltration_schedules

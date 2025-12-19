@@ -1,0 +1,40 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "fuel_type",
+    "Reference": "NECB 2011 p3 8.4.4.22 (maybe)",
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "Secondary Boiler 0kBtu/hr 0.85 AFUE": {
+          "boiler_name": "Secondary Boiler 0kBtu/hr 0.85 AFUE",
+          "boiler_eff": 0.85,
+          "eff_curve_name": "BOILER-EFFFPLR-NECB2011",
+          "eff_curve_type": "OS_Curve_Cubic",
+          "curve_coefficients": [
+            0.3831,
+            2.0567,
+            -2.6469,
+            1.2148,
+            0.0,
+            1.0
+          ]
+        },
+        "Primary Boiler 313kBtu/hr 0.83 Thermal Eff": {
+          "boiler_name": "Primary Boiler 313kBtu/hr 0.83 Thermal Eff",
+          "boiler_eff": 0.83,
+          "eff_curve_name": "BOILER-EFFFPLR-NECB2011",
+          "eff_curve_type": "OS_Curve_Cubic",
+          "curve_coefficients": [
+            0.3831,
+            2.0567,
+            -2.6469,
+            1.2148,
+            0.0,
+            1.0
+          ]
+        }
+      }
+    }
+  }
+}

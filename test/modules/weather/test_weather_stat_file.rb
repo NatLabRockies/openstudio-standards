@@ -38,8 +38,29 @@ class TestWeatherStatFile < Minitest::Test
 
   def test_load_sparse_stat_file
     model = OpenStudio::Model::Model.new
-    stat_file_path = File.join(File.dirname(__FILE__),'data','G0100010.stat')
+    stat_file_path = File.join(File.dirname(__FILE__), 'data', 'G0100010.stat')
     assert(File.exist?(stat_file_path))
     stat_file = OpenstudioStandards::Weather::StatFile.new(stat_file_path)
+  end
+
+  def test_load_stat_file_no_dry_period
+    model = OpenStudio::Model::Model.new
+    stat_file_path = File.join(File.dirname(__FILE__), 'data', 'USA_HI_Keahole-Kona.Intl.AP.911975_TMY3.stat')
+    assert(File.exist?(stat_file_path))
+    stat_file = OpenstudioStandards::Weather::StatFile.new(stat_file_path)
+  end
+
+  def test_load_stat_file_climateonebuilding
+    model = OpenStudio::Model::Model.new
+    stat_file_path = File.join(File.dirname(__FILE__), 'data', 'USA_CO_Denver.Intl.AP.725650_TMYx.2009-2023.stat')
+    assert(File.exist?(stat_file_path))
+    stat_file = OpenstudioStandards::Weather::StatFile.new(stat_file_path)
+    assert_equal(15, stat_file.heating_design_info.size)
+    assert_equal([12.0, -17.9, -14.6, -22.0, 0.6, -11.2, -19.6, 0.8,
+                  -6.5, 13.3, 5.7, 11.8, 2.7, 3.4, 230.0], stat_file.heating_design_info)
+
+    assert_equal(16, stat_file.extremes_design_info.size)
+    assert_equal([12.1, 10.6, 8.9, nil, -23.5, 37.4, 3.1, 1.1, -25.8,
+                  38.2, -27.6, 38.9, -29.3, 39.5, -31.6, 40.3], stat_file.extremes_design_info)
   end
 end

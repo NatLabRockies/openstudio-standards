@@ -1,6 +1,6 @@
 require_relative '../../helpers/minitest_helper'
 
-class TestCreateWaterUse < Minitest::Test
+class TestServiceWaterHeatingCreatePipingLosses < Minitest::Test
   def setup
     @swh = OpenstudioStandards::ServiceWaterHeating
 
@@ -9,6 +9,9 @@ class TestCreateWaterUse < Minitest::Test
     @climate_zone = 'ASHRAE 169-2013-2A'
     @std = Standard.build(template)
     @model = @std.safe_load_model("#{File.dirname(__FILE__)}/../../os_stds_methods/models/QuickServiceRestaurant_2A_2010.osm")
+
+    # create output directory
+    FileUtils.mkdir_p "#{__dir__}/output"
   end
 
   def test_create_piping_losses_defaults

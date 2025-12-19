@@ -5,9 +5,22 @@ class BTAPData
   attr_accessor :sqlite_file
   attr_accessor :btap_data
 
-  def initialize(model:, runner: nil, cost_result:, baseline_cost_equipment_total_cost_per_m_sq: -1.0,
-                 baseline_cost_utility_neb_total_cost_per_m_sq: -1.0, baseline_energy_eui_total_gj_per_m_sq: -1.0, qaqc:,
-                 npv_start_year:, npv_end_year:, npv_discount_rate:)
+  def initialize(
+    model:, 
+    runner: nil, 
+    cost_result:, 
+    carbon_result:,
+    baseline_cost_equipment_total_cost_per_m_sq: -1.0,
+    baseline_cost_utility_neb_total_cost_per_m_sq: -1.0, 
+    baseline_energy_eui_total_gj_per_m_sq: -1.0, 
+    qaqc:,
+    npv_start_year: 2022, 
+    npv_end_year: 2041, 
+    npv_discount_rate: 0.03, 
+    npv_discount_rate_carbon: 0.03, 
+    oerd_utility_pricing: nil,
+    utility_pricing_year: 2020)
+
     @model = model
     @error_warning = []
     # sets sql file.
@@ -17,7 +30,10 @@ class BTAPData
     @btap_data = {}
     @btap_results_version = 1.00
     @neb_prices_csv_file_name = File.join(__dir__, 'neb_end_use_prices.csv')
+    @neb_prices_csv_file_name = File.join(__dir__, 'utility_pricing_2025-02-20.csv') if oerd_utility_pricing.to_bool
     @necb_reference_runs_csv_file_name = File.join(__dir__, 'necb_reference_runs.csv')
+    @eccc_ghg_electricity = File.join(__dir__, 'eccc_electric_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for ECCC's emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions": https://data-donnees.az.ec.gc.ca/data/substances/monitor/canada-s-greenhouse-gas-emissions-projections/Current-Projections-Actuelles/Energy-Energie/AM%20Scenario%20AMS/Grid-O%26G-Intensities-Intensites-Reseau-Delectricite-P%26G?lang=en
+    @nir_ghg_gas = File.join(__dir__, 'nir_gas_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for Year 2022 of "Table A6.1–1 CO2 Emission Factors for Marketable Natural Gas" of National Inventory Report: https://data-donnees.az.ec.gc.ca/api/file?path=%2Fsubstances%2Fmonitor%2Fcanada-s-official-greenhouse-gas-inventory%2FD-Emission-Factors%2FEN_Annex6_Emission_Factors.pdf
 
     # Conditioned floor area is used so much. May as well make it a object variable.
     # setup the queries
@@ -49,7 +65,7 @@ class BTAPData
     @btap_data.merge!(service_water_heating_data)
     @btap_data.merge!(energy_eui_data(model))
     @btap_data.merge!(energy_peak_data)
-    @btap_data.merge!(utility(model))
+    @btap_data.merge!(utility(model: model, utility_pricing_year: utility_pricing_year))
     @btap_data.merge!(unmet_hours(model))
     @btap_data.merge!outdoor_air_data(model)
 
@@ -87,8 +103,10 @@ class BTAPData
     phius_performance_indicators(model)
     # The below method calculates energy performance indicators (i.e. TEDI and MEUI) as per BC Energy Step Code
     bc_energy_step_code_performance_indicators
+        # calculates annual peak electricity cost (dollar)
+    annual_peak_kW_per_m_sq = oerd_electricity_cost(model: model, utility_pricing_year: utility_pricing_year, oerd_utility_pricing: oerd_utility_pricing)
     # calculate net present value
-    net_present_value(npv_start_year, npv_end_year, npv_discount_rate) unless cost_result.nil?
+    net_present_value(npv_start_year: npv_start_year, npv_end_year: npv_end_year, npv_discount_rate: npv_discount_rate, npv_discount_rate_carbon: npv_discount_rate_carbon, oerd_utility_pricing: oerd_utility_pricing, annual_peak_kW_per_m_sq: annual_peak_kW_per_m_sq) unless cost_result.nil?
 
     measure_metrics(qaqc)
     @btap_data
@@ -155,8 +173,8 @@ class BTAPData
 
   def building_costing_data(cost_result)
     building_data = {}
-    building_data['cost_rs_means_prov'] = cost_result['rs_means_prov']
-    building_data['cost_rs_means_city'] = cost_result['rs_means_city']
+    building_data['cost_province_state'] = cost_result['province_state']
+    building_data['cost_city'] = cost_result['city']
     building_data['cost_equipment_envelope_total_cost_per_m_sq'] = (cost_result['totals']['envelope']) / @conditioned_floor_area_m_sq
     building_data['cost_equipment_thermal_bridging_total_cost_per_m_sq'] = (cost_result['totals']['thermal_bridging']) / @conditioned_floor_area_m_sq
     building_data['cost_equipment_lighting_total_cost_per_m_sq'] = (cost_result['totals']['lighting']) / @conditioned_floor_area_m_sq
@@ -171,34 +189,42 @@ class BTAPData
     return building_data
   end
 
-  def net_present_value(npv_start_year, npv_end_year, npv_discount_rate)
+  def net_present_value(npv_start_year: 2022, npv_end_year: 2041, npv_discount_rate: 0.03, npv_discount_rate_carbon: 0.03, oerd_utility_pricing: false, annual_peak_kW_per_m_sq: nil)
 
     # Find end year in the neb data
     neb_header = CSV.read(@neb_prices_csv_file_name, headers: true).headers
     neb_header.delete_if { |item| ["building_type", "province", "fuel_type"].include?(item) } # remove "building_type", "province", "fuel_type" from neb_header in order to have only years in neb_header
+    neb_header.delete_if { |item| ["rate_class", "units", "references", "links"].include?(item) } if oerd_utility_pricing # remove additional headers if the OERD data is used
     neb_header.map(&:to_f)  #convert years to float
     year_max = neb_header.max
 
     # Convert a string to a float
-    if npv_start_year.instance_of?(String) && npv_start_year != 'NECB_Default' && npv_start_year != 'none'
+    if npv_start_year.instance_of?(String) && npv_start_year != 'NECB_Default' && npv_start_year != 'none' && !npv_start_yeay.nil?
       npv_start_year = npv_start_year.to_f
     end
-    if npv_end_year.instance_of?(String) && npv_end_year != 'NECB_Default' && npv_end_year != 'none'
+    if npv_end_year.instance_of?(String) && npv_end_year != 'NECB_Default' && npv_end_year != 'none' && !npv_end_year.nil?
       npv_end_year = npv_end_year.to_f
     end
-    if npv_discount_rate.instance_of?(String) && npv_discount_rate != 'NECB_Default' && npv_discount_rate != 'none'
+    if npv_discount_rate.instance_of?(String) && npv_discount_rate != 'NECB_Default' && npv_discount_rate != 'none' && !npv_discount_rate.nil?
       npv_discount_rate = npv_discount_rate.to_f
     end
+    if npv_discount_rate_carbon.instance_of?(String) && npv_discount_rate_carbon != 'NECB_Default' && npv_discount_rate_carbon != 'none' && !npv_discount_rate_carbon.nil?
+      npv_discount_rate_carbon = npv_discount_rate_carbon.to_f
+    end
+
 
     # Set default npv_start_year as 2022, npv_end_year as 2041, npv_discount_rate as 3%
-    if npv_start_year == 'NECB_Default' || npv_start_year == nil || npv_start_year == 'none'
+    if npv_start_year == 'NECB_Default' || npv_start_year.nil? || npv_start_year == 'none'
       npv_start_year = 2022
     end
-    if npv_end_year == 'NECB_Default' || npv_end_year == nil || npv_end_year == 'none'
+    if npv_end_year == 'NECB_Default' || npv_end_year.nil? || npv_end_year == 'none'
       npv_end_year = 2041
     end
-    if npv_discount_rate == 'NECB_Default' || npv_discount_rate == nil || npv_discount_rate == 'none'
+    if npv_discount_rate == 'NECB_Default' || npv_discount_rate.nil? || npv_discount_rate == 'none'
       npv_discount_rate = 0.03
+    end
+    if npv_discount_rate_carbon == 'NECB_Default' || npv_discount_rate_carbon.nil? || npv_discount_rate_carbon == 'none'
+      npv_discount_rate_carbon = 0.03
     end
 
     # Set npv_end_year as year_max if users' input > neb's end year
@@ -211,10 +237,13 @@ class BTAPData
     # puts "npv_discount_rate is #{npv_discount_rate}"
 
     # Get energy end-use prices (CER data from https://apps.cer-rec.gc.ca/ftrppndc/dflt.aspx?GoCTemplateCulture=en-CA)
-    @neb_prices_csv_file_name = "#{File.dirname(__FILE__)}/neb_end_use_prices.csv"
+    # @neb_prices_csv_file_name = "#{File.dirname(__FILE__)}/neb_end_use_prices.csv"
 
     # Create a hash of the neb data.
     neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
+
+    # Create a hash of the ECCC's electricity emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions".
+    eccc_ghg_elec_emission_factors = CSV.parse(File.read(@eccc_ghg_electricity), headers: true, converters: :numeric).map(&:to_h)
 
     # Find which province the proposed building is located in
     building_type = 'Commercial'
@@ -236,53 +265,76 @@ class BTAPData
     else
       eui_elec = @btap_data['energy_eui_electricity_gj_per_m_sq']
     end
-    # puts "onsite_elec_generation is #{onsite_elec_generation}"
-    # puts "eui_elec is #{eui_elec}"
+    # Find the appropriate row for electricity GHG emmission factors
+    row_emm_factor = eccc_ghg_elec_emission_factors.detect do |data|
+      (data['province'] == province)
+    end
+    # Find the appropriate row for electricity pricing
     row = neb_data.detect do |data|
       (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Electricity')
     end
+    row_peak = nil
+    if oerd_utility_pricing && !annual_peak_kW_per_m_sq.nil?
+      row_peak = neb_data.detect do |data|
+        (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Electricity Peak')
+      end
+    end
     npv_elec = 0.0
     year_index = 1.0
+    npv_elec_ghg = 0.0
+    npv_elec_peak = 0.0
+    emm_factor_conv = 3600.0 #GWH to GJ
     if eui_elec > 0.0
       for year in npv_start_year.to_int..npv_end_year.to_int
-        # puts "year, #{year}, #{row[year.to_s]}, year_index, #{year_index}"
         npv_elec += (eui_elec * row[year.to_s]) / (1+npv_discount_rate)**year_index
+        npv_elec_ghg += (((eui_elec * row_emm_factor[year.to_i.to_s].to_f) / emm_factor_conv) * get_national_ghg_cost(year: year.to_i)) / (1+npv_discount_rate_carbon)**year_index
+        npv_elec_peak += (annual_peak_kW_per_m_sq * row_peak[year.to_i.to_s]).to_f / (1+npv_discount_rate)**year_index unless row_peak.nil? || annual_peak_kW_per_m_sq.nil?
         year_index += 1.0
       end
     end
-    # puts "npv_elec is #{npv_elec}"
 
     # Calculate npv of natural gas
     eui_ngas= @btap_data['energy_eui_natural_gas_gj_per_m_sq']
+    # Convert to tonnes of ghg/m^2
+    ghg_ngas = @btap_data['cost_utility_ghg_natural gas_kg_per_m_sq'].to_f/1000.0
     row = neb_data.detect do |data|
       (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Natural Gas')
     end
     npv_ngas = 0.0
+    npv_ngas_ghg = 0.0
     year_index = 1.0
     for year in npv_start_year.to_int..npv_end_year.to_int
       npv_ngas += (eui_ngas * row[year.to_s]) / (1+npv_discount_rate)**year_index
+      npv_ngas_ghg += (ghg_ngas * get_national_ghg_cost(year: year.to_i)) / (1+npv_discount_rate_carbon)**year_index
       year_index += 1.0
     end
     # puts "npv_ngas is #{npv_ngas}"
 
     # Calculate npv of oil
     eui_oil= @btap_data['energy_eui_additional_fuel_gj_per_m_sq']
+    # Convert to tonnes of ghg/m^2
+    ghg_oil = @btap_data['cost_utility_ghg_oil_kg_per_m_sq'].to_f/1000.0
     row = neb_data.detect do |data|
       (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Oil')
     end
     npv_oil = 0.0
+    npv_oil_ghg = 0.0
     year_index = 1.0
     for year in npv_start_year.to_int..npv_end_year.to_int
       npv_oil += (eui_oil * row[year.to_s]) / (1+npv_discount_rate)**year_index
+      npv_oil_ghg += (ghg_oil * get_national_ghg_cost(year: year.to_i)) / (1+npv_discount_rate_carbon)**year_index
       year_index += 1.0
     end
     # puts "npv_oil is #{npv_oil}"
 
     # Calculate total npv
     npv_total = @btap_data['cost_equipment_total_cost_per_m_sq'] + npv_elec + npv_ngas + npv_oil
-
+    npv_ghg_total = npv_elec_ghg + npv_ngas_ghg + npv_oil_ghg
+    npv_total_with_ghg_and_peak = npv_ghg_total + npv_total + npv_elec_peak
     @btap_data.merge!('npv_total_per_m_sq' => npv_total)
-
+    @btap_data.merge!('npv_carbon_pricing_per_m_sq' => npv_ghg_total)
+    @btap_data.merge!('npv_peak_elec_per_m_sq' => npv_elec_peak)
+    @btap_data.merge!('npv_with_carbon_and_peak_pricing_total_per_m_sq' => npv_total_with_ghg_and_peak)
   end
 
   def envelope(model)
@@ -515,7 +567,148 @@ class BTAPData
     return geography_data
   end
 
-  def utility(model)
+  ### The 'annual_peak_electricity_cost_dollar' function calculates annual peak electricity cost (dollar)
+  ### for OEE-Electrification project using the OERD's electricity rates for commercial buildings
+  ### that Danielle Krauel of OEE provided to CE-O
+  def oerd_electricity_cost(model:, utility_pricing_year: 2020, oerd_utility_pricing: false)
+    unless oerd_utility_pricing
+      @btap_data.merge!('cost_utility_oerd_electricity_peak_annual_cost_per_m_sq' => 0.00) unless oerd_utility_pricing
+      @btap_data.merge!('cost_utility_oerd_electricity_energy_annual_cost_per_m_sq' => 0.00) unless oerd_utility_pricing
+      return 0.00
+    end
+
+    #===================================================================================================================
+    ### OERD's electricity rates for commercial buildings
+    neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    ##################### Calculate annual electricity peak cost using OERD's electricity rate #########################
+    #===================================================================================================================
+    #===================================================================================================================
+    ### Find index for hourly data of 'ElectricityNet:Facility' (J)
+    query = "
+        SELECT ReportDataDictionaryIndex
+        FROM ReportDataDictionary
+        WHERE Name=='ElectricityNet:Facility' AND ReportingFrequency == 'Hourly' AND Units == 'J'
+        "
+    index_timestep_electricity = model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+    number_of_timesteps_per_hour = 1
+    puts "Trying hourly ElectricityNet:Facility"
+
+    ### Find index for timestep data of 'Electricity:Facility' (J) if 'ElectricityNet:Facility' data is not available
+    if index_timestep_electricity.nil?
+      query = "
+        SELECT ReportDataDictionaryIndex
+        FROM ReportDataDictionary
+        WHERE Name=='Electricity:Facility' AND ReportingFrequency == 'Zone Timestep' AND Units == 'J'
+        "
+      index_timestep_electricity = model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+      number_of_timesteps_per_hour = model.getTimestep.numberOfTimestepsPerHour
+      puts "Trying timestep Electricity:Facility"
+    end
+
+    ### Find index for hourly data of 'Electricity:Facility' (J) if timestep data is not available
+    if index_timestep_electricity.nil?
+      query = "
+        SELECT ReportDataDictionaryIndex
+        FROM ReportDataDictionary
+        WHERE Name=='Electricity:Facility' AND ReportingFrequency == 'Hourly' AND Units == 'J'
+        "
+      index_timestep_electricity = model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+      number_of_timesteps_per_hour = 1
+      puts "Trying hourly Electricity:Facility"
+    end
+
+    if index_timestep_electricity.nil?
+      puts "No hourly or timestep data available.  Peak data not available"
+      @btap_data.merge!('cost_utility_oerd_electricity_peak_annual_cost_per_m_sq' => 0.00) unless oerd_utility_pricing
+      @btap_data.merge!('cost_utility_oerd_electricity_energy_annual_cost_per_m_sq' => 0.00) unless oerd_utility_pricing
+      return 0.00
+    end
+    ### Get number of timesteps from the model
+    timestep_second = 3600 / number_of_timesteps_per_hour
+    #===================================================================================================================
+    ### Calculate number of timesteps of the whole year, and create dates/times for the whole year
+    number_of_timesteps_of_year = 365 * 24 * number_of_timesteps_per_hour
+    timesteps_of_year = []
+    d = Time.new(2006, 1, 1, 0)
+    (0...number_of_timesteps_of_year).each do |increment|
+      timesteps_of_year << (d + (60 * 60 / number_of_timesteps_per_hour) * increment).strftime('%Y-%m-%d %H:%M')
+    end
+    #===================================================================================================================
+
+    #===================================================================================================================
+    ### Get timestep output for Electricity:Facility output.
+    query = "
+      Select VariableValue
+      FROM ReportVariableData
+      WHERE
+      ReportVariableDataDictionaryIndex = #{index_timestep_electricity}
+    "
+    timestep_values = model.sqlFile.get.execAndReturnVectorOfDouble(query).get
+    #===================================================================================================================
+    ### Calculate electricity peak (J) for each month of the year
+    # Find month of each timestep
+    keys_month = timesteps_of_year.map{ |timestep| DateTime.parse(timestep).to_date.month }
+    # Create a hash where its keys are months and values for eahc month are electricity energy use (J) of all timesteps for that month
+    hash_months_electricity = keys_month.zip(timestep_values).group_by(&:first).map{|key, value| [key, value.map(&:last)]}.to_h
+    # Find maximum of electricity energy use (J) among all timesteps for each month of the year
+    monthly_peak_J = hash_months_electricity.map { |key, value| [key, value.max()] }.to_h
+    #===================================================================================================================
+    ### Convert J to kW of maximum electricity energy use (J)
+    monthly_peak_kW = monthly_peak_J.map { |key, value| [key, value * 0.001 / timestep_second] }.to_h
+    ### Normalize by building floor area
+    annual_peak_kW_per_m_sq = monthly_peak_kW.values.sum / @btap_data['bldg_conditioned_floor_area_m_sq'].to_f
+    #===================================================================================================================
+    ### Get province of the model and find its peak electricity price from the utility_pricing_2025-02-20.csv
+    province = @btap_data['location_state_province_region']
+    # Find which province the proposed building is located in
+    building_type = 'Commercial'
+    geography_data = climate_data
+    province_abbreviation = geography_data['location_state_province_region']
+    province = @standards_data['province_map'][province_abbreviation]
+    row_peak = neb_data.detect do |data|
+      (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Electricity Peak')
+    end
+    province_dollar_kW_month = row_peak[utility_pricing_year.to_i.to_s]
+    #===================================================================================================================
+    ### Calculate cost of peak electricity for each month
+    monthly_peak_cost = monthly_peak_kW.map { |key, value| [key, value * province_dollar_kW_month] }.to_h
+    #===================================================================================================================
+    ### Calculate cost of peak electricity for the whole year in dollar
+    annual_peak_cost_dollar = monthly_peak_cost.values.sum
+    #===================================================================================================================
+    ### Calculate cost of peak electricity for the whole year in dollar normalized by floor area
+    annual_peak_cost_dollar_per_m_sq = annual_peak_cost_dollar / @btap_data['bldg_conditioned_floor_area_m_sq']
+    #===================================================================================================================
+    ### Merge the calculated value to @btap_data
+    @btap_data.merge!('cost_utility_oerd_electricity_peak_annual_cost_per_m_sq' => annual_peak_cost_dollar_per_m_sq.round(2))
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    #===================================================================================================================
+    ################### Calculate annual electricity energy use cost using OERD's electricity rate #####################
+    #===================================================================================================================
+    ### Get province of the model and find its peak electricity price from the pricing_2025-02-20.csv
+    row_elec = neb_data.detect do |data|
+      (data['building_type'] == building_type) && (data['province'] == province) && (data['fuel_type'] == 'Electricity')
+    end
+    province_dollar_kWh = row_elec[utility_pricing_year.to_i.to_s]
+    #===================================================================================================================
+    # Calculate cost of energy electricity for the whole year in dollar normalized by floor area
+    annual_energy_cost_dollar_per_m_sq = @btap_data['energy_eui_electricity_gj_per_m_sq'] * 277.778 * province_dollar_kWh
+    #===================================================================================================================
+    ### Merge the calculated value to @btap_data
+    @btap_data.merge!('cost_utility_oerd_electricity_energy_annual_cost_per_m_sq' => annual_energy_cost_dollar_per_m_sq.round(2))
+    #===================================================================================================================
+    return annual_peak_kW_per_m_sq
+  end
+
+  def utility(model:, utility_pricing_year: 2020)
     economics_data = {}
     building_type = 'Commercial'
     province = @standards_data['province_map'][model.getWeatherFile.stateProvinceRegion]
@@ -538,12 +731,14 @@ class BTAPData
     neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
 
     neb_eplus_fuel_map.each do |neb_fuel, ep_fuel|
+      next if neb_fuel.to_s.downcase == 'electricity peak'
       row = neb_data.detect do |data|
-        (data['building_type'] == building_type) &&
-          (data['province'] == province) &&
-          (data['fuel_type'] == neb_fuel)
+        (data['building_type'].to_s == building_type) &&
+          (data['province'].to_s == province) &&
+          (data['fuel_type'].to_s == neb_fuel)
       end
-      neb_fuel_cost = row['2021']
+      utility_pricing_year_s = utility_pricing_year.to_i.to_s
+      neb_fuel_cost = row[utility_pricing_year_s]
       fuel_consumption_gj = 0.0
       sql_command = "SELECT Value FROM tabulardatawithstrings
                      WHERE ReportName='EnergyMeters'
@@ -558,7 +753,16 @@ class BTAPData
       economics_data["cost_utility_neb_#{neb_fuel.downcase}_cost_per_m_sq"] = fuel_consumption_gj * neb_fuel_cost.to_f / @conditioned_floor_area_m_sq
       economics_data['cost_utility_neb_total_cost_per_m_sq'] += economics_data["cost_utility_neb_#{neb_fuel.downcase}_cost_per_m_sq"]
       # Determine cost in GHG kg of CO2
-      economics_data["cost_utility_ghg_#{neb_fuel.downcase}_kg_per_m_sq"] = fuel_consumption_gj * get_utility_ghg_kg_per_gj(province: model.getWeatherFile.stateProvinceRegion, fuel_type: ep_fuel[:eplus_fuel_name]) / @conditioned_floor_area_m_sq
+      if neb_fuel.downcase == 'electricity' # Use ECCC data for utility emission factors rather than NEB data.
+        # Create a hash of the ECCC's electricity emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions".
+        eccc_ghg_elec_emission_factors = CSV.parse(File.read(@eccc_ghg_electricity), headers: true, converters: :numeric).map(&:to_h)
+        # Find the appropriate row for electricity GHG emmission factors
+        row_emm_factor = eccc_ghg_elec_emission_factors.detect { |data| (data['province'] == province) }
+        emm_factor_conv = 3600.0
+        economics_data["cost_utility_ghg_#{neb_fuel.downcase}_kg_per_m_sq"] = ((fuel_consumption_gj * row_emm_factor[utility_pricing_year.to_i.to_s].to_f) / emm_factor_conv) * 1000 / @conditioned_floor_area_m_sq
+      else
+        economics_data["cost_utility_ghg_#{neb_fuel.downcase}_kg_per_m_sq"] = fuel_consumption_gj * get_utility_ghg_kg_per_gj(province: model.getWeatherFile.stateProvinceRegion, fuel_type: ep_fuel[:eplus_fuel_name]) / @conditioned_floor_area_m_sq
+      end
       economics_data['cost_utility_ghg_total_kg_per_m_sq'] += economics_data["cost_utility_ghg_#{neb_fuel.downcase}_kg_per_m_sq"]
     end
     # Commenting out block charge rates for now....
@@ -1400,6 +1604,142 @@ class BTAPData
     cooling_peak_w = [cooling_peak_w_electricity.to_f, cooling_peak_w_gas.to_f].max
     data['cooling_peak_w_per_m_sq'] = cooling_peak_w / @conditioned_floor_area_m_sq
 
+    # Peak water system load  # @todo IMPORTANT NOTE: Peak water system load must be updated if a combination of fuel types is used in a building model.
+    command = "SELECT Value
+               FROM TabularDataWithStrings
+               WHERE ReportName='EnergyMeters'
+               AND ReportForString='Entire Facility'
+               AND TableName='Annual and Peak Values - Electricity'
+               AND RowName='WaterSystems:Electricity'
+               AND ColumnName='Electricity Maximum Value'
+               AND Units='W'"
+    water_heating_peak_w_electricity = @sqlite_file.get.execAndReturnFirstDouble(command)
+    command = "SELECT Value
+              FROM TabularDataWithStrings
+              WHERE ReportName='EnergyMeters'
+              AND ReportForString='Entire Facility'
+              AND TableName='Annual and Peak Values - Natural Gas'
+              AND RowName='WaterSystems:NaturalGas'
+              AND ColumnName='Natural Gas Maximum Value'
+              AND Units='W'"
+    water_heating_peak_w_gas = @sqlite_file.get.execAndReturnFirstDouble(command)
+    water_heating_peak_w = [water_heating_peak_w_electricity.to_f, water_heating_peak_w_gas.to_f].max
+    data['energy_peak_water_systems_w_per_m_sq'] = water_heating_peak_w / @conditioned_floor_area_m_sq
+
+    #===================================================================================================================
+    # Winter peak values
+    ### Get number of timesteps from the model
+    number_of_timesteps_per_hour = 1
+    timestep_second = 3600 / number_of_timesteps_per_hour
+    #===================================================================================================================
+    ### Calculate number of timesteps of the whole year, and create dates/times for the whole year
+    number_of_timesteps_of_year = 365 * 24 * number_of_timesteps_per_hour
+    timesteps_of_year = []
+    d = Time.new(2006, 1, 1, 0)
+    (0...number_of_timesteps_of_year).each do |increment|
+      timesteps_of_year << (d + (60 * 60 / number_of_timesteps_per_hour) * increment).strftime('%Y-%m-%d %H:%M')
+    end
+    # Find month of each timestep
+    keys_month = timesteps_of_year.map{ |timestep| DateTime.parse(timestep).to_date.month }
+    # Peak electricity in winter
+    query = "
+    SELECT ReportDataDictionaryIndex
+    FROM ReportDataDictionary
+    WHERE Name=='Electricity:Facility' AND ReportingFrequency == 'Hourly' AND Units == 'J'
+    "
+    index_timestep_electricity = @model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+    number_of_timesteps_per_hour = 1
+    if index_timestep_electricity.nil?
+      puts "No hourly or timestep data available.  Peak data not available"
+      data['energy_peak_electric_w_per_m_sq_winter'] = 0
+    else
+      ### Get timestep output for Electricity:Facility output.
+      query = "
+      Select VariableValue
+      FROM ReportVariableData
+      WHERE
+      ReportVariableDataDictionaryIndex = #{index_timestep_electricity}
+      "
+      timestep_values = @model.sqlFile.get.execAndReturnVectorOfDouble(query).get
+          # Create a hash where its keys are months and values for eahc month are electricity energy use (J) of all timesteps for that month
+      hash_months_electricity = keys_month.zip(timestep_values).group_by(&:first).map{|key, value| [key, value.map(&:last)]}.to_h
+      # Find maximum of electricity energy use (J) among all timesteps for each month of the year
+      monthly_peak_J = hash_months_electricity.map { |key, value| [key, value.max()] }.to_h
+      ### Convert J to W of maximum electricity energy use (J)
+      monthly_peak_W = monthly_peak_J.map { |key, value| [key, value / timestep_second] }.to_h
+      # Get winter peak
+      winter_peak_W = [monthly_peak_W[12].to_f, monthly_peak_W[1].to_f, monthly_peak_W[2].to_f].max
+      ### Normalize by building floor area
+      annual_peak_W_per_m_sq = winter_peak_W / @btap_data['bldg_conditioned_floor_area_m_sq'].to_f
+      data['energy_peak_electric_w_per_m_sq_winter'] = annual_peak_W_per_m_sq
+    end
+
+    # Peak electricity heating in winter
+    query = "
+    SELECT ReportDataDictionaryIndex
+    FROM ReportDataDictionary
+    WHERE Name=='Heating:Electricity' AND ReportingFrequency == 'Hourly' AND Units == 'J'
+    "
+    index_timestep_electricity = @model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+    number_of_timesteps_per_hour = 1
+    if index_timestep_electricity.nil?
+      puts "No hourly or timestep data available.  Peak data not available"
+      data['energy_peak_electric_heating_w_per_m_sq_winter'] = 0
+    else
+      ### Get timestep output for Electricity:Facility output.
+      query = "
+      Select VariableValue
+      FROM ReportVariableData
+      WHERE
+      ReportVariableDataDictionaryIndex = #{index_timestep_electricity}
+      "
+      timestep_values = @model.sqlFile.get.execAndReturnVectorOfDouble(query).get
+      # Create a hash where its keys are months and values for eahc month are electricity energy use (J) of all timesteps for that month
+      hash_months_electricity = keys_month.zip(timestep_values).group_by(&:first).map{|key, value| [key, value.map(&:last)]}.to_h
+      # Find maximum of electricity energy use (J) among all timesteps for each month of the year
+      monthly_peak_J = hash_months_electricity.map { |key, value| [key, value.max()] }.to_h
+      ### Convert J to W of maximum electricity energy use (J)
+      monthly_peak_W = monthly_peak_J.map { |key, value| [key, value / timestep_second] }.to_h
+      # Get winter peak
+      winter_peak_W = [monthly_peak_W[12].to_f, monthly_peak_W[1].to_f, monthly_peak_W[2].to_f].max
+      ### Normalize by building floor area
+      annual_peak_W_per_m_sq = winter_peak_W / @btap_data['bldg_conditioned_floor_area_m_sq'].to_f
+      data['energy_peak_electric_heating_w_per_m_sq_winter'] = annual_peak_W_per_m_sq
+    end
+
+    # Peak water system electricity heating in winter
+    query = "
+    SELECT ReportDataDictionaryIndex
+    FROM ReportDataDictionary
+    WHERE Name=='WaterSystems:Electricity' AND ReportingFrequency == 'Hourly' AND Units == 'J'
+    "
+    index_timestep_electricity = @model.sqlFile.get.execAndReturnVectorOfInt(query).get[0]
+    number_of_timesteps_per_hour = 1
+    if index_timestep_electricity.nil?
+      puts "No hourly or timestep data available.  Peak data not available"
+      data['energy_peak_electric_water_systems_w_per_m_sq_winter'] = 0
+    else
+      ### Get timestep output for Electricity:Facility output.
+      query = "
+      Select VariableValue
+      FROM ReportVariableData
+      WHERE
+      ReportVariableDataDictionaryIndex = #{index_timestep_electricity}
+      "
+      timestep_values = @model.sqlFile.get.execAndReturnVectorOfDouble(query).get
+          # Create a hash where its keys are months and values for eahc month are electricity energy use (J) of all timesteps for that month
+      hash_months_electricity = keys_month.zip(timestep_values).group_by(&:first).map{|key, value| [key, value.map(&:last)]}.to_h
+      # Find maximum of electricity energy use (J) among all timesteps for each month of the year
+      monthly_peak_J = hash_months_electricity.map { |key, value| [key, value.max()] }.to_h
+      ### Convert J to W of maximum electricity energy use (J)
+      monthly_peak_W = monthly_peak_J.map { |key, value| [key, value / timestep_second] }.to_h
+      # Get winter peak
+      winter_peak_W = [monthly_peak_W[12].to_f, monthly_peak_W[1].to_f, monthly_peak_W[2].to_f].max
+      ### Normalize by building floor area
+      annual_peak_W_per_m_sq = winter_peak_W / @btap_data['bldg_conditioned_floor_area_m_sq'].to_f
+      data['energy_peak_electric_water_systems_w_per_m_sq_winter'] = annual_peak_W_per_m_sq
+    end
+
     return data
   end
 
@@ -1899,20 +2239,36 @@ class BTAPData
   def get_utility_ghg_kg_per_gj(province:, fuel_type:)
     ghg_data = [
       # Obtained from Portfolio Manager https://portfoliomanager.energystar.gov/pdf/reference/Emissions.pdf 10/10/2020
-      { "province": 'AB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.24, "CO2eq Emissions (g/m3)": 1939.0 },
-      { "province": 'BC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.19, "CO2eq Emissions (g/m3)": 1937.0 },
-      { "province": 'MB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.09, "CO2eq Emissions (g/m3)": 1897.0 },
-      { "province": 'NB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'NL', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'NT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'NS', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'NU', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'ON', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.14, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'PE', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
-      { "province": 'QC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.12, "CO2eq Emissions (g/m3)": 1898.0 },
-      { "province": 'SK', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 50.53, "CO2eq Emissions (g/m3)": 1840.0 },
-      { "province": 'YT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'AB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.24, "CO2eq Emissions (g/m3)": 1939.0 },
+      #{ "province": 'BC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.19, "CO2eq Emissions (g/m3)": 1937.0 },
+      #{ "province": 'MB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.09, "CO2eq Emissions (g/m3)": 1897.0 },
+      #{ "province": 'NB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'NL', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'NT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'NS', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'NU', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'ON', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.14, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'PE', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
+      #{ "province": 'QC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.12, "CO2eq Emissions (g/m3)": 1898.0 },
+      #{ "province": 'SK', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 50.53, "CO2eq Emissions (g/m3)": 1840.0 },
+      #{ "province": 'YT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.50, "CO2eq Emissions (g/m3)": 1912.0 },
 
+      #REF (Retrieved March 11, 2025) for Year 2022 of "Table A6.1–1 CO2 Emission Factors for Marketable Natural Gas" of National Inventory Report: https://data-donnees.az.ec.gc.ca/api/file?path=%2Fsubstances%2Fmonitor%2Fcanada-s-official-greenhouse-gas-inventory%2FD-Emission-Factors%2FEN_Annex6_Emission_Factors.pdf
+      { "province": 'AB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.87, "CO2eq Emissions (g/m3)": 1962.0 },
+      { "province": 'BC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.98, "CO2eq Emissions (g/m3)": 1966.0 },
+      { "province": 'MB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.58, "CO2eq Emissions (g/m3)": 1915.0 },
+      { "province": 'NB', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.69, "CO2eq Emissions (g/m3)": 1919.0 },
+      { "province": 'NL', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.69, "CO2eq Emissions (g/m3)": 1919.0 },
+      { "province": 'NT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.98, "CO2eq Emissions (g/m3)": 1966.0 },
+      { "province": 'NS', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.69, "CO2eq Emissions (g/m3)": 1919.0 },
+      { "province": 'NU', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 53.98, "CO2eq Emissions (g/m3)": 1966.0 },
+      { "province": 'ON', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.75, "CO2eq Emissions (g/m3)": 1921.0 },
+      { "province": 'PE', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.69, "CO2eq Emissions (g/m3)": 1919.0 },
+      { "province": 'QC', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.88, "CO2eq Emissions (g/m3)": 1926.0 },
+      { "province": 'SK', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 52.72, "CO2eq Emissions (g/m3)": 1920.0 },
+      { "province": 'YT', "fuel_type": 'NaturalGas', "CO2eq Emissions (kg/MBtu)": 56.98, "CO2eq Emissions (g/m3)": 1966.0 },
+
+      # Obtained from Portfolio Manager https://portfoliomanager.energystar.gov/pdf/reference/Emissions.pdf 10/10/2020
       { "province": 'AB', "fuel_type": 'FuelOilNo2', "CO2eq Emissions (kg/MBtu)": 75.13, "CO2eq Emissions (g/m3)": 2763.0 },
       { "province": 'BC', "fuel_type": 'FuelOilNo2', "CO2eq Emissions (kg/MBtu)": 75.13, "CO2eq Emissions (g/m3)": 2763.0 },
       { "province": 'MB', "fuel_type": 'FuelOilNo2', "CO2eq Emissions (kg/MBtu)": 75.13, "CO2eq Emissions (g/m3)": 2763.0 },
@@ -2281,5 +2637,20 @@ class BTAPData
       @btap_data.merge!('phius_necb_meet_cooling_peak_load' => 'False')
     end
     # def phius_metrics(model)
+  end
+
+  def get_national_ghg_cost(year:)
+    raise "Nil year submitted for national ghg cost" if year.nil?
+    year = year.to_i
+    if year < 2019
+      price = 0.0
+    elsif (year >= 2019) && (year <= 2030)
+      ghg_price_data = @standards_data["tables"]["canada_national_carbon_pricing"]["table"]
+      year_price = ghg_price_data.detect { |item| (item["year"].to_i == year) }
+      price = year_price["price_per_tonne"].to_f
+    elsif (year > 2030)
+      price = 170.0
+    end
+    return price.to_f
   end
 end

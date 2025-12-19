@@ -136,7 +136,7 @@ module OpenstudioStandards
           when '16'
             ashrae_climate_zone = '5B'
           end
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Weather.information', "Using ASHRAE climate zone #{climate_zone} for California climate zone #{california_cz}.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Weather.information', "Using ASHRAE climate zone #{climate_zone} for California climate zone #{climate_zone.value}.")
         end
       end
 
@@ -202,7 +202,7 @@ module OpenstudioStandards
         stat_string = load_resource_relative("../../../data/weather/#{weather_file_name.gsub('.epw', '.stat')}")
 
         # extract to local weather dir
-        weather_dir = File.expand_path(File.join(__dir__, 'extracted_files/weather/'))
+        weather_dir = File.expand_path(File.join(Dir.pwd, 'extracted_files/weather/'))
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Weather.information', "Extracting weather files from OpenStudio CLI to #{weather_dir}")
         FileUtils.mkdir_p(weather_dir)
 
@@ -210,15 +210,15 @@ module OpenstudioStandards
         if path_length > 260
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Weather.information', "Weather file path length #{path_length} is >260 characters and may cause issues in Windows environments.")
         end
-        File.open("#{weather_dir}/#{weather_file_name}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name}", 'wb') do |f|
           f << epw_string
           f.flush
         end
-        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.ddy')}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.ddy')}", 'wb') do |f|
           f << ddy_string
           f.flush
         end
-        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.stat')}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.stat')}", 'wb') do |f|
           f << stat_string
           f.flush
         end

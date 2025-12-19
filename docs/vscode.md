@@ -69,11 +69,7 @@ This will create a container workspace and clone all the source code for openstu
 ### Install Certificates (NRCan Only)
 The NRCan network requires certificate to be installed in your container. Clone the cert repo. 
 ```sh
-git clone https://github.com/canmet-energy/linux_nrcan_certs
-```
-Then install the certs by cut and pasting this command. This will also remove the cert folder as it will no longer be needed. 
-```ssh 
-cd linux_nrcan_certs && ./install_nrcan_certs.sh && cd .. && rm -fr linux_nrcan_certs
+git clone https://github.com/canmet-energy/linux_nrcan_certs && cd linux_nrcan_certs && ./install_nrcan_certs.sh && cd .. && rm -fr linux_nrcan_certs
 ```
 
 ### Install / Update Ruby Gems. 

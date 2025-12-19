@@ -315,7 +315,7 @@ module OpenstudioStandards
 
           opt_space = water_use_equipment.space
           if opt_space.is_initialized
-            space = space.get
+            space = opt_space.get
             hours_of_operation = OpenstudioStandards::Space.space_hours_of_operation(space)
             OpenstudioStandards::Schedules.schedule_ruleset_get_parametric_inputs(schedule, water_use_equipment, parametric_inputs, hours_of_operation, gather_data_only: gather_data_only, hoo_var_method: hoo_var_method)
           else
