@@ -72,7 +72,6 @@ class MyParallelTests
     processors = ProcessorsUsed if processors.nil?
     did_all_tests_pass = true
     @test_output_folder = test_output_folder
-    @full_file_list = nil
     FileUtils.rm_rf(@test_output_folder)
     FileUtils.mkpath(@test_output_folder)
 
@@ -87,33 +86,59 @@ class MyParallelTests
     # the tests at this time, we need to temporarily disable it.
     test_files_and_test_names = []
     test_files_already_checked = []
+    puts "Scanning test files to generate list of tests...".blue
+    count = 0
+
+    tests_to_skip = ["nrc_report\/tests",
+                    "nrc_report_hourly_ghg_emissions",
+                    "nrc_set_amy_weather_file"]
+    skipped_tests = []
     @full_file_list.each do |test_file|
+      if tests_to_skip.any? { |p| test_file.include?(p) }
+        skipped_tests << test_file
+        next   # skip to next file in the loop
+      end
+      count += 1
+      puts "Scanning (#{count}) #{test_file}.".green
 
-      # Disable minitest/autorun
-      eval('module Minitest @@installed_at_exit = true end')
+      # Capture existing subclasses
+      before = Minitest::Test.subclasses.dup
 
-      # Load the test file
-      require test_file
-
-      # Find the test method names
-      ObjectSpace.each_object(Class) do |klass|
-        next if test_files_already_checked.include?(klass.name) # Skip files already checked
-        next if klass.name.to_s == 'RunAllTests' # Don't want this to run recursively
-        klass.ancestors.each do |ancestor|
-          next unless ancestor.name == 'Minitest::Test'
-          next if klass.to_s.include?('Minitest') # Skip classes from the Minitest library itself
-          test_files_already_checked << klass.name
-          # puts "*** Test file is: #{klass}"
-          # puts "  ancestor is: #{ancestor.name}"
-          klass.runnable_methods.each do |test_name|
-            # puts "  #{test_name}"
-            test_files_and_test_names << [test_file, test_name]
-          end
-        end
+      # Silence output while requiring files
+      original_stdout = $stdout
+      original_stdout.flush
+      $stdout = File.open(File::NULL, "w")
+      begin
+        require test_file
+      ensure
+        $stdout.close
+        $stdout = original_stdout
       end
 
-      # Re-enable minitest/autorun
-      eval('module Minitest @@installed_at_exit = false end')
+      # Find newly added subclasses and record file associated with each (likely just one new class)
+      after = Minitest::Test.subclasses
+      new_classes = after - before
+
+      new_classes.each do |klass|
+        klass.instance_variable_set(:@source_test_file, test_file)
+      end
+    end
+
+    puts "Generating list of tests...".blue
+    checked = Set.new
+    Minitest::Test.subclasses.each do |klass|
+      kname = klass.name
+      next if checked.include?(kname)
+      next if kname == "RunAllTests"
+      next if kname.nil?
+      next if kname.include?("Minitest")
+      checked << kname
+
+      # Retrieve the stored file name
+      test_file = klass.instance_variable_get(:@source_test_file)
+      klass.runnable_methods.each do |test_name|
+        test_files_and_test_names << [test_file, test_name]
+      end
     end
 
     $totalTestCount = test_files_and_test_names.size
