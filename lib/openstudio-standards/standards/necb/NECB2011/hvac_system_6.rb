@@ -81,8 +81,7 @@ class NECB2011
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
-        #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
-        #air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        #Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
         air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
@@ -369,8 +368,7 @@ class NECB2011
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
 
-        #Set Type of Load to Size On to "ventilationRequirement" if ventilation efficiency is being applied
-        #air_loop.sizingSystem.setTypeofLoadtoSizeOn('VentilationRequirement') if self.fuel_type_set.apply_ventilation_efficiency
+        #Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
         air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
