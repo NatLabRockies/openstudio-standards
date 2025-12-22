@@ -48,6 +48,8 @@ class NECB2011
     system_data[:HeatingDesignAirFlowMethod] = 'DesignDay'
     system_data[:HeatingDesignAirFlowRate] = 0.0
     system_data[:SystemOutdoorAirMethod] = 'ZoneSum'
+    # Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
+    system_data[:SystemOutdoorAirMethod] = 'Standard62.1VentilationRateProcedure' if self.fuel_type_set.apply_ventilation_efficiency
     system_data[:CentralCoolingDesignSupplyAirHumidityRatio] = 0.0085
     system_data[:CentralHeatingDesignSupplyAirHumidityRatio] = 0.0080
     system_data[:CentralCoolingDesignSupplyAirTemperature] = 13.0
@@ -136,6 +138,7 @@ class NECB2011
       # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
       # set explicitly)
       oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('ZoneSum')
+      oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
       oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
 
@@ -201,6 +204,7 @@ class NECB2011
         sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
         sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
       end
+      sizing_zone.setDesignZoneAirDistributionEffectivenessinHeatingMode(0.8) if self.fuel_type_set.apply_ventilation_efficiency
 
       # Create a PTAC for each zone:
       # PTAC DX Cooling with electric heating coil; electric heating coil is always off

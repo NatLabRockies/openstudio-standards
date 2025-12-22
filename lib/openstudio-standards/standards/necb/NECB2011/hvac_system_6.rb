@@ -42,6 +42,8 @@ class NECB2011
     system_data[:ZoneVAVMinFlowFactorPerFloorArea] = 0.002
     system_data[:ZoneVAVMaxReheatTemp] = 43.0
     system_data[:ZoneVAVDamperAction] = 'Normal'
+    # Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
+    system_data[:SystemOutdoorAirMethod] = 'Standard62.1VentilationRateProcedure' if self.fuel_type_set.apply_ventilation_efficiency
 
     always_on = model.alwaysOnDiscreteSchedule
 
@@ -80,9 +82,6 @@ class NECB2011
 
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
-
-        #Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
-        air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)
@@ -204,6 +203,8 @@ class NECB2011
     system_6_data[:ZoneVAVMinFlowFactorPerFloorArea] = 0.002
     system_6_data[:ZoneVAVMaxReheatTemp] = 43.0
     system_6_data[:ZoneVAVDamperAction] = 'Normal'
+    # Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
+    system_6_data[:SystemOutdoorAirMethod] = 'Standard62.1VentilationRateProcedure' if self.fuel_type_set.apply_ventilation_efficiency
     system_data = system_6_data
 
     always_on = model.alwaysOnDiscreteSchedule
@@ -256,6 +257,7 @@ class NECB2011
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)
         oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('ZoneSum')
+        oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
 
@@ -289,6 +291,7 @@ class NECB2011
           sizing_zone.setZoneHeatingDesignSupplyAirTemperature(system_data[:ZoneHeatingDesignSupplyAirTemperature])
           sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
           sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+          sizing_zone.setDesignZoneAirDistributionEffectivenessinHeatingMode(0.8) if self.fuel_type_set.apply_ventilation_efficiency
 
           if heating_coil_type == 'Hot Water'
             reheat_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
@@ -341,6 +344,8 @@ class NECB2011
     system_data[:ZoneHeatingDesignSupplyAirTemperatureDifference] = 21.0
     system_data[:ZoneDXCoolingSizingFactor] = 1.0
     system_data[:ZoneDXHeatingSizingFactor] = 1.3
+    # Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
+    system_data[:SystemOutdoorAirMethod] = 'Standard62.1VentilationRateProcedure' if self.fuel_type_set.apply_ventilation_efficiency
 
 
     always_on = model.alwaysOnDiscreteSchedule
@@ -367,9 +372,6 @@ class NECB2011
 
         oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
-
-        #Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
-        air_loop.sizingSystem.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
         # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
         # set explicitly)

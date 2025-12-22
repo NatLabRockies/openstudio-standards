@@ -25,6 +25,8 @@ class NECB2011
     system_data[:HeatingDesignAirFlowMethod] = 'DesignDay'
     system_data[:HeatingDesignAirFlowRate] = 0.0
     system_data[:SystemOutdoorAirMethod] = 'ZoneSum'
+    # Set outdoor air method to Standard62.1VentilationRateProcedure if ventilation efficiency is being applied
+    system_data[:SystemOutdoorAirMethod] = 'Standard62.1VentilationRateProcedure' if self.fuel_type_set.apply_ventilation_efficiency
     system_data[:CentralCoolingDesignSupplyAirHumidityRatio] = 0.0085
     system_data[:CentralHeatingDesignSupplyAirHumidityRatio] = 0.0080
     system_data[:CentralCoolingDesignSupplyAirTemperature] = 13.0
@@ -116,6 +118,7 @@ class NECB2011
       # Set mechanical ventilation controller outdoor air to ZoneSum (used to be defaulted to ZoneSum but now should be
       # set explicitly)
       oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('ZoneSum')
+      oa_controller.controllerMechanicalVentilation.setSystemOutdoorAirMethod('Standard62.1VentilationRateProcedure') if self.fuel_type_set.apply_ventilation_efficiency
 
       # oa_system
       oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
@@ -145,6 +148,7 @@ class NECB2011
       sizing_zone.setZoneHeatingDesignSupplyAirTemperatureDifference(21.0)
       sizing_zone.setZoneCoolingSizingFactor(1.1)
       sizing_zone.setZoneHeatingSizingFactor(1.3)
+      sizing_zone.setDesignZoneAirDistributionEffectivenessinHeatingMode(0.8) if self.fuel_type_set.apply_ventilation_efficiency
 
       # Set up PTAC heating coil; apply always off schedule
 
