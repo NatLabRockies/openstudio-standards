@@ -77,6 +77,7 @@ module OpenstudioStandards
   # HVAC Module
   require_relative 'openstudio-standards/hvac/air_loop/information'
   require_relative 'openstudio-standards/hvac/create_cbecs_hvac_system'
+  require_relative 'openstudio-standards/hvac/create_hvac_system'
   require_relative 'openstudio-standards/hvac/curves'
   require_relative 'openstudio-standards/hvac/components/air_conditioner_vrf'
   require_relative 'openstudio-standards/hvac/components/air_terminal'
@@ -577,7 +578,6 @@ module OpenstudioStandards
   require_relative "#{proto}/common/objects/Prototype.FanVariableVolume"
   require_relative "#{proto}/common/objects/Prototype.FanZoneExhaust"
   require_relative "#{proto}/common/objects/Prototype.HeatExchangerAirToAirSensibleAndLatent"
-  require_relative "#{proto}/common/objects/Prototype.hvac_systems"
   require_relative "#{proto}/common/objects/Prototype.Model.elevators"
   require_relative "#{proto}/common/objects/Prototype.Model.hvac"
   require_relative "#{proto}/common/objects/Prototype.Model"
