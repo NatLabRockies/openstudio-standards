@@ -4,7 +4,7 @@ module OpenstudioStandards
     # @!group CBECS HVAC
     # Method to apply a typical CBECS HVAC system to thermal zones
 
-    # Adds the HVAC system as derived from the combinations of CBECS 2012 MAINHT and MAINCL fields.
+    # Creates the HVAC system as derived from the combinations of CBECS 2012 MAINHT and MAINCL fields.
     # Mapping between combinations and HVAC systems per http://www.nrel.gov/docs/fy08osti/41956.pdf
     # Table C-31
     #
@@ -13,7 +13,7 @@ module OpenstudioStandards
     # @param hvac_system_type [String] HVAC system type
     # @param zones [Array<OpenStudio::Model::ThermalZone>] Array of OpenStudio ThermalZone objects
     # @return [Boolean] returns true if successful, false if not
-    def self.add_cbecs_hvac_system(model, standard, hvac_system_type, zones)
+    def self.create_cbecs_hvac_system(model, standard, hvac_system_type, zones)
       # the 'zones' argument includes zones that have heating, cooling, or both
       # if the HVAC system type serves a single zone, handle zones with only heating separately by adding unit heaters
       # applies to system types PTAC, PTHP, PSZ-AC, and Window AC
