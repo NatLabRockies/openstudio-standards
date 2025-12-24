@@ -144,7 +144,7 @@ module OpenstudioStandards
           hot_water_loop.addSupplyBranchForComponent(water_to_water_hp)
           # Get or add an ambient loop
           if ambient_loop.nil?
-            ambient_loop = model_get_or_add_ambient_water_loop(model)
+            ambient_loop = OpenstudioStandards::HVAC.model_get_or_add_ambient_water_loop(model)
           end
           ambient_loop.addDemandBranchForComponent(water_to_water_hp)
         # Central Air Source Heat Pump
@@ -429,10 +429,10 @@ module OpenstudioStandards
       unless condenser_water_loop.nil?
         case waterside_economizer
         when 'integrated'
-          model_add_waterside_economizer(model, chilled_water_loop, condenser_water_loop,
+          OpenstudioStandards::HVAC.model_add_waterside_economizer(model, chilled_water_loop, condenser_water_loop,
                                         integrated: true)
         when 'non-integrated'
-          model_add_waterside_economizer(model, chilled_water_loop, condenser_water_loop,
+          OpenstudioStandards::HVAC.model_add_waterside_economizer(model, chilled_water_loop, condenser_water_loop,
                                         integrated: false)
         end
       end
@@ -1251,7 +1251,7 @@ module OpenstudioStandards
         determine_zone_cooling_needs_prg = model.getEnergyManagementSystemProgramByName('Determine_Zone_Cooling_Needs')
         determine_zone_heating_needs_prg = model.getEnergyManagementSystemProgramByName('Determine_Zone_Heating_Needs')
         unless determine_zone_cooling_needs_prg.is_initialized && determine_zone_heating_needs_prg.is_initialized
-          model_add_zone_heat_cool_request_count_program(model, thermal_zones)
+          OpenstudioStandards::HVAC.model_add_zone_heat_cool_request_count_program(model, thermal_zones)
         end
 
         # create program to determine plant heating or cooling mode
@@ -1867,7 +1867,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
       if !min_sys_airflow_ratio.nil?
         if model.version < OpenStudio::VersionString.new('2.7.0')
@@ -2106,7 +2106,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
 
       # air handler controls
@@ -2248,7 +2248,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -2449,7 +2449,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
 
       # air handler controls
@@ -2595,7 +2595,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -2768,7 +2768,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures and settings used across all air loops
-        dsgn_temps = standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
         unless hot_water_loop.nil?
           hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
           hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -3048,7 +3048,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures used across all air loops
-        dsgn_temps = standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
         # adjusted zone design heating temperature for psz_vav
         dsgn_temps['htg_dsgn_sup_air_temp_f'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_f']
@@ -3262,7 +3262,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures across all air loops
-        dsgn_temps = standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
         unless hot_water_loop.nil?
           hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
           hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -3428,7 +3428,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures across all air loops
-        dsgn_temps = standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
         # adjusted zone design heating temperature for data center psz_ac
         dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 64.4
@@ -3641,7 +3641,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted zone design heating temperature for data center psz_ac
       dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 64.4
@@ -3792,7 +3792,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted zone design heating temperature for split_ac
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -3932,7 +3932,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted temperatures for minisplit
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -4045,7 +4045,7 @@ module OpenstudioStandards
                             ventilation: true)
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -4161,7 +4161,7 @@ module OpenstudioStandards
                             ventilation: true)
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted zone design temperatures for pthp
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -4271,7 +4271,7 @@ module OpenstudioStandards
       fan_pressure_rise = 0.2 if fan_pressure_rise.nil?
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted zone design heating temperature for unit heater
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -4422,7 +4422,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted design temperatures for evap cooler
       dsgn_temps['clg_dsgn_sup_air_temp_f'] = 70.0
@@ -4627,7 +4627,7 @@ module OpenstudioStandards
                                                                                                     master_zone: master_zone)
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       vrfs = []
       thermal_zones.each do |zone|
@@ -4686,7 +4686,7 @@ module OpenstudioStandards
                                           capacity_control_method: 'CyclingFan')
 
       # default design temperatures used across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # make a fan coil unit for each zone
       fcus = []
@@ -5131,7 +5131,7 @@ module OpenstudioStandards
 
       # convert to a two-pipe system if required
       if two_pipe_system
-        model_two_pipe_loop(model, hot_water_loop, chilled_water_loop,
+        OpenstudioStandards::HVAC.model_two_pipe_loop(model, hot_water_loop, chilled_water_loop,
                             control_strategy: two_pipe_control_strategy,
                             lockout_temperature: two_pipe_lockout_temperature,
                             thermal_zones: thermal_zones)
@@ -5140,7 +5140,7 @@ module OpenstudioStandards
       # add supply water temperature control if enabled
       if plant_supply_water_temperature_control
         # add supply water temperature for heating plant loop
-        model_add_plant_supply_water_temperature_control(model, hot_water_loop,
+        OpenstudioStandards::HVAC.model_add_plant_supply_water_temperature_control(model, hot_water_loop,
                                                         control_strategy: plant_supply_water_temperature_control_strategy,
                                                         sp_at_oat_low: hwsp_at_oat_low,
                                                         oat_low: hw_oat_low,
@@ -5149,7 +5149,7 @@ module OpenstudioStandards
                                                         thermal_zones: thermal_zones)
 
         # add supply water temperature for cooling plant loop
-        model_add_plant_supply_water_temperature_control(model, chilled_water_loop,
+        OpenstudioStandards::HVAC.model_add_plant_supply_water_temperature_control(model, chilled_water_loop,
                                                         control_strategy: plant_supply_water_temperature_control_strategy,
                                                         sp_at_oat_low: chwsp_at_oat_low,
                                                         oat_low: chw_oat_low,
@@ -5387,7 +5387,7 @@ module OpenstudioStandards
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding furnace AC for #{zone.name}.")
 
         # default design temperatures across all air loops
-        dsgn_temps = standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
         # adjusted temperatures for furnace_central_ac
         dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -5502,7 +5502,7 @@ module OpenstudioStandards
       crank_case_max_temp_f = 55
 
       # default design temperatures across all air loops
-      dsgn_temps = standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
 
       # adjusted temperatures for furnace_central_ac
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -6274,31 +6274,31 @@ module OpenstudioStandards
       else
         case cool_fuel
         when 'DistrictCooling'
-          chilled_water_loop = model_add_chw_loop(model,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   chw_pumping_type: 'const_pri',
                                                   cooling_fuel: cool_fuel)
         when 'HeatPump'
-          condenser_water_loop = model_get_or_add_ambient_water_loop(model)
-          chilled_water_loop = model_add_chw_loop(model,
+          condenser_water_loop = OpenstudioStandards::HVAC.model_get_or_add_ambient_water_loop(model)
+          chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   chw_pumping_type: 'const_pri_var_sec',
                                                   chiller_cooling_type: 'WaterCooled',
                                                   chiller_compressor_type: 'Rotary Screw',
                                                   condenser_water_loop: condenser_water_loop)
         when 'Electricity'
           if chilled_water_loop_cooling_type == 'AirCooled'
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     chw_pumping_type: 'const_pri',
                                                     chiller_cooling_type: 'AirCooled',
                                                     cooling_fuel: cool_fuel)
           else
-            fan_type = model_cw_loop_cooling_tower_fan_type(model)
-            condenser_water_loop = model_add_cw_loop(model,
+
+            condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model,
                                                     cooling_tower_type: 'Open Cooling Tower',
                                                     cooling_tower_fan_type: 'Propeller or Axial',
-                                                    cooling_tower_capacity_control: fan_type,
+                                                    cooling_tower_capacity_control: 'Variable Speed Fan',
                                                     number_of_cells_per_tower: 1,
                                                     number_cooling_towers: 1)
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     chw_pumping_type: 'const_pri_var_sec',
                                                     chiller_cooling_type: 'WaterCooled',
                                                     chiller_compressor_type: 'Rotary Screw',
@@ -6310,15 +6310,6 @@ module OpenstudioStandards
       end
 
       return chilled_water_loop
-    end
-
-    # Determine which type of fan the cooling tower will have.  Defaults to TwoSpeed Fan.
-    #
-    # @param model [OpenStudio::Model::Model] OpenStudio model object
-    # @return [String] the fan type: TwoSpeed Fan, Variable Speed Fan
-    def self.model_cw_loop_cooling_tower_fan_type(model)
-      fan_type = 'Variable Speed Fan'
-      return fan_type
     end
 
     # Adds supply water temperature control on specified plant water loops.
@@ -6367,7 +6358,7 @@ module OpenstudioStandards
         determine_zone_cooling_needs_prg = model.getEnergyManagementSystemProgramByName('Determine_Zone_Cooling_Needs')
         determine_zone_heating_needs_prg = model.getEnergyManagementSystemProgramByName('Determine_Zone_Heating_Needs')
         unless determine_zone_cooling_needs_prg.is_initialized && determine_zone_heating_needs_prg.is_initialized
-          model_add_zone_heat_cool_request_count_program(model, thermal_zones)
+          OpenstudioStandards::HVAC.model_add_zone_heat_cool_request_count_program(model, thermal_zones)
         end
 
         plant_water_loop_name = OpenstudioStandards::HVAC.ems_friendly_name(plant_water_loop.name)
@@ -6807,12 +6798,12 @@ module OpenstudioStandards
 
       if make_new_hot_water_loop
         if hot_water_loop_type == 'HighTemperature'
-          hot_water_loop = model_add_hw_loop(model, heat_fuel)
+          hot_water_loop = OpenstudioStandards::HVAC.model_add_hw_loop(model, heat_fuel)
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'New high temperature hot water loop created.')
         elsif hot_water_loop_type == 'LowTemperature'
-          hot_water_loop = model_add_hw_loop(model, heat_fuel,
-                                            dsgn_sup_wtr_temp: 120.0,
-                                            boiler_draft_type: 'Condensing')
+          hot_water_loop = OpenstudioStandards::HVAC.model_add_hw_loop(model, heat_fuel,
+                                                                       dsgn_sup_wtr_temp: 120.0,
+                                                                       boiler_draft_type: 'Condensing')
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'New low temperature hot water loop created.')
         else
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Hot water loop archetype #{hot_water_loop_type} not recognized.")
@@ -6830,7 +6821,7 @@ module OpenstudioStandards
       ambient_water_loop = if model.getPlantLoopByName('Ambient Loop').is_initialized
                             model.getPlantLoopByName('Ambient Loop').get
                           else
-                            model_add_district_ambient_loop(model)
+                            OpenstudioStandards::HVAC.model_add_district_ambient_loop(model)
                           end
       return ambient_water_loop
     end
@@ -6844,7 +6835,7 @@ module OpenstudioStandards
       ground_hx_loop = if model.getPlantLoopByName('Ground HX Loop').is_initialized
                         model.getPlantLoopByName('Ground HX Loop').get
                       else
-                        model_add_ground_hx_loop(model)
+                        OpenstudioStandards::HVAC.model_add_ground_hx_loop(model)
                       end
       return ground_hx_loop
     end
@@ -6865,7 +6856,7 @@ module OpenstudioStandards
       heat_pump_loop = if model.getPlantLoopByName('Heat Pump Loop').is_initialized
                         model.getPlantLoopByName('Heat Pump Loop').get
                       else
-                        model_add_hp_loop(model, heating_fuel: heat_fuel, cooling_fuel: cool_fuel, cooling_type: heat_pump_loop_cooling_type)
+                        OpenstudioStandards::HVAC.model_add_hp_loop(model, heating_fuel: heat_fuel, cooling_fuel: cool_fuel, cooling_type: heat_pump_loop_cooling_type)
                       end
       return heat_pump_loop
     end
@@ -6928,11 +6919,11 @@ module OpenstudioStandards
         case main_heat_fuel
         when 'NaturalGas', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam'
           heating_type = 'Water'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
           heating_type = 'Water'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         when 'Electricity'
           heating_type = main_heat_fuel
@@ -6942,7 +6933,7 @@ module OpenstudioStandards
           hot_water_loop = nil
         end
 
-        model_add_ptac(model,
+        OpenstudioStandards::HVAC.model_add_ptac(model,
                       zones,
                       cooling_type: 'Single Speed DX AC',
                       heating_type: heating_type,
@@ -6951,7 +6942,7 @@ module OpenstudioStandards
                       ventilation: zone_equipment_ventilation)
 
       when 'PTHP'
-        model_add_pthp(model,
+        OpenstudioStandards::HVAC.model_add_pthp(model,
                       zones,
                       fan_type: 'Cycling',
                       ventilation: zone_equipment_ventilation)
@@ -6962,7 +6953,7 @@ module OpenstudioStandards
           heating_type = main_heat_fuel
           supplemental_heating_type = 'Electricity'
           if air_loop_heating_type == 'Water'
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: hot_water_loop_type)
             heating_type = 'Water'
           else
@@ -6971,12 +6962,12 @@ module OpenstudioStandards
         when 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam'
           heating_type = 'Water'
           supplemental_heating_type = 'Electricity'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump', 'ASHP'
           heating_type = 'Water'
           supplemental_heating_type = 'Electricity'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         when 'Electricity'
           heating_type = main_heat_fuel
@@ -6989,14 +6980,14 @@ module OpenstudioStandards
 
         case cool_fuel
         when 'DistrictCooling'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel)
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel)
           cooling_type = 'Water'
         else
           chilled_water_loop = nil
           cooling_type = 'Single Speed DX AC'
         end
 
-        model_add_psz_ac(model,
+        OpenstudioStandards::HVAC.model_add_psz_ac(model,
                         zones,
                         cooling_type: cooling_type,
                         chilled_water_loop: chilled_water_loop,
@@ -7007,7 +6998,7 @@ module OpenstudioStandards
                         fan_type: 'ConstantVolume')
 
       when 'PSZ-HP'
-        model_add_psz_ac(model,
+        OpenstudioStandards::HVAC.model_add_psz_ac(model,
                         zones,
                         system_name: 'PSZ-HP',
                         cooling_type: 'Single Speed Heat Pump',
@@ -7022,7 +7013,7 @@ module OpenstudioStandards
         else
           supplemental_heating_type = 'Electricity'
         end
-        model_add_psz_vav(model,
+        OpenstudioStandards::HVAC.model_add_psz_vav(model,
                           zones,
                           system_name: 'PSZ-VAV',
                           heating_type: main_heat_fuel,
@@ -7031,17 +7022,17 @@ module OpenstudioStandards
                           oa_damper_sch: nil)
 
       when 'VRF'
-        model_add_vrf(model,
+        OpenstudioStandards::HVAC.model_add_vrf(model,
                       zones,
                       ventilation: zone_equipment_ventilation)
 
       when 'Fan Coil'
         case main_heat_fuel
         when 'NaturalGas', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam', 'Electricity'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         else
           hot_water_loop = nil
@@ -7049,13 +7040,13 @@ module OpenstudioStandards
 
         case cool_fuel
         when 'Electricity', 'DistrictCooling'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
 
-        model_add_four_pipe_fan_coil(model,
+        OpenstudioStandards::HVAC.model_add_four_pipe_fan_coil(model,
                                     zones,
                                     chilled_water_loop,
                                     hot_water_loop: hot_water_loop,
@@ -7065,10 +7056,10 @@ module OpenstudioStandards
       when 'Radiant Slab'
         case main_heat_fuel
         when 'NaturalGas', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam', 'Electricity'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         else
           hot_water_loop = nil
@@ -7076,13 +7067,13 @@ module OpenstudioStandards
 
         case cool_fuel
         when 'Electricity', 'DistrictCooling'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
 
-        model_add_low_temp_radiant(model,
+        OpenstudioStandards::HVAC.model_add_low_temp_radiant(model,
                                   zones,
                                   hot_water_loop,
                                   chilled_water_loop)
@@ -7090,10 +7081,10 @@ module OpenstudioStandards
       when 'Baseboards'
         case main_heat_fuel
         when 'NaturalGas', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         when 'Electricity'
           hot_water_loop = nil
@@ -7101,12 +7092,12 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'Baseboards must have heating_type specified.')
           return false
         end
-        model_add_baseboard(model,
+        OpenstudioStandards::HVAC.model_add_baseboard(model,
                             zones,
                             hot_water_loop: hot_water_loop)
 
       when 'Unit Heaters'
-        model_add_unitheater(model,
+        OpenstudioStandards::HVAC.model_add_unitheater(model,
                             zones,
                             hvac_op_sch: nil,
                             fan_control_type: 'ConstantVolume',
@@ -7114,17 +7105,16 @@ module OpenstudioStandards
                             heating_type: main_heat_fuel)
 
       when 'High Temp Radiant'
-        model_add_high_temp_radiant(model,
+        OpenstudioStandards::HVAC.model_add_high_temp_radiant(model,
                                     zones,
                                     heating_type: main_heat_fuel,
                                     combustion_efficiency: 0.8)
 
       when 'Window AC'
-        model_add_window_ac(model,
-                            zones)
+        OpenstudioStandards::HVAC.model_add_window_ac(model, zones)
 
       when 'Residential AC'
-        model_add_furnace_central_ac(model,
+        OpenstudioStandards::HVAC.model_add_furnace_central_ac(model,
                                     zones,
                                     heating: false,
                                     cooling: true,
@@ -7132,21 +7122,21 @@ module OpenstudioStandards
 
       when 'Forced Air Furnace'
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', 'If a Forced Air Furnace with ventilation serves a core zone, make sure the outdoor air is included in design sizing for the systems (typically occupancy, and therefore ventilation is zero during winter sizing), otherwise it may not be sized large enough to meet the heating load in some situations.')
-        model_add_furnace_central_ac(model,
+        OpenstudioStandards::HVAC.model_add_furnace_central_ac(model,
                                     zones,
                                     heating: true,
                                     cooling: false,
                                     ventilation: true)
 
       when 'Residential Forced Air Furnace'
-        model_add_furnace_central_ac(model,
+        OpenstudioStandards::HVAC.model_add_furnace_central_ac(model,
                                     zones,
                                     heating: true,
                                     cooling: false,
                                     ventilation: false)
 
       when 'Residential Forced Air Furnace with AC'
-        model_add_furnace_central_ac(model,
+        OpenstudioStandards::HVAC.model_add_furnace_central_ac(model,
                                     zones,
                                     heating: true,
                                     cooling: true,
@@ -7155,25 +7145,24 @@ module OpenstudioStandards
       when 'Residential Air Source Heat Pump'
         heating = true unless main_heat_fuel.nil?
         cooling = true unless cool_fuel.nil?
-        model_add_central_air_source_heat_pump(model,
+        OpenstudioStandards::HVAC.model_add_central_air_source_heat_pump(model,
                                               zones,
                                               heating: heating,
                                               cooling: cooling,
                                               ventilation: false)
 
       when 'Residential Minisplit Heat Pumps'
-        model_add_minisplit_hp(model,
-                              zones)
+        OpenstudioStandards::HVAC.model_add_minisplit_hp(model, zones)
 
       when 'VAV Reheat'
         case main_heat_fuel
         when 'NaturalGas', 'Gas', 'HeatPump', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam'
           heating_type = main_heat_fuel
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
           heating_type = main_heat_fuel
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         else
           heating_type = 'Electricity'
@@ -7182,7 +7171,7 @@ module OpenstudioStandards
 
         case air_loop_cooling_type
         when 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
@@ -7202,7 +7191,7 @@ module OpenstudioStandards
           reheat_type = 'Water'
         end
 
-        model_add_vav_reheat(model,
+        OpenstudioStandards::HVAC.model_add_vav_reheat(model,
                             zones,
                             heating_type: heating_type,
                             reheat_type: reheat_type,
@@ -7216,11 +7205,11 @@ module OpenstudioStandards
         case main_heat_fuel
         when 'NaturalGas', 'Gas', 'HeatPump', 'DistrictHeating', 'DistrictHeatingWater', 'DistrictHeatingSteam'
           heating_type = main_heat_fuel
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: hot_water_loop_type)
         when 'AirSourceHeatPump'
           heating_type = main_heat_fuel
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         else
           heating_type = 'Electricity'
@@ -7228,12 +7217,12 @@ module OpenstudioStandards
         end
 
         if air_loop_cooling_type == 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
-        model_add_vav_reheat(model,
+        OpenstudioStandards::HVAC.model_add_vav_reheat(model,
                             zones,
                             heating_type: heating_type,
                             reheat_type: nil,
@@ -7245,12 +7234,12 @@ module OpenstudioStandards
 
       when 'VAV Gas Reheat'
         if air_loop_cooling_type == 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
-        model_add_vav_reheat(model,
+        OpenstudioStandards::HVAC.model_add_vav_reheat(model,
                             zones,
                             heating_type: 'NaturalGas',
                             reheat_type: 'NaturalGas',
@@ -7262,11 +7251,11 @@ module OpenstudioStandards
       when 'PVAV Reheat'
         case main_heat_fuel
         when 'AirSourceHeatPump'
-          hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+          hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                           hot_water_loop_type: 'LowTemperature')
         else
           if air_loop_heating_type == 'Water'
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: hot_water_loop_type)
           else
             heating_type = main_heat_fuel
@@ -7277,7 +7266,7 @@ module OpenstudioStandards
         when 'Electricity'
           chilled_water_loop = nil
         else
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         end
 
@@ -7287,7 +7276,7 @@ module OpenstudioStandards
           electric_reheat = false
         end
 
-        model_add_pvav(model,
+        OpenstudioStandards::HVAC.model_add_pvav(model,
                       zones,
                       hot_water_loop: hot_water_loop,
                       chilled_water_loop: chilled_water_loop,
@@ -7297,11 +7286,11 @@ module OpenstudioStandards
       when 'PVAV PFP Boxes'
         case cool_fuel
         when 'DistrictCooling'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel)
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel)
         else
           chilled_water_loop = nil
         end
-        model_add_pvav_pfp_boxes(model,
+        OpenstudioStandards::HVAC.model_add_pvav_pfp_boxes(model,
                                 zones,
                                 chilled_water_loop: chilled_water_loop,
                                 fan_efficiency: 0.62,
@@ -7309,9 +7298,9 @@ module OpenstudioStandards
                                 fan_pressure_rise: 4.0)
 
       when 'VAV PFP Boxes'
-        chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+        chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
-        model_add_pvav_pfp_boxes(model,
+        OpenstudioStandards::HVAC.model_add_pvav_pfp_boxes(model,
                                 zones,
                                 chilled_water_loop: chilled_water_loop,
                                 fan_efficiency: 0.62,
@@ -7320,29 +7309,29 @@ module OpenstudioStandards
 
       when 'Water Source Heat Pumps'
         if (main_heat_fuel.include?('DistrictHeating') && cool_fuel == 'DistrictCooling') || (main_heat_fuel == 'AmbientLoop' && cool_fuel == 'AmbientLoop')
-          condenser_loop = model_get_or_add_ambient_water_loop(model)
+          condenser_loop = OpenstudioStandards::HVAC.model_get_or_add_ambient_water_loop(model)
         else
-          condenser_loop = model_get_or_add_heat_pump_loop(model, main_heat_fuel, cool_fuel,
+          condenser_loop = OpenstudioStandards::HVAC.model_get_or_add_heat_pump_loop(model, main_heat_fuel, cool_fuel,
                                                           heat_pump_loop_cooling_type: heat_pump_loop_cooling_type)
         end
-        model_add_water_source_hp(model,
+        OpenstudioStandards::HVAC.model_add_water_source_hp(model,
                                   zones,
                                   condenser_loop,
                                   ventilation: zone_equipment_ventilation)
 
       when 'Ground Source Heat Pumps'
-        condenser_loop = model_get_or_add_ground_hx_loop(model)
-        model_add_water_source_hp(model,
+        condenser_loop = OpenstudioStandards::HVAC.model_get_or_add_ground_hx_loop(model)
+        OpenstudioStandards::HVAC.model_add_water_source_hp(model,
                                   zones,
                                   condenser_loop,
                                   ventilation: zone_equipment_ventilation)
 
       when 'DOAS Cold Supply'
-        hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+        hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                         hot_water_loop_type: hot_water_loop_type)
-        chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+        chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
-        model_add_doas_cold_supply(model,
+        OpenstudioStandards::HVAC.model_add_doas_cold_supply(model,
                                   zones,
                                   hot_water_loop: hot_water_loop,
                                   chilled_water_loop: chilled_water_loop)
@@ -7353,26 +7342,26 @@ module OpenstudioStandards
           when nil
             hot_water_loop = nil
           when 'AirSourceHeatPump'
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: 'LowTemperature')
           when 'Electricity'
             OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "air_loop_heating_type '#{air_loop_heating_type}' is not supported with main_heat_fuel '#{main_heat_fuel}' for a 'DOAS' system type.")
             return false
           else
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: hot_water_loop_type)
           end
         else
           hot_water_loop = nil
         end
         if air_loop_cooling_type == 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
 
-        model_add_doas(model,
+        OpenstudioStandards::HVAC.model_add_doas(model,
                       zones,
                       hot_water_loop: hot_water_loop,
                       chilled_water_loop: chilled_water_loop)
@@ -7383,23 +7372,23 @@ module OpenstudioStandards
           when nil
             hot_water_loop = nil
           when 'AirSourceHeatPump'
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: 'LowTemperature')
           else
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: hot_water_loop_type)
           end
         else
           hot_water_loop = nil
         end
         if air_loop_cooling_type == 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
 
-        model_add_doas(model,
+        OpenstudioStandards::HVAC.model_add_doas(model,
                       zones,
                       hot_water_loop: hot_water_loop,
                       chilled_water_loop: chilled_water_loop,
@@ -7412,23 +7401,23 @@ module OpenstudioStandards
           when nil
             hot_water_loop = nil
           when 'AirSourceHeatPump'
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: 'LowTemperature')
           else
-            hot_water_loop = model_get_or_add_hot_water_loop(model, main_heat_fuel,
+            hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, main_heat_fuel,
                                                             hot_water_loop_type: hot_water_loop_type)
           end
         else
           hot_water_loop = nil
         end
         if air_loop_cooling_type == 'Water'
-          chilled_water_loop = model_get_or_add_chilled_water_loop(model, cool_fuel,
+          chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, cool_fuel,
                                                                   chilled_water_loop_cooling_type: chilled_water_loop_cooling_type)
         else
           chilled_water_loop = nil
         end
 
-        model_add_doas(model,
+        OpenstudioStandards::HVAC.model_add_doas(model,
                       zones,
                       hot_water_loop: hot_water_loop,
                       chilled_water_loop: chilled_water_loop,
@@ -7436,25 +7425,25 @@ module OpenstudioStandards
                       econo_ctrl_mthd: 'FixedDryBulb')
 
       when 'ERVs'
-        model_add_zone_erv(model, zones)
+        OpenstudioStandards::HVAC.model_add_zone_erv(model, zones)
 
       when 'Residential ERVs'
-        model_add_residential_erv(model, zones)
+        OpenstudioStandards::HVAC.model_add_residential_erv(model, zones)
 
       when 'Residential Ventilators'
-        model_add_residential_ventilator(model, zones)
+        OpenstudioStandards::HVAC.model_add_residential_ventilator(model, zones)
 
       when 'Evaporative Cooler'
-        model_add_evap_cooler(model, zones)
+        OpenstudioStandards::HVAC.model_add_evap_cooler(model, zones)
 
       when 'Ideal Air Loads'
-        model_add_ideal_air_loads(model, zones)
+        OpenstudioStandards::HVAC.model_add_ideal_air_loads(model, zones)
 
       else
         # Combination Systems
         if system_type.include? 'with DOAS with DCV'
           # add DOAS DCV system
-          model_add_hvac_system(model, 'DOAS with DCV', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, 'DOAS with DCV', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -7464,7 +7453,7 @@ module OpenstudioStandards
                                 fan_coil_capacity_control_method: fan_coil_capacity_control_method)
           # add paired system type
           paired_system_type = system_type.gsub(' with DOAS with DCV', '')
-          model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -7474,7 +7463,7 @@ module OpenstudioStandards
                                 fan_coil_capacity_control_method: fan_coil_capacity_control_method)
         elsif system_type.include? 'with DOAS'
           # add DOAS system
-          model_add_hvac_system(model, 'DOAS', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, 'DOAS', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -7484,7 +7473,7 @@ module OpenstudioStandards
                                 fan_coil_capacity_control_method: fan_coil_capacity_control_method)
           # add paired system type
           paired_system_type = system_type.gsub(' with DOAS', '')
-          model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -7494,7 +7483,7 @@ module OpenstudioStandards
                                 fan_coil_capacity_control_method: fan_coil_capacity_control_method)
         elsif system_type.include? 'with ERVs'
           # add DOAS system
-          model_add_hvac_system(model, 'ERVs', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, 'ERVs', main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -7504,7 +7493,7 @@ module OpenstudioStandards
                                 fan_coil_capacity_control_method: fan_coil_capacity_control_method)
           # add paired system type
           paired_system_type = system_type.gsub(' with ERVs', '')
-          model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+          OpenstudioStandards::HVAC.model_add_hvac_system(model, paired_system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                 hot_water_loop_type: hot_water_loop_type,
                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,

@@ -32,7 +32,7 @@ module Laboratory
       # add exhaust fan to fume hood zone
       fume_hood_zone_volume = space.volume
       flow_rate_fume_hood = fume_hood_zone_volume * fume_hood_exhaust_ach / 3600.0
-      model_add_exhaust_fan(model, [space.thermalZone.get], flow_rate: flow_rate_fume_hood, flow_fraction_schedule_name: 'Lab_FumeHood_Sch')
+      OpenstudioStandards::HVAC.model_add_exhaust_fan(model, [space.thermalZone.get], flow_rate: flow_rate_fume_hood, flow_fraction_schedule_name: 'Lab_FumeHood_Sch')
     end
 
     # adjust doas sizing

@@ -641,7 +641,7 @@ class AppendixGPRMTests < Minitest::Test
           model_ptac = BTAP::FileIO.deep_copy(model_base)
           # Remove all HVAC from model, excluding service water heating
           std.model_remove_prm_hvac(model_ptac)
-          hot_water_loop = std.model_add_hw_loop(model_ptac, 'DistrictHeating')
+          hot_water_loop = OpenstudioStandards::HVAC.model_add_hw_loop(model_ptac, 'DistrictHeating')
           model_ptac.getPumpVariableSpeeds.each do |pump|
             pump.setRatedFlowRate(100)
           end
@@ -649,7 +649,7 @@ class AppendixGPRMTests < Minitest::Test
           zones.each do |zone|
             zone.additionalProperties.setFeature('baseline_system_type', 'PTAC')
           end
-          std.model_add_ptac(model_ptac,
+          OpenstudioStandards::HVAC.model_add_ptac(model_ptac,
                              zones,
                              cooling_type: 'Single Speed DX AC',
                              heating_type: 'Water',
@@ -690,7 +690,7 @@ class AppendixGPRMTests < Minitest::Test
             zones.each do |zone|
               zone.additionalProperties.setFeature('baseline_system_type', 'PTHP')
             end
-            std.model_add_pthp(model_pthp,
+            OpenstudioStandards::HVAC.model_add_pthp(model_pthp,
                                zones,
                                fan_type: 'ConstantVolume')
             zones.each do |zone|
@@ -734,7 +734,7 @@ class AppendixGPRMTests < Minitest::Test
             # Remove all EMS objects from the model
             std.model_remove_prm_ems_objects(model_psz_ac)
             zones = model_psz_ac.getThermalZones
-            std.model_add_psz_ac(model_psz_ac,
+            OpenstudioStandards::HVAC.model_add_psz_ac(model_psz_ac,
                                  zones,
                                  cooling_type: 'Single Speed DX AC',
                                  chilled_water_loop: nil,
@@ -954,7 +954,7 @@ class AppendixGPRMTests < Minitest::Test
           zones.each do |zone|
             zone.additionalProperties.setFeature('baseline_system_type', 'Gas_Furnace')
           end
-          std.model_add_unitheater(model_gas_furnace,
+          OpenstudioStandards::HVAC.model_add_unitheater(model_gas_furnace,
                                    zones,
                                    fan_control_type: 'ConstantVolume',
                                    fan_pressure_rise: 0.2,

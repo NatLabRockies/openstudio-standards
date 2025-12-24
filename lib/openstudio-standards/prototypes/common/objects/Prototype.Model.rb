@@ -1621,9 +1621,9 @@ Standard.class_eval do
           oa_cfm_per_ft2 = 0.0578940512546562
           oa_m3_per_m2 = OpenStudio.convert(OpenStudio.convert(oa_cfm_per_ft2, 'cfm', 'm^3/s').get, '1/ft^2', '1/m^2').get
           if has_erv
-            model_add_residential_erv(model, [zone], oa_m3_per_m2)
+            OpenstudioStandards::HVAC.model_add_residential_erv(model, [zone], oa_m3_per_m2)
           else
-            model_add_residential_ventilator(model, [zone], oa_m3_per_m2)
+            OpenstudioStandards::HVAC.model_add_residential_ventilator(model, [zone], oa_m3_per_m2)
           end
 
           # Shut-off air loop level OA intake

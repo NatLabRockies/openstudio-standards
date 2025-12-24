@@ -1418,11 +1418,11 @@ class Standard
           hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                              model.getPlantLoopByName('Hot Water Loop').get
                            else
-                             model_add_hw_loop(model, main_heat_fuel)
+                             OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                            end
 
           # Add a hot water PTAC to each zone
-          model_add_ptac(model,
+          OpenstudioStandards::HVAC.model_add_ptac(model,
                          zones,
                          cooling_type: 'Single Speed DX AC',
                          heating_type: 'Water',
@@ -1433,7 +1433,7 @@ class Standard
       when 'PTHP' # System 2
         unless zones.empty?
           # add an air-source packaged terminal heat pump with electric supplemental heat to each zone.
-          model_add_pthp(model,
+          OpenstudioStandards::HVAC.model_add_pthp(model,
                          zones,
                          fan_type: 'ConstantVolume')
         end
@@ -1448,7 +1448,7 @@ class Standard
             hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                                model.getPlantLoopByName('Hot Water Loop').get
                              else
-                               model_add_hw_loop(model, main_heat_fuel)
+                               OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                              end
           end
 
@@ -1460,14 +1460,14 @@ class Standard
             chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                    model.getPlantLoopByName('Chilled Water Loop').get
                                  else
-                                   model_add_chw_loop(model,
+                                   OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                       cooling_fuel: cool_fuel,
                                                       chw_pumping_type: 'const_pri')
                                  end
           end
 
           # Add a PSZ-AC to each zone
-          model_add_psz_ac(model,
+          OpenstudioStandards::HVAC.model_add_psz_ac(model,
                            zones,
                            cooling_type: cooling_type,
                            chilled_water_loop: chilled_water_loop,
@@ -1481,7 +1481,7 @@ class Standard
       when 'PSZ_HP' # System 4
         unless zones.empty?
           # Add an air-source packaged single zone heat pump with electric supplemental heat to each zone.
-          model_add_psz_ac(model,
+          OpenstudioStandards::HVAC.model_add_psz_ac(model,
                            zones,
                            system_name: 'PSZ-HP',
                            cooling_type: 'Single Speed Heat Pump',
@@ -1497,7 +1497,7 @@ class Standard
         hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                            model.getPlantLoopByName('Hot Water Loop').get
                          else
-                           model_add_hw_loop(model, main_heat_fuel)
+                           OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                          end
 
         # If district cooling
@@ -1506,7 +1506,7 @@ class Standard
           chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
-                                 model_add_chw_loop(model,
+                                 OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
                                                     chw_pumping_type: 'const_pri')
                                end
@@ -1544,7 +1544,7 @@ class Standard
           # If and only if there are primary zones to attach to the loop
           # counter example: floor with only one elevator machine room that get classified as sec_zones
           unless pri_zones.empty?
-            air_loop = model_add_pvav(model,
+            air_loop = OpenstudioStandards::HVAC.model_add_pvav(model,
                                       pri_zones,
                                       system_name: system_name,
                                       hot_water_loop: hot_water_loop,
@@ -1568,7 +1568,7 @@ class Standard
           chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
-                                 model_add_chw_loop(model,
+                                 OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
                                                     chw_pumping_type: 'const_pri')
                                end
@@ -1598,7 +1598,7 @@ class Standard
           system_name = "#{story_name} PVAV_PFP_Boxes (Sys6)"
           # If and only if there are primary zones to attach to the loop
           unless pri_zones.empty?
-            model_add_pvav_pfp_boxes(model,
+            OpenstudioStandards::HVAC.model_add_pvav_pfp_boxes(model,
                                      pri_zones,
                                      system_name: system_name,
                                      chilled_water_loop: chilled_water_loop,
@@ -1619,7 +1619,7 @@ class Standard
         hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                            model.getPlantLoopByName('Hot Water Loop').get
                          else
-                           model_add_hw_loop(model, main_heat_fuel)
+                           OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                          end
 
         # Retrieve the existing chilled water loop or add a new one if necessary.
@@ -1628,18 +1628,18 @@ class Standard
           chilled_water_loop = model.getPlantLoopByName('Chilled Water Loop').get
         else
           if cool_fuel == 'DistrictCooling'
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
                                                     chw_pumping_type: 'const_pri')
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
-            condenser_water_loop = model_add_cw_loop(model,
+            condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model,
                                                      cooling_tower_type: 'Open Cooling Tower',
                                                      cooling_tower_fan_type: 'Propeller or Axial',
                                                      cooling_tower_capacity_control: fan_type,
                                                      number_of_cells_per_tower: 1,
                                                      number_cooling_towers: 1)
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     chw_pumping_type: 'const_pri_var_sec',
                                                     chiller_cooling_type: 'WaterCooled',
                                                     chiller_compressor_type: 'Rotary Screw',
@@ -1685,7 +1685,7 @@ class Standard
             if chilled_water_loop.additionalProperties.hasFeature('secondary_loop_name')
               chilled_water_loop = model.getPlantLoopByName(chilled_water_loop.additionalProperties.getFeatureAsString('secondary_loop_name').get).get
             end
-            air_loop = model_add_vav_reheat(model,
+            air_loop = OpenstudioStandards::HVAC.model_add_vav_reheat(model,
                                             pri_zones,
                                             system_name: system_name,
                                             reheat_type: reheat_type,
@@ -1712,18 +1712,18 @@ class Standard
           chilled_water_loop = model.getPlantLoopByName('Chilled Water Loop').get
         else
           if cool_fuel == 'DistrictCooling'
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
                                                     chw_pumping_type: 'const_pri')
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
-            condenser_water_loop = model_add_cw_loop(model,
+            condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model,
                                                      cooling_tower_type: 'Open Cooling Tower',
                                                      cooling_tower_fan_type: 'Propeller or Axial',
                                                      cooling_tower_capacity_control: fan_type,
                                                      number_of_cells_per_tower: 1,
                                                      number_cooling_towers: 1)
-            chilled_water_loop = model_add_chw_loop(model,
+            chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     chw_pumping_type: 'const_pri_var_sec',
                                                     chiller_cooling_type: 'WaterCooled',
                                                     chiller_compressor_type: 'Rotary Screw',
@@ -1758,7 +1758,7 @@ class Standard
             if chilled_water_loop.additionalProperties.hasFeature('secondary_loop_name')
               chilled_water_loop = model.getPlantLoopByName(chilled_water_loop.additionalProperties.getFeatureAsString('secondary_loop_name').get).get
             end
-            model_add_vav_pfp_boxes(model,
+            OpenstudioStandards::HVAC.model_add_vav_pfp_boxes(model,
                                     pri_zones,
                                     system_name: system_name,
                                     chilled_water_loop: chilled_water_loop,
@@ -1782,11 +1782,11 @@ class Standard
             hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                                model.getPlantLoopByName('Hot Water Loop').get
                              else
-                               model_add_hw_loop(model, main_heat_fuel)
+                               OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                              end
           end
           # Add a System 9 - Gas Unit Heater to each zone
-          model_add_unitheater(model,
+          OpenstudioStandards::HVAC.model_add_unitheater(model,
                                zones,
                                fan_control_type: 'ConstantVolume',
                                fan_pressure_rise: 0.2,
@@ -1797,7 +1797,7 @@ class Standard
       when 'Electric_Furnace' # System 10
         unless zones.empty?
           # Add a System 10 - Electric Unit Heater to each zone
-          model_add_unitheater(model,
+          OpenstudioStandards::HVAC.model_add_unitheater(model,
                                zones,
                                fan_control_type: 'ConstantVolume',
                                fan_pressure_rise: 0.2,
@@ -1812,7 +1812,7 @@ class Standard
             hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                                model.getPlantLoopByName('Hot Water Loop').get
                              else
-                               model_add_hw_loop(model, main_heat_fuel)
+                               OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                              end
           else
             # If no hot water loop is defined, heat will default to electric resistance
@@ -1822,12 +1822,12 @@ class Standard
           chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
-                                 model_add_chw_loop(model,
+                                 OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
                                                     chw_pumping_type: 'const_pri')
                                end
 
-          model_add_four_pipe_fan_coil(model,
+          OpenstudioStandards::HVAC.model_add_four_pipe_fan_coil(model,
                                        zones,
                                        chilled_water_loop,
                                        hot_water_loop: hot_water_loop,
@@ -1857,7 +1857,7 @@ class Standard
               hot_water_loop = if model.getPlantLoopByName('Hot Water Loop').is_initialized
                                  model.getPlantLoopByName('Hot Water Loop').get
                                else
-                                 hot_water_loop = model_add_hw_loop(model, main_heat_fuel)
+                                 hot_water_loop = OpenstudioStandards::HVAC.model_add_hw_loop(model, main_heat_fuel)
                                end
               heating_type = 'Water'
           end
@@ -1866,10 +1866,10 @@ class Standard
           chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
-                                 chilled_water_loop = model_add_chw_loop(model, chw_pumping_type: 'const_pri')
+                                 chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model, chw_pumping_type: 'const_pri')
                                end
 
-          model_add_psz_vav(model,
+          OpenstudioStandards::HVAC.model_add_psz_vav(model,
                             zones,
                             heating_type: heating_type,
                             cooling_type: 'WaterCooled',
