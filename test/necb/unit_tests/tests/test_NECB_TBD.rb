@@ -24,7 +24,7 @@ class NECB_TBD_Tests < Minitest::Test
 
     # Range of test options.
     @templates = [
-      # 'NECB2011',
+      'NECB2011',
       # 'NECB2015',
       # 'NECB2017',
       'NECB2020'
@@ -52,8 +52,8 @@ class NECB_TBD_Tests < Minitest::Test
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
-      # 'Warehouse'
+      'SmallOffice',
+      'Warehouse'
     ]
 
     # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
@@ -64,7 +64,7 @@ class NECB_TBD_Tests < Minitest::Test
     #         BTAP::Activity features - @todo.
 
     @structure = [
-      # '',
+      '',
       'structure'
     ]
 
@@ -82,8 +82,8 @@ class NECB_TBD_Tests < Minitest::Test
     #        surfaces with their initial, code-required Uo factors.
     #
     @options = [
-      # 'none',
-      # 'bad',
+      'none',
+      'bad',
       # 'good',
       'uprate'
     ]
@@ -161,6 +161,7 @@ class NECB_TBD_Tests < Minitest::Test
                   assert(surface.isConstructionDefaulted, err_msg)
 
                   lc      = surface.construction
+                  film    = surface.filmResistance
                   err_msg = "BTAP/TBD: #{id} construction (#{cas})?"
                   refute_empty(lc, err_msg)
                   lc      = lc.get.to_LayeredConstruction
@@ -207,12 +208,12 @@ class NECB_TBD_Tests < Minitest::Test
                   # So there's quite a gap between insulated vs uninsulated
                   # constructions when working with the NECBs. A potentially
                   # simple way of determining whether an assembly is indeed
-                  # insulated/costed: if rsi > 1.0.
+                  # insulated/costed: if TBD.rsi() > 1.0.
                   err_msg = "BTAP/TBD: #{id} attic rsi (#{cas})?"
 
                   if attic
                     if boundary == "outdoors"
-                      assert(TBD.rsi(lc) < 1.0, err_msg) # uninsulated
+                      assert(TBD.rsi(lc, film) < 1.0, err_msg) # uninsulated
                     else
                       adjacent = surface.adjacentSurface
                       err_msg  = "BTAP/TBD: #{id} adjacent (#{cas})?"
@@ -229,18 +230,18 @@ class NECB_TBD_Tests < Minitest::Test
                       refute_empty(prop, err_msg)
 
                       if other.partofTotalFloorArea
-                        assert(TBD.rsi(lc) > 1.0, err_msg) # insulated
+                        assert(TBD.rsi(lc, film) > 1.0, err_msg)   # insulated
                       else
-                        if prop.get.downcase == "unconditioned" # another attic?
-                          assert(TBD.rsi(lc) < 1.0, err_msg)    # uninsulated
+                        if prop.get.downcase == "unconditioned"    # 2nd attic?
+                          assert(TBD.rsi(lc, film) < 1.0, err_msg) # uninsulated
                         else
-                          assert(TBD.rsi(lc) > 1.0, err_msg)    # insulated
+                          assert(TBD.rsi(lc, film) > 1.0, err_msg) # insulated
                         end
                       end
                     end
                   else
                     if boundary == "outdoors"
-                      assert(TBD.rsi(lc) > 1.0, err_msg) # insulated
+                      assert(TBD.rsi(lc, film) > 1.0, err_msg) # insulated
                     end
                   end
                 end
@@ -291,6 +292,7 @@ class NECB_TBD_Tests < Minitest::Test
                   next unless surfaces[id][:heatloss ].abs > TBD::TOL
 
                   lc      = surface.construction
+                  film    = surface.filmResistance
                   err_msg = "BTAP/TBD: #{id} construction (#{cas})?"
                   refute_empty(lc, err_msg)
                   lc      = lc.get.to_LayeredConstruction
@@ -301,25 +303,28 @@ class NECB_TBD_Tests < Minitest::Test
                   err_msg = "Failed TBD processes (#{cas})?"
                   assert_includes(nom, " c tbd", err_msg)
 
-                  prop    = surface.additionalProperties.getFeatureAsDouble(tg)
+                  prop = surface.additionalProperties.getFeatureAsDouble(tg)
                   err_msg = "BTAP/TBD: #{id} uprated Uo (#{cas})?"
-                  refute_empty(prop, err_msg)
 
-                  # Initial, uprated Uo, e.g. (FullServiceRestaurant):
-                  #   0:1:1:0:1:Dining : 0.130 (R44) # skylight well wall
-                  #   0:1:1:Dining     : 0.100 (R57) # insulated attic ceiling
-                  uo = prop.get
-                  # puts "#{id} : #{uo.round(3)} vs #{(1/TBD.rsi(lc)).round(3)}"
+                  unless option == 'uprate'
+                    assert_empty(prop, err_msg)
+                  else
+                    refute_empty(prop, err_msg)
 
-                  err_msg = "BTAP/TBD: #{id} Uo vs U (#{cas})?"
-                  assert(uo < 1/TBD.rsi(lc))
+                    # Initial, uprated Uo, e.g. (FullServiceRestaurant):
+                    #   0:1:1:0:1:Dining : 0.130 (R44) # skylight well wall
+                    #   0:1:1:Dining     : 0.100 (R57) # insulated attic ceiling
+                    uo = prop.get
+                    # puts "#{id} : #{uo.round(3)} vs #{(1/TBD.rsi(lc, film)).round(3)}"
+
+                    err_msg = "BTAP/TBD: #{id} Uo vs U (#{cas})?"
+                    assert(uo < 1/TBD.rsi(lc, film))
+                  end
                 end
 
-                st.tbd.feedback[:logs].each do |log|
-                  fdback << log
-                  # NOTE: BTAP/TBD feedback logs are simple strings. Look up
-                  # st.tbd.tally Hash to extract quantities for costing.
-                end
+                # Note: BTAP/TBD feedback logs are simple strings. Look up
+                #       st.tbd.tally Hash to extract quantities for costing.
+                st.tbd.feedback[:logs].each { |log| fdback << log }
               end
             end                # |inter    |
           end                  # |option   |
