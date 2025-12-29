@@ -250,7 +250,7 @@ module OpenstudioStandards
       end
 
       if dsgn_sup_wtr_temp.nil?
-        dsgn_sup_wtr_temp = 44
+        dsgn_sup_wtr_temp = 44.0
       end
 
       # chilled water loop sizing and controls
@@ -596,7 +596,8 @@ module OpenstudioStandards
           cooling_tower.setDesignRangeTemperature(dsgn_sup_wtr_temp_delt_k)
           cooling_tower.setDesignApproachTemperature(wet_bulb_approach_k)
           cooling_tower.setFractionofTowerCapacityinFreeConvectionRegime(0.125)
-          twr_fan_curve = model_add_curve(model, 'VSD-TWR-FAN-FPLR')
+          coeffs = [0.33162901, -0.88567609, 0.60556507, 0.9484823]
+          twr_fan_curve = OpenstudioStandards::HVAC.create_curve_cubic(model, coeffs, name: 'VSD-TWR-FAN-FPLR', min_x: 0, max_x: 1.0, min_out: nil, max_out: nil)
           cooling_tower.setFanPowerRatioFunctionofAirFlowRateRatioCurve(twr_fan_curve)
         else
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.Prototype.hvac_systems', "#{cooling_tower_capacity_control} is not a valid choice of cooling tower capacity control.  Valid choices are Fluid Bypass, Fan Cycling, TwoSpeed Fan, Variable Speed Fan.")
@@ -614,6 +615,7 @@ module OpenstudioStandards
       # apply 90.1 sizing temperatures
       if use_90_1_design_sizing
         # use the formulation in 90.1-2010 G3.1.3.11 to set the approach temperature
+        std = Standard.build('90.1-2010')
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.hvac_systems', "Using the 90.1-2010 G3.1.3.11 approach temperature sizing methodology for condenser loop #{condenser_water_loop.name}.")
 
         # first, look in the model design day objects for sizing information
@@ -703,7 +705,7 @@ module OpenstudioStandards
         design_oat_wb_c = OpenStudio.convert(design_oat_wb_f, 'F', 'C').get
 
         # call method to apply design sizing to the condenser water loop
-        prototype_apply_condenser_water_temperatures(condenser_water_loop, design_wet_bulb_c: design_oat_wb_c)
+        std.prototype_apply_condenser_water_temperatures(condenser_water_loop, design_wet_bulb_c: design_oat_wb_c)
       end
 
       # Condenser water loop pipes
@@ -1287,9 +1289,9 @@ module OpenstudioStandards
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param hot_water_loop [OpenStudio::Model::PlantLoop] hot water loop to connect to heating and zone fan coils
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect to cooling coil
-    # @param hvac_op_sch [String] name of the HVAC operation schedule, default is always on
-    # @param min_oa_sch [String] name of the minimum outdoor air schedule, default is always on
-    # @param min_frac_oa_sch [String] name of the minimum fraction of outdoor air schedule, default is always on
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param min_oa_sch [OpenStudio::Model::Schedule]  OpenStudio Schedule object for the minimum outdoor air schedule. Defaults to always on if nil.
+    # @param min_frac_oa_sch [String] OpenStudio Schedule object for the minimum fraction of outdoor air schedule. Defaults to always on if nil.
     # @param fan_maximum_flow_rate [Double] fan maximum flow rate in cfm, default is autosize
     # @param econo_ctrl_mthd [String] economizer control type, default is Fixed Dry Bulb
     # @param energy_recovery [Boolean] if true, an ERV will be added to the system
@@ -1337,8 +1339,6 @@ module OpenstudioStandards
       # set availability schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # DOAS design temperatures
@@ -1411,15 +1411,11 @@ module OpenstudioStandards
       # minimum outdoor air schedule
       if min_oa_sch.nil?
         min_oa_sch = model.alwaysOnDiscreteSchedule
-      else
-        min_oa_sch = model_add_schedule(model, min_oa_sch)
       end
 
       # minimum outdoor air fraction schedule
       if min_frac_oa_sch.nil?
         min_frac_oa_sch = model.alwaysOnDiscreteSchedule
-      else
-        min_frac_oa_sch = model_add_schedule(model, min_frac_oa_sch)
       end
 
       # create controller outdoor air
@@ -1515,9 +1511,9 @@ module OpenstudioStandards
     # @param doas_control_strategy [String] DOAS control strategy
     # @param hot_water_loop [OpenStudio::Model::PlantLoop] hot water loop to connect to heating and zone fan coils
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect to cooling coil
-    # @param hvac_op_sch [String] name of the HVAC operation schedule, default is always on
-    # @param min_oa_sch [String] name of the minimum outdoor air schedule, default is always on
-    # @param min_frac_oa_sch [String] name of the minimum fraction of outdoor air schedule, default is always on
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param min_oa_sch [OpenStudio::Model::Schedule]  OpenStudio Schedule object for the minimum outdoor air schedule. Defaults to always on if nil.
+    # @param min_frac_oa_sch [String] OpenStudio Schedule object for the minimum fraction of outdoor air schedule. Defaults to always on if nil.
     # @param fan_maximum_flow_rate [Double] fan maximum flow rate in cfm, default is autosize
     # @param econo_ctrl_mthd [String] economizer control type, default is Fixed Dry Bulb
     #   If enabled, the DOAS will be sized for twice the ventilation minimum to allow economizing
@@ -1566,8 +1562,6 @@ module OpenstudioStandards
       # set availability schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # DOAS design temperatures
@@ -1658,14 +1652,12 @@ module OpenstudioStandards
 
       # minimum outdoor air schedule
       unless min_oa_sch.nil?
-        min_oa_sch = model_add_schedule(model, min_oa_sch)
+        min_oa_sch = model.alwaysOnDiscreteSchedule
       end
 
       # minimum outdoor air fraction schedule
       if min_frac_oa_sch.nil?
         min_frac_oa_sch = model.alwaysOnDiscreteSchedule
-      else
-        min_frac_oa_sch = model_add_schedule(model, min_frac_oa_sch)
       end
 
       # create controller outdoor air
@@ -1819,8 +1811,8 @@ module OpenstudioStandards
     # @param reheat_type [String] valid options are NaturalGas, Gas, Electricity, Water, nil (no heat)
     # @param hot_water_loop [OpenStudio::Model::PlantLoop] hot water loop to connect heating and reheat coils to
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect cooling coil to
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule, or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
     # @param fan_efficiency [Double] fan total efficiency, including motor and impeller
     # @param fan_motor_efficiency [Double] fan motor efficiency
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
@@ -1857,18 +1849,16 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       unless oa_damper_sch.nil?
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
+        oa_damper_sch = model.alwaysOnDiscreteSchedule
       end
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
       if !min_sys_airflow_ratio.nil?
         if model.version < OpenStudio::VersionString.new('2.7.0')
           sizing_system.setMinimumSystemAirFlowRatio(min_sys_airflow_ratio)
@@ -2066,8 +2056,8 @@ module OpenstudioStandards
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to connect to this system
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect to the cooling coil
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
     # @param fan_efficiency [Double] fan total efficiency, including motor and impeller
     # @param fan_motor_efficiency [Double] fan motor efficiency
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
@@ -2094,20 +2084,16 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2208,8 +2194,8 @@ module OpenstudioStandards
     # @param heating_type [String] main heating coil fuel type
     #   valid choices are NaturalGas, Electricity, Water, or nil (defaults to NaturalGas)
     # @param electric_reheat [Boolean] if true electric reheat coils, if false the reheat coils served by hot_water_loop
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
     # @param econo_ctrl_mthd [String] economizer control type
     # @return [OpenStudio::Model::AirLoopHVAC] the resulting packaged VAV air loop
     def self.model_add_pvav(model,
@@ -2236,15 +2222,11 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # default design temperatures used across all air loops
@@ -2261,7 +2243,7 @@ module OpenstudioStandards
       end
 
       # default design settings used across all air loops
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2409,8 +2391,8 @@ module OpenstudioStandards
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to connect to this system
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect cooling coils to. If nil, will be DX cooling
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
     # @param fan_efficiency [Double] fan total efficiency, including motor and impeller
     # @param fan_motor_efficiency [Double] fan motor efficiency
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
@@ -2437,20 +2419,16 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2554,8 +2532,8 @@ module OpenstudioStandards
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param hot_water_loop [OpenStudio::Model::PlantLoop] hot water loop to connect to heating and reheat coils.
     # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop to connect to the cooling coil.
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
     # @param fan_efficiency [Double] fan total efficiency, including motor and impeller
     # @param fan_motor_efficiency [Double] fan motor efficiency
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
@@ -2583,15 +2561,11 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # default design temperatures used across all air loops
@@ -2608,7 +2582,7 @@ module OpenstudioStandards
       dsgn_temps['zn_htg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['zn_htg_dsgn_sup_air_temp_f'], 'F', 'C').get
 
       # default design settings used across all air loops
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 1.0)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 1.0)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2725,8 +2699,9 @@ module OpenstudioStandards
     # @param supplemental_heating_type [String] valid choices are Electricity, NaturalGas,  nil (no heat)
     # @param fan_location [String] valid choices are BlowThrough, DrawThrough
     # @param fan_type [String] valid choices are ConstantVolume, Cycling
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param econ_max_oa_frac_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the economizer maximum outdoor air fraction schedule.
     # @return [Array<OpenStudio::Model::AirLoopHVAC>] an array of the resulting PSZ-AC air loops
     def self.model_add_psz_ac(model,
                               thermal_zones,
@@ -2739,20 +2714,17 @@ module OpenstudioStandards
                               fan_location: 'DrawThrough',
                               fan_type: 'ConstantVolume',
                               hvac_op_sch: nil,
-                              oa_damper_sch: nil)
+                              oa_damper_sch: nil,
+                              econ_max_oa_frac_sch: nil)
 
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # create a PSZ-AC for each zone
@@ -2781,7 +2753,7 @@ module OpenstudioStandards
         dsgn_temps['htg_dsgn_sup_air_temp_c'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_c']
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 1.0)
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 1.0)
 
         # air handler controls
         # add a setpoint manager single zone reheat to control the supply air temperature
@@ -2961,12 +2933,10 @@ module OpenstudioStandards
         oa_controller.setMinimumOutdoorAirSchedule(oa_damper_sch)
         oa_controller.autosizeMinimumOutdoorAirFlowRate
         oa_controller.resetEconomizerMinimumLimitDryBulbTemperature
+        oa_controller.setMaximumFractionofOutdoorAirSchedule(econ_max_oa_frac_sch) unless econ_max_oa_frac_sch.nil?
         oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
         oa_system.setName("#{air_loop.name} OA System")
         oa_system.addToNode(air_loop.supplyInletNode)
-
-        # @todo enable economizer maximum fraction outdoor air schedule input
-        # econ_eff_sch = model_add_schedule(model, 'RetailStandalone PSZ_Econ_MaxOAFrac_Sch')
 
         # set air loop availability controls and night cycle manager, after oa system added
         air_loop.setAvailabilitySchedule(hvac_op_sch)
@@ -3005,8 +2975,9 @@ module OpenstudioStandards
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param heating_type [String] valid choices are NaturalGas, Electricity, Water, nil (no heat)
     # @param supplemental_heating_type [String] valid choices are Electricity, NaturalGas,  nil (no heat)
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param econ_max_oa_frac_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the economizer maximum outdoor air fraction schedule.
     # @return [Array<OpenStudio::Model::AirLoopHVAC>] an array of the resulting PSZ-AC air loops
     def self.model_add_psz_vav(model,
                                thermal_zones,
@@ -3017,6 +2988,7 @@ module OpenstudioStandards
                                hvac_op_sch: nil,
                                fan_type: 'VAV_System_Fan',
                                oa_damper_sch: nil,
+                               econ_max_oa_frac_sch: nil,
                                hot_water_loop: nil,
                                chilled_water_loop: nil,
                                minimum_volume_setpoint: nil)
@@ -3024,15 +2996,11 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # create a PSZ-VAV for each zone
@@ -3055,7 +3023,7 @@ module OpenstudioStandards
         dsgn_temps['htg_dsgn_sup_air_temp_c'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_c']
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
         # air handler controls
         # add a setpoint manager single zone reheat to control the supply air temperature
@@ -3133,9 +3101,6 @@ module OpenstudioStandards
           clg_coil.setNominalSpeedLevel(1)
         end
 
-        # @todo enable economizer maximum fraction outdoor air schedule input
-        # econ_eff_sch = model_add_schedule(model, 'RetailStandalone PSZ_Econ_MaxOAFrac_Sch')
-
         # wrap coils in a unitary system
         unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
         unitary_system.setSupplyFan(fan)
@@ -3177,6 +3142,7 @@ module OpenstudioStandards
         oa_controller.autosizeMinimumOutdoorAirFlowRate
         oa_controller.resetEconomizerMinimumLimitDryBulbTemperature
         oa_controller.setHeatRecoveryBypassControlType('BypassWhenOAFlowGreaterThanMinimum')
+        oa_controller.setMaximumFractionofOutdoorAirSchedule(econ_max_oa_frac_sch) unless econ_max_oa_frac_sch.nil?
         oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
         oa_system.setName("#{air_loop.name} OA System")
         oa_system.addToNode(air_loop.supplyInletNode)
@@ -3222,8 +3188,9 @@ module OpenstudioStandards
     # @param hot_water_loop [OpenStudio::Model::PlantLoop] hot water loop to connect to the heating coil
     # @param heat_pump_loop [OpenStudio::Model::PlantLoop] heat pump water loop to connect to heat pump
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to connect to this system
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param rel_hum_setp_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the relative humidity setpoint schedule. Defaults to 30% if nil.
     # @param main_data_center [Boolean] whether or not this is the main data center in the building.
     # @return [Array<OpenStudio::Model::AirLoopHVAC>] an array of the resulting air loops
     def self.model_add_data_center_hvac(model,
@@ -3233,20 +3200,22 @@ module OpenstudioStandards
                                         system_name: nil,
                                         hvac_op_sch: nil,
                                         oa_damper_sch: nil,
+                                        rel_hum_setp_sch: nil,
                                         main_data_center: false)
 
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
+      end
+
+      # relative humidity setpoint schedule
+      if rel_hum_setp_sch.nil?
+        rel_hum_setp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model, 30.0, name: "OfficeLarge DC_MinRelHumSetSch")
       end
 
       # create a PSZ-AC for each zone
@@ -3273,7 +3242,7 @@ module OpenstudioStandards
         dsgn_temps['htg_dsgn_sup_air_temp_c'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_c']
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 1.0)
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 1.0)
 
         # air handler controls
         # add a setpoint manager single zone reheat to control the supply air temperature
@@ -3316,7 +3285,7 @@ module OpenstudioStandards
           humidity_spm.setControlZone(zone)
           humidity_spm.addToNode(humidifier.outletModelObject.get.to_Node.get)
           humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-          humidistat.setHumidifyingRelativeHumiditySetpointSchedule(model_add_schedule(model, 'OfficeLarge DC_MinRelHumSetSch'))
+          humidistat.setHumidifyingRelativeHumiditySetpointSchedule(rel_hum_setp_sch)
           zone.setZoneControlHumidistat(humidistat)
         end
 
@@ -3381,10 +3350,9 @@ module OpenstudioStandards
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param thermal_zones [String] zones to connect to this system
-    # @param hvac_op_sch [String] name of the HVAC operation schedule
-    # or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [Double] name of the oa damper schedule,
-    # or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param rel_hum_setp_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the relative humidity setpoint schedule. Defaults to 8% if nil.
     # @param fan_location [Double] valid choices are BlowThrough, DrawThrough
     # @param fan_type [Double] valid choices are ConstantVolume, Cycling, VariableVolume
     # no heating
@@ -3404,15 +3372,16 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
+      end
+
+      # relative humidity setpoint schedule
+      if rel_hum_setp_sch.nil?
+        rel_hum_setp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model, 8.0, name: 'DataCenter Humidity Setpoint Schedule')
       end
 
       # Make a CRAC for each data center zone
@@ -3445,7 +3414,7 @@ module OpenstudioStandards
         dsgn_temps['zn_clg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['zn_clg_dsgn_sup_air_temp_f'], 'F', 'C').get
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 0.05)
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 0.05)
 
         # Zone sizing
         sizing_zone = zone.sizingZone
@@ -3555,7 +3524,7 @@ module OpenstudioStandards
         humidity_spm.addToNode(humidifier.outletModelObject.get.to_Node.get)
 
         humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-        humidistat.setHumidifyingRelativeHumiditySetpointSchedule(model_add_schedule(model, 'DataCenter Humidity Setpoint Schedule'))
+        humidistat.setHumidifyingRelativeHumiditySetpointSchedule(rel_hum_setp_sch)
         zone.setZoneControlHumidistat(humidistat)
 
         # Add a setpoint manager for cooling to control the supply air temperature based on the needs of this zone
@@ -3598,10 +3567,9 @@ module OpenstudioStandards
     # @param chilled_water_loop [String
     # @param system_name [String] the name of the system, or nil in which case it will be defaulted
     # @param thermal_zones [String] zones to connect to this system
-    # @param hvac_op_sch [String] name of the HVAC operation schedule
-    # or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [Double] name of the oa damper schedule,
-    # or nil in which case will be defaulted to always open
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param rel_hum_setp_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the relative humidity setpoint schedule. Defaults to 8% if nil.
     # no heating
     # @return [Array<OpenStudio::Model::AirLoopHVAC>] an array of the resulting CRAH air loops
     def self.model_add_crah(model,
@@ -3621,15 +3589,16 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
+      end
+
+      # relative humidity setpoint schedule
+      if rel_hum_setp_sch.nil?
+        rel_hum_setp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model, 8.0, name: 'DataCenter Humidity Setpoint Schedule')
       end
 
       # air handler
@@ -3658,7 +3627,7 @@ module OpenstudioStandards
       dsgn_temps['zn_clg_dsgn_sup_air_temp_c'] = dsgn_temps['clg_dsgn_sup_air_temp_c']
 
       # default design settings used across all air loops
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 0.3)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 0.3)
 
       # Add a setpoint manager for cooling to control the supply air temperature based on the needs of this zone
       if supply_temp_sch.nil?
@@ -3739,7 +3708,7 @@ module OpenstudioStandards
         humidity_spm.addToNode(humidifier.outletModelObject.get.to_Node.get)
 
         humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-        humidistat.setHumidifyingRelativeHumiditySetpointSchedule(model_add_schedule(model, 'DataCenter Humidity Setpoint Schedule'))
+        humidistat.setHumidifyingRelativeHumiditySetpointSchedule(rel_hum_setp_sch)
         zone.setZoneControlHumidistat(humidistat)
 
         unless return_plenum.nil?
@@ -3758,9 +3727,9 @@ module OpenstudioStandards
     # @param heating_type [String] valid choices are Gas, Single Speed Heat Pump
     # @param supplemental_heating_type [String] valid choices are Electric, Gas
     # @param fan_type [String] valid choices are ConstantVolume, Cycling
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
-    # @param oa_damper_sch [String] name of the oa damper schedule, or nil in which case will be defaulted to always open
-    # @param econ_max_oa_frac_sch [String] name of the economizer maximum outdoor air fraction schedule
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param oa_damper_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the OA damper schedule. Defaults to always on if nil.
+    # @param econ_max_oa_frac_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the economizer maximum outdoor air fraction schedule.
     # @return [OpenStudio::Model::AirLoopHVAC] the resulting split AC air loop
     def self.model_add_split_ac(model,
                                 thermal_zones,
@@ -3780,15 +3749,11 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # oa damper schedule
       if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
-      else
-        oa_damper_sch = model_add_schedule(model, oa_damper_sch)
       end
 
       # default design temperatures used across all air loops
@@ -3801,7 +3766,7 @@ module OpenstudioStandards
       dsgn_temps['htg_dsgn_sup_air_temp_c'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_c']
 
       # default design settings used across all air loops
-      sizing_system = adjust_sizing_system(air_loop, dsgn_temps, min_sys_airflow_ratio: 1.0, sizing_option: 'NonCoincident')
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: 1.0, sizing_option: 'NonCoincident')
 
       # air handler controls
       # add a setpoint manager single zone reheat to control the supply air temperature
@@ -3883,7 +3848,7 @@ module OpenstudioStandards
       oa_controller.setMinimumOutdoorAirSchedule(oa_damper_sch)
       oa_controller.autosizeMinimumOutdoorAirFlowRate
       oa_controller.resetEconomizerMinimumLimitDryBulbTemperature
-      oa_controller.setMaximumFractionofOutdoorAirSchedule(model_add_schedule(model, econ_max_oa_frac_sch)) unless econ_max_oa_frac_sch.nil?
+      oa_controller.setMaximumFractionofOutdoorAirSchedule(econ_max_oa_frac_sch) unless econ_max_oa_frac_sch.nil?
       oa_system = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_controller)
       oa_system.setName("#{air_loop.name} OA System")
       oa_system.addToNode(air_loop.supplyInletNode)
@@ -3916,7 +3881,7 @@ module OpenstudioStandards
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to connect to this system
     # @param cooling_type [String] valid choices are Two Speed DX AC, Single Speed DX AC, Single Speed Heat Pump
     # @param heating_type [String] valid choices are Single Speed DX
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
     # @return [OpenStudio::Model::AirLoopHVAC] the resulting split AC air loop
     def self.model_add_minisplit_hp(model,
                                     thermal_zones,
@@ -3927,8 +3892,6 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # default design temperatures across all air loops
@@ -3947,7 +3910,7 @@ module OpenstudioStandards
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding minisplit HP for #{zone.name}.")
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
         sizing_system.setAllOutdoorAirinCooling(false)
         sizing_system.setAllOutdoorAirinHeating(false)
 
@@ -4237,7 +4200,7 @@ module OpenstudioStandards
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to connect to this system
-    # @param hvac_op_sch [String] name of the HVAC operation schedule or nil in which case will be defaulted to always on
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
     # @param fan_control_type [String] valid choices are OnOff, ConstantVolume, VariableVolume
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
     # @param heating_type [String] valid choices are NaturalGas, Gas, Electricity, Electric, DistrictHeating, DistrictHeatingWater, DistrictHeatingSteam
@@ -4262,8 +4225,6 @@ module OpenstudioStandards
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # set defaults if nil
@@ -4445,7 +4406,7 @@ module OpenstudioStandards
         air_loop.setName("#{zone_name_clean} Evaporative Cooler")
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps)
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
         # air handler controls
         # setpoint follows OAT WetBulb
@@ -5396,7 +5357,7 @@ module OpenstudioStandards
         dsgn_temps['htg_dsgn_sup_air_temp_c'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_c']
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
         sizing_system.setAllOutdoorAirinCooling(true)
         sizing_system.setAllOutdoorAirinHeating(true)
 
@@ -5518,7 +5479,7 @@ module OpenstudioStandards
         air_loop.setName("#{zone.name} Central Air Source HP")
 
         # default design settings used across all air loops
-        sizing_system = adjust_sizing_system(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
+        sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, sizing_option: 'NonCoincident')
         sizing_system.setAllOutdoorAirinCooling(true)
         sizing_system.setAllOutdoorAirinHeating(true)
 
@@ -5770,9 +5731,9 @@ module OpenstudioStandards
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to enable ideal air loads
-    # @param hvac_op_sch [String] name of the HVAC operation schedule, default is always on
-    # @param heat_avail_sch [String] name of the heating availability schedule, default is always on
-    # @param cool_avail_sch [String] name of the cooling availability schedule, default is always on
+    # @param hvac_op_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the HVAC Operating Schedule. Defaults to always on if nil.
+    # @param heat_avail_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the heating availability schedule. Defaults to always on if nil.
+    # @param cool_avail_sch [OpenStudio::Model::Schedule] OpenStudio Schedule object for the cooling availability schedule. Defaults to always on if nil.
     # @param heat_limit_type [String] heating limit type
     #   options are 'NoLimit', 'LimitFlowRate', 'LimitCapacity', and 'LimitFlowRateAndCapacity'
     # @param cool_limit_type [String] cooling limit type
@@ -5813,22 +5774,16 @@ module OpenstudioStandards
       # set availability schedules
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
-      else
-        hvac_op_sch = model_add_schedule(model, hvac_op_sch)
       end
 
       # set heating availability schedules
       if heat_avail_sch.nil?
         heat_avail_sch = model.alwaysOnDiscreteSchedule
-      else
-        heat_avail_sch = model_add_schedule(model, heat_avail_sch)
       end
 
       # set cooling availability schedules
       if cool_avail_sch.nil?
         cool_avail_sch = model.alwaysOnDiscreteSchedule
-      else
-        cool_avail_sch = model_add_schedule(model, cool_avail_sch)
       end
 
       ideal_systems = []
@@ -6033,7 +5988,7 @@ module OpenstudioStandards
         heat_exchanger.setThresholdTemperature(-23.3)
         heat_exchanger.setInitialDefrostTimeFraction(0.167)
         heat_exchanger.setRateofDefrostTimeFractionIncrease(1.44)
-        heat_exchanger.setAvailabilitySchedule(model_add_schedule(model, 'Always On - No Design Day'))
+        heat_exchanger.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
         heat_exchanger_air_to_air_sensible_and_latent_apply_prototype_efficiency_enthalpy_recovery_ratio(heat_exchanger, enthalpy_recovery_ratio, design_conditions, climate_zone)
 
         # Create ERV Controller
@@ -6131,22 +6086,20 @@ module OpenstudioStandards
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] an array of thermal zones
     # @param flow_rate [Double] the exhaust fan flow rate in m^3/s
-    # @param availability_sch_name [String] the name of the fan availability schedule
-    # @param flow_fraction_schedule_name [String] the name of the flow fraction schedule
-    # @param balanced_exhaust_fraction_schedule_name [String] the name of the balanced exhaust fraction schedule
+    # @param availability_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the Availability Schedule. Defaults to always on if nil.
+    # @param flow_fraction_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the flow fraction schedule
+    # @param balanced_exhaust_fraction_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the the balanced exhaust fraction schedule
     # @return [Array<OpenStudio::Model::FanZoneExhaust>] an array of exhaust fans created
     # @todo use the create_fan_zone_exhaust method, default to 1.25 inH2O pressure rise and fan efficiency of 0.6
     def self.model_add_exhaust_fan(model,
                                    thermal_zones,
                                    flow_rate: nil,
-                                   availability_sch_name: nil,
-                                   flow_fraction_schedule_name: nil,
-                                   balanced_exhaust_fraction_schedule_name: nil)
+                                   availability_schedule: nil,
+                                   flow_fraction_schedule: nil,
+                                   balanced_exhaust_fraction_schedule: nil)
 
-      if availability_sch_name.nil?
+      if availability_schedule.nil?
         availability_schedule = model.alwaysOnDiscreteSchedule
-      else
-        availability_schedule = model_add_schedule(model, availability_sch_name)
       end
 
       # make an exhaust fan for each zone
@@ -6168,13 +6121,13 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'Wrong format of flow rate')
         end
 
-        unless flow_fraction_schedule_name.nil?
-          fan.setFlowFractionSchedule(model_add_schedule(model, flow_fraction_schedule_name))
+        unless flow_fraction_schedule.nil?
+          fan.setFlowFractionSchedule(flow_fraction_schedule)
         end
 
         fan.setSystemAvailabilityManagerCouplingMode('Decoupled')
-        unless balanced_exhaust_fraction_schedule_name.nil?
-          fan.setBalancedExhaustFractionSchedule(model_add_schedule(model, balanced_exhaust_fraction_schedule_name))
+        unless balanced_exhaust_fraction_schedule.nil?
+          fan.setBalancedExhaustFractionSchedule(balanced_exhaust_fraction_schedule)
         end
 
         fan.addToThermalZone(zone)
@@ -6190,18 +6143,16 @@ module OpenstudioStandards
     # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] an array of thermal zones
     # @param ventilation_type [String] the zone ventilation type either Exhaust, Natural, or Intake
     # @param flow_rate [Double] the ventilation design flow rate in m^3/s
-    # @param availability_sch_name [String] the name of the fan availability schedule
+    # @param availability_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the Availability Schedule. Defaults to always on if nil.
     # @return [Array<OpenStudio::Model::ZoneVentilationDesignFlowRate>] an array of zone ventilation objects created
     def self.model_add_zone_ventilation(model,
                                         thermal_zones,
                                         ventilation_type: nil,
                                         flow_rate: nil,
-                                        availability_sch_name: nil)
+                                        availability_schedule: nil)
 
-      if availability_sch_name.nil?
+      if availability_schedule.nil?
         availability_schedule = model.alwaysOnDiscreteSchedule
-      else
-        availability_schedule = model_add_schedule(model, availability_sch_name)
       end
 
       if flow_rate.nil?

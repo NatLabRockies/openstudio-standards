@@ -16,6 +16,32 @@ class Standard
       thermal_zones = model_get_zones_from_spaces_on_system(model, system)
       return_plenum = model_get_return_plenum_from_system(model, system)
 
+      # add system specific schedules to the model
+      hvac_op_sch = nil
+      if !system['operation_schedule'].nil? && !system['operation_schedule'].to_s.empty?
+        hvac_op_sch = model_add_schedule(model, system['operation_schedule'])
+      end
+
+      oa_damper_sch = nil
+      if !system['oa_damper_schedule'].nil? && !system['oa_damper_schedule'].to_s.empty?
+        oa_damper_sch = model_add_schedule(model, system['oa_damper_schedule'])
+      end
+
+      min_frac_oa_sch = nil
+      if !system['minimum_fraction_of_outdoor_air_schedule'].nil? && !system['minimum_fraction_of_outdoor_air_schedule'].to_s.empty?
+        min_frac_oa_sch = model_add_schedule(model, system['minimum_fraction_of_outdoor_air_schedule'])
+      end
+
+      flow_fraction_schedule = nil
+      if !system['flow_fraction_schedule'].nil? && !system['flow_fraction_schedule'].to_s.empty?
+        flow_fraction_schedule = model_add_schedule(model, system['flow_fraction_schedule'])
+      end
+
+      balanced_exhaust_fraction_schedule = nil
+      if !system['balanced_exhaust_fraction_schedule'].nil? && !system['balanced_exhaust_fraction_schedule'].to_s.empty?
+        balanced_exhaust_fraction_schedule = model_add_schedule(model, system['balanced_exhaust_fraction_schedule'])
+      end
+
       # Add the HVAC systems
       case system['type']
       when 'VAV'
@@ -82,8 +108,8 @@ class Standard
                              reheat_type: 'Water',
                              hot_water_loop: hot_water_loop,
                              chilled_water_loop: chilled_water_loop,
-                             hvac_op_sch: system['operation_schedule'],
-                             oa_damper_sch: system['oa_damper_schedule'],
+                             hvac_op_sch: hvac_op_sch,
+                             oa_damper_sch: oa_damper_sch,
                              fan_efficiency: 0.62,
                              fan_motor_efficiency: 0.9,
                              fan_pressure_rise: 4.0,
@@ -122,8 +148,8 @@ class Standard
                       system_name: system['name'],
                       hot_water_loop: hot_water_loop,
                       chilled_water_loop: chilled_water_loop,
-                      hvac_op_sch: system['operation_schedule'],
-                      oa_damper_sch: system['oa_damper_schedule'],
+                      hvac_op_sch: hvac_op_sch,
+                      oa_damper_sch: oa_damper_sch,
                       fan_efficiency: 0.62,
                       fan_motor_efficiency: 0.9,
                       fan_pressure_rise: 4.0)
@@ -163,8 +189,8 @@ class Standard
                          hot_water_loop: heat_pump_loop,
                          fan_location: fan_position,
                          fan_type: system['fan_type'],
-                         hvac_op_sch: system['operation_schedule'],
-                         oa_damper_sch: system['oa_damper_schedule'])
+                         hvac_op_sch: hvac_op_sch,
+                         oa_damper_sch: oa_damper_sch)
 
       when 'PVAV'
         # Retrieve the existing hot water loop or add a new one if necessary.
@@ -187,8 +213,8 @@ class Standard
         OpenstudioStandards::HVAC.model_add_pvav(model,
                        thermal_zones,
                        system_name: system['name'],
-                       hvac_op_sch: system['operation_schedule'],
-                       oa_damper_sch: system['oa_damper_schedule'],
+                       hvac_op_sch: hvac_op_sch,
+                       oa_damper_sch: oa_damper_sch,
                        electric_reheat: electric_reheat,
                        hot_water_loop: hot_water_loop,
                        return_plenum: return_plenum)
@@ -236,9 +262,9 @@ class Standard
                                    system_name: system['name'],
                                    hot_water_loop: hot_water_loop,
                                    chilled_water_loop: chilled_water_loop,
-                                   hvac_op_sch: system['operation_schedule'],
-                                   min_oa_sch: system['oa_damper_schedule'],
-                                   min_frac_oa_sch: system['minimum_fraction_of_outdoor_air_schedule'],
+                                   hvac_op_sch: hvac_op_sch,
+                                   min_oa_sch: oa_damper_sch,
+                                   min_frac_oa_sch: min_frac_oa_sch,
                                    fan_maximum_flow_rate: system['fan_maximum_flow_rate'],
                                    econo_ctrl_mthd: system['economizer_control_method'],
                                    doas_control_strategy: system['doas_control_strategy'],
@@ -284,9 +310,9 @@ class Standard
                        doas_type: doas_type,
                        hot_water_loop: hot_water_loop,
                        chilled_water_loop: nil,
-                       hvac_op_sch: system['operation_schedule'],
-                       min_oa_sch: system['oa_damper_schedule'],
-                       min_frac_oa_sch: system['minimum_fraction_of_outdoor_air_schedule'],
+                       hvac_op_sch: hvac_op_sch,
+                       min_oa_sch: oa_damper_sch,
+                       min_frac_oa_sch: min_frac_oa_sch,
                        fan_maximum_flow_rate: system['fan_maximum_flow_rate'],
                        econo_ctrl_mthd: econo_ctrl_mthd,
                        include_exhaust_fan: include_exhaust_fan,
@@ -308,8 +334,8 @@ class Standard
                                    thermal_zones,
                                    hot_water_loop,
                                    heat_pump_loop,
-                                   hvac_op_sch: system['flow_fraction_schedule'],
-                                   oa_damper_sch: system['flow_fraction_schedule'],
+                                   hvac_op_sch: flow_fraction_schedule,
+                                   oa_damper_sch: flow_fraction_schedule,
                                    main_data_center: system['main_data_center'])
 
       when 'CRAC' # Small Data Center
@@ -317,8 +343,8 @@ class Standard
                        thermal_zones,
                        climate_zone,
                        system_name: system['name'],
-                       hvac_op_sch: system['CRAC_operation_schedule'],
-                       oa_damper_sch: system['CRAC_oa_damper_schedule'],
+                       hvac_op_sch: hvac_op_sch,
+                       oa_damper_sch: oa_damper_sch,
                        fan_location: 'DrawThrough',
                        fan_type: system['CRAC_fan_type'],
                        cooling_type: system['CRAC_cooling_type'],
@@ -354,8 +380,8 @@ class Standard
                        thermal_zones,
                        system_name: system['name'],
                        chilled_water_loop: chilled_water_loop,
-                       hvac_op_sch: system['operation_schedule'],
-                       oa_damper_sch: system['oa_damper_schedule'],
+                       hvac_op_sch: hvac_op_sch,
+                       oa_damper_sch: oa_damper_sch,
                        return_plenum: nil,
                        supply_temp_sch: nil)
 
@@ -366,14 +392,14 @@ class Standard
                            heating_type: system['heating_type'],
                            supplemental_heating_type: system['supplemental_heating_type'],
                            fan_type: system['fan_type'],
-                           hvac_op_sch: system['operation_schedule'],
-                           oa_damper_sch: system['oa_damper_schedule'],
+                           hvac_op_sch: hvac_op_sch,
+                           oa_damper_sch: oa_damper_sch,
                            econ_max_oa_frac_sch: system['econ_max_oa_frac_sch'])
 
       when 'UnitHeater'
         OpenstudioStandards::HVAC.model_add_unitheater(model,
                              thermal_zones,
-                             hvac_op_sch: system['operation_schedule'],
+                             hvac_op_sch: hvac_op_sch,
                              fan_control_type: system['fan_type'],
                              fan_pressure_rise: system['fan_static_pressure'],
                              heating_type: system['heating_type'])
@@ -394,16 +420,16 @@ class Standard
         OpenstudioStandards::HVAC.model_add_exhaust_fan(model,
                               thermal_zones,
                               flow_rate: system['flow_rate'],
-                              availability_sch_name: system['operation_schedule'],
-                              flow_fraction_schedule_name: system['flow_fraction_schedule'],
-                              balanced_exhaust_fraction_schedule_name: system['balanced_exhaust_fraction_schedule'])
+                              availability_schedule: hvac_op_sch,
+                              flow_fraction_schedule: flow_fraction_schedule,
+                              balanced_exhaust_fraction_schedule: balanced_exhaust_fraction_schedule)
 
       when 'Zone Ventilation'
         OpenstudioStandards::HVAC.model_add_zone_ventilation(model,
                                    thermal_zones,
                                    ventilation_type: system['ventilation_type'],
                                    flow_rate: system['flow_rate'],
-                                   availability_sch_name: system['operation_schedule'])
+                                   availability_schedule: hvac_op_sch)
 
       when 'Refrigeration'
         model_add_refrigeration(model,

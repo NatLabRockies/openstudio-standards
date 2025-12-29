@@ -75,7 +75,8 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/thermal_zone/thermostat_schedules'
 
   # HVAC Module
-  require_relative 'openstudio-standards/hvac/air_loop/information'
+  require_relative 'openstudio-standards/hvac/air_loop_controls'
+  require_relative 'openstudio-standards/hvac/air_loop_information'
   require_relative 'openstudio-standards/hvac/create_cbecs_hvac_system'
   require_relative 'openstudio-standards/hvac/create_hvac_system'
   require_relative 'openstudio-standards/hvac/curves'
@@ -100,11 +101,11 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/hvac/components/fan'
   require_relative 'openstudio-standards/hvac/components/heat_exchanger_air_to_air'
   require_relative 'openstudio-standards/hvac/components/pump'
-  require_relative 'openstudio-standards/hvac/controls/radiant_system_controls'
   require_relative 'openstudio-standards/hvac/conversions'
   require_relative 'openstudio-standards/hvac/helpers'
   require_relative 'openstudio-standards/hvac/exhaust/create_exhaust_fan'
   require_relative 'openstudio-standards/hvac/setpoint_managers/information'
+  require_relative 'openstudio-standards/hvac/radiant_system_controls'
 
   # CreateTypical Module
   require_relative 'openstudio-standards/create_typical/enumerations'
@@ -571,7 +572,6 @@ module OpenstudioStandards
 
   # Model Objects
   require_relative "#{proto}/common/objects/Prototype.AirTerminalSingleDuctVAVReheat"
-  require_relative "#{proto}/common/objects/Prototype.CoolingTower"
   require_relative "#{proto}/common/objects/Prototype.Fan"
   require_relative "#{proto}/common/objects/Prototype.FanConstantVolume"
   require_relative "#{proto}/common/objects/Prototype.FanOnOff"
