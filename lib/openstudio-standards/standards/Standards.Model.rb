@@ -423,7 +423,7 @@ class Standard
       # Apply the baseline system water loop temperature reset control
       model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         plant_loop_apply_prm_baseline_temperatures(plant_loop)
       end
@@ -455,7 +455,7 @@ class Standard
       # Set the baseline number of boilers and chillers
       model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         plant_loop_apply_prm_number_of_boilers(plant_loop)
         plant_loop_apply_prm_number_of_chillers(plant_loop)
@@ -465,7 +465,7 @@ class Standard
       # Must be done after all chillers are added
       model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         plant_loop_apply_prm_number_of_cooling_towers(plant_loop)
       end
@@ -479,7 +479,7 @@ class Standard
       # Must be done after sizing components
       model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         plant_loop_apply_prm_baseline_pump_power(plant_loop)
         plant_loop_apply_prm_baseline_pumping_type(plant_loop)
@@ -641,7 +641,7 @@ class Standard
     # If needed, remove all non-adiabatic pipes of SWH loops
     proposed_model.getPlantLoops.sort.each do |plant_loop|
       # Skip non service water heating loops
-      next unless plant_loop_swh_loop?(plant_loop)
+      next unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
       plant_loop_adiabatic_pipes_only(plant_loop)
     end
@@ -4975,7 +4975,7 @@ class Standard
     # Plant loops
     model.getPlantLoops.sort.each do |loop|
       # Don't remove service water heating loops
-      next if plant_loop_swh_loop?(loop)
+      next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(loop)
 
       loop.remove
     end
@@ -5806,12 +5806,12 @@ class Standard
                                      swh_building_type = 'All others')
     model.getPlantLoops.sort.each do |plant_loop|
       # Skip non service water heating loops
-      next unless plant_loop_swh_loop?(plant_loop)
+      next unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
       # Rename the loop to avoid accidentally hooking up the HVAC systems to this loop later.
       plant_loop.setName('Service Water Heating Loop')
 
-      htg_fuels, combination_system, storage_capacity, total_heating_capacity = plant_loop_swh_system_type(plant_loop)
+      htg_fuels, combination_system, storage_capacity, total_heating_capacity = OpenstudioStandards::HVAC.plant_loop_swh_system_type(plant_loop)
 
       # htg_fuels.size == 0 shoudln't happen
 

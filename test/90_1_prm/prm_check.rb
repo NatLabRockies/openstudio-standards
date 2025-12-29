@@ -1481,8 +1481,7 @@ class AppendixGPRMTests < Minitest::Test
         next if n_boilers == 0
 
         # Find area served by this loop
-        standard = Standard.build('90.1-PRM-2019')
-        area_served_m2 = standard.plant_loop_total_floor_area_served(plant_loop)
+        area_served_m2 = OpenstudioStandards::HVAC.plant_loop_total_floor_area_served(plant_loop)
         area_served_ft2 = OpenStudio.convert(area_served_m2, 'm^2', 'ft^2').get
 
         # check that the number of boilers equals the amount specified by the standard based on the conditioned floor area
@@ -1532,8 +1531,7 @@ class AppendixGPRMTests < Minitest::Test
         end
 
         # Initialize Standard class
-        standard = Standard.build('90.1-PRM-2019')
-        cap_w = standard.plant_loop_total_cooling_capacity(plant_loop)
+        cap_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
         cap_tons = OpenStudio.convert(cap_w, 'W', 'ton').get
 
         if cap_tons <= 300
@@ -1684,7 +1682,7 @@ class AppendixGPRMTests < Minitest::Test
       # first check if the baseline_model has water loops or not (SHW is not included)
       baseline_model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if Standard.new.plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         baseline_model.getSetpointManagerOutdoorAirResets.each do |oa_reset|
           name = oa_reset.name.to_s

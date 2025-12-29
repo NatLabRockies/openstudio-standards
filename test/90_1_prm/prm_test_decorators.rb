@@ -119,9 +119,8 @@ class AppendixGPRMTests < Minitest::Test
 
   # Add piping insulation to service heating water systems
   def add_piping_insulation(model, arguments)
-    std = Standard.build('90.1-PRM-2019')
     model.getPlantLoops.each do |plant_loop|
-      if std.plant_loop_swh_loop?(plant_loop)
+      if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
         OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_piping_losses(model, plant_loop)
       end
     end

@@ -430,11 +430,11 @@ module OpenstudioStandards
           chiller_max_flow_rate_units_ip = options['chiller_max_flow_rate']['units']
 
           # get capacity of loop (not individual chiller but entire loop)
-          total_cooling_capacity_w = std.plant_loop_total_cooling_capacity(plant_loop)
+          total_cooling_capacity_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
           total_cooling_capacity_ton = OpenStudio.convert(total_cooling_capacity_w, 'W', 'Btu/h').get / 12_000.0
 
           # get the max flow rate (not individual chiller)
-          maximum_loop_flow_rate = std.plant_loop_find_maximum_loop_flow_rate(plant_loop)
+          maximum_loop_flow_rate = OpenstudioStandards::HVAC.plant_loop_maximum_loop_flow_rate(plant_loop)
           maximum_loop_flow_rate_ip = OpenStudio.convert(maximum_loop_flow_rate, 'm^3/s', 'gal/min').get
 
           if total_cooling_capacity_ton < 0.01
@@ -1145,10 +1145,10 @@ module OpenstudioStandards
         # Check the heating and cooling capacity of the plant loops against their coil loads
         @model.getPlantLoops.sort.each do |plant_loop|
           # Heating capacity
-          htg_cap_w = std.plant_loop_total_heating_capacity(plant_loop)
+          htg_cap_w = OpenstudioStandards::HVAC.plant_loop_total_heating_capacity(plant_loop)
 
           # Cooling capacity
-          clg_cap_w = std.plant_loop_total_cooling_capacity(plant_loop)
+          clg_cap_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
 
           # Sum the load for each coil on the loop
           htg_load_w = 0.0

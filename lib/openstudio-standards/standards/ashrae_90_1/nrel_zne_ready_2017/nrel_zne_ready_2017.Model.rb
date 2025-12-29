@@ -34,7 +34,7 @@ class NRELZNEReady2017 < ASHRAE901
     model.getPumpVariableSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
     model.getHeaderedPumpsConstantSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
     model.getHeaderedPumpsVariableSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
-    model.getPlantLoops.sort.each { |obj| plant_loop_apply_prm_baseline_pumping_type(obj) unless plant_loop_swh_loop?(obj) }
+    model.getPlantLoops.sort.each { |obj| plant_loop_apply_prm_baseline_pumping_type(obj) unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(obj) }
 
     # Unitary HPs
     # set DX HP coils before DX clg coils because when DX HP coils need to first

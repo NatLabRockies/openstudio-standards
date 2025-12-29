@@ -150,7 +150,7 @@ class ASHRAE901PRM < Standard
     return true if chillers.empty?
 
     # Determine the capacity of the loop
-    cap_w = plant_loop_total_cooling_capacity(plant_loop)
+    cap_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
     cap_tons = OpenStudio.convert(cap_w, 'W', 'ton').get
 
     # Throw exception for > 2,400 tons as this breaks our staging strategy cap of 3 chillers
