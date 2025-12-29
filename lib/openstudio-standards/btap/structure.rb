@@ -201,8 +201,8 @@ module BTAP
     #  "recreation"  gymnastics, ice arena, indoor soccer/pool
     #      "robust"  penitentiary, parking garage (i.e. heavyduty, resistant)
     #
-    # Each CATEGORY holds "small"-scale and "large"-scale STRUCTURE options by
-    # defaults, depending on the characteristics of the building.
+    # Each CATEGORY holds default "small"-scale and "large"-scale STRUCTURE
+    # options, set based on building characteristics.
     @@data[:category]               = {}
     @@data[:category]["housing"   ] = {small: :wood    , large: :concrete}
     @@data[:category]["lodging"   ] = {small: :wood    , large: :concrete}
@@ -303,7 +303,7 @@ module BTAP
       cat = activity.category
       lload = activity.liveload
 
-      if cat.respond_to?(:to_s)
+      if cat.respond_to?(:to_sym)
         cat = cat.to_s.downcase
 
         if cat.empty?
@@ -411,19 +411,22 @@ module BTAP
       iwall_m2  = TBD.facets(cspaces, "surface", "wall").map(&:grossArea).sum
 
       # In OpenStudio, partitions are usually limited to interzone walls between
-      # zones, in order to save on simulation times. Partitions typically absent
-      # from a model include walls surrounding lobbies, stairwells, WCs and
-      # technical rooms, as well as separations between similar rooms (e.g.
-      # multiple, side-by-side enclosed offices, a row of hotel rooms).
-      # Comparing BTAP prototype models and samples of building plans for
-      # similar facilities suggest matching modelled partition m2 (or total
-      # floor m2) as a suitable basis to determine the weight of non-modelled
-      # partitions. As this estimate may be more on the high side for many
-      # prototype models, fixed appliances (e.g. fixtures, counters, doors and
-      # windows) are considered included.
-      # partition_m2 = iwall_m2
-      # partition_m2 = floor_m2 if partition_m2 > floor_m2
-      partition_m2 = floor_m2
+      # zones to save on simulation times. Partitions typically absent from a
+      # model include walls surrounding lobbies, stairwells, WCs and technical
+      # rooms, as well as separations between similar rooms (e.g. multiple,
+      # side-by-side enclosed offices, a row of hotel rooms). Comparing BTAP
+      # prototype models and samples of building plans for similar facilities
+      # suggests matching modelled partition m2 with floor m2 as a suitable
+      # basis to determine the mass of non-modelled partitions. As this estimate
+      # may be more on the high side for many prototype models, fixed appliances
+      # (e.g. fixtures, counters, doors and windows) are considered included.
+      # Adjust for larger spaces, based on building category.
+      case @@data[:category]
+      when "commerce"   then partition_m2 = floor_m2 / 2
+      when "industry"   then partition_m2 = floor_m2 / 4
+      when "recreation" then partition_m2 = floor_m2 / 3
+      else                   partition_m2 = floor_m2
+      end
 
       # For wood-framed partitions, representative material volumes (per m2):
       #  - 16% wood-framing: 0.0224 m3/m2 x 540 kg/m3 =  12.1 kg/m2 (35.7%)
@@ -467,11 +470,12 @@ module BTAP
       #     - if structure :wood
       #       - 1/2 :clt                              =  48 kg/m
 
-      # Fetch approx. total column height (m) in building (including plenums).
+      # Fetch approx. total column height (m).
       column_m = 0
 
       model.getSpaces.each do |space|
-        column_m += BTAP::Geometry::Spaces.space_height(space) * 15 / 1000
+        height    = BTAP::Geometry::Spaces.space_height(space)
+        column_m += height * space.floorArea * 15 / 1000
       end
 
       case @structure
@@ -555,80 +559,42 @@ module BTAP
         mass.setSpace(space)
       end
 
-      # Embodied CO2-e kg (A1-A3) of a model is tallied separately as follows:
-      @co2              = {}
-      @co2[:structure ] = 0
-      @co2[:insulation] = 0
-      @co2[:cladding  ] = 0
-
-      # The :structure key/value pair includes above grade 'structures' (e.g.
-      # slabs, columns) and 'framing' (e.g. wood-framed vs steel-framed). Why
-      # grouped together? In many smaller-scale facilities, structure and
-      # framing are synonymous, or at least tightly coupled, e.g.:
-      #   - load-bearing wood-framed walls in small-scale residential
-      #   - load-bearing CMU walls in small-scale industrial
-      #   - metal buildings
+      # Embodied CO2-e kg (A1-A3?) of a model's structure includes:
+      #   - non-modelled above grade items (e.g. columns)
+      #   - non-modelled partitions
       #
       # Below-grade structures (rebar + poured concrete) are ignored - no
       # alternative options are considered for the moment, e.g. lower carbon
       # concrete mixes.
-      #
-      # Upon initialization, only the :structure tally is set. It is assumed
-      # that structure (and main framing) do not change with NECB U-factor
-      # requirements, e.g.:
-      #   - NECB 2011 vs 2020
-      #   - Vancouver vs Calgary
-      #
-      # Once default construction sets are (later) established (+), followed by
-      # TBD uprating assemblies as per NECB 2017 & 2020 requirements (++),
-      # embodied carbon tallies can be updated/reset, which would include:
-      #   - cladding
-      #   - insulation
-      #   - secondary framing (proportional to insulation thicknesses)
-      #
-      #  (+) openstudio-standards/standards/necb/NECB2011/building_envelope.rb
-      # (++) openstudio-standards/btap/bridging.rb
+      @co2 = {structure: 0}
 
-      # Start with occupied floors & roofs (exclude slabs on grade).
-      m2 = ofloor_m2 + ifloor_m2 + roof_m2
-
+      # Add columns.
       case @structure
-      when :wood     then # engineered I-joists + plywood
-        floor_kg    = 50.0 * m2
-        floor_m3    = floor_kg / 540.0                  # kg/m3
-        floor_co2kg = floor_m3 * 55.0 / floor_kg        # kgCO2-e/kg
-      when :concrete then # 200mm flat slab, 3% rebar + accessories
-        floor_m3    = 0.200 * m2
-        floor_kgm3  = (0.03 * 7850.0) + (0.97 * 2240.0) # kg/m3
-        floor_co2kg = (0.03 * 0.854 ) + (0.97 *  0.250) # kgCO2-e/kg
-        floor_kg    = floor_m3 * floor_kgm3
-      else # :steel, includes joists/fasteners
-        floor_m3    = 0.125 * m2
-        floor_kgm3  = (0.08 * 7850.0) + (0.92 * 2240.0) # kg/m3
-        floor_co2kg = (0.08 * 0.854 ) + (0.92 *  0.250) # kgCO2-e/kg
-        floor_kg    = floor_m3 * floor_kgm3
+      when :steel then cl_co2 =  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
+      when :metal then cl_co2 =  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
+      when :wood  then cl_co2 = 55.000 * (column_m *  48) / 540 # 55 kgCO2-e/m3
+      when :clt   then cl_co2 = 55.000 * (column_m *  96) / 540 # 55 kgCO2-e/m3
+      else             cl_co2 =  0.268 * (column_m *  96) # 0.268 kgCO2-e/kg
       end
 
-      @co2[:structure] += floor_co2kg * floor_kg
+      @co2[:structure] += cl_co2
 
-      # Add exposed walls and interior partitions.
-      m2 = wall_m2 + iwall_m2 + partition_m2
+      # Add interior partitions.
+      m2 = partition_m2
 
       case @framing
-      when :wood then # basic 2x6 construction, 16% of framing cavity
-        wall_kg    =  12.1 * m2
-        wall_co2kg =  55.0 / 540.0 # 55 kgCO2-e/m3 / density
+      when :wood then
+        partition_co2kg = 55.0 / 540.0 # 55 kgCO2-e/m3 / density
       when :cmu  then # 250mm medium weight CMU, 200 kgCO2-e/m3
-        wall_m3    = 0.250 * m2    # nominal m3
-        wall_kg    = 250.0 * m2    # volume-weighted concrete/air/grout
-        wall_kgm3  = 0.250 / 250.0
-        wall_co2kg = 200.0 / wall_kgm3 # 200 kgCO2-e/m3 / density
-      else # :steel, 1% lightweight steel-framing
-        wall_kg    =   4.7 * m2
-        wall_co2kg = 2.440
+        partition_m3    = 0.250 * m2 # nominal m3
+        partition_kg    = 250.0 * m2 # volume-weighted concrete/air/grout
+        partition_kgm3  = pt_kg / partition_m3
+        partition_co2kg = 200.0 / partition_kgm3 # 200 kgCO2-e/m3 / density
+      else # :steel, 1% lightweight steel-framing + drywall
+        partition_co2kg = 2.440
       end
 
-      @co2[:structure] += wall_co2kg * wall_kg
+      @co2[:structure] += partition_kgm2 * m2 * partition_co2kg
 
       true
     end
