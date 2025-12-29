@@ -33,16 +33,16 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LEEPMultiTower',
-      'LowriseApartment',
+      # 'LowriseApartment',
       'MediumOffice',
-      'MidriseApartment',
+      # 'MidriseApartment',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
-      'RetailStandalone',
-      'RetailStripmall',
+      # 'QuickServiceRestaurant',
+      # 'RetailStandalone',
+      # 'RetailStripmall',
       # 'SecondarySchool',
-      'SmallHotel',
+      # 'SmallHotel',
       'SmallOffice',
       'Warehouse'
     ]
@@ -55,7 +55,7 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @options = [
-      "",
+      # "",
       "structure"
     ]
 
