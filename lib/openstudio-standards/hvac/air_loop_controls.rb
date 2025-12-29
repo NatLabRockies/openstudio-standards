@@ -4,6 +4,26 @@ module OpenstudioStandards
     # @!group AirLoop:Controls
     # Methods to set Air Loop HVAC controls
 
+    # Returns standard design sizing temperatures
+    #
+    # @return [Hash] Hash of design sizing temperature lookups
+    def self.standard_design_sizing_temperatures
+      dsgn_temps = {}
+      dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 45.0
+      dsgn_temps['preclg_dsgn_sup_air_temp_f'] = 55.0
+      dsgn_temps['htg_dsgn_sup_air_temp_f'] = 55.0
+      dsgn_temps['clg_dsgn_sup_air_temp_f'] = 55.0
+      dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 104.0
+      dsgn_temps['zn_clg_dsgn_sup_air_temp_f'] = 55.0
+      dsgn_temps['prehtg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['prehtg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      dsgn_temps['preclg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['preclg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      dsgn_temps['htg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['htg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      dsgn_temps['clg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['clg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      dsgn_temps['zn_htg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['zn_htg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      dsgn_temps['zn_clg_dsgn_sup_air_temp_c'] = OpenStudio.convert(dsgn_temps['zn_clg_dsgn_sup_air_temp_f'], 'F', 'C').get
+      return dsgn_temps
+    end
+
     # Sets the air loop system sizing parameters
     #
     # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
