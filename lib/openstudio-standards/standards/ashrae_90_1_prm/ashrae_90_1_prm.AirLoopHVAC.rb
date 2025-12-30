@@ -89,15 +89,6 @@ class ASHRAE901PRM < Standard
     return true
   end
 
-  # Determine if the system is a multizone VAV system
-  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
-  # @return [Boolean] Returns true if required, false if not.
-  def OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop_hvac)
-    return true if air_loop_hvac.name.to_s.include?('Sys5') || air_loop_hvac.name.to_s.include?('Sys6') || air_loop_hvac.name.to_s.include?('Sys7') || air_loop_hvac.name.to_s.include?('Sys8')
-
-    return false
-  end
-
   # Determine whether the VAV damper control is single maximum or dual maximum control.
   # Defaults to Single Maximum for stable baseline.
   #
