@@ -608,14 +608,4 @@ class ASHRAE901PRM < Standard
     end
     return true
   end
-
-  # Set configuration in model for chilled water primary/secondary loop interface
-  # Use heat_exchanger for stable baseline
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @return [String] common_pipe or heat_exchanger
-  def plant_loop_set_chw_pri_sec_configuration(model)
-    pri_sec_config = 'heat_exchanger'
-    return pri_sec_config
-  end
 end

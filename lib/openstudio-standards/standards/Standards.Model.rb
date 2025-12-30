@@ -1462,7 +1462,7 @@ class Standard
                                  else
                                    OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                       cooling_fuel: cool_fuel,
-                                                      chw_pumping_type: 'const_pri',
+                                                      chw_pumping_configuration: 'constant primary',
                                                       outdoor_air_reset: true)
                                  end
           end
@@ -1509,7 +1509,7 @@ class Standard
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
-                                                    chw_pumping_type: 'const_pri',
+                                                    chw_pumping_configuration: 'constant primary',
                                                     outdoor_air_reset: true)
                                end
         end
@@ -1572,7 +1572,7 @@ class Standard
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
-                                                    chw_pumping_type: 'const_pri',
+                                                    chw_pumping_configuration: 'constant primary',
                                                     outdoor_air_reset: true)
                                end
         end
@@ -1633,7 +1633,7 @@ class Standard
           if cool_fuel == 'DistrictCooling'
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
-                                                    chw_pumping_type: 'const_pri',
+                                                    chw_pumping_configuration: 'constant primary',
                                                     outdoor_air_reset: true)
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
@@ -1644,7 +1644,7 @@ class Standard
                                                      number_of_cells_per_tower: 1,
                                                      number_cooling_towers: 1)
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    chw_pumping_type: 'const_pri_var_sec',
+                                                    chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
                                                     chiller_cooling_type: 'WaterCooled',
                                                     chiller_compressor_type: 'Rotary Screw',
                                                     condenser_water_loop: condenser_water_loop,
@@ -1719,7 +1719,7 @@ class Standard
           if cool_fuel == 'DistrictCooling'
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
-                                                    chw_pumping_type: 'const_pri',
+                                                    chw_pumping_configuration: 'constant primary',
                                                     outdoor_air_reset: true)
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
@@ -1730,7 +1730,7 @@ class Standard
                                                      number_of_cells_per_tower: 1,
                                                      number_cooling_towers: 1)
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    chw_pumping_type: 'const_pri_var_sec',
+                                                    chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
                                                     chiller_cooling_type: 'WaterCooled',
                                                     chiller_compressor_type: 'Rotary Screw',
                                                     condenser_water_loop: condenser_water_loop,
@@ -1831,7 +1831,7 @@ class Standard
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                     cooling_fuel: cool_fuel,
-                                                    chw_pumping_type: 'const_pri',
+                                                    chw_pumping_configuration: 'constant primary',
                                                     outdoor_air_reset: true)
                                end
 
@@ -1874,7 +1874,9 @@ class Standard
           chilled_water_loop = if model.getPlantLoopByName('Chilled Water Loop').is_initialized
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
-                                 chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model, chw_pumping_type: 'const_pri', outdoor_air_reset: true)
+                                 chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
+                                  chw_pumping_configuration: 'constant primary',
+                                  outdoor_air_reset: true)
                                end
 
           OpenstudioStandards::HVAC.model_add_psz_vav(model,

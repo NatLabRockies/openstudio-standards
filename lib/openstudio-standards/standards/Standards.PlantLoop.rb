@@ -11,15 +11,6 @@ class Standard
     # plant_loop_enable_supply_water_temperature_reset(plant_loop) if plant_loop_supply_water_temperature_reset_required?(plant_loop)
   end
 
-  # Set configuration in model for chilled water primary/secondary loop interface
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @return [String] common_pipe or heat_exchanger
-  def plant_loop_set_chw_pri_sec_configuration(model)
-    pri_sec_config = 'common_pipe'
-    return pri_sec_config
-  end
-
   # apply prm baseline pump power
   # @note I think it makes more sense to sense the motor efficiency right there...
   #   But actually it's completely irrelevant...
