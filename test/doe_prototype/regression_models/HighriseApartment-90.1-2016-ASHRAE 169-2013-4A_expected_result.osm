@@ -89707,7 +89707,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {beba528a-3062-4c2f-a2ec-b8576e0c6cb1}, !- Handle
   T S2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -89744,41 +89744,6 @@ OS:Table:IndependentVariable,
   ,                                       !- External File Starting Row Number
   0.75,                                   !- Value 1
   1;                                      !- Value 2
-
-OS:Schedule:Ruleset,
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Handle
-  Always On - No Design Day,              !- Name
-  {12c8bdc0-c491-45b5-bd22-1b5950ff0b42}, !- Schedule Type Limits Name
-  {f847a9d3-691e-4b48-9885-718bfd21ab73}, !- Default Day Schedule Name
-  {3895c214-e7ad-4975-a441-3a65cb247553}, !- Summer Design Day Schedule Name
-  {c102945c-bba0-4835-9f39-468dd38a7d3a}; !- Winter Design Day Schedule Name
-
-OS:Schedule:Day,
-  {f847a9d3-691e-4b48-9885-718bfd21ab73}, !- Handle
-  Always On - No Design Day Default,      !- Name
-  {12c8bdc0-c491-45b5-bd22-1b5950ff0b42}, !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  1;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {c102945c-bba0-4835-9f39-468dd38a7d3a}, !- Handle
-  Always On - No Design Day Winter Design Day, !- Name
-  {12c8bdc0-c491-45b5-bd22-1b5950ff0b42}, !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  0;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {3895c214-e7ad-4975-a441-3a65cb247553}, !- Handle
-  Always On - No Design Day Summer Design Day, !- Name
-  {12c8bdc0-c491-45b5-bd22-1b5950ff0b42}, !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  0;                                      !- Value Until Time 1
 
 OS:Table:Lookup,
   {715811af-47c7-434b-ba3f-2f31cdc58f0c}, !- Handle
@@ -90024,7 +89989,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {0a9d2323-04bb-40ac-9a14-0845f2f2875f}, !- Handle
   T N2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -90306,7 +90271,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {6b797048-2922-4f8c-9083-c6d956d55fcb}, !- Handle
   T N1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -90588,7 +90553,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {e2c8fb4a-2406-4264-b7bc-7ca423bf502b}, !- Handle
   T NE Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -90870,7 +90835,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {9c04f2b4-e17b-40be-ad3f-d6e3fef9c5a2}, !- Handle
   F9 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -91152,7 +91117,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {0d793910-d17f-4e67-9986-f18e13e6f69a}, !- Handle
   F9 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -91434,7 +91399,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {b1ba82da-9f2a-4e15-9e12-eb4caa39768c}, !- Handle
   F9 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -91716,7 +91681,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {3c53c13a-e472-44da-9286-6cff41019066}, !- Handle
   F9 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -91998,7 +91963,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {cc113920-abdf-4404-87db-66755c508bda}, !- Handle
   F9 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -92280,7 +92245,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {4d729396-498d-4740-b5fb-52f83df0330b}, !- Handle
   F8 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -92562,7 +92527,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {f3d6ef5e-7410-406f-b579-1ee7d0c78067}, !- Handle
   F8 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -92844,7 +92809,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {92b5a8ad-4894-405e-8354-e0379630b6a4}, !- Handle
   F8 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -93126,7 +93091,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {d2fb53b8-27f6-4851-b00f-2f6cf8a1e8e3}, !- Handle
   F4 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -93408,7 +93373,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {76395799-8afa-4403-865f-b0e75aa8d19a}, !- Handle
   M SE Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -93690,7 +93655,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {2af7293f-dfc9-419b-91b4-c669d5f8eb3e}, !- Handle
   F4 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -93972,7 +93937,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {5cfbf0a0-3ccb-449e-8353-ab020ccc02cd}, !- Handle
   F3 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -94254,7 +94219,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {94572f0b-498f-40a8-9251-43081565a46d}, !- Handle
   F3 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -94536,7 +94501,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {449f8e7b-3f7d-4b75-87ae-bcae10d90d9d}, !- Handle
   F3 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -94818,7 +94783,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {c161f3a3-2cb7-4f1d-8982-c952b01653af}, !- Handle
   F4 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -95100,7 +95065,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {e2648e16-aa11-47a6-b717-3e7e18cbeddc}, !- Handle
   F2 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -95382,7 +95347,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {8633dc52-433a-47e4-bee5-35a1508d45ad}, !- Handle
   T NW Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -95664,7 +95629,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {fbbda09b-70f4-47f8-b123-fcb16367e0f0}, !- Handle
   F9 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -95946,7 +95911,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {5b5263eb-20d3-40fa-9bd4-e8aa5253b77e}, !- Handle
   F8 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -96228,7 +96193,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {37d25d31-b355-4060-ac3e-9babbbbe6e06}, !- Handle
   F8 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -96510,7 +96475,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {dc18f8e6-3bfd-4cb8-ab43-088c389af0cc}, !- Handle
   G N2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -96792,7 +96757,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {7bb54c4e-9787-46d6-8b9d-2a18b8e7d40e}, !- Handle
   G SW Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -97074,7 +97039,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a878d608-c41c-4f33-8dc9-a99a9096ac19}, !- Handle
   F2 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -97356,7 +97321,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {3e0c35d5-041f-46c1-8f1e-8d83669a2a4b}, !- Handle
   F9 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -97638,7 +97603,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {1b3f92cc-a89d-45cc-a5f3-5d062aff7c6a}, !- Handle
   F3 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -97920,7 +97885,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {2b30c64b-fc8a-4853-924f-de9d63c50241}, !- Handle
   T S1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -98202,7 +98167,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {8a5dd8e7-c17a-415e-9ff1-892e1e04976d}, !- Handle
   F7 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -98484,7 +98449,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {6e5c7894-773d-40f1-a5f9-c0979de3f2f2}, !- Handle
   G NW Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -98766,7 +98731,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {300e7269-98d0-4ced-85a8-cd8908c7d0cd}, !- Handle
   F4 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -99048,7 +99013,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {4fc59f70-ed38-4605-b768-24a0654fd8fd}, !- Handle
   M S2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -99330,7 +99295,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {25fb7d49-9b87-46ae-a497-b17278109d1d}, !- Handle
   F7 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -99612,7 +99577,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {4932ec91-5330-4141-ac48-d8bd66a4618a}, !- Handle
   G NE Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -99894,7 +99859,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {8da9ab70-421e-44d1-ab4f-8f748322e86c}, !- Handle
   F2 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -100176,7 +100141,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {21d07bff-1b54-4a93-a9c7-34da25524154}, !- Handle
   F6 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -100458,7 +100423,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {ec862d1d-f3de-4e8c-86df-7b16ed26a07d}, !- Handle
   F2 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -100740,7 +100705,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {c966b396-35df-47ad-a6f5-8d7b31aaec73}, !- Handle
   F9 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -101022,7 +100987,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {d9e90ce6-e979-4c2f-a7ba-8ed546380773}, !- Handle
   F3 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -101304,7 +101269,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {ebc3be4e-73bb-4e40-9c9a-d0a3e9cd7501}, !- Handle
   M N1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -101586,7 +101551,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {ed428c36-6cde-4bd9-adbe-66b73f40f561}, !- Handle
   F4 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -101868,7 +101833,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {ecb761b1-97bc-42af-aff8-7d37319c8fd2}, !- Handle
   F7 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -102150,7 +102115,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {5c2c9754-3373-4253-9760-6e665239aaa8}, !- Handle
   F2 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -102432,7 +102397,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {6c3174bf-d460-4851-a665-50953981f06b}, !- Handle
   G S1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -102714,7 +102679,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {623994ad-e1cd-4776-95f1-35dabafe37ef}, !- Handle
   G N1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -102996,7 +102961,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {88540b31-27b3-43d6-aa74-d500f02efea2}, !- Handle
   F6 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -103278,7 +103243,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {b3d56bc8-2a94-4544-ad79-bcb5a8c21c96}, !- Handle
   G S2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -103560,7 +103525,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {6bff0dc0-5583-4f6d-871e-daa64569843e}, !- Handle
   F7 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -103842,7 +103807,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {0ce818d3-8530-4153-b6c1-d712f8e9c050}, !- Handle
   F2 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -104124,7 +104089,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {2b9f00d9-1eb1-455e-9fbe-c32a89cc54fc}, !- Handle
   F2 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -104406,7 +104371,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {1a628e4d-9122-4ce9-bf68-543adb8b2e6f}, !- Handle
   F4 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -104688,7 +104653,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {69f0af18-6d8d-4320-a72e-0f8336590028}, !- Handle
   F3 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -104970,7 +104935,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {df9540e6-97cc-41c5-9564-26c9495d9abf}, !- Handle
   F2 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -105252,7 +105217,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {54cdcf40-770d-4ddb-91cc-dfe70def72d6}, !- Handle
   F4 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -105534,7 +105499,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a938560c-c150-4f41-a5a4-90b07cd58b81}, !- Handle
   F7 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -105816,7 +105781,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {cd24139f-555d-4aee-8aa6-bda65164bea7}, !- Handle
   M SW Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -106098,7 +106063,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {53f29066-e7d8-4430-a5f6-7fe432273345}, !- Handle
   M N2 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -106380,7 +106345,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {86589428-0fc6-4aa9-9d18-58e024e456d0}, !- Handle
   F7 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -106662,7 +106627,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {03a25ac5-29f7-45ac-8d4a-0d40e8a418c5}, !- Handle
   F4 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -106944,7 +106909,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a66f75d0-8671-45e2-81c9-3091e3df682a}, !- Handle
   M NW Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -107226,7 +107191,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {9cf1e163-a124-4106-b1d4-4816ca6dc17a}, !- Handle
   M NE Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -107508,7 +107473,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {fab26235-75cd-4767-9a91-b720600f06f6}, !- Handle
   T SE Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -107790,7 +107755,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {6a9b3f98-e17f-437e-9309-7e90a9763291}, !- Handle
   F3 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -108072,7 +108037,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {c8b48b7e-55df-41a0-881e-babdb5078e97}, !- Handle
   F3 NW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -108354,7 +108319,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {290ae43b-2a93-42a4-86af-0a659adaa914}, !- Handle
   M S1 Apartment ZN ERV HX,               !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -108748,7 +108713,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a73232ae-be75-48cd-abc5-d1deadb65e5a}, !- Handle
   F6 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -109030,7 +108995,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {eba059db-3af5-4f19-95ba-bc972cea6ac4}, !- Handle
   F6 N1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -109312,7 +109277,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {3f6f6e14-f136-4a67-b59a-00eb44d91b79}, !- Handle
   F6 N2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -109594,7 +109559,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {e9fdc8d1-5da1-4e26-abcc-898befc96742}, !- Handle
   F6 S1 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -109876,7 +109841,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {39503a44-3980-44e1-9986-398dd0b12464}, !- Handle
   F6 S2 Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -110158,7 +110123,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {212df508-eea0-4149-b1cc-3295bb898f7c}, !- Handle
   F6 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -110440,7 +110405,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {ed0be28c-431b-4cf0-bc0f-435fd7e82b04}, !- Handle
   F7 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -110722,7 +110687,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {8a89dcc5-be25-49cb-8a81-44df633819c2}, !- Handle
   F7 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -111004,7 +110969,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a4305cfd-8314-402a-b28f-4948f4cdf9ff}, !- Handle
   F8 NE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -111286,7 +111251,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {a3b6f9ae-05ca-4066-8320-11f46846ddba}, !- Handle
   F8 SW Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
@@ -111568,7 +111533,7 @@ OS:Curve:Cubic,
 OS:HeatExchanger:AirToAir:SensibleAndLatent,
   {b7df0d1b-5218-4240-84f8-8efdfdc87a5f}, !- Handle
   F8 SE Apartment ZN ERV HX,              !- Name
-  {2bc3bec2-ce1a-481d-ba08-aa553aae61e3}, !- Availability Schedule
+  {6a9a7b2e-0a37-43d1-988d-ad4562db0543}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
   0.6660875,                              !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
   0.451,                                  !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}

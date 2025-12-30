@@ -1621,7 +1621,11 @@ Standard.class_eval do
           oa_cfm_per_ft2 = 0.0578940512546562
           oa_m3_per_m2 = OpenStudio.convert(OpenStudio.convert(oa_cfm_per_ft2, 'cfm', 'm^3/s').get, '1/ft^2', '1/m^2').get
           if has_erv
-            OpenstudioStandards::HVAC.model_add_residential_erv(model, [zone], oa_m3_per_m2)
+            zone_ervs = OpenstudioStandards::HVAC.model_add_residential_erv(model, [zone], oa_m3_per_m2)
+            zone_ervs.each do |erv|
+              hx = erv.heatExchanger.to_HeatExchangerAirToAirSensibleAndLatent.get
+              heat_exchanger_air_to_air_sensible_and_latent_apply_effectiveness(hx)
+            end
           else
             OpenstudioStandards::HVAC.model_add_residential_ventilator(model, [zone], oa_m3_per_m2)
           end
