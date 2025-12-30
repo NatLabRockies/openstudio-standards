@@ -313,9 +313,9 @@ class Standard
       # Get supply, return, relief fan power for each air loop
       if model_get_fan_power_breakdown
         model.getAirLoopHVACs.sort.each do |air_loop|
-          supply_fan_w = air_loop_hvac_get_supply_fan_power(air_loop)
-          return_fan_w = air_loop_hvac_get_return_fan_power(air_loop)
-          relief_fan_w = air_loop_hvac_get_relief_fan_power(air_loop)
+          supply_fan_w = OpenstudioStandards::HVAC.air_loop_hvac_supply_fan_power(air_loop)
+          return_fan_w = OpenstudioStandards::HVAC.air_loop_hvac_return_fan_power(air_loop)
+          relief_fan_w = OpenstudioStandards::HVAC.air_loop_hvac_relief_fan_power(air_loop)
 
           # Save fan power at the zone to determining
           # baseline fan power
@@ -2256,10 +2256,10 @@ class Standard
     ##### Apply equipment efficiencies
 
     # Fans
-    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
+    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
 
     # Pumps
     model.getPumpConstantSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
@@ -6204,7 +6204,7 @@ class Standard
         # Check heating air loop first
         if !heating_equipment.nil? && heating_equipment.to_StraightComponent.is_initialized
           air_loop = heating_equipment.to_StraightComponent.get.airLoopHVAC.get
-          return_plenum = air_loop_hvac_return_air_plenum(air_loop)
+          return_plenum = OpenstudioStandards::HVAC.air_loop_hvac_return_air_plenum(air_loop)
           return_air_type = return_plenum.nil? ? 'ducted_return_or_direct_to_unit' : 'return_plenum'
           return_plenum = return_plenum.nil? ? nil : return_plenum.name.to_s
         end
@@ -6214,7 +6214,7 @@ class Standard
            (return_air_type != 'return_plenum') &&
            cooling_equipment.to_StraightComponent.is_initialized
           air_loop = cooling_equipment.to_StraightComponent.get.airLoopHVAC.get
-          return_plenum = air_loop_hvac_return_air_plenum(air_loop)
+          return_plenum = OpenstudioStandards::HVAC.air_loop_hvac_return_air_plenum(air_loop)
           return_air_type = return_plenum.nil? ? 'ducted_return_or_direct_to_unit' : 'return_plenum'
           return_plenum = return_plenum.nil? ? nil : return_plenum.name.to_s
         end

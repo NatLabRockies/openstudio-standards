@@ -413,7 +413,7 @@ class AppendixGPRMTests < Minitest::Test
 
       if building_type == 'SmallOffice'
         model.getFanVariableVolumes.sort.each do |fan|
-          fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+          fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
           fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
           fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
           assert(fan_bhp_ip.round(4) == 0.0017, "Fan power for #{fan.name} fan in #{building_type} #{template} #{climate_zone} #{mod} is #{fan_bhp_ip.round(4)} instead of 0.0017.")
@@ -423,7 +423,7 @@ class AppendixGPRMTests < Minitest::Test
       if building_type == 'RetailStandalone'
         model.getFanOnOffs.sort.each do |fan|
           if fan.name.to_s.include?('Front_Entry ZN')
-            fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+            fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
             fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
             fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
             assert(fan_bhp_ip.round(4) == 0.0012, "Fan power for  #{fan.name} fan in #{building_type} #{template} #{climate_zone} #{mod} is #{fan_bhp_ip.round(4)} instead of 0.0012.")

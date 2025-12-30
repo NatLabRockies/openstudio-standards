@@ -315,7 +315,7 @@ class ASHRAE9012016 < ASHRAE901
   # @return [Integer] the number of stages: 0, 1, 2
   def air_loop_hvac_single_zone_controls_num_stages(air_loop_hvac, climate_zone)
     min_clg_cap_btu_per_hr = 65_000
-    clg_cap_btu_per_hr = OpenStudio.convert(air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
+    clg_cap_btu_per_hr = OpenStudio.convert(OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
     if clg_cap_btu_per_hr >= min_clg_cap_btu_per_hr
       num_stages = 2
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: two-stage control is required since cooling capacity of #{clg_cap_btu_per_hr.round} Btu/hr exceeds the minimum of #{min_clg_cap_btu_per_hr.round} Btu/hr .")
@@ -337,7 +337,7 @@ class ASHRAE9012016 < ASHRAE901
     is_sat_reset_required = false
 
     # Only required for multizone VAV systems
-    unless air_loop_hvac_multizone_vav_system?(air_loop_hvac)
+    unless OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop_hvac)
       return is_sat_reset_required
     end
 

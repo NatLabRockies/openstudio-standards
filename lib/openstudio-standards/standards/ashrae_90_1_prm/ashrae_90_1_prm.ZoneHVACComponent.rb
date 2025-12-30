@@ -103,7 +103,7 @@ class ASHRAE901PRM < Standard
       fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
 
       # Get fan BHP
-      fan_bhp = fan_brake_horsepower(fan)
+      fan_bhp = OpenstudioStandards::HVAC.fan_brake_horsepower(fan)
 
       # Set the motor efficiency, preserving the impeller efficiency.
       # For zone HVAC fans, a bhp lookup of 0.5bhp is always used because

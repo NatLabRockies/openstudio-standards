@@ -9,7 +9,7 @@ class NRELZNEReady2017 < ASHRAE901
 
     # Air Loop Controls
     if apply_controls.nil? || apply_controls == true
-      model.getAirLoopHVACs.sort.each { |obj| air_loop_hvac_apply_standard_controls(obj, climate_zone) unless air_loop_hvac_unitary_system?(obj) }
+      model.getAirLoopHVACs.sort.each { |obj| air_loop_hvac_apply_standard_controls(obj, climate_zone) unless OpenstudioStandards::HVAC.air_loop_hvac_unitary_system?(obj) }
     end
 
     # Plant Loop Controls
@@ -23,10 +23,10 @@ class NRELZNEReady2017 < ASHRAE901
     ##### Apply equipment efficiencies
 
     # Fans
-    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
+    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
     model.getZoneHVACComponents.sort.each { |obj| zone_hvac_component_apply_prm_baseline_fan_power(obj) }
 
     # Pumps

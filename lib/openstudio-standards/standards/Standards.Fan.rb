@@ -19,12 +19,12 @@ module Fan
     fan_change_motor_efficiency(fan, motor_eff)
 
     # Calculate the total motor HP
-    motor_hp = fan_motor_horsepower(fan)
+    motor_hp = OpenstudioStandards::HVAC.fan_motor_horsepower(fan)
 
     # Exception for small fans, including
     # zone exhaust, fan coil, and fan powered terminals.
     # In this case, 0.5 HP is used for the lookup.
-    if fan_small_fan?(fan)
+    if OpenstudioStandards::HVAC.fan_small_fan?(fan)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Fan', "For #{fan.name}: motor eff = #{(motor_eff * 100).round(2)}%; assumed to represent several less than 1 HP motors.")
     else
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Fan', "For #{fan.name}: motor nameplate = #{nominal_hp}HP, motor eff = #{(motor_eff * 100).round(2)}%.")
@@ -50,7 +50,7 @@ module Fan
                             end
 
     # Get the current fan power
-    current_fan_power_w = fan_fanpower(fan)
+    current_fan_power_w = OpenstudioStandards::HVAC.fan_fanpower(fan)
 
     # Get the current pressure rise (Pa)
     pressure_rise_pa = fan.pressureRise
@@ -66,93 +66,11 @@ module Fan
     fan.setPressureRise(new_pressure_rise_pa)
 
     # Calculate the new power
-    new_power_w = fan_fanpower(fan)
+    new_power_w = OpenstudioStandards::HVAC.fan_fanpower(fan)
 
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Fan', "For #{fan.name}: pressure rise = #{new_pressure_rise_in_h2o.round(1)} in w.c., power = #{fan_motor_horsepower(fan).round(2)}HP.")
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Fan', "For #{fan.name}: pressure rise = #{new_pressure_rise_in_h2o.round(1)} in w.c., power = #{OpenstudioStandards::HVAC.fan_motor_horsepower(fan).round(2)}HP.")
 
     return true
-  end
-
-  # Determines the design fan flow (m3/s)
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Double] design fan flow
-  def fan_design_air_flow(fan)
-    # Get design supply air flow rate (whether autosized or hard-sized)
-    dsn_air_flow_m3_per_s = if fan.to_FanZoneExhaust.empty?
-                              if fan.maximumFlowRate.is_initialized
-                                fan.maximumFlowRate.get
-                              elsif fan.autosizedMaximumFlowRate.is_initialized
-                                fan.autosizedMaximumFlowRate.get
-                              else
-                                OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Fan', "The maximum flow rate for fan '#{fan.name}' was neither specified nor set to Autosize.")
-                              end
-                            else
-                              if fan.maximumFlowRate.is_initialized
-                                fan.maximumFlowRate.get
-                              else
-                                OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Fan', "The maximum flow rate for exhaust fan '#{fan.name}' was not specified.")
-                              end
-                            end
-    return dsn_air_flow_m3_per_s
-  end
-
-  # Determines the fan power (W) based on
-  # flow rate, pressure rise, and total fan efficiency(impeller eff * motor eff)
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Double] fan power in watts
-  def fan_fanpower(fan)
-    # Get the total fan efficiency,
-    # which in E+ includes both motor and
-    # impeller efficiency.
-    fan_total_eff = fan.fanEfficiency
-
-    # Get the pressure rise (Pa)
-    pressure_rise_pa = fan.pressureRise
-
-    # Calculate the fan power (W)
-    fan_power_w = pressure_rise_pa * fan_design_air_flow(fan) / fan_total_eff
-
-    return fan_power_w
-  end
-
-  # Determines the brake horsepower of the fan based on fan power and fan motor efficiency.
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Double] brake horsepower
-  def fan_brake_horsepower(fan)
-    # Get the fan motor efficiency
-    existing_motor_eff = 0.7
-    if fan.to_FanZoneExhaust.empty?
-      existing_motor_eff = fan.motorEfficiency
-    end
-
-    # Get the fan power (W)
-    fan_power_w = fan_fanpower(fan)
-
-    # Calculate the brake horsepower (bhp)
-    fan_bhp = fan_power_w * existing_motor_eff / 746
-
-    return fan_bhp
-  end
-
-  # Determines the horsepower of the fan motor, including motor efficiency and fan impeller efficiency.
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Double] motor horsepower
-  def fan_motor_horsepower(fan)
-    # Get the fan power
-    fan_power_w = fan_fanpower(fan)
-
-    # Convert to HP
-    fan_hp = fan_power_w / 745.7 # 745.7 W/HP
-
-    return fan_hp
   end
 
   # Changes the fan motor efficiency and also the fan total efficiency
@@ -222,7 +140,7 @@ module Fan
     # @todo check COMNET and T24 ACM and PNNL 90.1 doc
     fan_impeller_eff = 0.65
 
-    if fan_small_fan?(fan)
+    if OpenstudioStandards::HVAC.fan_small_fan?(fan)
       fan_impeller_eff = 0.55
     end
 
@@ -270,7 +188,7 @@ module Fan
     # Exception for small fans, including
     # zone exhaust, fan coil, and fan powered terminals.
     # In this case, use the 0.5 HP for the lookup.
-    if fan_small_fan?(fan)
+    if OpenstudioStandards::HVAC.fan_small_fan?(fan)
       nominal_hp = 0.5
 
       # Get the efficiency based on the nominal horsepower
@@ -309,63 +227,5 @@ module Fan
     fan_motor_eff = motor_properties['nominal_full_load_efficiency']
 
     return [fan_motor_eff, nominal_hp]
-  end
-
-  # Zone exhaust fans, fan coil unit fans, and powered VAV terminal fans all count
-  # as small fans and get different impeller efficiencies and motor efficiencies than other fans
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Boolean] returns true if it is a small fan, false if not
-  def fan_small_fan?(fan)
-    is_small = false
-
-    # Exhaust fan
-    if fan.to_FanZoneExhaust.is_initialized
-      is_small = true
-    # Fan coil unit, unit heater, PTAC, PTHP, VRF terminals, WSHP, ERV
-    elsif fan.containingZoneHVACComponent.is_initialized
-      zone_hvac = fan.containingZoneHVACComponent.get
-      if zone_hvac.to_ZoneHVACFourPipeFanCoil.is_initialized
-        is_small = true
-      # elsif zone_hvac.to_ZoneHVACUnitHeater.is_initialized
-      #   is_small = true
-      elsif zone_hvac.to_ZoneHVACPackagedTerminalAirConditioner.is_initialized || zone_hvac.to_ZoneHVACPackagedTerminalHeatPump.is_initialized || zone_hvac.to_ZoneHVACTerminalUnitVariableRefrigerantFlow.is_initialized || zone_hvac.to_ZoneHVACWaterToAirHeatPump.is_initialized || zone_hvac.to_ZoneHVACEnergyRecoveryVentilator.is_initialized
-        is_small = true
-      end
-    # Powered VAV terminal
-    elsif fan.containingHVACComponent.is_initialized
-      zone_hvac = fan.containingHVACComponent.get
-      if zone_hvac.to_AirTerminalSingleDuctParallelPIUReheat.is_initialized || zone_hvac.to_AirTerminalSingleDuctSeriesPIUReheat.is_initialized
-        is_small = true
-      end
-    end
-
-    return is_small
-  end
-
-  # Find the actual rated fan power per flow (W/CFM) by querying the sql file
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @return [Double] rated power consumption per flow in watters per cfm, W*min/ft^3
-  def fan_rated_w_per_cfm(fan)
-    # Get design power (whether autosized or hard-sized)
-    rated_power_w = fan_fanpower(fan)
-
-    if fan.maximumFlowRate.is_initialized
-      max_m3_per_s = fan.ratedFlowRate.get
-    elsif fan.autosizedMaximumFlowRate.is_initialized
-      max_m3_per_s = fan.autosizedMaximumFlowRate.get
-    else
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Fan', "For #{fan.name}, could not find fan Maximum Flow Rate, cannot determine w per cfm correctly.")
-      return false
-    end
-
-    rated_w_per_m3s = rated_power_w / max_m3_per_s
-
-    rated_w_per_cfm = OpenStudio.convert(rated_w_per_m3s, 'W*s/m^3', 'W*min/ft^3').get
-
-    return rated_w_per_cfm
   end
 end

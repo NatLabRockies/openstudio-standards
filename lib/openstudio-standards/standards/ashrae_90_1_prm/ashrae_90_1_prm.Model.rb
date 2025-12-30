@@ -602,10 +602,10 @@ class ASHRAE901PRM < Standard
       # - No cooling coil and/or,
       # - An evaporative cooling coil
       zone.airLoopHVACs.each do |air_loop|
-        if (!air_loop_hvac_include_cooling_coil?(air_loop) &&
-          air_loop_hvac_include_evaporative_cooler?(air_loop)) ||
-           (!air_loop_hvac_include_cooling_coil?(air_loop) &&
-             air_loop_hvac_include_economizer?(air_loop))
+        if (!OpenstudioStandards::HVAC.air_loop_hvac_cooling_coil?(air_loop) &&
+          OpenstudioStandards::HVAC.air_loop_hvac_direct_evap?(air_loop)) ||
+           (!OpenstudioStandards::HVAC.air_loop_hvac_cooling_coil?(air_loop) &&
+             OpenstudioStandards::HVAC.air_loop_hvac_economizer?(air_loop))
           air_loop.additionalProperties.setFeature('non_mechanically_cooled', true)
           zone.additionalProperties.setFeature('non_mechanically_cooled', true)
         end
@@ -676,10 +676,10 @@ class ASHRAE901PRM < Standard
 
     # @todo The fan and pump efficiency will be done by another task.
     # Fans
-    # model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
+    # model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
 
     # Pumps
     # model.getPumpConstantSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
