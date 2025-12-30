@@ -4,10 +4,10 @@ module OpenstudioStandards
     # @!group AirLoop:Controls
     # Methods to set Air Loop HVAC controls
 
-    # Returns standard design sizing temperatures
+    # Returns standard air loop design sizing temperatures
     #
     # @return [Hash] Hash of design sizing temperature lookups
-    def self.standard_design_sizing_temperatures
+    def self.standard_air_loop_design_sizing_temperatures
       dsgn_temps = {}
       dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 45.0
       dsgn_temps['preclg_dsgn_sup_air_temp_f'] = 55.0
@@ -27,7 +27,7 @@ module OpenstudioStandards
     # Sets the air loop system sizing parameters
     #
     # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
-    # @param design_temperatures [Hash] a hash of design temperature lookups from standard_design_sizing_temperatures
+    # @param design_temperatures [Hash] a hash of design temperature lookups from standard_air_loop_design_sizing_temperatures
     # @param type_of_load_sizing [String] type of load to size on
     # @param minimum_system_airflow_ratio [Double] minimum system airflow ratio, between 0 and 1
     # @param sizing_option [String] sizing option. Options are 'Coincident' and 'NonCoincident'

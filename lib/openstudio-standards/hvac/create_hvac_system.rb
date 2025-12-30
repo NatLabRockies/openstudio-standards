@@ -206,6 +206,8 @@ module OpenstudioStandards
     #     to provide waterside economizing whenever wet bulb temperatures allow
     #   If 'non-integrated' will add a heat exchanger in parallel with the chiller that will operate
     #     only when it can meet cooling demand exclusively with the waterside economizing.
+    # @param outdoor_air_reset [Boolean] whether to apply outdoor air temperature reset to the supply water temperature.
+    #   Default is a false, using a constant setpoint supply water temperature.
     # @return [OpenStudio::Model::PlantLoop] the resulting chilled water loop
     def self.model_add_chw_loop(model,
                                 system_name: 'Chilled Water Loop',
@@ -218,7 +220,8 @@ module OpenstudioStandards
                                 chiller_compressor_type: nil,
                                 num_chillers: 1,
                                 condenser_water_loop: nil,
-                                waterside_economizer: 'none')
+                                waterside_economizer: 'none',
+                                outdoor_air_reset: false)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', 'Adding chilled water loop.')
 
       # create chilled water loop
@@ -233,8 +236,11 @@ module OpenstudioStandards
         dsgn_sup_wtr_temp = 44.0
       end
 
-      # chilled water loop sizing and controls
-      chw_sizing_control(model, chilled_water_loop, dsgn_sup_wtr_temp, dsgn_sup_wtr_temp_delt)
+      # chilled water loop design temperature sizing and controls
+      dsgn_temps = OpenstudioStandards::HVAC.standard_chilled_water_loop_design_sizing_temperatures
+      dsgn_temps['dsgn_chw_temp_f'] = dsgn_sup_wtr_temp
+      dsgn_temps['dsgn_chw_temp_delt_r'] = dsgn_sup_wtr_temp_delt
+      OpenstudioStandards::HVAC.set_chilled_water_loop_system_sizing(chilled_water_loop, dsgn_temps, outdoor_air_reset: outdoor_air_reset)
 
       # create chilled water pumps
       if chw_pumping_type == 'const_pri'
@@ -293,7 +299,13 @@ module OpenstudioStandards
           # Reset primary loop name
           chilled_water_loop.setName("#{secondary_loop_name}_Primary")
           secondary_chilled_water_loop.setName(secondary_loop_name)
-          chw_sizing_control(model, secondary_chilled_water_loop, dsgn_sup_wtr_temp, dsgn_sup_wtr_temp_delt)
+
+          # chilled water loop design temperature sizing and controls
+          dsgn_temps = OpenstudioStandards::HVAC.standard_chilled_water_loop_design_sizing_temperatures
+          dsgn_temps['dsgn_chw_temp_f'] = dsgn_sup_wtr_temp
+          dsgn_temps['dsgn_chw_temp_delt_r'] = dsgn_sup_wtr_temp_delt
+          OpenstudioStandards::HVAC.set_chilled_water_loop_system_sizing(chilled_water_loop, dsgn_temps, outdoor_air_reset: outdoor_air_reset)
+
           chilled_water_loop.additionalProperties.setFeature('is_primary_loop', true)
           chilled_water_loop.additionalProperties.setFeature('secondary_loop_name', secondary_chilled_water_loop.name.to_s)
           secondary_chilled_water_loop.additionalProperties.setFeature('is_secondary_loop', true)
@@ -381,7 +393,7 @@ module OpenstudioStandards
         # Create chillers and set plant operation scheme
         num_chillers.times do |i|
           chiller = OpenStudio::Model::ChillerElectricEIR.new(model)
-          chiller.setName("#{template} #{chiller_cooling_type} #{chiller_condenser_type} #{chiller_compressor_type} Chiller #{i}")
+          chiller.setName("#{chiller_cooling_type} #{chiller_condenser_type} #{chiller_compressor_type} Chiller #{i}")
           chilled_water_loop.addSupplyBranchForComponent(chiller)
           dsgn_sup_wtr_temp_c = OpenStudio.convert(dsgn_sup_wtr_temp, 'F', 'C').get
           chiller.setReferenceLeavingChilledWaterTemperature(dsgn_sup_wtr_temp_c)
@@ -1837,7 +1849,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
       if !min_sys_airflow_ratio.nil?
         if model.version < OpenStudio::VersionString.new('2.7.0')
@@ -2072,7 +2084,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
       # air handler controls
@@ -2210,7 +2222,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -2407,7 +2419,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures and settings used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
 
       # air handler controls
@@ -2549,7 +2561,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -2720,7 +2732,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures and settings used across all air loops
-        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
         unless hot_water_loop.nil?
           hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
           hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -2996,7 +3008,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures used across all air loops
-        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
         # adjusted zone design heating temperature for psz_vav
         dsgn_temps['htg_dsgn_sup_air_temp_f'] = dsgn_temps['zn_htg_dsgn_sup_air_temp_f']
@@ -3211,7 +3223,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures across all air loops
-        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
         unless hot_water_loop.nil?
           hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
           hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -3377,7 +3389,7 @@ module OpenstudioStandards
         end
 
         # default design temperatures across all air loops
-        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
         # adjusted zone design heating temperature for data center psz_ac
         dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 64.4
@@ -3590,7 +3602,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted zone design heating temperature for data center psz_ac
       dsgn_temps['prehtg_dsgn_sup_air_temp_f'] = 64.4
@@ -3737,7 +3749,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted zone design heating temperature for split_ac
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -3875,7 +3887,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted temperatures for minisplit
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -3988,7 +4000,7 @@ module OpenstudioStandards
                             ventilation: true)
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
         hw_delta_t_k = hot_water_loop.sizingPlant.loopDesignTemperatureDifference
@@ -4104,7 +4116,7 @@ module OpenstudioStandards
                             ventilation: true)
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted zone design temperatures for pthp
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -4212,7 +4224,7 @@ module OpenstudioStandards
       fan_pressure_rise = 0.2 if fan_pressure_rise.nil?
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted zone design heating temperature for unit heater
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -4363,7 +4375,7 @@ module OpenstudioStandards
       end
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted design temperatures for evap cooler
       dsgn_temps['clg_dsgn_sup_air_temp_f'] = 70.0
@@ -4568,7 +4580,7 @@ module OpenstudioStandards
                                                                                                     master_zone: master_zone)
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       vrfs = []
       thermal_zones.each do |zone|
@@ -4627,7 +4639,7 @@ module OpenstudioStandards
                                           capacity_control_method: 'CyclingFan')
 
       # default design temperatures used across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # make a fan coil unit for each zone
       fcus = []
@@ -5328,7 +5340,7 @@ module OpenstudioStandards
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding furnace AC for #{zone.name}.")
 
         # default design temperatures across all air loops
-        dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+        dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
         # adjusted temperatures for furnace_central_ac
         dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0
@@ -5443,7 +5455,7 @@ module OpenstudioStandards
       crank_case_max_temp_f = 55
 
       # default design temperatures across all air loops
-      dsgn_temps = OpenstudioStandards::HVAC.standard_design_sizing_temperatures
+      dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
 
       # adjusted temperatures for furnace_central_ac
       dsgn_temps['zn_htg_dsgn_sup_air_temp_f'] = 122.0

@@ -609,58 +609,6 @@ class ASHRAE901PRM < Standard
     return true
   end
 
-  # Apply sizing and controls to chilled water loop
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop
-  # @param dsgn_sup_wtr_temp [Double] design chilled water supply T
-  # @param dsgn_sup_wtr_temp_delt [Double] design chilled water supply delta T
-  # @return [Boolean] returns true if successful, false if not
-  def chw_sizing_control(model, chilled_water_loop, dsgn_sup_wtr_temp, dsgn_sup_wtr_temp_delt)
-    design_chilled_water_temperature = 44 # Loop design chilled water temperature (F)
-    design_chilled_water_temperature_delta = 10.1 # Loop design chilled water temperature  (deltaF)
-    chw_outdoor_temperature_high = 80 # Chilled water temperature reset at high outdoor air temperature (F)
-    chw_outdoor_temperature_low = 60 # Chilled water temperature reset at low outdoor air temperature (F)
-    chw_outdoor_high_setpoint = 44 # Chilled water setpoint temperature at high outdoor air temperature (F)
-    chw_outdoor_low_setpoint = 54 # Chilled water setpoint temperature at low outdoor air temperature (F)
-    chiller_chw_low_temp_limit = 36 # Chiller leaving chilled water lower temperature limit (F)
-    chiller_chw_cond_temp = 95 # Chiller entering condenser fluid temperature (F)
-    primary_pump_power = 9 # primary pump power (W/gpm)
-
-    if dsgn_sup_wtr_temp.nil?
-      dsgn_sup_wtr_temp_c = OpenStudio.convert(design_chilled_water_temperature, 'F', 'C').get
-    else
-      dsgn_sup_wtr_temp_c = OpenStudio.convert(dsgn_sup_wtr_temp, 'F', 'C').get
-    end
-    if dsgn_sup_wtr_temp_delt.nil?
-      dsgn_sup_wtr_temp_delt_k = OpenStudio.convert(design_chilled_water_temperature_delta, 'R', 'K').get
-    else
-      dsgn_sup_wtr_temp_delt_k = OpenStudio.convert(dsgn_sup_wtr_temp_delt, 'R', 'K').get
-    end
-    chilled_water_loop.setMinimumLoopTemperature(1.0)
-    chilled_water_loop.setMaximumLoopTemperature(40.0)
-
-    sizing_plant = chilled_water_loop.sizingPlant
-    sizing_plant.setLoopType('Cooling')
-    sizing_plant.setDesignLoopExitTemperature(dsgn_sup_wtr_temp_c)
-    sizing_plant.setLoopDesignTemperatureDifference(dsgn_sup_wtr_temp_delt_k)
-    # Use OA reset setpoint manager
-    outdoor_low_temperature_c = OpenStudio.convert(chw_outdoor_temperature_low, 'F', 'C').get.round(1)
-    outdoor_high_temperature_c = OpenStudio.convert(chw_outdoor_temperature_high, 'F', 'C').get.round(1)
-    setpoint_temperature_outdoor_high_c = OpenStudio.convert(chw_outdoor_high_setpoint, 'F', 'C').get.round(1)
-    setpoint_temperature_outdoor_low_c = OpenStudio.convert(chw_outdoor_low_setpoint, 'F', 'C').get.round(1)
-
-    chw_stpt_manager = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
-    chw_stpt_manager.setName("#{chilled_water_loop.name} Setpoint Manager")
-    chw_stpt_manager.setOutdoorHighTemperature(outdoor_high_temperature_c) # Degrees Celsius
-    chw_stpt_manager.setSetpointatOutdoorHighTemperature(setpoint_temperature_outdoor_high_c) # Degrees Celsius
-    chw_stpt_manager.setOutdoorLowTemperature(outdoor_low_temperature_c) # Degrees Celsius
-    chw_stpt_manager.setSetpointatOutdoorLowTemperature(setpoint_temperature_outdoor_low_c) # Degrees Celsius
-    chw_stpt_manager.addToNode(chilled_water_loop.supplyOutletNode)
-
-    return true
-  end
-
   # Set configuration in model for chilled water primary/secondary loop interface
   # Use heat_exchanger for stable baseline
   #

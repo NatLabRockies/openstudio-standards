@@ -894,7 +894,7 @@ class Standard
       # coils
       if OpenstudioStandards::HVAC.air_loop_hvac_hydronic_cooling?(air_loop_hvac)
         oa_control.setLockoutType('LockoutWithHeating')
-        oa_control.setEconomizerMaximumLimitDryBulbTemperature(OpenstudioStandards::HVAC.standard_design_sizing_temperatures['clg_dsgn_sup_air_temp_c'])
+        oa_control.setEconomizerMaximumLimitDryBulbTemperature(OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures['clg_dsgn_sup_air_temp_c'])
       else
         oa_control.setLockoutType('LockoutWithCompressor')
       end

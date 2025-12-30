@@ -11,45 +11,6 @@ class Standard
     # plant_loop_enable_supply_water_temperature_reset(plant_loop) if plant_loop_supply_water_temperature_reset_required?(plant_loop)
   end
 
-  # Apply sizing and controls to chilled water loop
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param chilled_water_loop [OpenStudio::Model::PlantLoop] chilled water loop
-  # @param dsgn_sup_wtr_temp [Double] design chilled water supply T
-  # @param dsgn_sup_wtr_temp_delt [Double] design chilled water supply delta T
-  # @return [Boolean] returns true if successful, false if not
-  def chw_sizing_control(model, chilled_water_loop, dsgn_sup_wtr_temp, dsgn_sup_wtr_temp_delt)
-    # chilled water loop sizing and controls
-    if dsgn_sup_wtr_temp.nil?
-      dsgn_sup_wtr_temp = 44.0
-      dsgn_sup_wtr_temp_c = OpenStudio.convert(dsgn_sup_wtr_temp, 'F', 'C').get
-    else
-      dsgn_sup_wtr_temp_c = OpenStudio.convert(dsgn_sup_wtr_temp, 'F', 'C').get
-    end
-    if dsgn_sup_wtr_temp_delt.nil?
-      dsgn_sup_wtr_temp_delt_k = OpenStudio.convert(10.1, 'R', 'K').get
-    else
-      dsgn_sup_wtr_temp_delt_k = OpenStudio.convert(dsgn_sup_wtr_temp_delt, 'R', 'K').get
-    end
-    chilled_water_loop.setMinimumLoopTemperature(1.0)
-    chilled_water_loop.setMaximumLoopTemperature(40.0)
-    sizing_plant = chilled_water_loop.sizingPlant
-    sizing_plant.setLoopType('Cooling')
-    sizing_plant.setDesignLoopExitTemperature(dsgn_sup_wtr_temp_c)
-    sizing_plant.setLoopDesignTemperatureDifference(dsgn_sup_wtr_temp_delt_k)
-    chw_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
-                                                                                   dsgn_sup_wtr_temp_c,
-                                                                                   name: "#{chilled_water_loop.name} Temp - #{dsgn_sup_wtr_temp.round(0)}F",
-                                                                                   schedule_type_limit: 'Temperature')
-    chw_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, chw_temp_sch)
-    chw_stpt_manager.setName("#{chilled_water_loop.name} Setpoint Manager")
-    chw_stpt_manager.addToNode(chilled_water_loop.supplyOutletNode)
-    # @todo Yixing check the CHW Setpoint from standards
-    # @todo Should be a OutdoorAirReset, see the changes I've made in Standards.PlantLoop.apply_prm_baseline_temperatures
-
-    return true
-  end
-
   # Set configuration in model for chilled water primary/secondary loop interface
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object

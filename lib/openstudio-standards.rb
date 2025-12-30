@@ -105,6 +105,7 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/hvac/helpers'
   require_relative 'openstudio-standards/hvac/exhaust/create_exhaust_fan'
   require_relative 'openstudio-standards/hvac/setpoint_manager_information'
+  require_relative 'openstudio-standards/hvac/plant_loop_controls'
   require_relative 'openstudio-standards/hvac/plant_loop_information'
   require_relative 'openstudio-standards/hvac/radiant_system_controls'
 
