@@ -373,11 +373,19 @@ class ASHRAE9012010 < ASHRAE901
     # Moisture regime is not needed for climate zone 8
     climate_zone = climate_zone.split('-')[-1]
     climate_zone = '8' if climate_zone.include?('8')
+    # Default to use values for cooling for climate zones 0, 1, 2, and 3 and heating for all others.
+    case climate_zone
+    when '0A', '0B', '1A', '1A', '1B', '2A', '2B', '3A', '3B', '3C'
+      design_conditions = 'Cooling'
+    else
+      design_conditions = 'Heating'
+    end
 
     # Table 6.5.6.1
     search_criteria = {
       'template' => template,
-      'climate_zone' => climate_zone
+      'climate_zone' => climate_zone,
+      'design_conditions' => design_conditions
     }
     energy_recovery_limits = model_find_object(standards_data['energy_recovery'], search_criteria)
     if energy_recovery_limits.nil?

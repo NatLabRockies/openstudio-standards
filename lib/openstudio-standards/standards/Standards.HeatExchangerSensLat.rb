@@ -91,6 +91,7 @@ class Standard
   def heat_exchanger_air_to_air_sensible_and_latent_apply_effectiveness(heat_exchanger_air_to_air_sensible_and_latent)
     # Assumed to be sensible and latent at all flow
     full_htg_sens_eff, full_htg_lat_eff, part_htg_sens_eff, part_htg_lat_eff, full_cool_sens_eff, full_cool_lat_eff, part_cool_sens_eff, part_cool_lat_eff = heat_exchanger_air_to_air_sensible_and_latent_minimum_effectiveness(heat_exchanger_air_to_air_sensible_and_latent)
+
     if heat_exchanger_air_to_air_sensible_and_latent.model.version < OpenStudio::VersionString.new('3.8.0')
       heat_exchanger_air_to_air_sensible_and_latent.setSensibleEffectivenessat100HeatingAirFlow(full_htg_sens_eff)
       heat_exchanger_air_to_air_sensible_and_latent.setLatentEffectivenessat100HeatingAirFlow(full_htg_lat_eff)
@@ -131,23 +132,30 @@ class Standard
     # Process climate zone:
     # Moisture regime is not needed for climate zone 7 and 8
     climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(heat_exchanger_air_to_air_sensible_and_latent.model)
-    climate_zone_code = climate_zone.split('-')[-1]
-    climate_zone_code = 7 if ['7A', '7B'].include? climate_zone_code
-    climate_zone_code = 8 if ['8A', '8B'].include? climate_zone_code
+    climate_zone_code = climate_zone.split('-')[-1].to_s
+    climate_zone_code = '8' if ['8A', '8B'].include? climate_zone_code
+
+    # Default to use values for cooling for climate zones 0, 1, 2, and 3 and heating for all others.
+    case climate_zone_code
+    when '0A', '0B', '1A', '1A', '1B', '2A', '2B', '3A', '3B', '3C'
+      design_conditions = 'Cooling'
+    else
+      design_conditions = 'Heating'
+    end
 
     case template
       when '90.1-2019', '90.1-2016'
         search_criteria = {
-          'template' => template,
           'climate_zone' => climate_zone_code,
+          'design_conditions' => design_conditions,
           'under_8000_hours' => false,
           'nontransient_dwelling' => true
         }
         metric = 'enthalpy_recovery_ratio'
       else
         search_criteria = {
-          'template' => template,
           'climate_zone' => climate_zone_code,
+          'design_conditions' => design_conditions,
           'under_8000_hours' => false
         }
         metric = 'energy_recovery_effectiveness'
@@ -171,21 +179,6 @@ class Standard
       if erv_enthalpy_recovery_ratio[metric].nil? & erv_enthalpy_recovery_ratio['design_conditions'].nil?
         # If not included in the data, an ERR of 50% is used
         enthalpy_recovery_ratio = 0.5
-        case climate_zone
-          when 'ASHRAE 169-2006-6B',
-            'ASHRAE 169-2013-6B',
-            'ASHRAE 169-2006-7A',
-            'ASHRAE 169-2013-7A',
-            'ASHRAE 169-2006-7B',
-            'ASHRAE 169-2013-7B',
-            'ASHRAE 169-2006-8A',
-            'ASHRAE 169-2013-8A',
-            'ASHRAE 169-2006-8B',
-            'ASHRAE 169-2013-8B'
-            design_conditions = 'heating'
-          else
-            design_conditions = 'cooling'
-        end
       else
         design_conditions = erv_enthalpy_recovery_ratio['design_conditions'].downcase
         enthalpy_recovery_ratio = erv_enthalpy_recovery_ratio[metric]
