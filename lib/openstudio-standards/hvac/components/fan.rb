@@ -360,6 +360,57 @@ module OpenstudioStandards
       return true
     end
 
+    # Changes the fan motor efficiency and also the fan total efficiency
+    # at the same time, preserving the impeller efficiency.
+    #
+    # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
+    #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
+    # @param motor_eff [Double] motor efficiency (0.0 to 1.0)
+    # @return [Boolean] returns true if successful, false if not
+    def self.fan_change_motor_efficiency(fan, motor_eff)
+      # Calculate the existing impeller efficiency
+      existing_motor_eff = 0.7
+      if fan.to_FanZoneExhaust.empty?
+        existing_motor_eff = fan.motorEfficiency
+      end
+      existing_total_eff = fan.fanEfficiency
+      existing_impeller_eff = existing_total_eff / existing_motor_eff
+
+      # Calculate the new total efficiency
+      new_total_eff = motor_eff * existing_impeller_eff
+
+      # Set the revised motor and total fan efficiencies
+      if fan.to_FanZoneExhaust.is_initialized
+        fan.setFanEfficiency(new_total_eff)
+      else
+        fan.setFanEfficiency(new_total_eff)
+        fan.setMotorEfficiency(motor_eff)
+      end
+      return true
+    end
+
+    # Changes the fan impeller efficiency and also the fan total efficiency
+    # at the same time, preserving the motor efficiency.
+    #
+    # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
+    #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
+    # @param impeller_eff [Double] impeller efficiency (0.0 to 1.0)
+    # @return [Boolean] returns true if successful, false if not
+    def self.fan_change_impeller_efficiency(fan, impeller_eff)
+      # Get the existing motor efficiency
+      existing_motor_eff = 0.7
+      if fan.to_FanZoneExhaust.empty?
+        existing_motor_eff = fan.motorEfficiency
+      end
+
+      # Calculate the new total efficiency
+      new_total_eff = existing_motor_eff * impeller_eff
+
+      # Set the revised motor and total fan efficiencies
+      fan.setFanEfficiency(new_total_eff)
+      return true
+    end
+
     # Determines the design fan flow (m3/s)
     #
     # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:

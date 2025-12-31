@@ -625,12 +625,12 @@ class Standard
       # Set the baseline impeller eff of the fan,
       # preserving the proposed motor eff.
       baseline_impeller_eff = fan_baseline_impeller_efficiency(fan)
-      fan_change_impeller_efficiency(fan, baseline_impeller_eff)
+      OpenstudioStandards::HVAC.fan_change_impeller_efficiency(fan, baseline_impeller_eff)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "* #{(baseline_impeller_eff * 100).round(1)}% = Baseline fan impeller efficiency.")
 
       # Set the baseline motor efficiency for the specified bhp
       baseline_motor_eff = fan.standardMinimumMotorEfficiency(standards, allowable_fan_bhp)
-      fan_change_motor_efficiency(fan, baseline_motor_eff)
+      OpenstudioStandards::HVAC.fan_change_motor_efficiency(fan, baseline_motor_eff)
 
       # Get design supply air flow rate (whether autosized or hard-sized)
       dsn_air_flow_m3_per_s = 0

@@ -43,7 +43,7 @@ class Standard
     fan = air_terminal_single_duct_parallel_piu_reheat.fan.to_FanConstantVolume.get
 
     # Set the impeller efficiency
-    fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
+    OpenstudioStandards::HVAC.fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
 
     # Set the motor efficiency, preserving the impeller efficency.
     # For terminal fans, a bhp lookup of 0.5bhp is always used because

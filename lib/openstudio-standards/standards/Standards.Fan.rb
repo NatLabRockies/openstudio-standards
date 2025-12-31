@@ -16,7 +16,7 @@ module Fan
     # Change the motor efficiency
     # but preserve the existing fan impeller
     # efficiency.
-    fan_change_motor_efficiency(fan, motor_eff)
+    OpenstudioStandards::HVAC.fan_change_motor_efficiency(fan, motor_eff)
 
     # Calculate the total motor HP
     motor_hp = OpenstudioStandards::HVAC.fan_motor_horsepower(fan)
@@ -70,57 +70,6 @@ module Fan
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Fan', "For #{fan.name}: pressure rise = #{new_pressure_rise_in_h2o.round(1)} in w.c., power = #{OpenstudioStandards::HVAC.fan_motor_horsepower(fan).round(2)}HP.")
 
-    return true
-  end
-
-  # Changes the fan motor efficiency and also the fan total efficiency
-  # at the same time, preserving the impeller efficiency.
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @param motor_eff [Double] motor efficiency (0.0 to 1.0)
-  # @return [Boolean] returns true if successful, false if not
-  def fan_change_motor_efficiency(fan, motor_eff)
-    # Calculate the existing impeller efficiency
-    existing_motor_eff = 0.7
-    if fan.to_FanZoneExhaust.empty?
-      existing_motor_eff = fan.motorEfficiency
-    end
-    existing_total_eff = fan.fanEfficiency
-    existing_impeller_eff = existing_total_eff / existing_motor_eff
-
-    # Calculate the new total efficiency
-    new_total_eff = motor_eff * existing_impeller_eff
-
-    # Set the revised motor and total fan efficiencies
-    if fan.to_FanZoneExhaust.is_initialized
-      fan.setFanEfficiency(new_total_eff)
-    else
-      fan.setFanEfficiency(new_total_eff)
-      fan.setMotorEfficiency(motor_eff)
-    end
-    return true
-  end
-
-  # Changes the fan impeller efficiency and also the fan total efficiency
-  # at the same time, preserving the motor efficiency.
-  #
-  # @param fan [OpenStudio::Model::StraightComponent] fan object, allowable types:
-  #   FanConstantVolume, FanOnOff, FanVariableVolume, and FanZoneExhaust
-  # @param impeller_eff [Double] impeller efficiency (0.0 to 1.0)
-  # @return [Boolean] returns true if successful, false if not
-  def fan_change_impeller_efficiency(fan, impeller_eff)
-    # Get the existing motor efficiency
-    existing_motor_eff = 0.7
-    if fan.to_FanZoneExhaust.empty?
-      existing_motor_eff = fan.motorEfficiency
-    end
-
-    # Calculate the new total efficiency
-    new_total_eff = existing_motor_eff * impeller_eff
-
-    # Set the revised motor and total fan efficiencies
-    fan.setFanEfficiency(new_total_eff)
     return true
   end
 

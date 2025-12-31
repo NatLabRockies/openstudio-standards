@@ -340,7 +340,7 @@ class ASHRAE901PRM < Standard
       if fan_efficacy_w_per_cfm > 0
         # Convert efficacy to metric
         fan_efficacy_w_per_m3_per_s = OpenStudio.convert(fan_efficacy_w_per_cfm, 'm^3/s', 'cfm').get
-        fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
+        OpenstudioStandards::HVAC.fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
 
         # Get fan BHP
         fan_bhp = OpenstudioStandards::HVAC.fan_brake_horsepower(fan)

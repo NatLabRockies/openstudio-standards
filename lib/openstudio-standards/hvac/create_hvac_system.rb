@@ -5609,12 +5609,21 @@ module OpenstudioStandards
         supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
                                                                   'ERV_Supply_Fan',
                                                                   fan_name: "#{zone.name} ERV Supply Fan")
-        impeller_eff = fan_baseline_impeller_efficiency(supply_fan)
-        fan_change_impeller_efficiency(supply_fan, impeller_eff)
+        if OpenstudioStandards::HVAC.fan_small_fan?(supply_fan)
+          impeller_eff = 0.55
+        else
+          impeller_eff = 0.65
+        end
+        OpenstudioStandards::HVAC.fan_change_impeller_efficiency(supply_fan, impeller_eff)
         exhaust_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
                                                                    'ERV_Supply_Fan',
                                                                    fan_name: "#{zone.name} ERV Exhaust Fan")
-        fan_change_impeller_efficiency(exhaust_fan, impeller_eff)
+        if OpenstudioStandards::HVAC.fan_small_fan?(exhaust_fan)
+          impeller_eff = 0.55
+        else
+          impeller_eff = 0.65
+        end
+        OpenstudioStandards::HVAC.fan_change_impeller_efficiency(exhaust_fan, impeller_eff)
 
         erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
         erv_controller.setName("#{zone.name} ERV Controller")
