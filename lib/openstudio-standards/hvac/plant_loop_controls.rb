@@ -47,7 +47,7 @@ module OpenstudioStandards
         setpoint_temperature_outdoor_high_c = OpenStudio.convert(design_temperatures['chw_out_high_setp_f'], 'F', 'C').get
         outdoor_low_temperature_c = OpenStudio.convert(design_temperatures['chw_out_temp_low_f'], 'F', 'C').get
         setpoint_temperature_outdoor_low_c = OpenStudio.convert(design_temperatures['chw_out_low_setp_f'], 'F', 'C').get
-        chw_stpt_manager = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
+        chw_stpt_manager = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(chilled_water_loop.model)
         chw_stpt_manager.setOutdoorHighTemperature(outdoor_high_temperature_c) # Degrees Celsius
         chw_stpt_manager.setSetpointatOutdoorHighTemperature(setpoint_temperature_outdoor_high_c) # Degrees Celsius
         chw_stpt_manager.setOutdoorLowTemperature(outdoor_low_temperature_c) # Degrees Celsius
