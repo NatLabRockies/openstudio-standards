@@ -831,12 +831,12 @@ class ASHRAE901PRM < Standard
         end
       end
     end
-    # in this situation, we hard set the temperature to be 22 F
-    # (ASHRAE 90.1 Room heating stepoint temperature is 72 F)
+    # in this situation, we hard set the temperature to be 22 C
+    # (ASHRAE 90.1 Room heating setpoint temperature is 72 F)
     max_heat_setpoint = 22.2 if max_heat_setpoint.zero?
 
     max_heat_setpoint_f = OpenStudio.convert(max_heat_setpoint, 'C', 'F').get
-    preheat_setpoint_f = max_heat_setpoint_f - 20
+    preheat_setpoint_f = max_heat_setpoint_f - 20.0
     preheat_setpoint_c = OpenStudio.convert(preheat_setpoint_f, 'F', 'C').get
 
     # create a new constant schedule and this method will add schedule limit type

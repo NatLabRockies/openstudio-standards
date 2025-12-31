@@ -271,10 +271,10 @@ module OpenstudioStandards
       has_term_rht = false
       air_loop_hvac.demandComponents.each do |sc|
         if sc.to_AirTerminalSingleDuctConstantVolumeReheat.is_initialized ||
-          sc.to_AirTerminalSingleDuctParallelPIUReheat.is_initialized ||
-          sc.to_AirTerminalSingleDuctSeriesPIUReheat.is_initialized ||
-          sc.to_AirTerminalSingleDuctVAVHeatAndCoolReheat.is_initialized ||
-          sc.to_AirTerminalSingleDuctVAVReheat.is_initialized
+           sc.to_AirTerminalSingleDuctParallelPIUReheat.is_initialized ||
+           sc.to_AirTerminalSingleDuctSeriesPIUReheat.is_initialized ||
+           sc.to_AirTerminalSingleDuctVAVHeatAndCoolReheat.is_initialized ||
+           sc.to_AirTerminalSingleDuctVAVReheat.is_initialized
           has_term_rht = true
           break
         end
@@ -317,10 +317,8 @@ module OpenstudioStandards
           end
         elsif comp.to_AirLoopHVACUnitarySystem.is_initialized
           fan = comp.to_AirLoopHVACUnitarySystem.get.supplyFan
-          if fan.is_initialized
-            if fan.get.to_FanVariableVolume.is_initialized
-              is_vav = true
-            end
+          if fan.is_initialized && fan.get.to_FanVariableVolume.is_initialized
+            is_vav = true
           end
         end
       end

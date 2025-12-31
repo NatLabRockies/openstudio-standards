@@ -2176,10 +2176,6 @@ class Standard
     return true
   end
 
-
-
-
-
   # Set the VAV damper control to single maximum or dual maximum control depending on the standard.
   #
   # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
