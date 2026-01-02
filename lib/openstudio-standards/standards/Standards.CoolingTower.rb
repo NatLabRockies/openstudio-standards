@@ -84,28 +84,55 @@ module CoolingTower
     # per method used in PNNL prototype buildings.
     # Assumes that the fan brake horsepower is 90%
     # of the fan nameplate rated motor power.
-    fan_motor_nameplate_hp = design_water_flow_gpm / min_gpm_per_hp
-    fan_bhp = 0.9 * fan_motor_nameplate_hp
-
-    # Lookup the minimum motor efficiency
+    # Source: Thornton et al. (2011), Achieving the 30% Goal: Energy and Cost Savings Analysis of ASHRAE Standard 90.1-2010, Section 4.5.4
+    nominal_hp = design_water_flow_gpm / min_gpm_per_hp
+    fan_bhp = 0.9 * nominal_hp
     fan_motor_eff = 0.85
-    motors = standards_data['motors']
 
-    # Assuming all fan motors are 4-pole Enclosed
-    search_criteria = {
-      'template' => template,
-      'number_of_poles' => 4.0,
-      'type' => 'Enclosed'
-    }
+    if nominal_hp <= 0.75
+      motor_type = motor_type(nominal_hp)
+      motor_properties = motor_fractional_hp_efficiencies(nominal_hp, motor_type = motor_type)
+    else
+      # Lookup the minimum motor efficiency
+      motors = standards_data['motors']
 
-    motor_properties = model_find_object(motors, search_criteria, fan_motor_nameplate_hp)
-    if motor_properties.nil?
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CoolingTower', "For #{cooling_tower.name}, could not find motor properties using search criteria: #{search_criteria}, motor_hp = #{fan_motor_nameplate_hp} hp.")
-      return false
+      # Assuming all fan motors are 4-pole Enclosed
+      search_criteria = {
+        'template' => template,
+        'number_of_poles' => 4.0,
+        'type' => 'Enclosed'
+      }
+
+      # Use the efficiency largest motor efficiency when BHP is greater than the largest size for which a requirement is provided
+      data = model_find_objects(motors, search_criteria)
+      if data.empty?
+        search_criteria = {
+          'template' => template,
+          'type' => nil
+        }
+        data = model_find_objects(motors, search_criteria)
+      end
+      maximum_capacity = model_find_maximum_value(data, 'maximum_capacity')
+      if fan_bhp > maximum_capacity
+        fan_bhp = maximum_capacity
+      end
+
+      motor_properties = model_find_object(motors, search_criteria, capacity = nil, date = Date.today, area = nil, num_floors = nil, fan_motor_bhp = fan_bhp)
+
+      if motor_properties.nil?
+        # Retry without the date
+        motor_properties = model_find_object(motors, search_criteria, capacity = nil, date = nil, area = nil, num_floors = nil, fan_motor_bhp = fan_bhp)
+      end
     end
 
-    fan_motor_eff = motor_properties['nominal_full_load_efficiency']
-    nominal_hp = motor_properties['maximum_capacity'].to_f.round(1)
+    if motor_properties.nil?
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CoolingTower', "For #{cooling_tower.name}, could not find motor properties using search criteria: #{search_criteria}, motor_hp = #{nominal_hp} hp. Using a default value of #{fan_motor_eff}.")
+    end
+
+    unless motor_properties.nil?
+      fan_motor_eff = motor_properties['nominal_full_load_efficiency']
+      nominal_hp = motor_properties['maximum_capacity'].to_f.round(1)
+    end
     # Round to nearest whole HP for niceness
     if nominal_hp >= 2
       nominal_hp = nominal_hp.round
@@ -116,7 +143,7 @@ module CoolingTower
     # Convert to W
     fan_motor_actual_power_w = fan_motor_actual_power_hp * 745.7 # 745.7 W/HP
 
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoolingTower', "For #{cooling_tower.name}, allowed fan motor nameplate hp = #{fan_motor_nameplate_hp.round(1)} hp, fan brake horsepower = #{fan_bhp.round(1)}, and fan motor actual power = #{fan_motor_actual_power_hp.round(1)} hp (#{fan_motor_actual_power_w.round} W) at #{fan_motor_eff} motor efficiency.")
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CoolingTower', "For #{cooling_tower.name}, allowed fan motor nameplate hp = #{nominal_hp.round(1)} hp, fan brake horsepower = #{fan_bhp.round(1)}, and fan motor actual power = #{fan_motor_actual_power_hp.round(1)} hp (#{fan_motor_actual_power_w.round} W) at #{fan_motor_eff} motor efficiency.")
 
     # Append the efficiency to the name
     cooling_tower.setName("#{cooling_tower.name} #{min_gpm_per_hp.to_f.round(1)} gpm/hp")

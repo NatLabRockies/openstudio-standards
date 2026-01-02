@@ -268,9 +268,9 @@ class Standard
   # @return [Double] UA product in W/K
   def surface_subsurface_ua(surface)
     # Compute the surface UA product
+    cons = surface.construction.get
+    fc_obj_type = cons.iddObjectType.valueName.to_s
     if surface.outsideBoundaryCondition.to_s == 'GroundFCfactorMethod' && surface.construction.is_initialized
-      cons = surface.construction.get
-      fc_obj_type = cons.iddObjectType.valueName.to_s
       case fc_obj_type
         when 'OS_Construction_FfactorGroundFloor'
           cons = surface.construction.get.to_FFactorGroundFloorConstruction.get
@@ -295,6 +295,9 @@ class Standard
 
           ua = u_eff * surface.netArea
       end
+    elsif fc_obj_type == 'OS_Construction_AirBoundary'
+      # Air boundary meant for lighting and air exchanges, no heat transfer happen in this surface.
+      ua = 0.0
     else
       ua = surface.uFactor.get * surface.netArea if surface.uFactor.is_initialized
     end
@@ -302,10 +305,15 @@ class Standard
     surface.subSurfaces.sort.each do |subsurface|
       subsurface_construction = subsurface.construction.get
       u_factor = OpenstudioStandards::SqlFile.construction_calculated_fenestration_u_factor(subsurface_construction)
+      if !u_factor && subsurface.uFactor.is_initialized
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.surface', "Failed to search subsurface construction: #{subsurface_construction.name.get} u factor from simulation output file (SQL). It is likely due to the model is not simulated.")
+        u_factor = subsurface.uFactor.get
+      end
+      prm_raise(u_factor, @sizing_run_dir, "Failed to calculate subsurface #{subsurface_construction.name.get} u-factor. It is likely the subsurface construction is not defined or the model is not simulated")
       ua += u_factor * subsurface.netArea
     end
 
-    return ua
+    ua
   end
 
   # Adjust the fenestration area to the values specified by the reduction value in a surface

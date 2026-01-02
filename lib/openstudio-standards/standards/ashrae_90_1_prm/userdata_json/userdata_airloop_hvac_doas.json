@@ -1,0 +1,127 @@
+{
+    "title": "ASHRAE 90.1 PRM Air Loop DOAS HVAC User Data",
+    "definitions": {
+        "UserDataAirLoopHVACDOASData": {
+            "type": "object",
+            "properties": {
+                "userdata_airloop_hvac_doas": {
+                    "type": "array",
+                    "description": "List of userdata_airloop_hvac_doas rows",
+                    "items": {
+                        "$ref": "#/definitions/UserDataAirLoopHVACDOAS"
+                    }
+                }
+            }
+        },
+        "UserDataAirLoopHVACDOAS": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Identifier or name for the air loop configuration"
+                },
+                "has_fan_power_credit_fully_ducted": {
+                    "type": "integer",
+                    "description": "Fan power credit for fully ducted systems",
+                    "default": 0,
+                    "minimum": 0,
+                    "$comment": "Set this field to the number of return or exhaust systems required by code or accreditation standards to be fully ducted, or systems required to maintain air pressure differentials between adjacent rooms that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_return_or_exhaust_flow_control": {
+                    "type": "integer",
+                    "description": "Fan power credit for return or exhaust flow control",
+                    "default": 0,
+                    "minimum": 0,
+                    "$comment": "Set this field to the number of return and/or exhaust airflow control devices that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "fan_power_credit_exhaust_treatment": {
+                    "type": "integer",
+                    "description": "Fan power credit for exhaust treatment",
+                    "default": 0,
+                    "minimum": 0,
+                    "$comment": "Set this field to the sum of the pressure-drop (calculated at fan system design conditions) of all exhaust filters, scrubbers, or other exhaust treatment devices that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_filtration_m9to12": {
+                    "type": "integer",
+                    "description": "Fan power credit for MERV 9-12 filtration",
+                    "default": 0,
+                    "minimum": 0,
+                    "$comment": "Set this field to the number of MERV 9 through 12 filters that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_filtration_m13to15": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for MERV 13-15 filtration",
+                    "$comment": "Set this field to the number of MERV 13 through 15 filters that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "clean_filter_pressure_drop_for_fan_power_credit_filtration_m16plus": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Clean filter pressure drop for MERV 16+ filtration fan power credit",
+                    "$comment": "Set this field to the sum of the pressure-drop (calculated at 2 times the clean filter pressure-drop at fan system design conditions) of all MERV 16+ filters and electronically enhanced filters that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "fan_power_credit_gas_phase_cleaners": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for gas phase cleaners",
+                    "$comment": "Set this field to the sum of carbon and other gas-phase air cleaners’ pressure-drop (at the fan system design conditions) that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "fan_power_credit_biosafety": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for biosafety measures",
+                    "$comment": "Set this field to the sum of the pressure-drop (calculated at fan system design conditions) of biosafety cabinets that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "fan_power_credit_other_than_coil_runaround": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for other than coil runaround",
+                    "$comment": "Set this field to the number of energy recovery devices other than coil runaround loop that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_coil_runaround": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for coil runaround",
+                    "$comment": "Set this field to the number of runaround loop that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "fan_power_credit_evaporative_humidifier_or_cooler": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for evaporative humidifier or cooler",
+                    "$comment": "Set this field to the sum of the pressure-drop (calculated at fan system design conditions) of the evaporative humidifier or cooler that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_sound_attenuation": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for sound attenuation",
+                    "$comment": "Set this field to the number of sound attenuation sections of fans serving spaces with design background noise goals below NC35 that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_exhaust_serving_fume_hoods": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for exhaust serving fume hoods",
+                    "$comment": "Set this field to the number of exhaust systems serving fume hoods that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                },
+                "has_fan_power_credit_lab_or_vivarium_highrise_vertical_duct": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Fan power credit for lab or vivarium highrise vertical duct",
+                    "$comment": "Set this field to the number of laboratory and vivarium exhaust systems in high-rise buildings that the airloop HVAC object includes. If it doesnt apply, set this field to 0."
+                }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        }
+    }
+}
+  

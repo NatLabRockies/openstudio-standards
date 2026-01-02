@@ -262,7 +262,7 @@ module OpenstudioStandards
     # @!group Information:Space
 
     # Calculate the space envelope area.
-    # According to the 90.1 definition, building envelope include:
+    # According to the 90.1 definition, the building envelope includes:
     # 1. "the elements of a building that separate conditioned spaces from the exterior"
     # 2. "the elements of a building that separate conditioned space from unconditioned
     #    space or that enclose semiheated spaces through which thermal energy may be
@@ -912,7 +912,7 @@ module OpenstudioStandards
       model.getBuildingStorys.sort.each do |story|
         z = OpenstudioStandards::Geometry.building_story_get_minimum_height(story)
         if (minimum_height - z).abs < tolerance
-          OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Model', "The story with a min z value of #{minimum_height.round(2)} is #{story.name}.")
+          OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Geometry.Information', "The story with a min z value of #{minimum_height.round(2)} is #{story.name}.")
           matched_story = story
         end
       end
@@ -1170,6 +1170,53 @@ module OpenstudioStandards
       end
 
       return perimeter
+    end
+
+
+    # Calculate the model envelope area.
+    # According to the 90.1 definition, the building envelope includes:
+    # 1. "the elements of a building that separate conditioned spaces from the exterior"
+    # 2. "the elements of a building that separate conditioned space from unconditioned
+    #    space or that enclose semiheated spaces through which thermal energy may be
+    #    transferred to or from the exterior, to or from unconditioned spaces or to or
+    #    from conditioned spaces."
+    #
+    # Outside boundary conditions currently supported:
+    # - Adiabatic
+    # - Surface
+    # - Outdoors
+    # - Foundation
+    # - Ground
+    # - GroundFCfactorMethod
+    # - OtherSideCoefficients
+    # - OtherSideConditionsModel
+    # - GroundSlabPreprocessorAverage
+    # - GroundSlabPreprocessorCore
+    # - GroundSlabPreprocessorPerimeter
+    # - GroundBasementPreprocessorAverageWall
+    # - GroundBasementPreprocessorAverageFloor
+    # - GroundBasementPreprocessorUpperWall
+    # - GroundBasementPreprocessorLowerWall
+    #
+    # Surface type currently supported:
+    # - Floor
+    # - Wall
+    # - RoofCeiling
+    #
+    # @param model [OpenStudio::Model::Model] OpenStudio model object
+    # @param multiplier [Boolean] account for space multipliers
+    # @return [Double] area in m^2
+    def self.model_get_envelope_area(model, multiplier: true)
+      building_envelope_area_m2 = 0
+      model.getSpaces.each do |space|
+        building_envelope_area_m2 += OpenstudioStandards::Geometry.space_get_envelope_area(space)
+      end
+      if building_envelope_area_m2 < 0.01
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Information', 'Calculated building envelope area is 0 m2')
+        return 0.0
+      end
+
+      return building_envelope_area_m2
     end
 
     # @!endgroup Information:Model

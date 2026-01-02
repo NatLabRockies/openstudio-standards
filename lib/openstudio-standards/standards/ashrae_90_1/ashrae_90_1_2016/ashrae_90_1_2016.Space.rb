@@ -177,13 +177,4 @@ class ASHRAE9012016 < ASHRAE901
 
     return [sensor_1_frac, sensor_2_frac, sensor_1_window, sensor_2_window]
   end
-
-  # Determine the base infiltration rate at 75 Pa.
-  #
-  # @return [Double] the baseline infiltration rate, in cfm/ft^2
-  # defaults to no infiltration.
-  def space_infiltration_rate_75_pa(space = nil)
-    basic_infil_rate_cfm_per_ft2 = 1.0
-    return basic_infil_rate_cfm_per_ft2
-  end
 end

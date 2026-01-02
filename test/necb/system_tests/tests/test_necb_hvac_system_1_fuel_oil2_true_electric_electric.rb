@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_1_Test_FO2_T_E_E < Minitest::Test
+class NECB_HVAC_System_1_Test < Minitest::Test
 
 
   #System #1 ToDo
@@ -37,7 +37,7 @@ class NECB_HVAC_System_1_Test_FO2_T_E_E < Minitest::Test
     template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
     system_name = 'system_1'
     vintage = 'NECB2011'
-    boiler_fueltype = ' FuelOil#2'
+    boiler_fueltype = ' FuelOilNo2'
     mau_type = true
     mau_heating_coil_type = 'Electric'
     baseboard_type = 'Electric'

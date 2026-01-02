@@ -2,7 +2,7 @@ require 'openstudio'
 require 'securerandom'
 require 'optparse'
 require 'yaml'
-#require 'git-revision'
+# require 'git-revision'
 # resource_folder = File.join(__dir__, '..', '..', 'measures/btap_results/resources')
 # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
@@ -77,13 +77,13 @@ class BTAPDatapoint
     @dp_output_folder = File.join(output_folder, @options[:datapoint_id])
 
     # Show versions in yml file.
-    @options[:btap_costing_git_revision] = Git::Revision.commit_short
     @options[:os_git_revision] = OpenstudioStandards.git_revision
 
     # Get users' inputs for the parameters needed for the calculation af net present value
     @npv_start_year = @options[:npv_start_year]
     @npv_end_year = @options[:npv_end_year]
     @npv_discount_rate = @options[:npv_discount_rate]
+    @npv_discount_rate_carbon = @options[:npv_discount_rate_carbon]
 
     # Save configuration to temp folder.
     File.open(File.join(@dp_temp_folder, 'run_options.yml'), 'w') { |file| file.write(@options.to_yaml) }
@@ -92,6 +92,10 @@ class BTAPDatapoint
       # This dynamically creates a class by string using the factory method design pattern.
       @options[:template] = 'NECB2011' if @options[:algorithm_type] == 'osm_batch'
       @standard = Standard.build(@options[:template])
+
+      # Set use the convert_arg_to_bool method from the standard class to set the @oerd_utility_pricing_flag
+      @oerd_utility_pricing = @standard.convert_arg_to_bool(variable: @options[:oerd_utility_pricing], default: false)
+      @utility_pricing_year = @standard.convert_arg_to_f(variable: @options[:utility_pricing_year], default: 2020)
 
       # This allows you to select the skeleton model from our built in starting points. You can add a custom file as
       # it will search the libary first,.
@@ -120,7 +124,13 @@ class BTAPDatapoint
         @standard.model_apply_standard(model: model,
                                        epw_file: @options[:epw_file],
                                        custom_weather_folder: weather_folder,
+                                       btap_weather: @options[:btap_weather],
                                        sizing_run_dir: File.join(@dp_temp_folder, 'sizing_folder'),
+                                       hvac_system_primary: @options[:hvac_system_primary],
+                                       hvac_system_dwelling_units: @options[:hvac_system_dwelling_units],
+                                       hvac_system_washrooms: @options[:hvac_system_washrooms],
+                                       hvac_system_corridor: @options[:hvac_system_corridor],
+                                       hvac_system_storage: @options[:hvac_system_storage],
                                        primary_heating_fuel: @options[:primary_heating_fuel],
                                        necb_reference_hp: @options[:necb_reference_hp],
                                        necb_reference_hp_supp_fuel: @options[:necb_reference_hp_supp_fuel],
@@ -178,11 +188,14 @@ class BTAPDatapoint
                                        tbd_option: @options[:tbd_option],
                                        necb_hdd: @options[:necb_hdd],
                                        boiler_fuel: @options[:boiler_fuel],
-                                       boiler_cap_ratio: @options[:boiler_cap_ratio]
+                                       boiler_cap_ratio: @options[:boiler_cap_ratio],
+                                       swh_fuel: @options[:swh_fuel],
+                                       airloop_fancoils_heating: @options[:airloop_fancoils_heating],
+                                       oerd_utility_pricing: @oerd_utility_pricing
                                        )
       end
 
-      # Save model to to disk.
+      # Save model to disk.
       puts "saving model to #{File.join(@dp_temp_folder, 'output.osm')}"
       BTAP::FileIO.save_osm(model, File.join(@dp_temp_folder, 'output.osm'))
 
@@ -194,30 +207,7 @@ class BTAPDatapoint
         #Check if sql file was create.. if not we can't get much output.
         raise('no sql file found,simulation probably could not start due to error...see error logs.') if model.sqlFile.empty?
         # Create qaqc file and save it.
-        @qaqc = @standard.init_qaqc(model)
-        command = "SELECT Value
-                  FROM TabularDataWithStrings
-                  WHERE ReportName='LEEDsummary'
-                  AND ReportForString='Entire Facility'
-                  AND TableName='Sec1.1A-General Information'
-                  AND RowName = 'Principal Heating Source'
-                  AND ColumnName='Data'"
-        value = model.sqlFile.get.execAndReturnFirstString(command)
-        # make sure all the data are available
-        @qaqc[:building][:principal_heating_source] = 'unknown'
-        unless value.empty?
-          @qaqc[:building][:principal_heating_source] = value.get
-        end
-
-        if @qaqc[:building][:principal_heating_source] == 'Additional Fuel'
-          model.getPlantLoops.sort.each do |iplantloop|
-            boilers = iplantloop.components.select { |icomponent| icomponent.to_BoilerHotWater.is_initialized }
-            @qaqc[:building][:principal_heating_source] = 'FuelOilNo2' unless boilers.select { |boiler| boiler.to_BoilerHotWater.get.fuelType.to_s == 'FuelOilNo2' }.empty?
-          end
-        end
-
-        @qaqc[:aws_datapoint_id] = @options[:datapoint_id]
-        @qaqc[:aws_analysis_id] = @options[:analysis_id]
+        @qaqc = BTAPDatapoint.build_qaqc(model, @standard, @options[:datapoint_id], @options[:analysis_id])
 
         # Load the sql file into model
         sql_path = OpenStudio::Path.new(File.join(@run_dir, 'run/eplusout.sql'))
@@ -233,15 +223,26 @@ class BTAPDatapoint
         # Attach the sql file from the run to the sizing model
         model.setSqlFile(sql)
 
+        if @options[:enable_costing] or @options[:enable_carbon]
+          @cp = CommonPaths.instance
+          post_analysis = BTAPDatapointAnalysis.new(
+            model: model,
+            output_folder: @dp_temp_folder,
+            template: @options[:template],
+            standard: @standard,
+            qaqc: @qaqc)
+        end
+
         @cost_result = nil
-        if defined?(BTAPCosting)
-          # Perform costing
-          costing = BTAPCosting.new
-          costing.load_database
-          @cost_result, @btap_items = costing.cost_audit_all(model: model, prototype_creator: @standard, template_type: @options[:template])
-          @qaqc[:costing_information] = @cost_result
-          File.open(File.join(@dp_temp_folder, 'cost_results.json'), 'w') { |f| f.write(JSON.pretty_generate(@cost_result, allow_nan: true)) }
-          puts "Wrote File cost_results.json in #{Dir.pwd} "
+        if @options[:enable_costing]
+          @cost_result = post_analysis.run_costing(
+            costs_csv: @cp.costs_path,
+            factors_csv: @cp.costs_local_factors_path)
+        end
+
+        @carbon_result = nil
+        if @options[:enable_carbon]
+          @carbon_result = post_analysis.run_carbon
         end
 
         @qaqc[:options] = @options # This is options sent on the command line
@@ -249,10 +250,14 @@ class BTAPDatapoint
         @btap_data = BTAPData.new(model: model,
                                   runner: nil,
                                   cost_result: @cost_result,
+                                  carbon_result: @carbon_result,
                                   qaqc: @qaqc,
                                   npv_start_year: @npv_start_year,
                                   npv_end_year: @npv_end_year,
-                                  npv_discount_rate: @npv_discount_rate).btap_data
+                                  npv_discount_rate: @npv_discount_rate,
+                                  npv_discount_rate_carbon: @npv_discount_rate_carbon,
+                                  oerd_utility_pricing: @oerd_utility_pricing,
+                                  utility_pricing_year: @utility_pricing_year).btap_data
 
         # Write Files
         File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') { |f| f.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true)) }
@@ -263,6 +268,9 @@ class BTAPDatapoint
 
         #output hourly data
         self.output_hourly_data(model,@dp_temp_folder, @options[:datapoint_id])
+
+        # Output timestep data
+        self.output_timestep_data(model,@dp_temp_folder, @options[:datapoint_id])
       end
     rescue StandardError => bang
       puts "Error occured: #{bang}"
@@ -287,25 +295,62 @@ class BTAPDatapoint
       # clean temp/cache folder up.
       FileUtils.rm_rf(input_folder_cache)
       FileUtils.rm_rf(@dp_temp_folder)
-      if @failed == true
+      # Do not fail container if running on AWS, handle error on AWS instead to avoid isuses with large analyses.
+      unless @failed == false || (@dp_output_folder.start_with?('s3://'))
+      #if @failed == true
         raise(@bang)
       end
     end
   end
 
+  class << self
+
+    # Initializes the qaqc data structure.
+    # Scoped inside of the class so that it can be used in the intialization of
+    # this class as well as in BTAPAnalysis.
+    def build_qaqc(model, standard, datapoint_id, analysis_id)
+      qaqc = standard.init_qaqc(model)
+      command = "SELECT Value
+                FROM TabularDataWithStrings
+                WHERE ReportName='LEEDsummary'
+                AND ReportForString='Entire Facility'
+                AND TableName='Sec1.1A-General Information'
+                AND RowName = 'Principal Heating Source'
+                AND ColumnName='Data'"
+      value = model.sqlFile.get.execAndReturnFirstString(command)
+      # make sure all the data are available
+      qaqc[:building][:principal_heating_source] = 'unknown'
+      unless value.empty?
+        qaqc[:building][:principal_heating_source] = value.get
+      end
+
+      if qaqc[:building][:principal_heating_source] == 'Additional Fuel'
+        model.getPlantLoops.sort.each do |iplantloop|
+          boilers = iplantloop.components.select { |icomponent| icomponent.to_BoilerHotWater.is_initialized }
+          qaqc[:building][:principal_heating_source] = 'FuelOilNo2' unless boilers.select { |boiler| boiler.to_BoilerHotWater.get.fuelType.to_s == 'FuelOilNo2' }.empty?
+        end
+      end
+
+      qaqc[:aws_datapoint_id] = datapoint_id
+      qaqc[:aws_analysis_id]  = analysis_id
+
+      return qaqc
+    end
+  end
+
   def s3_copy_file_to_s3(bucket_name:, source_file:, target_file:, n: 0)
-    #require 'aws-sdk-core'
-    #require 'aws-sdk-s3'
+    # require 'aws-sdk-core'
+    # require 'aws-sdk-s3'
     Aws.use_bundled_cert!
-    s3_resource = Aws::S3::Resource.new(region: 'ca-central-1')
+    s3_client = Aws::S3::Client.new(region: 'ca-central-1')
+    # Using transfer manager class instead of depricated method
+    transfer_manager = Aws::S3::TransferManager.new(client: s3_client)
 
     puts("Copying File to S3. source_file:#{source_file} bucket:#{bucket_name} target_folder:#{target_file}")
     response = nil
     begin
-      obj = s3_resource.bucket(bucket_name).object(target_file)
-
-      # passing the TempFile object's path is massively faster than passing the TempFile object itself
-      result = obj.upload_file(source_file)
+      # Using upload_file from transfer manager class instead of depricated method from older class structure
+      result = transfer_manager.upload_file(source_file, bucket: bucket_name, key: target_file)
 
       if result == true
         puts "Object '#{source_file}' uploaded to bucket '#{bucket_name}'."
@@ -361,8 +406,7 @@ class BTAPDatapoint
     return exit_code
   end
 
-
-  def output_hourly_data(model, output_folder,datapoint_id)
+  def output_hourly_data(model, output_folder, datapoint_id)
     osm_path = File.join(output_folder, "run_dir/in.osm")
     sql_path = File.join(output_folder, "run_dir/run/eplusout.sql")
     csv_output = File.join(output_folder, "hourly.csv")
@@ -373,20 +417,18 @@ class BTAPDatapoint
       hours_of_year << (d + (60 * 60) * increment).strftime('%Y-%m-%d %H:%M')
     end
 
-
     array_of_hashes = []
 
-
-#Find hourly outputs available for this datapoint.
+    # Find hourly outputs available for this datapoint.
     query = "
         SELECT ReportDataDictionaryIndex
         FROM ReportDataDictionary
         WHERE ReportingFrequency == 'Hourly'
                                                        "
-# Get hourly data for each output.
+    # Get hourly data for each output.
     model.sqlFile.get.execAndReturnVectorOfInt(query).get.each do |rdd_index|
 
-      #Get Name
+      # Get Name
       query = "
         SELECT Name
         FROM ReportDataDictionary
@@ -394,7 +436,7 @@ class BTAPDatapoint
       "
       name = model.sqlFile.get.execAndReturnFirstString(query).get
 
-      #Get KeyValue
+      # Get KeyValue
       query = "
         SELECT KeyValue
         FROM ReportDataDictionary
@@ -411,7 +453,7 @@ class BTAPDatapoint
         key_value = ""
       end
 
-      #Get Units
+      # Get Units
       query = "
         SELECT Units
         FROM ReportDataDictionary
@@ -419,7 +461,7 @@ class BTAPDatapoint
       "
       units = model.sqlFile.get.execAndReturnFirstString(query).get
 
-      #Get hourly data
+      # Get hourly data
       query = "
                     Select Value
                     FROM ReportData
@@ -430,7 +472,7 @@ class BTAPDatapoint
 
       hourly_hash = Hash[hours_of_year.zip(hourly_values)]
 
-      data_hash = {"datapoint_id": datapoint_id, "Name": name, "KeyValue": key_value, "Units": units}.merge(hourly_hash)
+      data_hash = { "datapoint_id": datapoint_id, "Name": name, "KeyValue": key_value, "Units": units }.merge(hourly_hash)
       array_of_hashes << data_hash
     end
 
@@ -443,4 +485,169 @@ class BTAPDatapoint
       end
     end
   end
+  #=====================================================================================================================
+  def output_timestep_data(model, output_folder,datapoint_id)
+    osm_path = File.join(output_folder, "run_dir/in.osm")
+    sql_path = File.join(output_folder, "run_dir/run/eplusout.sql")
+    csv_output = File.join(output_folder, "timestep.csv")
+    #===================================================================================================================
+    # Get number of timesteps from the model
+    number_of_timesteps_per_hour = model.getTimestep.numberOfTimestepsPerHour
+    #===================================================================================================================
+    # Calculate number of timesteps of the whole year
+    number_of_timesteps_of_year = 365 * 24 * number_of_timesteps_per_hour
+
+    timesteps_of_year = []
+    d = Time.new(2006, 1, 1, 0)
+    (0...number_of_timesteps_of_year).each do |increment|
+      timesteps_of_year << (d + (60 * 60 / number_of_timesteps_per_hour) * increment).strftime('%Y-%m-%d %H:%M')
+    end
+    timesteps_index = Array(0..number_of_timesteps_of_year-1)
+    #===================================================================================================================
+    # Create a hash with indices ('timesteps_index') as keys and timesteps as values ('timesteps_of_year')
+    # Note from Sara Gilani: 'I had to do this, as when I used 'timesteps_of_year' as keys to create all hashes below
+    # (e.g. timestep_hash_datapoint_id, timestep_hash_name, timestep_hash_key_value, ...),
+    # it did not create the right number of timesteps for the whole year'
+    timesteps_of_year_with_index = Hash[timesteps_index.zip(timesteps_of_year)]
+    #===================================================================================================================
+    array_of_hashes = []
+    array_of_hashes_transposed = []
+    #===================================================================================================================
+    # Find timestep outputs available for this datapoint.
+    query = "
+        SELECT ReportDataDictionaryIndex
+        FROM ReportDataDictionary
+        WHERE ReportingFrequency == 'Zone Timestep'
+        "
+    #===================================================================================================================
+    # Get timestep data for each output.
+    model.sqlFile.get.execAndReturnVectorOfInt(query).get.each do |rdd_index|
+      #=================================================================================================================
+      # Get Name
+      query = "
+        SELECT Name
+        FROM ReportDataDictionary
+        WHERE ReportDataDictionaryIndex == #{rdd_index}
+      "
+      name = model.sqlFile.get.execAndReturnFirstString(query).get
+      #=================================================================================================================
+      # Get KeyValue
+      query = "
+        SELECT KeyValue
+        FROM ReportDataDictionary
+        WHERE ReportDataDictionaryIndex == #{rdd_index}
+      "
+      #=================================================================================================================
+      # In some cases KeyValue has a value and sometimes it does not.  In some cases KeyValue is null.  If the command
+      # below is run and KeyValue is null then the command fails and returns an error.  The fix below assumes that if
+      # the command below fails it is because KeyValue is null.  In that case the "key_value" variable is set to a
+      # blank.
+      begin
+        key_value = model.sqlFile.get.execAndReturnFirstString(query).get
+      rescue StandardError => bang
+        key_value = ""
+      end
+      #=================================================================================================================
+      # Get Units
+      query = "
+        SELECT Units
+        FROM ReportDataDictionary
+        WHERE ReportDataDictionaryIndex == #{rdd_index}
+      "
+      units = model.sqlFile.get.execAndReturnFirstString(query).get
+      #=================================================================================================================
+      # Get timestep data
+      query = "
+        Select VariableValue
+        FROM ReportVariableData
+        WHERE
+        ReportVariableDataDictionaryIndex = #{rdd_index}
+      "
+      timestep_values = model.sqlFile.get.execAndReturnVectorOfDouble(query).get
+
+      timestep_hash = Hash[timesteps_index.zip(timestep_values)]
+
+      data_hash = { "datapoint_id": datapoint_id, "Name": name, "KeyValue": key_value, "Units": units }.merge(timestep_hash)
+
+      array_of_hashes << data_hash
+
+      #=================================================================================================================
+      # Create a hash of data for having timesteps as rows instead of columns that is used for hourly outputs START
+      number_of_timesteps = timesteps_of_year.length()
+
+      array = [datapoint_id]
+      array_datapoint_id = array.zip(*[array]*number_of_timesteps).flatten
+      timestep_hash_datapoint_id = Hash[timesteps_index.zip(array_datapoint_id)]
+
+      array = [name]
+      array_name = array.zip(*[array]*number_of_timesteps).flatten
+      timestep_hash_name = Hash[timesteps_index.zip(array_name)]
+
+      array = [key_value]
+      array_key_value = array.zip(*[array]*number_of_timesteps).flatten
+      timestep_hash_key_value = Hash[timesteps_index.zip(array_key_value)]
+
+      array = [units]
+      array_units = array.zip(*[array]*number_of_timesteps).flatten
+      timestep_hash_units = Hash[timesteps_index.zip(array_units)]
+
+      timestep_hash_values = Hash[timesteps_index.zip(timestep_values)]
+
+      data_hash_transposed = Hash.new
+      timestep_hash_values.keys.each do |key|
+        data_hash_transposed[key] = [
+          timesteps_of_year_with_index[key],
+          timestep_hash_datapoint_id[key],
+          timestep_hash_name[key],
+          timestep_hash_key_value[key],
+          timestep_hash_units[key],
+          timestep_hash_values[key]
+        ]
+      end
+
+      array_of_hashes_transposed << data_hash_transposed
+      # Create a hash of data for having timesteps as rows instead of columns that is used for hourly outputs END
+      #=================================================================================================================
+
+    end #model.sqlFile.get.execAndReturnVectorOfInt(query).get.each do |rdd_index|
+    #===================================================================================================================
+    # # This csv file has timesteps as the first row
+    # CSV.open(csv_output, "wb") do |csv|
+    #   unless array_of_hashes.empty?
+    #     csv << array_of_hashes.first.keys # adds the attributes name on the first line
+    #     array_of_hashes.each do |hash|
+    #       csv << hash.values
+    #     end
+    #   end
+    # end
+    #===================================================================================================================
+    # This csv file has timesteps as the first column
+    header = ['Index', 'Timestep', 'datapoint_id', 'Name', 'KeyValue', 'Units', 'Value']
+    CSV.open(csv_output, "wb") do |csv|
+      csv << header
+      array_of_hashes_transposed.each do |hash|
+        hash.keys().each do |index|
+          row_index = index
+          row_timestep = hash[index][0]
+          row_datapoint_id = hash[index][1]
+          row_name = hash[index][2]
+          row_key_value = hash[index][3]
+          row_units = hash[index][4]
+          row_value = hash[index][5]
+
+          row = CSV::Row.new(header,[])
+          row['Index'] = row_index
+          row['Timestep'] = row_timestep
+          row['datapoint_id'] = row_datapoint_id
+          row['Name'] = row_name
+          row['KeyValue'] = row_key_value
+          row['Units'] = row_units
+          row['Value'] = row_value
+          csv << row
+        end
+      end
+    end
+    #===================================================================================================================
+  end #output_timestep_data
+  #=====================================================================================================================
 end

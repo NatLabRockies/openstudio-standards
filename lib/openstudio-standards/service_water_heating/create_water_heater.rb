@@ -56,6 +56,7 @@ module OpenstudioStandards
       end
       water_heater_volume_gal = OpenStudio.convert(water_heater_volume, 'm^3', 'gal').get
       water_heater.setTankVolume(water_heater_volume)
+      water_heating_sizing = water_heater.waterHeaterSizing
 
       # set the water heater fuel
       case water_heater_fuel
@@ -68,6 +69,9 @@ module OpenstudioStandards
         water_heater.setOffCycleParasiticFuelType('Gas')
         water_heater.setOffCycleLossCoefficienttoAmbientTemperature(6.0)
         water_heater.setOnCycleLossCoefficienttoAmbientTemperature(6.0)
+        # assume 0.5 hour recovery temperature for natural gas water heaters
+        water_heating_sizing.setDesignMode('PeakDraw')
+        water_heating_sizing.setTimeforTankRecovery(0.5)
       when 'Electricity', 'Electric', 'Elec'
         water_heater.setHeaterFuelType('Electricity')
         water_heater.setHeaterThermalEfficiency(1.0)
@@ -77,6 +81,9 @@ module OpenstudioStandards
         water_heater.setOffCycleParasiticFuelType('Electricity')
         water_heater.setOffCycleLossCoefficienttoAmbientTemperature(1.053)
         water_heater.setOnCycleLossCoefficienttoAmbientTemperature(1.053)
+        # assume 1.0 hour recovery temperature for electric water heaters
+        water_heating_sizing.setDesignMode('PeakDraw')
+        water_heating_sizing.setTimeforTankRecovery(1.0)
       when 'FuelOilNo2'
         water_heater.setHeaterFuelType('FuelOilNo2')
         water_heater.setHeaterThermalEfficiency(0.78)
@@ -86,6 +93,9 @@ module OpenstudioStandards
         water_heater.setOffCycleParasiticFuelType('FuelOilNo2')
         water_heater.setOffCycleLossCoefficienttoAmbientTemperature(6.0)
         water_heater.setOnCycleLossCoefficienttoAmbientTemperature(6.0)
+        # assume 0.5 hour recovery temperature for fuel oil water heaters
+        water_heating_sizing.setDesignMode('PeakDraw')
+        water_heating_sizing.setTimeforTankRecovery(0.5)
       when 'HeatPump', 'SimpleHeatPump'
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating', 'Simple workaround to represent heat pump water heaters without incurring significant runtime penalty associated with using correct objects.')
         # Make a part-load efficiency modifier curve with a value above 1, which is multiplied by the nominal efficiency of 100% to represent the COP of a HPWH.
@@ -452,8 +462,7 @@ module OpenstudioStandards
 
       # add EMS for overriding HPWH setpoints schedules (for upper/lower heating element in water tank and compressor in heat pump)
       if heat_pump_type == 'WrappedCondenser' && use_ems_control
-        std = Standard.build('90.1-2013')
-        hpwh_name_ems_friendly = std.ems_friendly_name(hpwh.name)
+        hpwh_name_ems_friendly = OpenstudioStandards::HVAC.ems_friendly_name(hpwh.name)
 
         # create an ambient temperature sensor for the air that blows through the HPWH evaporator
         if water_heater_thermal_zone.nil?

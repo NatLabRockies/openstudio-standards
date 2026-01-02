@@ -10,442 +10,639 @@ class NECB_HVAC_Boiler_Tests < Minitest::Test
     define_std_ranges
   end
 
-
-  # Test to validate the boiler thermal efficiency generated against expected values stored in the file:
-  # 'compliance_boiler_efficiencies_expected_results.csv
+  # Test to validate the boiler thermal efficiency generated against expected values.
+  #  Makes use of the template design pattern with the work done by the do_* method below (i.e. 'do_' prepended to the current method name)
   def test_boiler_efficiency
+    logger.info "Starting suite of tests for: #{__method__}"
 
-    # Set up remaining parameters for test.
-    output_folder = method_output_folder(__method__)
-    save_intermediate_models = false
+    # Define test parameters that apply to all tests.
+    test_parameters = {TestMethod: __method__,
+                       SaveIntermediateModels: true,
+                       mau_type: true,
+                       mau_heating_coil_type: 'Hot Water',
+                       baseboard_type: 'Hot Water'}
 
-    # Generate the osm files for all relevant cases to generate the test data for system 1
-    boiler_fueltypes = ['Electricity','NaturalGas','FuelOilNo2']
-    mau_type = true
-    mau_heating_coil_type = 'Hot Water'
-    baseboard_type = 'Hot Water'
-    templates = ['NECB2011', 'NECB2015', 'NECB2020', 'BTAPPRE1980']
+    # Define test cases.
+    test_cases = Hash.new
 
-    templates.each do |template|
-      standard = get_standard(template)
-      boiler_expected_result_file = File.join(@expected_results_folder, "#{template.downcase}_compliance_boiler_efficiencies_expected_results.csv")
+    # Define references (per vintage in this case).
+    test_cases[:NECB2011] = {Reference: "NECB 2011 p3 Table 5.2.12.1"}
 
-      # Initialize hashes for storing expected boiler efficiency data from file.
-      fuel_type_min_cap = {}
-      fuel_type_min_cap['Electricity'] = []
-      fuel_type_min_cap['NaturalGas'] = []
-      fuel_type_min_cap['FuelOilNo2'] = []
-      fuel_type_max_cap = {}
-      fuel_type_max_cap['Electricity'] = []
-      fuel_type_max_cap['NaturalGas'] = []
-      fuel_type_max_cap['FuelOilNo2'] = []
-      efficiency_type = {}
-      efficiency_type['Electricity'] = []
-      efficiency_type['NaturalGas'] = []
-      efficiency_type['FuelOilNo2'] = []
+    # Test cases. Three cases for NG and FuelOil, one for Electric.
+    # Results and name are tbd here as they will be calculated in the test.
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["Electricity"],
+                       TestCase: ["case-1"],
+                       TestPars: {:tested_capacity_kW => 10.0,
+                                     :efficiency_metric => "thermal efficiency"}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas", "FuelOilNo2"],
+                       TestCase: ["case-1"],
+                       TestPars: {:name => "tbd",
+                                     :tested_capacity_kW => 43.96,
+                                     :efficiency_metric => "annual fuel utilization efficiency",
+                                     :efficiency_value => "tbd"}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas", "FuelOilNo2"],
+                       TestCase: ["case-2"],
+                       TestPars: {:name => "tbd",
+                                     :tested_capacity_kW => 410.3,
+                                     :efficiency_metric => "thermal efficiency",
+                                     :efficiency_value => "tbd"}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas", "FuelOilNo2"],
+                       TestCase: ["case-3"],
+                       TestPars: {:name => "tbd",
+                                     :tested_capacity_kW => 2510,
+                                     :efficiency_metric => "combustion efficiency",
+                                     :efficiency_value => "tbd"}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
 
-      # Read the file for the expected boiler efficiency values for different fuels and equipment capacity ranges.
-      CSV.foreach(boiler_expected_result_file, headers: true) do |data|
-        fuel_type_min_cap[data['Fuel']] << data['Min Capacity (Btu per hr)']
-        fuel_type_max_cap[data['Fuel']] << data['Max Capacity (Btu per hr)']
-        if data['Annual Fuel Utilization Efficiency (AFUE)'].to_f > 0.0
-          efficiency_type[data['Fuel']] << 'Annual Fuel Utilization Efficiency (AFUE)'
-        elsif data['Thermal Efficiency'].to_f > 0.0
-          efficiency_type[data['Fuel']] << 'Thermal Efficiency'
-        elsif data['Combustion Efficiency'].to_f > 0.0
-          efficiency_type[data['Fuel']] << 'Combustion Efficiency'
-        end
-      end
+    # Create empty results hash and call the template method that runs the individual test cases.
+    test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
 
-      # Use the expected boiler efficiency data to generate suitable equipment capacities for the test to cover all
-      # the relevant equipment capacity ranges.
-      fuel_type_cap = {}
-      fuel_type_min_cap.each do |fuel, cap|
-        unless fuel_type_cap.key? fuel then
-          fuel_type_cap[fuel] = []
-        end
-        if cap.size == 1
-          fuel_type_cap[fuel] << 10000.0
-        else
-          fuel_type_cap[fuel] << 0.5 * (OpenStudio.convert(fuel_type_min_cap[fuel][0].to_f, 'Btu/hr', 'W').to_f + OpenStudio.convert(fuel_type_min_cap[fuel][1].to_f, 'Btu/h', 'W').to_f)
-          if cap.size == 2
-            fuel_type_cap[fuel] << (OpenStudio.convert(fuel_type_min_cap[fuel][1].to_f, 'Btu/hr', 'W').to_f + 10000.0)
-          else
-            fuel_type_cap[fuel] << 0.5 * (OpenStudio.convert(fuel_type_min_cap[fuel][1].to_f, 'Btu/hr', 'W').to_f + OpenStudio.convert(fuel_type_min_cap[fuel][2].to_f, 'Btu/hr', 'W').to_f)
-            fuel_type_cap[fuel] << (fuel_type_min_cap[fuel][2].to_f + 10000.0)
-          end
-        end
-      end
+    # Write test results.
+    file_root = "#{self.class.name}-#{__method__}".downcase
+    test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
+    File.write(test_result_file, JSON.pretty_generate(test_results))
 
-      actual_boiler_thermal_eff = {}
-      actual_boiler_thermal_eff['Electricity'] = []
-      actual_boiler_thermal_eff['NaturalGas'] = []
-      actual_boiler_thermal_eff['FuelOilNo2'] = []
-      boiler_fueltypes.each do |boiler_fueltype|
-        fuel_type_cap[boiler_fueltype].each do |boiler_cap|
-          name = "#{template}_sys1_Boiler-#{boiler_fueltype}_cap-#{boiler_cap.to_int}W_MAU-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}"
-          name.gsub!(/\s+/, "-")
-          puts "***************#{name}***************\n"
+    # Read expected results.
+    file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
+    expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
-          # Load model and set climate file.
-          model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
-          weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
-          OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
-          BTAP::FileIO.save_osm(model, "#{output_folder}/#{name}-baseline.osm") if save_intermediate_models
-
-          hw_loop = OpenStudio::Model::PlantLoop.new(model)
-          always_on = model.alwaysOnDiscreteSchedule
-          standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, always_on)
-          standard.add_sys1_unitary_ac_baseboard_heating(model: model,
-                                                         zones: model.getThermalZones,
-                                                         mau_type: mau_type,
-                                                         mau_heating_coil_type: mau_heating_coil_type,
-                                                         baseboard_type: baseboard_type,
-                                                         hw_loop: hw_loop)
-
-          # Set the boiler capacity.
-          model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(boiler_cap)}
-
-          # Run sizing.
-          run_sizing(model: model, template: template, test_name: name, save_model_versions: save_intermediate_models)
-
-          # Recover the thermal efficiency set in the measure for checking below.
-          model.getBoilerHotWaters.each do |iboiler|
-            if iboiler.nominalCapacity.to_f > 1
-              actual_boiler_thermal_eff[boiler_fueltype] << iboiler.nominalThermalEfficiency
-              break
-            end
-          end
-        end
-      end
-
-      # Generate table of test boiler efficiencies.
-      actual_boiler_eff = {}
-      actual_boiler_eff['Electricity'] = []
-      actual_boiler_eff['NaturalGas'] = []
-      actual_boiler_eff['FuelOilNo2'] = []
-      boiler_res_file_output_text = "Fuel,Min Capacity (Btu per hr),Max Capacity (Btu per hr),Annual Fuel Utilization Efficiency (AFUE),Thermal Efficiency,Combustion Efficiency\n"
-      boiler_fueltypes.each do |ifuel|
-        output_line_text = ''
-        for int in 0..fuel_type_cap[ifuel].size - 1
-          output_line_text += "#{ifuel},#{fuel_type_min_cap[ifuel][int]},#{fuel_type_max_cap[ifuel][int]},"
-          if efficiency_type[ifuel][int] == 'Annual Fuel Utilization Efficiency (AFUE)'
-            actual_boiler_eff[ifuel][int] = (standard.thermal_eff_to_afue(actual_boiler_thermal_eff[ifuel][int]) + 0.0001).round(3)
-            output_line_text += "#{actual_boiler_eff[ifuel][int]},,\n"
-          elsif efficiency_type[ifuel][int] == 'Combustion Efficiency'
-            actual_boiler_eff[ifuel][int] = (standard.thermal_eff_to_comb_eff(actual_boiler_thermal_eff[ifuel][int]) + 0.0001).round(3)
-            output_line_text += ",,#{actual_boiler_eff[ifuel][int]}\n"
-          elsif efficiency_type[ifuel][int] == 'Thermal Efficiency'
-            actual_boiler_eff[ifuel][int] = (actual_boiler_thermal_eff[ifuel][int] + 0.0001).round(3)
-            output_line_text += ",#{actual_boiler_eff[ifuel][int]},\n"
-          end
-        end
-        boiler_res_file_output_text += output_line_text
-      end
-
-      # Write test results file.
-      test_result_file = File.join( @test_results_folder, "#{template.downcase}_compliance_boiler_efficiencies_test_results.csv")
-      File.open(test_result_file, 'w') {|f| f.write(boiler_res_file_output_text)}
-
-      # Test that the values are correct by doing a file compare.
-      expected_result_file = File.join( @expected_results_folder, "#{template.downcase}_compliance_boiler_efficiencies_expected_results.csv")
-
-      # Check if test results match expected.
-      msg = "Boiler efficiencies test results do not match what is expected in test"
-      file_compare(expected_results_file: expected_result_file, test_results_file: test_result_file, msg: msg)
-    end
+    # Check if test results match expected.
+    msg = "Boiler efficiencies test results do not match what is expected in test"
+    compare_results(expected_results: expected_results, test_results: test_results, msg: msg, type: 'json_data')
+    logger.info "Finished suite of tests for: #{__method__}"
   end
+
+  # @param test_pars [Hash] has the static parameters.
+  # @param test_case [Hash] has the specific test parameters.
+  # @return results of this case.
+  # @note Companion method to test_boiler_efficiency that runs a specific test. Called by do_test_cases in necb_helper.rb.
+  def do_test_boiler_efficiency(test_pars:, test_case:)
+
+    # Debug.
+    logger.debug "test_pars: #{JSON.pretty_generate(test_pars)}"
+    logger.debug "test_case: #{JSON.pretty_generate(test_case)}"
+
+    # Define local variables. These are extracted from the supplied hashes.
+    # General inputs.
+    test_name = test_pars[:TestMethod]
+    save_intermediate_models = test_pars[:SaveIntermediateModels]
+    mau_type = test_pars[:mau_type]
+    mau_heating_coil_type = test_pars[:mau_heating_coil_type]
+    baseboard_type = test_pars[:baseboard_type]
+    fuel_type = test_pars[:fuel_type]
+    vintage = test_pars[:vintage]
+
+    # Test specific inputs.
+    boiler_cap = test_case[:tested_capacity_kW]
+    efficiency_metric = test_case[:efficiency_metric]
+
+    # Define the test name.
+    name = "#{vintage}_sys1_Boiler-#{fuel_type}_cap-#{boiler_cap.to_int}kW_MAU-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}"
+    name_short = "#{vintage}_sys1_Boiler-#{fuel_type}_cap-#{boiler_cap.to_int}kW"
+    output_folder = method_output_folder("#{test_name}/#{name_short}")
+    logger.info "Starting individual test: #{name}"
+    results = Hash.new
+
+    # Wrap test in begin/rescue/ensure.
+    begin
+
+      # Load model and set climate file.
+      model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
+      weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
+      OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
+
+      hw_loop = OpenStudio::Model::PlantLoop.new(model)
+      always_on = model.alwaysOnDiscreteSchedule
+      standard = get_standard(vintage)
+      standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
+      standard.add_sys1_unitary_ac_baseboard_heating(model: model,
+                                                    zones: model.getThermalZones,
+                                                    mau_type: mau_type,
+                                                    mau_heating_coil_type: mau_heating_coil_type,
+                                                    baseboard_type: baseboard_type,
+                                                    hw_loop: hw_loop)
+
+      # Set the boiler capacity. Convert from kw to W first.
+      model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(boiler_cap*1000.0)}
+
+      # Run sizing.
+      run_sizing(model: model, template: vintage, save_model_versions: save_intermediate_models, output_dir: output_folder) if PERFORM_STANDARDS
+    rescue => error
+      msg = "#{__FILE__}::#{__method__}\n#{error.full_message}"
+      logger.error(msg)
+      return {ERROR: msg}
+    end
+
+    # Recover the thermal efficiency set in the measure for checking below.
+    test_efficiency_value = 0
+    model.getBoilerHotWaters.each do |iboiler|
+      if iboiler.nominalCapacity.to_f > 1
+        test_efficiency_value = iboiler.nominalThermalEfficiency
+        break
+      end
+    end
+
+    # Convert efficiency depending on the metric being used.
+    if efficiency_metric == 'annual fuel utilization efficiency'
+      test_efficiency_value = OpenstudioStandards::HVAC.thermal_eff_to_afue(test_efficiency_value)
+    elsif efficiency_metric == 'combustion efficiency'
+      test_efficiency_value = OpenstudioStandards::HVAC.thermal_eff_to_comb_eff(test_efficiency_value)
+    elsif efficiency_metric == 'thermal efficiency'
+      test_efficiency_value = test_efficiency_value
+    end
+
+    # Add this test case to results and return the hash.
+    results = {
+      name: name,
+      tested_capacity_kW: boiler_cap.signif,
+      efficiency_metric: efficiency_metric,
+      efficiency_value: test_efficiency_value.signif(3)
+    }
+    logger.info "Completed individual test: #{name}"
+    return results
+  end
+
 
   # Test to validate the number of boilers used and their capacities depending on total heating capacity.
   # NECB2011 rule for number of boilers is:
   # if capacity <= 176 kW ---> one single stage boiler
   # if capacity > 176 kW and <= 352 kW ---> 2 boilers of equal capacity
   # if capacity > 352 kW ---> one modulating boiler down to 25% of capacity"
-  def test_NECB2011_number_of_boilers
+  def test_number_of_boilers
+    logger.info "Starting suite of tests for: #{__method__}"
 
-    # Set up remaining parameters for test.
-    output_folder = method_output_folder(__method__)
-    template = 'NECB2011'
-    standard = get_standard(template)
-    save_intermediate_models = false
+    # Define test parameters.
+    test_parameters = {TestMethod: __method__,
+                       SaveIntermediateModels: true,
+                       fuel_type: 'NaturalGas',
+                       mau_type: true,
+                       heating_coil_type: 'Electric',
+                       baseboard_type: 'Hot Water'}
 
-    first_cutoff_blr_cap = 176000.0
-    second_cutoff_blr_cap = 352000.0
-    tol = 1.0e-3
+    # Define test cases.
+    test_cases = Hash.new
 
-    # Generate the osm files for all relevant cases to generate the test data for system 3.
-    boiler_fueltype = 'NaturalGas'
-    baseboard_type = 'Hot Water'
-    heating_coil_type = 'Electric'
-    test_boiler_cap = [100000.0, 200000.0, 400000.0]
+    # Define references (per vintage in this case).
+    test_cases[:NECB2011] = {Reference: "NECB 2011 p3 8.4.4.10.(6) clauses b,c,d"}
 
-    test_boiler_cap.each do |boiler_cap|
-      name = "#{template}_sys1_Boiler-#{boiler_fueltype}_boiler_cap-#{boiler_cap}watts_HeatingCoilType#-#{heating_coil_type}_Baseboard-#{baseboard_type}"
-      name.gsub!(/\s+/, "-")
-      puts "***************#{name}***************\n"
+    # Test cases. Three cases for NG and FuelOil, one for Electric.
+    # Results and name are tbd here as they will be calculated in the test.
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas"],
+                       TestCase: ["Single_Small_Boiler"],
+                       TestPars: {:tested_capacity_kW => 100}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas"],
+                       TestCase: ["Two_Equal_Sized_Boilers"],
+                       TestPars: {:tested_capacity_kW => 200}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+    test_cases_hash = {vintage: @AllTemplates,
+                       fuel_type: ["NaturalGas"],
+                       TestCase: ["Single_Large_Boiler"],
+                       TestPars: {:tested_capacity_kW => 400}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
+
+    # Read expected results. This is used to set the tested cases as the parameters change depending on the
+    # fuel type and boiler size.
+    file_root = "#{self.class.name}-#{__method__}".downcase
+    file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
+    expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
+
+    # Create empty results hash and call the template method that runs the individual test cases.
+    test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
+
+    # Write test results.
+    test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
+    File.write(test_result_file, JSON.pretty_generate(test_results))
+
+    # Check if test results match expected.
+    msg = "Boiler efficiencies test results do not match what is expected in test"
+    compare_results(expected_results: expected_results, test_results: test_results, msg: msg, type: 'json_data')
+
+    logger.info "Finished suite of tests for: #{__method__}"
+  end
+
+  # @param test_pars [Hash] has the static parameters.
+  # @param test_case [Hash] has the specific test parameters.
+  # @return results of this case.
+  # @note Companion method to test_number_of_boilers that runs a specific test. Called by do_test_cases in necb_helper.rb.
+  def do_test_number_of_boilers(test_pars:, test_case:)
+
+    # Debug.
+    logger.debug "test_pars: #{JSON.pretty_generate(test_pars)}"
+    logger.debug "test_case: #{JSON.pretty_generate(test_case)}"
+
+    # Define local variables. These are extracted from the supplied hashes.
+    # General inputs.
+    test_name = test_pars[:TestMethod]
+    save_intermediate_models = test_pars[:SaveIntermediateModels]
+    mau_type = test_pars[:mau_type]
+    heating_coil_type = test_pars[:heating_coil_type]
+    baseboard_type = test_pars[:baseboard_type]
+    fuel_type = test_pars[:fuel_type]
+    vintage = test_pars[:vintage]
+
+    # Test specific inputs.
+    total_boiler_cap = test_case[:tested_capacity_kW]
+
+    # Define the test name.
+    name = "#{vintage}_Sys1_#{total_boiler_cap.round(0)}kW_#{fuel_type}_boiler_HeatingCoilType-#{heating_coil_type}_Baseboard-#{baseboard_type}"
+    name_short = "#{vintage}_sys1_#{total_boiler_cap.round(0)}kW_#{fuel_type}_boiler"
+    output_folder = method_output_folder("#{test_name}/#{name_short}")
+    logger.info "Starting individual test: #{name}"
+    results = Hash.new
+
+    # Wrap test in begin/rescue/ensure.
+    begin
 
       # Load model and set climate file.
       model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
       weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
       OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
-      BTAP::FileIO.save_osm(model, "#{output_folder}/#{name}-baseline.osm") if save_intermediate_models
+      BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
 
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, always_on)
-      standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(
-          model: model,
-          zones: model.getThermalZones,
-          heating_coil_type: heating_coil_type,
-          baseboard_type: baseboard_type,
-          hw_loop: hw_loop,
-          new_auto_zoner: false)
-      model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(boiler_cap)}
+      standard = get_standard(vintage)
+      standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
+      standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(model: model,
+                                                                                                  zones: model.getThermalZones,
+                                                                                                  heating_coil_type: heating_coil_type,
+                                                                                                  baseboard_type: baseboard_type,
+                                                                                                  hw_loop: hw_loop,
+                                                                                                  new_auto_zoner: false)
+      model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(total_boiler_cap*1000.0)}
 
-      # Run sizing.
-      run_sizing(model: model, template: template, test_name: name, save_model_versions: save_intermediate_models)
-
-      boilers = model.getBoilerHotWaters
-
-      # check that there are two boilers in the model.
-      num_of_boilers_is_correct = false
-      if boilers.size == 2 then
-        num_of_boilers_is_correct = true
-      end
-      assert(num_of_boilers_is_correct, 'test_number_of_boilers: Number of boilers is not 2')
-      this_is_the_first_cap_range = false
-      this_is_the_second_cap_range = false
-      this_is_the_third_cap_range = false
-      if boiler_cap < first_cutoff_blr_cap
-        this_is_the_first_cap_range = true
-      elsif boiler_cap > second_cutoff_blr_cap
-        this_is_the_third_cap_range = true
-      else
-        this_is_the_second_cap_range = true
-      end
-      # compare boiler capacities to expected values
-      boilers.each do |iboiler|
-        if iboiler.name.to_s.include? 'Primary Boiler'
-          boiler_cap_is_correct = false
-          if this_is_the_first_cap_range || this_is_the_third_cap_range
-            cap_diff = (boiler_cap - iboiler.nominalCapacity.to_f).abs / boiler_cap
-          elsif this_is_the_second_cap_range
-            cap_diff = (0.5 * boiler_cap - iboiler.nominalCapacity.to_f).abs / (0.5 * boiler_cap)
-          end
-          if cap_diff < tol then
-            boiler_cap_is_correct = true
-          end
-          assert(boiler_cap_is_correct, 'test_number_of_boilers: Primary boiler capacity is not correct')
-        end
-        if iboiler.name.to_s.include? 'Secondary Boiler'
-          boiler_cap_is_correct = false
-          if this_is_the_first_cap_range || this_is_the_third_cap_range
-            cap_diff = (iboiler.nominalCapacity.to_f - 0.001).abs
-          elsif this_is_the_second_cap_range
-            cap_diff = (0.5 * boiler_cap - iboiler.nominalCapacity.to_f).abs / (0.5 * boiler_cap)
-          end
-          if cap_diff < tol then
-            boiler_cap_is_correct = true
-          end
-          assert(boiler_cap_is_correct, 'test_number_of_boilers: Secondary boiler capacity is not correct')
-        end
-      end
+      # Run sizing. Is this required?
+      run_sizing(model: model, template: vintage, save_model_versions: save_intermediate_models, output_dir: output_folder) if PERFORM_STANDARDS
+    rescue => error
+      msg = "#{__FILE__}::#{__method__}\n#{error.full_message}"
+      logger.error(msg)
+      return {ERROR: msg}
     end
+
+    # Check that there are two boilers in the model. BTAP sets the second boiler to 0.001 W if the rules say only one boiler required.
+    boilers = model.getBoilerHotWaters
+    boiler_count = 0
+    total_capacity = 0.0
+    boilers.each do |boiler|
+
+      # Skip boilers that are sized zero.
+      next if boiler.nominalCapacity.to_f < 0.1
+
+      # Add this test case to results.
+      boiler_count += 1
+      boiler_capacity = (boiler.nominalCapacity.to_f)/1000.0
+      total_capacity += boiler_capacity
+      boilerID = "Boiler-#{boiler_count}"
+      results[boilerID.to_sym] = {
+        name: boiler.name.to_s,
+        boiler_capacity_kW: (boiler_capacity).signif,
+        minimum_part_load_ratio: boiler.minimumPartLoadRatio
+      }
+    end
+    results[:All]= {
+      tested_capacity_kW: (total_boiler_cap.to_f).signif,
+      total_capacity_kW: (total_capacity).signif,
+      number_of_boilers: boiler_count
+    }
+    logger.info "Completed individual test: #{name}"
+    return results
   end
 
-  # Test to validate the boiler part load performance curve
-  def test_NECB2011_boiler_plf_vs_plr_curve
+  # Test to validate the boiler part load performance curve.
+  def test_boiler_plf_vs_plr_curve
+    logger.info "Starting suite of tests for: #{__method__}"
 
-    # Set up remaining parameters for test.
-    output_folder = method_output_folder(__method__)
-    template = 'NECB2011'
-    standard = get_standard(template)
-    save_intermediate_models = false
+    # Define test parameters that apply to all tests.
+    test_parameters = {TestMethod: __method__,
+                       SaveIntermediateModels: true,
+                       mau_type: true,
+                       mau_heating_coil_type: 'Hot Water',
+                       baseboard_type: 'Hot Water'}
 
-    # Generate the osm files for all relevant cases to generate the test data for system 1.
-    boiler_res_file_output_text = "Name,Type,coeff1,coeff2,coeff3,coeff4,min_x,max_x\n"
-    boiler_fueltype = 'NaturalGas'
-    mau_type = true
-    mau_heating_coil_type = 'Hot Water'
-    baseboard_type = 'Hot Water'
+    # Define test cases.
+    test_cases = Hash.new
 
-    name = "#{template}_sys1_Boiler-#{boiler_fueltype}_Mau-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}"
-    name.gsub!(/\s+/, "-")
-    puts "***************#{name}***************\n"
+    # Define references (per vintage in this case).
+    test_cases[:NECB2011] = {Reference: "NECB 2011 p3 8.4.4.22 (maybe)"}
 
-    # Load model and set climate file.
-    model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
-    weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
-    OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
-    BTAP::FileIO.save_osm(model, "#{output_folder}/#{name}-baseline.osm") if save_intermediate_models
+    # Test cases. Three cases for NG and FuelOil, one for Electric.
+    # Results and name are tbd here as they will be calculated in the test.
+    test_cases_hash = {vintage: ['NECB2011'], # @AllTemplates,
+                       fuel_type: ["NaturalGas"],
+                       TestCase: ["case-1"],
+                       TestPars: {:name => "tbd"}}
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
 
-    hw_loop = OpenStudio::Model::PlantLoop.new(model)
-    always_on = model.alwaysOnDiscreteSchedule
-    standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, always_on)
-    standard.add_sys1_unitary_ac_baseboard_heating(model: model,
-                                                   zones: model.getThermalZones,
-                                                   mau_type: mau_type,
-                                                   mau_heating_coil_type: mau_heating_coil_type,
-                                                   baseboard_type: baseboard_type,
-                                                   hw_loop: hw_loop)
+    # Create empty results hash and call the template method that runs the individual test cases.
+    test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
 
-    # Run sizing.
-    run_sizing(model: model, template: template, test_name: name, save_model_versions: save_intermediate_models)
+    # Write test results.
+    file_root = "#{self.class.name}-#{__method__}".downcase
+    test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
+    File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    boilers = model.getBoilerHotWaters
-    boiler_curve = boilers[0].normalizedBoilerEfficiencyCurve.get.to_CurveCubic.get
-    boiler_res_file_output_text += "BOILER-EFFFPLR-NECB2011,cubic,#{boiler_curve.coefficient1Constant},#{boiler_curve.coefficient2x},#{boiler_curve.coefficient3xPOW2}," +
-        "#{boiler_curve.coefficient4xPOW3},#{boiler_curve.minimumValueofx},#{boiler_curve.maximumValueofx}"
-
-    # Write test results file.
-    test_result_file = File.join( @test_results_folder, "#{template.downcase}_compliance_boiler_plfvsplr_curve_test_results.csv")
-    File.open(test_result_file, 'w') {|f| f.write(boiler_res_file_output_text)}
-
-    # Test that the values are correct by doing a file compare.
-    expected_result_file = File.join( @expected_results_folder, "#{template.downcase}_compliance_boiler_plfvsplr_curve_expected_results.csv")
+    # Read expected results.
+    file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
+    expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
     # Check if test results match expected.
     msg = "Boiler plf vs plr curve coeffs test results do not match what is expected in test"
-    file_compare(expected_results_file: expected_result_file, test_results_file: test_result_file, msg: msg)
+    compare_results(expected_results: expected_results, test_results: test_results, msg: msg, type: 'json_data')
+    logger.info "Finished suite of tests for: #{__method__}"
+  end
+
+  # @param test_pars [Hash] has the static parameters.
+  # @param test_case [Hash] has the specific test parameters.
+  # @return results of this case.
+  # @note Companion method to test_boiler_plf_vs_plr_curve that runs a specific test. Called by do_test_cases in necb_helper.rb.
+  def do_test_boiler_plf_vs_plr_curve(test_pars:, test_case:)
+
+    # Debug.
+    logger.debug "test_pars: #{JSON.pretty_generate(test_pars)}"
+    logger.debug "test_case: #{JSON.pretty_generate(test_case)}"
+
+    # Define local variables. These are extracted from the supplied hashes.
+    # General inputs.
+    test_name = test_pars[:TestMethod]
+    save_intermediate_models = test_pars[:SaveIntermediateModels]
+    mau_type = test_pars[:mau_type]
+    mau_heating_coil_type = test_pars[:mau_heating_coil_type]
+    baseboard_type = test_pars[:baseboard_type]
+    fuel_type = test_pars[:fuel_type]
+    vintage = test_pars[:vintage]
+
+    name = "#{vintage}_sys1_Boiler-#{fuel_type}_Mau-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}"
+    name_short = "#{vintage}_sys1"
+    output_folder = method_output_folder("#{test_name}/#{name_short}")
+    logger.info "Starting individual test: #{name}"
+    results = Hash.new
+
+    # Wrap test in begin/rescue/ensure.
+    begin
+
+      # Load model and set climate file.
+      model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
+      weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
+      OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
+
+      hw_loop = OpenStudio::Model::PlantLoop.new(model)
+      always_on = model.alwaysOnDiscreteSchedule
+      standard = get_standard(vintage)
+      standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
+      standard.add_sys1_unitary_ac_baseboard_heating(model: model,
+                                                    zones: model.getThermalZones,
+                                                    mau_type: mau_type,
+                                                    mau_heating_coil_type: mau_heating_coil_type,
+                                                    baseboard_type: baseboard_type,
+                                                    hw_loop: hw_loop)
+
+      # Run sizing.
+      run_sizing(model: model, template: vintage, save_model_versions: save_intermediate_models, output_dir: output_folder) if PERFORM_STANDARDS
+    rescue => error
+      msg = "#{__FILE__}::#{__method__}\n#{error.full_message}"
+      logger.error(msg)
+      return {ERROR: msg}
+    end
+
+    # Extract the results for checking. There are always two boilers.
+    boilers = model.getBoilerHotWaters
+    boilers.each do |boiler|
+      logger.info "Boiler: #{boiler}"
+      eff_curve_name, eff_curve_type, corr_coeff = get_boiler_eff_curve_data(boiler)
+      boiler_eff = boiler.nominalThermalEfficiency
+      boiler_name = boiler.name.get
+      results[boiler_name.to_sym]= {
+          boiler_name: boiler_name,
+          boiler_eff: boiler_eff,
+          eff_curve_name: eff_curve_name,
+          eff_curve_type: eff_curve_type,
+          curve_coefficients: corr_coeff
+      }
+    end
+    logger.info "Completed individual test: #{name}"
+    return results
   end
 
   # Test to validate the custom boiler thermal efficiencies applied against expected values stored in the file:
   # 'compliance_boiler_custom_efficiencies_expected_results.json
   def test_custom_efficiency
+    logger.info "Starting suite of tests for: #{__method__}"
 
-    # Set up remaining parameters for test.
-    output_folder = method_output_folder(__method__)
-    templates = ['NECB2011', 'BTAPPRE1980']
-    save_intermediate_models = false
+    # Define test parameters that apply to all cases.
+    test_parameters = {TestMethod: __method__,
+                       SaveIntermediateModels: false,
+                       mau_type: true,
+                       mau_heating_coil_type: 'Hot Water',
+                       baseboard_type: 'Hot Water'}
 
-    # Generate the osm files for all relevant cases to generate the test data for system 1.
-    mau_type = true
-    mau_heating_coil_type = 'Hot Water'
-    baseboard_type = 'Hot Water'
-    test_res = []
-
-    templates.each do |template|
-      standard = get_standard(template)
-      standard_ecms = get_standard("ECMS")
-      boiler_fueltype = 'NaturalGas'
-      boiler_cap = 1500000
-      standard_ecms.standards_data["tables"]["boiler_eff_ecm"]["table"].each do |cust_eff_test|
-        name = "#{template}_sys1_Boiler-#{boiler_fueltype}_cap-#{boiler_cap.to_int}W_MAU-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}_efficiency-#{cust_eff_test["name"].to_s}"
-        name.gsub!(/\s+/, "-")
-        puts "***************#{name}***************\n"
-
-        # Load model and set climate file.
-        model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
-        weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
-        OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
-        BTAP::FileIO.save_osm(model, "#{output_folder}/#{name}-baseline.osm") if save_intermediate_models
-
-        hw_loop = OpenStudio::Model::PlantLoop.new(model)
-        always_on = model.alwaysOnDiscreteSchedule
-        standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, always_on)
-        standard.add_sys1_unitary_ac_baseboard_heating(model: model,
-                                                       zones: model.getThermalZones,
-                                                       mau_type: mau_type,
-                                                       mau_heating_coil_type: mau_heating_coil_type,
-                                                       baseboard_type: baseboard_type,
-                                                       hw_loop: hw_loop)
-        model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(boiler_cap)}
-
-        # Run sizing.
-        run_sizing(model: model, template: template, test_name: name, save_model_versions: save_intermediate_models)
-
-        # Customize the efficiency.
-        standard_ecms.modify_boiler_efficiency(model: model, boiler_eff: cust_eff_test)
-
-        boilers = model.getBoilerHotWaters
-        boilers.each do |boiler|
-          corr_coeff = []
-          eff_curve = nil
-          eff_curve_type = boiler.normalizedBoilerEfficiencyCurve.get.iddObjectType.valueName.to_s
-          case eff_curve_type
-          when "OS_Curve_Bicubic"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveBicubic.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.coefficient3xPOW2
-            corr_coeff << eff_curve.coefficient4y
-            corr_coeff << eff_curve.coefficient5yPOW2
-            corr_coeff << eff_curve.coefficient6xTIMESY
-            corr_coeff << eff_curve.coefficient7xPOW3
-            corr_coeff << eff_curve.coefficient8yPOW3
-            corr_coeff << eff_curve.coefficient9xPOW2TIMESY
-            corr_coeff << eff_curve.coefficient10xTIMESYPOW2
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-            corr_coeff << eff_curve.minimumValueofy
-            corr_coeff << eff_curve.maximumValueofy
-          when "OS_Curve_Biquadratic"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveBiquadratic.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.coefficient3xPOW2
-            corr_coeff << eff_curve.coefficient4y
-            corr_coeff << eff_curve.coefficient5yPOW2
-            corr_coeff << eff_curve.coefficient6xTIMESY
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-            corr_coeff << eff_curve.minimumValueofy
-            corr_coeff << eff_curve.maximumValueofy
-          when "OS_Curve_Cubic"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveCubic.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.coefficient3xPOW2
-            corr_coeff << eff_curve.coefficient4xPOW3
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-          when "OS_Curve_Linear"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveLinear.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-          when "OS_Curve_Quadratic"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveQuadratic.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.coefficient3xPOW2
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-          when "OS_Curve_QuadraticLinear"
-            eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveQuadraticLinear.get
-            corr_coeff << eff_curve.coefficient1Constant
-            corr_coeff << eff_curve.coefficient2x
-            corr_coeff << eff_curve.coefficient3xPOW2
-            corr_coeff << eff_curve.coefficient4y
-            corr_coeff << eff_curve.coefficient5xTIMESY
-            corr_coeff << eff_curve.coefficient6xPOW2TIMESY
-            corr_coeff << eff_curve.minimumValueofx
-            corr_coeff << eff_curve.maximumValueofx
-            corr_coeff << eff_curve.minimumValueofy
-            corr_coeff << eff_curve.maximumValueofy
-          end
-          eff_curve_name = eff_curve.name
-          boiler_eff = boiler.nominalThermalEfficiency
-          test_res << {
-              template: template,
-              boiler_name: boiler.name,
-              boiler_eff: boiler_eff,
-              eff_curve_name: eff_curve_name,
-              curve_coefficients: corr_coeff
-          }
-        end
-      end
+    # Define test cases.
+    standard_ecms = get_standard("ECMS")
+    boilers = standard_ecms.standards_data["tables"]["boiler_eff_ecm"]["table"] # Used to get the case names and data.
+    test_cases = Hash.new
+    boilers.each do |boiler|
+      test_cases_hash = {vintage: @AllTemplates,
+                         TestCase: [boiler["name"]],
+                         TestPars: {:Reference=>boiler["notes"],
+                                       :boiler_name=>boiler["name"],
+                                       :boiler_eff=>boiler["efficiency"],
+                                       :eff_curve_name=>boiler["part_load_curve"]}}
+      new_test_cases = make_test_cases_json(test_cases_hash)
+      merge_test_cases!(test_cases, new_test_cases)
     end
 
+    # Create empty results hash and call the template method that runs the individual test cases.
+    test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
+
     # Write test results.
-    test_result_file = File.join( @test_results_folder, "boiler_efficiency_modification_test_results.json")
-    File.write(test_result_file, JSON.pretty_generate(test_res))
-    expected_result_file = File.join( @test_results_folder, "boiler_efficiency_modification_expected_results.json")
+    file_root = "#{self.class.name}-#{__method__}".downcase
+    test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
+    File.write(test_result_file, JSON.pretty_generate(test_results))
+
+    # Read expected results.
+    file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
+    expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
     # Check if test results match expected.
-    msg = "Boiler custom efficiencies test results do not match what is expected in test"
-    file_compare(expected_results_file: expected_result_file, test_results_file: test_result_file, msg: msg)
+    msg = "Boiler efficiencies test results do not match what is expected in test"
+    compare_results(expected_results: expected_results, test_results: test_results, msg: msg, type: 'json_data')
+    logger.info "Finished suite of tests for: #{__method__}"
   end
 
+  # @param test_pars [Hash] has the static parameters.
+  # @param test_case [Hash] has the specific test parameters.
+  # @return results of this case.
+  # @note Companion method to test_custom_efficiency that runs a specific test. Called by do_test_cases in necb_helper.rb.
+  def do_test_custom_efficiency(test_pars:, test_case:)
+
+    # Debug.
+    logger.debug "test_pars: #{JSON.pretty_generate(test_pars)}"
+    logger.debug "test_case: #{JSON.pretty_generate(test_case)}"
+
+    # Define local variables. These are extracted from the supplied hashes.
+    # General inputs.
+    test_name = test_pars[:TestMethod]
+    save_intermediate_models = test_pars[:SaveIntermediateModels]
+    mau_type = test_pars[:mau_type]
+    mau_heating_coil_type = test_pars[:mau_heating_coil_type]
+    baseboard_type = test_pars[:baseboard_type]
+    vintage = test_pars[:vintage]
+    reference = test_case[:Reference]
+
+    # Test specific inputs.
+    boiler_name = test_case[:boiler_name]
+    fuel_type = 'NaturalGas'
+    boiler_cap = 1500000
+
+    # Define the test name.
+    name = "#{vintage}_sys1_Boiler-#{fuel_type}_cap-#{boiler_cap.to_int}W_MAU-#{mau_type}_MauCoil-#{mau_heating_coil_type}_Baseboard-#{baseboard_type}_efficiency-#{boiler_name}"
+    name_short = "#{vintage}_sys1-#{boiler_name}"
+    output_folder = method_output_folder("#{test_name}/#{name_short}")
+    logger.info "Started individual test: #{name}"
+    results = Hash.new
+
+    # Wrap test in begin/rescue/ensure.
+    begin
+      standard = get_standard(vintage)
+      standard_ecms = get_standard("ECMS")
+
+      # Load model and set climate file.
+      model = BTAP::FileIO.load_osm(File.join(@resources_folder,"5ZoneNoHVAC.osm"))
+      weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
+      OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
+
+      hw_loop = OpenStudio::Model::PlantLoop.new(model)
+      always_on = model.alwaysOnDiscreteSchedule
+      standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
+      standard.add_sys1_unitary_ac_baseboard_heating(model: model,
+                                                      zones: model.getThermalZones,
+                                                      mau_type: mau_type,
+                                                      mau_heating_coil_type: mau_heating_coil_type,
+                                                      baseboard_type: baseboard_type,
+                                                      hw_loop: hw_loop)
+      model.getBoilerHotWaters.each {|iboiler| iboiler.setNominalCapacity(boiler_cap)}
+
+      # Run sizing.
+      run_sizing(model: model, template: vintage, save_model_versions: save_intermediate_models, output_dir: output_folder) if PERFORM_STANDARDS
+
+      # Customize the efficiency. Specify the name and the method will look up the correct boiler.
+      standard_ecms.modify_boiler_efficiency(model: model, boiler_eff: boiler_name)
+    rescue => error
+      msg = "#{__FILE__}::#{__method__}\n#{error.full_message}"
+      logger.error(msg)
+      return {ERROR: msg}
+    end
+
+    # Extract the results for checking. There are always two boilers.
+    results[:Reference] = reference
+    boilers = model.getBoilerHotWaters
+    boilers.each do |boiler|
+      eff_curve_name, eff_curve_type, corr_coeff = get_boiler_eff_curve_data(boiler)
+      boiler_eff = boiler.nominalThermalEfficiency
+      boiler_name = boiler.name.get
+      results[boiler_name.to_sym]= {
+          boiler_name: boiler_name,
+          boiler_eff: boiler_eff,
+          eff_curve_name: eff_curve_name,
+          eff_curve_type: eff_curve_type,
+          curve_coefficients: corr_coeff
+      }
+    end
+    logger.info "Completed individual test: #{name}"
+    return results
+  end
+
+  # @note Helper method to return the part load curve data.
+  # @param boiler [OS::Boiler] an openstudio boiler.
+  # @return the efficiency curve name [String], curve type [String] and the curve coefficients [Array] (curve type dependent).
+  def get_boiler_eff_curve_data(boiler)
+    corr_coeff = []
+    eff_curve = nil
+    eff_curve_type = boiler.normalizedBoilerEfficiencyCurve.get.iddObjectType.valueName.to_s
+    case eff_curve_type
+    when "OS_Curve_Bicubic"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveBicubic.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.coefficient3xPOW2
+      corr_coeff << eff_curve.coefficient4y
+      corr_coeff << eff_curve.coefficient5yPOW2
+      corr_coeff << eff_curve.coefficient6xTIMESY
+      corr_coeff << eff_curve.coefficient7xPOW3
+      corr_coeff << eff_curve.coefficient8yPOW3
+      corr_coeff << eff_curve.coefficient9xPOW2TIMESY
+      corr_coeff << eff_curve.coefficient10xTIMESYPOW2
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+      corr_coeff << eff_curve.minimumValueofy
+      corr_coeff << eff_curve.maximumValueofy
+    when "OS_Curve_Biquadratic"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveBiquadratic.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.coefficient3xPOW2
+      corr_coeff << eff_curve.coefficient4y
+      corr_coeff << eff_curve.coefficient5yPOW2
+      corr_coeff << eff_curve.coefficient6xTIMESY
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+      corr_coeff << eff_curve.minimumValueofy
+      corr_coeff << eff_curve.maximumValueofy
+    when "OS_Curve_Cubic"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveCubic.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.coefficient3xPOW2
+      corr_coeff << eff_curve.coefficient4xPOW3
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+    when "OS_Curve_Linear"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveLinear.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+    when "OS_Curve_Quadratic"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveQuadratic.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.coefficient3xPOW2
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+    when "OS_Curve_QuadraticLinear"
+      eff_curve = boiler.normalizedBoilerEfficiencyCurve.get.to_CurveQuadraticLinear.get
+      corr_coeff << eff_curve.coefficient1Constant
+      corr_coeff << eff_curve.coefficient2x
+      corr_coeff << eff_curve.coefficient3xPOW2
+      corr_coeff << eff_curve.coefficient4y
+      corr_coeff << eff_curve.coefficient5xTIMESY
+      corr_coeff << eff_curve.coefficient6xPOW2TIMESY
+      corr_coeff << eff_curve.minimumValueofx
+      corr_coeff << eff_curve.maximumValueofx
+      corr_coeff << eff_curve.minimumValueofy
+      corr_coeff << eff_curve.maximumValueofy
+    end
+    eff_curve_name = eff_curve.name.get
+    return eff_curve_name, eff_curve_type, corr_coeff
+  end
 end

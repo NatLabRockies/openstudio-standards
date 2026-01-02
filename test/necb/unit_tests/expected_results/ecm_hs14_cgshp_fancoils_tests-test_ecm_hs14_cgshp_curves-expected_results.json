@@ -1,0 +1,45 @@
+{
+  "VarType": "vintage",
+  "Reference": "ECM test - checking hs14 CGSHP curves",
+  "NECB2017": {
+    "VarType": "TestCase",
+    "case 1": {
+      "capacity_curve": {
+        "type": "quadlinear",
+        "const": "-3.33491E+00",
+        "coeff2w": "-5.14519E-01",
+        "coeff3x": "4.51593E+00",
+        "coeff4y": "1.79711E-02",
+        "coeff5z": "1.55798E-01",
+        "min_w": "-1.00000E+02",
+        "max_w": "1.00000E+02",
+        "min_x": "-1.00000E+02",
+        "max_x": "1.00000E+02",
+        "min_y": "0.00000E+00",
+        "max_y": "1.00000E+02",
+        "min_z": "0.00000E+00",
+        "max_z": "1.00000E+02",
+        "min_output": "0.00000E+00",
+        "max_output": "3.80000E+01"
+      },
+      "power_curve": {
+        "type": "quadlinear",
+        "const": "-8.93122E+00",
+        "coeff2w": "8.57036E+00",
+        "coeff3x": "1.29661E+00",
+        "coeff4y": "-2.16292E-01",
+        "coeff5z": "3.38624E-02",
+        "min_w": "-1.00000E+02",
+        "max_w": "1.00000E+02",
+        "min_x": "-1.00000E+02",
+        "max_x": "1.00000E+02",
+        "min_y": "0.00000E+00",
+        "max_y": "1.00000E+02",
+        "min_z": "0.00000E+00",
+        "max_z": "1.00000E+02",
+        "min_output": "0.00000E+00",
+        "max_output": "3.80000E+01"
+      }
+    }
+  }
+}

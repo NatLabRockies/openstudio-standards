@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_4_Test_E_E_E < Minitest::Test
+class NECB_HVAC_System_4_Test < Minitest::Test
 
   def test_necb_hvac_system_4_electricity_electric_electric()
     vintage = ['NECB2011']
@@ -43,9 +43,14 @@ class NECB_HVAC_System_4_Test_E_E_E < Minitest::Test
     standard = Standard.build(vintage)
     name = "system_4_Boiler-#{boiler_fueltype}_HeatingCoilType#-#{heating_coil}_BaseboardType-#{baseboard_type}"
     puts "***************************************#{name}*******************************************************\n"
-    model = BTAP::FileIO::load_osm(template_osm_file)
-    weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file)
-    OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+    model = standard.load_building_type_from_library(building_type: 'SmallOffice')
+    standard.assign_building_activity(model: model)
+    standard.assign_building_structure(model: model, activity: @activity, massive: false)
+    standard.apply_weather_data(model: model, epw_file: weather_file)
+    standard.apply_loads(model: model)
+    standard.apply_envelope(model: model)
+    standard.apply_fdwr_srr_daylighting(model: model)
+    standard.apply_auto_zoning(model: model, sizing_run_dir: output_folder)
     hw_loop = nil
     if (baseboard_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)

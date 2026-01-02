@@ -111,7 +111,7 @@ class Baseline9012013TestBldg4 < Minitest::Test
     model.getFanZoneExhausts.each do |exhaust_fan|
       number_of_exhaust_fans +=1
       if exhaust_fan.name.get.to_s == "Parking Level 1B ParkingLot Exhaust Fan"
-        expected_efficiency = 0.6
+        expected_efficiency = 0.71047619047619
         expected_pressure_rise = 716.49
         expected_flow_rate = 35.396
         # check values
@@ -129,7 +129,7 @@ class Baseline9012013TestBldg4 < Minitest::Test
           failure_array << "Baseline Fan Flow Rate for #{exhaust_fan.name} expected to matched Proposed Value of #{expected_flow_rate} m3/s but no value was specified"
         end
       elsif exhaust_fan.name.get.to_s == "Parking Level 2B ParkingLot Exhaust Fan"
-        expected_efficiency = 0.6
+        expected_efficiency = 0.71047619047619
         expected_pressure_rise = 908.41
         expected_flow_rate = 40.116
         # check values

@@ -24,8 +24,7 @@ class Standard
     # Convert max flow rate to cfm
     maximum_flow_rate_cfm = OpenStudio.convert(maximum_flow_rate_m3_per_s, 'm^3/s', 'cfm').get
 
-    # Pressure rise will be determined based on the
-    # following logic.
+    # Pressure rise will be determined based on the following logic.
     pressure_rise_in_h2o = 0.0
 
     # If the fan lives inside of a zone hvac equipment
@@ -91,72 +90,5 @@ class Standard
                            end
 
     return pressure_rise_in_h2o
-  end
-
-  # creates an on off fan
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param fan_name [String] fan name
-  # @param fan_efficiency [Double] fan efficiency
-  # @param pressure_rise [Double] fan pressure rise in Pa
-  # @param motor_efficiency [Double] fan motor efficiency
-  # @param motor_in_airstream_fraction [Double] fraction of motor heat in airstream
-  # @param end_use_subcategory [String] end use subcategory name
-  # @return [OpenStudio::Model::FanOnOff] on off fan object
-  def create_fan_on_off(model,
-                        fan_name: nil,
-                        fan_efficiency: nil,
-                        pressure_rise: nil,
-                        motor_efficiency: nil,
-                        motor_in_airstream_fraction: nil,
-                        end_use_subcategory: nil)
-    fan = OpenStudio::Model::FanOnOff.new(model)
-    PrototypeFan.apply_base_fan_variables(fan,
-                                          fan_name: fan_name,
-                                          fan_efficiency: fan_efficiency,
-                                          pressure_rise: pressure_rise,
-                                          end_use_subcategory: end_use_subcategory)
-    fan.setMotorEfficiency(motor_efficiency) unless motor_efficiency.nil?
-    fan.setMotorInAirstreamFraction(motor_in_airstream_fraction) unless motor_in_airstream_fraction.nil?
-    return fan
-  end
-
-  # creates a on off fan from a json
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param fan_json [Hash] hash of fan properties
-  # @param fan_name [String] fan name
-  # @param fan_efficiency [Double] fan efficiency
-  # @param pressure_rise [Double] fan pressure rise in Pa
-  # @param motor_efficiency [Double] fan motor efficiency
-  # @param motor_in_airstream_fraction [Double] fraction of motor heat in airstream
-  # @param end_use_subcategory [String] end use subcategory name
-  # @return [OpenStudio::Model::FanOnOff] on off fan object
-  def create_fan_on_off_from_json(model,
-                                  fan_json,
-                                  fan_name: nil,
-                                  fan_efficiency: nil,
-                                  pressure_rise: nil,
-                                  motor_efficiency: nil,
-                                  motor_in_airstream_fraction: nil,
-                                  end_use_subcategory: nil)
-    # check values to use
-    fan_efficiency ||= fan_json['fan_efficiency']
-    pressure_rise ||= fan_json['pressure_rise']
-    motor_efficiency ||= fan_json['motor_efficiency']
-    motor_in_airstream_fraction ||= fan_json['motor_in_airstream_fraction']
-
-    # convert values
-    pressure_rise = pressure_rise ? OpenStudio.convert(pressure_rise, 'inH_{2}O', 'Pa').get : nil
-
-    # create fan
-    fan = create_fan_on_off(model,
-                            fan_name: fan_name,
-                            fan_efficiency: fan_efficiency,
-                            pressure_rise: pressure_rise,
-                            motor_efficiency: motor_efficiency,
-                            motor_in_airstream_fraction: motor_in_airstream_fraction,
-                            end_use_subcategory: end_use_subcategory)
-    return fan
   end
 end

@@ -825,10 +825,10 @@ class Standard
     plant_loop.supplyComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, pri_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-        headered_pumps_variable_speed_set_control_type(pump, pri_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       end
     end
 
@@ -836,10 +836,10 @@ class Standard
     plant_loop.demandComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, sec_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: sec_control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-        headered_pumps_variable_speed_set_control_type(pump, sec_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: sec_control_type)
       end
     end
 
@@ -869,7 +869,7 @@ class Standard
     plant_loop.supplyComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: control_type)
       end
     end
 
@@ -898,10 +898,10 @@ class Standard
     plant_loop.supplyComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-        headered_pumps_variable_speed_set_control_type(pump, control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: control_type)
       end
     end
 
@@ -1274,12 +1274,12 @@ class Standard
     plant_loop.supplyComponents.each do |component|
       if component.to_PumpConstantSpeed.is_initialized
         pump = component.to_PumpConstantSpeed.get
-        pump_rated_w_per_gpm = pump_rated_w_per_gpm(pump)
+        pump_rated_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(pump)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.PlantLoop', "'#{loop_type}' Loop #{plant_loop.name} - Primary (Supply) Constant Speed Pump '#{pump.name}' - pump_rated_w_per_gpm #{pump_rated_w_per_gpm} W/GPM")
         supply_w_per_gpm += pump_rated_w_per_gpm
       elsif component.to_PumpVariableSpeed.is_initialized
         pump = component.to_PumpVariableSpeed.get
-        pump_rated_w_per_gpm = pump_rated_w_per_gpm(pump)
+        pump_rated_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(pump)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.PlantLoop', "'#{loop_type}' Loop #{plant_loop.name} - Primary (Supply) VSD Pump '#{pump.name}' - pump_rated_w_per_gpm #{pump_rated_w_per_gpm} W/GPM")
         supply_w_per_gpm += pump_rated_w_per_gpm
       end
@@ -1291,12 +1291,12 @@ class Standard
     demand_pumps.each do |component|
       if component.to_PumpConstantSpeed.is_initialized
         pump = component.to_PumpConstantSpeed.get
-        pump_rated_w_per_gpm = pump_rated_w_per_gpm(pump)
+        pump_rated_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(pump)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.PlantLoop', "'#{loop_type}' Loop #{plant_loop.name} - Secondary (Demand) Constant Speed Pump '#{pump.name}' - pump_rated_w_per_gpm #{pump_rated_w_per_gpm} W/GPM")
         demand_w_per_gpm += pump_rated_w_per_gpm
       elsif component.to_PumpVariableSpeed.is_initialized
         pump = component.to_PumpVariableSpeed.get
-        pump_rated_w_per_gpm = pump_rated_w_per_gpm(pump)
+        pump_rated_w_per_gpm = OpenstudioStandards::HVAC.pump_get_rated_w_per_gpm(pump)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.PlantLoop', "'#{loop_type}' Loop #{plant_loop.name} - Secondary (Demand) VSD Pump '#{pump.name}' - pump_rated_w_per_gpm #{pump_rated_w_per_gpm} W/GPM")
         demand_w_per_gpm += pump_rated_w_per_gpm
       end

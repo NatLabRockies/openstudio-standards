@@ -1,0 +1,37 @@
+{
+    "title": "ASHRAE 90.1 PRM Water Use Definition Connection User Data",
+    "definitions": {
+      "UserDataWaterUseEquipmentDefinitionData": {
+        "type": "object",
+        "properties": {
+          "userdata_wateruse_equipment_definition": {
+            "type": "array",
+            "description": "List of userdata_wateruse_equipment_definition rows",
+            "items": {
+              "$ref": "#/definitions/UserDataWaterUseEquipmentDefinition"
+            }
+          }
+        }
+      },
+      "UserDataWaterUseEquipmentDefinition": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the water use connection object."
+          },
+          "hot_water_supply_temperature_schedule": {
+            "type": "string",
+            "description": "Name of the hot water supply temperature schedule."
+          },
+          "cold_water_supply_temperature_schedule": {
+            "type": "string",
+            "description": "Name of the cold water supply temperature schedule."
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      }
+    }
+  }
+  

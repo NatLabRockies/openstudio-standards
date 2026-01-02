@@ -1,6 +1,12 @@
 class ASHRAE901PRM < Standard
   # @!group Model
 
+  # Returns the PRM building envelope infiltration rate at a pressure differential of 75 Pa in cfm per ft^2
+  # @return [Double] infiltration rate in cfm per ft^2 at 75 Pa
+  def prm_building_envelope_infiltration_rate
+    return 1.0
+  end
+
   # Determines which system number is used for the baseline system.
   # @param model [OpenStudio::Model::Model] OpenStudio model object
   # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
@@ -104,36 +110,11 @@ class ASHRAE901PRM < Standard
     return fan_type
   end
 
-  # Calculate the building envelope area according to the 90.1 definition
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @return [Double] Building envelope area in m2
-  def model_building_envelope_area(model)
-    # Get the space building envelope area
-    # According to the 90.1 definition, building envelope include:
-    # - "the elements of a building that separate conditioned spaces from the exterior"
-    # - "the elements of a building that separate conditioned space from unconditioned
-    #    space or that enclose semiheated spaces through which thermal energy may be
-    #    transferred to or from the exterior, to or from unconditioned spaces or to or
-    #    from conditioned spaces."
-    building_envelope_area_m2 = 0
-    model.getSpaces.each do |space|
-      building_envelope_area_m2 += OpenstudioStandards::Geometry.space_get_envelope_area(space)
-    end
-    if building_envelope_area_m2 < 0.01
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', 'Calculated building envelope area is 0 m2, no infiltration will be added.')
-      return 0.0
-    end
-
-    return building_envelope_area_m2
-  end
-
-  # This method creates customized infiltration objects for each
-  # space and removes the SpaceType-level infiltration objects.
+  # This method creates customized infiltration objects for each space and removes the SpaceType-level infiltration objects.
   # @param model [OpenStudio::Model::Model] openstudio model
-  # @param specific_space_infiltration_rate_75_pa [Double] space infiltration rate at a pressure differential of 75 Pa
+  # @param infiltration_rate [Double] space infiltration rate at a pressure differential of 75 Pa in cfm per ft^2
   # @return [Boolean] true if successful, false if not
-  def model_apply_standard_infiltration(model, specific_space_infiltration_rate_75_pa = nil)
+  def model_apply_standard_infiltration(model, infiltration_rate: prm_building_envelope_infiltration_rate)
     # Model shouldn't use SpaceInfiltrationEffectiveLeakageArea
     # Excerpt from the EnergyPlus Input/Output reference manual:
     #     "This model is based on work by Sherman and Grimsrud (1980)
@@ -148,16 +129,15 @@ class ASHRAE901PRM < Standard
     end
 
     # Get the space building envelope area
-    building_envelope_area_m2 = model_building_envelope_area(model)
+    building_envelope_area_m2 = OpenstudioStandards::Geometry.model_get_envelope_area(model)
     prm_raise(building_envelope_area_m2 > 0.0, @sizing_run_dir, 'Calculated building envelope area is 0 m2, Please check model inputs.')
 
     # Calculate current model air leakage rate @ 75 Pa and report it
     curr_tot_infil_m3_per_s_per_envelope_area = model_current_building_envelope_infiltration_at_75pa(model, building_envelope_area_m2)
     OpenStudio.logFree(OpenStudio::Info, 'prm.log', "The model's I_75Pa is estimated to be #{curr_tot_infil_m3_per_s_per_envelope_area} m3/s per m2 of total building envelope.")
 
-    # Calculate building adjusted building envelope
-    # air infiltration following the 90.1 PRM rules
-    tot_infil_m3_per_s = model_adjusted_building_envelope_infiltration(building_envelope_area_m2, specific_space_infiltration_rate_75_pa)
+    # Calculate building adjusted building envelope air infiltration following the 90.1 PRM rules
+    tot_infil_m3_per_s = model_adjusted_building_envelope_infiltration(building_envelope_area_m2, infiltration_rate: infiltration_rate)
 
     # Find infiltration method used in the model, if any.
     #
@@ -193,7 +173,7 @@ class ASHRAE901PRM < Standard
       unless space.spaceInfiltrationDesignFlowRates.empty?
         old_infil = space.spaceInfiltrationDesignFlowRates[0]
         old_infil_method = old_infil.designFlowRateCalculationMethod.to_s
-        # Return flow per space floor area if method is inconsisten in proposed model
+        # Return flow per space floor area if method is inconsistent in proposed model
         return 'Flow/Area' if infil_method != old_infil_method && !infil_method.nil?
 
         infil_method = old_infil_method
@@ -236,7 +216,7 @@ class ASHRAE901PRM < Standard
         vel = old_infil.velocityTermCoefficient
         vel_2 = old_infil.velocitySquaredTermCoefficient
         old_infil_coeffs = [cst, temp, vel, vel_2] if !(cst.nil? && temp.nil? && vel.nil? && vel_2.nil?)
-        # Return flow per space floor area if method is inconsisten in proposed model
+        # Return flow per space floor area if method is inconsistent in proposed model
         return [0.0, 0.0, 0.224, 0.0] if infil_coeffs != old_infil_coeffs && !(infil_coeffs[0].nil? &&
                                                                                     infil_coeffs[1].nil? &&
                                                                                     infil_coeffs[2].nil? &&
@@ -246,7 +226,7 @@ class ASHRAE901PRM < Standard
       end
 
       # Infiltration at the space type level
-      if infil_coeffs == [nil, nil, nil, nil] && space.spaceType.is_initialized
+      if (infil_coeffs == [nil, nil, nil, nil]) && space.spaceType.is_initialized
         space_type = space.spaceType.get
         unless space_type.spaceInfiltrationDesignFlowRates.empty?
           old_infil = space_type.spaceInfiltrationDesignFlowRates[0]
@@ -255,7 +235,7 @@ class ASHRAE901PRM < Standard
           vel = old_infil.velocityTermCoefficient
           vel_2 = old_infil.velocitySquaredTermCoefficient
           old_infil_coeffs = [cst, temp, vel, vel_2] if !(cst.nil? && temp.nil? && vel.nil? && vel_2.nil?)
-          # Return flow per space floor area if method is inconsisten in proposed model
+          # Return flow per space floor area if method is inconsistent in proposed model
           return [0.0, 0.0, 0.224, 0.0] unless infil_coeffs != old_infil_coeffs && !(infil_coeffs[0].nil? &&
                                                                                       infil_coeffs[1].nil? &&
                                                                                       infil_coeffs[2].nil? &&
@@ -308,318 +288,28 @@ class ASHRAE901PRM < Standard
       bldg_air_leakage_rate += model_get_space_air_leakage(space)
     end
 
-    # adjust_infiltration_to_prototype_building_conditions(1) corresponds
-    # to the 0.112 shown in G3.1.1.4
+    # adjust_infiltration_to_prototype_building_conditions(1) corresponds to the 0.112 shown in G3.1.1.4
     curr_tot_infil_m3_per_s_per_envelope_area = bldg_air_leakage_rate / OpenstudioStandards::Infiltration.adjust_infiltration_to_prototype_building_conditions(1) / building_envelope_area_m2
     return curr_tot_infil_m3_per_s_per_envelope_area
   end
 
-  # This method calculates the building envelope infiltration,
-  # this approach uses the 90.1 PRM rules
+  # Determine the total building baseline infiltration rate in cfm per ft2 of the building envelope at 75 Pa per the 90.1 PRM rules.
   #
   # @param building_envelope_area_m2 [Double] Building envelope area as per 90.1 in m^2
-  # @param specific_space_infiltration_rate_75_pa [Double] Specific space infiltration rate at 75 pa
+  # @param infiltration_rate [Double] Specific space infiltration rate at 75 pa in cfm per ft2
   # @return [Double] building envelope infiltration
-  def model_adjusted_building_envelope_infiltration(building_envelope_area_m2, specific_space_infiltration_rate_75_pa = nil)
-    # Determine the total building baseline infiltration rate in cfm per ft2 of the building envelope at 75 Pa
-    if specific_space_infiltration_rate_75_pa.nil?
-      basic_infil_rate_cfm_per_ft2 = space_infiltration_rate_75_pa
-    else
-      basic_infil_rate_cfm_per_ft2 = specific_space_infiltration_rate_75_pa
-    end
-
+  def model_adjusted_building_envelope_infiltration(building_envelope_area_m2, infiltration_rate: prm_building_envelope_infiltration_rate)
     # Conversion factor
     conv_fact = OpenStudio.convert(1.0, 'm^3/s', 'ft^3/min').get / OpenStudio.convert(1.0, 'm^2', 'ft^2').get
 
     # Adjust the infiltration rate to the average pressure for the prototype buildings.
-    # adj_infil_rate_cfm_per_ft2 = 0.112 * basic_infil_rate_cfm_per_ft2
-    adj_infil_rate_cfm_per_ft2 = OpenstudioStandards::Infiltration.adjust_infiltration_to_prototype_building_conditions(basic_infil_rate_cfm_per_ft2)
+    adj_infil_rate_cfm_per_ft2 = OpenstudioStandards::Infiltration.adjust_infiltration_to_prototype_building_conditions(infiltration_rate)
     adj_infil_rate_m3_per_s_per_m2 = adj_infil_rate_cfm_per_ft2 / conv_fact
 
     # Calculate the total infiltration
     tot_infil_m3_per_s = adj_infil_rate_m3_per_s_per_m2 * building_envelope_area_m2
 
     return tot_infil_m3_per_s
-  end
-
-  # Apply the standard construction to each surface in the model, based on the construction type currently assigned.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
-  # @param wwr_building_type [String] building type used for defining window to wall ratio, e.g. 'Office > 50,000 sq ft'
-  # @param wwr_info [Hash] A map that maps each building area type to its correspondent wwr.
-  # @return [Boolean] returns true if successful, false if not
-  def model_apply_standard_constructions(model, climate_zone, wwr_building_type: nil, wwr_info: {})
-    types_to_modify = []
-
-    # Possible boundary conditions are
-    # Adiabatic
-    # Surface
-    # Outdoors
-    # Ground
-    # Foundation
-    # GroundFCfactorMethod
-    # OtherSideCoefficients
-    # OtherSideConditionsModel
-    # GroundSlabPreprocessorAverage
-    # GroundSlabPreprocessorCore
-    # GroundSlabPreprocessorPerimeter
-    # GroundBasementPreprocessorAverageWall
-    # GroundBasementPreprocessorAverageFloor
-    # GroundBasementPreprocessorUpperWall
-    # GroundBasementPreprocessorLowerWall
-
-    # Possible surface types are
-    # Floor
-    # Wall
-    # RoofCeiling
-    # FixedWindow
-    # OperableWindow
-    # Door
-    # GlassDoor
-    # OverheadDoor
-    # Skylight
-    # TubularDaylightDome
-    # TubularDaylightDiffuser
-
-    # Create an array of surface types
-    types_to_modify << ['Outdoors', 'Floor']
-    types_to_modify << ['Outdoors', 'Wall']
-    types_to_modify << ['Outdoors', 'RoofCeiling']
-    types_to_modify << ['Outdoors', 'FixedWindow']
-    types_to_modify << ['Outdoors', 'OperableWindow']
-    types_to_modify << ['Outdoors', 'Door']
-    types_to_modify << ['Outdoors', 'GlassDoor']
-    types_to_modify << ['Outdoors', 'OverheadDoor']
-    types_to_modify << ['Outdoors', 'Skylight']
-    types_to_modify << ['Surface', 'Floor']
-    types_to_modify << ['Surface', 'Wall']
-    types_to_modify << ['Surface', 'RoofCeiling']
-    types_to_modify << ['Surface', 'FixedWindow']
-    types_to_modify << ['Surface', 'OperableWindow']
-    types_to_modify << ['Surface', 'Door']
-    types_to_modify << ['Surface', 'GlassDoor']
-    types_to_modify << ['Surface', 'OverheadDoor']
-    types_to_modify << ['Ground', 'Floor']
-    types_to_modify << ['Ground', 'Wall']
-    types_to_modify << ['Foundation', 'Wall']
-    types_to_modify << ['GroundFCfactorMethod', 'Wall']
-    types_to_modify << ['OtherSideCoefficients', 'Wall']
-    types_to_modify << ['OtherSideConditionsModel', 'Wall']
-    types_to_modify << ['GroundBasementPreprocessorAverageWall', 'Wall']
-    types_to_modify << ['GroundBasementPreprocessorUpperWall', 'Wall']
-    types_to_modify << ['GroundBasementPreprocessorLowerWall', 'Wall']
-    types_to_modify << ['Foundation', 'Floor']
-    types_to_modify << ['GroundFCfactorMethod', 'Floor']
-    types_to_modify << ['OtherSideCoefficients', 'Floor']
-    types_to_modify << ['OtherSideConditionsModel', 'Floor']
-    types_to_modify << ['GroundSlabPreprocessorAverage', 'Floor']
-    types_to_modify << ['GroundSlabPreprocessorCore', 'Floor']
-    types_to_modify << ['GroundSlabPreprocessorPerimeter', 'Floor']
-
-    # Find just those surfaces
-    surfaces_to_modify = []
-    surface_category = {}
-    org_surface_boundary_conditions = {}
-    types_to_modify.each do |boundary_condition, surface_type|
-      # Surfaces
-      model.getSurfaces.sort.each do |surf|
-        next unless surf.outsideBoundaryCondition == boundary_condition
-        next unless surf.surfaceType == surface_type
-
-        # Check if surface is adjacent to an unenclosed or unconditioned space (e.g. attic or parking garage)
-        if surf.outsideBoundaryCondition == 'Surface'
-          adj_space = surf.adjacentSurface.get.space.get
-          adj_space_cond_type = space_conditioning_category(adj_space)
-          if adj_space_cond_type == 'Unconditioned'
-            # Get adjacent surface
-            adjacent_surf = surf.adjacentSurface.get
-
-            # Store original boundary condition type
-            org_surface_boundary_conditions[surf.name.to_s] = adjacent_surf
-
-            # Identify this surface as exterior
-            surface_category[surf] = 'ExteriorSurface'
-
-            # Temporary change the surface's boundary condition to 'Outdoors' so it can be assigned a baseline construction
-            surf.setOutsideBoundaryCondition('Outdoors')
-            adjacent_surf.setOutsideBoundaryCondition('Outdoors')
-          end
-        end
-
-        if boundary_condition == 'Outdoors'
-          surface_category[surf] = 'ExteriorSurface'
-        elsif ['Ground', 'Foundation', 'GroundFCfactorMethod', 'OtherSideCoefficients', 'OtherSideConditionsModel', 'GroundSlabPreprocessorAverage', 'GroundSlabPreprocessorCore', 'GroundSlabPreprocessorPerimeter', 'GroundBasementPreprocessorAverageWall', 'GroundBasementPreprocessorAverageFloor', 'GroundBasementPreprocessorUpperWall', 'GroundBasementPreprocessorLowerWall'].include?(boundary_condition)
-          surface_category[surf] = 'GroundSurface'
-        else
-          surface_category[surf] = 'NA'
-        end
-        surfaces_to_modify << surf
-      end
-
-      # SubSurfaces
-      model.getSubSurfaces.sort.each do |surf|
-        next unless surf.outsideBoundaryCondition == boundary_condition
-        next unless surf.subSurfaceType == surface_type
-
-        surface_category[surf] = 'ExteriorSubSurface'
-        surfaces_to_modify << surf
-      end
-    end
-
-    # Modify these surfaces
-    prev_created_consts = {}
-    surfaces_to_modify.sort.each do |surf|
-      # Get space conditioning
-      space = surf.space.get
-      space_cond_type = space_conditioning_category(space)
-
-      # Do not modify constructions for unconditioned spaces
-      prev_created_consts = planar_surface_apply_standard_construction(surf, climate_zone, prev_created_consts, wwr_building_type, wwr_info, surface_category[surf]) unless space_cond_type == 'Unconditioned'
-
-      # Reset boundary conditions to original if they were temporary modified
-      if org_surface_boundary_conditions.include?(surf.name.to_s)
-        surf.setAdjacentSurface(org_surface_boundary_conditions[surf.name.to_s])
-      end
-    end
-
-    # List the unique array of constructions
-    if prev_created_consts.empty?
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', 'None of the constructions in your proposed model have both Intended Surface Type and Standards Construction Type')
-    else
-      prev_created_consts.each do |surf_type, construction|
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "For #{surf_type.join(' ')}, applied #{construction.name}.")
-      end
-    end
-
-    return true
-  end
-
-  # Go through the default construction sets and hard-assigned constructions.
-  # Clone the existing constructions and set their intended surface type and standards construction type per the PRM.
-  # For some standards, this will involve making modifications.  For others, it will not.
-  # 90.1-2019
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @return [Boolean] returns true if successful, false if not
-  def model_apply_prm_construction_types(model)
-    types_to_modify = []
-
-    # Possible boundary conditions are
-    # Adiabatic
-    # Surface
-    # Outdoors
-    # Ground
-    # Foundation
-    # GroundFCfactorMethod
-    # OtherSideCoefficients
-    # OtherSideConditionsModel
-    # GroundSlabPreprocessorAverage
-    # GroundSlabPreprocessorCore
-    # GroundSlabPreprocessorPerimeter
-    # GroundBasementPreprocessorAverageWall
-    # GroundBasementPreprocessorAverageFloor
-    # GroundBasementPreprocessorUpperWall
-    # GroundBasementPreprocessorLowerWall
-
-    # Possible surface types are
-    # AtticFloor
-    # AtticWall
-    # AtticRoof
-    # DemisingFloor
-    # DemisingWall
-    # DemisingRoof
-    # ExteriorFloor
-    # ExteriorWall
-    # ExteriorRoof
-    # ExteriorWindow
-    # ExteriorDoor
-    # GlassDoor
-    # GroundContactFloor
-    # GroundContactWall
-    # GroundContactRoof
-    # InteriorFloor
-    # InteriorWall
-    # InteriorCeiling
-    # InteriorPartition
-    # InteriorWindow
-    # InteriorDoor
-    # OverheadDoor
-    # Skylight
-    # TubularDaylightDome
-    # TubularDaylightDiffuser
-
-    # Possible standards construction types
-    # Mass
-    # SteelFramed
-    # WoodFramed
-    # IEAD
-    # View
-    # Daylight
-    # Swinging
-    # NonSwinging
-    # Heated
-    # Unheated
-    # RollUp
-    # Sliding
-    # Metal
-    # Nonmetal framing (all)
-    # Metal framing (curtainwall/storefront)
-    # Metal framing (entrance door)
-    # Metal framing (all other)
-    # Metal Building
-    # Attic and Other
-    # Glass with Curb
-    # Plastic with Curb
-    # Without Curb
-
-    # Create an array of types
-    types_to_modify << ['Outdoors', 'ExteriorWall', 'SteelFramed']
-    types_to_modify << ['Outdoors', 'ExteriorRoof', 'IEAD']
-    types_to_modify << ['Outdoors', 'ExteriorFloor', 'SteelFramed']
-    types_to_modify << ['Outdoors', 'ExteriorWindow', 'Any Vertical Glazing']
-    types_to_modify << ['Outdoors', 'GlassDoor', 'Any Vertical Glazing']
-    types_to_modify << ['Outdoors', 'ExteriorDoor', 'NonSwinging']
-    types_to_modify << ['Outdoors', 'ExteriorDoor', 'Swinging']
-    types_to_modify << ['Ground', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['Ground', 'GroundContactWall', 'Mass']
-
-    # Foundation
-    types_to_modify << ['Foundation', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['Foundation', 'GroundContactWall', 'Mass']
-
-    # F/C-Factor methods
-    types_to_modify << ['GroundFCfactorMethod', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['GroundFCfactorMethod', 'GroundContactWall', 'Mass']
-
-    # Other side coefficients
-    types_to_modify << ['OtherSideCoefficients', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['OtherSideConditionsModel', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['OtherSideCoefficients', 'GroundContactWall', 'Mass']
-    types_to_modify << ['OtherSideConditionsModel', 'GroundContactWall', 'Mass']
-
-    # Slab preprocessor
-    types_to_modify << ['GroundSlabPreprocessorAverage', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['GroundSlabPreprocessorCore', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['GroundSlabPreprocessorPerimeter', 'GroundContactFloor', 'Unheated']
-
-    # Basement preprocessor
-    types_to_modify << ['GroundBasementPreprocessorAverageWall', 'GroundContactWall', 'Mass']
-    types_to_modify << ['GroundBasementPreprocessorAverageFloor', 'GroundContactFloor', 'Unheated']
-    types_to_modify << ['GroundBasementPreprocessorUpperWall', 'GroundContactWall', 'Mass']
-    types_to_modify << ['GroundBasementPreprocessorLowerWall', 'GroundContactWall', 'Mass']
-
-    # Modify all constructions of each type
-    types_to_modify.each do |boundary_cond, surf_type, const_type|
-      constructions = OpenstudioStandards::Constructions.model_get_constructions(model, boundary_cond, surf_type)
-
-      constructions.sort.each do |const|
-        standards_info = const.standardsInformation
-        standards_info.setIntendedSurfaceType(surf_type)
-        standards_info.setStandardsConstructionType(const_type)
-      end
-    end
-
-    return true
   end
 
   # Reduces the SRR to the values specified by the PRM. SRR reduction will be done by shrinking vertices toward the centroid.
@@ -756,8 +446,7 @@ class ASHRAE901PRM < Standard
           elevator_counter_weight_of_car = elevator_weight_of_car + (0.4 * elevator_rated_load)
         end
         search_criteria = {
-          'template' => template,
-          'type' => 'Any'
+          'template' => template
         }
       end
       elevator_motor_bhp = (elevator_weight_of_car + elevator_rated_load - elevator_counter_weight_of_car) * elevator_speed_of_car / (33000 * elevator_mech_eff) # Lookup the minimum motor efficiency
@@ -1230,7 +919,7 @@ class ASHRAE901PRM < Standard
         standards_data['userdata_airloop_hvac'].each do |row|
           next unless row['name'].to_s.downcase.strip == air_loop_hvac.name.to_s.downcase.strip
 
-          if row['dcv_exception_airloop'].to_s.upcase.strip == 'TRUE'
+          if row['dcv_exception_airloop']
             dcv_airloop_user_exception = true
             break
           end
@@ -1251,7 +940,7 @@ class ASHRAE901PRM < Standard
         standards_data['userdata_thermal_zone'].each do |row|
           next unless row['name'].to_s.downcase.strip == thermal_zone.name.to_s.downcase.strip
 
-          if row['dcv_exception_thermal_zone'].to_s.upcase.strip == 'TRUE'
+          if row['dcv_exception_thermal_zone']
             dcv_zone_user_exception = true
             break
           end
@@ -2312,10 +2001,10 @@ class ASHRAE901PRM < Standard
                            'prm.log',
                            "User data in the userdata_building.csv indicate building #{building_name} is exempted from rotation. Update the run to a single orientation PRM generation.")
         # @todo need to use user data enums later.
-        run_orients_flag = user_buildings[user_building_index]['is_exempt_from_rotations'].casecmp('False') == 0
+        run_orients_flag = user_buildings[user_building_index]['is_exempt_from_rotations']
       end
     end
-    return run_orients_flag
+    run_orients_flag
   end
 
   # Function that extract the total fenestration area from a model by orientations.
@@ -2382,7 +2071,8 @@ class ASHRAE901PRM < Standard
 
     if surfaces_with_fc_factor_boundary
       # Remove existing FCFactor temperature profile
-      model.getSiteGroundTemperatureFCfactorMethod.remove
+      ground_temp = model.getSiteGroundTemperatureFCfactorMethod
+      ground_temp.resetAllMonths
 
       # Get path to weather file specified in the model
       weather_file_path = prm_get_optional_handler(model.getWeatherFile, @sizing_run_dir, 'path').to_s
@@ -2400,7 +2090,6 @@ class ASHRAE901PRM < Standard
         stat_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file).sub('.epw', '.stat').to_s
       end
 
-      ground_temp = OpenStudio::Model::SiteGroundTemperatureFCfactorMethod.new(model)
       stat_file = OpenstudioStandards::Weather::StatFile.load(stat_file_path)
       ground_temperatures = stat_file.monthly_lagged_dry_bulb
       unless ground_temperatures.empty?
@@ -3340,6 +3029,10 @@ class ASHRAE901PRM < Standard
     end
     prm_raise(heat_type_props, @sizing_run_dir, "Could not find baseline heat type for: #{template}-#{hvac_building_type}-#{climate_zone}.")
     return heat_type_props['heat_type']
+  end
+
+  def has_space_conditioning_category
+    true
   end
 
   private

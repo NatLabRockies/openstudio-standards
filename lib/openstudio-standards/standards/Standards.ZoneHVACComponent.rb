@@ -341,7 +341,7 @@ class Standard
     fan.setAvailabilitySchedule(avail_sch)
 
     # Clean name of zone HVAC
-    equip_name_clean = ems_friendly_name(zone_hvac.name)
+    equip_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(zone_hvac.name)
 
     # Sensors
     # Get existing OAT sensor if present

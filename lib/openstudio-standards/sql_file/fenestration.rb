@@ -12,7 +12,7 @@ module OpenstudioStandards
       # check for sql file
       sql = construction.model.sqlFile
       unless sql.is_initialized
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.SqlFile', 'Model has no sql file containing results, cannot lookup data.')
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SqlFile', 'Model has no sql file containing results, cannot lookup data.')
         return false
       end
       sql = sql.get

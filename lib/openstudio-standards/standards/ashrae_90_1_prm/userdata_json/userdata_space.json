@@ -1,0 +1,388 @@
+{
+    "title": "ASHRAE 90.1 PRM Space User Data",
+    "definitions": {
+      "UserDataSpaceData": {
+        "type": "object",
+        "properties": {
+          "userdata_space": {
+            "type": "array",
+            "description": "List of userdata_space rows",
+            "items": {
+              "$ref": "#/definitions/UserDataSpace"
+            }
+          }
+        }
+      },
+      "UserDataSpace": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the Space object in the model."
+          },
+          "building_type_for_wwr": {
+            "type": "string",
+            "enum": [
+              "All others",
+              "Grocery store",
+              "Healthcare (outpatient)",
+              "Hospital",
+              "Hotel/motel <= 75 rooms",
+              "Hotel/motel > 75 rooms",
+              "Office 5,000 to 50,000 sq ft",
+              "Office <= 5,000 sq ft",
+              "Office > 50,000 sq ft",
+              "Restaurant (full service)",
+              "Restaurant (quick service)",
+              "Retail (stand alone)",
+              "Retail (strip mall)",
+              "School (primary)",
+              "School (secondary and university)",
+              "Warehouse (nonrefrigerated)"
+            ]
+          },
+          "num_std_ltg_types": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of lighting space types."
+          },
+          "std_ltg_type01": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac01": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type02": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac02": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type03": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac03": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type04": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac04": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type05": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac05": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type06": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac06": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type07": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac07": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type08": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac08": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type09": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac09": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type10": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type11": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac11": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type12": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac12": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type13": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac13": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type14": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac14": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type15": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac15": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type16": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac16": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type17": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac17": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type18": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac18": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type19": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac19": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "std_ltg_type20": {
+            "$ref": "#/definitions/StdLtgType"
+          },
+          "std_ltg_type_frac20": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1.0,
+            "description": "Fraction of the floor area for spaces that is to be assigned to that lighting space type."
+          },
+          "has_residential_exception": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set to true if an exception applies to the space, false otherwise."
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "StdLtgType": {
+        "type": "string",
+        "enum": [
+          "apartment - hardwired",
+          "audience seating - exercise center",
+          "audience seating - gymnasium",
+          "audience seating - sports arena",
+          "audience seating - transportation facility",
+          "audience seating - convention center",
+          "audience seating - penitentiary",
+          "audience seating - motion picture theater",
+          "audience seating - religious facility",
+          "audience seating - performing arts theater",
+          "audience seating - auditorium",
+          "audience seating - all other",
+          "atrium > 40 ft height",
+          "atrium <= 40 ft height",
+          "banking activity",
+          "classroom/lecture/training - penitentiary",
+          "classroom/lecture/training - preschool to 12th",
+          "classroom - laboratory or shop",
+          "classroom/lecture/training - all other",
+          "conference/meeting/multipurpose",
+          "confinement cells",
+          "copy/print",
+          "corridor - manufacturing facility",
+          "corridor - all other",
+          "corridor - hospital",
+          "corridor for visually impaired",
+          "courtroom",
+          "computer room",
+          "dining - penitentiary",
+          "dining - bar/lounge/leisure",
+          "dining - family",
+          "dining for visually impaired",
+          "dining - cafeteria/fast food",
+          "dining - all other",
+          "electrical/mechanical",
+          "emergency vehicle garage",
+          "kitchen",
+          "guest room",
+          "judges chambers",
+          "laboratory",
+          "laundry/washing",
+          "loading dock",
+          "lobby - motion picture theater",
+          "lobby - hotel",
+          "lobby - performing arts theater",
+          "lobby for visually impaired",
+          "lobby - elevator",
+          "lobby - all other",
+          "locker room",
+          "lounge/breakroom - healthcare facility",
+          "lounge/breakroom - all other",
+          "office - enclosed <= 250 sf",
+          "office - open",
+          "office - open with workstation occup sensors",
+          "parking area, interior",
+          "pharmacy",
+          "restroom - visually impaired",
+          "restroom - all other",
+          "sales",
+          "seating area, general",
+          "stairwell",
+          "storage < 50 sf - hospital",
+          "storage 50 to 1000 sf - hospital",
+          "storage < 50 sf - all other",
+          "storage 50 to 1000 sf - all other",
+          "storage >= 1000 sf - all other",
+          "vehicular maintenance",
+          "workshop",
+          "chapel - visually impaired",
+          "recreation/common living - visually impaired",
+          "automotive",
+          "exhibit - convention center",
+          "dormitory - living quarters",
+          "firestation - sleeping quarters",
+          "gymnasium exercise area",
+          "gymnasium playing area",
+          "emergency room",
+          "exam/treatment",
+          "medical supply",
+          "nursery",
+          "nurses station",
+          "operating room",
+          "patient room",
+          "physical therapy",
+          "recovery",
+          "library - reading",
+          "library - stacks",
+          "detailed manufacuring",
+          "manufacturing equipment room",
+          "manufacturing extra high bay",
+          "manufacturing high bay",
+          "manufacturing low bay",
+          "museum exhibit area",
+          "museum restoration",
+          "post office - sorting area",
+          "fellowship hall - religious facility",
+          "worship/pulpit/choir area",
+          "retail dressing room",
+          "retail mall concourse",
+          "sports arena playing area, class I",
+          "sports arena playing area, class II",
+          "sports arena playing area, class III",
+          "sports arena playing area, class IV",
+          "baggage/carousel",
+          "airport concourse",
+          "transportation ticket counter",
+          "warehouse - bulk storage",
+          "warehouse - fine storage",
+          "attic - unoccupied",
+          "elevator core",
+          "plenum",
+          "automotive facility - whole building",
+          "convention center - whole building",
+          "courthouse - whole building",
+          "dining: bar lounge/leisure - whole building",
+          "dining: cafeteria/fast food - whole building",
+          "dining: family - whole building",
+          "dormitory - whole building",
+          "exercise center - whole building",
+          "fire station - whole building",
+          "gymnasium - whole building",
+          "health-care clinic - whole building",
+          "hospital - whole building",
+          "hotel/motel - whole building",
+          "library - whole building",
+          "manufacturing facility - whole building",
+          "motion picture theater - whole building",
+          "multifamily - whole building",
+          "museum - whole building",
+          "office - whole building",
+          "parking garage - whole building",
+          "penitentiary - whole building",
+          "performing arts theater - whole building",
+          "police station - whole building",
+          "post office - whole building",
+          "religious facility - whole building",
+          "retail - whole building",
+          "school/university - whole building",
+          "sports arena - whole building",
+          "town hall - whole building",
+          "transportation - whole building",
+          "warehouse - whole building",
+          "workshop - whole building"
+        ]
+      }
+    }
+  }

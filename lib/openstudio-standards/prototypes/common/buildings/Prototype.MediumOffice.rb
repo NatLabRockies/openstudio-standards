@@ -32,12 +32,12 @@ module MediumOffice
                                         'Electric Equipment Electricity Energy'
                                       end
 
-    model_add_transformer(model,
-                          wired_lighting_frac: 0.0281,
-                          transformer_size: 45000,
-                          transformer_efficiency: transformer_efficiency,
-                          excluded_interiorequip_key: '2 Elevator Lift Motors',
-                          excluded_interiorequip_meter: excluded_interiorequip_variable)
+    OpenstudioStandards::Equipment.create_transformer(model,
+                                                      wired_lighting_frac: 0.0281,
+                                                      transformer_size: 45000,
+                                                      transformer_efficiency: transformer_efficiency,
+                                                      excluded_interiorequip_key: '2 Elevator Lift Motors',
+                                                      excluded_interiorequip_meter: excluded_interiorequip_variable)
 
     model.getSpaces.sort.each do |space|
       if space.name.get.to_s == 'Core_bottom'
@@ -57,31 +57,6 @@ module MediumOffice
     # add extra infiltration for entry door
     add_door_infiltration(climate_zone, model)
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Added door infiltration')
-
-    # set infiltration schedule for plenums
-    # @todo remove once infil_sch in Standards.Space pulls from default building infiltration schedule
-    model.getSpaces.each do |space|
-      next unless space.name.get.to_s.include? 'Plenum'
-
-      # add infiltration if DOE Ref vintage
-      if template == 'DOE Ref 1980-2004' || template == 'DOE Ref Pre-1980'
-        # Create an infiltration rate object for this space
-        infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(space.model)
-        infiltration.setName("#{space.name} Infiltration")
-        all_ext_infil_m3_per_s_per_m2 = OpenStudio.convert(0.2232, 'ft^3/min*ft^2', 'm^3/s*m^2').get
-        infiltration.setFlowperExteriorSurfaceArea(all_ext_infil_m3_per_s_per_m2)
-        infiltration.setSchedule(model_add_schedule(model, 'Medium Office Infil Quarter On'))
-        infiltration.setConstantTermCoefficient(1.0)
-        infiltration.setTemperatureTermCoefficient(0.0)
-        infiltration.setVelocityTermCoefficient(0.0)
-        infiltration.setVelocitySquaredTermCoefficient(0.0)
-        infiltration.setSpace(space)
-      else
-        space.spaceInfiltrationDesignFlowRates.each do |infiltration_object|
-          infiltration_object.setSchedule(model_add_schedule(model, 'OfficeMedium INFIL_SCH_PNNL'))
-        end
-      end
-    end
 
     return true
   end

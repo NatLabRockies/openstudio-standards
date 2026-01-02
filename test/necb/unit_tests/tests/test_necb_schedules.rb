@@ -13,29 +13,97 @@ class NECB_Schedules_Tests < Minitest::Test
 
 
   # Tests to ensure that the NECB default schedules are being defined correctly.
-  # This is not for compliance, but for archetype development.
-  # @return [Boolean] true if successful.
   def test_schedule_type_defaults()
+    logger.info "Starting suite of tests for: #{__method__}"
+    
+    # Define test parameters that apply to all tests.
+    test_parameters = { TestMethod: __method__,
+                        SaveIntermediateModels: true,
+                        fuel_type: 'Electricity' }
+    
+    # Define test cases.
+    test_cases = {}
 
-    # Set up remaining parameters for test.
-    output_folder = method_output_folder(__method__)
+    test_cases_hash = {
+      vintage: ['NECB2011', 'NECB2015', 'BTAPPRE1980'], # @AllTemplates,
+      :SpaceType => @SpaceTypes,
+      TestCase: ["ZoneResults"],
+      TestPars: {  } # Nothing specific in this case.
+    }
+    new_test_cases = make_test_cases_json(test_cases_hash)
+    merge_test_cases!(test_cases, new_test_cases)
 
-    # Create new model for testing.
-    model = OpenStudio::Model::Model.new
+    # Create empty results hash and call the template method that runs the individual test cases.
+    test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
 
-    # Create only above ground geometry (Used for infiltration tests).
-    length = 100.0; width = 100.0; num_above_ground_floors = 1; num_under_ground_floors = 0; floor_to_floor_height = 3.8 ; plenum_height = 1; perimeter_zone_depth = 4.57; initial_height = 10.0
-    OpenstudioStandards::Geometry.create_shape_rectangle(model, length, width, num_above_ground_floors,num_under_ground_floors, floor_to_floor_height, plenum_height,perimeter_zone_depth, initial_height )
+    # Write test results.
+    file_root = "#{self.class.name}-#{__method__}".downcase
+    test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
+    File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    output_array = []
-    # Iterate through all spacetypes/buildingtypes.
-    #@Templates.each do |template|
-    ['NECB2011', 'NECB2015', 'BTAPPRE1980'].each do |template|
+    # Read expected results.
+    file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
+    expected_results = JSON.parse(File.read(file_name), { symbolize_names: true })
+
+    # Check if test results match expected.
+    msg = "Default schedule test results do not match what is expected in test"
+    compare_results(expected_results: expected_results, test_results: test_results, msg: msg, type: 'json_data')
+    logger.info "Finished suite of tests for: #{__method__}"
+  end
+
+    
+  # @param test_pars [Hash] has the static parameters.
+  # @param test_case [Hash] has the specific test parameters.
+  # @return results of this case.
+  # @note Companion method to test_schedule_type_defaults that runs a specific test. Called by do_test_cases in necb_helper.rb.
+  def do_test_schedule_type_defaults(test_pars:, test_case:)
+    
+    # Debug.
+    logger.debug "test_pars: #{JSON.pretty_generate(test_pars)}"
+    logger.debug "test_case: #{JSON.pretty_generate(test_case)}"
+    
+    # Define local variables. These are extracted from the supplied hashes.
+    test_name = test_pars[:TestMethod]
+    save_intermediate_models = test_pars[:SaveIntermediateModels]
+    fuel_type = test_pars[:fuel_type]
+    vintage = test_pars[:vintage]
+    space_type = test_pars[:SpaceType]
+
+    name = "#{vintage}_building_type_#{space_type}_schedule"
+    name_short = "#{vintage}_#{space_type}"
+    output_folder = method_output_folder("#{test_name}/#{name_short}/")
+    logger.info "Starting individual test: #{name}"
+    results = Array.new
+
+    # (1) load fsr 3 zone model (2 occupied, 1 attic zone)
+    # (2) loop through space types in the model and change them to the desired space type
+    # (3) call standard.model_add_loads(model, 'NECB_Default', 1.0) 
+    # (4) check ventilation
+
+    # Wrap test in begin/rescue/ensure.
+    begin
+      
+      # Load model and set climate file.
+      model = BTAP::FileIO.load_osm(File.join(@resources_folder, "fsr.osm"))
+      weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
+      OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
+    
+
+      # Create new model for testing.
+      model = OpenStudio::Model::Model.new
+
+      # Create only above ground geometry (Used for infiltration tests).
+      length = 100.0; width = 100.0; num_above_ground_floors = 1; num_under_ground_floors = 0; floor_to_floor_height = 3.8 ; plenum_height = 1; perimeter_zone_depth = 4.57; initial_height = 10.0
+      OpenstudioStandards::Geometry.create_shape_rectangle(model, length, width, num_above_ground_floors,num_under_ground_floors, floor_to_floor_height, plenum_height,perimeter_zone_depth, initial_height )
+
+      output_array = []
+      # Iterate through all spacetypes/buildingtypes.
 
       # Set applicable standard.
-      standard = get_standard(template)
+      standard = get_standard(vintage)
       search_criteria = {
-        "template" => template,
+        "template" => vintage,
       }
 
       # Lookup space type properties.
@@ -46,7 +114,7 @@ class NECB_Schedules_Tests < Minitest::Test
         st = OpenStudio::Model::SpaceType.new(model)
         st.setStandardsBuildingType(space_type_properties['building_type'])
         st.setStandardsSpaceType(space_type_properties['space_type'])
-        st.setName("#{template}-#{space_type_properties['building_type']}-#{space_type_properties['space_type']}")
+        st.setName("#{vintage}-#{space_type_properties['building_type']}-#{space_type_properties['space_type']}")
         standard.space_type_apply_rendering_color(st)
         standard.model_add_loads(model, 'NECB_Default', 1.0)
 
@@ -57,6 +125,7 @@ class NECB_Schedules_Tests < Minitest::Test
 
         # Add Infiltration rates to the space objects themselves.
         standard.model_apply_infiltration_standard(model)
+
 
         # Get handle for space.
         space = model.getSpaces[0]
@@ -230,17 +299,12 @@ class NECB_Schedules_Tests < Minitest::Test
         swh_loop.remove
         water_fixture.remove unless water_fixture.nil?
       end # loop spacetypes
-    end # loop Template
-
-    # Write test report file.
-    test_result_file = File.join(@test_results_folder,'schedule_test_results.json')
-    File.open(test_result_file, 'w') {|f| f.write(JSON.pretty_generate(output_array)) }
-
-    # Test that the values are correct by doing a file compare.
-    expected_result_file = File.join(@expected_results_folder,'schedule_expected_results.json')
-
-    # Check if test results match expected.
-    msg = "Schedule test results do not match what is expected in test"
-    file_compare(expected_results_file: expected_result_file, test_results_file: test_result_file, msg: msg)
+      
+    rescue StandardError => error
+      msg = "Model creation failed for #{vintage} #{space_type}\n#{__FILE__}::#{__method__} #{error.message}"
+      logger.error(msg)
+      return [ERROR: msg]
+    end
+    return output_array
   end
 end

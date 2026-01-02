@@ -68,7 +68,11 @@ module SmallOfficeDetailed
     # add extra infiltration for attic in m3/s (there is no attic in 'DOE Ref Pre-1980')
     return false if template == 'DOE Ref 1980-2004' || template == 'DOE Ref Pre-1980'
 
-    entry_space = model.getSpaceByName('Attic').get
+    if model.getSpaceByName('Attic').is_initialized
+      entry_space = model.getSpaceByName('Attic').get
+    elsif model.getSpaceByName('Attic 1').is_initialized
+      entry_space = model.getSpaceByName('Attic 1').get
+    end
     infiltration_attic = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infiltration_attic.setName('attic Infiltration')
     infiltration_per_zone_attic = 0.2001

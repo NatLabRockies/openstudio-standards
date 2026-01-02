@@ -1,0 +1,56 @@
+{
+    "title": "ASHRAE 90.1 PRM Thermal Zone User Data",
+    "definitions": {
+      "UserDataThermalZoneData": {
+        "type": "object",
+        "properties": {
+          "userdata_thermal_zone": {
+            "type": "array",
+            "description": "List of userdata_thermal_zone rows",
+            "items": {
+              "$ref": "#/definitions/UserDataThermalZone"
+            }
+          }
+        }
+      },
+      "UserDataThermalZone": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thermal zone object in the model."
+          },
+          "building_type_for_hvac": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "public assembly",
+              "heated-only storage",
+              "retail",
+              "other nonresidential",
+              "unconditioned",
+              "hospital"
+            ]
+          },
+          "number_of_systems": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Allows multiple systems to be modeled conceptually in a single thermal zone."
+          },
+          "dcv_exception_thermal_zone": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indicates if an exception to demand controlled ventilation requirements applies to the zone."
+          },
+          "has_health_safety_night_cycle_exception": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indicates if an exception to cycling mode requirements during unoccupied hours applies to the zone."
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      }
+    }
+  }

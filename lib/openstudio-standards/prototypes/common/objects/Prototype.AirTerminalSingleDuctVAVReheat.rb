@@ -16,4 +16,37 @@ class Standard
 
     return true
   end
+
+  # Sets VAV reheat and VAV no reheat terminals on an air loop to control for outdoor air
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @param air_loop [<OpenStudio::Model::AirLoopHVAC>] air loop to enable DCV on.
+  #   Default is nil, which will apply to all air loops
+  # @return [OpenStudio::Model::Model] OpenStudio model object
+  def model_set_vav_terminals_to_control_for_outdoor_air(model, air_loop: nil)
+    vav_reheats = model.getAirTerminalSingleDuctVAVReheats
+    vav_no_reheats = model.getAirTerminalSingleDuctVAVNoReheats
+
+    if air_loop.nil?
+      # all terminals
+      vav_reheats.each do |vav_reheat|
+        vav_reheat.setControlForOutdoorAir(true)
+      end
+      vav_no_reheats.each do |vav_no_reheat|
+        vav_no_reheat.setControlForOutdoorAir(true)
+      end
+    else
+      vav_reheats.each do |vav_reheat|
+        next if vav_reheat.airLoopHVAC.get.name.to_s != air_loop.name.to_s
+
+        vav_reheat.setControlForOutdoorAir(true)
+      end
+      vav_no_reheats.each do |vav_no_reheat|
+        next if vav_no_reheat.airLoopHVAC.get.name.to_s != air_loop.name.to_s
+
+        vav_no_reheat.setControlForOutdoorAir(true)
+      end
+    end
+    return model
+  end
 end

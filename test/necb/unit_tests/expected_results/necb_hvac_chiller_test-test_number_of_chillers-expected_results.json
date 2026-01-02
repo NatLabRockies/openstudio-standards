@@ -1,0 +1,627 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "chiller_type",
+    "Reference": "NECB 2011 p3 8.4.4.11.(6)",
+    "Scroll": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Scroll 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Centrifugal 227tons 0.6kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Reciprocating 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "chiller_type",
+    "Reference": "xx",
+    "Scroll": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Scroll 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Centrifugal 227tons 0.6kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Reciprocating 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "chiller_type",
+    "Reference": "xx",
+    "Scroll": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Scroll 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Centrifugal 227tons 0.6kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Reciprocating 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "chiller_type",
+    "Reference": "NECB 2011 p3 8.4.4.10.(6)",
+    "Scroll": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Scroll 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Scroll 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Centrifugal 227tons 0.6kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Centrifugal 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Rotary Screw 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "single": {
+        "Chiller-1": {
+          "name": "Primary Chiller WaterCooled Reciprocating 227tons 0.7kW/ton",
+          "capacity_kW": 800,
+          "capacity_ton": 227,
+          "capacity_BTUh": 2730,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 800,
+          "total_capacity_kW": 800,
+          "number_of_chillers": 1
+        }
+      },
+      "twin": {
+        "Chiller-1": {
+          "name": "Secondary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "Chiller-2": {
+          "name": "Primary Chiller WaterCooled Reciprocating 455tons 0.6kW/ton",
+          "capacity_kW": 1600,
+          "capacity_ton": 455,
+          "capacity_BTUh": 5460,
+          "minimum_part_load_ratio": 0.25
+        },
+        "All": {
+          "tested_capacity_kW": 3200,
+          "total_capacity_kW": 3200,
+          "number_of_chillers": 2
+        }
+      }
+    }
+  }
+}

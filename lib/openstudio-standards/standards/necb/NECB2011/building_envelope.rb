@@ -160,26 +160,29 @@ class NECB2011
 
   # Reduces the SRR to the values specified by the PRM. SRR reduction
   # will be done by shrinking vertices toward the centroid.
-  #
-  def apply_standard_skylight_to_roof_ratio(model:, srr_set: -1.0)
+  def apply_standard_skylight_to_roof_ratio(model:, srr_set: -1.0, srr_opt: '')
     # If srr_set is between 1.0 and 1.2 set it to the maximum allowed by the NECB.  If srr_set is between 0.0 and 1.0
     # apply whatever was passed.  If srr_set >= 1.2 then set the existing srr of the building to be the necb maximum
     # only if the the srr exceeds this maximum (otherwise leave it to be whatever was modeled).
-
+    #
     # srr_set settings:
-    # 0-1:  Remove all skylights and add skylights to match this srr
-    # -1:  Remove all skylights and add skylights to match max srr from NECB
-    # -2:  Do not apply any srr changes, leave skylights alone (also works for srr > 1)
-    # -3:  Use old method which reduces existing skylight size (if necessary) to meet maximum NECB skylight limit
+    #   0-1:  Remove all skylights and add skylights to match this srr
+    #    -1:  Remove all skylights and add skylights to match max srr from NECB
+    #    -2:  Do not apply any srr changes, leave skylights alone (also works for srr > 1)
+    #    -3:  Use old method which reduces existing skylight size (if necessary) to meet maximum NECB skylight limit
     # <-3.1:  Remove all skylights
-    # > 1:  Do nothing
-
+    #   > 1:  Do nothing
+    #
+    # By default, :srr_opt is an empty string (" "). If set to "osut", SRR is
+    # instead met using OSut's addSkylights (:srr_set numeric values may apply).
     return if srr_set.to_f > 1.0
-    return apply_max_srr_nrcan(model: model, srr_lim: srr_set.to_f) if srr_set.to_f >= 0.0 && srr_set.to_f <= 1.0
+    return apply_max_srr_nrcan(model: model, srr_lim: srr_set.to_f, srr_opt: srr_opt) if srr_set.to_f >= 0.0 && srr_set.to_f <= 1.0
+
     # Get the maximum NECB srr
-    return apply_max_srr_nrcan(model: model, srr_lim: get_standards_constant('skylight_to_roof_ratio_max_value').to_f) if srr_set.to_f >= -1.1 && srr_set.to_f <= -0.9
+    return apply_max_srr_nrcan(model: model, srr_lim: get_standards_constant('skylight_to_roof_ratio_max_value').to_f, srr_opt: srr_opt) if srr_set.to_f >= -1.1 && srr_set.to_f <= -0.9
+
     return if srr_set.to_f >= -2.1 && srr_set.to_f <= -1.9
-    return apply_max_srr_nrcan(model: model, srr_lim: srr_set.to_f) if srr_set.to_f < -3.1
+    return apply_max_srr_nrcan(model: model, srr_lim: srr_set.to_f, srr_opt: srr_opt) if srr_set.to_f < -3.1
     return unless srr_set.to_f >= -3.1 && srr_set.to_f <= -2.9
 
     # SRR limit
@@ -197,6 +200,7 @@ class NECB2011
     sh_sky_m2 = 0
     total_roof_m2 = 0.001
     total_subsurface_m2 = 0
+
     model.getSpaces.sort.each do |space|
       # Loop through all surfaces in this space
       wall_area_m2 = 0
@@ -286,6 +290,680 @@ class NECB2011
   def max_fwdr(hdd)
     #  get formula from json database.
     return eval(get_standards_formula('fdwr_formula'))
+  end
+
+  ##
+  # Returns NECB-required U-factor, based on surface type, outside boundary
+  # condition, heating-degree-days (18C) and NECB edition (template). The bulk
+  # of this should be a CSV file.
+  #
+  # @author denis@rd2.ca
+  #
+  # @param stype [#to_s] surface type, e.g. "roofceiling"
+  # @param condition [#to_s] outside boundary condition, e.g. "outdoors"
+  # @param hdd [#to_f] heating-degree-days 18C
+  #
+  # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
+  def max_u_necb(stype = "roofceiling", condition = "outdoors", hdd = 8000)
+    hdd = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
+
+    # Admissible surface types.
+    stypes = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
+    stype  = stype.respond_to?(:to_s) ? stype.to_s.downcase : "roofceiling"
+    stype  = stypes.include?(stype) ? stype : "roofceiling"
+
+    # Admissible outside boundary conditions.
+    conditions = ["outdoors", "ground"]
+    condition  = condition.respond_to?(:to_s) ? condition.to_s.downcase : "outdoors"
+    condition  = conditions.include?(condition) ? condition : "outdoors"
+
+    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020"]
+
+    data = {}
+
+    # Initialize data.
+    templates.each do |tp|
+      data[tp] = {}
+
+      conditions.each do |cd|
+        data[tp][cd] = {}
+
+        stypes.each { |st| data[tp][cd][st] = {} }
+      end
+    end
+
+    # From NECB Part 3 tables. Moving away from BTAP formulas. Should be CSV.
+    data["NECB2011"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2011"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2011"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2011"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2011"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2011"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][3000] = 0.227
+    data["NECB2011"]["outdoors"]["roofceiling"][4000] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][5000] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][6000] = 0.162
+    data["NECB2011"]["outdoors"]["roofceiling"][7000] = 0.162
+    data["NECB2011"]["outdoors"]["roofceiling"][9999] = 0.142
+    data["NECB2011"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2011"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2011"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2011"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2011"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2011"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2011"]["outdoors"]["window"     ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["window"     ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][9999] = 1.600
+    data["NECB2011"]["outdoors"]["skylight"   ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["skylight"   ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][9999] = 1.600
+    data["NECB2011"]["outdoors"]["door"       ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["door"       ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][9999] = 1.600
+    data["NECB2011"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2011"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2011"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2011"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2011"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2011"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2011"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2015"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2015"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2015"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2015"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2015"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2015"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][3000] = 0.227
+    data["NECB2015"]["outdoors"]["roofceiling"][4000] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][5000] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][6000] = 0.162
+    data["NECB2015"]["outdoors"]["roofceiling"][7000] = 0.162
+    data["NECB2015"]["outdoors"]["roofceiling"][9999] = 0.142
+    data["NECB2015"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2015"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2015"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2015"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2015"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2015"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2015"]["outdoors"]["window"     ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["window"     ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][9999] = 1.600
+    data["NECB2015"]["outdoors"]["skylight"   ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["skylight"   ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][9999] = 1.600
+    data["NECB2015"]["outdoors"]["door"       ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["door"       ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][9999] = 1.600
+    data["NECB2015"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2015"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2015"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2015"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2015"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2015"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2015"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2017"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2017"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2017"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2017"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2017"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2017"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2017"]["outdoors"]["roofceiling"][3000] = 0.193
+    data["NECB2017"]["outdoors"]["roofceiling"][4000] = 0.156
+    data["NECB2017"]["outdoors"]["roofceiling"][5000] = 0.156
+    data["NECB2017"]["outdoors"]["roofceiling"][6000] = 0.138
+    data["NECB2017"]["outdoors"]["roofceiling"][7000] = 0.138
+    data["NECB2017"]["outdoors"]["roofceiling"][9999] = 0.121
+    data["NECB2017"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2017"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2017"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2017"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2017"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2017"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2017"]["outdoors"]["window"     ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["window"     ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][9999] = 1.400
+    data["NECB2017"]["outdoors"]["skylight"   ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["skylight"   ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][9999] = 1.400
+    data["NECB2017"]["outdoors"]["door"       ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["door"       ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][9999] = 1.400
+    data["NECB2017"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2017"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2017"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2017"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2017"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2017"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2017"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2020"]["outdoors"]["wall"       ][3000] = 0.290
+    data["NECB2020"]["outdoors"]["wall"       ][4000] = 0.265
+    data["NECB2020"]["outdoors"]["wall"       ][5000] = 0.240
+    data["NECB2020"]["outdoors"]["wall"       ][6000] = 0.215
+    data["NECB2020"]["outdoors"]["wall"       ][7000] = 0.190
+    data["NECB2020"]["outdoors"]["wall"       ][9999] = 0.165
+    data["NECB2020"]["outdoors"]["roofceiling"][3000] = 0.164
+    data["NECB2020"]["outdoors"]["roofceiling"][4000] = 0.156
+    data["NECB2020"]["outdoors"]["roofceiling"][5000] = 0.138
+    data["NECB2020"]["outdoors"]["roofceiling"][6000] = 0.121
+    data["NECB2020"]["outdoors"]["roofceiling"][7000] = 0.117
+    data["NECB2020"]["outdoors"]["roofceiling"][9999] = 0.110
+    data["NECB2020"]["outdoors"]["floor"      ][3000] = 0.193
+    data["NECB2020"]["outdoors"]["floor"      ][4000] = 0.175
+    data["NECB2020"]["outdoors"]["floor"      ][5000] = 0.156
+    data["NECB2020"]["outdoors"]["floor"      ][6000] = 0.138
+    data["NECB2020"]["outdoors"]["floor"      ][7000] = 0.121
+    data["NECB2020"]["outdoors"]["floor"      ][9999] = 0.117
+    data["NECB2020"]["outdoors"]["window"     ][3000] = 1.900
+    data["NECB2020"]["outdoors"]["window"     ][4000] = 1.900
+    data["NECB2020"]["outdoors"]["window"     ][5000] = 1.730
+    data["NECB2020"]["outdoors"]["window"     ][6000] = 1.730
+    data["NECB2020"]["outdoors"]["window"     ][7000] = 1.440
+    data["NECB2020"]["outdoors"]["window"     ][9999] = 1.440
+    data["NECB2020"]["outdoors"]["skylight"   ][3000] = 2.690
+    data["NECB2020"]["outdoors"]["skylight"   ][4000] = 2.690
+    data["NECB2020"]["outdoors"]["skylight"   ][5000] = 2.410
+    data["NECB2020"]["outdoors"]["skylight"   ][6000] = 2.410
+    data["NECB2020"]["outdoors"]["skylight"   ][7000] = 2.010
+    data["NECB2020"]["outdoors"]["skylight"   ][9999] = 2.010
+    data["NECB2020"]["outdoors"]["door"       ][3000] = 2.120
+    data["NECB2020"]["outdoors"]["door"       ][4000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][5000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][6000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][7000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][9999] = 1.440
+    data["NECB2020"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2020"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2020"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2020"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2020"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2020"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2020"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][9999] = 0.379
+
+    # Return required U-factor if provided HDD < stored HDD.
+    data[@template][condition][stype].each { |hdd18, u| return u if hdd < hdd18 }
+
+    0.110
+  end
+
+  ##
+  # Adds default construction sets, based on building 'category' & 'structure'
+  # selections. This is an alternative method to 'model_apply_construction'
+  # & 'apply_standard_construction_properties' methods.
+  #
+  # @author denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  # @param necb_hdd [Boolean] whether to rely on BTAP to set HDD (vs stat file)
+  # @param a [Hash] optional U & SHGC overrides
+  # @option a [Hash] eWallU exposed wall Uo (or Ut)
+  # @option a [Hash] eFloorU exposed floor Uo (or Ut)
+  # @option a [Hash] eRoofU exposed roof Uo (or Ut)
+  # @option a [Hash] gWallU ground wall Uo (or Ut)
+  # @option a [Hash] gFloorU ground floor Uo (or Ut)
+  # @option a [Hash] gRoofU ground roof Uo (or Ut)
+  # @option a [Hash] doorU opaque door U
+  # @option a [Hash] fenU fenestration U (e.g. fixe, operable, glass door)
+  # @option a [Hash] skyU skylight U
+  # @option a [Hash] doorSHGC opaque door SHGC
+  # @option a [Hash] fenSHGC fenestration SHGC
+  # @option a [Hash] skySHGC skylight SHGC
+  #
+  # @return [Boolean] whether default constructions were successfully added.
+  def add_construction_sets(model, necb_hdd, a)
+    return false unless model.is_a?(OpenStudio::Model::Model)
+    return false unless a.is_a?(Hash)
+
+    btp = BTAP::Resources::Envelope::Constructions # alias
+    necb_hdd = true unless [true, false].include?(necb_hdd)
+
+    # Validate argh options (limited to either U or SHGC)
+    a.each do |k, v|
+      return false unless v.is_a?(Numeric)
+      return false unless v.round(3) > 0
+
+      if k.to_s[-1].downcase == "u"
+        return false unless v.between?(btp::uMIN, btp::uMAX)
+      else
+        return false unless v.between?(0.05, 0.95)
+      end
+    end
+
+    tag  = "space_conditioning_category"
+    bldg = model.getBuilding
+    hdd  = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
+
+    # Reset constructions.
+    model.getPlanarSurfaces.sort.each(&:resetConstruction)
+
+    # Fetch NECB-required U-factors (or provided as arguments).
+    eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", "outdoors", hdd)
+    eRoofU  = a[:eRoofU ] ? a[:eRoofU ] : max_u_necb("roofceiling", "outdoors", hdd)
+    eFloorU = a[:eFloorU] ? a[:eFloorU] : max_u_necb("floor", "outdoors", hdd)
+    gWallU  = a[:gWallU ] ? a[:gWallU ] : max_u_necb("wall", "ground", hdd)
+    gFloorU = a[:gFloorU] ? a[:gFloorU] : max_u_necb("floor", "ground", hdd)
+    gRoofU  = a[:gRoofU ] ? a[:gRoofU ] : max_u_necb("roofceiling", "ground", hdd)
+    doorU   = a[:doorU  ] ? a[:doorU  ] : max_u_necb("door", "outdoors", hdd)
+    fenU    = a[:fenU   ] ? a[:fenU   ] : max_u_necb("window", "outdoors", hdd)
+    skyU    = a[:skyU   ] ? a[:skyU   ] : max_u_necb("skylight", "outdoors", hdd)
+
+    # FYI: Excerpt of the 'SimpleGlazing' material generated using BTAP:
+    #
+    #   SimpleGlazing:U=0.220 SHGC=0.600, !- Name
+    #     2.2,                            !- U-Factor {W/m2-K}
+    #     0.6,                            !- Solar Heat Gain Coefficient
+    #     0.21;                           !- Visible Transmittance
+    #
+    # 1. Identifier 'U=0.220' for an NFRC-rated U-factor of 2.2 W/m2.K ?
+    # 2. VT is almost always higher than SHGC - not the other way around. VT
+    #    should be set here based on a reasonable LSG ratio:
+    #    - eta-publications.lbl.gov/sites/default/files/femp-spec-sel-low-e.pdf
+    #    - www.wbdg.org/resources/windows-and-glazing
+    #
+    # ... for the moment, sticking to SHGC 60%, yet keeping default VT.
+    doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
+    fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
+    skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
+
+    # Fetch corresponding BTAP structure parameters.
+    category  = @structure.category
+    structure = @structure.structure
+    framing   = @structure.framing
+    cladding  = @structure.cladding
+    finish    = @structure.finish
+
+    # Uninsulated slab-on-grade, except if HDD > 6999 (Uo = 0.379 W/m2.K).
+    # If HDD < 7000, slab-on-grade insulation is instead only required along
+    # perimeter. Perimeter insulation requires special treatment, à la KIVA. The
+    # vast majority of models do not have full-height basements. Exceptions:
+    #   - LargeOffice
+    #   - LargeHotel
+    #   - Hospital
+    #
+    # The solution is temporarily OK, yet a more nuanced treatment is required
+    # for full-height basement cases. This would likely require a space-by-space
+    # treatment, based on Z-axis grade-vs-floor height difference - @todo.
+    specs          = {}
+    specs[:type  ] = :slab
+    specs[:uo    ] = nil
+    specs[:uo    ] = gFloorU   if hdd > 6999
+    specs[:frame ] = :none unless hdd > 6999
+    specs[:finish] = :none     if category == "robust"
+    specs[:finish] = :none     if category == "industry"
+    gFloor         = TBD.genConstruction(model, specs)
+    insulation     = TBD.insulatingLayer(gFloor)
+
+    # Ensure insulating layer uniqueness for each insulated construction.
+    lyr = TBD.insulatingLayer(gFloor)
+    TBD.assignUniqueMaterial(gFloor, lyr[:index]) if lyr[:index]
+
+    # Insulated basement wall. A more nuanced treatment is necessary for
+    # multiple basement stories - no insulation required below 2.4m from grade.
+    specs          = {}
+    specs[:type  ] = :basement
+    specs[:uo    ] = gWallU
+    gWall          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(gWall)
+    TBD.assignUniqueMaterial(gWall, lyr[:index]) if lyr[:index]
+
+    # Insulated basement roof. Again, a more nuanced approach is necessary if
+    # the basement roof is below 1.2m from grade (e.g. a tunnel).
+    specs          = {}
+    specs[:type  ] = :roof
+    specs[:uo    ] = gRoofU
+    specs[:frame ] = :medium
+    specs[:finish] = :heavy
+    gRoof          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(gRoof)
+    TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing wall.
+    specs          = {}
+    specs[:type  ] = :wall
+    specs[:uo    ] = eWallU
+    specs[:frame ] = :medium
+    specs[:clad  ] = :heavy  if category == "robust"
+    specs[:finish] = :medium if category == "robust"
+    specs[:finish] = :medium if framing  == :cmu
+    eWall          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eWall)
+    TBD.assignUniqueMaterial(eWall, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing roof.
+    specs          = {}
+    specs[:type  ] = :roof
+    specs[:uo    ] = eRoofU
+    specs[:clad  ] = :medium if category == "housing" && structure == :concrete
+    specs[:clad  ] = :medium if category == "lodging" && structure == :concrete
+    specs[:frame ] = :medium
+    specs[:frame ] = :heavy  if framing  == :wood
+    specs[:finish] = :medium if category == "robust"
+    specs[:finish] = :heavy  if category == "housing" && structure == :concrete
+    specs[:finish] = :heavy  if category == "lodging" && structure == :concrete
+    eRoof          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eRoof)
+    TBD.assignUniqueMaterial(eRoof, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing floor.
+    specs          = {}
+    specs[:type  ] = :floor
+    specs[:uo    ] = eFloorU
+    specs[:finish] = :medium unless framing == :wood
+    specs[:finish] = :heavy  if category == "housing" && structure == :concrete
+    specs[:finish] = :heavy  if category == "lodging" && structure == :concrete
+    eFloor         = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eFloor)
+    TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing, opaque door.
+    specs          = {}
+    specs[:type  ] = :door
+    specs[:uo    ] = doorU
+    door           = TBD.genConstruction(model, specs)
+
+    # Outdoor-facing, vertical fenestration.
+    specs          = {}
+    specs[:type  ] = :window
+    specs[:uo    ] = fenU
+    specs[:shgc  ] = fenSHGC
+    fen            = TBD.genConstruction(model, specs)
+
+    # Outdoor-facing, horizontal skylight.
+    specs          = {}
+    specs[:type  ] = :skylight
+    specs[:uo    ] = skyU
+    specs[:shgc  ] = skySHGC
+    sky            = TBD.genConstruction(model, specs)
+
+    # Interzone/partition wall.
+    specs          = {}
+    specs[:type  ] = :partition
+    iWall          = TBD.genConstruction(model, specs)
+
+    # Interzone roof/ceiling & floor.
+    specs          = {}
+    specs[:type  ] = :partition
+    specs[:frame ] = :medium unless framing == :wood
+    specs[:frame ] = :heavy  if category == "housing" && structure == :concrete
+    specs[:frame ] = :heavy  if category == "lodging" && structure == :concrete
+    specs[:frame ] = :heavy  if category == "robust"
+    specs[:clad  ] = :none   if category == "robust"
+    specs[:finish] = :none   if category == "robust"
+    iRoof          = TBD.genConstruction(model, specs)
+    iFloor         = TBD.genConstruction(model, specs)
+
+    # Shading material.
+    specs          = {type: :shading}
+    shading        = TBD.genConstruction(model, specs)
+
+    # Building-wide, default constructions.
+    intBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    solBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    extBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    subBLDG = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
+    intBLDG.setName("BTAP interior constructions BLDG")
+    solBLDG.setName("BTAP ground constructions BLDG")
+    extBLDG.setName("BTAP exterior constructions BLDG")
+    subBLDG.setName("BTAP subsurface constructions BLDG")
+    intBLDG.setWallConstruction(iWall)
+    intBLDG.setFloorConstruction(iFloor)
+    intBLDG.setRoofCeilingConstruction(iRoof)
+    solBLDG.setWallConstruction(gWall)
+    solBLDG.setFloorConstruction(gFloor)
+    solBLDG.setRoofCeilingConstruction(gRoof)
+    extBLDG.setWallConstruction(eWall)
+    extBLDG.setFloorConstruction(eFloor)
+    extBLDG.setRoofCeilingConstruction(eRoof)
+    subBLDG.setFixedWindowConstruction(fen)
+    subBLDG.setOperableWindowConstruction(fen)
+    subBLDG.setGlassDoorConstruction(fen)
+    subBLDG.setSkylightConstruction(sky)
+    subBLDG.setTubularDaylightDomeConstruction(sky)
+    subBLDG.setTubularDaylightDiffuserConstruction(sky)
+    subBLDG.setDoorConstruction(door)
+    subBLDG.setOverheadDoorConstruction(door)
+
+    setBLDG = OpenStudio::Model::DefaultConstructionSet.new(model)
+    setBLDG.setName("BTAP construction set BLDG")
+    setBLDG.setDefaultInteriorSurfaceConstructions(intBLDG)
+    setBLDG.setDefaultGroundContactSurfaceConstructions(solBLDG)
+    setBLDG.setDefaultExteriorSurfaceConstructions(extBLDG)
+    setBLDG.setDefaultExteriorSubSurfaceConstructions(subBLDG)
+    setBLDG.setInteriorPartitionConstruction(iWall)
+    setBLDG.setSpaceShadingConstruction(shading)
+    setBLDG.setBuildingShadingConstruction(shading)
+    setBLDG.setSiteShadingConstruction(shading)
+    setBLDG.setAdiabaticSurfaceConstruction(iWall)
+
+    bldg.setDefaultConstructionSet(setBLDG)
+
+    # Unconditioned, unoccupied spaces (e.g. attics) inherit their own
+    # default construction set. Indirectly-conditioned, unoccupied spaces
+    # (e.g. plenums) also inherit their own construction set.
+    attics  = []
+    plenums = []
+
+    model.getSpaces.each do |space|
+      prop = space.additionalProperties.getFeatureAsString(tag)
+      next if prop.empty?
+      next if space.partofTotalFloorArea
+
+      prop = prop.get.downcase
+      attics  << space if prop == "unconditioned"
+      plenums << space if prop == "nonresconditioned"
+    end
+
+    # None of the outdoor-facing surfaces of attics are required to be
+    # insulated. All attic interzone surfaces are required to be insulated.
+    unless attics.empty?
+      specs          = {}
+      specs[:type  ] = :slab
+      specs[:uo    ] = nil
+      specs[:frame ] = :none
+      specs[:finish] = :none
+      gAtticFloor    = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :basement
+      specs[:clad  ] = :none
+      specs[:finish] = :none
+      gAtticWall     = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :roof
+      specs[:uo    ] = nil
+      specs[:clad  ] = :none
+      specs[:finish] = :heavy
+      gAtticRoof     = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :wall
+      specs[:uo    ] = nil
+      specs[:clad  ] = :none
+      specs[:finish] = :none
+      eAtticWall     = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :roof
+      specs[:uo    ] = nil
+      specs[:clad  ] = :none
+      eAtticRoof     = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :floor
+      specs[:uo    ] = nil
+      specs[:finish] = :none
+      eAtticFloor    = TBD.genConstruction(model, specs)
+
+      specs          = {}
+      specs[:type  ] = :partition
+      specs[:uo    ] = eWallU
+      iAtticWall     = TBD.genConstruction(model, specs)
+
+      lyr = TBD.insulatingLayer(iAtticWall)
+      TBD.assignUniqueMaterial(iAtticWall, lyr[:index]) if lyr[:index]
+
+      specs          = {}
+      specs[:type  ] = :floor
+      specs[:uo    ] = eFloorU
+      specs[:frame ] = :heavy
+      specs[:finish] = :none
+      specs[:finish] = :heavy if structure == :concrete
+      iAtticFloor    = TBD.genConstruction(model, specs)
+
+      lyr = TBD.insulatingLayer(iAtticFloor)
+      TBD.assignUniqueMaterial(iAtticFloor, lyr[:index]) if lyr[:index]
+
+      specs          = {}
+      specs[:type  ] = :floor
+      specs[:uo    ] = eRoofU
+      specs[:frame ] = :light
+      specs[:frame ] = :heavy if framing == :wood
+      specs[:clad  ] = :none
+      specs[:clad  ] = :heavy if category == "robust"
+      iAtticRoof     = TBD.genConstruction(model, specs)
+
+      lyr = TBD.insulatingLayer(iAtticRoof)
+      TBD.assignUniqueMaterial(iAtticRoof, lyr[:index]) if lyr[:index]
+
+      intATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      solATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      extATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      intATTIC.setName("BTAP interior constructions ATTIC")
+      solATTIC.setName("BTAP ground constructions ATTIC")
+      extATTIC.setName("BTAP exterior constructions ATTIC")
+      intATTIC.setWallConstruction(iAtticWall)
+      intATTIC.setFloorConstruction(iAtticFloor)
+      intATTIC.setRoofCeilingConstruction(iAtticRoof)
+      solATTIC.setWallConstruction(gAtticWall)
+      solATTIC.setFloorConstruction(gAtticFloor)
+      solATTIC.setRoofCeilingConstruction(gAtticRoof)
+      extATTIC.setWallConstruction(eAtticWall)
+      extATTIC.setFloorConstruction(eAtticFloor)
+      extATTIC.setRoofCeilingConstruction(eAtticRoof)
+
+      setATTIC = OpenStudio::Model::DefaultConstructionSet.new(model)
+      setATTIC.setName("BTAP construction set ATTIC")
+      setATTIC.setDefaultInteriorSurfaceConstructions(intATTIC)
+      setATTIC.setDefaultGroundContactSurfaceConstructions(solATTIC)
+      setATTIC.setDefaultExteriorSurfaceConstructions(extATTIC)
+
+      attics.each { |attic| attic.setDefaultConstructionSet(setATTIC) }
+    end
+
+    # No change for outdoor-facing surfaces (vs BLDG default construction set).
+    # Treat interzone 'plenum' floors as uninsulated ceiling tiles.
+    unless plenums.empty?
+      specs          = {}
+      specs[:type  ] = :partition
+      specs[:uo    ] = nil
+      specs[:clad  ] = :none
+      specs[:finish] = :none
+      iPlenumFloor   = TBD.genConstruction(model, specs)
+
+      intPLENUM = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      intPLENUM.setName("BTAP interior constructions PLENUM")
+      intPLENUM.setFloorConstruction(iPlenumFloor)
+
+      setPLENUM = OpenStudio::Model::DefaultConstructionSet.new(model)
+      setPLENUM.setName("BTAP construction set PLENUM")
+      setPLENUM.setDefaultInteriorSurfaceConstructions(intPLENUM)
+
+      plenums.each { |plenum| plenum.setDefaultConstructionSet(setPLENUM) }
+    end
+
+    # The above solution should work well for prototype models distributed with
+    # OpenStudio-Standards. However, the solution may assign odd construction
+    # choices for some 3rd-party models, e.g. underfloor plenums or 'sandwiched'
+    # unconditioned spaces. It is quite feasible to introduce a final safeguard
+    # check that would loop through all surfaces to:
+    #   - check if insulated when required
+    #   - ensure uninsulated assemblies unless required
+    #   - hard assign constructions if either case
+    #
+    # Future upgrades could include adding story- or space-specific default
+    # construction sets (e.g. CMU walls of a school gym in an otherwise
+    # steel-framed school). @todo
+
+    true
   end
 
   # Go through the default construction sets and hard-assigned
@@ -480,7 +1158,8 @@ class NECB2011
     # Make a construction set for each space type, if one is specified
     # apply_default_constructionsets_to_spacetypes(climate_zone, model)
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying constructions')
-    return true
+
+    true
   end
 
   def apply_building_default_constructionset(model)
@@ -724,44 +1403,118 @@ class NECB2011
     return true
   end
 
-  # This method is similar to the 'apply_max_fdwr' method above but applies the maximum skylight to roof area ratio to a
-  # building as per NECB 2011 8.4.4.3 and 3.2.1.4 (or equivalent in other versions of the NECB).  It first checks for all
-  # exterior roofs adjacent to conditioned spaces.  It distinguishes between plenums and other conditioned spaces.  It
-  # uses only the non-plenum roof area to calculate the maximum skylight area to be applied to the building.
-  def apply_max_srr_nrcan(model:, srr_lim:)
-    # First determine which roof surfaces are adjacent to heated spaces (both plenum and non-plenum).
-    exp_surf_info = find_exposed_conditioned_roof_surfaces(model)
-    # If the non-plenum roof area is very small raise a warning.  It may be perfectly fine but it is probably a good
-    # idea to warn the user.
-    if exp_surf_info['exp_nonplenum_roof_area_m2'] < 0.1
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'This building has no exposed ceilings adjacent to spaces that are not attics or plenums.  No skylights will be added.')
-      return false
-    end
-
-    # If the SRR is greater than one something is seriously wrong so raise an error.  If it is less than 0.001 assume
-    # all the skylights should go.
-    if srr_lim > 1
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'This building requires a larger skylight area than there is roof area.')
-      return false
-    elsif srr_lim < 0.001
-      exp_surf_info['exp_nonplenum_roofs'].sort.each do |exp_surf|
-        exp_surf.subSurfaces.sort.each(&:remove)
-      end
-      return true
-    end
-
+  # This method is similar to the 'apply_max_fdwr' method above, but applies a maximum skylight-to-roof-area-ratio (SRR)
+  # to a building model, as per NECB 2011 8.4.4.3 and 3.2.1.4 (or equivalent in other NECB vintages). There are 2 options:
+  #
+  # OPTION A: Default, initial BTAP solution. It first checks for all exterior roofs adjacent to conditioned spaces.
+  #           It distinguishes between plenums and other conditioned spaces. It uses only the non-plenum roof area to
+  #           calculate the maximum skylight area to be applied to the building.
+  #
+  # OPTION B: Selected if srr_opt == 'osut'. OSut's 'addSkylights' attempts to meet the requested SRR% target, even if
+  #           occupied spaces to toplight are under unoccupied plenums or attics - skylight wells are added if needed.
+  #           With attics, skylight well walls are considered part of the 'building envelope' (and therefore insulated
+  #           like exterior walls). The method returns a building 'gross roof area' (see attr_reader :osut), which
+  #           excludes the area of attic roof overhangs.
+  def apply_max_srr_nrcan(model:, srr_lim:, srr_opt: '')
     construct_set = model.getBuilding.defaultConstructionSet.get
     skylight_construct_set = construct_set.defaultExteriorSubSurfaceConstructions.get.skylightConstruction.get
 
-    # Go through all of exposed roofs adjacent to heated, non-plenum spaces, remove any existing subsurfaces, and add
-    # a skylight in the centroid of the surface, with the same shape of the surface, only scaled to be the area
-    # determined by the SRR.  The name of the skylight will be the surface name with the subsurface type attached
-    # ('skylight' in this case).  Note that this method will only work if the surface does not fold into itself (like an
-    # L or a V).
-    exp_surf_info['exp_nonplenum_roofs'].sort.each do |roof|
-      # sub_surface_create_centered_subsurface_from_scaled_surface(roof, srr_lim, model)
-      sub_surface_create_scaled_subsurfaces_from_surface(surface: roof, area_fraction: srr_lim, construction: skylight_construct_set)
+    unless srr_opt.to_s.downcase == 'osut' # OPTION A
+      # First determine which roof surfaces are adjacent to heated spaces (both plenum and non-plenum).
+      exp_surf_info = find_exposed_conditioned_roof_surfaces(model)
+      # If the non-plenum roof area is very small raise a warning.  It may be perfectly fine but it is probably a good
+      # idea to warn the user.
+      if exp_surf_info['exp_nonplenum_roof_area_m2'] < 0.1
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'This building has no exposed ceilings adjacent to spaces that are not attics or plenums.  No skylights will be added.')
+        return false
+      end
+
+      # If the SRR is greater than one something is seriously wrong so raise an error.  If it is less than 0.001 assume
+      # all the skylights should go.
+      if srr_lim > 1
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'This building requires a larger skylight area than there is roof area.')
+        return false
+      elsif srr_lim < 0.001
+        exp_surf_info['exp_nonplenum_roofs'].sort.each do |exp_surf|
+          exp_surf.subSurfaces.sort.each(&:remove)
+        end
+        return true
+      end
+
+      # Go through all of exposed roofs adjacent to heated, non-plenum spaces, remove any existing subsurfaces, and add
+      # a skylight in the centroid of the surface, with the same shape of the surface, only scaled to be the area
+      # determined by the SRR.  The name of the skylight will be the surface name with the subsurface type attached
+      # ('skylight' in this case).  Note that this method will only work if the surface does not fold into itself (like an
+      # L or a V).
+      exp_surf_info['exp_nonplenum_roofs'].sort.each do |roof|
+        # sub_surface_create_centered_subsurface_from_scaled_surface(roof, srr_lim, model)
+        sub_surface_create_scaled_subsurfaces_from_surface(surface: roof, area_fraction: srr_lim, construction: skylight_construct_set)
+      end
+    else # OPTION B
+      TBD.clean!
+      spaces = model.getSpaces
+      types  = model.getSpaceTypes
+      roofs  = TBD.facets(spaces, "Outdoors", "RoofCeiling")
+
+      # A model's 'nominal' gross roof area (gra0) may be greater than its
+      # 'effective' gross roof area (graX). For instance, the "SmallOffice"
+      # prototype model has (unconditioned) attic roof overhangs that end up
+      # tallied as a gross roof area in OpenStudio and EnergyPlus. See:
+      #
+      #   github.com/rd2/osut/blob/117c7dceb59fd8aab771da8ba672c14c97d23bd0
+      #   /lib/osut/utils.rb#L6268
+      #
+      gra0 = roofs.sum(&:grossArea)    # nominal gross roof area
+      graX = TBD.grossRoofArea(spaces) # effective gross roof area
+
+      unless gra0.round > 0
+        msg = 'Invalid nominal gross roof area. No skylights will be added.'
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', msg)
+        return false
+      end
+
+      unless graX.round > 0
+        msg = 'Invalid effective gross roof area. No skylights will be added.'
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', msg)
+        return false
+      end
+
+      self.osut[:gra0] = gra0
+      self.osut[:graX] = graX
+
+      # Relying on the total area of attic roof surfaces (for SRR%) exagerrates
+      # the requested skylight area, often by 10% to 15%. This makes it unfair
+      # for NECBs, and more challenging when dealing with skylight wells. This
+      # issue only applies with attics - not plenums. Trim down SRR if required.
+      target = srr_lim * graX
+
+      # Filtering out tiny roof surfaces, twisty corridors, etc.
+      types = types.reject { |tp| tp.nameString.downcase.include?("undefined") }
+      types = types.reject { |tp| tp.nameString.downcase.include?("mech"     ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("elec"     ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("toilet"   ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("locker"   ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("shower"   ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("washroom" ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("corr"     ) }
+      types = types.reject { |tp| tp.nameString.downcase.include?("stair"    ) }
+
+      spaces = spaces.reject { |sp| sp.spaceType.empty? }
+      spaces = spaces.select { |sp| types.include?(sp.spaceType.get) }
+
+      TBD.addSkyLights(spaces, {area: target})
+      self.osut[:logs] = TBD.logs
+
+      skys = TBD.facets(model.getSpaces, "Outdoors", "Skylight")
+      skm2 = skys.sum(&:grossArea)
+
+      unless skm2.round == target.round
+        msg = "Skylights m2: failed to meet #{target.round} (vs #{skm2.round})"
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', msg)
+        return false
+      end
     end
+
     return true
   end
 end

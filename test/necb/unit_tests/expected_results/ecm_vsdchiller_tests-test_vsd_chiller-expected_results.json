@@ -1,0 +1,618 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "archetype",
+    "LargeOffice": {
+      "VarType": "chiller_capacity_kW",
+      "235": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 235,
+            "COP": 5.89,
+            "CAPFT_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.252113,
+              "x": 0.01324053,
+              "x2": -0.008637329,
+              "y": 0.08581056,
+              "y2": -0.004261176,
+              "xy": 0.008661899,
+              "minX": 7.22,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 26.67
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.4475238,
+              "x": -0.0258821,
+              "x2": -0.001459053,
+              "y": 0.04342595,
+              "y2": -0.001000651,
+              "xy": 0.001920106,
+              "minX": 7.22,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 26.67
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.2778889,
+              "x": 0.2338363,
+              "x2": 0.4883748,
+              "minX": 0.1,
+              "maxX": 1.15
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 235,
+            "COP": 5.89,
+            "CAPFT_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.252113,
+              "x": 0.01324053,
+              "x2": -0.008637329,
+              "y": 0.08581056,
+              "y2": -0.004261176,
+              "xy": 0.008661899,
+              "minX": 7.22,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 26.67
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.4475238,
+              "x": -0.0258821,
+              "x2": -0.001459053,
+              "y": 0.04342595,
+              "y2": -0.001000651,
+              "xy": 0.001920106,
+              "minX": 7.22,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 26.67
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.2778889,
+              "x": 0.2338363,
+              "x2": 0.4883748,
+              "minX": 0.1,
+              "maxX": 1.15
+            }
+          }
+        }
+      },
+      "606": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 606,
+            "COP": 5.42,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.9797101,
+              "x": -0.002895701,
+              "x2": -0.0008970718,
+              "y": 0.0103144,
+              "y2": -0.0007431651,
+              "xy": 0.001453508,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 11.25,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9946139,
+              "x": -0.04829399,
+              "x2": 0.0004674277,
+              "y": -0.001158726,
+              "y2": 0.0005762583,
+              "xy": 0.0002148192,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 11.25,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.1202277,
+              "x": 0.1396384,
+              "x2": 0.7394038000000001,
+              "minX": 0.19,
+              "maxX": 1.02
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 606,
+            "COP": 5.42,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.9797101,
+              "x": -0.002895701,
+              "x2": -0.0008970718,
+              "y": 0.0103144,
+              "y2": -0.0007431651,
+              "xy": 0.001453508,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 11.25,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9946139,
+              "x": -0.04829399,
+              "x2": 0.0004674277,
+              "y": -0.001158726,
+              "y2": 0.0005762583,
+              "xy": 0.0002148192,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 11.25,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 742kW/5.42COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.1202277,
+              "x": 0.1396384,
+              "x2": 0.7394038000000001,
+              "minX": 0.19,
+              "maxX": 1.02
+            }
+          }
+        }
+      },
+      "819": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 819,
+            "COP": 7.23,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.5559679,
+              "x": 0.0763086,
+              "x2": -0.001431181,
+              "y": 0.02167593,
+              "y2": -0.0006233447,
+              "xy": -0.0009876498,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.6511011,
+              "x": 0.04948557,
+              "x2": -0.0008152733,
+              "y": 0.02322946,
+              "y2": 0.0001990802,
+              "xy": -0.002669401,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.203638,
+              "x": -0.39132,
+              "x2": 1.187172,
+              "minX": 0.2,
+              "maxX": 1.04
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 819,
+            "COP": 7.23,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.5559679,
+              "x": 0.0763086,
+              "x2": -0.001431181,
+              "y": 0.02167593,
+              "y2": -0.0006233447,
+              "xy": -0.0009876498,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.6511011,
+              "x": 0.04948557,
+              "x2": -0.0008152733,
+              "y": 0.02322946,
+              "y2": 0.0001990802,
+              "xy": -0.002669401,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 897kW/7.23COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.203638,
+              "x": -0.39132,
+              "x2": 1.187172,
+              "minX": 0.2,
+              "maxX": 1.04
+            }
+          }
+        }
+      },
+      "993": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 993,
+            "COP": 7.57,
+            "CAPFT_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.6769028,
+              "x": 0.05711844,
+              "x2": -0.000607231,
+              "y": 0.01656541,
+              "y2": -0.0008087831,
+              "xy": 0.0002303904,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9241019,
+              "x": -0.04961574,
+              "x2": 0.0001291675,
+              "y": 0.03299013,
+              "y2": -0.0006769477,
+              "xy": 0.001692815,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.1431969,
+              "x": -0.4920686,
+              "x2": 1.341333,
+              "minX": 0.14,
+              "maxX": 1.02
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 993,
+            "COP": 7.57,
+            "CAPFT_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.6769028,
+              "x": 0.05711844,
+              "x2": -0.000607231,
+              "y": 0.01656541,
+              "y2": -0.0008087831,
+              "xy": 0.0002303904,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9241019,
+              "x": -0.04961574,
+              "x2": 0.0001291675,
+              "y": 0.03299013,
+              "y2": -0.0006769477,
+              "xy": 0.001692815,
+              "minX": 5.56,
+              "maxX": 10.0,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller York YT 1090kW/7.57COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.1431969,
+              "x": -0.4920686,
+              "x2": 1.341333,
+              "minX": 0.14,
+              "maxX": 1.02
+            }
+          }
+        }
+      },
+      "1220": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 1220,
+            "COP": 7.9,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 1.063866,
+              "x": -0.0144899,
+              "x2": -0.001021036,
+              "y": -0.001197817,
+              "y2": -0.0004163507,
+              "xy": 0.001927446,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9953536,
+              "x": -0.03118863,
+              "x2": 0.002094171,
+              "y": 0.007086716,
+              "y2": 0.0007387078,
+              "xy": -0.00138433,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.3336374,
+              "x": -0.4098166,
+              "x2": 1.077791,
+              "minX": 0.19,
+              "maxX": 1.02
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 1220,
+            "COP": 7.9,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 1.063866,
+              "x": -0.0144899,
+              "x2": -0.001021036,
+              "y": -0.001197817,
+              "y2": -0.0004163507,
+              "xy": 0.001927446,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.9953536,
+              "x": -0.03118863,
+              "x2": 0.002094171,
+              "y": 0.007086716,
+              "y2": 0.0007387078,
+              "xy": -0.00138433,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 1350kW/7.90COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.3336374,
+              "x": -0.4098166,
+              "x2": 1.077791,
+              "minX": 0.19,
+              "maxX": 1.02
+            }
+          }
+        }
+      },
+      "1536": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 1540,
+            "COP": 8.32,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.4742518,
+              "x": -0.05109937,
+              "x2": -0.002845323,
+              "y": 0.08257997,
+              "y2": -0.003404799,
+              "xy": 0.005625321,
+              "minX": 6.11,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.2950574,
+              "x": -0.1036684,
+              "x2": -0.004169567,
+              "y": 0.125679,
+              "y2": -0.004004203,
+              "xy": 0.006718687,
+              "minX": 6.11,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.237401,
+              "x": -0.1796745,
+              "x2": 0.9441507,
+              "minX": 0.18,
+              "maxX": 1.04
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 1540,
+            "COP": 8.32,
+            "CAPFT_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD CAPFT",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.4742518,
+              "x": -0.05109937,
+              "x2": -0.002845323,
+              "y": 0.08257997,
+              "y2": -0.003404799,
+              "xy": 0.005625321,
+              "minX": 6.11,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD EIRFT",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.2950574,
+              "x": -0.1036684,
+              "x2": -0.004169567,
+              "y": 0.125679,
+              "y2": -0.004004203,
+              "xy": 0.006718687,
+              "minX": 6.11,
+              "maxX": 12.78,
+              "minY": 12.78,
+              "maxY": 23.89
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller Carrier 19XR 1723kW/8.32COP/VSD EIRFPLR",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.237401,
+              "x": -0.1796745,
+              "x2": 0.9441507,
+              "minX": 0.18,
+              "maxX": 1.04
+            }
+          }
+        }
+      },
+      "1773": {
+        "VarType": "TestCase",
+        "Test Case": {
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller": {
+            "capacity_kW": 1770,
+            "COP": 9.54,
+            "CAPFT_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD CAPFT_2",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.7585741,
+              "x": -0.05127829,
+              "x2": 0.005848602,
+              "y": 0.04235544,
+              "y2": -0.001606561,
+              "xy": 0.0009364594,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 29.44
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD EIRFT_2",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.7563409,
+              "x": -0.01966623,
+              "x2": -0.0003927494,
+              "y": 0.02973607,
+              "y2": 0.000129923,
+              "xy": -0.0004325357,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 29.44
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD EIRFPLR_2",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.06917141,
+              "x": 0.1743339,
+              "x2": 0.7524059,
+              "minX": 0.1,
+              "maxX": 1.04
+            }
+          },
+          "ChillerElectricEIR_VSDCentrifugalWaterChiller 1": {
+            "capacity_kW": 1770,
+            "COP": 9.54,
+            "CAPFT_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD CAPFT_2",
+            "CAPFT_curve_type": "OS_Curve_Biquadratic",
+            "CAPFT_curve_coeffs": {
+              "const": 0.7585741,
+              "x": -0.05127829,
+              "x2": 0.005848602,
+              "y": 0.04235544,
+              "y2": -0.001606561,
+              "xy": 0.0009364594,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 29.44
+            },
+            "EIRFT_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD EIRFT_2",
+            "EIRFT_curve_type": "OS_Curve_Biquadratic",
+            "EIRFT_curve_coeffs": {
+              "const": 0.7563409,
+              "x": -0.01966623,
+              "x2": -0.0003927494,
+              "y": 0.02973607,
+              "y2": 0.000129923,
+              "xy": -0.0004325357,
+              "minX": 5.56,
+              "maxX": 8.89,
+              "minY": 12.78,
+              "maxY": 29.44
+            },
+            "EITFPLR_curve_name": "ElectricEIRChiller York YT 2233kW/9.54COP/VSD EIRFPLR_2",
+            "EITFPLR_curve_type": "OS_Curve_Quadratic",
+            "EITFPLR_curve_coeffs": {
+              "const": 0.06917141,
+              "x": 0.1743339,
+              "x2": 0.7524059,
+              "minX": 0.1,
+              "maxX": 1.04
+            }
+          }
+        }
+      }
+    }
+  }
+}

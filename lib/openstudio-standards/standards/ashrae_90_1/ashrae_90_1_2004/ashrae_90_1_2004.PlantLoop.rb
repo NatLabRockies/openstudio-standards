@@ -35,10 +35,10 @@ class ASHRAE9012004 < ASHRAE901
     plant_loop.supplyComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, pri_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-        headered_pumps_variable_speed_set_control_type(pump, control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       end
     end
 
@@ -46,10 +46,10 @@ class ASHRAE9012004 < ASHRAE901
     plant_loop.demandComponents.each do |sc|
       if sc.to_PumpVariableSpeed.is_initialized
         pump = sc.to_PumpVariableSpeed.get
-        pump_variable_speed_set_control_type(pump, sec_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: sec_control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-        headered_pumps_variable_speed_set_control_type(pump, control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       end
     end
 

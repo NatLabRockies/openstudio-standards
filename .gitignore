@@ -3,6 +3,7 @@
 /netbeans
 /.vscode
 /.VSCodeCounter
+/.serena
 
 # Developer installation
 /.bundle/
@@ -24,15 +25,22 @@
 output/
 coverage/
 /spec/reports/
+/test/measures
 /test/reports
-/test/necb/data/*test_results.csv
-/test/necb/*/expected_results/*_test_results.csv
-/test/necb/*/expected_results/*_test_results.json
-/test/necb/*/expected_results/*_test_result.idf
-/test/necb/*/expected_results/*_test_result.osm
-/test/necb/*/expected_results/*_diffs.json
-/test/necb/*/tests/before.osm
-/test/necb/*/tests/after.osm
+/test/necb/*/expected_results/*-test_results.csv
+/test/necb/*/expected_results/*-test_results.json
+/test/necb/*/expected_results/*test_results.json
+/test/necb/*/log.txt*
+/test/necb/*/autozone
+/test/helpers/ci_test_helper/timings.json
+
+# BTAP costing test output
+lib/openstudio-standards/btap/costing/output/
+lib/openstudio-standards/btap/costing/costing_output/
+lib/openstudio-standards/btap/costing/local_test_output/
+
+lib/openstudio-standards/btap/costing/btap_results/tests/regression_files/*test_result.cost.json
+lib/openstudio-standards/btap/costing/btap_results/tests/output/
 
 # auto generated CI files
 /test/ci_test_files/models
@@ -49,3 +57,10 @@ coverage/
 /data/standards/openstudio_standards_duplicates_log.csv
 /data/standards/export
 /data/geometry/../*.osw
+temp_folder/
+input_cache/
+input/
+/utilities/btap_cli/input
+/utilities/btap_cli/output
+
+/.venv

@@ -67,7 +67,7 @@ class NECB2011
       return true
     else
       zones.each do |zone|
-        air_loop = add_system_3_and_8_airloop_multi_speed(heating_coil_type, model, system_data, zone)
+        air_loop = add_system_3_and_8_airloop_multi_speed(heating_coil_type, model, system_data, zone, hw_loop)
         add_sys3_and_8_zone_equip(air_loop,
                                   baseboard_type,
                                   hw_loop,
@@ -78,7 +78,7 @@ class NECB2011
     end
   end
 
-  def add_system_3_and_8_airloop_multi_speed(heating_coil_type, model, system_data, control_zone)
+  def add_system_3_and_8_airloop_multi_speed(heating_coil_type, model, system_data, control_zone, hw_loop)
     # System Type 3: PSZ-AC
     # This measure creates:
     # -a constant volume packaged single-zone A/C unit

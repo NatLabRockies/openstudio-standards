@@ -1,0 +1,516 @@
+{
+    "tables": {
+      "hvac_types": {
+        "data_type": "table",
+        "refs": [
+          "assumption"
+        ],
+        "table":[
+            {
+              "description": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+              "name": "sys_1|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "mau_heating_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_1",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+              "name": "sys_1|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "mau_heating_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_1",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+              "name": "sys_1|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "mau_heating_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_1",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+              "name": "sys_1|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "mau_heating_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_1",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+              "name": "sys_1|doas|shr>none|sc>dx|sh>c-hw|ssf>cv|zh>b-hw|zc>ptac|srf>none|",
+              "baseboard_type": "Hot Water",
+              "mau_heating_type": "Hot Water",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_1",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+              "name": "sys_1|doas|shr>none|sc>dx|sh>c-hw|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+              "baseboard_type": "Electric",
+              "mau_heating_type": "Hot Water",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_1",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+              "name": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-hw|zc>ptac|srf>none|",
+              "baseboard_type": "Hot Water",
+              "mau_heating_type": "Electric",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_1",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+              "name": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+              "baseboard_type": "Electric",
+              "mau_heating_type": "Electric",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_1",
+              "needs_boiler": false
+            },
+            {
+              "description": "FPFC MAU DX Coils with Scroll Chiller",
+              "name": "sys_2|doas|shr>none|sc>dx|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Scroll",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "DX",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU DX Coils with Centrifugal Chiller",
+              "name": "sys_2|doas|shr>none|sc>dx|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Centrifugal",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "DX",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU DX Coils with Rotary Screw Chiller",
+              "name": "sys_2|doas|shr>none|sc>dx|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "RotaryScrew",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "DX",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU DX Coils with Reciprocating Chiller",
+              "name": "sys_2|doas|shr>none|sc>dx|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Reciprocating",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "DX",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+              "name": "sys_2|doas|shr>none|sc>c-chw|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Scroll",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "Hydronic",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+              "name": "sys_2|doas|shr>none|sc>c-chw|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Centrifugal",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "Hydronic",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+              "name": "sys_2|doas|shr>none|sc>c-chw|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "RotaryScrew",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "Hydronic",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+              "name": "sys_2|doas|shr>none|sc>c-chw|sh>c-g|ssf>cv|zh>fpfc|zc>fpfc|srf>none|",
+              "chiller_type": "Reciprocating",
+              "fan_coil_type": "FPFC",
+              "mau_cooling_type": "Hydronic",
+              "system": "sys_2",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_3",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_3",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_3",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "DX",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_3",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "Gas",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_3",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "Gas",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_3",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "Electric",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_3",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+              "name": "sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "Electric",
+              "mau_type": true,
+              "multispeed": false,
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_3",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "DX",
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_4",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "DX",
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "NaturalGas",
+              "system": "sys_4",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "DX",
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_4",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "DX",
+              "necb_reference_hp": true,
+              "necb_reference_hp_supp_fuel": "Electricity",
+              "system": "sys_4",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "Gas",
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_4",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "Gas",
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_4",
+              "needs_boiler": false
+            },
+            {
+              "description": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-hw|zc>none|srf>none|",
+              "baseboard_type": "Hot Water",
+              "heating_coil_type": "Electric",
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_4",
+              "needs_boiler": true
+            },
+            {
+              "description": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+              "name": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+              "baseboard_type": "Electric",
+              "heating_coil_type": "Electric",
+              "necb_reference_hp": false,
+              "necb_reference_hp_supp_fuel": "None",
+              "system": "sys_4",
+              "needs_boiler": false
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Scroll",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": false
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Centrifugal",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": false
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "RotaryScrew",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": false
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Reciprocating",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": false
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Scroll",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Centrifugal",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "RotaryScrew",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-e|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Reciprocating",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Electric",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Scroll",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Centrifugal",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "RotaryScrew",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-e|zc>none|srf>vv|",
+              "baseboard_type": "Electric",
+              "chiller_type": "Reciprocating",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Scroll",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Centrifugal",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "RotaryScrew",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            },
+            {
+              "description": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+              "name": "sys_6|mixed|shr>none|sc>c-chw|sh>c-hw|ssf>vv|zh>b-hw|zc>none|srf>vv|",
+              "baseboard_type": "Hot Water",
+              "chiller_type": "Reciprocating",
+              "fan_type": "var_speed_drive",
+              "heating_coil_type": "Hot Water",
+              "system": "sys_6",
+              "needs_boiler": true
+            }
+          ]
+    }
+  }
+}

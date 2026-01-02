@@ -32,11 +32,11 @@ module LargeOffice
       end
     end
 
-    model_add_transformer(model,
-                          wired_lighting_frac: 0.0281,
-                          transformer_size: 500000,
-                          transformer_efficiency: transformer_efficiency,
-                          excluded_interiorequip_meter: 'DataCenterPlugLoads:InteriorEquipment:Electricity')
+    OpenstudioStandards::Equipment.create_transformer(model,
+                                                      wired_lighting_frac: 0.0281,
+                                                      transformer_size: 500000,
+                                                      transformer_efficiency: transformer_efficiency,
+                                                      excluded_interiorequip_meter: 'DataCenterPlugLoads:InteriorEquipment:Electricity')
 
     system_to_space_map = define_hvac_system_map(building_type, climate_zone)
 
@@ -72,31 +72,6 @@ module LargeOffice
           return false
         end
         return_plenum = return_plenum.get
-      end
-    end
-
-    # set infiltration schedule for plenums
-    # @todo remove once infil_sch in Standards.Space pulls from default building infiltration schedule
-    model.getSpaces.each do |space|
-      next unless space.name.get.to_s.include? 'Plenum'
-
-      # add infiltration if DOE Ref vintage
-      if template == 'DOE Ref 1980-2004' || template == 'DOE Ref Pre-1980'
-        # Create an infiltration rate object for this space
-        infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(space.model)
-        infiltration.setName("#{space.name} Infiltration")
-        all_ext_infil_m3_per_s_per_m2 = OpenStudio.convert(0.2232, 'ft^3/min*ft^2', 'm^3/s*m^2').get
-        infiltration.setFlowperExteriorSurfaceArea(all_ext_infil_m3_per_s_per_m2)
-        infiltration.setSchedule(model_add_schedule(model, 'Large Office Infil Quarter On'))
-        infiltration.setConstantTermCoefficient(1.0)
-        infiltration.setTemperatureTermCoefficient(0.0)
-        infiltration.setVelocityTermCoefficient(0.0)
-        infiltration.setVelocitySquaredTermCoefficient(0.0)
-        infiltration.setSpace(space)
-      else
-        space.spaceInfiltrationDesignFlowRates.each do |infiltration_object|
-          infiltration_object.setSchedule(model_add_schedule(model, 'OfficeLarge INFIL_SCH_PNNL'))
-        end
       end
     end
 

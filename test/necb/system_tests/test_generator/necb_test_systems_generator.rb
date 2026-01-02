@@ -65,7 +65,7 @@ class GeneratorNECBRegressionTests
               # generate unique filename
               test_name = "test_necb_hvac_#{system[:name]}_#{boiler_fueltype.snek}_#{mau_type.to_s.snek}_#{mau_heating_coil_type.snek}_#{baseboard_type.snek}"
               filename = File.join(@file_out_dir, "#{test_name}.rb")
-              file_string = ERB.new(necb_system_template, 0, "", "@html").result(binding)
+              file_string = ERB.new(necb_system_template).result(binding)
               # write file
               File.write(filename, file_string)
               filenames << filename
@@ -109,7 +109,7 @@ class GeneratorNECBRegressionTests
               # generate unique filename
               test_name = "test_necb_hvac_#{system[:name]}_#{boiler_fueltype.snek}_#{chiller_type.to_s.snek}_#{mua_cooling_type.snek}_#{fan_coil_type.snek}"
               filename = File.join(@file_out_dir, "#{test_name}.rb")
-              file_string = ERB.new(necb_system_template, 0, "", "@html").result(binding)
+              file_string = ERB.new(necb_system_template).result(binding)
               # write file
               File.open(filename, 'w') {|file| file.write(file_string)}
               filenames << filename
@@ -141,7 +141,7 @@ class GeneratorNECBRegressionTests
             # generate unique filename
             test_name = "test_necb_hvac_#{system[:name]}_#{boiler_fueltype.snek}_#{heating_coil_type_sys3.to_s.snek}_#{baseboard_type.snek}"
             filename = File.join(@file_out_dir, "#{test_name}.rb")
-            file_string = ERB.new(necb_system_template, 0, "", "@html").result(binding)
+            file_string = ERB.new(necb_system_template).result(binding)
             # write file
             File.open(filename, 'w') {|file| file.write(file_string)}
             filenames << filename
@@ -173,7 +173,7 @@ class GeneratorNECBRegressionTests
             # generate unique filename
             test_name = "test_necb_hvac_#{system[:name]}_#{boiler_fueltype.snek}_#{heating_coil_type_sys4.to_s.snek}_#{baseboard_type.snek}"
             filename = File.join(@file_out_dir, "#{test_name}.rb")
-            file_string = ERB.new(necb_system_template, 0, "", "@html").result(binding)
+            file_string = ERB.new(necb_system_template).result(binding)
             # write file
             File.open(filename, 'w') {|file| file.write(file_string)}
             filenames << filename
@@ -210,7 +210,7 @@ class GeneratorNECBRegressionTests
                 # generate unique filename
                 test_name = "test_necb_hvac_#{system[:name]}_#{boiler_fueltype.snek}_#{heating_coil_type_sys6.to_s.snek}_#{baseboard_type.snek}__#{chiller_type.snek}_#{fan_type.snek}"
                 filename = File.join(@file_out_dir, "#{test_name}.rb")
-                file_string = ERB.new(necb_system_template, 0, "", "@html").result(binding)
+                file_string = ERB.new(necb_system_template).result(binding)
                 # write file
                 File.open(filename, 'w') {|file| file.write(file_string)}
                 filenames << filename

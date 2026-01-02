@@ -110,14 +110,18 @@ class NECB2011
       #end
       # MAU Heating type selection.
       raise("Flag 'necb_reference_hp' is true while 'mau_heating_coil_type' is not set to type DX") if (necb_reference_hp && (mau_heating_coil_type != 'DX'))
-      if mau_heating_coil_type == 'Electric' # electric coil
+      if mau_heating_coil_type == 'Electric' || mau_heating_coil_type == 'Electricity' || mau_heating_coil_type == 'FuelOilNo2' # electric coil
         mau_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-      elsif  mau_heating_coil_type == 'Hot Water'
+      elsif  mau_heating_coil_type == 'Hot Water' || mau_heating_coil_type == 'HotWater'
         mau_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
         hw_loop.addDemandBranchForComponent(mau_htg_coil)
       elsif mau_heating_coil_type == 'DX'
         mau_htg_coil = add_onespeed_htg_DX_coil(model, always_on)
         mau_htg_coil.setName('CoilHeatingDXSingleSpeed_ashp')
+      elsif mau_heating_coil_type == 'Gas' || mau_heating_coil_type == "NaturalGas"
+        mau_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
+      else
+        raise('Invalid fuel type selected for mau heating coil')
       end
 
       # Set up Single Speed DX coil with
@@ -167,6 +171,8 @@ class NECB2011
       # Add a setpoint manager to control the supply air temperature
       if necb_reference_hp
         setpoint_mgr = OpenStudio::Model::SetpointManagerWarmest.new(model)
+        setpoint_mgr.setName("SAT Warmest Reset Heatpump")
+        setpoint_mgr.setStrategy('MaximumTemperature')
         setpoint_mgr.setMinimumSetpointTemperature(13)
         setpoint_mgr.setMaximumSetpointTemperature(20)
         setpoint_mgr.addToNode(mau_air_loop.supplyOutletNode)
@@ -228,11 +234,14 @@ class NECB2011
           epw = OpenStudio::EpwFile.new(model.weatherFile.get.path.get)
           necb_reference_hp_supp_fuel = @standards_data['regional_fuel_use'].detect { |fuel_sources| fuel_sources['state_province_regions'].include?(epw.stateProvinceRegion) }['fueltype_set']
         end
-        if necb_reference_hp_supp_fuel == 'NaturalGas'
+        if necb_reference_hp_supp_fuel == 'NaturalGas' || necb_reference_hp_supp_fuel == "Gas"
           rh_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
-        elsif necb_reference_hp_supp_fuel == 'Electricity' or  necb_reference_hp_supp_fuel == 'FuelOilNo2'
+        elsif necb_reference_hp_supp_fuel == 'Electricity' || necb_reference_hp_supp_fuel == 'Electric' || necb_reference_hp_supp_fuel == 'FuelOilNo2'
           rh_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-        else #hot water coils is an option in the future
+        elsif necb_reference_hp_supp_fuel == 'Hot Water' || necb_reference_hp_supp_fuel == 'HotWater'
+          rh_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+          hw_loop.addDemandBranchForComponent(rh_coil)
+        else
           raise('Invalid fuel type selected for heat pump supplemental coil')
         end
         cav_rh_terminal = OpenStudio::Model::AirTerminalSingleDuctConstantVolumeReheat.new(model, always_on, rh_coil)
@@ -251,6 +260,9 @@ class NECB2011
       sys_name_pars['sys_clg'] = 'ashp' if necb_reference_hp
       sys_name_pars['sys_htg'] = mau_heating_coil_type
       sys_name_pars['sys_htg'] = 'ashp' if necb_reference_hp
+      sys_name_pars['sys_htg'] = 'ashp>c-g' if (necb_reference_hp && (necb_reference_hp_supp_fuel == "NaturalGas" || necb_reference_hp_supp_fuel == "Gas"))
+      sys_name_pars['sys_htg'] = 'ashp>c-e' if necb_reference_hp && necb_reference_hp_supp_fuel == "Electricity"
+      sys_name_pars['sys_htg'] = 'ashp>c-hw' if necb_reference_hp && (necb_reference_hp_supp_fuel == "Hot Water" || necb_reference_hp_supp_fuel == "HotWater")
       sys_name_pars['sys_sf'] = 'cv'
       sys_name_pars['zone_htg'] = baseboard_type
       sys_oa = 'doas'
@@ -262,7 +274,7 @@ class NECB2011
         sys_oa = 'doas'
       end
       sys_name_pars['sys_rf'] = 'none'
-      assign_base_sys_name(mau_air_loop,
+      return assign_base_sys_name(air_loop: mau_air_loop,
                            sys_abbr: 'sys_1',
                            sys_oa: sys_oa,
                            sys_name_pars: sys_name_pars)

@@ -181,11 +181,12 @@ Standard.class_eval do
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object
   # @param sizing_run_dir [String] file path location for the sizing run, defaults to 'SR' in the current directory
+  # @param sizing_run_simulation [Boolean] whether to run the simulation for the sizing periods, defaults to true
   # @return [Boolean] returns true if successful, false if not
-  def model_run_sizing_run(model, sizing_run_dir = "#{Dir.pwd}/SR")
+  def model_run_sizing_run(model, sizing_run_dir = "#{Dir.pwd}/SR", sizing_run_simulation = true)
     # Change the simulation to only run the sizing days
     sim_control = model.getSimulationControl
-    sim_control.setRunSimulationforSizingPeriods(true)
+    sim_control.setRunSimulationforSizingPeriods(sizing_run_simulation)
     sim_control.setRunSimulationforWeatherFileRunPeriods(false)
     if model.version >= OpenStudio::VersionString.new('3.0.0')
       sim_control.setDoHVACSizingSimulationforSizingPeriods(true)

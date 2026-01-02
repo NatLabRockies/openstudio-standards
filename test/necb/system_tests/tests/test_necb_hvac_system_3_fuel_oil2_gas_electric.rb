@@ -24,14 +24,14 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_3_Test_FO2_G_E < Minitest::Test
+class NECB_HVAC_System_3_Test < Minitest::Test
 
   def test_necb_hvac_system_3_fuel_oil2_gas_electric()
     weather_file = 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw'
     template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
     system_name = 'system_3'
     vintage = 'NECB2011'
-    boiler_fueltype = 'FuelOil#2'
+    boiler_fueltype = 'FuelOilNo2'
     baseboard_type = 'Electric'
     heating_coil_type_sys3 = 'Gas'
 
@@ -44,7 +44,11 @@ class NECB_HVAC_System_3_Test_FO2_G_E < Minitest::Test
     name = "sys3_Boiler-#{boiler_fueltype}_HeatingCoilType-#{heating_coil_type_sys3}_BaseboardType-#{baseboard_type}"
     puts "***************************************#{name}*******************************************************\n"
     model = standard.load_building_type_from_library(building_type: 'SmallOffice')
+    standard.assign_building_activity(model: model)
+    standard.assign_building_structure(model: model, activity: @activity, massive: false)
     standard.apply_weather_data(model: model, epw_file: weather_file)
+    standard.assign_building_activity(model: model)
+    standard.assign_building_structure(model: model, activity: @activity)
     standard.apply_loads(model: model)
     standard.apply_envelope(model: model)
     standard.apply_fdwr_srr_daylighting(model: model)
@@ -52,7 +56,7 @@ class NECB_HVAC_System_3_Test_FO2_G_E < Minitest::Test
     hw_loop = nil
     if (baseboard_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype,model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(
         model: model,

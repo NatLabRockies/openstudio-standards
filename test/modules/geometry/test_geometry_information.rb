@@ -128,6 +128,7 @@ class TestGeometryInformation < Minitest::Test
 
   # Information:Space
 
+  # enable when space conditioning category doesn't require a model run
   # def test_space_get_envelope_area
   #   space = @model.getSpaceByName('Aux_Gym_ZN_1_FLR_1').get
   #   result = @geo.space_get_envelope_area(space)
@@ -276,4 +277,9 @@ class TestGeometryInformation < Minitest::Test
     result = @geo.model_get_perimeter(@model)
     assert_equal(708, result.round(0))
   end
+
+  # enable when space conditioning category doesn't require a model run
+  # def test_model_get_envelope_area
+  #   result = @geo.model_get_envelope_area(@model)
+  # end
 end

@@ -13,7 +13,7 @@ class NECB2015
     compressor_type = search_criteria['compressor_type']
 
     # Get the chiller capacity
-    capacity_w = chiller_electric_eir_find_capacity(chiller_electric_eir)
+    capacity_w = OpenstudioStandards::HVAC.chiller_electric_get_capacity(chiller_electric_eir)
 
     # All chillers must be modulating down to 25% of their capacity
     chiller_electric_eir.setChillerFlowMode('LeavingSetpointModulated')
@@ -95,7 +95,7 @@ class NECB2015
     cop = nil
     if chlr_props['minimum_full_load_efficiency']
       kw_per_ton = chlr_props['minimum_full_load_efficiency']
-      cop = kw_per_ton_to_cop(kw_per_ton)
+      cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(kw_per_ton)
       chiller_electric_eir.setReferenceCOP(cop)
     else
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ChillerElectricEIR', "For #{chiller_electric_eir.name}, cannot find minimum full load efficiency, will not be set.")
@@ -104,14 +104,23 @@ class NECB2015
 
     # Set cooling tower properties now that the new COP of the chiller is set
     if chiller_electric_eir.name.to_s.include? 'Primary Chiller'
-      # Single speed tower model assumes 25% extra for compressor power
+      # Get the cooling tower based on the condenser water loop rather than assume that there is only one cooling tower loop.
+      clg_towers = []
       tower_cap = capacity_w * (1.0 + 1.0 / chiller_electric_eir.referenceCOP)
-      if (tower_cap / 1000.0) < 1750
-        clg_tower_objs[0].setNumberofCells(1)
-      else
-        clg_tower_objs[0].setNumberofCells((tower_cap / (1000 * 1750) + 0.5).round)
+      condenser_loop = chiller_electric_eir.condenserWaterLoop.get
+      condenser_loop.supplyComponents.each do |supply_comp|
+        if supply_comp.to_CoolingTowerSingleSpeed.is_initialized
+          clg_towers << supply_comp.to_CoolingTowerSingleSpeed.get
+        end
       end
-      clg_tower_objs[0].setFanPoweratDesignAirFlowRate(0.013 * tower_cap)
+      # Single speed tower model assumes 25% extra for compressor power
+      if (tower_cap / 1000.0) < 1750
+        clg_towers[0].setNumberofCells(1)
+      else
+        clg_towers[0].setNumberofCells((tower_cap / (1000 * 1750) + 0.5).round)
+      end
+      # Only apply cooling tower fan power if power is greater than 13kW.  This is to avoid EnergyPlus issues with some small cooling towers.
+      clg_towers[0].setFanPoweratDesignAirFlowRate(0.013 * tower_cap) if (tower_cap * 0.013 > 13000.0)
     end
 
     # Append the name with size and kw/ton
@@ -138,7 +147,8 @@ class NECB2015
       max_total_loop_pump_power_table = @standards_data['max_total_loop_pump_power']
       plantloop.supplyComponents.each do |supplycomp|
         case supplycomp.iddObjectType.valueName.to_s
-          when 'OS_CentralHeatPumpSystem', 'OS_Coil_Heating_WaterToAirHeatPump_EquationFit', 'OS_Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit', 'OS_Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit_SpeedData'
+          when 'OS_CentralHeatPumpSystem', 'OS_Coil_Heating_WaterToAirHeatPump_EquationFit', 'OS_Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit',
+            'OS_Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit_SpeedData', 'OS_HeatPump_PlantLoop_EIR_Heating', 'OS_HeatPump_PlantLoop_EIR_Cooling'
             search_hash = { 'hydronic_system_type' => 'WSHP' }
             max_powertoload = model_find_object(max_total_loop_pump_power_table, search_hash)['total_normalized_pump_power_wperkw']
           when 'OS_GroundHeatExchanger_Vertical'
@@ -166,7 +176,7 @@ class NECB2015
       var_spd_pumps = pumps.select {|pump| pump.to_PumpVariableSpeed.is_initialized}
       # EnergyPlus doesn't currently properly account for variable speed pumps operation in the condenser loop.
       # This code is an approximation for a correction to the pump head when the loop has variable speed pumps for ground-source condenser loops.
-      # These estimates were confirmed with OS runs using Montreal weather file for offices, schoold, and apartment bldgs. Office estimates are 
+      # These estimates were confirmed with OS runs using Montreal weather file for offices, schoold, and apartment bldgs. Office estimates are
       # then for other bldg types.
       if plantloop.name.to_s.upcase.include? "GLHX"
         max_powertoload = 21.0

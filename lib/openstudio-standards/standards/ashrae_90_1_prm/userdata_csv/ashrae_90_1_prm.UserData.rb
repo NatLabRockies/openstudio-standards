@@ -6,6 +6,7 @@ class UserDataCSV
   def initialize(model, save_dir)
     @model = model
     @component_name = nil
+    @unique_model_object = false
     unless Dir.exist?(save_dir)
       raise ArgumentError "Saving directory #{save_dir} does not exist!"
     end
@@ -70,6 +71,10 @@ class UserDataCSV
   # subclass shall determine what data group to extract from a modle.
   # @return [Array] array of OpenStudio components.
   def load_component
+    if @unique_model_object
+      return [@model.public_send("get#{@component_name}")]
+    end
+
     return @model.public_send("get#{@component_name}")
   end
 end
@@ -145,6 +150,7 @@ class UserDataCSVBuilding < UserDataCSV
   def initialize(model, save_dir)
     super
     @component_name = 'Building'
+    @unique_model_object = true
     @file_name = UserDataFiles::BUILDING
   end
 
@@ -274,7 +280,7 @@ class UserDataWaterUseConnection < UserDataCSV
   # @param save_dir [String] directory to save user data files
   def initialize(model, save_dir)
     super
-    @component_name = 'WaterUseConnections'
+    @component_name = 'WaterUseConnectionss'
     @file_name = UserDataFiles::WATERUSE_CONNECTIONS
   end
 

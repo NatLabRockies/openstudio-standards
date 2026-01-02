@@ -1,5 +1,5 @@
 # *********************************************************************
-# *  Copyright (c) 2008-2015, Natural Resources Canada
+# *  Copyright (c) 2008-2025, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -22,7 +22,10 @@ require 'fileutils'
 require 'singleton'
 require 'find'
 require 'date'
+require_relative 'attributes'
 require_relative 'fileio'
+require_relative 'activity'
+require_relative 'structure'
 require_relative 'geometry'
 require_relative 'envelope'
 require_relative 'bridging'
@@ -341,4 +344,3 @@ module BTAP
   end
 end
 #module BTAP
-

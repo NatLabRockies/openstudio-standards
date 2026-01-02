@@ -1,5 +1,5 @@
 # *********************************************************************
-# *  Copyright (c) 2008-2015, Natural Resources Canada
+# *  Copyright (c) 2008-2025, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -17,6 +17,7 @@
 # *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 # **********************************************************************/
 
+require 'tbd'
 
 module BTAP
   module Geometry
@@ -205,8 +206,7 @@ module BTAP
       return model
     end
 
-    def self.rotate_building(model: , degrees: nil)
-
+    def self.rotate_building(model:, degrees: nil)
       # report as not applicable if effective relative rotation is 0
       if degrees == 0 || degrees.nil?
         puts ('The requested rotation was 0 or nil degrees. The model was not rotated.')
@@ -489,7 +489,6 @@ module BTAP
         return array
       end
 
-
       def self.filter_spaces_by_space_types(model, spaces_array, spacetype_array)
         spaces_array = BTAP::Common::validate_array(model, spaces_array, "Space")
         spacetype_array = BTAP::Common::validate_array(model, spacetype_array, "SpaceType")
@@ -500,11 +499,81 @@ module BTAP
         end
         return returnarray
       end
+
+      ##
+      # Fetch a space's full height.
+      #
+      # @param space [OpenStudio::Model::Space] a space
+      #
+      # @return [Float] full height of space (0 if invalid input)
+      def self.space_height(space = nil)
+        return 0 unless space.is_a?(OpenStudio::Model::Space)
+
+        minZ =  10000
+        maxZ = -10000
+
+        space.surfaces.each do |surface|
+          minZ = [surface.vertices.min_by(&:z).z, minZ].min
+          maxZ = [surface.vertices.max_by(&:z).z, maxZ].max
+        end
+
+        maxZ < minZ ? 0 : maxZ - minZ
+      end
+
+      ##
+      # Fetch a space's width.
+      #
+      # @param space [OpenStudio::Model::Space] a space
+      #
+      # @return [Float] width of a space (0 if invalid input)
+      def self.space_width(space = nil)
+        return 0 unless space.is_a?(OpenStudio::Model::Space)
+
+        floors = facets(space, "all", "Floor")
+        return 0 if floors.empty?
+
+        # Automatically determining a space's "width" is not straightforward:
+        #   - a space may hold multiple floor surfaces at various Z-axis levels
+        #   - a space may hold multiple floor surfaces, with unique "widths"
+        #   - a floor surface may expand/contract (in "width") along its length.
+        #
+        # First, attempt to merge all floor surfaces together as 1x polygon:
+        #   - select largest floor surface (in area)
+        #   - determine its 3D plane
+        #   - retain only other floor surfaces sharing same 3D plane
+        #   - recover potential union between floor surfaces
+        #   - fall back to largest floor surface if invalid union
+        #   - return width of largest bounded box
+        floors = floors.sort_by(&:grossArea).reverse
+        floor  = floors.first
+        plane  = floor.plane
+        t      = OpenStudio::Transformation.alignFace(floor.vertices)
+        polyg  = poly(floor, false, true, true, t, :ulc).to_a.reverse
+        return 0 if polyg.empty?
+
+        if floors.size > 1
+          floors = floors.select { |flr| plane.equal(flr.plane, 0.001) }
+
+          if floors.size > 1
+            polygs = floors.map    { |flr| poly(flr, false, true, true, t, :ulc) }
+            polygs = polygs.reject { |plg| plg.empty? }
+            polygs = polygs.map    { |plg| plg.to_a.reverse }
+            union  = OpenStudio.joinAll(polygs, 0.01).first
+            polyg  = poly(union, false, true, true)
+            return 0 if polyg.empty?
+          end
+        end
+
+        res = realignedFace(polyg.to_a.reverse)
+        return 0 if res[:box].nil?
+
+        # A bounded box's 'height', at its narrowest, is its 'width'.
+        height(res[:box])
+      end
     end
 
     #This Module contains methods that create, modify and query Thermal zone objects.
     module Zones
-
       # This method will filter an array of zones that have an external wall
       # passed floors. Note: if you wish to avoid to create an array of spaces,
       # simply put the space variable in [] brackets
@@ -523,7 +592,6 @@ module BTAP
         end
         return array
       end
-
 
       # This method will filter an array of zones that have no external wall
       # passed floors. Note: if you wish to avoid to create an array of spaces,
@@ -1570,6 +1638,18 @@ module BTAP
           area -= vertex.y.to_f * vertices[j].x.to_f
         end
         return area
+      end
+
+      # Calculate the perimeter from a set of OpenStudio vertices.
+      # Calculated by iterating through vertex pairs, subtracting the difference, and getting the length of the returned
+      # Vector3d object.
+      def self.getSurfacePerimeterFromVertices(vertices:)
+        perimeter = 0.0
+        return 0.0 if vertices.size < 2
+        (vertices.size - 1).times do |i|
+          perimeter += (vertices[i] - vertices[(i + 1) % vertices.size]).length
+        end
+        return perimeter
       end
     end #Module Surfaces
   end #module Geometry
