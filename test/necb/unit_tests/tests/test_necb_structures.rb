@@ -123,7 +123,7 @@ class NECB_Structure_Tests < Minitest::Test
                 else
                   id = c.layers.last.nameString
                   err_msg = "BTAP::Structure #{id} insulation layer (#{cas})?"
-                  assert_includes(id, "cellulose", err_msg)
+                  assert_includes(id, "OSut:K", err_msg)
                 end
               end
             end
