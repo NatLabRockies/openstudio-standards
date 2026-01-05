@@ -3361,7 +3361,8 @@ module OpenstudioStandards
                             fan_location: 'DrawThrough',
                             fan_type: 'ConstantVolume',
                             cooling_type: 'Single Speed DX AC',
-                            supply_temp_sch: nil)
+                            supply_temp_sch: nil,
+                            rel_hum_setp_sch: nil)
       # hvac operation schedule
       if hvac_op_sch.nil?
         hvac_op_sch = model.alwaysOnDiscreteSchedule
@@ -3573,7 +3574,8 @@ module OpenstudioStandards
                             hvac_op_sch: nil,
                             oa_damper_sch: nil,
                             return_plenum: nil,
-                            supply_temp_sch: nil)
+                            supply_temp_sch: nil,
+                            rel_hum_setp_sch: nil)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding CRAH system for #{thermal_zones.size} zones data center.")
       thermal_zones.each do |zone|
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Model.Model', "---#{zone.name}")
