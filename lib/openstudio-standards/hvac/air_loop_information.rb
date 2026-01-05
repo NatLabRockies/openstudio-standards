@@ -370,8 +370,7 @@ module OpenstudioStandards
     # Get the return air plenum zone object for an air loop, if it exists
     #
     # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] OpenStudio AirLoopHVAC object
-    # @return [OpenStudio::Model::ThermalZone] OpenStudio thermal zone object of the return air plenum zone
-    #                                          when an air loop uses a return air plenum, nil otherwise
+    # @return [OpenStudio::Model::ThermalZone] OpenStudio thermal zone object of the return air plenum zone when an air loop uses a return air plenum, nil otherwise
     def self.air_loop_hvac_return_air_plenum(air_loop_hvac)
       # Get return air node
       return_air_node = air_loop_hvac.demandOutletNode
@@ -391,10 +390,34 @@ module OpenstudioStandards
       return nil
     end
 
-    # Get supply fan for airloop
+    # Get the heating coil for an air loop
+    #
+    # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] AirLoopHVAC object
+    # @return [OpenStudio::Model::HVACComponent] heating coil object, cast as its object type under the HVACComponent class
+    def self.air_loop_hvac_heating_coil(air_loop_hvac)
+      heating_coil = nil
+      air_loop_hvac.supplyComponents.each do |comp|
+        if comp.to_CoilHeatingWater.is_initialized
+          heating_coil = comp.to_CoilHeatingWater.get
+        elsif comp.to_CoilHeatingElectric.is_initialized
+          heating_coil = comp.to_CoilHeatingElectric.get
+        elsif comp.to_AirLoopHVACUnitarySystem.is_initialized
+          htg_coil = comp.to_AirLoopHVACUnitarySystem.get.heatingCoil
+          if htg_coil.is_initialized && htg_coil.get.to_CoilHeatingWater.is_initialized
+            heating_coil = htg_coil.get.to_CoilHeatingWater.get
+          elsif htg_coil.is_initialized && htg_coil.get.to_CoilHeatingElectric.is_initialized
+            heating_coil = htg_coil.get.to_CoilHeatingElectric.get
+          end
+        end
+      end
+
+      return heating_coil
+    end
+
+    # Get the supply fan for an air loop
     #
     # @param air_loop [OpenStudio::Model::AirLoopHVAC] AirLoopHVAC object
-    # @return fan
+    # @return [OpenStudio::Model::HVACComponent] fan object, cast as its object type under the HVACComponent class
     def self.air_loop_hvac_supply_fan(air_loop)
       fan = nil
       if air_loop.supplyFan.is_initialized

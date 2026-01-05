@@ -6126,17 +6126,6 @@ class Standard
     return true
   end
 
-  # Template method for adding a setpoint manager for a coil control logic to a heating coil.
-  # ASHRAE 90.1-2019 Appendix G.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model
-  # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] thermal zone array
-  # @param coil [OpenStudio::Model::StraightComponent] heating coil
-  # @return [Boolean] returns true if successful, false if not
-  def model_set_central_preheat_coil_spm(model, thermal_zones, coil)
-    return true
-  end
-
   # Template method for evaluate DCV requirements in the user model
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model

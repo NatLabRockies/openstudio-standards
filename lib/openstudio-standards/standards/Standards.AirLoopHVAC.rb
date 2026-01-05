@@ -52,6 +52,10 @@ class Standard
     # Multizone VAV Systems
     if OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop_hvac)
 
+      # set the setpointmanager for the central/preheat coil if required
+      heating_coil = OpenstudioStandards::HVAC.air_loop_hvac_heating_coil(air_loop_hvac)
+      model_set_central_preheat_coil_spm(air_loop_hvac.model, air_loop_hvac.thermal_zones, heating_coil)
+
       # VAV Reheat Control
       air_loop_hvac_apply_vav_damper_action(air_loop_hvac)
 
@@ -2984,5 +2988,16 @@ class Standard
     max_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.7)
     oa_control.setMaximumFractionofOutdoorAirSchedule(max_oa_sch)
     return max_oa_sch
+  end
+
+  # Template method for adding a setpoint manager for a coil control logic to a heating coil.
+  # ASHRAE 90.1-2019 Appendix G.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model
+  # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] thermal zone array
+  # @param coil [OpenStudio::Model::StraightComponent] heating coil
+  # @return [Boolean] returns true if successful, false if not
+  def model_set_central_preheat_coil_spm(model, thermal_zones, coil)
+    return true
   end
 end

@@ -1895,9 +1895,6 @@ module OpenstudioStandards
                                                                        rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
       end
 
-      # set the setpointmanager for the central/preheat coil if required
-      model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
-
       # create cooling coil
       if chilled_water_loop.nil?
         OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
@@ -2101,9 +2098,6 @@ module OpenstudioStandards
                                                                         air_loop_node: air_loop.supplyInletNode,
                                                                         name: "#{air_loop.name} Htg Coil")
 
-      # set the setpointmanager for the central/preheat coil if required
-      model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
-
       # create cooling coil
       OpenstudioStandards::HVAC.create_coil_cooling_water(model,
                                                           chilled_water_loop,
@@ -2261,9 +2255,6 @@ module OpenstudioStandards
                                                                        rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
                                                                        rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
       end
-
-      # set the setpointmanager for the central/preheat coil if required
-      model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
 
       # create cooling coil
       if chilled_water_loop.nil?
@@ -2435,9 +2426,6 @@ module OpenstudioStandards
       htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
                                                                         air_loop_node: air_loop.supplyInletNode,
                                                                         name: "#{air_loop.name} Main Htg Coil")
-
-      # set the setpointmanager for the central/preheat coil if required
-      model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
 
       # create cooling coil
       if chilled_water_loop.nil?
