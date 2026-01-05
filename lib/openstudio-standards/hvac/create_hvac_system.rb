@@ -1989,7 +1989,15 @@ module OpenstudioStandards
           terminal.setMaximumReheatAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
           air_loop.multiAddBranchForZone(zone, terminal.to_HVACComponent.get)
           oa_rate = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate_per_area(zone)
-          air_terminal_single_duct_vav_reheat_apply_initial_prototype_damper_position(terminal, oa_rate)
+
+          # Set the minimum flow fraction based on reheat type
+          min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
+                        when 'Electricity', 'NaturalGas'
+                          0.3
+                        else # 'HotWater', other
+                          0.2
+                        end
+          terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
           # zone sizing
           sizing_zone = zone.sizingZone
@@ -2010,7 +2018,15 @@ module OpenstudioStandards
           end
           air_loop.multiAddBranchForZone(zone, terminal.to_HVACComponent.get)
           oa_rate = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate_per_area(zone)
-          air_terminal_single_duct_vav_reheat_apply_initial_prototype_damper_position(terminal, oa_rate)
+
+          # Set the minimum flow fraction based on reheat type
+          min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
+                        when 'Electricity', 'NaturalGas'
+                          0.3
+                        else # 'HotWater', other
+                          0.2
+                        end
+          terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
           # zone sizing
           sizing_zone = zone.sizingZone
@@ -2340,7 +2356,15 @@ module OpenstudioStandards
         terminal.setMaximumReheatAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
         air_loop.multiAddBranchForZone(zone, terminal.to_HVACComponent.get)
         oa_rate = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate_per_area(zone)
-        air_terminal_single_duct_vav_reheat_apply_initial_prototype_damper_position(terminal, oa_rate)
+
+        # Set the minimum flow fraction based on reheat type
+        min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
+                      when 'Electricity', 'NaturalGas'
+                        0.3
+                      else # 'HotWater', other
+                        0.2
+                      end
+        terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
         unless return_plenum.nil?
           zone.setReturnPlenum(return_plenum)
@@ -2638,7 +2662,15 @@ module OpenstudioStandards
         terminal.setMaximumReheatAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
         air_loop.multiAddBranchForZone(zone, terminal.to_HVACComponent.get)
         oa_rate = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate_per_area(zone)
-        air_terminal_single_duct_vav_reheat_apply_initial_prototype_damper_position(terminal, oa_rate)
+
+        # Set the minimum flow fraction based on reheat type
+        min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
+                      when 'Electricity', 'NaturalGas'
+                        0.3
+                      else # 'HotWater', other
+                        0.2
+                      end
+        terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
         # zone sizing
         sizing_zone = zone.sizingZone
@@ -2648,9 +2680,6 @@ module OpenstudioStandards
         sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
         sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       end
-
-      # Set the damper action based on the template.
-      air_loop_hvac_apply_vav_damper_action(air_loop)
 
       return air_loop
     end

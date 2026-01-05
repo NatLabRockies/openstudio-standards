@@ -54,7 +54,7 @@ class Standard
 
       # set the setpointmanager for the central/preheat coil if required
       heating_coil = OpenstudioStandards::HVAC.air_loop_hvac_heating_coil(air_loop_hvac)
-      model_set_central_preheat_coil_spm(air_loop_hvac.model, air_loop_hvac.thermal_zones, heating_coil)
+      model_set_central_preheat_coil_spm(air_loop_hvac.model, air_loop_hvac.thermalZones, heating_coil)
 
       # VAV Reheat Control
       air_loop_hvac_apply_vav_damper_action(air_loop_hvac)
