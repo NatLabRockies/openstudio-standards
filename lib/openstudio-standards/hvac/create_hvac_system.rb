@@ -3470,9 +3470,8 @@ module OpenstudioStandards
                          'ASHRAE 169-2013-6A', 'ASHRAE 169-2013-6B', 'ASHRAE 169-2013-7A',
                          'ASHRAE 169-2013-7B', 'ASHRAE 169-2013-8A', 'ASHRAE 169-2013-8B']
         if cold_climates.include? climate_zone
-          # Determine the economizer type in the prototype buildings, which depends on climate zone.
-          economizer_type = model_economizer_type(model, climate_zone)
-          oa_controller.setEconomizerControlType(economizer_type)
+          # Use FixedDryBulb as it is allowed and has the fewest performance issues
+          oa_controller.setEconomizerControlType('FixedDryBulb')
 
           # Check that the economizer type set by the prototypes
           # is not prohibited by code.  If it is, change to no economizer.
