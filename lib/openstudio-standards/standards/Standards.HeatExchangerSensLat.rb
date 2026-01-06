@@ -188,6 +188,24 @@ class Standard
     enthalpy_recovery_ratio = enthalpy_recovery_ratio_design_to_typical_adjustment(enthalpy_recovery_ratio, climate_zone)
     full_htg_sens_eff, full_htg_lat_eff, part_htg_sens_eff, part_htg_lat_eff, full_cool_sens_eff, full_cool_lat_eff, part_cool_sens_eff, part_cool_lat_eff = heat_exchanger_air_to_air_sensible_and_latent_enthalpy_recovery_ratio_to_effectiveness(enthalpy_recovery_ratio, design_conditions)
 
+    # use minimum of 0.5 for sensible and 0 minimum for latent.
+    if full_htg_sens_eff.nil? || full_htg_sens_eff < 0.5
+      full_htg_sens_eff = 0.5
+    end
+    full_htg_lat_eff = 0.0 if full_htg_lat_eff.nil?
+    if part_htg_sens_eff.nil? || part_htg_sens_eff < 0.5
+      part_htg_sens_eff = 0.5
+    end
+    part_htg_lat_eff = 0.5 if part_htg_lat_eff.nil?
+    if full_cool_sens_eff.nil? || full_cool_sens_eff < 0.5
+      full_cool_sens_eff = 0.5
+    end
+    full_cool_lat_eff = 0.5 if full_cool_lat_eff.nil?
+    if part_cool_sens_eff.nil? || part_cool_sens_eff < 0.5
+      part_cool_sens_eff = 0.5
+    end
+    part_cool_lat_eff = 0.5 if part_cool_lat_eff.nil?
+
     return full_htg_sens_eff, full_htg_lat_eff, part_htg_sens_eff, part_htg_lat_eff, full_cool_sens_eff, full_cool_lat_eff, part_cool_sens_eff, part_cool_lat_eff
   end
 
