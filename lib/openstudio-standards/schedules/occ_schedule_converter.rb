@@ -223,7 +223,7 @@ end
 
 def convert_all_schedules(create_osm: false)
   base_dir = File.dirname(__FILE__), '../standards/ashrae_90_1/data'
-  data_path = File.join(base_dir, 'ashrae_90_1.schedules.cleaned.json')
+  data_path = File.join(base_dir, 'ashrae_90_1.schedules.json')
 
   data = load_schedule_data(data_path)
 
