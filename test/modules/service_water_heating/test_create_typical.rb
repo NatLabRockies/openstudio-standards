@@ -247,4 +247,22 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
 
     model.save("#{output_dir}/out.osm", true)
   end
+
+  def test_create_typical_service_water_heating_deer_school
+    # set output directory
+    output_dir = "#{__dir__}/output/#{__method__}"
+    FileUtils.mkdir_p output_dir
+
+    model = @std.safe_load_model("#{__dir__}/../../deer_prototype/models/epr_test.osm")
+    model.save("#{output_dir}/in.osm", true)
+
+    # remove swh loops
+    model.getPlantLoops.each { |swh_loop| swh_loop.remove unless (swh_loop.name == 'Hot Water Loop') }
+
+    # default water heater
+    created_loops = @swh.create_typical_service_water_heating(model)
+    assert(created_loops.size > 1, "Expected more than 1 service water heating loop.")
+
+    model.save("#{output_dir}/out.osm", true)
+  end
 end
