@@ -3472,13 +3472,6 @@ module OpenstudioStandards
         if cold_climates.include? climate_zone
           # Use FixedDryBulb as it is allowed and has the fewest performance issues
           oa_controller.setEconomizerControlType('FixedDryBulb')
-
-          # Check that the economizer type set by the prototypes
-          # is not prohibited by code.  If it is, change to no economizer.
-          unless air_loop_hvac_economizer_type_allowable?(air_loop, climate_zone)
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.prototype.Model', "#{air_loop.name} is required to have an economizer, but the type chosen, #{economizer_type} is prohibited by code for , climate zone #{climate_zone}.  Economizer type will be switched to No Economizer.")
-            oa_controller.setEconomizerControlType('NoEconomizer')
-          end
         end
 
         # add humidifier to control minimum RH
