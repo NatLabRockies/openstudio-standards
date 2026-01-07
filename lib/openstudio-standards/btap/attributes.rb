@@ -257,15 +257,17 @@ module BTAP
           # In models with attics, roofs may be unconditioned and as a result
           # will not be considered for further analysis. However, attic floors
           # and skylight well walls will be insulated and these surfaces will
-          # need to be filtered.
+          # need to be properly categorized.
           # TODO: Eventually crawlspaces should also be considered, however they
           # are not present in any of the NECB template buildings.
-          unless surfaces_hash["ExteriorRoof"].empty?
-            if surfaces_hash["ExteriorRoof"].first.rsi < 1.0
-              surfaces_hash["InterzonalAtticFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-                exterior_surfaces, "Floor").sort
-              surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-                exterior_surfaces, "Wall").sort
+          if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
+            surfaces_hash["InterzonalAtticFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+              derated_surfaces, "Floor").sort
+            surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+              derated_surfaces, "Wall").sort
+            (surfaces_hash["InterzonalAtticFloor"] + surfaces_hash["InterzonalSkylightWalls"]).each do |surface|
+              surface.instance_variable_set(:@rsi, TBD.rsi(
+                surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
             end
           end
           surfaces_hash["InterzonalAtticFloor"]    = [] unless surfaces_hash.has_key?("InterzonalAtticFloor")
