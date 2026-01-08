@@ -90,8 +90,8 @@ class Standard
           end
           chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   cooling_fuel: 'Electricity',
-                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'].to_f,
-                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'].to_f,
+                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'],
+                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'],
                                                   chw_pumping_configuration: system['chw_pumping_configuration'],
                                                   chiller_cooling_type: system['chiller_cooling_type'],
                                                   chiller_condenser_type: system['chiller_condenser_type'],
@@ -133,8 +133,8 @@ class Standard
           condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model, cooling_tower_capacity_control: 'Variable Speed Fan') if system['chiller_cooling_type'] == 'WaterCooled'
           chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   cooling_fuel: 'Electricity',
-                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'].to_f,
-                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'].to_f,
+                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'],
+                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'],
                                                   chw_pumping_configuration: system['chw_pumping_configuration'],
                                                   chiller_cooling_type: system['chiller_cooling_type'],
                                                   chiller_condenser_type: system['chiller_condenser_type'],
@@ -248,8 +248,8 @@ class Standard
           end
           chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   cooling_fuel: 'Electricity',
-                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'].to_f,
-                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'].to_f,
+                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'],
+                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'],
                                                   chw_pumping_configuration: system['chw_pumping_configuration'],
                                                   chiller_cooling_type: system['chiller_cooling_type'],
                                                   chiller_condenser_type: system['chiller_condenser_type'],
@@ -367,8 +367,8 @@ class Standard
           end
           chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
                                                   cooling_fuel: 'Electricity',
-                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'].to_f,
-                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'].to_f,
+                                                  dsgn_sup_wtr_temp: system['chilled_water_design_supply_water_temperature'],
+                                                  dsgn_sup_wtr_temp_delt: system['chilled_water_design_supply_water_temperature_delta'],
                                                   chw_pumping_configuration: system['chw_pumping_configuration'],
                                                   chiller_cooling_type: system['chiller_cooling_type'],
                                                   chiller_condenser_type: system['chiller_condenser_type'],
