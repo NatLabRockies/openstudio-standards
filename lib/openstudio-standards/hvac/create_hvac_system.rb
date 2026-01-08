@@ -296,11 +296,11 @@ module OpenstudioStandards
         chilled_water_loop.setName("#{secondary_loop_name}_Primary")
         secondary_chilled_water_loop.setName(secondary_loop_name)
 
-        # chilled water loop design temperature sizing and controls
+        # set chilled water loop design temperature sizing and controls for secondary loop
         dsgn_temps = OpenstudioStandards::HVAC.standard_chilled_water_loop_design_sizing_temperatures
         dsgn_temps['dsgn_chw_temp_f'] = dsgn_sup_wtr_temp
         dsgn_temps['dsgn_chw_temp_delt_r'] = dsgn_sup_wtr_temp_delt
-        OpenstudioStandards::HVAC.set_chilled_water_loop_system_sizing(chilled_water_loop, dsgn_temps, outdoor_air_reset: outdoor_air_reset)
+        OpenstudioStandards::HVAC.set_chilled_water_loop_system_sizing(secondary_chilled_water_loop, dsgn_temps, outdoor_air_reset: outdoor_air_reset)
 
         chilled_water_loop.additionalProperties.setFeature('is_primary_loop', true)
         chilled_water_loop.additionalProperties.setFeature('secondary_loop_name', secondary_chilled_water_loop.name.to_s)
