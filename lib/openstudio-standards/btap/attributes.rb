@@ -98,6 +98,21 @@ module BTAP
         "InterzonalSkylightWalls" => :walls
       }
 
+      # TODO: Temporary default constructions for underatable surface types.
+      @default_surface_constructions_by_type = {
+        "ExteriorFixedWindow"             => "BTAP-ExteriorWindow-FixedWindow-1",
+        "ExteriorOperableWindow"          => "BTAP-ExteriorWindow-OperableWindow-5b",
+        "ExteriorSkylight"                => "BTAP-Skylight-2",
+        "ExteriorTubularDaylightDiffuser" => "BTAP-Skylight-2",
+        "ExteriorTubularDaylightDome"     => "BTAP-Skylight-2",
+        "ExteriorDoor"                    => "BTAP-ExteriorDoor-Metal-1",
+        "ExteriorGlassDoor"               => "BTAP-ExteriorWindow-GlazedDoor-4",
+        "ExteriorOverheadDoor"            => "BTAP-ExteriorOverheadDoor-Metal-1",
+        "GroundContactWall"               => "BTAP-GroundContactWall-Mass2",
+        "GroundContactRoof"               => "BTAP-GroundContactRoof-Mass-2",
+        "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
+      }
+
       @zones         = []
       @spaces        = []
       @constructions = {}
@@ -133,13 +148,7 @@ module BTAP
       @spaces.each do |space|
         @surface_types.each do |surface_type|
           space.surfaces_hash[surface_type].each do |surface|
-            if @surface_type_tbd_map.has_key?(surface_type)
-              compile_surface_construction(surface, surface_type)
-            else
-              puts "[BTAP::Attributes] Surface takeoff for " \
-                   "#{surface.nameString} with surface type #{surface_type} " \
-                   "is unavailable."
-            end
+            compile_surface_construction(surface, surface_type)
           end
         end
       end
@@ -158,8 +167,13 @@ module BTAP
       # surface is less than 1, then skip it.
       return if surface.rsi < 1.0
 
-      tbd_surface_type          = @surface_type_tbd_map[surface_type]
-      construction_name         = @surface_types_to_assemblies[surface_type]
+      if @surface_type_tbd_map.has_key?(surface_type)
+        tbd_surface_type          = @surface_type_tbd_map[surface_type]
+        construction_name         = @surface_types_to_assemblies[surface_type]
+      else # TODO: Temporary branching for temporary defaults.
+        construction_name = @default_surface_constructions_by_type[surface_type]
+      end
+
       construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
       surface_usi               = 1 / surface.rsi
       closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
