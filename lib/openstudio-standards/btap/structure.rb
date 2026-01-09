@@ -596,28 +596,11 @@ module BTAP
 
       @co2[:structure] += partition_kgm2 * m2 * partition_co2kg
 
+      # Set an AdditionalProperty for tallied CO2-e [kg] (A1-A3):
+      tag = "co2_structure"
+      bldg.additionalProperties.setFeature(tag, @co2[:structure])
+
       true
-    end
-
-    ##
-    # Updates and returns embodied carbon estimates (A1-A3).
-    #
-    # @param model [OpenStudio::Model::Model] a model
-    #
-    # @return [Hash] embodied carbon tally (CO2-e kg, A1-A3)
-    def tallyCO2(model)
-      mth = "BTAP::Structure::#{__callee__}"
-      cl  = OpenStudio::Model::Model
-      lgs = @feedback[:logs]
-
-      unless model.is_a?(cl)
-        lgs << "Invalid OpenStudio model (#{mth})"
-        return 0
-      end
-
-      # @todo
-
-      @co2
     end
   end
 end
