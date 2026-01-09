@@ -1150,7 +1150,6 @@ module BTAP
       # The "convex/concave" suffix on tally edges can be safely ignored since
       # they currently aren't relevant to any NECB standard, but they are to
       # ASHRAE 90.1.
-
       tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
       tally_edges.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
@@ -1193,15 +1192,18 @@ module BTAP
     end
 
     # Remove most instance variables from this TBD object. This is a temporary
-    # workaround for getting caching to work since the TBD object has lots of
-    # member attributes and freezes, possibly due to a recurisve attribute
-    # somewhere. This prevents inspecting the object without a file pager or
-    # writing it to a file.
+    # workaround for getting caching to work since the TBD object is very deeply
+    # nested with member attributes. A bug exists in ruby which causes the
+    # `inspect` method to hang for such objects:
+    # https://bugs.ruby-lang.org/issues/6783
+
+    # This prevents inspecting the object in an interactive debug shell without
+    # a file pager and prevents writing the object to a file.
     def shorten_instance_variables
-      self.instance_variables.filter {|variable| variable != :@tally and variable != :@model}.each do |variable|
+      self.instance_variables.filter { |variable| variable != :@tally and variable != :@model }.each do |variable|
         remove_instance_variable(variable)
       end
-      @model.keys.filter { |value| value != :perform}.each do |value|
+      @model.keys.filter { |value| value != :perform }.each do |value|
         @model.delete(value)
       end
       @tally.delete(:constructions)
