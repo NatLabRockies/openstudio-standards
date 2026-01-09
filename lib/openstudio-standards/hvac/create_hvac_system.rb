@@ -4812,40 +4812,39 @@ module OpenstudioStandards
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', "Replacing #{radiant_type} constructions with new radiant slab constructions.")
 
       # determine construction insulation thickness by climate zone
-      climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(model)
-      if climate_zone.empty?
+      climate_zone_number = OpenstudioStandards::Weather.model_get_ashrae_climate_zone_number(model)
+      if climate_zone_number.nil?
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', 'Unable to determine climate zone for radiant slab insulation determination.  Defaulting to climate zone 5, R-20 insulation, 110F heating design supply water temperature.')
         cz_mult = 4
         radiant_htg_dsgn_sup_wtr_temp_f = 110
       else
-        climate_zone_set = model_find_climate_zone_set(model, climate_zone)
-        case climate_zone_set.gsub('ClimateZone ', '').gsub('CEC T24 ', '')
-        when '1'
+        case climate_zone_number
+        when 0, 1
           cz_mult = 2
           radiant_htg_dsgn_sup_wtr_temp_f = 90
-        when '2', '2A', '2B', 'CEC15'
+        when 2
           cz_mult = 2
           radiant_htg_dsgn_sup_wtr_temp_f = 100
-        when '3', '3A', '3B', '3C', 'CEC3', 'CEC4', 'CEC5', 'CEC6', 'CEC7', 'CEC8', 'CEC9', 'CEC10', 'CEC11', 'CEC12', 'CEC13', 'CEC14'
+        when 3
           cz_mult = 3
           radiant_htg_dsgn_sup_wtr_temp_f = 100
-        when '4', '4A', '4B', '4C', 'CEC1', 'CEC2'
+        when 4
           cz_mult = 4
           radiant_htg_dsgn_sup_wtr_temp_f = 100
-        when '5', '5A', '5B', '5C', 'CEC16'
+        when 5
           cz_mult = 4
           radiant_htg_dsgn_sup_wtr_temp_f = 110
-        when '6', '6A', '6B'
+        when 6
           cz_mult = 4
           radiant_htg_dsgn_sup_wtr_temp_f = 120
-        when '7', '8'
+        when 7, 8
           cz_mult = 5
           radiant_htg_dsgn_sup_wtr_temp_f = 120
         else # default to 4
           cz_mult = 4
           radiant_htg_dsgn_sup_wtr_temp_f = 100
         end
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', "Based on model climate zone #{climate_zone} using R-#{(cz_mult * 5).to_i} slab insulation, R-#{((cz_mult + 1) * 5).to_i} exterior floor insulation, R-#{((cz_mult + 1) * 2 * 5).to_i} exterior roof insulation, and #{radiant_htg_dsgn_sup_wtr_temp_f}F heating design supply water temperature.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', "Based on model climate zone #{climate_zone_number} using R-#{(cz_mult * 5).to_i} slab insulation, R-#{((cz_mult + 1) * 5).to_i} exterior floor insulation, R-#{((cz_mult + 1) * 2 * 5).to_i} exterior roof insulation, and #{radiant_htg_dsgn_sup_wtr_temp_f}F heating design supply water temperature.")
       end
 
       # create materials
