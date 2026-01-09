@@ -1191,7 +1191,7 @@ module BTAP
       return material_quantities
     end
 
-    # Remove most instance variables from this TBD object. This is a temporary
+    # Remove most instance variables from the TBD object. This is a temporary
     # workaround for getting caching to work since the TBD object is very deeply
     # nested with member attributes. A bug exists in ruby which causes the
     # `inspect` method to hang for such objects:
