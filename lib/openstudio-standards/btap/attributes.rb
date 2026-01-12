@@ -259,47 +259,26 @@ module BTAP
           surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
           surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
           surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
-
-          # Whether TBD is enabled or not affects the way the U-value is
-          # retrieved for exterior surfaces. If enabled, use the additional
-          # property and if not, calculate it with the TBD.rsi class method.
-          if @use_tbd
-            exterior_surfaces.each do |surface|
-
-              # Some uninsulated surfaces like attic roofs won't be derated and
-              # will not contain a U-value. Check for the presence of the
-              # "c tbd" substring which determines whether or not the surface
-              # was derated.
-              if surface.construction.get.nameString.include?("c tbd")
-                surface.instance_variable_set(:@rsi,
-                  1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get)
-              else
-                surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get,
-                  surface.filmResistance))
-              end
-            end
-          else
-            exterior_surfaces.each do |surface|
-              surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get,
-                surface.filmResistance))
-            end
+          exterior_surfaces.each do |surface|
+            surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
 
           # Interzonal Surfaces
           # In models with attics, roofs may be unconditioned and as a result
           # will not be considered for further analysis. However, attic floors
           # and skylight well walls will be insulated and these surfaces will
-          # need to be properly categorized.
+          # need to be properly categorized. Since these are unconditioned and
+          # unaffected by TBD, get the mirrored surface of these surfaces via
+          # `adjacentSurface` which is conditioned.
           # TODO: Eventually crawlspaces should also be considered, however they
           # are not present in any of the NECB template buildings.
           if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
             surfaces_hash["InterzonalAtticFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-              space.surfaces, "Floor").sort
+              space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
             surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-              space.surfaces, "Wall").sort
+              space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
             (surfaces_hash["InterzonalAtticFloor"] + surfaces_hash["InterzonalSkylightWalls"]).each do |surface|
-              surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get,
-                surface.filmResistance))
+              surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
             end
           end
           surfaces_hash["InterzonalAtticFloor"]    = [] unless surfaces_hash.has_key?("InterzonalAtticFloor")
@@ -332,6 +311,25 @@ module BTAP
 
           space.instance_variable_set(:@surfaces_hash, surfaces_hash)
         end
+      end
+    end
+
+    # Helper method for `compile_model()`. Whether TBD is enabled or not affects
+    # the way the U-value is retrieved for exterior and interzonal surfaces.
+    # If enabled, use the additional property and if not, calculate it with the
+    # TBD.rsi class method.
+    #
+    # @param surface [OpenStudio::Model::Surface]
+    # @return [Float] The RSI for the surface.
+    def get_correct_rsi(surface)
+
+      # Uninsulated surfaces are not derated by TBD. These surfaces will not
+      # have a stored U-value. In those cases, the fallback method should return
+      # zero accordingly.
+      if @use_tbd and surface.additionalProperties.getFeatureAsDouble("uprated_Uo").is_initialized
+        return 1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
+      else
+        return TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       end
     end
   end
