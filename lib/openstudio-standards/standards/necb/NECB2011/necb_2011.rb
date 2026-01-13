@@ -16,31 +16,42 @@ class NECB2011 < Standard
   attr_accessor :space_multiplier_map
   attr_accessor :fuel_type_set
 
-  # This is a helper method to convert arguments that may support 'NECB_Default, and nils to convert to float'
+  # This is a helper method to convert arguments to float.
+  #   If variable undefined set to the default
+  #   If already a numeric then return it
+  #   If variable is a string then convert to a float, using the default if 'NECB_Default'
+  #   If that all fails then return the default.
   def convert_arg_to_f(variable:, default:)
-    return variable if variable.kind_of?(Numeric)
-    return default if variable.nil? || (variable.to_s == 'NECB_Default')
-    return unless variable.kind_of?(String)
-
-    variable = variable.strip
-    return variable.to_f
-  end
-
-  # This method converts arguments to bool.  Anything other than a bool false or string 'false' is converted
-  # to a bool true.  Bool false and case insesitive string false are turned into bool false.
-  def convert_arg_to_bool(variable:, default:)
     return default if variable.nil?
+    return variable if variable.kind_of?(Numeric)
     if variable.is_a? String
-      return true if variable.to_s.downcase == 'true'
-      return false if variable.to_s.downcase == 'false'
-      return default
+      return default if variable.to_s.downcase == 'necb_default'
+      variable = variable.strip
+      return variable.to_f
     end
-    return variable if variable.is_a?(TrueClass) || variable.is_a?(FalseClass)
     return default
   end
 
-  # This method checks if a variable is a string.  If it is anything but a string it returns the default.  If it is a
-  # string set to "NECB_Default" it return the default.  Otherwise it returns the strirng set to it.
+  # This method converts arguments to bool.
+  #   If variable undefined set to the default
+  #   If already a bool then return it
+  #   If variable is a string then convert to a bool, using the default if 'NECB_Default'
+  #   If that all fails then return the default.
+  def convert_arg_to_bool(variable:, default:)
+    return default if variable.nil?
+    return variable if variable.is_a?(TrueClass) || variable.is_a?(FalseClass)
+    if variable.is_a? String
+      return default if variable.to_s.downcase == 'necb_default'
+      return false if variable.to_s.downcase == 'false'
+      return true if variable.to_s.downcase == 'true'
+    end
+    return default
+  end
+
+  # This method checks if a variable is a string.
+  #   If variable undefined set to the default
+  #   If variable is a string then return it, using the default if 'NECB_Default'
+  #   If that all fails then return the default.
   def convert_arg_to_string(variable:, default:)
     return default if variable.nil?
     if variable.is_a? String
@@ -187,6 +198,22 @@ class NECB2011 < Standard
     min_distance = 100000000000000.0
     necb_closest = nil
     weather_file_path = model.weatherFile.get.path.get.to_s
+
+    # Check if weather file exists at the specified path
+    unless File.exist?(weather_file_path)
+      # Try to find the file in the data/weather folder
+      weather_file_name = File.basename(weather_file_path)
+      data_weather_path = File.absolute_path(File.join(__FILE__, '..', '..', '..', '..', '..', '..', 'data', 'weather', weather_file_name))
+
+      if File.exist?(data_weather_path)
+        weather_file_path = data_weather_path
+        # Update the model's weather file path to point to the found file
+        OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
+      else
+        raise "Weather file not found at #{weather_file_path} or #{data_weather_path}"
+      end
+    end
+
     epw_file = model.weatherFile.get.file.get
     stat_file_path = weather_file_path.gsub('.epw', '.stat')
     stat_file = OpenstudioStandards::Weather::StatFile.new(stat_file_path)
@@ -576,7 +603,7 @@ class NECB2011 < Standard
   def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil)
     # clean model..
     BTAP::Resources::Envelope::remove_all_envelope_information(model)
-    model = remove_all_hvac(model)
+    model = OpenstudioStandards::HVAC.remove_all_hvac(model)
     model.getThermalZones.sort.each { |zone| zone.setUseIdealAirLoads(true) }
     model.getZoneHVACPackagedTerminalAirConditioners.each(&:remove)
     model.getCoilCoolingDXSingleSpeeds.each(&:remove)
@@ -735,9 +762,8 @@ class NECB2011 < Standard
     end
 
     # Rename air loop and plant loop nodes to accommodate coming OpenStudio version
-    rename_air_loop_nodes(model)
-    rename_plant_loop_nodes(model)
-
+    OpenstudioStandards::HVAC.rename_air_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_plant_loop_nodes(model)
   end
 
   def apply_loads(model:,
@@ -2104,7 +2130,8 @@ class NECB2011 < Standard
       space_type_apply_internal_loads(space_type: space_type, lights_type: lights_type, lights_scale: lights_scale)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type, true, true, true, true, true, true)
+      space_type_apply_internal_load_schedules(space_type)
+      space_type_apply_thermostat_schedules(space_type)
     end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying space types (loads)')
