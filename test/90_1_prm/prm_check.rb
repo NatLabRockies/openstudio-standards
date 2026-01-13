@@ -645,7 +645,7 @@ class AppendixGPRMTests < Minitest::Test
           model_ptac.getPumpVariableSpeeds.each do |pump|
             pump.setRatedFlowRate(100)
           end
-          zones = model_ptac.getThermalZones
+          zones = model_ptac.getThermalZones.select { |z| !OpenstudioStandards::ThermalZone.thermal_zone_plenum?(z) }
           zones.each do |zone|
             zone.additionalProperties.setFeature('baseline_system_type', 'PTAC')
           end
@@ -658,7 +658,7 @@ class AppendixGPRMTests < Minitest::Test
           zones.each do |zone|
             zone.equipment.each do |zone_equipment|
               ptac = zone_equipment.to_ZoneHVACPackagedTerminalAirConditioner.get
-              ptac.supplyAirFan.to_FanConstantVolume.get.setMaximumFlowRate(100)
+              ptac.supplyAirFan.to_FanOnOff.get.setMaximumFlowRate(100)
               clg_coil = ptac.coolingCoil.to_CoilCoolingDXSingleSpeed.get
               capacity_cool_w = OpenStudio.convert(key_cool, 'Btu/hr', 'W'). get
               clg_coil.setRatedTotalCoolingCapacity(capacity_cool_w)
@@ -696,7 +696,7 @@ class AppendixGPRMTests < Minitest::Test
             zones.each do |zone|
               zone.equipment.each do |zone_equipment|
                 pthp = zone_equipment.to_ZoneHVACPackagedTerminalHeatPump.get
-                pthp.supplyAirFan.to_FanConstantVolume.get.setMaximumFlowRate(100)
+                pthp.supplyAirFan.to_FanOnOff.get.setMaximumFlowRate(100)
                 clg_coil = pthp.coolingCoil.to_CoilCoolingDXSingleSpeed.get
                 capacity_cool_w = OpenStudio.convert(key_cool, 'Btu/hr', 'W'). get
                 clg_coil.setRatedTotalCoolingCapacity(capacity_cool_w)

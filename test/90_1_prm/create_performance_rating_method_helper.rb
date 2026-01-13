@@ -94,7 +94,7 @@ def create_baseline_model(model_name, standard, climate_zone, building_type, cus
       # set the weather file to the model
       success = OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
       if success
-        puts "Set Weather file to '#{weather_file}'"
+        puts "Set Weather file to '#{weather_file_path}'"
       else
         puts "Failed to set the weather file"
         return [false, ["Failed to set the weather file"]]

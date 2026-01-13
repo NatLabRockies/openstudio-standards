@@ -402,11 +402,10 @@ def export_openstudio_libraries
           std_applier.space_type_apply_rendering_color(space_type)
 
           # Loads
-          std_applier.space_type_apply_internal_loads(space_type, true, true, true, true, true)
+          std_applier.space_type_apply_internal_loads(space_type)
 
           # Schedules
-          std_applier.space_type_apply_internal_load_schedules(space_type, true, true, true, true, true, true)
-
+          std_applier.space_type_apply_internal_load_schedules(space_type)
         end
       end
 
