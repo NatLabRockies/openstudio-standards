@@ -18,6 +18,7 @@
 # **************************************************************************** /
 
 require 'tbd'
+require 'json'
 
 module BTAP
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
@@ -577,6 +578,7 @@ module BTAP
     def initialize(model = nil, argh = {})
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
+      tag       = "uprated_Uo"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
@@ -619,7 +621,7 @@ module BTAP
 
       return false if args[:io_path].nil?
 
-      args[:option ] = ""
+      args[:option] = ""
 
       loop do
         if initial
@@ -657,9 +659,6 @@ module BTAP
         mdl = OpenStudio::Model::Model.new
         mdl.addObjects(model.toIdfFile.objects)
         TBD.clean!
-
-        # fil = File.join("/Users/rd2/Desktop/test.osm")
-        # mdl.save(fil, true)
 
         res = TBD.process(mdl, args)
 
@@ -732,6 +731,17 @@ module BTAP
           next unless v[:stypes] == stypes
 
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
+
+          # Maintain initial uprated Uo as AdditionalProperty.
+          v[:surfaces].each do |id|
+            surface = model.getSurfaceByName(id)
+            next if surface.empty?
+
+            surface = surface.get
+            next unless surface.additionalProperties.getFeatureAsDouble(tag).empty?
+
+            surface.additionalProperties.setFeature(tag, v[:uo])
+          end
         end
       end
 
@@ -1121,8 +1131,7 @@ module BTAP
           lgs << "# '#{type}' (#{e.size}x):"
 
           e.each do |psi, length|
-            l = format("%.2f", length)
-            lgs << "... PSI set '#{psi}' : #{l} m"
+            lgs << "... PSI set '#{psi}' : #{format("%.2f", length)} m"
           end
         end
       end
@@ -1130,56 +1139,75 @@ module BTAP
       true
     end
 
-    # def get_material_quantities()
-    #   material_quantities = {}
-    #   csv = CSV.read("#{File.dirname(__FILE__)}/../../../data/inventory/thermal_bridging.csv", headers: true)
-    #   tally_edges = @tally[:edges].transform_keys(&:to_s)
-    #
-    #   tally_edges.each do |edge_type_full, value|
-    #     edge_type = edge_type_full.delete_suffix('convex')
-    #     edge_type = 'fenestration' if ['head', 'jamb', 'sill'].include?(edge_type)
-    #
-    #     value.each do |wall_ref_and_quality, quantity|
-    #       /(.*)\s(.*)/ =~ wall_ref_and_quality
-    #       wall_reference = $1
-    #       quality = $2
-    #
-    #       if wall_reference =='BTAP-ExteriorWall-SteelFramed-1'
-    #         wall_reference = 'BTAP-ExteriorWall-SteelFramed-2'
-    #       end
-    #
-    #       next if edge_type == 'transition'
-    #
-    #       result = csv.find { |row| row['edge_type'] == edge_type &&
-    #         row['quality'] == quality &&
-    #         row['wall_reference'] == wall_reference
-    #       }
-    #
-    #       if result.nil?
-    #         puts ("#{edge_type}-#{wall_reference}-#{quality}")
-    #         puts "not found in tb database"
-    #         next
-    #       end
-    #
-    #       # Split
-    #       material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
-    #       id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
-    #
-    #       material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
-    #         material_quantities[id] = 0.0 if material_quantities[id].nil?
-    #         material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
-    #       end
-    #     end
-    #   end
-    #
-    #   material_opaque_id_quantities = []
-    #
-    #   material_quantities.each do |id,quantity|
-    #     material_opaque_id_quantities << { 'materials_opaque_id' => id, 'quantity' => quantity, 'domain'=> 'thermal_bridging' }
-    #   end
-    #
-    #   return material_opaque_id_quantities
-    # end
+    # Retrieve the material quantities for the values in the tbd.edges
+    # parameter.
+    # @return [Hash] IDs mapped to their quantities in feet.
+    def get_material_quantities_for_edges
+      cp                  = CommonPaths.instance
+      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+      material_quantities = {}
+
+      # The "convex/concave" suffix on tally edges can be safely ignored since
+      # they currently aren't relevant to any NECB standard, but they are to
+      # ASHRAE 90.1.
+      tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
+      tally_edges.each do |edge_type, value|
+        value.each do |wall_reference_and_quality, quantity|
+
+          # "transition" edges aren't considered.
+          if edge_type == "transition"
+            next
+
+          # "jamb", "sill", and "head" may all be grouped under fenestration
+          # when referencing the thermal bridging CSV. Same for "skylightjamb",
+          # "skylightsill", and "skylighthead".
+          elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
+            edge_type = "fenestration"
+          end
+
+          result = csv.find do |row|
+            row["edge_type"]      == edge_type &&
+            row["wall_reference"] == wall_reference_and_quality
+          end
+
+          if result.nil?
+            puts("Wall with type #{edge_type} and reference #{wall_reference_and_quality}" \
+                 " could not be found in the thermal bridging database")
+            next
+          end
+
+          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
+          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
+          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
+            if material_quantities[id].nil?
+              material_quantities[id] = 0.0
+            end
+
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
+          end
+        end
+      end
+
+      return material_quantities
+    end
+
+    # Remove most instance variables from the TBD object. This is a temporary
+    # workaround for getting caching to work since the TBD object is very deeply
+    # nested with member attributes. A bug exists in ruby which causes the
+    # `inspect` method to hang for such objects:
+    # https://bugs.ruby-lang.org/issues/6783
+
+    # This prevents inspecting the object in an interactive debug shell without
+    # a file pager and prevents writing the object to a file.
+    def shorten_instance_variables
+      self.instance_variables.filter { |variable| variable != :@tally and variable != :@model }.each do |variable|
+        remove_instance_variable(variable)
+      end
+      @model.keys.filter { |value| value != :perform }.each do |value|
+        @model.delete(value)
+      end
+      @tally.delete(:constructions)
+    end
   end
 end
 
