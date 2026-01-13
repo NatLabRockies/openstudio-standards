@@ -2071,7 +2071,8 @@ class ASHRAE901PRM < Standard
 
     if surfaces_with_fc_factor_boundary
       # Remove existing FCFactor temperature profile
-      model.getSiteGroundTemperatureFCfactorMethod.remove
+      ground_temp = model.getSiteGroundTemperatureFCfactorMethod
+      ground_temp.resetAllMonths
 
       # Get path to weather file specified in the model
       weather_file_path = prm_get_optional_handler(model.getWeatherFile, @sizing_run_dir, 'path').to_s
@@ -2089,7 +2090,6 @@ class ASHRAE901PRM < Standard
         stat_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file).sub('.epw', '.stat').to_s
       end
 
-      ground_temp = OpenStudio::Model::SiteGroundTemperatureFCfactorMethod.new(model)
       stat_file = OpenstudioStandards::Weather::StatFile.load(stat_file_path)
       ground_temperatures = stat_file.monthly_lagged_dry_bulb
       unless ground_temperatures.empty?

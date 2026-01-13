@@ -16,13 +16,8 @@ class NECB2011
       space_type_apply_internal_loads(space_type: space_type)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type,
-                                               true,
-                                               true,
-                                               true,
-                                               true,
-                                               true,
-                                               true)
+      space_type_apply_internal_load_schedules(space_type)
+      space_type_apply_thermostat_schedules(space_type)
     end
   end
 
@@ -67,7 +62,6 @@ class NECB2011
     end
 
     # Get the space Type data from @standards data
-
     spacetype_data = @standards_data['tables']['space_types']['table']
 
     standards_building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
@@ -79,6 +73,7 @@ class NECB2011
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} was not found in the standards data.")
       return false
     end
+
     # People
     people_have_info = false
     occupancy_per_area = space_type_properties['occupancy_per_area'].to_f
@@ -296,9 +291,10 @@ class NECB2011
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation per area to #{ventilation_per_area} cfm/ft^2.")
       end
       unless ventilation_per_person.zero?
-        # For BTAP we often use an occupancy per area rate for ventilation which is different from the one used for
-        # everything else.  The mod_ventilation_per_person rate adjusts the per person ventilation rate so that the
-        # proper ventilation rate is calculated when using the general occupant per area rate.
+        # The occupancy per area rate for ventilation is different from the occupancy used for other loads as the occupancy assumption in the applicable  
+        # ventilation standard is followed.  The mod_ventilation_per_person rate adjusts the per person ventilation rate (from the standard) so that the
+        # correct ventilation rate (per the standard) is calculated when using the NECB occupant density (defined as occupancy_per_area in the space_types.json file)
+        # Later the method thermal_zone_convert_outdoor_air_to_per_area (in standards) uses the space occupancy which is the NECB figure to get the total vent rate.
         mod_ventilation_per_person = ventilation_per_person * ventilation_occupancy_per_area / occupancy_per_area
         ventilation.setOutdoorAirFlowperPerson(OpenStudio.convert(mod_ventilation_per_person.to_f, 'ft^3/min*person', 'm^3/s*person').get)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation per person to #{mod_ventilation_per_person} cfm/person.")
@@ -307,7 +303,15 @@ class NECB2011
         ventilation.setOutdoorAirFlowAirChangesperHour(ventilation_ach)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation to #{ventilation_ach} ACH.")
       end
-
+      
+      # Add information about the source to an additional properties object. Used in unit testing but could be useful elsewhere.
+      notes = ventilation.additionalProperties
+      notes.setFeature("Ref OA per area", space_type_properties['ventilation_per_area'].to_f)
+      notes.setFeature("Ref OA per person", space_type_properties['ventilation_per_person'].to_f)
+      notes.setFeature("Ref OA ach", space_type_properties['ventilation_air_changes'].to_f)
+      notes.setFeature("Ref occupancy per 1000ft2", space_type_properties['ventilation_occupancy_rate_people_per_1000ft2'].to_f)
+      notes.setFeature("Ref standard", space_type_properties['ventilation_occupancy_standard'].to_s)
+      notes.setFeature("Ref space type", space_type_properties['ventilation_standard_space_type'].to_s)
     elsif set_ventilation && !ventilation_have_info
 
       # All space types must have a design spec OA

@@ -196,6 +196,7 @@ class NECB_HVAC_HRV_Tests < Minitest::Test
                                                                                                   hw_loop: hw_loop,
                                                                                                   new_auto_zoner: false)
 
+      # Loop through the air loops and appy the multiplier (this is used to force application (or not) of HRV rules)
       systems = model.getAirLoopHVACs
       for isys in 0..0
         zones = systems[isys].thermalZones
@@ -209,19 +210,15 @@ class NECB_HVAC_HRV_Tests < Minitest::Test
         end
       end
 
-      # Test the compliance with OA requirements outlined in NECB 2017 Table 5.2.10.1.-B for the Airflow Rate Thresholds
+      # Set the OA requirements.
       air_loops_hvac = model.getAirLoopHVACs
       air_loops_hvac.each do |air_loop_hvac|
-        if vintage == "NECB2017" || vintage == "NECB2020"
-          designSupplyAirFlowRate = flow / oaf
-          air_loop_hvac.setDesignSupplyAirFlowRate(designSupplyAirFlowRate)
-          oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
-          controller_oa = oa_system.getControllerOutdoorAir
-          controller_oa.setMinimumOutdoorAirFlowRate(flow)
-          # Had to increase the MaximumOutdoorAirFlowRate, otherwise E+ would fail by :
-          # "maximum outdoor air flow rate < minimum outdoor air flow rate"
-          controller_oa.setMaximumOutdoorAirFlowRate(flow * 1.2)
-        end
+        designSupplyAirFlowRate = flow / oaf
+        air_loop_hvac.setDesignSupplyAirFlowRate(designSupplyAirFlowRate)
+        oa_system = air_loop_hvac.airLoopHVACOutdoorAirSystem.get
+        controller_oa = oa_system.getControllerOutdoorAir
+        controller_oa.setMinimumOutdoorAirFlowRate(flow)
+        controller_oa.setMaximumOutdoorAirFlowRate(flow * 1.2)
       end
 
       # Run sizing.
@@ -241,7 +238,6 @@ class NECB_HVAC_HRV_Tests < Minitest::Test
     # Sort air loops by name
     sorted_air_loops_hvac = air_loops_hvac.sort_by { |air_loop_hvac| air_loop_hvac.name.get }
     sorted_air_loops_hvac.each do |air_loop_hvac|
-      has_hrv = false
       exhaust_heat_content_kW = standard.calculate_exhaust_heat(air_loop_hvac)
       air_loop_hvac_name = air_loop_hvac.name.get
       hdd = standard.get_necb_hdd18(model: model)

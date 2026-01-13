@@ -1,10 +1,12 @@
 require_relative './minitest_helper'
-require_relative './create_doe_prototype_helper'
 require 'fileutils'
 require 'parallel'
 require 'open3'
 
 ProcessorsUsed = (Parallel.processor_count - 1).floor
+$totalTestCount = 0
+$completedTestCount = 0
+$completedMutex = Mutex.new
 
 class String
   # colorization
@@ -41,8 +43,9 @@ def write_results(result, test_file, test_name)
   test_file_output = File.join(@test_output_folder, "#{File.basename(test_file)}_#{test_name}_test_output.json")
   File.delete(test_file_output) if File.exist?(test_file_output)
   test_result = false
+  $completedMutex.synchronize {$completedTestCount += 1}
   if result[2].success?
-    puts "PASSED: #{test_name} IN FILE #{test_file.gsub(/.*\/test\//, 'test/')}".green
+    puts "PASSED (#{$completedTestCount}/#{$totalTestCount}): #{test_name} IN FILE #{test_file.gsub(/.*\/test\//, 'test/')}".green
     return true
   else
     #store output for failed run.
@@ -58,7 +61,7 @@ def write_results(result, test_file, test_name)
 
     #puts test_file_output
     File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
-    puts "FAILED: #{test_name} IN FILE #{test_file.gsub(/.*\/test\//, 'test/')}".red
+    puts "FAILED (#{$completedTestCount}/#{$totalTestCount}): #{test_name} IN FILE #{test_file.gsub(/.*\/test\//, 'test/')}".red
     return false
   end
 end
@@ -113,6 +116,7 @@ class ParallelTests
       eval('module Minitest @@installed_at_exit = false end')
     end
 
+    $totalTestCount = test_files_and_test_names.size
     puts "Running #{test_files_and_test_names.size} tests from #{@full_file_list.size} tests suites in parallel using #{processors} of #{Parallel.processor_count} available cpus."
     puts "To increase or decrease the ProcessorsUsed, please edit the test/helpers/parallel_tests.rb file."
     timings_json = Hash.new()
@@ -137,6 +141,7 @@ class ParallelTests
         data = JSON.parse(File.read(file))
         failed_runs << [data["test_file"], data['test_name']]
       end
+      $totalTestCount = failed_runs.size
       puts "Some tests failed the first time. This may have been due to computer performance issues. Rerunning failed tests..."
       Parallel.each(failed_runs, in_threads: (processors), progress: "Progress :") do |test_file_test_name|
         test_file = test_file_test_name[0]

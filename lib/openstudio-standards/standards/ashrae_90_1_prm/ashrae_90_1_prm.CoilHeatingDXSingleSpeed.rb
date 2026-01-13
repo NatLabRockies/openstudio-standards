@@ -65,13 +65,16 @@ class ASHRAE901PRM < Standard
       return capacity_w
     end
 
+    # find properties
+    multiplier = coil_dx_number_of_systems(clg_coil, sys_type)
+
     # If a coil was found, cast to the correct type
     if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
       clg_coil = clg_coil.to_CoilCoolingDXSingleSpeed.get
-      capacity_w = coil_cooling_dx_single_speed_find_capacity(clg_coil, sys_type)
+      capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_single_speed_get_capacity(clg_coil, multiplier: multiplier)
     elsif clg_coil.to_CoilCoolingDXTwoSpeed.is_initialized
       clg_coil = clg_coil.to_CoilCoolingDXTwoSpeed.get
-      capacity_w = coil_cooling_dx_two_speed_find_capacity(clg_coil, sys_type)
+      capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_two_speed_get_capacity(clg_coil, multiplier: multiplier)
     end
 
     # Check for user data that indicates multiple systems per thermal zone

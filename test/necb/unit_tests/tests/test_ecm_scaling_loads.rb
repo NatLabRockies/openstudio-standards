@@ -17,7 +17,7 @@ class NECB_scaling_loads_Tests < Minitest::Test
 
     # Define test parameters that apply to all tests.
     test_parameters = {TestMethod: __method__,
-                       SaveIntermediateModels: true,
+                       SaveIntermediateModels: false,
                        epw_file: 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw', 
                        fuel_type: 'NaturalGas'}
 
@@ -93,8 +93,8 @@ class NECB_scaling_loads_Tests < Minitest::Test
     loads_scale = test_case[:scaling_factor]
 
     # Define the test name. 
-    name = "#{vintage}_load_scaling-#{fuel_type}_scale-#{loads_scale.to_int}"
-    name_short = "#{vintage}_scale-#{fuel_type}-#{loads_scale.to_int}"
+    name = "#{vintage}_#{building_type}_load_scaling-#{fuel_type}_scale-#{format('%.1f', loads_scale)}"
+    name_short = "#{vintage}_#{building_type}_scale-#{fuel_type}-#{format('%.1f', loads_scale)}"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
     logger.info "Starting individual test: #{name}"
     results = Hash.new

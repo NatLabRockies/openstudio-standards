@@ -220,6 +220,8 @@ class NECB_HDD_Tests < Minitest::Test
 
     # Worflow should mirror BTAP workflow up to fdwr. Note envelope includes infiltration.
     # Not validating spacetypes as not needed for this simplified test.
+    standard.assign_building_activity(model: model)
+    standard.assign_building_structure(model: model, activity: @activity)
     standard.apply_loads(model: model)
     standard.apply_envelope(model: model)
     standard.apply_fdwr_srr_daylighting(model: model)

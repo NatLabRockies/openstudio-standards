@@ -24,14 +24,14 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
 
     # Define test cases.
     test_cases = {}
-
+    
     # Define references (per vintage in this case).
     test_cases[:NECB2011] = { Reference: "NECB 2011 p3:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-13)" }
     test_cases[:NECB2015] = { Reference: "NECB 2015 p1:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-14)" }
     test_cases[:NECB2017] = { Reference: "NECB 2017 p2:Table 5.2.12.1. Air-cooled Unitary Air Conditioners and Heat Pumps - Electrically Operated (page 5-15)" }
     test_cases[:NECB2020] = { Reference: "NECB 2020 p1:Table 5.2.12.1-A" }
 
-    # Test cases.
+    # Test cases. 
     test_cases_hash = { vintage: @AllTemplates,
                         :unitary_heating_types => ['Electric Resistance', 'All Other'], # DX is tested in the heatpump tests.
                         TestCase: ["Small single package system"],
@@ -107,7 +107,6 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
     # Test specific inputs.
     cap = test_case[:test_capacity_kW]
     vintage = test_pars[:vintage]
-    standard = get_standard(vintage)
 
     # Define the test name.
     name = "#{vintage}_sys3_MauHtgCoilType-#{heating_type}_Speed-#{speed}_cap-#{cap.to_int}kW"
@@ -115,9 +114,6 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
     output_folder = method_output_folder("#{test_name}/#{name_short}")
     logger.info "Starting individual test: #{name}"
     results = {}
-
-    standard.fuel_type_set = SystemFuels.new()
-    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
 
     # Wrap test in begin/rescue/ensure.
     begin
@@ -136,6 +132,9 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
 
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
+      standard = get_standard(vintage)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
       case speed
       when 'single'
@@ -166,7 +165,6 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
       logger.error(msg)
       return {ERROR: msg}
     end
-
     # Extract results and generate hash.
     capacity_btu_per_hr = OpenStudio.convert(cap.to_f, 'kW', 'Btu/hr').get
     dx_units = model.getCoilCoolingDXSingleSpeeds
@@ -180,14 +178,14 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
       if cap < 19 then
         if vintage == 'BTAPPRE1980' || vintage == 'BTAP1980TO2010' then
           metric = 'EER'
-          value = standard.cop_no_fan_to_eer(rated_cop).signif(3)
+          value = OpenstudioStandards::HVAC.cop_no_fan_to_eer(rated_cop).signif(3)
         else
           metric = 'SEER'
-          value = standard.cop_no_fan_to_seer(rated_cop).signif(3)
+          value = OpenstudioStandards::HVAC.cop_no_fan_to_seer(rated_cop).signif(3)
         end
       else
         metric = 'EER'
-        value = standard.cop_no_fan_to_eer(rated_cop).signif(3)
+        value = OpenstudioStandards::HVAC.cop_no_fan_to_eer(rated_cop).signif(3)
       end
       results_coil << {
         name: "#{dx_unit_name}",
@@ -263,10 +261,6 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
     mau_cooling_type = test_pars[:mau_cooling_type]
     fuel_type = test_pars[:fuel_type]
     vintage = test_pars[:vintage]
-    standard = get_standard(vintage)
-
-    standard.fuel_type_set = SystemFuels.new()
-    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
 
     # Define the test name.
     name = "#{vintage}_sys2_CoolingType_#{fuel_type}_kW_chiller_type-#{chiller_type}_#{mau_cooling_type}"
@@ -286,6 +280,9 @@ class NECB_HVAC_Unitary_Tests < Minitest::Test
 
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
+      standard = get_standard(vintage)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
 
       standard.add_sys2_FPFC_sys5_TPFC(model: model,

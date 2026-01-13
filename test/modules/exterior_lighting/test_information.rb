@@ -46,14 +46,14 @@ class TestExteriorLightingInformation < Minitest::Test
     assert(areas[:parking_area_and_drives_area] > 0, 'Parking area and drives area should be greater than 0.')
   end
 
-  def test_model_get_exterior_lighting_properties
-    ext_lighting_properties = @ext.model_get_exterior_lighting_properties
+  def test_exterior_lighting_properties
+    ext_lighting_properties = @ext.exterior_lighting_properties
     assert(!ext_lighting_properties.nil?, 'Exterior lighting properties should not be nil.')
 
-    ext_lighting_properties = @ext.model_get_exterior_lighting_properties(lighting_generation: 'default')
+    ext_lighting_properties = @ext.exterior_lighting_properties(lighting_generation: 'default')
     assert(!ext_lighting_properties.nil?, 'Exterior lighting properties should not be nil.')
 
-    ext_lighting_properties = @ext.model_get_exterior_lighting_properties(lighting_zone: 1)
+    ext_lighting_properties = @ext.exterior_lighting_properties(lighting_zone: 1)
     assert(ext_lighting_properties.nil?, 'Data should not yet be available for this lighting zone.')
   end
 end

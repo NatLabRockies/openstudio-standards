@@ -9,7 +9,7 @@ class ZEAEDGMultifamily < ASHRAE901
   # @return [Double] minimum damper position
   def air_terminal_single_duct_vav_reheat_minimum_damper_position(air_terminal_single_duct_vav_reheat, has_ddc = true)
     min_damper_position = nil
-    case air_terminal_single_duct_vav_reheat_reheat_type(air_terminal_single_duct_vav_reheat)
+    case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(air_terminal_single_duct_vav_reheat)
     when 'HotWater'
       min_damper_position = if has_ddc
                               0.2

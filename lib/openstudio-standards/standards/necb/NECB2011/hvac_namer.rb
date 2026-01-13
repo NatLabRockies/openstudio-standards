@@ -172,9 +172,9 @@ class NECB2011
 
         # Determine if the system is a DOAS based on
         # whether there is 100% OA in heating and cooling sizing.
-        puts "allOutdoorAirinCooling #{air_loop.sizingSystem.allOutdoorAirinCooling}"
-        puts "allOutdoorAirinHeating #{air_loop.sizingSystem.allOutdoorAirinHeating}"
-        puts "typeofLoadtoSizeOn #{air_loop.sizingSystem.typeofLoadtoSizeOn}"
+        # puts "allOutdoorAirinCooling #{air_loop.sizingSystem.allOutdoorAirinCooling}"
+        # puts "allOutdoorAirinHeating #{air_loop.sizingSystem.allOutdoorAirinHeating}"
+        # puts "typeofLoadtoSizeOn #{air_loop.sizingSystem.typeofLoadtoSizeOn}"
 
 
 
@@ -206,8 +206,8 @@ class NECB2011
         # puts "return_fan_vv: #{return_fan_vv}"
         # puts "supply_fan_cv: #{supply_fan_cv}"
         # puts "return_fan_cv: #{return_fan_cv}"
-        puts "zone_rh_elec: #{zone_rh_elec}"
-        puts "zone_rh_gas: #{zone_rh_gas}"
+        # puts "zone_rh_elec: #{zone_rh_elec}"
+        # puts "zone_rh_gas: #{zone_rh_gas}"
         # puts "unitary_hp: #{unitary_hp}"
         # puts "unitary_heating_coil_elec: #{unitary_heating_coil_elec}"
         # puts "unitary_heating_coil_gas: #{unitary_heating_coil_gas}"

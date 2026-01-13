@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_2_Test_E_RS_H_FPFC < Minitest::Test
+class NECB_HVAC_System_2_Test < Minitest::Test
 
 
   #System #2
@@ -34,7 +34,7 @@ class NECB_HVAC_System_2_Test_E_RS_H_FPFC < Minitest::Test
     template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
     system_name = 'system_2'
     vintage = 'NECB2011'
-    boiler_fueltype = ' Electricity'
+    boiler_fueltype = 'Electricity'
     chiller_type = 'Rotary Screw'
     mua_cooling_type = 'Hydronic'
     fan_coil_type = 'FPFC'
@@ -44,13 +44,13 @@ class NECB_HVAC_System_2_Test_E_RS_H_FPFC < Minitest::Test
     #create folders
     # FileUtils.rm_rf(output_folder)
     FileUtils::mkdir_p(output_folder)
+    model = BTAP::FileIO::load_osm(template_osm_file)
     standard = Standard.build(vintage)
-    primary_heating_fuel = "Electricity"
-    standard.fuel_type_set = SystemFuels.new()
-    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: primary_heating_fuel)
+      boiler_fueltype = standard.validate_primary_heating_fuel(primary_heating_fuel: boiler_fueltype, model: model)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     name = "sys2_Boiler-#{boiler_fueltype}_Chiller-#{chiller_type}_MuACoolingType-#{mua_cooling_type}"
     puts "***************************************#{name}*******************************************************\n"
-    model = BTAP::FileIO::load_osm(template_osm_file)
     weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file)
     OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
     hw_loop = OpenStudio::Model::PlantLoop.new(model)

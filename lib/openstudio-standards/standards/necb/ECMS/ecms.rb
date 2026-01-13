@@ -60,7 +60,7 @@ class ECMS < NECB2011
 
     # when the ecm is associated with adding a new HVAC system, then remove existing system components and loops
     ecm_std.remove_all_zone_eqpt(systems)
-    ecm_std.remove_air_loops(model)
+    OpenstudioStandards::HVAC.remove_air_loops(model)
     ecm_std.remove_hw_loops(model)
     ecm_std.remove_chw_loops(model)
     ecm_std.remove_cw_loops(model)

@@ -123,6 +123,7 @@ class ASHRAE901PRM2019 < ASHRAE901PRM
           plant_loop_adiabatic_pipes_only(plant_loop)
           plant_loop.supplyComponents.each do |component|
             next unless component.to_WaterHeaterMixed.is_initialized
+
             water_heater = component.to_WaterHeaterMixed.get
             model_apply_water_heater_prm_parameter(water_heater,
                                                    swh_building_type_new)

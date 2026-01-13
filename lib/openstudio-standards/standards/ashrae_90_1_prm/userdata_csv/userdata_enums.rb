@@ -38,7 +38,6 @@ class UserData
 
     value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value.to_s : value
   end
-
 end
 
 class UserDataBoolean < UserData

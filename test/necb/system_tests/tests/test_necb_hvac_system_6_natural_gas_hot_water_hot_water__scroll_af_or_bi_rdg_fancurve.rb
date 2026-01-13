@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_6_Test_NG_HW_HW_S_AFORBI_RDG_FC < Minitest::Test
+class NECB_HVAC_System_6_Test < Minitest::Test
 
   def test_necb_hvac_system_6_natural_gas_hot_water_hot_water__scroll_af_or_bi_rdg_fancurve()
 

@@ -111,12 +111,13 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
     qaqc[:openstudio_version] = "test"
     qaqc[:energyplus_version] = "test"
     results = BTAPData.new(model: model,
-                              runner: nil,
-                              cost_result: nil,
-                              qaqc: qaqc,
-                              npv_start_year: 2010,
-                              npv_end_year: 2030,
-                              npv_discount_rate: @npv_discount_rate).btap_data
+                           runner: nil,
+                           cost_result: nil,
+                           carbon_result: nil,
+                           qaqc: qaqc,
+                           npv_start_year: 2010,
+                           npv_end_year: 2030,
+                           npv_discount_rate: @npv_discount_rate).btap_data
 
     #btap_data_out.select.first
     results["simulation_btap_data_version"] = "test"

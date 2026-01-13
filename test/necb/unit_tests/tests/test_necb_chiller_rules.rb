@@ -15,14 +15,14 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
   # Consequently i've updated the expected results for all chiller types except the centrifugal chillers that are more then 2110 kW (7,200,000 btu/hr) to be 5.633 not 6.018
   def test_NECB_chiller_cop
     logger.info "Starting suite of tests for: #{__method__}"
-
+    
     # Define test parameters that apply to all tests.
     test_parameters = {TestMethod: __method__,
                        SaveIntermediateModels: false,
                        fuel_type: 'Electricity',
                        mau_cooling_type: 'Hydronic'}
 
-    # Define test cases.
+    # Define test cases. 
     test_cases = Hash.new
 
     # Define references (per vintage in this case).
@@ -30,35 +30,35 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_cases[:NECB2015] = {Reference: "NECB 2015 p1 Table 5.2.12.1. Points to CSA-C743-09"}
     test_cases[:NECB2017] = {Reference: "NECB 2017 p2 Table 5.2.12.1. Points to CSA-C743-09"}
     test_cases[:NECB2020] = {Reference: "NECB 2020 p1 Table 5.2.12.1.-K (Path B)"}
-
+    
     # Test cases. Define each case seperately as they have unique kW values to test accross the vintages/chiller types.
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["small"],
+                       TestCase: ["small"], 
                        TestPars: {:tested_capacity_kW => 132}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["medium"],
+                       TestCase: ["medium"], 
                        TestPars: {:tested_capacity_kW => 396}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["large"],
+                       TestCase: ["large"], 
                        TestPars: {:tested_capacity_kW => 791}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["x-large"],
+                       TestCase: ["x-large"], 
                        TestPars: {:tested_capacity_kW => 1200}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    test_cases_hash = {vintage: ['NECB2020'],
+    test_cases_hash = {vintage: ['NECB2020'], 
                        chiller_type: ["Scroll", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["xx-large"],
+                       TestCase: ["xx-large"], 
                        TestPars: {:tested_capacity_kW => 2200}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
@@ -71,7 +71,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
     File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    # Read expected results.
+    # Read expected results. 
     file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
     expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
@@ -103,7 +103,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     # Test specific inputs.
     chiller_cap = test_case[:tested_capacity_kW]
 
-    # Define the test name.
+    # Define the test name. 
     name = "#{vintage}_sys2_ChillerType-#{chiller_type}_Chiller_cap-#{chiller_cap}kW"
     name_short = "#{vintage}_sys2_Chiller-#{chiller_type}_cap-#{chiller_cap}kW"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
@@ -139,7 +139,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
       return {ERROR: msg}
     end
 
-    # Recover the COP for checking.
+    # Recover the COP for checking. 
     results = Hash.new
     chiller_count = 0
     total_capacity = 0.0
@@ -161,8 +161,8 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
       }
     end
     results[:All] = {
-      tested_capacity_kW: (chiller_cap.to_f).signif(3),
-      total_capacity_kW: (total_capacity).signif(3),
+      tested_capacity_kW: (chiller_cap.to_f).signif(3), 
+      total_capacity_kW: (total_capacity).signif(3), 
       number_of_chillers: chiller_count,
     }
 
@@ -176,7 +176,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
   # if capacity > 2100 kW ---> 2 chillers with half the capacity each"
   def test_number_of_chillers
     logger.info "Starting suite of tests for: #{__method__}"
-
+    
     # Define test parameters that apply to all tests.
     test_parameters = {TestMethod: __method__,
                        SaveIntermediateModels: false,
@@ -185,7 +185,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
                        heating_coil_type: 'Hot Water',
                        fan_type: 'AF_or_BI_rdg_fancurve'}
 
-    # Define test cases.
+    # Define test cases. 
     test_cases = Hash.new
 
     # Define references (per vintage in this case).
@@ -193,17 +193,17 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_cases[:NECB2015] = {Reference: "xx"}
     test_cases[:NECB2017] = {Reference: "xx"}
     test_cases[:NECB2020] = {Reference: "NECB 2011 p3 8.4.4.10.(6)"}
-
+    
     # Test cases. Define each case seperately as they have unique kW values to test accross the vintages/chiller types.
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["single"],
+                       TestCase: ["single"], 
                        TestPars: {:tested_capacity_kW => 800}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["twin"],
+                       TestCase: ["twin"], 
                        TestPars: {:tested_capacity_kW => 3200}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
@@ -216,7 +216,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
     File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    # Read expected results.
+    # Read expected results. 
     file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
     expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
@@ -249,11 +249,11 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
 
     # Test specific inputs.
     chiller_cap = test_case[:tested_capacity_kW]
-
+      
     # Wrap test in begin/rescue/ensure.
     begin
 
-      # Define the test name.
+      # Define the test name. 
       name = "#{vintage}_sys6_ChillerType_#{chiller_type}-Chiller_cap-#{chiller_cap}kW"
       name_short = "#{vintage}_sys6_Chiller-#{chiller_type}_cap-#{chiller_cap}kW"
       output_folder = method_output_folder("#{test_name}/#{name_short}")
@@ -288,7 +288,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
       return {ERROR: msg}
     end
 
-    # Recover the chillers for checking.
+    # Recover the chillers for checking. 
     results = Hash.new
     chiller_count = 0
     total_capacity = 0.0
@@ -309,8 +309,8 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
       }
     end
     results[:All] = {
-      tested_capacity_kW: (chiller_cap.to_f).signif(3),
-      total_capacity_kW: (total_capacity).signif(3),
+      tested_capacity_kW: (chiller_cap.to_f).signif(3), 
+      total_capacity_kW: (total_capacity).signif(3), 
       number_of_chillers: chiller_count,
     }
 
@@ -321,18 +321,18 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
   # Test to validate the chiller performance curves.
   def test_chiller_curves
     logger.info "Starting suite of tests for: #{__method__}"
-
+    
     # Define test parameters that apply to all tests.
     test_parameters = {TestMethod: __method__,
                        SaveIntermediateModels: false,
                        fuel_type: 'NaturalGas',
                        mau_cooling_type: 'Hydronic',
-
+                       
                        baseboard_type: 'Hot Water',
                        heating_coil_type: 'Hot Water',
                        fan_type: 'AF_or_BI_rdg_fancurve'}
 
-    # Define test cases.
+    # Define test cases. 
     test_cases = Hash.new
 
     # Define references (per vintage in this case).
@@ -340,12 +340,12 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_cases[:NECB2015] = {Reference: "xx"}
     test_cases[:NECB2017] = {Reference: "xx"}
     test_cases[:NECB2020] = {Reference: "xx"}
-
+    
     # Test cases. Define each case seperately as they have unique kW values to test accross the vintages/chiller types.
-    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'],
-    #test_cases_hash = {vintage: ['NECB2011'],
+    test_cases_hash = {vintage: ['NECB2011', 'NECB2015', 'NECB2017', 'NECB2020'], 
+    #test_cases_hash = {vintage: ['NECB2011'], 
                        chiller_type: ["Scroll", "Centrifugal", "Rotary Screw", "Reciprocating"],
-                       TestCase: ["small"],
+                       TestCase: ["small"], 
                        TestPars: {:tested_capacity_kW => 800}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
@@ -358,7 +358,7 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
     test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
     File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    # Read expected results.
+    # Read expected results. 
     file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
     expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
@@ -393,11 +393,11 @@ class NECB_HVAC_Chiller_Test < Minitest::Test
 
     # Test specific inputs.
     chiller_cap = test_case[:tested_capacity_kW]
-
+      
     # Wrap test in begin/rescue/ensure.
     begin
 
-      # Define the test name.
+      # Define the test name. 
       name = "#{vintage}_sys5_ChillerType_#{chiller_type}"
       name_short = "#{vintage}_sys5_ChillerType_#{chiller_type}"
       output_folder = method_output_folder("#{test_name}/#{name_short}")

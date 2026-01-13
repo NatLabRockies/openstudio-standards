@@ -171,6 +171,8 @@ class NECB2011
       # Add a setpoint manager to control the supply air temperature
       if necb_reference_hp
         setpoint_mgr = OpenStudio::Model::SetpointManagerWarmest.new(model)
+        setpoint_mgr.setName("SAT Warmest Reset Heatpump")
+        setpoint_mgr.setStrategy('MaximumTemperature')
         setpoint_mgr.setMinimumSetpointTemperature(13)
         setpoint_mgr.setMaximumSetpointTemperature(20)
         setpoint_mgr.addToNode(mau_air_loop.supplyOutletNode)

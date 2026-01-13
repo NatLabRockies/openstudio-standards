@@ -212,7 +212,6 @@ class NECB_HVAC_Loop_Rules_Tests < Minitest::Test
     name = "#{vintage}_#{fuel_type}_sys2_chw"
     name_short = "#{vintage}_#{fuel_type}_sys2_chw"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
-    standard = get_standard(vintage)
     logger.info "Starting individual test: #{name}"
 
     # Wrap test in begin/rescue/ensure.
@@ -225,6 +224,7 @@ class NECB_HVAC_Loop_Rules_Tests < Minitest::Test
       # Generate the osm files for all relevant cases to generate the test data for system 6
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
+      standard = get_standard(vintage)
       standard.fuel_type_set = SystemFuels.new()
       standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
