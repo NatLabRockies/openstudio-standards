@@ -6,14 +6,6 @@
     "Electricity": {
       "VarType": "TestCase",
       "case-1": {
-        "Pump Variable Speed 3": {
-          "plant_loop_type": "Condenser",
-          "max_power_to_load": 12,
-          "plant_loop_capacity_kW": 2400,
-          "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
-          "pump_power_adjustment": 1.2,
-          "pump_rated_pump_head_Pa": 210000
-        },
         "Pump Variable Speed 2": {
           "plant_loop_type": "Cooling",
           "max_power_to_load": 14,
@@ -26,6 +18,14 @@
           "plant_loop_type": "Heating",
           "max_power_to_load": 4.5,
           "plant_loop_capacity_kW": 150,
+          "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
+          "pump_power_adjustment": 1.2,
+          "pump_rated_pump_head_Pa": 210000
+        },
+        "Pump Variable Speed 3": {
+          "plant_loop_type": "Condenser",
+          "max_power_to_load": 12,
+          "plant_loop_capacity_kW": 2400,
           "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
           "pump_power_adjustment": 1.2,
           "pump_rated_pump_head_Pa": 210000
@@ -39,14 +39,6 @@
     "Electricity": {
       "VarType": "TestCase",
       "case-1": {
-        "Pump Variable Speed 3": {
-          "plant_loop_type": "Condenser",
-          "max_power_to_load": 12,
-          "plant_loop_capacity_kW": 2400,
-          "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
-          "pump_power_adjustment": 1.2,
-          "pump_rated_pump_head_Pa": 210000
-        },
         "Pump Variable Speed 2": {
           "plant_loop_type": "Cooling",
           "max_power_to_load": 14,
@@ -59,6 +51,14 @@
           "plant_loop_type": "Heating",
           "max_power_to_load": 4.5,
           "plant_loop_capacity_kW": 150,
+          "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
+          "pump_power_adjustment": 1.2,
+          "pump_rated_pump_head_Pa": 210000
+        },
+        "Pump Variable Speed 3": {
+          "plant_loop_type": "Condenser",
+          "max_power_to_load": 12,
+          "plant_loop_capacity_kW": 2400,
           "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
           "pump_power_adjustment": 1.2,
           "pump_rated_pump_head_Pa": 210000
@@ -72,10 +72,10 @@
     "Electricity": {
       "VarType": "TestCase",
       "case-1": {
-        "Pump Variable Speed 3": {
-          "plant_loop_type": "Condenser",
-          "max_power_to_load": 12,
-          "plant_loop_capacity_kW": 2400,
+        "Pump Variable Speed 1": {
+          "plant_loop_type": "Heating",
+          "max_power_to_load": 4.5,
+          "plant_loop_capacity_kW": 150,
           "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
           "pump_power_adjustment": 1.2,
           "pump_rated_pump_head_Pa": 210000
@@ -88,10 +88,10 @@
           "pump_power_adjustment": 1.4,
           "pump_rated_pump_head_Pa": 250000
         },
-        "Pump Variable Speed 1": {
-          "plant_loop_type": "Heating",
-          "max_power_to_load": 4.5,
-          "plant_loop_capacity_kW": 150,
+        "Pump Variable Speed 3": {
+          "plant_loop_type": "Condenser",
+          "max_power_to_load": 12,
+          "plant_loop_capacity_kW": 2400,
           "pump_design_power_sizing_method": "PowerPerFlowPerPressure",
           "pump_power_adjustment": 1.2,
           "pump_rated_pump_head_Pa": 210000
