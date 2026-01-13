@@ -671,7 +671,7 @@ s
     if air_loop_hvac.model.version < OpenStudio::VersionString.new('3.3.0')
       # Add EMS sensors
       # OA mass flow calculated by the Controller:MechanicalVentilation
-      air_loop_hvac_name_ems = ems_friendly_name(air_loop_hvac.name)
+      air_loop_hvac_name_ems = OpenstudioStandards::HVAC.ems_friendly_name(air_loop_hvac.name)
       oa_vrp_mass_flow = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Air System Outdoor Air Mechanical Ventilation Requested Mass Flow Rate')
       oa_vrp_mass_flow.setKeyName(air_loop_hvac.name.to_s)
       oa_vrp_mass_flow.setName("#{air_loop_hvac_name_ems}_OA_VRP")

@@ -183,9 +183,10 @@ module OpenstudioStandards
     # get exterior lighting properties by lighting generation
     #
     # @param lighting_generation [String] lighting generation
+    # @param lighting_zone [Integer] exterior lighting zone
     # @return [Hash] hash of exterior lighting properties
-    def self.model_get_exterior_lighting_properties(lighting_generation: 'default',
-                                                    lighting_zone: 3)
+    def self.exterior_lighting_properties(lighting_generation: 'default',
+                                          lighting_zone: 3)
       # load typical exterior lighting data
       data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_exterior_lighting.json"))
       exterior_lighting_properties = data['exterior_lighting'].select { |hash| (hash['lighting_generation'] == lighting_generation) && (hash['lighting_zone'] == lighting_zone) }[0]

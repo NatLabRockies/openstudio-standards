@@ -25,7 +25,7 @@ class Standard
                                               proportional_gain: 0.3,
                                               switch_over_time: 24.0)
 
-    zone_name = ems_friendly_name(zone.name)
+    zone_name = OpenstudioStandards::HVAC.ems_friendly_name(zone.name)
     zone_timestep = model.getTimestep.numberOfTimestepsPerHour
 
     if model.version < OpenStudio::VersionString.new('3.1.1')

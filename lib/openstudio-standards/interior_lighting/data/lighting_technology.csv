@@ -1,0 +1,46 @@
+﻿lighting_technology,lighting_generation,lighting_system_type,fixture_type,lamp_type,fixture_min_height_ft,fixture_max_height_ft,source_efficacy_lumens_per_watt,source_efficacy_reference,lamp_lumen_depreciation,luminaire_dirt_depreciation,lighting_loss_factor,lighting_loss_factor_reference,return_air_fraction,radiant_fraction,visible_fraction,radiant_fraction_reference
+T12,gen1_t12_incandescent,general,lamp,fluorescent,0,20,74,doe_2015_lmc_tableC3,0.93,0.89,0.8277,pnnl_90_1_lighting_subcommittee_model,0,0.31,0.2,ashrae_rp_1282
+HID High Bay Mercury Vapor,gen1_t12_incandescent,general,luminaire,high_energy_discharge,20,1000,43,doe_2015_lmc_tableC3,0.88,0.74,0.6512,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+Incandescent Decorative,gen1_t12_incandescent,supplemental,luminaire,incandescent,0,1000,8.7,doe_2015_lmc_tableC3,0.97,0.83,0.8051,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+Incandescent A-Shape,gen1_t12_incandescent,task,lamp,incandescent,0,1000,10.3,doe_2015_lmc_tableC3,0.97,0.81,0.7857,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+Incandescent Decorative,gen1_t12_incandescent,wall_wash,luminaire,incandescent,0,1000,8.7,doe_2015_lmc_tableC3,0.97,0.81,0.7857,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+T8,gen2_t8_halogen,general,lamp,fluorescent,0,20,94.1,doe_2015_lmc_tableC3,0.93,0.89,0.8277,pnnl_90_1_lighting_subcommittee_model,0,0.31,0.2,ashrae_rp_1282
+HID High Bay Metal Halide,gen2_t8_halogen,general,luminaire,high_energy_discharge,20,1000,90.2,doe_2015_lmc_tableC3,0.88,0.74,0.6512,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+Halogen Decorative,gen2_t8_halogen,supplemental,luminaire,halogen,0,1000,15,doe_2015_lmc_tableC3,0.97,0.83,0.8051,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+Halogen A-Shape,gen2_t8_halogen,task,lamp,halogen,0,1000,17.5,doe_2015_lmc_tableC3,0.97,0.81,0.7857,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+Halogen Decorative,gen2_t8_halogen,wall_wash,luminaire,halogen,0,1000,15,doe_2015_lmc_tableC3,0.97,0.81,0.7857,pnnl_90_1_lighting_subcommittee_model,0,0.125,0.2,ashrae_rp_1282
+T5,gen3_t5_cfl,general,lamp,fluorescent,0,20,103.5,doe_2015_lmc_tableC3,0.93,0.89,0.8277,pnnl_90_1_lighting_subcommittee_model,0,0.31,0.2,ashrae_rp_1282
+HID High Bay Metal Halide,gen3_t5_cfl,general,luminaire,high_energy_discharge,20,1000,90.2,doe_2015_lmc_tableC3,0.88,0.74,0.6512,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+Compact Fluorescent Pin,gen3_t5_cfl,supplemental,luminaire,compact_fluorescent,0,1000,70.1,doe_2015_lmc_tableC3,0.85,0.83,0.7055,pnnl_90_1_lighting_subcommittee_model,0,0.35,0.2,ashrae_rp_1282
+Compact Fluorescent Screw,gen3_t5_cfl,task,lamp,compact_fluorescent,0,1000,62.4,doe_2015_lmc_tableC3,0.85,0.81,0.6885,pnnl_90_1_lighting_subcommittee_model,0,0.35,0.2,ashrae_rp_1282
+Compact Fluorescent Pin,gen3_t5_cfl,wall_wash,luminaire,compact_fluorescent,0,1000,70.1,doe_2015_lmc_tableC3,0.85,0.81,0.6885,pnnl_90_1_lighting_subcommittee_model,0,0.35,0.2,ashrae_rp_1282
+LED lamp linear,gen4_led,general,lamp,led,0,20,104,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED luminaire,gen4_led,general,luminaire,led,0,20,96,doe_2019_ssl_tableD4,0.85,0.85,0.7225,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED high bay luminaire,gen4_led,general,luminaire,led,20,1000,118,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+LED decorative,gen4_led,supplemental,luminaire,led,0,1000,87,doe_2019_ssl_tableD4,0.85,0.9,0.765,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp general purpose,gen4_led,task,lamp,led,0,1000,93,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED directional,gen4_led,wall_wash,luminaire,led,0,1000,51,doe_2019_ssl_tableD4,0.85,0.84,0.714,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp linear,gen5_led,general,lamp,led,0,20,116,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED luminaire,gen5_led,general,luminaire,led,0,20,109,doe_2019_ssl_tableD4,0.85,0.85,0.7225,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED high bay luminaire,gen5_led,general,luminaire,led,20,1000,132,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+LED decorative,gen5_led,supplemental,luminaire,led,0,1000,97,doe_2019_ssl_tableD4,0.85,0.9,0.765,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp general purpose,gen5_led,task,lamp,led,0,1000,105,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED directional,gen5_led,wall_wash,luminaire,led,0,1000,57,doe_2019_ssl_tableD4,0.85,0.84,0.714,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp linear,gen6_led,general,lamp,led,0,20,132,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED luminaire,gen6_led,general,luminaire,led,0,20,126,doe_2019_ssl_tableD4,0.85,0.85,0.7225,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED high bay luminaire,gen6_led,general,luminaire,led,20,1000,152,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+LED decorative,gen6_led,supplemental,luminaire,led,0,1000,111,doe_2019_ssl_tableD4,0.85,0.9,0.765,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp general purpose,gen6_led,task,lamp,led,0,1000,122,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED directional,gen6_led,wall_wash,luminaire,led,0,1000,64,doe_2019_ssl_tableD4,0.85,0.84,0.714,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp linear,gen7_led,general,lamp,led,0,20,145,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED luminaire,gen7_led,general,luminaire,led,0,20,140,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED high bay luminaire,gen7_led,general,luminaire,led,20,1000,167,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+LED decorative,gen7_led,supplemental,luminaire,led,0,1000,123,doe_2019_ssl_tableD4,0.85,0.9,0.765,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp general purpose,gen7_led,task,lamp,led,0,1000,136,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED directional,gen7_led,wall_wash,luminaire,led,0,1000,71,doe_2019_ssl_tableD4,0.85,0.84,0.714,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp linear,gen8_led,general,lamp,led,0,20,157,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED luminaire,gen8_led,general,luminaire,led,0,20,152,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.365,0.2,ashrae_rp_1681
+LED high bay luminaire,gen8_led,general,luminaire,led,20,1000,181,doe_2019_ssl_tableD4,0.85,0.75,0.6375,pnnl_90_1_lighting_subcommittee_model,0,0.465,0.2,ashrae_rp_1681
+LED decorative,gen8_led,supplemental,luminaire,led,0,1000,133,doe_2019_ssl_tableD4,0.85,0.9,0.765,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED lamp general purpose,gen8_led,task,lamp,led,0,1000,147,doe_2019_ssl_tableD4,0.85,0.87,0.7395,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681
+LED directional,gen8_led,wall_wash,luminaire,led,0,1000,76,doe_2019_ssl_tableD4,0.85,0.84,0.714,pnnl_90_1_lighting_subcommittee_model,0,0.165,0.2,ashrae_rp_1681

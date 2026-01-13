@@ -76,10 +76,10 @@ class Standard
           # Part Load Fan Pressure Control
           if plr_req
             vsd_curve_type = air_loop_hvac_set_vsd_curve_type
-            fan_variable_volume_set_control_type(fan, vsd_curve_type)
+            OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: vsd_curve_type)
           # No Part Load Fan Pressure Control
           else
-            fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with discharge dampers')
+            OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Discharge Dampers')
           end
         else
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{fan}: This is not a multizone VAV fan system.")
@@ -95,16 +95,16 @@ class Standard
       ##     plr_req = fan_variable_volume_part_load_fan_power_limitation?(fan, template)
       ##     # Part Load Fan Pressure Control & Static Pressure Reset
       ##     if plr_req && spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Static Pressure Reset')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Static Pressure Setpoint Reset')
       ##     # Part Load Fan Pressure Control only
       ##     elsif plr_req && !spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
       ##     # Static Pressure Reset only
       ##     elsif !plr_req && spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
       ##     # No Control Required
       ##     else
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with AF or BI Riding Curve')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Airfoil or Backward Incline riding the curve')
       ##     end
       ##   else
       ##     OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.AirLoopHVAC', "For #{name}: there is a constant volume fan on a multizone vav system.  Cannot apply static pressure reset controls.")
@@ -159,7 +159,7 @@ class Standard
     if air_loop_hvac.thermalZones.size == 1
       air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
         if fan.to_FanVariableVolume.is_initialized
-          fan_variable_volume_set_control_type(fan, 'Single Zone VAV Fan')
+          OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Single Zone VAV')
         end
       end
       air_loop_hvac_apply_single_zone_controls(air_loop_hvac, climate_zone)
@@ -211,7 +211,7 @@ class Standard
       air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
         if fan.to_FanVariableVolume.is_initialized
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Setting fan part load curve per G3.1.3.15.")
-          fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+          OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
         end
       end
 
@@ -297,7 +297,7 @@ class Standard
     end
 
     # Clean name of airloop
-    loop_name_clean = ems_friendly_name(air_loop_hvac.name)
+    loop_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(air_loop_hvac.name)
 
     # Sensors
     oat_db_c_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Site Outdoor Air Drybulb Temperature')
@@ -372,7 +372,7 @@ class Standard
   # Set default fan curve to be VSD with static pressure reset
   # @return [String name of appropriate curve for this code version
   def air_loop_hvac_set_vsd_curve_type
-    return 'Multi Zone VAV with VSD and SP Setpoint Reset'
+    return 'Multi Zone VAV with Static Pressure Setpoint Reset'
   end
 
   # Calculate and apply the performance rating method baseline fan power to this air loop.
@@ -892,7 +892,7 @@ class Standard
         # CoilCoolingDXMultSpeed
         if clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
           coil = clg_coil.to_CoilCoolingDXMultiSpeed.get
-          total_cooling_capacity_w = coil_cooling_dx_multi_speed_find_capacity(coil)
+          total_cooling_capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_multi_speed_get_capacity(coil)
         end
       elsif sc.to_CoilCoolingDXVariableSpeed.is_initialized
         coil = sc.to_CoilCoolingDXVariableSpeed.get
@@ -2955,11 +2955,11 @@ class Standard
     fan_control = air_loop_hvac_multi_stage_dx_cooling?(air_loop_hvac)
 
     # Scrub special characters from the system name
-    snc = ems_friendly_name(air_loop_hvac.name)
+    snc = OpenstudioStandards::HVAC.ems_friendly_name(air_loop_hvac.name)
 
     # Get the zone name
     zone = air_loop_hvac.thermalZones[0]
-    zn_name_clean = ems_friendly_name(zone.name)
+    zn_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(zone.name)
 
     # Zone air node
     zone_air_node = zone.zoneAirNode

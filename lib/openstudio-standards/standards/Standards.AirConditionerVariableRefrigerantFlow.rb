@@ -23,24 +23,6 @@ class Standard
     return search_criteria
   end
 
-  # Find capacity in W
-  #
-  # @param air_conditioner_variable_refrigerant_flow [OpenStudio::Model::AirConditionerVariableRefrigerantFlow] vrf unit
-  # @return [Double] capacity in W
-  def air_conditioner_variable_refrigerant_flow_find_capacity(air_conditioner_variable_refrigerant_flow)
-    capacity_w = nil
-    if air_conditioner_variable_refrigerant_flow.grossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = air_conditioner_variable_refrigerant_flow.grossRatedTotalCoolingCapacity.get
-    elsif air_conditioner_variable_refrigerant_flow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
-      capacity_w = air_conditioner_variable_refrigerant_flow.autosizedGrossRatedTotalCoolingCapacity.get
-    else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{air_conditioner_variable_refrigerant_flow.name} capacity is not available, cannot apply efficiency standard.")
-      return false
-    end
-
-    return capacity_w
-  end
-
   # Finds lookup object in standards and return minimum thermal efficiency
   #
   # @param air_conditioner_variable_refrigerant_flow [OpenStudio::Model::AirConditionerVariableRefrigerantFlow] vrf unit
@@ -53,7 +35,7 @@ class Standard
     search_criteria = air_conditioner_variable_refrigerant_flow_find_search_criteria(air_conditioner_variable_refrigerant_flow)
 
     # Get the capacity
-    capacity_w = air_conditioner_variable_refrigerant_flow_find_capacity(air_conditioner_variable_refrigerant_flow)
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_capacity(air_conditioner_variable_refrigerant_flow)
 
     # Convert capacity to Btu/hr
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
@@ -82,7 +64,7 @@ class Standard
     # If specified as SEER
     unless vrf_props_cooling['minimum_seasonal_energy_efficiency_ratio'].nil?
       min_seer = vrf_props_cooling['minimum_seasonal_energy_efficiency_ratio']
-      cooling_cop = seer_to_cop_no_fan(min_seer)
+      cooling_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(min_seer)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
@@ -91,7 +73,7 @@ class Standard
     # TODO: assumed to be the same as SEER for now
     unless vrf_props_cooling['minimum_seasonal_energy_efficiency_ratio_2'].nil?
       min_seer = vrf_props_cooling['minimum_seasonal_energy_efficiency_ratio_2']
-      cooling_cop = seer_to_cop_no_fan(min_seer)
+      cooling_cop = OpenstudioStandards::HVAC.seer_to_cop_no_fan(min_seer)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_seer}SEER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; SEER = #{min_seer}")
     end
@@ -99,7 +81,7 @@ class Standard
     # If specified as EER
     unless vrf_props_cooling['minimum_energy_efficiency_ratio'].nil?
       min_eer = vrf_props_cooling['minimum_energy_efficiency_ratio']
-      cooling_cop = eer_to_cop_no_fan(min_eer)
+      cooling_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(min_eer)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_eer}EER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
     end
@@ -108,7 +90,7 @@ class Standard
     # TODO: assumed to be the same as EER for now
     unless vrf_props_cooling['minimum_energy_efficiency_ratio_2'].nil?
       min_eer = vrf_props_cooling['minimum_energy_efficiency_ratio_2']
-      cooling_cop = eer_to_cop_no_fan(min_eer)
+      cooling_cop = OpenstudioStandards::HVAC.eer_to_cop_no_fan(min_eer)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round}kBtu/hr #{min_eer}EER"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; EER = #{min_eer}")
     end
@@ -116,7 +98,7 @@ class Standard
     # If specified as HSPF
     unless vrf_props_heating['minimum_heating_seasonal_performance_factor'].nil?
       min_hspf = vrf_props_heating['minimum_heating_seasonal_performance_factor']
-      heating_cop = hspf_to_cop_no_fan(min_hspf)
+      heating_cop = OpenstudioStandards::HVAC.hspf_to_cop_no_fan(min_hspf)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round} Clg kBtu/hr #{min_hspf.round(1)}HSPF"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; HSPF = #{min_hspf}")
     end
@@ -125,7 +107,7 @@ class Standard
     # TODO: assumed to be the same as HSPF for now
     unless vrf_props_heating['minimum_heating_seasonal_performance_factor_2'].nil?
       min_hspf = vrf_props_heating['minimum_heating_seasonal_performance_factor_2']
-      heating_cop = hspf_to_cop_no_fan(min_hspf)
+      heating_cop = OpenstudioStandards::HVAC.hspf_to_cop_no_fan(min_hspf)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round} Clg kBtu/hr #{min_hspf.round(1)}HSPF"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; HSPF = #{min_hspf}")
     end
@@ -133,7 +115,7 @@ class Standard
     # If specified as COP
     unless vrf_props_heating['minimum_coefficient_of_performance_heating'].nil?
       min_coph = vrf_props_heating['minimum_coefficient_of_performance_heating']
-      heating_cop = cop_heating_to_cop_heating_no_fan(min_coph, OpenStudio.convert(capacity_kbtu_per_hr, 'kBtu/hr', 'W').get)
+      heating_cop = OpenstudioStandards::HVAC.cop_heating_to_cop_heating_no_fan(min_coph, OpenStudio.convert(capacity_kbtu_per_hr, 'kBtu/hr', 'W').get)
       new_comp_name = "#{air_conditioner_variable_refrigerant_flow.name} #{capacity_kbtu_per_hr.round} Clg kBtu/hr #{min_coph.round(1)}COPH"
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirConditionerVariableRefrigerantFlow', "For #{template}: #{air_conditioner_variable_refrigerant_flow.name}: Cooling Capacity = #{capacity_kbtu_per_hr.round}kBtu/hr; COPH = #{min_coph}")
     end

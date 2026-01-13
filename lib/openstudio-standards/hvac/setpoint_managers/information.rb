@@ -25,7 +25,7 @@ module OpenstudioStandards
           min_c = OpenstudioStandards::Schedules.schedule_constant_get_min_max(sch.to_ScheduleConstant.get)['min']
           max_c = OpenstudioStandards::Schedules.schedule_constant_get_min_max(sch.to_ScheduleConstant.get)['max']
         else
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Could not find min and max values for #{obj_type} Setpoint Manager.")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.HVAC', "Could not find min and max values for #{obj_type} Setpoint Manager.")
         end
         loop_op_min_f = OpenStudio.convert(min_c, 'C', 'F').get
         loop_op_max_f = OpenStudio.convert(max_c, 'C', 'F').get
@@ -53,7 +53,7 @@ module OpenstudioStandards
           elsif low_sch.to_ScheduleConstant.is_initialized
             min_c = OpenstudioStandards::Schedules.schedule_constant_get_min_max(low_sch.to_ScheduleConstant.get)['min']
           else
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Could not find min and max values for #{obj_type} Setpoint Manager.")
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.HVAC', "Could not find min and max values for #{obj_type} Setpoint Manager.")
           end
           loop_op_min_f = OpenStudio.convert(min_c, 'C', 'F').get unless min_c.nil?
         end
@@ -68,7 +68,7 @@ module OpenstudioStandards
           elsif high_sch.to_ScheduleConstant.is_initialized
             max_c = OpenstudioStandards::Schedules.schedule_constant_get_min_max(high_sch.to_ScheduleConstant.get)['max']
           else
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Could not find min and max values for #{obj_type} Setpoint Manager.")
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.HVAC', "Could not find min and max values for #{obj_type} Setpoint Manager.")
           end
           loop_op_max_f = OpenStudio.convert(max_c, 'C', 'F').get unless max_c.nil?
         end
@@ -83,7 +83,7 @@ module OpenstudioStandards
         loop_op_min_f = OpenStudio.convert(spm.minimumSetpointTemperature, 'C', 'F').get
         loop_op_max_f = OpenStudio.convert(spm.maximumSetpointTemperature, 'C', 'F').get
       else
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Could not find min and max values for #{obj_type} Setpoint Manager.")
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.HVAC', "Could not find min and max values for #{obj_type} Setpoint Manager.")
       end
 
       return { 'min_temp' => loop_op_min_f, 'max_temp' => loop_op_max_f }

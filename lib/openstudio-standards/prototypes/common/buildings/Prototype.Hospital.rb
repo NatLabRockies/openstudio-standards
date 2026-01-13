@@ -85,10 +85,10 @@ module Hospital
 
         # replace main supply air fan
         air_loop.supplyFan.get.remove
-        fan = create_fan_by_name(model,
-                                 'Hospital_CAV_Sytem_Fan',
-                                 fan_name: "#{air_loop.name} Fan",
-                                 end_use_subcategory: 'CAV System Fans')
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'Hospital_CAV_Sytem_Fan',
+                                                           fan_name: "#{air_loop.name} Fan",
+                                                           end_use_subcategory: 'CAV System Fans')
         fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
         fan.addToNode(air_loop.supplyOutletNode)
 
@@ -276,13 +276,13 @@ module Hospital
         humidity_spm = OpenStudio::Model::SetpointManagerSingleZoneHumidityMinimum.new(model)
         case template
         when '90.1-2004', '90.1-2007', '90.1-2010', '90.1-2013', '90.1-2016', '90.1-2019'
-          create_coil_heating_electric(model,
-                                       air_loop_node: supply_outlet_node,
-                                       name: "#{space_name} Electric Htg Coil")
-          create_coil_heating_water(model,
-                                    hot_water_loop,
-                                    air_loop_node: supply_outlet_node,
-                                    name: "#{space_name} Water Htg Coil")
+          OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                 air_loop_node: supply_outlet_node,
+                                                                 name: "#{space_name} Electric Htg Coil")
+          OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                              hot_water_loop,
+                                                              air_loop_node: supply_outlet_node,
+                                                              name: "#{space_name} Water Htg Coil")
         end
         # humidity_spm.addToNode(supply_outlet_node)
         humidity_spm.addToNode(humidifier.outletModelObject.get.to_Node.get)

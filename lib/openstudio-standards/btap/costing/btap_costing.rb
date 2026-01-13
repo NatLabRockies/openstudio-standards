@@ -1,6 +1,5 @@
 require 'json'
-require_relative 'costing_database_wrapper.rb'
-require_relative 'common_paths.rb'
+require_relative 'costing_database_wrapper'
 
 class SimpleLinearRegression
   #https://gist.github.com/rweald/3516193#file-full-slr-class-snippet-rb
@@ -41,9 +40,10 @@ class BTAPCosting
   # May be initialized with custom databases:
   #   costs_csv:   Path to custom costing
   #   factors_csv: Path to custom localization factors
-  def initialize(costs_csv: nil, factors_csv: nil)
+  def initialize(costs_csv: nil, factors_csv: nil, attributes:)
     @cp               = CommonPaths.instance
     @costing_database = CostingDatabase.instance
+    @attributes       = attributes
 
     # If the path for custom costing is defined, use custom costing.
     if (not costs_csv.nil?) and File.exist?(costs_csv)
@@ -54,10 +54,6 @@ class BTAPCosting
     if (not factors_csv.nil?) and File.exist?(factors_csv)
       @cp.costs_local_factors_path = factors_csv
     end
-  end
-
-  def load_database()
-    @costing_database.load_database
   end
 
   def validate_database()
