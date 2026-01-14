@@ -156,8 +156,10 @@ module BTAP
     def initialize(standard)
       @data = {}
       data["use_tbd"]              = !(standard.tbd.nil?)
-      data["building_performance"] = standard.tbd.model[:perform] == :lp ? "low" : "high"
-      data["tbd_edge_tallies"]     = standard.tbd.tally[:edges].transform_keys { |key| key.to_s }
+      if data["use_tbd"]
+        data["building_performance"] = standard.tbd.model[:perform] == :lp ? "low" : "high"
+        data["tbd_edge_tallies"]     = standard.tbd.tally[:edges].transform_keys { |key| key.to_s }
+      end
     end
 
     # @param path [String]

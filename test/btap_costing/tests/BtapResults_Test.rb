@@ -358,7 +358,7 @@ class BTAPResults_Test < Minitest::Test
       sql_path = "#{run_dir}/run/eplusout.sql"
       #create osm file to use mimic PAT/OS server called final
       model.save(model_out_path, true)
-      post_analysis = BTAPDatapointAnalysis.new(
+      post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
         template: template,
