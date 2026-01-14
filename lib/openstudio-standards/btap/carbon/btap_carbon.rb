@@ -125,6 +125,13 @@ class BTAPCarbon
       total_emissions += @carbon_report["#{surface_type.underscore}_carbon"]
     end
 
+    # Add the embodied carbon tallied from TBD which tallies carbon emissions
+    # of items that aren't explicitly modeled 
+    structure_carbon = \
+      @attributes.model.getBuilding.additionalProperties.getFeatureAsDouble("co2_structure").get.round(2)
+    @carbon_report["structure_carbon"] = structure_carbon
+    total_emissions += structure_carbon
+
     puts "\nEmbodied carbon data successfully generated. Total emboded carbon emissions is " \
          "#{total_emissions.to_f.round(2)} kg/m^2"
     @carbon_report["total"] = total_emissions
