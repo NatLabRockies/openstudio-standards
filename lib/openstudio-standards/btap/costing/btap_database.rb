@@ -60,16 +60,16 @@ class BTAPDatabase
     end
 
     # Load the construction data
-    @db["constructions"]["door"]       = File.open(@cp.constructions_door_path)       { |file| JSON.load(file)}
-    @db["constructions"]["door_glass"] = File.open(@cp.constructions_door_glass_path) { |file| JSON.load(file)}
-    @db["constructions"]["floors"]     = File.open(@cp.constructions_floor_path)      { |file| JSON.load(file)}
-    @db["constructions"]["roofs"]      = File.open(@cp.constructions_roof_path)       { |file| JSON.load(file)}
-    @db["constructions"]["skylight"]   = File.open(@cp.constructions_skylight_path)   { |file| JSON.load(file)}
-    @db["constructions"]["walls"]      = File.open(@cp.constructions_wall_path)       { |file| JSON.load(file)}
-    @db["constructions"]["window"]     = File.open(@cp.constructions_window_path)     { |file| JSON.load(file)}
-    @db["constructions"]["bg_roof"]    = File.open(@cp.constructions_bg_roof_path)    { |file| JSON.load(file)}
-    @db["constructions"]["bg_wall"]    = File.open(@cp.constructions_bg_wall_path)    { |file| JSON.load(file)}
-    @db["constructions"]["slab"]       = File.open(@cp.constructions_slab_path)       { |file| JSON.load(file)}
+    @db["constructions"]["door"]       = File.open(@cp.constructions_door_path)       { |file| JSON.load(file) }
+    @db["constructions"]["door_glass"] = File.open(@cp.constructions_door_glass_path) { |file| JSON.load(file) }
+    @db["constructions"]["floors"]     = File.open(@cp.constructions_floor_path)      { |file| JSON.load(file) }
+    @db["constructions"]["roofs"]      = File.open(@cp.constructions_roof_path)       { |file| JSON.load(file) }
+    @db["constructions"]["skylight"]   = File.open(@cp.constructions_skylight_path)   { |file| JSON.load(file) }
+    @db["constructions"]["walls"]      = File.open(@cp.constructions_wall_path)       { |file| JSON.load(file) }
+    @db["constructions"]["window"]     = File.open(@cp.constructions_window_path)     { |file| JSON.load(file) }
+    @db["constructions"]["bg_roof"]    = File.open(@cp.constructions_bg_roof_path)    { |file| JSON.load(file) }
+    @db["constructions"]["bg_wall"]    = File.open(@cp.constructions_bg_wall_path)    { |file| JSON.load(file) }
+    @db["constructions"]["slab"]       = File.open(@cp.constructions_slab_path)       { |file| JSON.load(file) }
 
     # Load the raw data
     raw_data_names = [
