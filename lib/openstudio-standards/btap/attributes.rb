@@ -79,7 +79,7 @@ module BTAP
         "ExteriorWall",
         "ExteriorRoof",
         "ExteriorFloor",
-        "InterzonalAtticFloor",
+        "InterzonalRoof",
         "InterzonalSkylightWalls",
         "ExteriorFixedWindow",
         "ExteriorOperableWindow",
@@ -100,7 +100,7 @@ module BTAP
         "ExteriorWall"            => :walls,
         "ExteriorRoof"            => :roofs,
         "ExteriorFloor"           => :floors,
-        "InterzonalAtticFloor"    => :floors,
+        "InterzonalRoof"          => :roofs,
         "InterzonalSkylightWalls" => :walls
       }
 
@@ -278,15 +278,15 @@ module BTAP
           # TODO: Eventually crawlspaces should also be considered, however they
           # are not present in any of the NECB template buildings.
           if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
-            surfaces_hash["InterzonalAtticFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+            surfaces_hash["InterzonalRoof"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
               space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
             surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
               space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
-            (surfaces_hash["InterzonalAtticFloor"] + surfaces_hash["InterzonalSkylightWalls"]).each do |surface|
+            (surfaces_hash["InterzonalRoof"] + surfaces_hash["InterzonalSkylightWalls"]).each do |surface|
               surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
             end
           end
-          surfaces_hash["InterzonalAtticFloor"]    = [] unless surfaces_hash.has_key?("InterzonalAtticFloor")
+          surfaces_hash["InterzonalRoof"]    = [] unless surfaces_hash.has_key?("InterzonalRoof")
           surfaces_hash["InterzonalSkylightWalls"] = [] unless surfaces_hash.has_key?("InterzonalSkylightWalls")
 
           # Exterior Subsurfaces
