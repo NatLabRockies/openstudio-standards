@@ -2867,13 +2867,4 @@ class NECB2011 < Standard
       # Otherwise, loop will rerun sizing
     end
   end
-
-  # Used by btap_analysis.rb for a no-simulation analysis. Loads useful member
-  # attributes.
-  #
-  # @param cache [BTAPStandardCache]
-  def load_standard_cache(cache)
-    @tbd       = cache.tbd
-    @structure = cache.structure
-  end
 end

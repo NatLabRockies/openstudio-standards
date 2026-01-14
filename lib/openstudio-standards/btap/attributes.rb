@@ -54,19 +54,25 @@ module BTAP
 
   # Class for accessing and pre-processing model attributes.
   class Attributes
-    attr_reader :model
-    attr_reader :zones
-    attr_reader :spaces
-    attr_reader :surface_types
-    attr_reader :surface_types_to_assemblies
-    attr_reader :use_tbd
+    attr_reader :model            # [OpenStudio::Model::Model]
+    attr_reader :zones            # [Array[OpenStudio::Model::Zone]]
+    attr_reader :spaces           # [Array[OpenStudio::Model::Space]]
+    attr_reader :surface_types    # [Array]
+    attr_reader :use_tbd          # [Boolean]
+    attr_reader :tbd_edge_tallies # [Hash]
 
-    # @param model    [OpenStudio::Model::Model]
-    # @param standard [Standard]
-    def initialize(model, standard)
-      @model            = model
-      @standard         = standard
-      @costing_database = BTAPDatabase.instance
+    # @param model                [OpenStudio::Model::Model]
+    # @param standard             [Standard]
+    # @param use_tbd              [Boolean]
+    # @param building_performance [String]
+    # @param tbd_edge_tallies     [Hash]
+    def initialize(model, standard, use_tbd, building_performance, tbd_edge_tallies)
+      @model                = model
+      @standard             = standard
+      @use_tbd              = use_tbd
+      @building_performance = building_performance
+      @tbd_edge_tallies     = tbd_edge_tallies
+      @costing_database     = BTAPDatabase.instance
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [
@@ -88,9 +94,9 @@ module BTAP
         "GroundContactFloor"
       ]
 
-      # Surface type map for converting between surface type strings and the TBD
-      # `stypes` parameter.
-      @surface_type_tbd_map = {
+      # Surface type map for converting between surface type strings and the
+      # `costed_assembly()` `surface_type` parameter.
+      @surface_type_assembly_map = {
         "ExteriorWall"            => :walls,
         "ExteriorRoof"            => :roofs,
         "ExteriorFloor"           => :floors,
@@ -117,7 +123,6 @@ module BTAP
       @spaces        = []
       @constructions = {}
 
-      @use_tbd = !(@standard.tbd.nil?)
 
       self.compile_model
       self.compile_constructions(@use_tbd)
@@ -138,11 +143,11 @@ module BTAP
       # the `costed_assembly` method assigns assemblies according to building
       # categories.
       if use_tbd
-        @surface_types_to_assemblies = @surface_type_tbd_map.keys.map { |surface_type|
-          [surface_type, @standard.tbd.costed_assembly(
+        @surface_types_to_assemblies = @surface_type_assembly_map.keys.map { |surface_type|
+          [surface_type, BTAP::Constructions.costed_assembly(
             @standard.structure,
-            @surface_type_tbd_map[surface_type],
-            @standard.tbd.model[:perform])]}.to_h
+            @surface_type_assembly_map[surface_type],
+            @building_performance)]}.to_h
       end
 
       @spaces.each do |space|
@@ -167,8 +172,8 @@ module BTAP
       # surface is less than 1, then skip it.
       return if surface.rsi < 1.0
 
-      if @surface_type_tbd_map.has_key?(surface_type)
-        tbd_surface_type          = @surface_type_tbd_map[surface_type]
+      if @surface_type_assembly_map.has_key?(surface_type)
+        tbd_surface_type          = @surface_type_assembly_map[surface_type]
         construction_name         = @surface_types_to_assemblies[surface_type]
       else # TODO: Temporary branching for temporary defaults.
         construction_name = @default_surface_constructions_by_type[surface_type]

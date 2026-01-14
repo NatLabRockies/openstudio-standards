@@ -210,7 +210,7 @@ class BTAPCosting
     # exterior walls per m^2 and multiply it buy the total parapet length.
     if @attributes.use_tbd
       wall_cost_per_m2 = @costing_report["envelope"]["exterior_wall_cost_per_m2"]
-      parapet_cost = prototype_creator.tbd.tally[:edges][:parapet].values.first * wall_cost_per_m2
+      parapet_cost = @attributes.tbd_edge_tallies["parapet"].values.first * wall_cost_per_m2
       @costing_report["envelope"]["parapet_cost"] = parapet_cost.round(2)
       totEnvCost += parapet_cost
     end

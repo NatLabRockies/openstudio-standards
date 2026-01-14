@@ -406,73 +406,6 @@ module BTAP
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
 
     ##
-    # Retrieves BTAP-costed assembly.
-    #
-    # @param structure [BTAP::Structure] BTAP Structure object
-    # @param stype [:walls, :floors or :roofs] surface type
-    # @param perform [:hp or :lp] high- or low-performance variant
-    #
-    # @return [String] BTAP assembly identifier for costing
-    def costed_assembly(structure = nil, stype = :walls, perform = :lp)
-      stype   = :walls unless [:roofs, :floors].include?(stype)
-      perform = :lp    unless perform == :hp
-      return STEL1 unless structure.is_a?(BTAP::Structure)
-
-      # Select BTAP-costed assembly, matching:
-      #   - BTAP::Structure generated construction parameters
-      #   - requested high (HP) vs low-performance (LP) PSI-factor level
-      #
-      # Ideally, chosen PSI factor sets and matching OpenStudio constructions
-      # shouldn't strictly be based on selected BTAP assemblies (e.g.
-      # wood-framed vs steel-framed, cladding choice), but also on selected
-      # building 'structure', e.g.:
-      #
-      #   - "wood-framed" MURB
-      #   - "steel post/beam" office building
-      #   - "reinforced concrete post/beam" public library
-      #   - "metal(-building)" warehouse
-      #   - "mass-timber (CLT)" university pavilion
-      #
-      # Major thermal bridges often consist of anchors or supports that transmit
-      # structural loads (and by the same token, 'heat') to a building's main
-      # structure. Examples include balconies, parapets and shelf angles.
-      # Highly conductive building structures (e.g. steel, aluminium) exacerbate
-      # thermal bridging effects - so building structural selection matters.
-      #
-      # The BTAP::Structure module generates such attributes, yet BTAP's costed
-      # thermal bridging database doesn't yet distinguish between building
-      # structures - @todo. For the moment, BTAP PSI set selection is strictly
-      # based on BTAP::Structure's :framing, :cladding and :finish attributes,
-      # which must be set prior to initiating BTAP's TBD's thermal bridging
-      # solution:
-
-      # Light gauge steel framing by default. Override if wood, cmu or precast.
-      case stype
-      when :roofs  then return ROOF
-      when :floors then return FLOOR
-      else
-        case structure.framing
-        when :wood
-          c1 = WOOD5
-          c2 = WOOD7
-        when :cmu
-          c1 = MASS2
-          c2 = MASSB
-        else
-          if structure.cladding == :heavy && structure.finish == :heavy
-            c1 = MASS4
-            c2 = MASS8
-          else
-            c1 = STEL1
-            c2 = STEL2
-          end
-        end
-      end
-
-      perform == :lp ? c1 : c2
-    end
-
-    ##
     # Retrieves nearest assembly Uo factor.
     #
     # @param assembly [String] BTAP assembly identifier
@@ -686,7 +619,7 @@ module BTAP
           # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
-          assembly = self.costed_assembly(argh[:structure], stypes, perform)
+          assembly = BTAP::Constructions.costed_assembly(argh[:structure], stypes, perform)
 
           uo = target ? self.costed_uo(assembly, target) : nil
 
@@ -1023,7 +956,7 @@ module BTAP
       # wall selection. Adapt once BTAP::Structure supports STRUCTURE
       # assignements per OpenStudio's building-to-space hierarchy, e.g. "cmu"
       # gymnasium walls in an otherwise "steel"post/frame school. @todo
-      assembly = self.costed_assembly(structure, :walls, perform)
+      assembly = BTAP::Constructions.costed_assembly(structure, :walls, perform)
       building_psi = self.set(assembly, quality)
 
       psis[ building_psi[:id] ] = building_psi
@@ -1137,76 +1070,6 @@ module BTAP
       end
 
       true
-    end
-
-    # Retrieve the material quantities for the values in the tbd.edges
-    # parameter.
-    # @return [Hash] IDs mapped to their quantities in feet.
-    def get_material_quantities_for_edges
-      cp                  = CommonPaths.instance
-      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
-      material_quantities = {}
-
-      # The "convex/concave" suffix on tally edges can be safely ignored since
-      # they currently aren't relevant to any NECB standard, but they are to
-      # ASHRAE 90.1.
-      tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
-      tally_edges.each do |edge_type, value|
-        value.each do |wall_reference_and_quality, quantity|
-
-          # "transition" edges aren't considered.
-          if edge_type == "transition"
-            next
-
-          # "jamb", "sill", and "head" may all be grouped under fenestration
-          # when referencing the thermal bridging CSV. Same for "skylightjamb",
-          # "skylightsill", and "skylighthead".
-          elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
-            edge_type = "fenestration"
-          end
-
-          result = csv.find do |row|
-            row["edge_type"]      == edge_type &&
-            row["wall_reference"] == wall_reference_and_quality
-          end
-
-          if result.nil?
-            puts("Wall with type #{edge_type} and reference #{wall_reference_and_quality}" \
-                 " could not be found in the thermal bridging database")
-            next
-          end
-
-          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
-          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
-          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
-            if material_quantities[id].nil?
-              material_quantities[id] = 0.0
-            end
-
-            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
-          end
-        end
-      end
-
-      return material_quantities
-    end
-
-    # Remove most instance variables from the TBD object. This is a temporary
-    # workaround for getting caching to work since the TBD object is very deeply
-    # nested with member attributes. A bug exists in ruby which causes the
-    # `inspect` method to hang for such objects:
-    # https://bugs.ruby-lang.org/issues/6783
-
-    # This prevents inspecting the object in an interactive debug shell without
-    # a file pager and prevents writing the object to a file.
-    def shorten_instance_variables
-      self.instance_variables.filter { |variable| variable != :@tally and variable != :@model }.each do |variable|
-        remove_instance_variable(variable)
-      end
-      @model.keys.filter { |value| value != :perform }.each do |value|
-        @model.delete(value)
-      end
-      @tally.delete(:constructions)
     end
   end
 end

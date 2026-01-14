@@ -229,7 +229,7 @@ class BTAPDatapoint
         post_analysis = nil
         if @options[:enable_costing] or @options[:enable_carbon]
           @cp = CommonPaths.instance
-          post_analysis = BTAPDatapointAnalysis.new(
+          post_analysis = BTAP::DatapointAnalysis.new(
             model: model,
             output_folder: @dp_temp_folder,
             template: @options[:template],
@@ -277,7 +277,7 @@ class BTAPDatapoint
         # Write cache files to be able to re-run this analysis without an annual
         # simulation.
         if post_analysis
-          post_analysis.write_cache(File.join(@dp_temp_folder, 'btap_cache.marshal')) 
+          post_analysis.write_cache(File.join(@dp_temp_folder, 'btap_cache.json'))
         end
 
         #output hourly data
@@ -321,7 +321,7 @@ class BTAPDatapoint
 
     # Initializes the qaqc data structure.
     # Scoped inside of the class so that it can be used in the intialization of
-    # this class as well as in BTAPAnalysis.
+    # this class as well as in BTAP::Analysis.
     def build_qaqc(model, standard, datapoint_id, analysis_id)
       qaqc = standard.init_qaqc(model)
       command = "SELECT Value
