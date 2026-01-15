@@ -28,14 +28,14 @@ class NECB_Activity_Tests < Minitest::Test
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      # "NECB2020"
+      "NECB2020"
     ]
 
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
 
     @buildings = [
       'FullServiceRestaurant',
-      # 'HighriseApartment',
+      'HighriseApartment',
       # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
@@ -43,20 +43,20 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
-      # 'MediumOffice',
+      'LowriseApartment',
+      'MediumOffice',
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
       # 'Outpatient',
-      # 'PrimarySchool',
+      'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
-      # 'SmallHotel',
-      # 'SmallOffice',
-      # 'Warehouse'
+      'SmallHotel',
+      'SmallOffice',
+      'Warehouse'
     ]
 
     # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:

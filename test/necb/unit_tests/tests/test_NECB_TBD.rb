@@ -40,7 +40,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
+      'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',  # *
@@ -49,7 +49,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',

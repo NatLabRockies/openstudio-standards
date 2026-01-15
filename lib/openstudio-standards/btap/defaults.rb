@@ -406,7 +406,7 @@ end
 #
 # ... are specified in both:
 #     - utilities/btap_cli/tests/run_options.yml
-#     - utilities/btap_cli/tests/run_options.yml
+#     - utilities/btap_cli/tests/run_options_local_osm.yml
 #
 # ... yet never used in BTAP/NECB.
 #
