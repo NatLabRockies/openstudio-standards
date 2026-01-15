@@ -238,7 +238,6 @@ module BTAP
 
       # Iterate through the data structures while also saving their sorted order later for reference.
       @model.instance_variable_set(:@zones_sorted, [])
-
       @model.getThermalZones.sort.each do |zone|
         @model << zone
         @zones << zone
@@ -253,68 +252,87 @@ module BTAP
           end
           zone    << space
           @spaces << space
-          surfaces_hash = {}
+          space.instance_variable_set(:@surfaces_hash, {})
+          space.surfaces_hash["InterzonalRoof"]          = []
+          space.surfaces_hash["InterzonalSkylightWalls"] = []
+        end
+      end
 
-          # The following surfaces are the ones considered for costing/carbon
-          # analysis. Filter them each into categories by boundary condition and
-          # store their RSI as an instance variable for future reference.
+      # The following surfaces are the ones considered for costing/carbon
+      # analysis. Filter them each into categories by boundary condition and
+      # store their RSI as an instance variable for future reference.
 
-          # Exterior Surfaces
-          exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
-          surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
-          surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
-          surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
-          exterior_surfaces.each do |surface|
+      @spaces.each do |space|
+        # Exterior Surfaces
+        exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
+        space.surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
+        space.surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
+        space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
+        exterior_surfaces.each do |surface|
+          surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
+        end
+
+        # Interzonal Surfaces
+        # In models with attics, roofs may be unconditioned and as a result
+        # will not be considered for further analysis. However, attic floors
+        # and skylight well walls will be insulated and these surfaces will
+        # need to be properly categorized. Since these are unconditioned and
+        # unaffected by TBD, get the mirrored surface of these surfaces via
+        # `adjacentSurface` which is conditioned.
+        # TODO: Eventually crawlspaces should also be considered, however they
+        # are not present in any of the NECB template buildings.
+        if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
+           interzonal_roof_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
+            space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
+           interzonal_skylight_wall_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
+            space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
+
+           # Since the mirrored surface is used, the space type will likely be
+           # different, so match the space type correctly.
+          interzonal_roof_surfaces .each do |surface|
+            matched_space = @spaces.find { |matching_space| surface.space.get == matching_space }
+            matched_space.surfaces_hash["InterzonalRoof"] << surface
             surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
 
-          # Interzonal Surfaces
-          # In models with attics, roofs may be unconditioned and as a result
-          # will not be considered for further analysis. However, attic floors
-          # and skylight well walls will be insulated and these surfaces will
-          # need to be properly categorized. Since these are unconditioned and
-          # unaffected by TBD, get the mirrored surface of these surfaces via
-          # `adjacentSurface` which is conditioned.
-          # TODO: Eventually crawlspaces should also be considered, however they
-          # are not present in any of the NECB template buildings.
-          if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
-            surfaces_hash["InterzonalRoof"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-              space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
-            surfaces_hash["InterzonalSkylightWalls"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-              space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
-            (surfaces_hash["InterzonalRoof"] + surfaces_hash["InterzonalSkylightWalls"]).each do |surface|
-              surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
-            end
+          interzonal_skylight_wall_surfaces.each do |surface|
+            matched_space = @spaces.find { |matching_space| surface.space.get == matching_space }
+            matched_space.surfaces_hash["InterzonalSkylightWalls"] << surface
+            surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
-          surfaces_hash["InterzonalRoof"]    = [] unless surfaces_hash.has_key?("InterzonalRoof")
-          surfaces_hash["InterzonalSkylightWalls"] = [] unless surfaces_hash.has_key?("InterzonalSkylightWalls")
+        end
 
-          # Exterior Subsurfaces
-          exterior_subsurfaces = exterior_surfaces.flat_map(&:subSurfaces)
-          surfaces_hash["ExteriorFixedWindow"]             = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["FixedWindow"]).sort
-          surfaces_hash["ExteriorOperableWindow"]          = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["OperableWindow"]).sort
-          surfaces_hash["ExteriorSkylight"]                = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["Skylight"]).sort
-          surfaces_hash["ExteriorTubularDaylightDiffuser"] = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["TubularDaylightDiffuser"]).sort
-          surfaces_hash["ExteriorTubularDaylightDome"]     = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["TubularDaylightDome"]).sort
-          surfaces_hash["ExteriorDoor"]                    = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["Door"]).sort
-          surfaces_hash["ExteriorGlassDoor"]               = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["GlassDoor"]).sort
-          surfaces_hash["ExteriorOverheadDoor"]            = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["OverheadDoor"]).sort
-          exterior_subsurfaces.each do |surface|
-            surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get))
-          end
+        # Exterior Subsurfaces
+        exterior_subsurfaces = exterior_surfaces.flat_map(&:subSurfaces)
+        space.surfaces_hash["ExteriorFixedWindow"]             = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["FixedWindow"]).sort
+        space.surfaces_hash["ExteriorOperableWindow"]          = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["OperableWindow"]).sort
+        space.surfaces_hash["ExteriorSkylight"]                = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["Skylight"]).sort
+        space.surfaces_hash["ExteriorTubularDaylightDiffuser"] = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["TubularDaylightDiffuser"]).sort
+        space.surfaces_hash["ExteriorTubularDaylightDome"]     = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["TubularDaylightDome"]).sort
+        space.surfaces_hash["ExteriorDoor"]                    = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["Door"]).sort
+        space.surfaces_hash["ExteriorGlassDoor"]               = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["GlassDoor"]).sort
+        space.surfaces_hash["ExteriorOverheadDoor"]            = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
+          exterior_subsurfaces, ["OverheadDoor"]).sort
+        exterior_subsurfaces.each do |surface|
+          surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get))
+        end
 
-          # Ground Surfaces
-          ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
-          ground_surfaces += BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Foundation")
-          surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Wall").sort
-          surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "RoofCeiling").sort
-          surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Floor").sort
-          ground_surfaces.each do |surface|
-            surface.instance_variable_set(:@rsi, TBD.rsi(
-              surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
-          end
-
-          space.instance_variable_set(:@surfaces_hash, surfaces_hash)
+        # Ground Surfaces
+        ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
+        ground_surfaces += BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Foundation")
+        space.surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Wall").sort
+        space.surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "RoofCeiling").sort
+        space.surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Floor").sort
+        ground_surfaces.each do |surface|
+          surface.instance_variable_set(:@rsi, TBD.rsi(
+            surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
         end
       end
     end
