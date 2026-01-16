@@ -1,4 +1,3 @@
-
 # Most of the maintainers of this code are professional engineers,
 # not professional Rubyists.  The style guide for this project
 # has been modified accordingly, with explanations given below.
@@ -13,19 +12,190 @@ AllCops:
     - 'lib/openstudio-standards/prototypes/common/do_not_edit_metaclasses.rb'
   NewCops: enable
 
-inherit_from:
-  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop.yml
+# Define the error reporting for each category
+Layout:
+  Severity: error
+Lint:
+  Severity: error
+Metrics:
+  Severity: error
+Naming:
+  Severity: warning
+Style:
+  Severity: error
 
-# =============== OpenStudio Standards Specific ===========
-# Ignore file name convention; choices based on OpenStudio C++ class names
+# ==================== Linters ====================
+Lint/AmbiguousOperator:
+  Enabled: true
+
+# Allow empty when branches to give
+# a space to clearly document the
+# reason that nothing is happening.
+Lint/EmptyWhen:
+  Enabled: false
+
+Lint/ParenthesesAsGroupedExpression:
+  Enabled: true
+
+Lint/RequireParentheses:
+  Enabled: true
+
+Lint/UnreachableCode:
+  Enabled: false
+
+# Allow variable initialization to indicate
+# what variable is going to be set by the next
+# block of code.
+Lint/UselessAssignment:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  Description: 'Checks for unused block arguments.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#underscore-unused-vars'
+  Enabled: false
+
+Lint/UnusedMethodArgument:
+  Description: 'Checks for unused method arguments.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#underscore-unused-vars'
+  Enabled: false
+
+# ==================== Metrics ====================
+
 Metrics/AbcSize:
   Max: 200
+  Severity: warning
+
+Metrics/BlockNesting:
+  Max: 5
 
 Metrics/BlockLength:
   Max: 100
+  Severity: warning
 
-Naming/FileName:
+Metrics/ClassLength:
+  Max: 500
+  CountComments: false
+  Severity: warning
+
+Metrics/CyclomaticComplexity:
+  Max: 60
+  Severity: warning
+
+Metrics/MethodLength:
+  Max: 350
+  CountComments: false
+  Severity: warning
+
+Metrics/ModuleLength:
+  Max: 500
+  CountComments: false
+  Severity: warning
+
+# Longer parameter list limits for methods that
+# add HVAC systems
+Metrics/ParameterLists:
+  Max: 15
+  Severity: warning
+
+Metrics/PerceivedComplexity:
+  Max: 60
+  Severity: warning
+
+# ==================== Styles ====================
+
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/ClassAndModuleChildren:
   Enabled: false
+
+Style/ClassVars:
+  Enabled: false
+
+# Allow this syntax -- do not autocorrect.
+#   a = if true
+#         1
+#       else
+#         2
+#       end
+Style/ConditionalAssignment:
+  Enabled: false
+
+# Documentation will be covered by YARD.
+Style/Documentation:
+  Enabled: false
+
+Style/EachWithObject:
+  Enabled: false
+
+# Allow for i in 0..3 loops
+Style/For:
+  Enabled: false
+
+# Configuration parameters: AllowedVariables.
+Style/GlobalVars:
+  Enabled: false
+
+# Disabled because in most of this codebase,
+# the current approach is more readable.
+Style/GuardClause:
+  Enabled: true
+
+# Allow duplication inside conditional branches to keep
+# code that does certain tasks more consolidated.
+Style/IdenticalConditionalBranches:
+  Enabled: false
+
+# Allow this type of nesting for logic clarity.
+Style/IfInsideElse:
+  Enabled: false
+
+# Do not force people to use one-line if statements.
+Style/IfUnlessModifier:
+  Enabled: false
+
+# Allow multiple comparisons via || for clarity
+Style/MultipleComparison:
+  Enabled: false
+
+# Allow negatives
+# https://rubocop.readthedocs.io/en/latest/cops_style/#stylenegatedif
+Style/NegatedIf:
+  Enabled: false
+
+# Do not force people to use Next.
+Style/Next:
+  Enabled: false
+
+# Do not convert 10000 to 10_000
+Style/NumericLiterals:
+  Description: 'Add underscores to large numeric literals to improve readability.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#underscores-in-numerics'
+  Enabled: false
+
+Style/NumericPredicate:
+  Description: 'Do not force using .zero?'
+  Enabled: false
+
+# encourage explicit returns for clarity
+Style/RedundantReturn:
+  Description: 'Do not use return where it is not required.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-explicit-return'
+  Enabled: false
+
+# Do NOT enable this because it appears $? is different than $CHILD_STATUS.
+Style/SpecialGlobalVars:
+  Enabled: false
+
+# Do not use %w, %W, %i, etc
+# Prefer [:a, :b, :c] over %i[a b c]
+Style/SymbolArray:
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-i'
+  EnforcedStyle: brackets
+
+# Do not use %w, %W, %i, etc
+# Prefer ['a', 'b', 'c'] over %w[a b c]
+Style/WordArray:
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-w'
+  EnforcedStyle: brackets
 
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -35,3 +205,37 @@ Style/HashSyntax:
 
 Style/HashEachMethods:
   Enabled: false
+
+# ==================== Naming ====================
+
+# Intentionally allow set_foo because these methods do not
+# take have cooresponding getters.
+Naming/AccessorMethodName:
+  Enabled: true
+
+# Allow variables like coeff_1 for legibility
+Naming/VariableNumber:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: false
+
+# ==================== Layout ====================
+
+Layout/BlockAlignment:
+  Enabled: true
+
+# Need to allow indented case statements
+# Configuration parameters: IndentWhenRelativeTo, SupportedStyles, IndentOneStep.
+Layout/CaseIndentation:
+  Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: aligned
+  Enabled: true
+
+# Allow long lines to encourage sufficiently
+# detailed user-facing log messages.
+Layout/LineLength:
+  Max: 1200
+  Severity: warning

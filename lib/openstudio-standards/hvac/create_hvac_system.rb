@@ -1996,11 +1996,11 @@ module OpenstudioStandards
 
           # Set the minimum flow fraction based on reheat type
           min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
-                        when 'Electricity', 'NaturalGas'
-                          0.3
-                        else # 'HotWater', other
-                          0.2
-                        end
+                                when 'Electricity', 'NaturalGas'
+                                  0.3
+                                else # 'HotWater', other
+                                  0.2
+                                end
           terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
           # zone sizing
@@ -2025,11 +2025,11 @@ module OpenstudioStandards
 
           # Set the minimum flow fraction based on reheat type
           min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
-                        when 'Electricity', 'NaturalGas'
-                          0.3
-                        else # 'HotWater', other
-                          0.2
-                        end
+                                when 'Electricity', 'NaturalGas'
+                                  0.3
+                                else # 'HotWater', other
+                                  0.2
+                                end
           terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
           # zone sizing
@@ -2363,11 +2363,11 @@ module OpenstudioStandards
 
         # Set the minimum flow fraction based on reheat type
         min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
-                      when 'Electricity', 'NaturalGas'
-                        0.3
-                      else # 'HotWater', other
-                        0.2
-                      end
+                              when 'Electricity', 'NaturalGas'
+                                0.3
+                              else # 'HotWater', other
+                                0.2
+                              end
         terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
         unless return_plenum.nil?
@@ -2669,11 +2669,11 @@ module OpenstudioStandards
 
         # Set the minimum flow fraction based on reheat type
         min_damper_position = case OpenstudioStandards::HVAC.air_terminal_single_duct_vav_reheat_reheat_type(terminal)
-                      when 'Electricity', 'NaturalGas'
-                        0.3
-                      else # 'HotWater', other
-                        0.2
-                      end
+                              when 'Electricity', 'NaturalGas'
+                                0.3
+                              else # 'HotWater', other
+                                0.2
+                              end
         terminal.setConstantMinimumAirFlowFraction(min_damper_position)
 
         # zone sizing
