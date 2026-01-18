@@ -53,8 +53,8 @@ module BTAP
     @@data = {bldg: {}, space: {}, ancillaries: []}
 
     # Hard setting path for both files (temporary @todo).
-    @@data[:bldg ][:file      ] = File.join(__dir__, "NECB_building_types.csv")
-    @@data[:space][:file      ] = File.join(__dir__, "NECB_space_types.csv")
+    @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
+    @@data[:space][:file      ] = File.join(__dir__, "btap_space_types.csv")
     @@data[:bldg ][:table     ] = nil
     @@data[:space][:table     ] = nil
     @@data[:bldg ][:activity  ] = {}
@@ -105,7 +105,8 @@ module BTAP
     # inheritance). BTAP can either continue to reference schedule set C for
     # NECB 2011 atria, or instead rely on Appendix Note A-8.4.3.2.(1) (on the
     # conditional use of default schedules). For instance, BTAP could simply
-    # apply the same policy as the other NECB editions.
+    # apply the same policy as the other NECB editions - to facilitate
+    # cross-comparisons between NECB editions, the NECB 2011 atrium schedule set follows the other NECB editions
     #
     # With respect to other NECB editions, NECB2011 also has a few missing
     # entries: There is neither GENERAL 'seating' (e.g. a waiting area) nor
@@ -119,23 +120,27 @@ module BTAP
     if File.exist?(@@data[:bldg][:file])
       table = CSV.open(@@data[:bldg][:file], headers: true).read
 
-      # 35 unique entries (rows), 6 columns per row, e.g.:
-      #    COL1 COL2     COL3  COL4                             COL5        COL6
-      #  ______ ____ ________ _____ ________________________________ ___________
-      #  "care,  20, housing, care, health/clinic/multi/residential, residential"
+      # 35 unique entries (rows), 10 columns per row, e.g.:
+      #    C01  C02 C03  C04 C05 C06      C07   C08               C09        C10
+      #   ____ ___ ____ ____ ___ ___ ________ _____ _______________ ____________
+      #   care, 25, 1.5, 500,  j, 13, housing, care, health/clinic/, residential
       #
-      #   COL1: BTAP building ACTIVITY e.g. "care"
-      #   COL2: non-occupant liveload  e.g. 20 kg/m2, ~1/12 of NBC min liveload
-      #   COL3: BTAP building CATEGORY e.g. "housing"
-      #   COL4: selected sub-string(s) e.g. "care", as in "Long-term care"
-      #   COL5: rejected sub-string(s) e.g. "health", "multi", "residential"
-      #   COL6: fallback (if missing)  e.g. "residential"
+      #   C01: BTAP building ACTIVITY e.g. "care"
+      #   C02: occupant density       e.g. 25.0 m2/occupant
+      #   C03: peak equipment load    e.g. 1.5 W/m2
+      #   C04: peak SWH load          e.g. 500.0 W/occupant
+      #   C05: schedule set           e.g. "j"
+      #   C06: non-occupant liveload  e.g. 13 kg/m2, ~1/12 of NBC min liveload
+      #   C07: BTAP building CATEGORY e.g. "housing"
+      #   C08: selected sub-string(s) e.g. "care", as in "Long-term care"
+      #   C09: rejected sub-string(s) e.g. "health", "multi", "residential"
+      #   C10: fallback (if missing)  e.g. "residential"
       #
       # Contrary to the aforementioned 'parking' case (where fortunately there
       # is an obvious one-to-one match between "Parking garage" (NECB2011) and
       # "Storage garage" (NECB2020)), there is no direct match here for a
       # long-term care facility when using the NECB2011. In this case, the
-      # fallback 'activity' is 'residential' (COL6). So in any cross-comparison
+      # fallback 'activity' is 'residential' (COL10). So in any cross-comparison
       # of long-term care facilities between NECB editions, the NECB2011 variant
       # would be akin to a MURB.
       #
@@ -154,12 +159,16 @@ module BTAP
       table.each do |row|
         key = row[0]
 
-        @@data[:bldg][:activity][key]            = {}
-        @@data[:bldg][:activity][key][:liveload] = row[1].to_f
-        @@data[:bldg][:activity][key][:category] = row[2].to_s
-        @@data[:bldg][:activity][key][:includes] = row[3].to_s.split("/")
-        @@data[:bldg][:activity][key][:excludes] = row[4].to_s.split("/")
-        @@data[:bldg][:activity][key][:fallback] = row[5].to_s
+        @@data[:bldg][:activity][key]              = {}
+        @@data[:bldg][:activity][key][:occdensity] = row[1].to_f
+        @@data[:bldg][:activity][key][:eqpload   ] = row[2].to_f
+        @@data[:bldg][:activity][key][:swhload   ] = row[3].to_f
+        @@data[:bldg][:activity][key][:schedule  ] = row[4].to_s
+        @@data[:bldg][:activity][key][:liveload  ] = row[5].to_f
+        @@data[:bldg][:activity][key][:category  ] = row[6].to_s
+        @@data[:bldg][:activity][key][:includes  ] = row[7].to_s.split("/")
+        @@data[:bldg][:activity][key][:excludes  ] = row[8].to_s.split("/")
+        @@data[:bldg][:activity][key][:fallback  ] = row[9].to_s
       end
 
       # Keep CSV table. Ensure building activities & categories uniqueness. Add
@@ -178,16 +187,19 @@ module BTAP
     if File.exist?(@@data[:space][:file])
       table = CSV.open(@@data[:space][:file], headers: true).read
 
-      # 108 unique rows, 4 columns per row, e.g.:
-      #                   COL1     COL2         COL3                COL4
-      #  _____________________ ________ ____________ ___________________
-      #           units::care,    unit, residential, units::residential
-      #   exhibit::convention, exhibit,      museum,
+      # 108 unique rows, 8 columns per row, e.g.:
+      #          C01 C02  C03  C04  C05 C06           C07                 C08
+      #  ___________ ___ ____ ____ ____ ____ ____________ ___________________
+      #  units::care, 25, 2.5, 500,  j, unit, residential, units::residential
       #
-      #   COL1: BTAP space ACTIVITY    e.g. "units::care"
-      #   COL2: selected sub-string(s) e.g. "unit"
-      #   COL3: rejected sub-string(s) e.g. "residential"
-      #   COL4: fallback (if missing)  e.g. "units::residential"
+      #   C01: BTAP space ACTIVITY    e.g. "units::care"
+      #   C02: occupant density       e.g. 25.0 m2/occupant
+      #   C03: peak equipment load    e.g. 2.5 W/m2
+      #   C04: peak SWH load          e.g. 500.0 W/occupant
+      #   C05: schedule set           e.g. "j"
+      #   C06: selected sub-string(s) e.g. "unit"
+      #   C07: rejected sub-string(s) e.g. "residential"
+      #   C08: fallback (if missing)  e.g. "units::residential"
       #
       # First, BTAP space 'activity' entries are namespaced, e.g.:
       #   - "units": 1-word descriptor on the nature of the space 'activity'

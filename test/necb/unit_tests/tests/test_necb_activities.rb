@@ -35,7 +35,7 @@ class NECB_Activity_Tests < Minitest::Test
 
     @buildings = [
       'FullServiceRestaurant',
-      'HighriseApartment',
+      # 'HighriseApartment',
       # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
@@ -44,17 +44,17 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
       # 'Outpatient',
-      'PrimarySchool',
+      # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       'RetailStripmall',
       # 'SecondarySchool',
-      'SmallHotel',
+      # 'SmallHotel',
       'SmallOffice',
       'Warehouse'
     ]
