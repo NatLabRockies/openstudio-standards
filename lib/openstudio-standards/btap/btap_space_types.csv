@@ -37,7 +37,7 @@ c3::arena,5,1.5,90,b,class 3/class III,,
 c4::arena,5,1.5,90,b,class 4/class IV,,
 octogon::arena,5,1.5,90,b,ring/octogon,manufacturing,
 exercise::gym,5,1,90,b,exercise,,
-court::gym,5,1.5,90,b,court/playing,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,
+court::gym,5,1.5,90,b,court/playing/gym,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,
 locker::common,10,2.5,0,*,locker,
 dressing::theatre,30,2.5,40,c,dress/fitt,retail,
 dressing::retail,30,2.5,40,c,dress/fitt,perform/art/theatre,
@@ -51,14 +51,14 @@ dining::restaurant,10,1,120,b,dining,penitentiary/leisure/lounge/bar/cafeteria/f
 dining::motel,10,1,115,b,dining,penitentiary/leisure/lounge/bar/cafeteria/fast/family/restaurant/hotel/common/other,dining::common
 dining::hotel,10,1,115,b,dining,penitentiaryleisure/lounge/bar/cafeteria/fast/family/restaurant/motel/lodging/common/other,dining::common
 cuisine::common,20,10,120,b,food/preparation,
-rooms::common,25,2.5,600,f,guest,otel,rooms::hotel
-rooms::motel,25,2.5,600,f,guest/otel,hotel,rooms::common
+rooms::common,25,2.5,600,f,guest/lodging,otel,rooms::hotel
+rooms::motel,25,2.5,600,f,guest/lodging/otel,hotel,rooms::common
 rooms::hotel,25,2.5,600,f,guest/otel,motel/hway/lodging,rooms::common
 quarters::dorm,25,2.5,500,g,quarter,fire,
 quarters::firehouse,25,2.5,500,g,quarter,dorm,
 units::residential,25,5,500,g,unit,care,units::residential
 units::care,25,2.5,500,j,unit,residential,units::residential
-recreation::common,10,1,60,b,recreation,hospital/healthcare,
+recreation::common,10,1,60,b,recreation,hospital/health,
 meeting::common,5,1,45,c,conference/meeting/multi-purpose,,
 office::common,20,7.5,90,a,office/enclosed,bank/open,office::common
 openplan::common,20,7.5,90,a,open,enclosed/bank,office::common
@@ -70,7 +70,7 @@ sorting::postal,20,7.5,90,a,sorting,,
 chambers::court,20,7.5,90,a,chambers,,
 tribunal::court,5,2.5,30,a,tribunal/courtroom,,
 cell::common,25,0,325,g,cell,courthouse,cell::common
-cell::court,,25,2.5,325,h,cell,confinement,cell::common
+cell::court,25,2.5,325,h,cell,confinement,cell::common
 classroom::common,7.5,5,65,d,classroom/lecture/training,penitentiary,classroom::common
 classroom::penitentiary,7.5,5,65,d,classroom,lecture/training,classroom::common
 reading::library,20,1,90,c,reading,,
@@ -88,19 +88,19 @@ patient::hospital,20,10,90,h,patient,,
 therapy::hospital,20,10,45,c,therapy,,
 imaging::hospital,20,10,90,h,radiology/imaging,,
 recovery::hospital,20,10,180,h,recovery,,
-laundry::common,20,20,60,c,laundry,hospital/healthcare,laundry::common
+laundry::common,20,20,60,c,laundry/washing,hospital/health,laundry::common
 laundry::hospital,20,20,60,c,laundry/washing,common,laundry::common
-lounge::common,10,1,60,b,lounge,dining,hospital/healthcare,lounge::common
+lounge::common,10,1,60,b,lounge,dining/hospital/health,lounge::common
 lounge::hospital,10,1,60,b,lounge,dining/common/other,lounge::common
-pharmacy::common,20,2.5,45,c,pharmacy,hospital/healthcare,pharmacy::common
+pharmacy::common,20,2.5,45,c,pharmacy,hospital/health,pharmacy::common
 pharmacy::hospital,20,2.5,45,c,pharmacy,common/other,pharmacy::common
-emergency::common,25,2.5,325,h,emergency,hospital/healthcare,emergency::hospital
+emergency::common,25,2.5,325,h,emergency,hospital/health,emergency::hospital
 emergency::hospital,20,10,180,h,emergency,vehicle/garage,emergency::common
 engineroom::firehouse,25,2.5,325,h,engine,,
 garage::parking,1000,0,0,k,garage,,
 repair::automotive,20,5,90,e,repair/maintenance,,
 dock::common,500,0,0,h,dock,,
-bulk::warehouse,100,1,65,a,bulk/pallet,fine,
+bulk::warehouse,100,1,65,a,blk/bulk/pallet,fine,
 fine::warehouse,50,1,65,a,fine,undefined/medium/bulk/pallet,
 workshop::common,30,10,90,a,workshop,,
 bay::manufacturing,30,10,90,a,bay,,

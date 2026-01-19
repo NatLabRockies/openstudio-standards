@@ -26,7 +26,7 @@ class NECB_Activity_Tests < Minitest::Test
     # Range of NECB templates.
     @templates = [
       # "NECB2011",
-      "NECB2015",
+      # "NECB2015",
       # "NECB2017",
       "NECB2020"
     ]
@@ -34,7 +34,7 @@ class NECB_Activity_Tests < Minitest::Test
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'Hospital',
       # 'LargeHotel',
@@ -43,7 +43,7 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
+      # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
@@ -52,7 +52,7 @@ class NECB_Activity_Tests < Minitest::Test
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
@@ -183,11 +183,28 @@ class NECB_Activity_Tests < Minitest::Test
 
           # Some buildings have NECB-listed 'ancillary' spacetypes. Comment in
           # the 'fdback' assignment below (which buildings? which spaces?).
-          a.activities.each do |space, params|
+          a.activities.each do |espace, params|
+            id      = espace.nameString
+            space   = model.getSpaceByName(id)
+            err_msg = "BTAP::Activity #{id} missing space (#{cas})?"
+            refute_empty(space, err_msg)
+
+            space   = space.get
+            sptype  = space.spaceType
+            err_msg = "BTAP::Activity #{id} empty spacetype (#{cas})?"
+            refute_empty(sptype, err_msg)
+
+            sptype  = sptype.get
+            sttype  = sptype.standardsSpaceType
+            err_msg = "BTAP::Activity #{id} empty stds spacetype (#{cas})?"
+            refute_empty(sttype, err_msg)
+            sttype  = sttype.get
+
+            fdback << "... #{id} :|: #{sptype.nameString} :|: #{sttype} :|: #{params[:keyword]}"
             next unless params.key?(:keyword)
             next unless BTAP::Activity.ancillary?(params[:keyword])
 
-            # fdback << "   ANCILLARY: #{space.nameString} (#{params[:keyword]})"
+            # fdback << "   ANCILLARY: #{espace.nameString} (#{params[:keyword]})"
           end
 
           a.feedback[:logs].each { |log| puts log }

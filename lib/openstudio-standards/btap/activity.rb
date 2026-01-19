@@ -102,11 +102,8 @@ module BTAP
 
     # NECB2011 recommends schedule set "C" for atria, while all other NECB
     # editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
-    # inheritance). BTAP can either continue to reference schedule set C for
-    # NECB 2011 atria, or instead rely on Appendix Note A-8.4.3.2.(1) (on the
-    # conditional use of default schedules). For instance, BTAP could simply
-    # apply the same policy as the other NECB editions - to facilitate
-    # cross-comparisons between NECB editions, the NECB 2011 atrium schedule set follows the other NECB editions
+    # inheritance). To facilitate cross-comparisons between NECB editions, the
+    # NECB 2011 atrium schedule set will harmonize with other NECB editions.
     #
     # With respect to other NECB editions, NECB2011 also has a few missing
     # entries: There is neither GENERAL 'seating' (e.g. a waiting area) nor
@@ -231,12 +228,16 @@ module BTAP
         activity = str[0].to_s
         bldgtype = str[1].to_s
 
-        @@data[:space][:activity][key]            = {}
-        @@data[:space][:activity][key][:activity] = activity
-        @@data[:space][:activity][key][:bldgtype] = bldgtype
-        @@data[:space][:activity][key][:includes] = row[1].to_s.split("/")
-        @@data[:space][:activity][key][:excludes] = row[2].to_s.split("/")
-        @@data[:space][:activity][key][:fallback] = row[3].to_s
+        @@data[:space][:activity][key]              = {}
+        @@data[:space][:activity][key][:activity  ] = activity
+        @@data[:space][:activity][key][:bldgtype  ] = bldgtype
+        @@data[:space][:activity][key][:occdensity] = row[1].to_f
+        @@data[:space][:activity][key][:eqpload   ] = row[2].to_f
+        @@data[:space][:activity][key][:swhload   ] = row[3].to_f
+        @@data[:space][:activity][key][:schedule  ] = row[4].to_s
+        @@data[:space][:activity][key][:includes  ] = row[5].to_s.split("/")
+        @@data[:space][:activity][key][:excludes  ] = row[6].to_s.split("/")
+        @@data[:space][:activity][key][:fallback  ] = row[7].to_s
       end
 
       @@data[:space][:table] = table
@@ -397,7 +398,7 @@ module BTAP
           fallbacks << fallback unless fallback.empty?
         end
 
-        # Reject if matching excluded keywords.
+        # Reject if matching any excluded keyword.
         data[:space][:activity].each do |k, v|
           v[:excludes].each do |kword|
             candidates.delete(k) if standards.include?(kword)
@@ -416,6 +417,17 @@ module BTAP
 
           candidate = data[:space][:activity].keys.first if candidate.empty?
         else
+          # if candidates.size > 1
+          #   # Select a "common" variant.
+          #   commons = []
+          #
+          #   candidates.each do |candidate|
+          #     commons << candidate if candidate.include?("::common")
+          #   end
+          #
+          #   candidates = commons if commons.size > 0
+          # end
+
           candidate = candidates.first
         end
 
