@@ -48,15 +48,15 @@ class NECB_Activity_Tests < Minitest::Test
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
-      # 'Outpatient',
+      'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
@@ -200,11 +200,17 @@ class NECB_Activity_Tests < Minitest::Test
             refute_empty(sttype, err_msg)
             sttype  = sttype.get
 
-            fdback << "... #{id} :|: #{sptype.nameString} :|: #{sttype} :|: #{params[:keyword]}"
-            next unless params.key?(:keyword)
+            err_msg = "BTAP::Activity #{id} missing keyword (#{cas})?"
+            assert(params.key?(:keyword), err_msg)
+            err_msg = "BTAP::Activity #{id} missing schedule (#{cas})?"
+            assert(params.key?(:schedule), err_msg)
             next unless BTAP::Activity.ancillary?(params[:keyword])
 
-            # fdback << "   ANCILLARY: #{espace.nameString} (#{params[:keyword]})"
+            # puts "... #{id} :|: #{sttype} :|: #{params[:keyword]} :|: #{params[:schedule]}"
+
+            err_msg = "BTAP::Activity #{id} ancillary schedule (#{cas})?"
+            assert_equal(params[:schedule], "*", err_msg)
+            fdback << "   ANCILLARY: #{id} (#{params[:keyword]}, #{params[:schedule]})"
           end
 
           a.feedback[:logs].each { |log| puts log }

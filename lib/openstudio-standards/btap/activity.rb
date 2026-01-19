@@ -417,27 +417,20 @@ module BTAP
 
           candidate = data[:space][:activity].keys.first if candidate.empty?
         else
-          # if candidates.size > 1
-          #   # Select a "common" variant.
-          #   commons = []
-          #
-          #   candidates.each do |candidate|
-          #     commons << candidate if candidate.include?("::common")
-          #   end
-          #
-          #   candidates = commons if commons.size > 0
-          # end
-
           candidate = candidates.first
         end
 
-        entry             = {}
-        entry[:m2       ] = space.floorArea
-        entry[:spacetype] = spacetype
-        entry[:standards] = standards
-        entry[:keyword  ] = candidate
-        entry[:activity ] = data[:space][:activity][candidate][:activity]
-        entry[:bldgtype ] = data[:space][:activity][candidate][:bldgtype]
+        entry              = {}
+        entry[:m2        ] = space.floorArea
+        entry[:spacetype ] = spacetype
+        entry[:standards ] = standards
+        entry[:keyword   ] = candidate
+        entry[:activity  ] = data[:space][:activity][candidate][:activity]
+        entry[:bldgtype  ] = data[:space][:activity][candidate][:bldgtype]
+        entry[:occdensity] = data[:space][:activity][candidate][:occdensity]
+        entry[:eqpload   ] = data[:space][:activity][candidate][:eqpload]
+        entry[:swhload   ] = data[:space][:activity][candidate][:swhload]
+        entry[:schedule  ] = data[:space][:activity][candidate][:schedule]
 
         activities[space] = entry
       end
