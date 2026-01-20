@@ -25,10 +25,10 @@ class NECB_Activity_Tests < Minitest::Test
 
     # Range of NECB templates.
     @templates = [
-      # "NECB2011",
+      "NECB2011",
       # "NECB2015",
       # "NECB2017",
-      "NECB2020"
+      # "NECB2020"
     ]
 
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
@@ -209,6 +209,15 @@ class NECB_Activity_Tests < Minitest::Test
             err_msg = "BTAP::Activity #{id} ancillary schedule (#{cas})?"
             assert_equal(params[:schedule], "*", err_msg)
             fdback << "   ANCILLARY: #{id} (#{params[:keyword]}, #{params[:schedule]})"
+
+            # A handful of ancillary spaces are considered 'wetspaces'.
+            next unless BTAP::Activity.wet?(params[:keyword])
+
+            err_msg = "BTAP::Activity #{id} wetspace (#{cas})?"
+            assert(params[:keyword].include?("washroom") ||
+                   params[:keyword].include?("locker"), err_msg)
+
+            fdback << "   WETSPACE: #{id} (#{params[:keyword]})"
           end
 
           a.feedback[:logs].each { |log| puts log }

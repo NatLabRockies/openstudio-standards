@@ -1,5 +1,5 @@
 # **************************************************************************** /
-# *  Copyright (c) 2008-2025, Natural Resources Canada
+# *  Copyright (c) 2008-2026, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -50,7 +50,9 @@ module BTAP
     # which in turn sets building-wide 'structural' options, e.g. wood-framed
     # (small-scale) vs reinforced concrete flat slab & post-beam (mid- & large-
     # scale) "housing". See lib/openstudio-standards/btap/structure.rb.
-    @@data = {bldg: {}, space: {}, ancillaries: []}
+    #
+    # @@data = {bldg: {}, space: {}, ancillaries: []}
+    @@data = {bldg: {}, space: {}}
 
     # Hard setting path for both files (temporary @todo).
     @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
@@ -89,18 +91,18 @@ module BTAP
     # This last note refers to the following NECB 'ancillary' spacetypes:
     #
     #                                                     2011  2015  2017  2020
-    @@data[:ancillaries] <<     "atrium::common"        #   C     *     *     *
-    @@data[:ancillaries] <<   "audience::common"        #         *     *     *
-    @@data[:ancillaries] <<   "computer::common"        #         *     *     *
-    @@data[:ancillaries] <<   "corridor::common"        #   *     *     *     *
-    @@data[:ancillaries] <<   "corridor::hospital"      #   *     *     *     *
-    @@data[:ancillaries] <<   "corridor::manufacturing" #   *     *     *     *
-    @@data[:ancillaries] << "mechanical::common"        #   *     *     *     *
-    @@data[:ancillaries] <<     "locker::common"        #   *     *     *     *
-    @@data[:ancillaries] <<    "seating::common"        #         *     *     *
-    @@data[:ancillaries] <<   "stairway::common"        #   *     *     *     *
-    @@data[:ancillaries] <<    "storage::common"        #   *     *     *     *
-    @@data[:ancillaries] <<   "washroom::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<     "atrium::common"        #   C     *     *     *
+    # @@data[:ancillaries] <<   "audience::common"        #         *     *     *
+    # @@data[:ancillaries] <<   "computer::common"        #         *     *     *
+    # @@data[:ancillaries] <<   "corridor::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<   "corridor::hospital"      #   *     *     *     *
+    # @@data[:ancillaries] <<   "corridor::manufacturing" #   *     *     *     *
+    # @@data[:ancillaries] << "mechanical::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<     "locker::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<    "seating::common"        #         *     *     *
+    # @@data[:ancillaries] <<   "stairway::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<    "storage::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<   "washroom::common"        #   *     *     *     *
 
     # NECB2011 recommends schedule set "C" for atria, while all other NECB
     # editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
@@ -258,9 +260,28 @@ module BTAP
 
       activity = activity.to_s.strip.downcase
       return false unless @@data[:space][:activity].include?(activity)
-      return false unless @@data[:ancillaries].include?(activity)
+      # return false unless @@data[:ancillaries].include?(activity)
+
+      return false unless @@data[:space][:activity][activity].key?(:schedule)
+      return false unless @@data[:space][:activity][activity][:schedule] == "*"
 
       true
+    end
+
+    ##
+    # Validates whether an activity is considered 'wet', e.g. locker room.
+    #
+    # @param activity [:to_sym] a BTAP::Activity item, e.g. "locker::common"
+    #
+    # @return [Boolean] whether activity is 'wet'.
+    def wet?(activity = "")
+      return false unless activity.respond_to?(:to_sym)
+
+      activity = activity.to_s.strip.downcase
+      return true if activity.include?("locker")
+      return true if activity.include?("washroom")
+
+      false
     end
 
     ##
