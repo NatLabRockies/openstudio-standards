@@ -88,17 +88,19 @@ module BTAP
     #
     # This last note refers to the following NECB 'ancillary' spacetypes:
     #
-    #                                                 2011  2015  2017  2020
-    @@data[:ancillaries] << "atrium::common"     #       C     *     *     *
-    @@data[:ancillaries] << "audience::common"   #             *     *     *
-    @@data[:ancillaries] << "computer::common"   #             *     *     *
-    @@data[:ancillaries] << "corridor::common"   #       *     *     *     *
-    @@data[:ancillaries] << "mechanical::common" #       *     *     *     *
-    @@data[:ancillaries] << "locker::common"     #       *     *     *     *
-    @@data[:ancillaries] << "seating::common"    #             *     *     *
-    @@data[:ancillaries] << "stairway::common"   #       *     *     *     *
-    @@data[:ancillaries] << "storage::common"    #       *     *     *     *
-    @@data[:ancillaries] << "washroom::common"   #       *     *     *     *
+    #                                                     2011  2015  2017  2020
+    @@data[:ancillaries] <<     "atrium::common"        #   C     *     *     *
+    @@data[:ancillaries] <<   "audience::common"        #         *     *     *
+    @@data[:ancillaries] <<   "computer::common"        #         *     *     *
+    @@data[:ancillaries] <<   "corridor::common"        #   *     *     *     *
+    @@data[:ancillaries] <<   "corridor::hospital"      #   *     *     *     *
+    @@data[:ancillaries] <<   "corridor::manufacturing" #   *     *     *     *
+    @@data[:ancillaries] << "mechanical::common"        #   *     *     *     *
+    @@data[:ancillaries] <<     "locker::common"        #   *     *     *     *
+    @@data[:ancillaries] <<    "seating::common"        #         *     *     *
+    @@data[:ancillaries] <<   "stairway::common"        #   *     *     *     *
+    @@data[:ancillaries] <<    "storage::common"        #   *     *     *     *
+    @@data[:ancillaries] <<   "washroom::common"        #   *     *     *     *
 
     # NECB2011 recommends schedule set "C" for atria, while all other NECB
     # editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
@@ -416,6 +418,14 @@ module BTAP
           end
 
           candidate = data[:space][:activity].keys.first if candidate.empty?
+
+          # Halt if:
+          #   - space is part of the total floor area
+          #   - 'candidate' spacetype is undefined
+          if space.partofTotalFloorArea && candidate == "undefined::common"
+            id = space.nameString
+            raise("Unrecognized spacetype #{stdstype} for #{id}. Revise.")
+          end
         else
           candidate = candidates.first
         end

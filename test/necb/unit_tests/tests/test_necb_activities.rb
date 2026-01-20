@@ -48,12 +48,12 @@ class NECB_Activity_Tests < Minitest::Test
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
-      'Outpatient',
+      # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
-      # 'SecondarySchool',
+      'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
       # 'Warehouse'
@@ -205,8 +205,6 @@ class NECB_Activity_Tests < Minitest::Test
             err_msg = "BTAP::Activity #{id} missing schedule (#{cas})?"
             assert(params.key?(:schedule), err_msg)
             next unless BTAP::Activity.ancillary?(params[:keyword])
-
-            # puts "... #{id} :|: #{sttype} :|: #{params[:keyword]} :|: #{params[:schedule]}"
 
             err_msg = "BTAP::Activity #{id} ancillary schedule (#{cas})?"
             assert_equal(params[:schedule], "*", err_msg)
