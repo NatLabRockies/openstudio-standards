@@ -48,12 +48,12 @@ class NECB_Activity_Tests < Minitest::Test
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
-      # 'Outpatient',
+      'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
-      'SecondarySchool',
+      # 'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
       # 'Warehouse'
@@ -204,10 +204,11 @@ class NECB_Activity_Tests < Minitest::Test
             assert(params.key?(:keyword), err_msg)
             err_msg = "BTAP::Activity #{id} missing schedule (#{cas})?"
             assert(params.key?(:schedule), err_msg)
+
             next unless BTAP::Activity.ancillary?(params[:keyword])
 
             err_msg = "BTAP::Activity #{id} ancillary schedule (#{cas})?"
-            assert_equal(params[:schedule], "*", err_msg)
+            refute_equal(params[:schedule], "*", err_msg)
             fdback << "   ANCILLARY: #{id} (#{params[:keyword]}, #{params[:schedule]})"
 
             # A handful of ancillary spaces are considered 'wetspaces'.
@@ -217,7 +218,7 @@ class NECB_Activity_Tests < Minitest::Test
             assert(params[:keyword].include?("washroom") ||
                    params[:keyword].include?("locker"), err_msg)
 
-            fdback << "   WETSPACE: #{id} (#{params[:keyword]})"
+            fdback << "   WETSPACES: #{id} (#{params[:keyword]})"
           end
 
           a.feedback[:logs].each { |log| puts log }

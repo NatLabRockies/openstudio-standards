@@ -50,9 +50,7 @@ module BTAP
     # which in turn sets building-wide 'structural' options, e.g. wood-framed
     # (small-scale) vs reinforced concrete flat slab & post-beam (mid- & large-
     # scale) "housing". See lib/openstudio-standards/btap/structure.rb.
-    #
-    # @@data = {bldg: {}, space: {}, ancillaries: []}
-    @@data = {bldg: {}, space: {}}
+    @@data = {bldg: {}, space: {}, ancillaries: []}
 
     # Hard setting path for both files (temporary @todo).
     @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
@@ -91,18 +89,18 @@ module BTAP
     # This last note refers to the following NECB 'ancillary' spacetypes:
     #
     #                                                     2011  2015  2017  2020
-    # @@data[:ancillaries] <<     "atrium::common"        #   C     *     *     *
-    # @@data[:ancillaries] <<   "audience::common"        #         *     *     *
-    # @@data[:ancillaries] <<   "computer::common"        #         *     *     *
-    # @@data[:ancillaries] <<   "corridor::common"        #   *     *     *     *
-    # @@data[:ancillaries] <<   "corridor::hospital"      #   *     *     *     *
-    # @@data[:ancillaries] <<   "corridor::manufacturing" #   *     *     *     *
-    # @@data[:ancillaries] << "mechanical::common"        #   *     *     *     *
-    # @@data[:ancillaries] <<     "locker::common"        #   *     *     *     *
-    # @@data[:ancillaries] <<    "seating::common"        #         *     *     *
-    # @@data[:ancillaries] <<   "stairway::common"        #   *     *     *     *
-    # @@data[:ancillaries] <<    "storage::common"        #   *     *     *     *
-    # @@data[:ancillaries] <<   "washroom::common"        #   *     *     *     *
+    # @@data[:ancillaries] <<     "atrium::common"        #  C     *     *     *
+    # @@data[:ancillaries] <<   "audience::common"        #        *     *     *
+    # @@data[:ancillaries] <<   "computer::common"        #        *     *     *
+    # @@data[:ancillaries] <<   "corridor::common"        #  *     *     *     *
+    # @@data[:ancillaries] <<   "corridor::hospital"      #  *     *     *     *
+    # @@data[:ancillaries] <<   "corridor::manufacturing" #  *     *     *     *
+    # @@data[:ancillaries] << "mechanical::common"        #  *     *     *     *
+    # @@data[:ancillaries] <<     "locker::common"        #  *     *     *     *
+    # @@data[:ancillaries] <<    "seating::common"        #        *     *     *
+    # @@data[:ancillaries] <<   "stairway::common"        #  *     *     *     *
+    # @@data[:ancillaries] <<    "storage::common"        #  *     *     *     *
+    # @@data[:ancillaries] <<   "washroom::common"        #  *     *     *     *
 
     # NECB2011 recommends schedule set "C" for atria, while all other NECB
     # editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
@@ -158,18 +156,18 @@ module BTAP
       # COL4 substrings, then rejecting COL5 substrings, there should be a
       # single selected row. See NECB unit test test_necb_activities.rb.
       table.each do |row|
-        key = row[0]
+        key = row[0].to_s
 
-        @@data[:bldg][:activity][key]              = {}
-        @@data[:bldg][:activity][key][:occdensity] = row[1].to_f
-        @@data[:bldg][:activity][key][:eqpload   ] = row[2].to_f
-        @@data[:bldg][:activity][key][:swhload   ] = row[3].to_f
-        @@data[:bldg][:activity][key][:schedule  ] = row[4].to_s
-        @@data[:bldg][:activity][key][:liveload  ] = row[5].to_f
-        @@data[:bldg][:activity][key][:category  ] = row[6].to_s
-        @@data[:bldg][:activity][key][:includes  ] = row[7].to_s.split("/")
-        @@data[:bldg][:activity][key][:excludes  ] = row[8].to_s.split("/")
-        @@data[:bldg][:activity][key][:fallback  ] = row[9].to_s
+        @@data[:bldg][:activity][key]            = {}
+        @@data[:bldg][:activity][key][:density ] = row[1].to_f
+        @@data[:bldg][:activity][key][:eqpload ] = row[2].to_f
+        @@data[:bldg][:activity][key][:swhload ] = row[3].to_f
+        @@data[:bldg][:activity][key][:schedule] = row[4].to_s
+        @@data[:bldg][:activity][key][:liveload] = row[5].to_f
+        @@data[:bldg][:activity][key][:category] = row[6].to_s
+        @@data[:bldg][:activity][key][:includes] = row[7].to_s.split("/")
+        @@data[:bldg][:activity][key][:excludes] = row[8].to_s.split("/")
+        @@data[:bldg][:activity][key][:fallback] = row[9].to_s
       end
 
       # Keep CSV table. Ensure building activities & categories uniqueness. Add
@@ -226,22 +224,25 @@ module BTAP
       # share many features (e.g. sleeping, showers), yet each remains specific
       # to an NECB space type entry (as required).
       table.each do |row|
-        key = row[0]
+        key = row[0].to_s
         str = key.split("::")
 
         activity = str[0].to_s
         bldgtype = str[1].to_s
+        schedule = row[4].to_s
 
-        @@data[:space][:activity][key]              = {}
-        @@data[:space][:activity][key][:activity  ] = activity
-        @@data[:space][:activity][key][:bldgtype  ] = bldgtype
-        @@data[:space][:activity][key][:occdensity] = row[1].to_f
-        @@data[:space][:activity][key][:eqpload   ] = row[2].to_f
-        @@data[:space][:activity][key][:swhload   ] = row[3].to_f
-        @@data[:space][:activity][key][:schedule  ] = row[4].to_s
-        @@data[:space][:activity][key][:includes  ] = row[5].to_s.split("/")
-        @@data[:space][:activity][key][:excludes  ] = row[6].to_s.split("/")
-        @@data[:space][:activity][key][:fallback  ] = row[7].to_s
+        @@data[:space][:activity][key]            = {}
+        @@data[:space][:activity][key][:activity] = activity
+        @@data[:space][:activity][key][:bldgtype] = bldgtype
+        @@data[:space][:activity][key][:density ] = row[1].to_f
+        @@data[:space][:activity][key][:eqpload ] = row[2].to_f
+        @@data[:space][:activity][key][:swhload ] = row[3].to_f
+        @@data[:space][:activity][key][:schedule] = schedule
+        @@data[:space][:activity][key][:includes] = row[5].to_s.split("/")
+        @@data[:space][:activity][key][:excludes] = row[6].to_s.split("/")
+        @@data[:space][:activity][key][:fallback] = row[7].to_s
+
+        @@data[:ancillaries] << key if schedule == "*"
       end
 
       @@data[:space][:table] = table
@@ -259,13 +260,9 @@ module BTAP
       return false unless activity.respond_to?(:to_sym)
 
       activity = activity.to_s.strip.downcase
-      return false unless @@data[:space][:activity].include?(activity)
-      # return false unless @@data[:ancillaries].include?(activity)
+      return true if @@data[:ancillaries].include?(activity)
 
-      return false unless @@data[:space][:activity][activity].key?(:schedule)
-      return false unless @@data[:space][:activity][activity][:schedule] == "*"
-
-      true
+      false
     end
 
     ##
@@ -374,6 +371,9 @@ module BTAP
         @category = data[:bldg][:activity][@activity][:category]
       end
 
+      # Assign schedules to ancillary spaces (if present).
+      self.setAncillarySchedules
+
       true
     end
 
@@ -384,9 +384,14 @@ module BTAP
     #
     # @return [Hash] a collection of space activities (see logs if empty)
     def getSpaceActivities(model = nil)
+      lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Model
-      return mismatch("model", model, cl, mth, DBG, {}) unless model.is_a?(cl)
+
+      unless model.is_a?(OpenStudio::Model::Model)
+        lgs << "Invalid or empty OpenStudio model (#{mth})"
+        return {}
+      end
 
       activities = {}
 
@@ -445,23 +450,24 @@ module BTAP
           #   - 'candidate' spacetype is undefined
           if space.partofTotalFloorArea && candidate == "undefined::common"
             id = space.nameString
-            raise("Unrecognized spacetype #{stdstype} for #{id}. Revise.")
+            lgs << "Unrecognized spacetype #{stdstype} for #{id} - revise."
+            raise("Unrecognized spacetype #{stdstype} for #{id} - revise.")
           end
         else
           candidate = candidates.first
         end
 
-        entry              = {}
-        entry[:m2        ] = space.floorArea
-        entry[:spacetype ] = spacetype
-        entry[:standards ] = standards
-        entry[:keyword   ] = candidate
-        entry[:activity  ] = data[:space][:activity][candidate][:activity]
-        entry[:bldgtype  ] = data[:space][:activity][candidate][:bldgtype]
-        entry[:occdensity] = data[:space][:activity][candidate][:occdensity]
-        entry[:eqpload   ] = data[:space][:activity][candidate][:eqpload]
-        entry[:swhload   ] = data[:space][:activity][candidate][:swhload]
-        entry[:schedule  ] = data[:space][:activity][candidate][:schedule]
+        entry             = {}
+        entry[:m2       ] = space.floorArea * space.multiplier
+        entry[:spacetype] = spacetype
+        entry[:standards] = standards
+        entry[:keyword  ] = candidate
+        entry[:activity ] = data[:space][:activity][candidate][:activity]
+        entry[:bldgtype ] = data[:space][:activity][candidate][:bldgtype]
+        entry[:density  ] = data[:space][:activity][candidate][:density]
+        entry[:eqpload  ] = data[:space][:activity][candidate][:eqpload]
+        entry[:swhload  ] = data[:space][:activity][candidate][:swhload]
+        entry[:schedule ] = data[:space][:activity][candidate][:schedule]
 
         activities[space] = entry
       end
@@ -474,11 +480,16 @@ module BTAP
     #
     # @param model OpenStudio::Model::Model] a model
     #
-    # @return [String] keyword describing a model's general activity
+    # @return [String] a model's general activity (see logs if empty)
     def getBuildingActivity(model = nil)
+      lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Model
-      return mismatch("model", model, cl, mth, DBG, "") unless model.is_a?(cl)
+
+      unless model.is_a?(OpenStudio::Model::Model)
+        lgs << "Invalid or empty OpenStudio model (#{mth})"
+        return "office"
+      end
 
       # OPTION A: Extract building activity from user-set 'additionalProperty'.
       tag      = "btap_building_activity"
@@ -590,9 +601,94 @@ module BTAP
                    end
       end
 
-      activity = "office" if activity.empty?
+      # Log warning.
+      if activity.empty?
+        lgs << "Assigning building activity 'office' (#{mth})"
+        activity = "office"
+      end
 
       activity
+    end
+
+    ##
+    # Collects list of neighbouring (side-by-side), non-ancillary spaces.
+    # Here, non-ancillary spaces include ancillary spaces that have valid
+    # assigned schedule sets.
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Array] neighbouring (non-ancillary) spaces
+    def neighbours(space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return {}
+      end
+
+      nghbours = []
+
+      space.surfaces.each do |s|
+        next unless s.surfaceType.downcase == "wall"
+
+        voisin = s.adjacentSurface
+        next if voisin.empty?
+
+        espace = voisin.get.space
+        next if espace.empty?
+
+        espace = espace.get
+        next unless @activities.key?(espace)
+
+        nghbours << espace if @activities[espace][:schedule] != "*"
+      end
+
+      nghbours
+    end
+
+    ##
+    # Sets schedules to ancillary spaces.
+    #
+    # @return [Boolean] true if successful
+    def setAncillarySchedules
+      lgs  = @feedback[:logs]
+      mth  = "BTAP::Activity::#{__callee__}"
+      bkup = "a"
+
+      if @@data[:bldg][:activity].key?(@activity)
+        bkup = @@data[:bldg][:activity][@activity][:schedule]
+      end
+
+      # Loop through ancillary spaces (largest to smallest in floor area).
+      @activities.sort_by { |space, v| v[:m2] }.reverse.each do |space, v|
+        id = space.nameString
+        next unless self.ancillary?(v[:keyword])
+
+        # Retrieve each space's non-ancillary neighbours.
+        schedules = {}
+        schedule  = bkup
+
+        self.neighbours(space).each do |nghbour|
+          next unless @activities.key?(nghbour)
+
+          sched = @activities[nghbour][:schedule]
+          m2    = @activities[nghbour][:m2]
+
+          schedules[sched]  = 0 unless schedules.key?(sched)
+          schedules[sched] += m2
+        end
+
+        if schedules.empty?
+          lgs << "Assigning BUILDING schedule #{bkup} for #{id} (#{mth})"
+          v[:schedule] = bkup
+        else
+          v[:schedule] = schedules.sort_by { |sched, m2| m2 }.reverse.first.first
+        end
+      end
+
+      true
     end
   end
 end
