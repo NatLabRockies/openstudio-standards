@@ -253,7 +253,7 @@ module BTAP
     ##
     # Validates whether an activity is 'ancillary' to other(s).
     #
-    # @param activity [:to_sym] a BTAP::Activity item, e.g. "corridor::common"
+    # @param activity [:to_sym] a BTAP::Activity keyword, e.g. "locker::common"
     #
     # @return [Boolean] whether activity is ancillary.
     def ancillary?(activity = "")
@@ -268,7 +268,7 @@ module BTAP
     ##
     # Validates whether an activity is considered 'wet', e.g. locker room.
     #
-    # @param activity [:to_sym] a BTAP::Activity item, e.g. "locker::common"
+    # @param activity [:to_sym] a BTAP::Activity keyword, e.g. "locker::common"
     #
     # @return [Boolean] whether activity is 'wet'.
     def wet?(activity = "")
@@ -297,16 +297,16 @@ module BTAP
   class BTAP::Activity
     extend ActivityData
 
-    # @return [String] assigned or inferred building ACTIVITY (e.g. "warehouse")
+    # @return [String] assigned or inferred building ACTIVITY, e.g. "warehouse"
     attr_reader :activity
 
-    # @return [Hash] collection of space ACTIVITIES (e.g. "bulk::warehouse")
+    # @return [Hash] collection of space ACTIVITIES, e.g. "bulk::warehouse"
     attr_reader :activities
 
-    # @return [String] building type CATEGORY (e.g. "industry")
+    # @return [String] building type CATEGORY, e.g. "industry"
     attr_reader :category
 
-    # @return [Float] expected non-occupant liveload (e.g. 90 kg/m2)
+    # @return [Float] expected non-occupant liveload, e.g. 90 kg/m2
     attr_reader :liveload
 
     # @return [Hash] logged messages
@@ -362,8 +362,8 @@ module BTAP
       end
 
       # Determine activities of occupied spaces in the model, then building.
-      @activities = self.getSpaceActivities(model)
-      @activity   = self.getBuildingActivity(model)
+      @activities = self.spaceActivities(model)
+      @activity   = self.buildingActivity(model)
       @liveload   = data[:bldg][:activity][@activity][:liveload]
 
       # Assign building category.
@@ -372,7 +372,7 @@ module BTAP
       end
 
       # Assign schedules to ancillary spaces (if present).
-      self.setAncillarySchedules
+      self.assignAncillarySchedules
 
       true
     end
@@ -383,7 +383,7 @@ module BTAP
     # @param model [OpenStudio::Model::Model] a model
     #
     # @return [Hash] a collection of space activities (see logs if empty)
-    def getSpaceActivities(model = nil)
+    def spaceActivities(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Model
@@ -481,7 +481,7 @@ module BTAP
     # @param model OpenStudio::Model::Model] a model
     #
     # @return [String] a model's general activity (see logs if empty)
-    def getBuildingActivity(model = nil)
+    def buildingActivity(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Model
@@ -652,7 +652,7 @@ module BTAP
     # Sets schedules to ancillary spaces.
     #
     # @return [Boolean] true if successful
-    def setAncillarySchedules
+    def assignAncillarySchedules
       lgs  = @feedback[:logs]
       mth  = "BTAP::Activity::#{__callee__}"
       bkup = "a"
@@ -689,6 +689,198 @@ module BTAP
       end
 
       true
+    end
+
+    ##
+    # Returns a space's BTAP::Activity keyword, e.g. "corridor::hospital".
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [String] a space's BTAP::Activity keyword - check logs if empty
+    def keyword(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return ""
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return ""
+      end
+
+      @activities[space][:keyword]
+    end
+
+    ##
+    # Returns a space's activity, e.g. "corridor" in "corridor::hospital".
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [String] a space's activity - check logs if empty
+    def act(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return ""
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return ""
+      end
+
+      @activities[space][:activity]
+    end
+
+    ##
+    # Returns a space's building type, e.g. "hospital" in "corridor::hospital".
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [String] a space's building type - check logs if empty
+    def bldg(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return ""
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return ""
+      end
+
+      @activities[space][:bldgtype]
+    end
+
+    ##
+    # Returns a space's floor area (m2), factoring a space's multiplier.
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's floor area - check logs if 0 m2
+    def m2(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 0.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 0.0
+      end
+
+      @activities[space][:m2]
+    end
+
+    ##
+    # Returns a space's occupant density (m2/occupant).
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's occupant density - check logs if 0 m2/occupant
+    def density(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 0.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 0.0
+      end
+
+      @activities[space][:density]
+    end
+
+    ##
+    # Returns a space's peak receptacle load (W/m2).
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's peak equipment load - check logs if 0 W/m2
+    def eqpWm2(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 0.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 0.0
+      end
+
+      @activities[space][:eqpload]
+    end
+
+    ##
+    # Returns a space's peak service water heating load (W/m2).
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's peak SWH load - check logs if 0 W/m2
+    def swhWm2(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 0.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 0.0
+      end
+
+      @activities[space][:swhload]
+    end
+
+    ##
+    # Returns a space's (NECB-related) schedule set character, e.g. "a".
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [String] schedule set. Check logs if empty string.
+    def schedule(space = "")
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return ""
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return ""
+      end
+
+      @activities[space][:schedule]
     end
   end
 end

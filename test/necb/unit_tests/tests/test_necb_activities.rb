@@ -48,12 +48,12 @@ class NECB_Activity_Tests < Minitest::Test
       # 'MidriseApartment',
       ## 'NorthernEducation',  # *
       ## 'NorthernHealthCare', # *
-      'Outpatient',
+      # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
-      # 'SecondarySchool',
+      'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
       # 'Warehouse'
@@ -183,42 +183,37 @@ class NECB_Activity_Tests < Minitest::Test
 
           # Some buildings have NECB-listed 'ancillary' spacetypes. Comment in
           # the 'fdback' assignment below (which buildings? which spaces?).
-          a.activities.each do |espace, params|
-            id      = espace.nameString
-            space   = model.getSpaceByName(id)
-            err_msg = "BTAP::Activity #{id} missing space (#{cas})?"
-            refute_empty(space, err_msg)
+          model.getSpaces.each do |space|
+            id      = space.nameString
+            err_msg = "BTAP::Activity mismatched space #{id} (#{cas})?"
+            assert(a.activities.key?(space), err_msg)
 
-            space   = space.get
             sptype  = space.spaceType
             err_msg = "BTAP::Activity #{id} empty spacetype (#{cas})?"
             refute_empty(sptype, err_msg)
 
-            sptype  = sptype.get
-            sttype  = sptype.standardsSpaceType
-            err_msg = "BTAP::Activity #{id} empty stds spacetype (#{cas})?"
+            sptype   = sptype.get
+            sttype   = sptype.standardsSpaceType
+            err_msg  = "BTAP::Activity #{id} empty stds spacetype (#{cas})?"
             refute_empty(sttype, err_msg)
-            sttype  = sttype.get
 
-            err_msg = "BTAP::Activity #{id} missing keyword (#{cas})?"
-            assert(params.key?(:keyword), err_msg)
-            err_msg = "BTAP::Activity #{id} missing schedule (#{cas})?"
-            assert(params.key?(:schedule), err_msg)
+            sttype   = sttype.get
+            keyword  = a.keyword(space)
+            schedule = a.schedule(space)
+            activity = a.act(space)
+            err_msg  = "BTAP::Activity #{id} schedule (#{cas})?"
+            refute_equal(schedule, "*", err_msg)
+            next unless a.ancillary?(keyword)
 
-            next unless BTAP::Activity.ancillary?(params[:keyword])
-
-            err_msg = "BTAP::Activity #{id} ancillary schedule (#{cas})?"
-            refute_equal(params[:schedule], "*", err_msg)
-            fdback << "   ANCILLARY: #{id} (#{params[:keyword]}, #{params[:schedule]})"
+            fdback << "   ANCILLARY: #{id} (#{keyword}, #{schedule})"
 
             # A handful of ancillary spaces are considered 'wetspaces'.
-            next unless BTAP::Activity.wet?(params[:keyword])
+            next unless a.wet?(keyword)
 
             err_msg = "BTAP::Activity #{id} wetspace (#{cas})?"
-            assert(params[:keyword].include?("washroom") ||
-                   params[:keyword].include?("locker"), err_msg)
+            assert(activity == "washroom" || activity == "locker", err_msg)
 
-            fdback << "   WETSPACES: #{id} (#{params[:keyword]})"
+            fdback << "   WETSPACES: #{id} (#{keyword})"
           end
 
           a.feedback[:logs].each { |log| puts log }
