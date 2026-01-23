@@ -52,6 +52,7 @@ module OpenstudioStandards
 
   # Schedules Module
   require_relative 'openstudio-standards/schedules/create'
+  require_relative 'openstudio-standards/schedules/create_parametric_schedule'
   require_relative 'openstudio-standards/schedules/modify'
   require_relative 'openstudio-standards/schedules/information'
   require_relative 'openstudio-standards/schedules/parametric'
