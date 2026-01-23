@@ -1,8 +1,7 @@
-require_relative 'information'
 module OpenstudioStandards
   module Schedules
-    # apply the smootherstep function to a given input located beetween a starting and ending value
-    # range between start/end values will be unitized
+    # @!group Schedule Derivation Methods
+    # Apply the smootherstep function to a given input located beetween a starting and ending value range between start/end values will be unitized
     #
     # @param edge0 [Float] lower limit
     # @param edge1 [FLoat] upper limit
@@ -19,8 +18,11 @@ module OpenstudioStandards
       return x_i * x_i * x_i * ((x_i * ((6.0 * x_i) - 15.0)) + 10.0)
     end
 
-    # applies smootherstep to the input set of <24 time_value_pairs to interpolate missing points
-    # returns an expanded array of 24 time value pairs
+    # Applies smootherstep to the input set of <24 time_value_pairs to interpolate missing points
+    #
+    # @param time_value_pairs [Array] array of time value pairs
+    # @param timesteps_per_hour [Integer] number of timesteps per hour
+    # @return [<Array>] Returns an expanded array of 24 time value pairs
     def self.smooth_schedule_from_time_values(time_value_pairs, timesteps_per_hour)
       return_arry = []
       if time_value_pairs[0][0] != 0
@@ -52,7 +54,10 @@ module OpenstudioStandards
       return_arry
     end
 
-    # wraps time value pairs to 24 hours
+    # Wrap time value pairs to 24 hours
+    #
+    # @param time_value_pairs [Array] array of time value pairs
+    # @return [Array] array of wrapped time value pairs
     def self.wrap_schedule_pairs(time_value_pairs)
       # divide the time value pairs at 24 hours
       wrap_group = []
@@ -84,7 +89,7 @@ module OpenstudioStandards
       result.sort_by { |time, _| time }
     end
 
-    # expands parametric schedule control points
+    # Expands parametric schedule control points
     #
     # @param schedule_data [Hash] hash of schedule data
     # @param base [Float] input schedule base value
@@ -111,10 +116,10 @@ module OpenstudioStandards
       # evaluate control points with inputs
       time_value_pairs = []
 
-      control_points = schedule_data[:control_pts]
-      puts control_points.inspect
+      control_points = schedule_data[:control_points]
+      puts "control points #{control_points}"
       control_points.each do |point|
-        # control points are an array of two strings describing hte time and value modifiers relative to start and end time (st/et) and base and peak values
+        # control points are an array of two strings describing the time and value modifiers relative to start and end time (st/et) and base and peak values
         # e.g. ['st-1', 'base*0.5']
         parser = /([a-z]+)(?:([+\-*])(\d+(?:\.\d+)?))?/
         time_point = point[0].scan(parser)[0]
@@ -156,11 +161,11 @@ module OpenstudioStandards
       p time_value_pairs
 
       if time_value_pairs[-1][0] > 24
-        time_value_pairs = wrap_schedule_pairs(time_value_pairs)
+        time_value_pairs = OpenstudioStandards::Schedules.wrap_schedule_pairs(time_value_pairs)
       end
       p time_value_pairs
       # apply smoothing to intermediate values between
-      smooth_schedule_from_time_values(time_value_pairs, timesteps_per_hour)
+      OpenstudioStandards::Schedules.smooth_schedule_from_time_values(time_value_pairs, timesteps_per_hour)
 
       # p expanded_tv_pairs
 
@@ -168,6 +173,11 @@ module OpenstudioStandards
       # wrap_schedule_pairs(expanded_tv_pairs)
     end
 
+    # Add time value pairs to OpenStudio ScheduleDay
+    #
+    # @param day_sch [OpenStudio::Model::ScheduleDay] OpenStudio ScheduleDay object
+    # @param time_value_pairs [Array] array of time value pairs
+    # @return [Boolean] true if successful, false if not
     def self.model_add_time_value_pairs_to_schedule(day_sch, time_value_pairs)
       time_value_pairs.each_with_index do |pair, i|
         # p pair
@@ -209,7 +219,7 @@ module OpenstudioStandards
         base = params[:base].nil? ? obj[:base_std] : params[:base]
         peak = params[:peak].nil? ? obj[:peak_std] : params[:peak]
 
-        time_value_pairs = expand_schedule_control_points(obj, base, peak, st, et, timesteps_per_hour)
+        time_value_pairs = OpenstudioStandards::Schedules.expand_schedule_control_points(obj, base, peak, st, et, timesteps_per_hour)
 
         tv_pairs_reduced = time_value_pairs.reject.with_index { |e, i| e[1] == time_value_pairs[i + 1][1] unless i == (time_value_pairs.size - 1) }
 
@@ -418,7 +428,7 @@ module OpenstudioStandards
           if day_types.include?('Default')
             day_sch = sch_ruleset.defaultDaySchedule
             day_sch.setName("#{schedule_name} Default")
-            model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
+            OpenstudioStandards::Schedules.model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
           end
 
           # Winter Design Day
@@ -427,7 +437,7 @@ module OpenstudioStandards
             sch_ruleset.setWinterDesignDaySchedule(day_sch)
             day_sch = sch_ruleset.winterDesignDaySchedule
             day_sch.setName("#{schedule_name} Winter Design Day")
-            model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
+            OpenstudioStandards::Schedules.model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
           end
 
           # Summer Design Day
@@ -436,7 +446,7 @@ module OpenstudioStandards
             sch_ruleset.setSummerDesignDaySchedule(day_sch)
             day_sch = sch_ruleset.summerDesignDaySchedule
             day_sch.setName("#{schedule_name} Summer Design Day")
-            model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
+            OpenstudioStandards::Schedules.model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
           end
 
           # Other days (weekdays, weekends, etc)
@@ -454,7 +464,7 @@ module OpenstudioStandards
             sch_rule = OpenStudio::Model::ScheduleRule.new(sch_ruleset)
             day_sch = sch_rule.daySchedule
             day_sch.setName("#{schedule_name} #{day_types} Day")
-            model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
+            OpenstudioStandards::Schedules.model_add_time_value_pairs_to_schedule(day_sch, derived_pairs)
 
             # Set the dates when the rule applies
             sch_rule.setStartDate(target_occ_rule.startDate.get) if target_occ_rule.startDate.is_initialized
@@ -496,39 +506,4 @@ module OpenstudioStandards
       return sch_ruleset
     end
   end
-end
-
-def test_add_parametric
-  require 'json'
-  require 'openstudio'
-
-  schedule_data = JSON.parse(File.read('schedules_data_test.json'), symbolize_names: true)
-
-  model = OpenStudio::Model::Model.new
-  model.getTimestep.setNumberOfTimestepsPerHour(4)
-
-  # default params
-  occ_sch = OpenstudioStandards::Schedules.model_add_parametric_schedule(model, schedule_data, 'conference_meeting_multipurpose_occupancy', {})
-  # puts occ_sch.defaultDaySchedule
-
-  [0.5, 0.75, 1.0].each do |peak|
-    [0.5, 1, 10].each do |response|
-      equip_sch = OpenstudioStandards::Schedules.model_derive_equipment_schedule(model, occ_sch, schedule_data, 'conference_meeting_multipurpose_equipment', { base: 0.1, peak: peak, response: response })
-      equip_sch.setName("equipment_peak:#{peak}_resp:#{response}")
-    end
-  end
-  # puts equip_sch.defaultDaySchedule
-
-  # equip_sch = OpenstudioStandards::Schedules.model_derive_equipment_schedule(model, occ_sch, schedule_data, 'conference_meeting_multipurpose_equipment', {base: 0.1, peak: 0.5, response: 10})
-
-  # model.save('test1.osm', true)
-  model.save('test4.osm', true)
-
-  # model = OpenStudio::Model::Model.new
-  # model.getTimestep.setNumberOfTimestepsPerHour(4)
-
-  # # modified params
-  # sch = OpenstudioStandards::Schedules.model_add_parametric_schedule(model, schedule_data, 'conference_meeting_multipurpose', { st: 6.0, et: 23.0, base: 0.25, peak: 0.75 })
-  # puts sch.defaultDaySchedule
-  # model.save('test2.osm', true)
 end
