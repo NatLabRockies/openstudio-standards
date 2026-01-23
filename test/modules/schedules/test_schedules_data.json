@@ -4,20 +4,20 @@
         "category": "Occupancy",
         "units": null,
         "day_types": "Default|SmrDsn|Wkdy",
-        "start_date": "1/1/2023",
-        "end_date": "12/31/2023",
+        "start_date": "2018-01-01T00:00:00+00:00",
+        "end_date": "2018-12-31T00:00:00+00:00",
         "type": "parametric",
         "base_std": 0.0,
         "peak_std": 0.9,
         "st_std": 8.0,
         "et_std": 19.0,
         "control_points": [
-            ["st", {"+":-1}, "base", {}],
-            ["st", {"+":2}, "peak", {}],
-            ["half", {"+":-1}, "peak",{"*":0.83}],
-            ["half", {"+":1}, "peak",{"*":0.83}],
-            ["et", {"+":-2}, "peak", {}],
-            ["et", {}, "base", {}]
+            ["st-1", "base"],
+            ["st+2","peak"],
+            ["st+8", "peak*0.83"],
+            ["st+9", "peak*0.83"],
+            ["et-2", "peak"],
+            ["et","base"]
         ]
     },
     {
