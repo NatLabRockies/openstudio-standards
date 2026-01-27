@@ -255,7 +255,7 @@ def convert_all_schedules(create_osm: false)
   # create schedules from parametric form
   names.each do |name|
     param_data = all_parametric_data.select { |obj| obj[:name] == name }
-    OpenstudioStandards::Schedules.model_add_parametric_schedule_full(model, param_data, name, {})
+    OpenstudioStandards::Schedules.create_parametric_schedule_full(model, param_data, name, {})
 
     # create equivalent schedules from standard data
     sch_data = occ_sch_data.select { |obj| obj[:name] == name }

@@ -149,7 +149,7 @@ def convert_all_schedules
 
     parametric_form = schedule_data_to_parametric(sch_data)
 
-    OpenstudioStandards::Schedules.model_add_parametric_schedule_full(model, parametric_form, name, {})
+    OpenstudioStandards::Schedules.create_parametric_schedule_full(model, parametric_form, name, {})
 
     # create equivalent schedule from standard data
     standard_sch_inputs = schedule_data_to_input_hash(sch_data)

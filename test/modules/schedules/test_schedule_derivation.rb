@@ -14,12 +14,15 @@ class TestSchedulesDerivation < Minitest::Test
     model.getTimestep.setNumberOfTimestepsPerHour(4)
 
     # default params
-    occ_sch = OpenstudioStandards::Schedules.model_add_parametric_schedule_full(model, schedule_data, 'conference_meeting_multipurpose_occupancy', {})
-    # puts occ_sch.defaultDaySchedule
+    occ_sch = OpenstudioStandards::Schedules.create_parametric_schedule_full(model, schedule_data, 'conference_meeting_multipurpose_occupancy', {})
 
+    # use default params
+    equip_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occ_sch, schedule_data, 'conference_meeting_multipurpose_equipment')
+
+    # test a range of derivation params
     [0.5, 0.75, 1.0].each do |peak|
       [0.5, 1, 10].each do |response|
-        equip_sch = OpenstudioStandards::Schedules.model_derive_equipment_schedule(model, occ_sch, schedule_data, 'conference_meeting_multipurpose_equipment', { base: 0.1, peak: peak, response: response })
+        equip_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occ_sch, schedule_data, 'conference_meeting_multipurpose_equipment', params: { base: 0.1, peak: peak, response: response })
         equip_sch.setName("equipment_peak:#{peak}_resp:#{response}")
       end
     end
