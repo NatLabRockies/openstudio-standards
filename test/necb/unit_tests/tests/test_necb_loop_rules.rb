@@ -85,6 +85,8 @@ class NECB_HVAC_Loop_Rules_Tests < Minitest::Test
     name_short = "#{vintage}_#{fuel_type}"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
     standard = get_standard(vintage)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
     logger.info "Starting individual test: #{name}"
 
     # Wrap test in begin/rescue/ensure.

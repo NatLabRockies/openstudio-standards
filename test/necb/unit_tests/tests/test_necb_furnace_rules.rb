@@ -110,6 +110,10 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
       OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
       BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
       standard = get_standard(vintage)
+      standard.fuel_type_set = SystemFuels.new()
+      fuel_type = 'NaturalGas' if heating_coil_type == 'NaturalGas'
+      fuel_type = 'Electricity' if heating_coil_type == 'Electric'
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       always_on = model.alwaysOnDiscreteSchedule
       hw_loop = nil
       if baseboard_type == 'Hot Water'
@@ -249,6 +253,8 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
       standard = get_standard(vintage)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
       # Single stage furnace.
       standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(model: model,
@@ -395,6 +401,8 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
       always_on = model.alwaysOnDiscreteSchedule
       standard = get_standard(vintage)
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
       standard.setup_hw_loop_with_components(model, hw_loop, fuel_type, fuel_type, always_on)
       standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_multi_speed(model: model,
                                                                                                  zones: model.getThermalZones,

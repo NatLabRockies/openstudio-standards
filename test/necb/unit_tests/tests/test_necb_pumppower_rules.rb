@@ -89,6 +89,8 @@ class NECB_PumpPower_Test < Minitest::Test
     fuel_type = test_pars[:fuel_type]
     vintage = test_pars[:vintage]
     standard = get_standard(vintage)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: fuel_type)
 
     # Define the test name.
     name = "#{vintage}_sys6_#{fuel_type}_ChillerType_#{chiller_type}_#{chiller_cap}watts_baseboard_type-#{baseboard_type}_heating_coil_type-#{heating_coil_type}_Baseboard-#{baseboard_type}"
