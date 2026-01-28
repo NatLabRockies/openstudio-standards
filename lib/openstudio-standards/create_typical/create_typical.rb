@@ -719,6 +719,7 @@ module OpenstudioStandards
             end
 
             puts "Adding #{hvac_system_type} to #{zone_names.join(', ')}"
+			runner.registerInfo( "Adding #{hvac_system_type} to #{zone_names.join(', ')}") ##AA added
 
             unless OpenstudioStandards::HVAC.add_cbecs_hvac_system(model, standard, hvac_system_type, zones)
               OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{hvac_system_type}' not recognized. Check input system type argument against cbecs_hvac.rb in the HVAC module for valid HVAC system type names.")
