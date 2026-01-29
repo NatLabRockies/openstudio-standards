@@ -46,7 +46,7 @@ module OpenstudioStandards
       # set radiant system temperature and setpoint control type
       unless ['surfacefacetemperature', 'surfaceinteriortemperature'].include? radiant_temperature_control_type.downcase
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model',
-                          "Control sequences not compatible with '#{radiant_temperature_control_type}' radiant system control. Defaulting to 'SurfaceFaceTemperature'.")
+                           "Control sequences not compatible with '#{radiant_temperature_control_type}' radiant system control. Defaulting to 'SurfaceFaceTemperature'.")
         radiant_temperature_control_type = 'SurfaceFaceTemperature'
       end
 
@@ -62,9 +62,9 @@ module OpenstudioStandards
         sch_radiant_switchover = sch_radiant_switchover.get
       else
         sch_radiant_switchover = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
-                                                                                                switch_over_time,
-                                                                                                name: 'Radiant System Switchover',
-                                                                                                schedule_type_limit: 'Dimensionless')
+                                                                                                 switch_over_time,
+                                                                                                 name: 'Radiant System Switchover',
+                                                                                                 schedule_type_limit: 'Dimensionless')
       end
 
       # set radiant system switchover schedule
@@ -89,8 +89,8 @@ module OpenstudioStandards
                                                                                             schedule_type_limit: 'Temperature')
       coil_heating_radiant.setHeatingControlTemperatureSchedule(sch_radiant_htgsetp)
       cmd_hot_water_ctrl = OpenStudio::Model::EnergyManagementSystemActuator.new(sch_radiant_htgsetp,
-                                                                                'Schedule:Year',
-                                                                                'Schedule Value')
+                                                                                 'Schedule:Year',
+                                                                                 'Schedule Value')
       cmd_hot_water_ctrl.setName("#{zone_name}_cmd_hot_water_ctrl")
 
       # Calculated cooling setpoint error. Calculated from upper comfort limit minus setpoint offset and 'measured' controlled zone temperature.
@@ -490,7 +490,7 @@ module OpenstudioStandards
       # set radiant system temperature and setpoint control type
       unless ['surfacefacetemperature', 'surfaceinteriortemperature'].include? radiant_temperature_control_type.downcase
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model',
-                          "Control sequences not compatible with '#{radiant_temperature_control_type}' radiant system control. Defaulting to 'SurfaceFaceTemperature'.")
+                           "Control sequences not compatible with '#{radiant_temperature_control_type}' radiant system control. Defaulting to 'SurfaceFaceTemperature'.")
         radiant_temperature_control_type = 'SurfaceFaceTemperature'
       end
 
@@ -502,9 +502,9 @@ module OpenstudioStandards
         sch_radiant_switchover = sch_radiant_switchover.get
       else
         sch_radiant_switchover = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
-                                                                                                switch_over_time,
-                                                                                                name: 'Radiant System Switchover',
-                                                                                                schedule_type_limit: 'Dimensionless')
+                                                                                                 switch_over_time,
+                                                                                                 name: 'Radiant System Switchover',
+                                                                                                 schedule_type_limit: 'Dimensionless')
       end
 
       # set radiant system switchover schedule
@@ -571,7 +571,7 @@ module OpenstudioStandards
           coil_cooling_radiant.setCoolingControlTemperatureSchedule(sch_radiant_slab_setp)
         else
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model',
-                            'Model does not have a weather file associated with it. Define to implement slab setpoint based on outdoor weather.')
+                             'Model does not have a weather file associated with it. Define to implement slab setpoint based on outdoor weather.')
         end
       else
         # radiant system cooling control setpoint

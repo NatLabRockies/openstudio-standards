@@ -10,7 +10,7 @@ class ASHRAE9012004 < ASHRAE901
     minimum_area_ft2 = 120_000
 
     # Determine the area served
-    area_served_m2 = plant_loop_total_floor_area_served(plant_loop)
+    area_served_m2 = OpenstudioStandards::HVAC.plant_loop_total_floor_area_served(plant_loop)
     area_served_ft2 = OpenStudio.convert(area_served_m2, 'm^2', 'ft^2').get
 
     # Determine the primary pump type

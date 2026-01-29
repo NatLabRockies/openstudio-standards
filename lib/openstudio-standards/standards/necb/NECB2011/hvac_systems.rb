@@ -33,7 +33,7 @@ class NECB2011
     # Determine if the airloop serves any computer rooms
     # / data centers, which changes the economizer.
     is_dc = false
-    if air_loop_hvac_data_center_area_served(air_loop_hvac) > 0
+    if OpenstudioStandards::HVAC.air_loop_hvac_data_center_area(air_loop_hvac) > 0
       is_dc = true
     end
 
@@ -58,7 +58,7 @@ class NECB2011
     end
     # Check whether the system requires an economizer by comparing
     # the system capacity to the minimum capacity.
-    total_cooling_capacity_w = air_loop_hvac_total_cooling_capacity(air_loop_hvac)
+    total_cooling_capacity_w = OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop_hvac)
     total_cooling_capacity_btu_per_hr = OpenStudio.convert(total_cooling_capacity_w, 'W', 'Btu/hr').get
     if total_cooling_capacity_btu_per_hr >= minimum_capacity_btu_per_hr
       if is_dc
@@ -1407,7 +1407,7 @@ class NECB2011
     # Exception for small fans, including
     # zone exhaust, fan coil, and fan powered terminals.
     # In this case, use the 0.5 HP for the lookup.
-    if fan_small_fan?(fan)
+    if OpenstudioStandards::HVAC.fan_small_fan?(fan)
       nominal_hp = 0.5
     else
       motor_properties = model_find_object(motors_table, search_criteria, motor_bhp)

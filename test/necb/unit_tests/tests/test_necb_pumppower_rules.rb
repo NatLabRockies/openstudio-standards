@@ -189,10 +189,8 @@ class NECB_PumpPower_Test < Minitest::Test
       # If nothing was found then do nothing (though by this point if nothing was found then an error should have been thrown).
       next if max_powertoload == 0
       # Get the capacity of the loop (using the more general method of calculating via maxflow*temp diff*density*heat capacity)
-      # This is more general than the other method in Standards.PlantLoop.rb which only looks at heat and cooling.  Also,
-      # that method looks for specific equipment and would be thrown if other equipment was present.  However my method
-      # only works for water for now.
-      plantloop_capacity = standard.plant_loop_capacity_w_by_maxflow_and_delta_t_forwater(plantloop)
+      # This is more general than the other plant loop information module methods which only consider heating and cooling capacity. Also, that method looks for specific equipment and would be thrown if other equipment was present. However my method only works for water for now.
+      plantloop_capacity = OpenstudioStandards::HVAC.plant_loop_heat_transfer_capacity(plantloop)
       # Sizing factor is pump power (W)/ zone demand (in kW, as approximated using plant loop capacity).
       necb_pump_power_cap = plantloop_capacity * max_powertoload / 1000
       pump_power_adjustment = necb_pump_power_cap / total_pump_power

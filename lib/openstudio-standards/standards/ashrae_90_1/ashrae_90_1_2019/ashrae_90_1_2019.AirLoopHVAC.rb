@@ -315,7 +315,7 @@ s
   # @return [Integer] the number of stages: 0, 1, 2
   def air_loop_hvac_single_zone_controls_num_stages(air_loop_hvac, climate_zone)
     min_clg_cap_btu_per_hr = 65_000
-    clg_cap_btu_per_hr = OpenStudio.convert(air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
+    clg_cap_btu_per_hr = OpenStudio.convert(OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
     if clg_cap_btu_per_hr >= min_clg_cap_btu_per_hr
       num_stages = 2
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: two-stage control is required since cooling capacity of #{clg_cap_btu_per_hr.round} Btu/hr exceeds the minimum of #{min_clg_cap_btu_per_hr.round} Btu/hr .")
@@ -337,7 +337,7 @@ s
     is_sat_reset_required = false
 
     # Only required for multizone VAV systems
-    unless air_loop_hvac_multizone_vav_system?(air_loop_hvac)
+    unless OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop_hvac)
       return is_sat_reset_required
     end
 
@@ -353,8 +353,8 @@ s
     design_oa_cfm = OpenStudio.convert(design_oa_m3s, 'm^3/s', 'cfm').get
 
     # check if there is erv 90.1 2019 Exceptions to 6.5.3.5 Exception 3
-    has_erv = air_loop_hvac_energy_recovery?(air_loop_hvac)
-    design_sa_m3s = air_loop_hvac_find_design_supply_air_flow_rate(air_loop_hvac)
+    has_erv = OpenstudioStandards::HVAC.air_loop_hvac_energy_recovery?(air_loop_hvac)
+    design_sa_m3s = OpenstudioStandards::HVAC.air_loop_hvac_design_supply_air_flow_rate(air_loop_hvac)
 
     oa_ratio = 0
     if design_sa_m3s > 0
@@ -729,7 +729,7 @@ s
   # @param standby_mode_spaces [Array<OpenStudio::Model::Space>] List of all spaces required to have standby mode controls
   # @return [Boolean] true if sucessful, false otherwise
   def air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces)
-    if air_loop_hvac_include_unitary_system?(air_loop_hvac)
+    if OpenstudioStandards::HVAC.air_loop_hvac_unitary_system?(air_loop_hvac)
       unitary_system = nil
       # Get unitary system
       air_loop_hvac.supplyComponents.each do |comp|

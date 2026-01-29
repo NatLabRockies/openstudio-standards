@@ -72,8 +72,8 @@ class ASHRAE9012004 < ASHRAE901
     min_ext_area_served_m2 = OpenStudio.convert(min_ext_area_served_ft2, 'ft^2', 'm^2').get
 
     # Get the interior and exterior area served
-    int_area_served_m2 = air_loop_hvac_floor_area_served_interior_zones(air_loop_hvac)
-    ext_area_served_m2 = air_loop_hvac_floor_area_served_exterior_zones(air_loop_hvac)
+    int_area_served_m2 = OpenstudioStandards::HVAC.air_loop_hvac_floor_area_interior_zones(air_loop_hvac)
+    ext_area_served_m2 = OpenstudioStandards::HVAC.air_loop_hvac_floor_area_exterior_zones(air_loop_hvac)
 
     # Check the floor area exception
     if int_area_served_m2 < min_int_area_served_m2 && ext_area_served_m2 < min_ext_area_served_m2
