@@ -37,7 +37,7 @@ c3::arena,5,1.5,90,b,class 3/class III,,
 c4::arena,5,1.5,90,b,class 4/class IV,,
 octogon::arena,5,1.5,90,b,ring/octogon,manufacturing,
 exercise::gym,5,1,90,b,exercise,,
-court::gym,5,1.5,90,b,court/playing/gym,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,
+court::gym,5,1.5,90,b,court/play/gym,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,
 locker::common,10,2.5,0,*,locker,
 dressing::theatre,30,2.5,40,c,dress/fitt,retail,
 dressing::retail,30,2.5,40,c,dress/fitt,perform/art/theatre,
@@ -57,15 +57,15 @@ rooms::hotel,25,2.5,600,f,guest/otel,motel/hway/lodging,rooms::common
 quarters::dorm,25,2.5,500,g,quarter,fire,
 quarters::firehouse,25,2.5,500,g,quarter,dorm,
 units::residential,25,5,500,g,unit,care,units::residential
-units::care,25,2.5,500,j,unit,residential,units::residential
+units::care,25,2.5,500,j,unit,dwelling/residential,units::residential
 recreation::common,10,1,60,b,recreation,hospital/health,
-meeting::common,5,1,45,c,conference/meeting/multi-purpose,,
+meeting::common,5,1,45,c,conf/meet/multi-purpose,
 office::common,20,7.5,90,a,office/enclosed,bank/open,office::common
 openplan::common,20,7.5,90,a,open,enclosed/bank,office::common
 bank::common,25,5,60,a,bank,,
 copiers::common,100,60,90,a,copier/copy/print,,
 computer::common,100,200,90,*,computer,server,office::common
-server::common,100,200,90,h,server,computer,copiers::common
+server::common,100,200,90,h,server,computer,office::common
 sorting::postal,20,7.5,90,a,sorting,,
 chambers::court,20,7.5,90,a,chambers,,
 tribunal::court,5,2.5,30,a,tribunal/courtroom,,

@@ -449,9 +449,10 @@ module BTAP
           #   - space is part of the total floor area
           #   - 'candidate' spacetype is undefined
           if space.partofTotalFloorArea && candidate == "undefined::common"
-            id = space.nameString
-            lgs << "Unrecognized spacetype #{stdstype} for #{id} - revise."
-            raise("Unrecognized spacetype #{stdstype} for #{id} - revise.")
+            id  = space.nameString
+            msg = "Unrecognized spacetype #{stdstype} for #{id} - revise."
+            lgs << msg
+            raise(msg)
           end
         else
           candidate = candidates.first
@@ -640,9 +641,12 @@ module BTAP
         next if espace.empty?
 
         espace = espace.get
+        next if espace == space
+        next if nghbours.include?(espace)
         next unless @activities.key?(espace)
+        next unless @activities[espace][:schedule] != "*"
 
-        nghbours << espace if @activities[espace][:schedule] != "*"
+        nghbours << espace
       end
 
       nghbours
@@ -681,6 +685,7 @@ module BTAP
         end
 
         if schedules.empty?
+          # Assign common building schedule if no non-ancillary adjacent spaces.
           lgs << "Assigning BUILDING schedule #{bkup} for #{id} (#{mth})"
           v[:schedule] = bkup
         else

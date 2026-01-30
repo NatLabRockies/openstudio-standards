@@ -35,21 +35,14 @@ class NECB_Skylights_Tests < Minitest::Test
     # spaces below roofs (e.g. attics or plenums). Both require skylight wells
     # to toplight occupied spaces below.
     @buildings = [
-      'FullServiceRestaurant',
-      'LargeOffice',
-      'MediumOffice',
-      # 'NorthernEducation',  # *
-      # 'NorthernHealthCare', # *
-      'QuickServiceRestaurant',
-      'SmallOffice'
+      # 'FullServiceRestaurant',
+      # 'LargeOffice',
+      # 'MediumOffice',
+      'NorthernEducation',
+      'NorthernHealthCare',
+      # 'QuickServiceRestaurant',
+      # 'SmallOffice'
     ]
-
-    # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
-    #       - Building.standardsNumberOfStories
-    #       - Building.standardsNumberOfAboveStories
-    #
-    #     ... and so both templates/models fail early on, irrespective of
-    #         BTAP::Activity features - @todo.
 
     # NOTE: Skipping NorthernEducation for now:
     #   Minitest::UnexpectedError: RuntimeError: validation of model failed.

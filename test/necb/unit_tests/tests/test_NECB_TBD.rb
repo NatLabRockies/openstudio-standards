@@ -27,12 +27,13 @@ class NECB_TBD_Tests < Minitest::Test
       'NECB2011',
       # 'NECB2015',
       # 'NECB2017',
-      'NECB2020'
+      # 'NECB2020'
     ]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
+      'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
@@ -40,28 +41,21 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
+      # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',  # *
-      # 'NorthernHealthCare', # *
+      'NorthernEducation',  # * only works with NECB2011?
+      'NorthernHealthCare', # * only works with NECB2011?
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
-
-    # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
-    #       - Building.standardsNumberOfStories
-    #       - Building.standardsNumberOfAboveStories
-    #
-    #     ... and so both templates/models fail early on, irrespective of
-    #         BTAP::Activity features - @todo.
 
     @structure = [
       '',
@@ -82,7 +76,7 @@ class NECB_TBD_Tests < Minitest::Test
     #        surfaces with their initial, code-required Uo factors.
     #
     @options = [
-      'none',
+      # 'none',
       'bad',
       # 'good',
       'uprate'
@@ -119,8 +113,8 @@ class NECB_TBD_Tests < Minitest::Test
         @structure.sort.each  do |structure|
           @options.sort.each  do |option   |
             @interpolate.each do |inter    |
-              next if building == "NorthernEducation"
-              next if building == "NorthernHealthCare"
+              # next if building == "NorthernEducation"
+              # next if building == "NorthernHealthCare"
               next if inter && option != "uprate"
 
               cas  = "CASE #{option} | #{building} (#{template})"

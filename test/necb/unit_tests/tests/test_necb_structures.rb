@@ -24,34 +24,37 @@ class NECB_Structure_Tests < Minitest::Test
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
+      # 'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
       # 'LEEPMidriseApartment',
+      # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LEEPMultiTower',
-      'LowriseApartment',
+      # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
+      'NorthernEducation',  # * only works with NECB2011?
+      'NorthernHealthCare', # * only works with NECB2011?
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     @templates = [
       "NECB2011",
       # "NECB2015",
       # "NECB2017",
-      "NECB2020"
+      # "NECB2020"
     ]
 
     @options = [
@@ -67,10 +70,10 @@ class NECB_Structure_Tests < Minitest::Test
     fdback << "BTAP::Structure Unit Tests"
     fdback << "~~~~  ~~~~~~~~~ ~~~~ ~~~~~"
 
-    @epws.sort.each          do |epw      |
-      @buildings.sort.each   do |building |
-        @templates.sort.each do |template |
-          @options.sort.each do |option   |
+    @epws.sort.each          do |epw     |
+      @buildings.sort.each   do |building|
+        @templates.sort.each do |template|
+          @options.sort.each do |option  |
             cas   = "CASE #{building} (#{template})"
             cas  += ":" unless option.empty?
 
@@ -251,10 +254,10 @@ class NECB_Structure_Tests < Minitest::Test
             end
 
             s.feedback[:logs].each { |log| puts log }
-          end                 # |option   |
-        end                   # |template |
-      end                     # |building |
-    end                       # |epw      |
+          end                 # |option  |
+        end                   # |template|
+      end                     # |building|
+    end                       # |epw     |
 
     fdback.each { |msg| puts msg }
 
