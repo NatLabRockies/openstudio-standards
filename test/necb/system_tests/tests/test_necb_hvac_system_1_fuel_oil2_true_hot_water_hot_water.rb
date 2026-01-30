@@ -46,6 +46,8 @@ class NECB_HVAC_System_1_Test < Minitest::Test
 
     FileUtils::mkdir_p(output_folder)
     standard = Standard.build(vintage)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     hw_loop = nil
     mau_heating_coil_type = "Electric" if mau_type == false
     model = BTAP::FileIO::load_osm(template_osm_file)

@@ -46,6 +46,8 @@ class NECB_HVAC_System_6_Test < Minitest::Test
 
     #save baseline
     standard = Standard.build(vintage)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     name = "sys6_Bo-#{boiler_fueltype}_Ch-#{chiller_type}_BB-#{baseboard_type}_HC-#{heating_coil_type}_Fan-#{fan_type}"
     puts "***************************************#{name}*******************************************************\n"
     model = BTAP::FileIO::load_osm(template_osm_file)

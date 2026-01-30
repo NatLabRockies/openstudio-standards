@@ -46,9 +46,9 @@ class NECB_HVAC_System_2_Test < Minitest::Test
     FileUtils::mkdir_p(output_folder)
     model = BTAP::FileIO::load_osm(template_osm_file)
     standard = Standard.build(vintage)
-      boiler_fueltype = standard.validate_primary_heating_fuel(primary_heating_fuel: boiler_fueltype, model: model)
-      standard.fuel_type_set = SystemFuels.new()
-      standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
+    boiler_fueltype = standard.validate_primary_heating_fuel(primary_heating_fuel: boiler_fueltype, model: model)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     name = "sys2_Boiler-#{boiler_fueltype}_Chiller-#{chiller_type}_MuACoolingType-#{mua_cooling_type}"
     puts "***************************************#{name}*******************************************************\n"
     weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path(weather_file)

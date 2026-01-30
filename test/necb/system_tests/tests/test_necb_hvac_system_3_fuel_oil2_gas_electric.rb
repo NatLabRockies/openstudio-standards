@@ -41,6 +41,8 @@ class NECB_HVAC_System_3_Test < Minitest::Test
     # FileUtils.rm_rf(output_folder)
     FileUtils::mkdir_p(output_folder)
     standard = Standard.build(vintage)
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(standards_data: standard.standards_data, primary_heating_fuel: boiler_fueltype)
     name = "sys3_Boiler-#{boiler_fueltype}_HeatingCoilType-#{heating_coil_type_sys3}_BaseboardType-#{baseboard_type}"
     puts "***************************************#{name}*******************************************************\n"
     model = standard.load_building_type_from_library(building_type: 'SmallOffice')
