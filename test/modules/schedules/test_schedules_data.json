@@ -1,34 +1,188 @@
 [
-    {
-        "name": "conference_meeting_multipurpose_occupancy",
-        "category": "Occupancy",
-        "units": null,
-        "day_types": "Default|SmrDsn|Wkdy",
-        "start_date": "2018-01-01T00:00:00+00:00",
-        "end_date": "2018-12-31T00:00:00+00:00",
-        "type": "parametric",
-        "base_std": 0.0,
-        "peak_std": 0.9,
-        "st_std": 8.0,
-        "et_std": 19.0,
-        "control_points": [
-            ["st-1", "base"],
-            ["st+2","peak"],
-            ["st+8", "peak*0.83"],
-            ["st+9", "peak*0.83"],
-            ["et-2", "peak"],
-            ["et","base"]
-        ]
-    },
-    {
-        "name": "conference_meeting_multipurpose_equipment",
-        "category": "Equipment",
-        "units": null,
-        "day_types": "Default|SmrDsn|Wkdy",
-        "type": "derived",
-        "derivation_type": "exponential",
-        "base": 0.3,
-        "peak": 0.9,
-        "response": 0.4
-    }
+  {
+    "name": "conference occupancy",
+    "day_types": "Default|SmrDsn|Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.9,
+    "st_std": 8.0,
+    "et_std": 19.0,
+    "control_points": [
+        ["st-1", "base"],
+        ["st+2","peak"],
+        ["st+8", "peak*0.83"],
+        ["st+9", "peak*0.83"],
+        ["et-2", "peak"],
+        ["et","base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.15,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.15789473684210525"],
+      ["et", "peak*0.15789473684210525"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.15,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.15789473684210525"],
+      ["et", "peak*0.15789473684210525"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  }
 ]

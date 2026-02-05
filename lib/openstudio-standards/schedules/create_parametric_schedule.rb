@@ -204,7 +204,7 @@ module OpenstudioStandards
       schedule_objs = schedule_array.select { |o| o[:name].to_s == schedule_name }
 
       options = {}
-      options['name'] = schedule_array[0][:name]
+      options['name'] = schedule_objs[0][:name]
       options['rules'] = []
       schedule_objs.each do |obj|
         sch_type = obj[:type]
@@ -246,156 +246,130 @@ module OpenstudioStandards
       return schedule
     end
 
-    # Add a schedule derived from an occupancy schedule and parametric inputs. The derived schedule is created by modifying the occupancy schedule time-value pairs according to the given parameters.
+    # Method to derive time-value pairs from a set of time-value pairs. The derived values are determined by applying the given parameters and derivation type.
     #
-    # @param occupancy_schedule [OpenStudio::Model::Schedule] input occupancy schedule to derive information from
-    # @param schedule_array [Array] list of default schedule data objects
-    # @param schedule_name [String] name of schedule to add
-    # @param params [Hash] hash of schedule input parameters. Specific key/values will depend on the schedule type
-    # @return [ScheduleRuleset] the resulting schedule ruleset
-    def self.create_derived_schedule_from_occupancy_schedule(occupancy_schedule, schedule_array, schedule_name, params: {})
-      model = occupancy_schedule.model
-      rules = schedule_array.select { |o| o[:name].to_s == schedule_name }
-
-      schedule_ruleset = OpenStudio::Model::ScheduleRuleset.new(model)
-      schedule_ruleset.setName(schedule_name)
-
-      rules.each do |rule|
-        sch_type = rule[:type]
-        day_types = rule[:day_types]
-        day_type_array = day_types.split('|')
-
-        # categorize occupancy schedule profiles
-        occ_profiles = OpenstudioStandards::Schedules.schedule_ruleset_categorize_day_schedules(occupancy_schedule)
-
-        day_type_array.each do |day_type|
-          # find corresponding occupancy schedule rule by day type
-          target_occ_profile = nil
-          occ_profiles.each do |key, value|
-            next unless target_occ_profile.nil?
-
-            if value.split('|').include? day_type
-              target_occ_profile = key
-            end
-          end
-
-          if target_occ_profile.nil?
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedule', "Could not find matching occupancy schedule day type for #{day_types} in #{occupancy_schedule.name.get} types")
-            return false
-          end
-
-          # get corresponding target rule
-          target_occ_rule = occupancy_schedule.scheduleRules.select { |r| r.daySchedule == target_occ_profile }.first
-
-          # get occ schedule time value pairs
-          occ_times = target_occ_profile.times.map(&:totalHours)
-          occ_time_values = occ_times.zip(target_occ_profile.values)
-
-          # override inputs if included in params
-          base = params[:base].nil? ? rule[:base] : params[:base]
-          peak = params[:peak].nil? ? rule[:peak] : params[:peak]
-          response = params[:response].nil? ? rule[:response] : params[:response]
-          derivation_type = params[:derivation_type].nil? ? 'exponential' : params[:derivation_type]
-
-          # derive time-value pairs
-          derived_pairs = []
-          case derivation_type
-          when 'linear'
-            occ_time_values.each do |initial_pair|
-              derived_value = base + ((peak - base) * (initial_pair[1] * response))
-              derived_pairs << [initial_pair[0], derived_value]
-            end
-          when 'exponential'
-            occ_time_values.each do |initial_pair|
-              derived_value = base + ((peak - base) * (initial_pair[1]**response.to_f))
-              derived_pairs << [initial_pair[0], derived_value]
-            end
-          when 'exponential-inverse'
-            occ_time_values.each do |initial_pair|
-              derived_value = base + ((peak - base) * (initial_pair[1]**(1 / response.to_f)))
-              derived_pairs << [initial_pair[0], derived_value]
-            end
-          end
-
-          # create rule
-          if day_types.include?('Default')
-            day_sch = schedule_ruleset.defaultDaySchedule
-            day_sch.setName("#{schedule_name} Default")
-            OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(day_sch, derived_pairs)
-          end
-
-          # Winter Design Day
-          if day_types.include?('WntrDsn')
-            day_sch = OpenStudio::Model::ScheduleDay.new(model)
-            schedule_ruleset.setWinterDesignDaySchedule(day_sch)
-            day_sch = schedule_ruleset.winterDesignDaySchedule
-            day_sch.setName("#{schedule_name} Winter Design Day")
-            OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(day_sch, derived_pairs)
-          end
-
-          # Summer Design Day
-          if day_types.include?('SmrDsn')
-            day_sch = OpenStudio::Model::ScheduleDay.new(model)
-            schedule_ruleset.setSummerDesignDaySchedule(day_sch)
-            day_sch = schedule_ruleset.summerDesignDaySchedule
-            day_sch.setName("#{schedule_name} Summer Design Day")
-            OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(day_sch, derived_pairs)
-          end
-
-          # Other days (weekdays, weekends, etc)
-          if day_type_array.include?('Wknd') ||
-             day_type.include?('Wkdy') ||
-             day_type.include?('Sat') ||
-             day_type.include?('Sun') ||
-             day_type.include?('Mon') ||
-             day_type.include?('Tue') ||
-             day_type.include?('Wed') ||
-             day_type.include?('Thu') ||
-             day_type.include?('Fri')
-
-            # Make the Rule
-            sch_rule = OpenStudio::Model::ScheduleRule.new(schedule_ruleset)
-            day_sch = sch_rule.daySchedule
-            day_sch.setName("#{schedule_name} #{day_types} Day")
-            OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(day_sch, derived_pairs)
-
-            # Set the dates when the rule applies
-            sch_rule.setStartDate(target_occ_rule.startDate.get) if target_occ_rule.startDate.is_initialized
-            sch_rule.setEndDate(target_occ_rule.endDate.get) if target_occ_rule.endDate.is_initialized
-
-            # Set the days when the rule applies
-            # Weekends
-            if day_types.include?('Wknd')
-              sch_rule.setApplySaturday(true)
-              sch_rule.setApplySunday(true)
-            end
-            # Weekdays
-            if day_types.include?('Wkdy')
-              sch_rule.setApplyMonday(true)
-              sch_rule.setApplyTuesday(true)
-              sch_rule.setApplyWednesday(true)
-              sch_rule.setApplyThursday(true)
-              sch_rule.setApplyFriday(true)
-            end
-            # Individual Days
-            sch_rule.setApplyMonday(true) if day_types.include?('Mon')
-            sch_rule.setApplyTuesday(true) if day_types.include?('Tue')
-            sch_rule.setApplyWednesday(true) if day_types.include?('Wed')
-            sch_rule.setApplyThursday(true) if day_types.include?('Thu')
-            sch_rule.setApplyFriday(true) if day_types.include?('Fri')
-            sch_rule.setApplySaturday(true) if day_types.include?('Sat')
-            sch_rule.setApplySunday(true) if day_types.include?('Sun')
-          end
-
-          # add params to schedule additional properties
-          props = day_sch.additionalProperties
-          props.setFeature('base', base)
-          props.setFeature('peak', peak)
-          props.setFeature('response', response)
-          props.setFeature('derived_from', target_occ_profile.name.get)
+    # @param derivation_type [String] type of derivation to perform. Options are 'linear', 'exponential', and 'exponential-inverse'
+    # @param base [Float] base value for schedule derivation
+    # @param peak [Float] peak value for schedule derivation
+    # @param response [Float] response factor for schedule derivation, which modifies the influence
+    # @param initial_values [Array] array of time value pairs to derive from
+    # @return [Array] array of derived time value pairs
+    def self.derive_values(derivation_type, base, peak, response, initial_values)
+      # derive time-value pairs
+      derived_pairs = []
+      case derivation_type
+      when 'linear'
+        initial_values.each do |initial_pair|
+          derived_value = base + ((peak - base) * (initial_pair[1] * response))
+          derived_pairs << [initial_pair[0], derived_value]
+        end
+      when 'exponential'
+        initial_values.each do |initial_pair|
+          derived_value = base + ((peak - base) * (initial_pair[1]**response.to_f))
+          derived_pairs << [initial_pair[0], derived_value]
+        end
+      when 'exponential-inverse'
+        initial_values.each do |initial_pair|
+          derived_value = base + ((peak - base) * (initial_pair[1]**(1 / response.to_f)))
+          derived_pairs << [initial_pair[0], derived_value]
         end
       end
-
-      return schedule_ruleset
+      return derived_pairs
     end
+
+    # Add a schedule derived from an occupancy schedule and parametric inputs. The derived schedule is created by modifying the occupancy schedule time-value pairs according to the given parameters.
+    #
+    # @param occupancy_schedule [OpenStudio::Model::ScheduleRuleset] input occupancy schedule to derive information from
+    # @param params [Hash] hash of schedule input parameters. Specific key/values will depend on the schedule type
+    # @return [ScheduleRuleset] the resulting schedule ruleset
+    def self.create_derived_schedule_from_occupancy_schedule(occupancy_schedule, params)
+      # get model object from existing schedule
+      model = occupancy_schedule.model
+
+      # get values from params
+      derivation_type = params[:derivation_type]
+      base = params[:base]
+      peak = params[:peak]
+      response = params[:response]
+      winter_design_day_base = params[:winter_design_day_base]
+      winter_design_day_peak = params[:winter_design_day_peak]
+      winter_design_day_response = params[:winter_design_day_response]
+      summer_design_day_base = params[:summer_design_day_base]
+      summer_design_day_peak = params[:summer_design_day_peak]
+      summer_design_day_response = params[:summer_design_day_response]
+
+      # create a new schedule ruleset
+      derived_schedule = OpenStudio::Model::ScheduleRuleset.new(model)
+      derived_schedule.setName(params[:name])
+
+      # create default day schedules
+      default_occ_day_sch = occupancy_schedule.defaultDaySchedule
+      default_occ_times = default_occ_day_sch.times.map(&:totalHours)
+      occ_time_values = default_occ_times.zip(default_occ_day_sch.values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, base, peak, response, occ_time_values)
+      default_day = derived_schedule.defaultDaySchedule
+      default_day.setName("#{params[:name]} Default Day")
+      OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(default_day, derived_pairs)
+
+      # create summer design day schedule
+      smr_occ_day_sch = occupancy_schedule.summerDesignDaySchedule
+      smr_occ_times = smr_occ_day_sch.times.map(&:totalHours)
+      occ_time_values = smr_occ_times.zip(smr_occ_day_sch.values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, summer_design_day_base, summer_design_day_peak, summer_design_day_response, occ_time_values)
+      summer_day = OpenStudio::Model::ScheduleDay.new(model)
+      summer_day.setName("#{params[:name]} Summer Design Day")
+      OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(summer_day, derived_pairs)
+      derived_schedule.setSummerDesignDaySchedule(summer_day)
+
+      # create winter design day schedule
+      wnt_occ_day_sch = occupancy_schedule.winterDesignDaySchedule
+      wnt_occ_times = wnt_occ_day_sch.times.map(&:totalHours)
+      occ_time_values = wnt_occ_times.zip(wnt_occ_day_sch.values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, winter_design_day_base, winter_design_day_peak, winter_design_day_response, occ_time_values)
+      winter_day = OpenStudio::Model::ScheduleDay.new(model)
+      winter_day.setName("#{params[:name]} Winter Design Day")
+      OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(winter_day, derived_pairs)
+      derived_schedule.setWinterDesignDaySchedule(winter_day)
+
+      # get rules from existing schedule
+      occupancy_schedule.scheduleRules.each do |rule|
+        # get occ schedule time value pairs
+        occ_day_sch = rule.daySchedule
+        occ_times = occ_day_sch.times.map(&:totalHours)
+        occ_time_values = occ_times.zip(occ_day_sch.values)
+
+        # derive time-value pairs
+        derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, base, peak, response, occ_time_values)
+
+        # Make the Rule
+        sch_rule = OpenStudio::Model::ScheduleRule.new(derived_schedule)
+        sch_rule.setName("#{rule.name} Derived #{params[:category]} Rule")
+        day_sch = sch_rule.daySchedule
+        day_sch.setName("#{rule.name} Derived #{params[:category]} Day Sch")
+        OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(day_sch, derived_pairs)
+
+        # Set the dates when the rule applies
+        sch_rule.setStartDate(rule.startDate.get) if rule.startDate.is_initialized
+        sch_rule.setEndDate(rule.endDate.get) if rule.endDate.is_initialized
+
+        # Set the days when the rule applies
+        sch_rule.setApplyMonday(rule.applyMonday) if rule.applyMonday
+        sch_rule.setApplyTuesday(rule.applyTuesday) if rule.applyTuesday
+        sch_rule.setApplyWednesday(rule.applyWednesday) if rule.applyWednesday
+        sch_rule.setApplyThursday(rule.applyThursday) if rule.applyThursday
+        sch_rule.setApplyFriday(rule.applyFriday) if rule.applyFriday
+        sch_rule.setApplySaturday(rule.applySaturday) if rule.applySaturday
+        sch_rule.setApplySunday(rule.applySunday) if rule.applySunday
+
+        # add params to schedule additional properties
+        props = day_sch.additionalProperties
+        props.setFeature('base', base)
+        props.setFeature('peak', peak)
+        props.setFeature('response', response)
+        props.setFeature('derived_from', rule.name.get)
+      end
+
+      return derived_schedule
+    end
+  end
 end

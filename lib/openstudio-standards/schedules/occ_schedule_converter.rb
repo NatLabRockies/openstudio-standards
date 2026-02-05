@@ -133,7 +133,7 @@ def control_points_from_changes(values)
 
   parametric_data[:st_std] = start_time
   parametric_data[:et_std] = end_time
-  parametric_data[:control_pts] = ctrl_pts
+  parametric_data[:control_points] = ctrl_pts
 
   return parametric_data
 end
