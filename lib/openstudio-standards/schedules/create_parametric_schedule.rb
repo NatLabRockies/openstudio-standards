@@ -255,6 +255,10 @@ module OpenstudioStandards
     # @param initial_values [Array] array of time value pairs to derive from
     # @return [Array] array of derived time value pairs
     def self.derive_values(derivation_type, base, peak, response, initial_values)
+      # correct values if base > peak or peak < base to ensure base is always the lower value and peak is the higher value
+      peak = base if (base > peak) && (base > 0.5)
+      base = peak if (peak < base) && (peak < 0.5)
+
       # derive time-value pairs
       derived_pairs = []
       case derivation_type
@@ -291,12 +295,12 @@ module OpenstudioStandards
       base = params[:base]
       peak = params[:peak]
       response = params[:response]
-      winter_design_day_base = params[:winter_design_day_base]
-      winter_design_day_peak = params[:winter_design_day_peak]
-      winter_design_day_response = params[:winter_design_day_response]
-      summer_design_day_base = params[:summer_design_day_base]
-      summer_design_day_peak = params[:summer_design_day_peak]
-      summer_design_day_response = params[:summer_design_day_response]
+      winter_design_day_base = params[:winter_design_day_base].nil? ? base : params[:winter_design_day_base]
+      winter_design_day_peak = params[:winter_design_day_peak].nil? ? peak : params[:winter_design_day_peak]
+      winter_design_day_response = params[:winter_design_day_response].nil? ? response : params[:winter_design_day_response]
+      summer_design_day_base = params[:summer_design_day_base].nil? ? base : params[:summer_design_day_base]
+      summer_design_day_peak = params[:summer_design_day_peak].nil? ? peak : params[:summer_design_day_peak]
+      summer_design_day_response = params[:summer_design_day_response].nil? ? response : params[:summer_design_day_response]
 
       # create a new schedule ruleset
       derived_schedule = OpenStudio::Model::ScheduleRuleset.new(model)

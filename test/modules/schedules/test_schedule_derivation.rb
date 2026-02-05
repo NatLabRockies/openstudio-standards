@@ -56,12 +56,8 @@ class TestSchedulesDerivation < Minitest::Test
       "base": 0.05,
       "peak": 0.9,
       "response": 0.5,
-      "winter_design_day_base": 0.0,
       "winter_design_day_peak": 0.0,
-      "winter_design_day_response": 0.0,
-      "summer_design_day_base": 1.0,
-      "summer_design_day_peak": 1.0,
-      "summer_design_day_response": 1.0
+      "summer_design_day_base": 1.0
     }
     light_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occ_sch, params)
 
