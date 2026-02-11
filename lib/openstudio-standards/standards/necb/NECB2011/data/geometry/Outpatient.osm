@@ -5171,6 +5171,13 @@ OS:Building,
   ,                                       !- Relocatable
   ;                                       !- Nominal Floor to Ceiling Height {m}
 
+OS:AdditionalProperties,
+  {a1022753-85d4-4c39-a5d0-ec702109142f}, !- Handle
+  {9e3e5eef-9590-4941-bdaa-4a05a47e12d6}, !- Object Name
+  btap_building_activity,                 !- Feature Name 1
+  String,                                 !- Feature Data Type 1
+  clinic;                                 !- Feature Value 1
+
 OS:Surface,
   {d6951edf-993a-42ed-8f8e-33db83db849e}, !- Handle
   E1B973,                                 !- Name
@@ -33207,13 +33214,13 @@ OS:SpaceType,
 
 OS:SpaceType,
   {e83f9e85-d63a-47d7-9071-1c7e037bac6f}, !- Handle
-  Space Function Dining - bar lounge/leisure, !- Name
+  Space Function Dining - other,          !- Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   ,                                       !- Group Rendering Name
   ,                                       !- Design Specification Outdoor Air Object Name
   Space Function,                         !- Standards Building Type
-  Dining - bar lounge/leisure;            !- Standards Space Type
+  Dining - other;                         !- Standards Space Type
 
 OS:Surface,
   {0f8b364a-281d-4ba8-bbfd-9df7f91d2590}, !- Handle
@@ -33435,4 +33442,3 @@ OS:Surface,
   -11.8872, 0, 0,                         !- X,Y,Z Vertex 2 {m}
   -15.24, 0, 0,                           !- X,Y,Z Vertex 3 {m}
   -15.24, 0, 3.048;                       !- X,Y,Z Vertex 4 {m}
-

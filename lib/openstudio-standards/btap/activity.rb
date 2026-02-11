@@ -36,8 +36,8 @@ module BTAP
     #   the repair or servicing of such vehicles.
     #
     # This mismatch, and other related issues of a similar nature, make it
-    # challenging to cross-compare NECB editions, for instance. The 'exact' NECB
-    # labels shouldn't matter - they almost always reference the same
+    # challenging to cross-compare NECB editions for instance. The 'exact' NECB
+    # spacetype strings shouldn't matter - they almost always reference the same
     # building 'activity' (e.g. a facility where vehicles are parked/stored).
     # BTAP should instead rely on abstract 'activity' designations, e.g.
     # 'parking'. This requires module/class methods to extract specific keywords
@@ -48,9 +48,9 @@ module BTAP
     # For instance, multi-unit residential buildings (MURBs), university/school
     # dormitories and long-term care facilities are all grouped under "housing",
     # which in turn sets building-wide 'structural' options, e.g. wood-framed
-    # (small-scale) vs reinforced concrete flat slab & post-beam (mid- & large-
-    # scale) "housing". See lib/openstudio-standards/btap/structure.rb.
-    @@data = {bldg: {}, space: {}, ancillaries: []}
+    # (small-scale "housing") vs reinforced concrete flat slab & post-beam (mid-
+    # & large-scale "housing"). See lib/openstudio-standards/btap/structure.rb.
+    @@data = {bldg: {}, space: {}, ancillaries: [], auxiliaries: []}
 
     # Hard setting path for both files (temporary @todo).
     @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
@@ -102,8 +102,8 @@ module BTAP
     # @@data[:ancillaries] <<    "storage::common"        #  *     *     *     *
     # @@data[:ancillaries] <<   "washroom::common"        #  *     *     *     *
 
-    # NECB2011 recommends schedule set "C" for atria, while all other NECB
-    # editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
+    # Note that NECB2011 recommends schedule set "C" for atria, while all other
+    # NECB editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
     # inheritance). To facilitate cross-comparisons between NECB editions, the
     # NECB 2011 atrium schedule set will harmonize with other NECB editions.
     #
@@ -242,7 +242,11 @@ module BTAP
         @@data[:space][:activity][key][:excludes] = row[6].to_s.split("/")
         @@data[:space][:activity][key][:fallback] = row[7].to_s
 
-        @@data[:ancillaries] << key if schedule == "*"
+        if schedule == "*"
+          @@data[:ancillaries] << key
+        elsif schedule.include?("*")
+          @@data[:auxiliaries] << key
+        end
       end
 
       @@data[:space][:table] = table
@@ -251,7 +255,8 @@ module BTAP
     end
 
     ##
-    # Validates whether an activity is 'ancillary' to other(s).
+    # Validates whether an activity is 'ancillary' to other(s). See relevant
+    # comments above, and note to Table A-8.4.3.3.(2)B. (1).
     #
     # @param activity [:to_sym] a BTAP::Activity keyword, e.g. "locker::common"
     #
@@ -261,6 +266,25 @@ module BTAP
 
       activity = activity.to_s.strip.downcase
       return true if @@data[:ancillaries].include?(activity)
+
+      false
+    end
+
+    ##
+    # Validates whether an activity is 'auxiliary' to the building activity.
+    # 'Auxiliary' spaces differ from NECB 'ancillary' spaces. If requested by
+    # the user (in the .osm file), the former may adopt the dominant building
+    # activity schedule set, instead of the NECB suggested one. Examples include
+    # a school's gymnasium, cafeteria or auditorium.
+    #
+    # @param activity [:to_sym] a BTAP::Activity keyword, e.g. "court::gym"
+    #
+    # @return [Boolean] whether activity is auxiliary.
+    def auxiliary?(activity = "")
+      return false unless activity.respond_to?(:to_sym)
+
+      activity = activity.to_s.strip.downcase
+      return true if @@data[:auxiliaries].include?(activity)
 
       false
     end
@@ -277,6 +301,103 @@ module BTAP
       activity = activity.to_s.strip.downcase
       return true if activity.include?("locker")
       return true if activity.include?("washroom")
+
+      false
+    end
+
+    ##
+    # Validates whether a space is targeted by ANSI/IES Recommended Practice RP28
+    # 2007 - see store.accuristech.com/standards/ies-rp-28-07?product_id=1555565.
+    #
+    # @param model [OpenStudio::Model::Space] an OpenStudio space
+    #
+    # @return [Boolean] true if RP28'ed
+    def rp28?(space = nil)
+      return false unless space.is_a?(OpenStudio::Model::Space)
+
+      # First check AdditionalProperty.
+      tag  = "rp28"
+      rp28 = space.additionalProperties.getFeatureAsBoolean(tag)
+      return rp28.get unless rp28.empty?
+
+      # Check spacetype strings.
+      variants = ["rp28", "rp-28", "rp_28", "rp 28"]
+
+      unless space.spaceType.empty?
+        type = space.spaceType.get
+        tID  = type.nameString.downcase
+
+        if variants.any? { |variant| tID.include?(variant) }
+          return space.additionalProperties.setFeature(tag, true)
+        end
+
+        unless type.standardsSpaceType.empty?
+          stype = type.standardsSpaceType.get.downcase
+
+          if variants.any? { |variant| stype.include?(variant) }
+            return space.additionalProperties.setFeature(tag, true)
+          end
+        end
+      end
+
+      # Check space identifier.
+      sID = space.nameString.downcase
+
+      if variants.any? { |variant| sID.include?(variant) }
+        return space.additionalProperties.setFeature(tag, true)
+      end
+
+      space.additionalProperties.setFeature(tag, false)
+
+      false
+    end
+
+    ##
+    # Validates whether a space is targeted for occupancy-sensing lighting
+    # control, per NECB2011.
+    #
+    # @param model [OpenStudio::Model::Space] an OpenStudio space
+    #
+    # @return [Boolean] true if occsensing
+    def occsensing?(space = nil)
+      return false unless space.is_a?(OpenStudio::Model::Space)
+
+      # First check AdditionalProperty.
+      tag  = "occsensing"
+      osns = space.additionalProperties.getFeatureAsBoolean(tag)
+      return osns.get unless osns.empty?
+
+      # Check spacetype strings.
+      variants = ["occ sens", "occ-sens", "occsens"]
+
+      unless space.spaceType.empty?
+        type = space.spaceType.get
+        tID  = type.nameString.downcase
+
+        if variants.any? { |variant| tID.include?(variant) }
+          space.additionalProperties.setFeature(tag, true)
+          return true
+        end
+
+        unless type.standardsSpaceType.empty?
+          stype = type.standardsSpaceType.get.downcase
+
+          if variants.any? { |variant| stype.include?(variant) }
+            space.additionalProperties.setFeature(tag, true)
+            return true
+          end
+        end
+      end
+
+      # Check space identifier.
+      sID = space.nameString.downcase
+
+      if variants.any? { |variant| sID.include?(variant) }
+        space.additionalProperties.setFeature(tag, true)
+        return true
+      end
+
+      space.additionalProperties.setFeature(tag, false)
 
       false
     end
@@ -371,7 +492,10 @@ module BTAP
         @category = data[:bldg][:activity][@activity][:category]
       end
 
-      # Assign schedules to ancillary spaces (if present).
+      # Assign schedules to auxiliary spaces - if present.
+      self.assignAuxiliarySchedules(self.buildingActivity?(model))
+
+      # Assign schedules to ancillary spaces - if present.
       self.assignAncillarySchedules
 
       true
@@ -448,12 +572,12 @@ module BTAP
           # Halt if:
           #   - space is part of the total floor area
           #   - 'candidate' spacetype is undefined
-          if space.partofTotalFloorArea && candidate == "undefined::common"
-            id  = space.nameString
-            msg = "Unrecognized spacetype #{stdstype} for #{id} - revise."
-            lgs << msg
-            raise(msg)
-          end
+          # if space.partofTotalFloorArea && candidate == "undefined::common"
+            # id  = space.nameString
+            # msg = "Unrecognized spacetype #{stdstype} for #{id} - revise."
+            # lgs << msg
+            # raise(msg)
+          # end
         else
           candidate = candidates.first
         end
@@ -571,8 +695,7 @@ module BTAP
       #   - "motion picture theatre"
       #
       # ... except for "auditorium". No NECB edition holds an "auditorium"
-      # building type entry. For the moment, "auditorium" will be associated
-      # with the ubiquitous high-school or college auditorium.
+      # building type entry. For the moment, "auditorium" == "theatre".
       if activity == "common"
         activities = {}
 
@@ -585,7 +708,7 @@ module BTAP
         end
 
         activity = case activities.sort.reverse.to_h.keys.first
-                   when "audience"    then "school"
+                   when "audience"    then "theatre"
                    when "sales"       then "retail"
                    when "dining"      then "restaurant"
                    when "cuisine"     then "restaurant"
@@ -609,6 +732,34 @@ module BTAP
       end
 
       activity
+    end
+
+    ##
+    # Validates whether user has explicitely set a valid building activity
+    # AdditionalProperty.
+    #
+    # @param model [OpenStudio::Model::Model] a model
+    #
+    # @return [Boolean] true if a valid building activity is set by user.
+    def buildingActivity?(model = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Model
+
+      unless model.is_a?(OpenStudio::Model::Model)
+        lgs << "Invalid or empty OpenStudio model (#{mth})"
+        return false
+      end
+
+      tag      = "btap_building_activity"
+      bldg     = model.getBuilding
+      activity = bldg.additionalProperties.getFeatureAsString(tag)
+      return false if activity.empty?
+
+      activity = activity.get.downcase
+      return false unless data[:bldg][:activities].include?(activity)
+
+      true
     end
 
     ##
@@ -653,6 +804,34 @@ module BTAP
     end
 
     ##
+    # Sets schedules to auxiliary spaces.
+    #
+    # @param uset [Boolean] whether user has explicitely set building activity.
+    #
+    # @return [Boolean] true if successful
+    def assignAuxiliarySchedules(uset = false)
+      lgs  = @feedback[:logs]
+      mth  = "BTAP::Activity::#{__callee__}"
+      bkup = "a"
+      uset = false unless [true, false].include?(uset)
+
+      if @@data[:bldg][:activity].key?(@activity)
+        bkup = @@data[:bldg][:activity][@activity][:schedule]
+      end
+
+      # Loop through auxiliary spaces (largest to smallest in floor area).
+      @activities.sort_by { |space, v| v[:m2] }.reverse.each do |space, v|
+        id  = space.nameString
+        sch = self.schedule(space)
+        next unless self.auxiliary?(v[:keyword])
+
+        v[:schedule] = uset ? bkup : sch.delete("*")
+      end
+
+      true
+    end
+
+    ##
     # Sets schedules to ancillary spaces.
     #
     # @return [Boolean] true if successful
@@ -691,6 +870,11 @@ module BTAP
         else
           v[:schedule] = schedules.sort_by { |sched, m2| m2 }.reverse.first.first
         end
+
+        # Forcing schedule set 'J' for ancillary spaces in:
+        #   - short-term accomodation (e.g. hotels, firestation quarters)
+        #   - housing (MURBs, dormitories) 
+        v[:schedule] = "j" if ["f", "g"].include?(v[:schedule])
       end
 
       true

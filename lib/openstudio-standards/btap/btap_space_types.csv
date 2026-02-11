@@ -4,12 +4,12 @@ washroom::common,30,1,0,*,washroom,,
 atrium::common,10,2.5,0,*,atrium,,
 concourse::retail,20,1,30,c,concourse,airport/terminal/transp,corridor::common
 concourse::terminal,20,0,65,h,concourse,retail/mall,corridor::common
-corridor::common,100,0,0,*,corr,manufacturing/hospital,corridor::common
-corridor::hospital,100,0,0,*,corr,manufacturing/common/other,corridor::common
-corridor::manufacturing,100,0,0,*,corr,hospital/common/other,corridor::common
+corridor::common,100,0,0,*,corr,manufacturing/health/hospital/clinic/outpatient,corridor::common
+corridor::health,100,0,0,*h,corr,manufacturing/common/other,corridor::common
+corridor::manufacturing,100,0,0,*,corr,health/hospital/clinic/outpatient/common/other,corridor::common
 stairway::common,200,0,0,*,stair,,
-elevator::common,10,1,0,c,elevator/foyer,,
-lobby::common,10,1,0,c,lobby,otel/motion/picture/cineplex/perform/art/theatre,lobby::common
+elevator::common,10,1,0,*c,elevator/foyer,,
+lobby::common,10,1,0,*c,lobby,otel/motion/picture/cineplex/perform/art/theatre,lobby::common
 lobby::hotel,10,2.5,30,h,lobby,motion/picture/cineplex/perform/art/theatre/common/other,lobby::common
 lobby::cineplex,10,1,0,c,lobby,otel/perform/art/common/other,lobby::common
 lobby::theatre,10,1,0,c,lobby,otel/motion/picture/cineplex/common/other,lobby::common
@@ -27,39 +27,40 @@ audience::common,5,1,15,*,audience,auditorium/religious/penitentiary/motion/pict
 audience::religious,5,1,15,i,audience,auditorium/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/gym/arena/common/other,audience::common
 audience::penitentiary,5,2.5,30,c,audience,auditorium/religious/motion/picture/cineplex/perform/art/theatre/convention/gym/arena/common/other,audience::common
 audience::cineplex,5,2.5,30,c,audience,auditorium/religious/penitentiary/perform/art/theatre/convention/gym/arena/common/other,audience::common
-audience::theatre,7.5,2.5,30,c,audience,auditorium/religious/penitentiary/motion/picture/cineplex/convention/gym/arena/common/other,audience::common
+audience::theatre,7.5,2.5,30,*c,audience,auditorium/religious/penitentiary/motion/picture/cineplex/convention/gym/arena/common/other,audience::common
 audience::convention,5,2.5,30,c,audience,auditorium/religious/penitentiary/motion/picture/cineplex/perform/art/theatre/gym/arena/common/other,audience::common
-audience::gym,5,0,30,b,audience,auditorium/religious/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/arena/common/other,audience::common
-audience::arena,5,0,30,b,audience,auditorium/religious/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/gym/common/other,audience::common
-c1::arena,5,1.5,90,b,class 1/class I,,
-c2::arena,5,1.5,90,b,class 2/class II,,
-c3::arena,5,1.5,90,b,class 3/class III,,
-c4::arena,5,1.5,90,b,class 4/class IV,,
-octogon::arena,5,1.5,90,b,ring/octogon,manufacturing,
-exercise::gym,5,1,90,b,exercise,,
-court::gym,5,1.5,90,b,court/play/gym,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,
-locker::common,10,2.5,0,*,locker,
-dressing::theatre,30,2.5,40,c,dress/fitt,retail,
-dressing::retail,30,2.5,40,c,dress/fitt,perform/art/theatre,
+audience::gym,5,0,30,*b,audience,auditorium/religious/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/arena/common/other,audience::common
+audience::arena,5,0,30,*b,audience,auditorium/religious/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/gym/common/other,audience::common
+audience::auditorium,5,2.5,30,*c,audience,religious/penitentiary/motion/picture/cineplex/perform/art/theatre/convention/gym/arena,audience::common
+c1::arena,5,1.5,90,*b,class 1/class I,,
+c2::arena,5,1.5,90,*b,class 2/class II,,
+c3::arena,5,1.5,90,*b,class 3/class III,,
+c4::arena,5,1.5,90,*b,class 4/class IV,,
+octogon::arena,5,1.5,90,*b,ring/octogon,manufacturing,octogon::arena
+exercise::gym,5,1,90,*b,exercise,,
+court::gym,5,1.5,90,*b,court/play/gym,class 1/class 2/class 3/class 4/class I/class II/class III/class IV/courthouse/courtroom/chambers/tribunal,court::gym
+locker::common,10,2.5,0,*,locker,,
+dressing::theatre,30,2.5,40,*c,dress/fitt,retail,dressing::retail
+dressing::retail,30,2.5,40,c,dress/fitt,perform/art/theatre,dressing::retail
 sales::common,30,2.5,40,c,sales,retail,sales::common
 sales::retail,30,2.5,40,c,retail,dress/fitt/mall/concourse,sales::retail
-dining::common,10,1,120,b,dining,penitentiary/leisure/lounge/bar/cafeteria/fast/family/restaurant/otel/lodging,dining::common
+dining::common,10,1,120,*b,dining,penitentiary/leisure/lounge/bar/cafeteria/fast/family/restaurant/otel/lodging,dining::common
 dining::penitentiary,10,1,120,b,dining,leisure/lounge/bar/cafeteria/fast/family/restaurant/otel/lodging/common/other,dining::common
 dining::leisure,10,1,90,b,dining,cafeteria/fast/family/restaurant/penitentiary/otel/lodging/common/other,dining::common
 dining::fastfood,10,1,120,b,dining,penitentiary/leisure/lounge/bar/family/restaurant/otel/lodging/common/other,dining::common
 dining::restaurant,10,1,120,b,dining,penitentiary/leisure/lounge/bar/cafeteria/fast/otel/lodging/common/other,dining::common
 dining::motel,10,1,115,b,dining,penitentiary/leisure/lounge/bar/cafeteria/fast/family/restaurant/hotel/common/other,dining::common
 dining::hotel,10,1,115,b,dining,penitentiaryleisure/lounge/bar/cafeteria/fast/family/restaurant/motel/lodging/common/other,dining::common
-cuisine::common,20,10,120,b,food/preparation,
+cuisine::common,20,10,120,*b,food/preparation,,
 rooms::common,25,2.5,600,f,guest/lodging,otel,rooms::hotel
 rooms::motel,25,2.5,600,f,guest/lodging/otel,hotel,rooms::common
 rooms::hotel,25,2.5,600,f,guest/otel,motel/hway/lodging,rooms::common
-quarters::dorm,25,2.5,500,g,quarter,fire,
-quarters::firehouse,25,2.5,500,g,quarter,dorm,
+quarters::dorm,25,2.5,500,g,quarter,fire,quarters::dorm
+quarters::firehouse,25,2.5,500,g,quarter,dorm,quarters::dorm
 units::residential,25,5,500,g,unit,care,units::residential
 units::care,25,2.5,500,j,unit,dwelling/residential,units::residential
-recreation::common,10,1,60,b,recreation,hospital/health,
-meeting::common,5,1,45,c,conf/meet/multi-purpose,
+recreation::common,10,1,60,*b,recreation,health/hospital/clinic/outpatient,recreation::common
+meeting::common,5,1,45,*c,conf/meet/multi-purpose,,
 office::common,20,7.5,90,a,office/enclosed,bank/open,office::common
 openplan::common,20,7.5,90,a,open,enclosed/bank,office::common
 bank::common,25,5,60,a,bank,,
@@ -73,35 +74,35 @@ cell::common,25,0,325,g,cell,courthouse,cell::common
 cell::court,25,2.5,325,h,cell,confinement,cell::common
 classroom::common,7.5,5,65,d,classroom/lecture/training,penitentiary,classroom::common
 classroom::penitentiary,7.5,5,65,d,classroom,lecture/training,classroom::common
-reading::library,20,1,90,c,reading,,
-stacks::library,20,0,90,c,stacks,,
-catalog::library,20,2.5,90,c,catalog,,
+reading::library,20,1,90,*c,reading,,
+stacks::library,20,0,90,*c,stacks,,
+catalog::library,20,2.5,90,*c,catalog,,
 lab::common,20,10,180,a,lab,teaching,lab::common
 teachinglab::common,20,10,180,d,lab,research/industr/medical/common/other,lab::common
 storage::common,1000,0,0,*,storage,suppl/garage,storage::common
-supplies::hospital,20,1,0,h,suppl,,
-exam::hospital,20,10,90,c,exam/treatment,,
-nursery::hospital,20,10,90,h,nursery,,
-nurses::hospital,20,2.5,45,h,nurses,,
-operating::hospital,20,10,300,h,operat,,
-patient::hospital,20,10,90,h,patient,,
-therapy::hospital,20,10,45,c,therapy,,
-imaging::hospital,20,10,90,h,radiology/imaging,,
-recovery::hospital,20,10,180,h,recovery,,
-laundry::common,20,20,60,c,laundry/washing,hospital/health,laundry::common
-laundry::hospital,20,20,60,c,laundry/washing,common,laundry::common
-lounge::common,10,1,60,b,lounge,dining/hospital/health,lounge::common
-lounge::hospital,10,1,60,b,lounge,dining/common/other,lounge::common
-pharmacy::common,20,2.5,45,c,pharmacy,hospital/health,pharmacy::common
-pharmacy::hospital,20,2.5,45,c,pharmacy,common/other,pharmacy::common
-emergency::common,25,2.5,325,h,emergency,hospital/health,emergency::hospital
-emergency::hospital,20,10,180,h,emergency,vehicle/garage,emergency::common
+supplies::health,20,1,0,*h,suppl,,
+exam::health,20,10,90,*c,exam/treatment,,
+nursery::health,20,10,90,*h,nursery,,
+nurses::health,20,2.5,45,*h,nurses,,
+operating::health,20,10,300,*h,operat,,
+patient::health,20,10,90,*h,patient,,
+therapy::health,20,10,45,*c,therapy,,
+imaging::health,20,10,90,*h,radiology/imaging,,
+recovery::health,20,10,180,*h,recovery,,
+laundry::common,20,20,60,c,laundry/washing,health/hospital/clinic/outpatient,laundry::common
+laundry::health,20,20,60,*c,laundry/washing,common,laundry::common
+lounge::common,10,1,60,*b,lounge,dining/health/hospital/clinic/outpatient,lounge::common
+lounge::health,10,1,60,*b,lounge,dining/common/other,lounge::common
+pharmacy::common,20,2.5,45,c,pharmacy,health/hospital/clinic/outpatient,pharmacy::common
+pharmacy::health,20,2.5,45,*c,pharmacy,common/other,pharmacy::common
+emergency::common,25,2.5,325,*h,emergency,health/hospital/clinic/outpatient,emergency::health
+emergency::health,20,10,180,*h,emergency,vehicle/garage,emergency::common
 engineroom::firehouse,25,2.5,325,h,engine,,
 garage::parking,1000,0,0,k,garage,,
 repair::automotive,20,5,90,e,repair/maintenance,,
-dock::common,500,0,0,h,dock,,
-bulk::warehouse,100,1,65,a,blk/bulk/pallet,fine,
-fine::warehouse,50,1,65,a,fine,undefined/medium/bulk/pallet,
+dock::common,500,0,0,*h,dock,,
+bulk::warehouse,100,1,65,a,blk/bulk/pallet,fine,bulk::warehouse
+fine::warehouse,50,1,65,a,fine,undefined/medium/bulk/pallet,bulk::warehouse
 workshop::common,30,10,90,a,workshop,,
 bay::manufacturing,30,10,90,a,bay,,
 detailed::manufacturing,30,10,90,a,detailed,,

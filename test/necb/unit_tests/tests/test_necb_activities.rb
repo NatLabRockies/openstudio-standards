@@ -47,10 +47,10 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',  # * only works with NECB2011?
-      'NorthernHealthCare', # * only works with NECB2011?
+      # 'NorthernEducation',  # * only works with NECB2011?
+      # 'NorthernHealthCare', # * only works with NECB2011?
       # 'Outpatient',
-      # 'PrimarySchool',
+      'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
@@ -181,6 +181,8 @@ class NECB_Activity_Tests < Minitest::Test
             next unless space.partofTotalFloorArea
 
             id      = space.nameString
+            width   = BTAP::Geometry::Spaces.space_width(space)
+            area    = space.floorArea
             err_msg = "BTAP::Activity mismatched space #{id} (#{cas})?"
             assert(a.activities.key?(space), err_msg)
 
@@ -200,7 +202,20 @@ class NECB_Activity_Tests < Minitest::Test
             err_msg  = "BTAP::Activity #{id} schedule (#{cas})?"
             refute_equal(schedule, "*", err_msg)
 
-            fdback << "#{id} : #{sttype}"
+            fdback << "- #{id}: #{sttype} | #{keyword} : #{schedule}"
+
+            # if a.occsensing?(space)
+            #   fdback << "#{id}: #{sttype} OCCSENSING"
+            # end
+
+            # if sttype.downcase.include?("corr")
+            #   fdback << "BTAP::Activity #{id}: #{width.round(2)}m"
+            # end
+
+            # if sttype.downcase.include?("suppl")
+            #   fdback << "BTAP::Activity #{id}: #{area.round(2)} m2"
+            # end
+
             next unless a.ancillary?(keyword)
 
             # fdback << "#{id} : #{st.determine_necb_schedule_type(space)}"
