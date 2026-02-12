@@ -45,6 +45,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest-reporters', '~> 1.7.1'
   spec.add_development_dependency 'openstudio-api-stubs'
   spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rexml', '~> 3.4.4'
   spec.add_development_dependency 'rubocop', '~> 1.81.1'
   spec.add_development_dependency 'rubocop-checkstyle_formatter', '~> 0.6.0'
   spec.add_development_dependency 'ruby-progressbar'

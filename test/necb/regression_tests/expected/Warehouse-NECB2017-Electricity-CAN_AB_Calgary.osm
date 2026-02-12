@@ -2257,41 +2257,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0032-000000000001},  !- Handle
   ems_sys_4_mixed_shr_none_sc_dx_sh_c_e_ssf_cv_zh_b_e_zc_none_srf_none__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}<23.9 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}>1.7, !- Program Line 1
-  SET {a1f60763-3bb6-41f7-aff1-0a2591eec2af} = 29.4, !- Program Line 2
-  SET {3cc889aa-59b5-4c12-bcbf-f62e10e5763d} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}<23.9 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}>1.7, !- Program Line 4
-  SET {a1f60763-3bb6-41f7-aff1-0a2591eec2af} = 29.4, !- Program Line 5
-  SET {3cc889aa-59b5-4c12-bcbf-f62e10e5763d} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}<23.9 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}>1.7, !- Program Line 7
-  SET {a1f60763-3bb6-41f7-aff1-0a2591eec2af} = 29.4, !- Program Line 8
-  SET {3cc889aa-59b5-4c12-bcbf-f62e10e5763d} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}<23.9 && {b58eba3e-7341-4aba-8b40-1377fde8de7d}>1.7, !- Program Line 10
-  SET {a1f60763-3bb6-41f7-aff1-0a2591eec2af} = 29.4, !- Program Line 11
-  SET {3cc889aa-59b5-4c12-bcbf-f62e10e5763d} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}<23.9 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}>1.7, !- Program Line 1
+  SET {6c8d0ab6-b1f7-423e-8acd-2fe7ebe88a64} = 29.4, !- Program Line 2
+  SET {af660c5c-a4ac-4dea-9724-3afbe089f331} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}<23.9 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}>1.7, !- Program Line 4
+  SET {6c8d0ab6-b1f7-423e-8acd-2fe7ebe88a64} = 29.4, !- Program Line 5
+  SET {af660c5c-a4ac-4dea-9724-3afbe089f331} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}<23.9 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}>1.7, !- Program Line 7
+  SET {6c8d0ab6-b1f7-423e-8acd-2fe7ebe88a64} = 29.4, !- Program Line 8
+  SET {af660c5c-a4ac-4dea-9724-3afbe089f331} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}<23.9 && {07e53740-cc69-4aa9-8e8b-35fc0f9e2720}>1.7, !- Program Line 10
+  SET {6c8d0ab6-b1f7-423e-8acd-2fe7ebe88a64} = 29.4, !- Program Line 11
+  SET {af660c5c-a4ac-4dea-9724-3afbe089f331} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {a1f60763-3bb6-41f7-aff1-0a2591eec2af} = NULL, !- Program Line 14
-  SET {3cc889aa-59b5-4c12-bcbf-f62e10e5763d} = NULL, !- Program Line 15
+  SET {6c8d0ab6-b1f7-423e-8acd-2fe7ebe88a64} = NULL, !- Program Line 14
+  SET {af660c5c-a4ac-4dea-9724-3afbe089f331} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0032-000000000002},  !- Handle
   ems_sys_4_mixed_shr_none_sc_dx_sh_c_e_ssf_cv_zh_b_e_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}<23.9 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}>1.7, !- Program Line 1
-  SET {97027ada-a443-4c5a-80db-27f02d547507} = 29.4, !- Program Line 2
-  SET {1082b96f-cd4c-4455-bf92-285cb935a97c} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}<23.9 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}>1.7, !- Program Line 4
-  SET {97027ada-a443-4c5a-80db-27f02d547507} = 29.4, !- Program Line 5
-  SET {1082b96f-cd4c-4455-bf92-285cb935a97c} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}<23.9 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}>1.7, !- Program Line 7
-  SET {97027ada-a443-4c5a-80db-27f02d547507} = 29.4, !- Program Line 8
-  SET {1082b96f-cd4c-4455-bf92-285cb935a97c} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}<23.9 && {d1d075e0-b7b4-429d-b482-5db0693c3b73}>1.7, !- Program Line 10
-  SET {97027ada-a443-4c5a-80db-27f02d547507} = 29.4, !- Program Line 11
-  SET {1082b96f-cd4c-4455-bf92-285cb935a97c} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {7d914216-d796-42f5-a069-5f3b0eab419a}<23.9 && {7d914216-d796-42f5-a069-5f3b0eab419a}>1.7, !- Program Line 1
+  SET {b133b3ba-438a-4ff2-82b7-0b65e6fcab51} = 29.4, !- Program Line 2
+  SET {2da41b29-2e72-45fd-b88f-ae2e7e21c7e5} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {7d914216-d796-42f5-a069-5f3b0eab419a}<23.9 && {7d914216-d796-42f5-a069-5f3b0eab419a}>1.7, !- Program Line 4
+  SET {b133b3ba-438a-4ff2-82b7-0b65e6fcab51} = 29.4, !- Program Line 5
+  SET {2da41b29-2e72-45fd-b88f-ae2e7e21c7e5} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {7d914216-d796-42f5-a069-5f3b0eab419a}<23.9 && {7d914216-d796-42f5-a069-5f3b0eab419a}>1.7, !- Program Line 7
+  SET {b133b3ba-438a-4ff2-82b7-0b65e6fcab51} = 29.4, !- Program Line 8
+  SET {2da41b29-2e72-45fd-b88f-ae2e7e21c7e5} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {7d914216-d796-42f5-a069-5f3b0eab419a}<23.9 && {7d914216-d796-42f5-a069-5f3b0eab419a}>1.7, !- Program Line 10
+  SET {b133b3ba-438a-4ff2-82b7-0b65e6fcab51} = 29.4, !- Program Line 11
+  SET {2da41b29-2e72-45fd-b88f-ae2e7e21c7e5} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {97027ada-a443-4c5a-80db-27f02d547507} = NULL, !- Program Line 14
-  SET {1082b96f-cd4c-4455-bf92-285cb935a97c} = NULL, !- Program Line 15
+  SET {b133b3ba-438a-4ff2-82b7-0b65e6fcab51} = NULL, !- Program Line 14
+  SET {2da41b29-2e72-45fd-b88f-ae2e7e21c7e5} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -3227,37 +3227,37 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0046-000000000032},  !- Handle
-  Zone1 Office WUC 0.09gpm 140F Inlet Water Node, !- Name
+  Zone1 Office WUC 0.0897gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000093},  !- Inlet Port
   {00000000-0000-0000-0014-000000000094};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0046-000000000033},  !- Handle
-  Zone1 Office WUC 0.09gpm 140F Outlet Water Node, !- Name
+  Zone1 Office WUC 0.0897gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000095},  !- Inlet Port
   {00000000-0000-0000-0014-000000000096};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0046-000000000034},  !- Handle
-  Zone2 Fine Storage WUC 0.15gpm 140F Inlet Water Node, !- Name
+  Zone2 Fine Storage WUC 0.1525gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000097},  !- Inlet Port
   {00000000-0000-0000-0014-000000000098};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0046-000000000035},  !- Handle
-  Zone2 Fine Storage WUC 0.15gpm 140F Outlet Water Node, !- Name
+  Zone2 Fine Storage WUC 0.1525gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000099},  !- Inlet Port
   {00000000-0000-0000-0014-000000000100};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0046-000000000036},  !- Handle
-  Zone3 Bulk Storage WUC 0.18gpm 140F Inlet Water Node, !- Name
+  Zone3 Bulk Storage WUC 0.1754gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000101},  !- Inlet Port
   {00000000-0000-0000-0014-000000000102};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0046-000000000037},  !- Handle
-  Zone3 Bulk Storage WUC 0.18gpm 140F Outlet Water Node, !- Name
+  Zone3 Bulk Storage WUC 0.1754gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000103},  !- Inlet Port
   {00000000-0000-0000-0014-000000000104};  !- Outlet Port
 
@@ -7426,7 +7426,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0093-000000000001},  !- Handle
-  Zone1 Office WUC 0.09gpm 140F,           !- Name
+  Zone1 Office WUC 0.0897gpm 140F,         !- Name
   {00000000-0000-0000-0014-000000000094},  !- Inlet Node Name
   {00000000-0000-0000-0014-000000000095},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -7440,7 +7440,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0093-000000000002},  !- Handle
-  Zone2 Fine Storage WUC 0.15gpm 140F,     !- Name
+  Zone2 Fine Storage WUC 0.1525gpm 140F,   !- Name
   {00000000-0000-0000-0014-000000000098},  !- Inlet Node Name
   {00000000-0000-0000-0014-000000000099},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -7454,7 +7454,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0093-000000000003},  !- Handle
-  Zone3 Bulk Storage WUC 0.18gpm 140F,     !- Name
+  Zone3 Bulk Storage WUC 0.1754gpm 140F,   !- Name
   {00000000-0000-0000-0014-000000000102},  !- Inlet Node Name
   {00000000-0000-0000-0014-000000000103},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -7468,28 +7468,28 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0094-000000000001},  !- Handle
-  Zone1 Office Service Water Use 0.09gpm 140F, !- Name
+  Zone1 Office Service Water Use 0.0897gpm 140F, !- Name
   {00000000-0000-0000-0095-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0075-000000000001},  !- Space Name
   {00000000-0000-0000-0058-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0094-000000000002},  !- Handle
-  Zone2 Fine Storage Service Water Use 0.15gpm 140F, !- Name
+  Zone2 Fine Storage Service Water Use 0.1525gpm 140F, !- Name
   {00000000-0000-0000-0095-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0075-000000000002},  !- Space Name
   {00000000-0000-0000-0058-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0094-000000000003},  !- Handle
-  Zone3 Bulk Storage Service Water Use 0.18gpm 140F, !- Name
+  Zone3 Bulk Storage Service Water Use 0.1754gpm 140F, !- Name
   {00000000-0000-0000-0095-000000000003},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0075-000000000003},  !- Space Name
   {00000000-0000-0000-0058-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0095-000000000001},  !- Handle
-  Zone1 office 0.09gpm 140F,               !- Name
+  Zone1 office 0.0897gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   5.66155504446499e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0058-000000000006},  !- Target Temperature Schedule Name
@@ -7498,7 +7498,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0095-000000000002},  !- Handle
-  Zone2 fine storage 0.15gpm 140F,         !- Name
+  Zone2 fine storage 0.1525gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   9.62094741841922e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0058-000000000006},  !- Target Temperature Schedule Name
@@ -7507,7 +7507,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0095-000000000003},  !- Handle
-  Zone3 bulk storage 0.18gpm 140F,         !- Name
+  Zone3 bulk storage 0.1754gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   1.10640895311821e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0058-000000000006},  !- Target Temperature Schedule Name

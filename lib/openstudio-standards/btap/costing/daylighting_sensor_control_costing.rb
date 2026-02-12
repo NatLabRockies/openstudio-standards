@@ -5,7 +5,8 @@ class BTAPCosting
     # NOTE: Number of daylighting sensors is based on how many a daylighted space needs sensors as per Mike Lubun's costing spec, rather than daylighting sensor control measure.
     standards_template = model.building.get.standardsTemplate.to_s
     if standards_template.include?('NECB')
-      standards_template = standards_template.gsub(/(?<=\p{L})(?=\d)/, ' ') #insert a space between NECB and 2011/2015/2017
+      # insert a space between NECB and 2011/2015/2017
+      standards_template = standards_template.gsub(/NECB(\d)/, 'NECB \1')
     end
 
     #-------------------------------------------------------------------------------------------------------------------
