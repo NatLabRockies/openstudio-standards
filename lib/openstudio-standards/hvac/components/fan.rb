@@ -203,7 +203,7 @@ module OpenstudioStandards
                                 fan_power_minimum_flow_rate_fraction: nil,
                                 fan_curve: nil,
                                 system_availability_manager_coupling_mode: nil)
-      fan_json = JSON.parse(File.read("#{__dir__}/data/fans.json"), symbolize_names: true)
+      fan_json = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/fans.json"), symbolize_names: true)
       fan_data = fan_json[:fans].select { |hash| hash[:name] == typical_fan }
 
       if fan_data.empty?

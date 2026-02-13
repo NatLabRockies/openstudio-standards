@@ -63,4 +63,21 @@ class TestSchedulesDerivation < Minitest::Test
 
     model.save(File.dirname(__FILE__) + '/output/test_schedule_derivation_school.osm', true)
   end
+
+  def test_space_type_apply_parametric_internal_load_schedules
+    # create a new model
+    model = OpenStudio::Model::Model.new
+    model.getTimestep.setNumberOfTimestepsPerHour(4)
+
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName('classroom')
+    space_type.setStandardsSpaceType('classroom')
+    space_type.additionalProperties.setFeature('standards_space_type', 'classroom/lecture/training')
+    OpenstudioStandards::SpaceType.set_standards_space_type_additional_properties(model, space_type_field: 'AdditionalProperties', reset_standards_space_type: true)
+
+    # set default scedules data
+    OpenstudioStandards::Schedules.space_type_apply_parametric_internal_load_schedules(space_type)
+
+    model.save(File.dirname(__FILE__) + '/output/test_parametric_space_type_schedules.osm', true)
+  end
 end

@@ -38,6 +38,7 @@ module OpenstudioStandards
     # @param add_thermostat [Boolean] Add thermostats to thermal zones based on the standards space type
     # @param add_refrigeration [Boolean] Add refrigerated cases and walkin refrigeration
     # @param refrigeration_template [String] The refrigeration technology level, either 'old', 'new', or 'advanced'
+    # @param schedule_method [String] The method for creating schedules for internal loads and thermostats. Options are 'prototype' or 'parametric'. 'prototype' uses the default schedules from the legacy DOE Prototype Models. 'parametric' creates schedules based on parametric occupancy schedules and derives internal load schedules from those. 'parametric' is recommend, as it results in more realistic schedules and better alignment between internal loads and occupancy.
     # @param modify_wkdy_op_hrs [Boolean] Modify the default weekday hours of operation
     # @param wkdy_op_hrs_start_time [Double] Weekday operating hours start time. Enter as a fractional value, e.g. 5:15pm is 17.25. Only used if modify_wkdy_op_hrs is true.
     # @param wkdy_op_hrs_duration [Double] Weekday operating hours duration from start time. Enter as a fractional value, e.g. 5:15pm is 17.25. Only used if modify_wkdy_op_hrs is true.
@@ -78,6 +79,7 @@ module OpenstudioStandards
                                                 add_thermostat: true,
                                                 add_refrigeration: true,
                                                 refrigeration_template: 'new',
+                                                schedule_method: 'parametric',
                                                 modify_wkdy_op_hrs: false,
                                                 wkdy_op_hrs_start_time: 8.0,
                                                 wkdy_op_hrs_duration: 8.0,
@@ -242,11 +244,14 @@ module OpenstudioStandards
           end
 
           # apply internal load schedules
-          standard.space_type_apply_internal_load_schedules(space_type)
+          if schedule_method == 'prototype'
+            standard.space_type_apply_standard_internal_load_schedules(space_type)
+          else # parametric
+            OpenstudioStandards::Schedules.space_type_apply_parametric_internal_load_schedules(space_type)
+          end
 
-          # extend space type name to include the template. Consider this as well for load defs
-          space_type.setName("#{space_type.name} - #{template}")
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Adding loads to space type named #{space_type.name}")
+          # Include the template as an additional property on the space type object if present
+          space_type.additionalProperties.setFeature('template', "#{template}")
         end
 
         # warn if spaces in model without space type
@@ -923,7 +928,7 @@ module OpenstudioStandards
           end
 
           # assign internal load schedules
-          standard.space_type_apply_internal_load_schedules(space_type)
+          standard.space_type_apply_standard_internal_load_schedules(space_type)
 
           # assign colors
           standard.space_type_apply_rendering_color(space_type)

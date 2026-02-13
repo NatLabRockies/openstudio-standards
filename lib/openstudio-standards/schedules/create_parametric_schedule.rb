@@ -9,9 +9,14 @@ module OpenstudioStandards
     # @return [Float] evaluated value
     def self.smootherstep(edge0, edge1, x)
       if x < edge0 && x > edge1
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Parametric.Model', 'Cannot apply smootherstep to an input outside of range')
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', 'Cannot apply smootherstep to an input outside of range')
         return false
       end
+
+      if edge0 == edge1
+        return 0.0
+      end
+
       # fractionalize input over unitized input range
       x_i = ((x - edge0) / (edge1 - edge0))
 
@@ -28,7 +33,7 @@ module OpenstudioStandards
       if time_value_pairs[0][0] != 0
         time_value_pairs.unshift([0, time_value_pairs[0][1]])
       end
-      if time_value_pairs[-1][0] <= 24
+      if time_value_pairs[-1][0] < 24
         time_value_pairs << [24, time_value_pairs[-1][1]]
       end
 
@@ -155,12 +160,11 @@ module OpenstudioStandards
         time_value_pairs << [time, val]
       end
       time_value_pairs.sort_by! { |pair| pair[0] }
-      p time_value_pairs
 
       if time_value_pairs[-1][0] > 24
         time_value_pairs = OpenstudioStandards::Schedules.wrap_schedule_pairs(time_value_pairs)
       end
-      p time_value_pairs
+
       # apply smoothing to intermediate values between
       OpenstudioStandards::Schedules.smooth_schedule_from_time_values(time_value_pairs, timesteps_per_hour)
 
@@ -185,8 +189,6 @@ module OpenstudioStandards
         hr = pair[0].to_i
         min = (pair[0].modulo(1) * 60).to_i
 
-        # puts "#{hr}:#{min} -> #{pair[1]}"
-
         day_sch.addValue(OpenStudio::Time.new(0, hr, min, 0), pair[1])
       end
     end
@@ -208,7 +210,6 @@ module OpenstudioStandards
       options['rules'] = []
       schedule_objs.each do |obj|
         sch_type = obj[:type]
-        control_points = obj[:control_points]
 
         st = params[:st].nil? ? obj[:st_std] : params[:st]
         et = params[:et].nil? ? obj[:et_std] : params[:et]
@@ -374,6 +375,97 @@ module OpenstudioStandards
       end
 
       return derived_schedule
+    end
+
+    # Sets the schedules for the selected internal loads to typical schedules.
+    # Uses parametric formulations for the occupancy schedule and derives interior lighting and equipment schedules from the occupancy schedule. If set_people is false, the occupancy schedule will not be applied but will still be used as the basis for deriving the lighting and equipment schedules.
+    #
+    # @param space_type [OpenStudio::Model::SpaceType] space type object
+    # @param set_people [Boolean] if true, set the occupancy and activity schedules
+    # @param set_lights [Boolean] if true, set the interior lighting schedule
+    # @param set_electric_equipment [Boolean] if true, set the electric schedule schedule
+    # @param set_gas_equipment [Boolean] if true, set the gas equipment schedule
+    # @param set_hot_water_equipment [Boolean] if true, set the hot water equipment schedule
+    # @return [Boolean] returns true if successful, false if not
+    def self.space_type_apply_parametric_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_hot_water_equipment: true)
+      # Get the default schedule set or create a new one if none exists
+      default_sch_set = nil
+      if space_type.defaultScheduleSet.is_initialized
+        default_sch_set = space_type.defaultScheduleSet.get
+      else
+        default_sch_set = OpenStudio::Model::DefaultScheduleSet.new(space_type.model)
+        default_sch_set.setName("#{space_type.name} Schedule Set")
+        space_type.setDefaultScheduleSet(default_sch_set)
+      end
+
+      # Load the default schedule set information
+      default_parametric_sch_set = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_parametric_schedule_set.json"), symbolize_names: true)
+
+      # Get the default parametric schedule set for this space type
+      if space_type.additionalProperties.getFeatureAsString('schedule_set').is_initialized
+        schedule_set_name = space_type.additionalProperties.getFeatureAsString('schedule_set').get
+        space_type_properties = default_parametric_sch_set.find { |s| s[:space_type_name] == schedule_set_name }
+      else
+        standards_space_type = 'not defined'
+        if space_type.additionalProperties.getFeatureAsString('standards_space_type').is_initialized
+          standards_space_type = space_type.additionalProperties.getFeatureAsString('standards_space_type').get
+        end
+
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Unable to find schedule set for #{space_type.name} with standards space type '#{standards_space_type}'. Please ensure the space type additional property 'schedule_set' is set to a valid schedule set name. Refer to the documentation for more information on parametric schedule sets.")
+        return false
+      end
+
+      # Find occupancy schedule
+      occupancy_schedules = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_parametric_occupancy_schedules.json"), symbolize_names: true)
+      puts "Attempting to create occupancy schedule with name '#{space_type_properties[:occupancy_schedule]}' for space type '#{space_type.name}'"
+      occupancy_sch = OpenstudioStandards::Schedules.create_parametric_schedule_full(space_type.model, occupancy_schedules, space_type_properties[:occupancy_schedule], {})
+
+      puts "Created occupancy schedule '#{occupancy_sch.name}'"
+
+      # Add occupancy schedule to the default schedule set
+      if set_people
+        unless occupancy_sch.nil?
+          default_sch_set.setNumberofPeopleSchedule(occupancy_sch)
+        end
+
+        # Set the activity schedule. Use a default 120 W/person
+        occupancy_activity_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(space_type.model, 120.0, name: "#{space_type.name} Occupant Activity Schedule")
+        default_sch_set.setPeopleActivityLevelSchedule(occupancy_activity_sch)
+      end
+
+      # Derive the interior lighting schedule and set as the default
+      if set_lights && !space_type_properties[:derived_interior_lighting_parameters].nil?
+        lighting_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_lighting_parameters.json"), symbolize_names: true)
+        lighting_params = lighting_data.find { |s| s[:name] == space_type_properties[:derived_interior_lighting_parameters] }
+        light_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occupancy_sch, lighting_params)
+        default_sch_set.setLightingSchedule(light_sch)
+      end
+
+      # Derive the electric equipment schedule and set as the default
+      if set_electric_equipment && !space_type_properties[:derived_electric_equipment_parameters].nil?
+        equip_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_electric_equipment_parameters.json"), symbolize_names: true)
+        equip_params = equip_data.find { |s| s[:name] == space_type_properties[:derived_electric_equipment_parameters] }
+        equip_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occupancy_sch, equip_params)
+        default_sch_set.setElectricEquipmentSchedule(equip_sch)
+      end
+
+      # Derive the gas equipment schedule and set as the default
+      if set_gas_equipment && !space_type_properties[:derived_gas_equipment_parameters].nil?
+        gas_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_gas_equipment_parameters.json"), symbolize_names: true)
+        gas_params = gas_data.find { |s| s[:name] == space_type_properties[:derived_gas_equipment_parameters] }
+        gas_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occupancy_sch, gas_params)
+        default_sch_set.setGasEquipmentSchedule(gas_sch)
+      end
+
+      # Derive the hot water equipment schedule and set as the default
+      if set_hot_water_equipment && !space_type_properties[:derived_hot_water_equipment_parameters].nil?
+        hot_water_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_hot_water_equipment_parameters.json"), symbolize_names: true)
+        hot_water_params = hot_water_data.find { |s| s[:name] == space_type_properties[:derived_hot_water_equipment_parameters] }
+        hot_water_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occupancy_sch, hot_water_params)
+        default_sch_set.setHotWaterEquipmentSchedule(hot_water_sch)
+      end
+
+      return true
     end
   end
 end

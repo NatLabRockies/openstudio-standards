@@ -1,0 +1,2395 @@
+[
+  {
+    "name": "apartment occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.25,
+    "peak_std": 1.0,
+    "st_std": 17,
+    "et_std": 32,
+    "control_points": [
+      ["et-1", "peak"],
+      ["et+2", "base"],
+      ["st-1", "base"],
+      ["st+2", "peak*0.87"],
+      ["st+4", "peak*0.87"],
+      ["st+5", "peak"]
+    ]
+  },
+  {
+    "name": "apartment occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "apartment occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "apartment occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.25,
+    "peak_std": 1.0,
+    "st_std": 17,
+    "et_std": 32,
+    "control_points": [
+      ["et-1", "peak"],
+      ["et+2", "base"],
+      ["st-1", "base"],
+      ["st+2", "peak*0.87"],
+      ["st+4", "peak*0.87"],
+      ["st+5", "peak"]
+    ]
+  },
+  {
+    "name": "banking activity occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "banking activity occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "banking activity occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "banking activity occupancy",
+    "day_types": "Wkdy|Sat",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 9,
+    "et_std": 17,
+    "control_points": [
+      ["st-2", "base"],
+      ["st-1", "peak*0.2"],
+      ["st", "peak*0.5"],
+      ["st+2", "peak"],
+      ["et-1", "peak"],
+      ["et", "peak*0.5"],
+      ["et+1", "peak*0.2"],
+      ["et+2", "base"]
+    ]
+  },
+  {
+    "name": "confinement cells occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "confinement cells occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "confinement cells occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 7,
+    "et_std": 17,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "confinement cells occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.75,
+    "st_std": 7,
+    "et_std": 17,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "courtroom occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "courtroom occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "courtroom occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "courtroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.5,
+    "st_std": 9,
+    "et_std": 19,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["st+4", "peak"],
+      ["et-5", "base"],
+      ["et-5", "base"],
+      ["et-4", "peak*0.8"],
+      ["et", "peak*0.8"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "datacenter occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "electrical mechanical occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "electrical mechanical occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "electrical mechanical occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 8,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "emergency room occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.2,
+    "peak_std": 0.8,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "emergency room occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "emergency room occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "emergency room occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.4,
+    "peak_std": 0.8,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st-3", "base"],
+      ["st+3", "peak"],
+      ["et", "peak"],
+      ["et+2", "peak*0.6"],
+      ["et+4", "base"]
+    ]
+  },
+  {
+    "name": "emergency room occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.2,
+    "peak_std": 0.6,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st-3", "base"],
+      ["st+3", "peak"],
+      ["et", "peak"],
+      ["et+2", "peak*0.8"],
+      ["et+4", "base"]
+    ]
+  },
+  {
+    "name": "exercise occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 7,
+    "et_std": 23,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["st+4", "peak"],
+      ["st+6", "base"],
+      ["st+6", "base"],
+      ["st+7", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "exercise occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "exercise occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "exercise occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 7,
+    "et_std": 23,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["st+4", "peak"],
+      ["st+6", "base"],
+      ["st+6", "base"],
+      ["st+7", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "guest room occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.2,
+    "peak_std": 0.65,
+    "st_std": 18,
+    "et_std": 21,
+    "control_points": [
+      ["st-12", "peak"],
+      ["st-10", "peak*0.5230769230769231"],
+      ["st-9", "peak*0.5230769230769231"],
+      ["st-8", "base"],
+      ["st-1", "base"],
+      ["et-1", "peak"],
+      ["et", "peak"],
+      ["et+1", "peak*0.7692307692307692"]
+    ]
+  },
+  {
+    "name": "guest room occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "guest room occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "guest room occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.13,
+    "peak_std": 0.65,
+    "st_std": 16,
+    "et_std": 33,
+    "control_points": [
+      ["st-10", "peak"],
+      ["st-8", "peak*0.4307692307692308"],
+      ["et", "peak*0.4307692307692308"],
+      ["et+1", "base"],
+      ["st-1", "base"],
+      ["st+1", "peak*0.5384615384615384"],
+      ["st+3", "peak*0.5384615384615384"],
+      ["st+4", "peak*0.7692307692307692"],
+      ["st+5", "peak*0.7692307692307692"],
+      ["st+7", "peak"]
+    ]
+  },
+  {
+    "name": "hospital extended schedule",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.4,
+    "peak_std": 0.6,
+    "st_std": 8,
+    "et_std": 16,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "hospital extended schedule",
+    "day_types": "Sat",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.4,
+    "peak_std": 0.6,
+    "st_std": 8,
+    "et_std": 19,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-2", "peak"],
+      ["et-1", "peak*0.8333333333333334"],
+      ["et", "peak*0.8333333333333334"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "hospital extended schedule",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "hospital extended schedule",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "hospital extended schedule",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.4,
+    "peak_std": 0.8,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak"],
+      ["et-3", "peak"],
+      ["et-1", "peak*0.625"],
+      ["et", "peak*0.625"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "hospital schedule",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.05,
+    "st_std": 8,
+    "et_std": 16,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "hospital schedule",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "hospital schedule",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "hospital schedule",
+    "day_types": "Sat",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.4,
+    "st_std": 8,
+    "et_std": 19,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak"],
+      ["et-2", "peak"],
+      ["et-1", "peak*0.25"],
+      ["et", "peak*0.25"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "hospital schedule",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 8,
+    "et_std": 22,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak"],
+      ["et-5", "peak"],
+      ["et-3", "peak*0.37499999999999994"],
+      ["et-2", "peak*0.37499999999999994"],
+      ["et-1", "peak*0.25"],
+      ["et", "peak*0.25"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "judges chambers occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "judges chambers occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "judges chambers occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 7,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "judges chambers occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": "FRACTION",
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.6,
+    "st_std": 7,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "laboratory occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.05,
+    "peak_std": 0.3,
+    "st_std": 6,
+    "et_std": 17,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.33333333333333337"],
+      ["st+2", "peak*0.33333333333333337"],
+      ["st+3", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.33333333333333337"],
+      ["et", "peak*0.33333333333333337"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "laboratory occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "laboratory occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "laboratory occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.05,
+    "peak_std": 0.9,
+    "st_std": 7,
+    "et_std": 21,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak"],
+      ["st+3", "peak"],
+      ["st+4", "peak*0.5"],
+      ["st+5", "peak*0.5"],
+      ["st+6", "peak"],
+      ["et-4", "peak"],
+      ["et-2", "peak*0.11111111111111112"],
+      ["et", "peak*0.11111111111111112"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "laundary occupancy",
+    "day_types": "Default|Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.18,
+    "st_std": 8,
+    "et_std": 17,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.5"],
+      ["st+2", "peak*0.5"],
+      ["st+3", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "base"],
+      ["et-4", "base"],
+      ["et-3", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "laundary occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "laundary occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "library occupancy",
+    "day_types": "Default|Wkdy|Sat",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.5,
+    "st_std": 10,
+    "et_std": 18,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "library occupancy",
+    "day_types": "Sun",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.5,
+    "st_std": 11,
+    "et_std": 17,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "library occupancy",
+    "day_types": "WntrDsn|Hol",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 10,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "library occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 10,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "outpatient occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.05,
+    "st_std": 8,
+    "et_std": 17,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "outpatient occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "outpatient occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "outpatient occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.05,
+    "peak_std": 0.9,
+    "st_std": 4,
+    "et_std": 22,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.22222222222222224"],
+      ["st+2", "peak*0.22222222222222224"],
+      ["st+4", "peak"],
+      ["et-4", "peak"],
+      ["et-3", "peak*0.5555555555555556"],
+      ["et-2", "peak*0.5555555555555556"],
+      ["et-1", "peak*0.22222222222222224"],
+      ["et", "peak*0.22222222222222224"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "outpatient occupancy",
+    "day_types": "Sat",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.05,
+    "peak_std": 0.3,
+    "st_std": 7,
+    "et_std": 20,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.6666666666666667"],
+      ["st+2", "peak*0.6666666666666667"],
+      ["st+3", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.6666666666666667"],
+      ["et", "peak*0.6666666666666667"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "restaurant dining occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.7,
+    "st_std": 7,
+    "et_std": 25,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak*0.7142857142857143"],
+      ["st+2", "peak*0.7142857142857143"],
+      ["st+3", "peak*0.28571428571428575"],
+      ["st+4", "peak*0.28571428571428575"],
+      ["st+6", "peak*0.7142857142857143"],
+      ["st+7", "peak*0.7142857142857143"],
+      ["et-9", "peak*0.28571428571428575"],
+      ["et-9", "peak*0.28571428571428575"],
+      ["et-4", "peak"],
+      ["et-4", "peak"],
+      ["et-2", "peak*0.28571428571428575"],
+      ["et", "peak*0.07142857142857144"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "restaurant dining occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "restaurant dining occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "restaurant dining occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.9,
+    "st_std": 7,
+    "et_std": 35,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak*0.5555555555555556"],
+      ["st+2", "peak*0.5555555555555556"],
+      ["st+4", "peak*0.22222222222222224"],
+      ["st+4", "peak*0.22222222222222224"],
+      ["st+6", "peak*0.5555555555555556"],
+      ["st+7", "peak*0.5555555555555556"],
+      ["st+9", "peak*0.3333333333333333"],
+      ["st+11", "peak*0.3333333333333333"],
+      ["st+13", "peak"],
+      ["et+9", "peak"],
+      ["et-9", "base"]
+    ]
+  },
+  {
+    "name": "restaurant dining occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 6,
+    "et_std": 35,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak*0.5"],
+      ["st+4", "peak*0.5"],
+      ["st+5", "peak*0.25"],
+      ["st+5", "peak*0.25"],
+      ["st+7", "peak"],
+      ["st+7", "peak"],
+      ["st+10", "peak*0.25"],
+      ["st+10", "peak*0.25"],
+      ["st+13", "peak"],
+      ["et+10", "peak"],
+      ["et-9", "base"]
+    ]
+  },
+
+  {
+    "name": "restaurant kitchen occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.7,
+    "st_std": 7,
+    "et_std": 25,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak*0.7142857142857143"],
+      ["st+2", "peak*0.7142857142857143"],
+      ["st+3", "peak*0.28571428571428575"],
+      ["st+4", "peak*0.28571428571428575"],
+      ["st+6", "peak*0.7142857142857143"],
+      ["st+7", "peak*0.7142857142857143"],
+      ["et-9", "peak*0.28571428571428575"],
+      ["et-9", "peak*0.28571428571428575"],
+      ["et-4", "peak"],
+      ["et-4", "peak"],
+      ["et-2", "peak*0.28571428571428575"],
+      ["et", "peak*0.07142857142857144"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "restaurant kitchen occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "restaurant kitchen occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "restaurant kitchen occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.9,
+    "st_std": 7,
+    "et_std": 35,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak*0.5555555555555556"],
+      ["st+2", "peak*0.5555555555555556"],
+      ["st+4", "peak*0.22222222222222224"],
+      ["st+4", "peak*0.22222222222222224"],
+      ["st+6", "peak*0.5555555555555556"],
+      ["st+7", "peak*0.5555555555555556"],
+      ["st+9", "peak*0.3333333333333333"],
+      ["st+11", "peak*0.3333333333333333"],
+      ["st+13", "peak"],
+      ["et+9", "peak"],
+      ["et-9", "base"]
+    ]
+  },
+  {
+    "name": "restaurant kitchen occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 6,
+    "et_std": 35,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak*0.5"],
+      ["st+4", "peak*0.5"],
+      ["st+5", "peak*0.25"],
+      ["st+5", "peak*0.25"],
+      ["st+7", "peak"],
+      ["st+7", "peak"],
+      ["st+10", "peak*0.25"],
+      ["st+10", "peak*0.25"],
+      ["st+13", "peak"],
+      ["et+10", "peak"],
+      ["et-9", "base"]
+    ]
+  },
+  {
+    "name": "retail occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.4,
+    "st_std": 10,
+    "et_std": 18,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak*0.5"],
+      ["st+2", "peak*0.5"],
+      ["st+3", "peak"],
+      ["et-1", "peak"],
+      ["et+2", "base"]
+    ]
+  },
+  {
+    "name": "retail occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "retail occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 1.0,
+    "peak_std": 1.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "retail occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 9,
+    "et_std": 22,
+    "control_points": [
+      ["st-2", "base"],
+      ["st+3", "peak"],
+      ["et-5", "peak"],
+      ["et-3", "peak*0.25"],
+      ["et-1", "peak*0.25"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "retail occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.8,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak*0.625"],
+      ["st+3", "peak*0.625"],
+      ["st+4", "peak*0.8749999999999999"],
+      ["et-6", "peak*0.8749999999999999"],
+      ["et-5", "peak"],
+      ["et-5", "peak"],
+      ["et-3", "peak*0.625"],
+      ["et-2", "peak*0.625"],
+      ["et-1", "peak*0.37499999999999994"],
+      ["et", "peak*0.37499999999999994"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.35,
+    "st_std": 8,
+    "et_std": 19,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.4285714285714286"],
+      ["et-2", "peak*0.4285714285714286"],
+      ["et-1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.2631578947368421"],
+      ["et-5", "peak*0.2631578947368421"],
+      ["et-4", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.35,
+    "st_std": 8,
+    "et_std": 19,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.4285714285714286"],
+      ["et-2", "peak*0.4285714285714286"],
+      ["et-1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 20,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.2631578947368421"],
+      ["et-5", "peak*0.2631578947368421"],
+      ["et-4", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school auditorium occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 7,
+    "et_std": 15,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.15"],
+      ["st+2", "peak*0.15"],
+      ["st+3", "peak*0.05"],
+      ["et-4", "peak*0.05"],
+      ["et-3", "peak"],
+      ["et-2", "peak"],
+      ["et-1", "peak*0.15"],
+      ["et", "peak*0.15"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.25,
+    "st_std": 9,
+    "et_std": 15,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 7,
+    "et_std": 15,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.15"],
+      ["st+2", "peak*0.15"],
+      ["st+3", "peak*0.05"],
+      ["et-4", "peak*0.05"],
+      ["et-3", "peak"],
+      ["et-2", "peak"],
+      ["et-1", "peak*0.15"],
+      ["et", "peak*0.15"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.25,
+    "st_std": 9,
+    "et_std": 15,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school cafeteria occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.15,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.15789473684210525"],
+      ["et", "peak*0.15789473684210525"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.15,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et-5", "peak"],
+      ["et-4", "peak*0.15789473684210525"],
+      ["et", "peak*0.15789473684210525"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school classroom occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.3684210526315789"],
+      ["et-5", "peak*0.3684210526315789"],
+      ["et-4", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.3684210526315789"],
+      ["et-5", "peak*0.3684210526315789"],
+      ["et-4", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.35,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.95,
+    "st_std": 8,
+    "et_std": 21,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak*0.3684210526315789"],
+      ["et-5", "peak*0.3684210526315789"],
+      ["et-4", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school gym occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.75,
+    "st_std": 7,
+    "et_std": 15,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.25,
+    "st_std": 7,
+    "et_std": 15,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.75,
+    "st_std": 7,
+    "et_std": 15,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.25,
+    "st_std": 9,
+    "et_std": 15,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+1", "peak"],
+      ["et-1", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-06-30T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-07-01T00:00:00+00:00",
+    "end_date": "2018-09-01T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "school kitchen occupancy",
+    "day_types": "Wknd",
+    "start_date": "2018-09-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "office occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.05,
+    "st_std": 6,
+    "et_std": 18,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "base"]
+    ]
+  },
+  {
+    "name": "office occupancy",
+    "day_types": "WntrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  },
+  {
+    "name": "office occupancy",
+    "day_types": "SmrDsn",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 1.0,
+    "st_std": 6,
+    "et_std": 20,
+    "control_points": [
+      ["st", "base"],
+      ["st+1", "peak"],
+      ["et", "peak"],
+      ["et+1", "peak*0.05"]
+    ]
+  },
+  {
+    "name": "office occupancy",
+    "day_types": "Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.5,
+    "st_std": 7,
+    "et_std": 22,
+    "control_points": [
+      ["st-1", "base"],
+      ["st+2", "peak"],
+      ["et-5", "peak"],
+      ["et-3", "peak*0.2"],
+      ["et", "peak*0.2"],
+      ["et+1", "peak*0.1"]
+    ]
+  },
+  {
+    "name": "zero occupancy",
+    "day_types": "Default",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.0,
+    "st_std": 0,
+    "et_std": 24,
+    "control_points": [
+      ["st", "base"],
+      ["et", "base"]
+    ]
+  }
+]
