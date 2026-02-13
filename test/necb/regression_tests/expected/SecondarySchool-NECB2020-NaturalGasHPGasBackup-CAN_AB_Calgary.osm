@@ -17010,81 +17010,81 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000001},  !- Handle
   ems_sys_3_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__13_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}<23.9 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}>1.7, !- Program Line 1
-  SET {d34eaa39-3401-4867-b25f-776bec7a9d1f} = 29.4, !- Program Line 2
-  SET {3b3a13dc-f71d-42e2-bbd2-53e42ff1f4ef} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}<23.9 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}>1.7, !- Program Line 4
-  SET {d34eaa39-3401-4867-b25f-776bec7a9d1f} = 29.4, !- Program Line 5
-  SET {3b3a13dc-f71d-42e2-bbd2-53e42ff1f4ef} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}<23.9 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}>1.7, !- Program Line 7
-  SET {d34eaa39-3401-4867-b25f-776bec7a9d1f} = 29.4, !- Program Line 8
-  SET {3b3a13dc-f71d-42e2-bbd2-53e42ff1f4ef} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}<23.9 && {3a80e41a-f478-43da-8d9e-bf847af7cfb6}>1.7, !- Program Line 10
-  SET {d34eaa39-3401-4867-b25f-776bec7a9d1f} = 29.4, !- Program Line 11
-  SET {3b3a13dc-f71d-42e2-bbd2-53e42ff1f4ef} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}<23.9 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}>1.7, !- Program Line 1
+  SET {67a58a74-03ba-451f-a434-f8d47b5c359d} = 29.4, !- Program Line 2
+  SET {96db01ef-07b1-435b-8deb-fb83e535eb24} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}<23.9 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}>1.7, !- Program Line 4
+  SET {67a58a74-03ba-451f-a434-f8d47b5c359d} = 29.4, !- Program Line 5
+  SET {96db01ef-07b1-435b-8deb-fb83e535eb24} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}<23.9 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}>1.7, !- Program Line 7
+  SET {67a58a74-03ba-451f-a434-f8d47b5c359d} = 29.4, !- Program Line 8
+  SET {96db01ef-07b1-435b-8deb-fb83e535eb24} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}<23.9 && {a2b611a2-5b46-40ae-a618-d91fb53dcf23}>1.7, !- Program Line 10
+  SET {67a58a74-03ba-451f-a434-f8d47b5c359d} = 29.4, !- Program Line 11
+  SET {96db01ef-07b1-435b-8deb-fb83e535eb24} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {d34eaa39-3401-4867-b25f-776bec7a9d1f} = NULL, !- Program Line 14
-  SET {3b3a13dc-f71d-42e2-bbd2-53e42ff1f4ef} = NULL, !- Program Line 15
+  SET {67a58a74-03ba-451f-a434-f8d47b5c359d} = NULL, !- Program Line 14
+  SET {96db01ef-07b1-435b-8deb-fb83e535eb24} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000002},  !- Handle
   ems_sys_3_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__2_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}<23.9 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}>1.7, !- Program Line 1
-  SET {516de1ab-2990-4fb2-8bf1-7e5498c3245f} = 29.4, !- Program Line 2
-  SET {64d34aa9-2fdd-49d2-bace-8b5d9c25933c} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}<23.9 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}>1.7, !- Program Line 4
-  SET {516de1ab-2990-4fb2-8bf1-7e5498c3245f} = 29.4, !- Program Line 5
-  SET {64d34aa9-2fdd-49d2-bace-8b5d9c25933c} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}<23.9 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}>1.7, !- Program Line 7
-  SET {516de1ab-2990-4fb2-8bf1-7e5498c3245f} = 29.4, !- Program Line 8
-  SET {64d34aa9-2fdd-49d2-bace-8b5d9c25933c} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}<23.9 && {10f2736b-260f-4ca0-9eb8-f012b5aca3b1}>1.7, !- Program Line 10
-  SET {516de1ab-2990-4fb2-8bf1-7e5498c3245f} = 29.4, !- Program Line 11
-  SET {64d34aa9-2fdd-49d2-bace-8b5d9c25933c} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {f537f833-f347-4b96-856e-316b52e6cef9}<23.9 && {f537f833-f347-4b96-856e-316b52e6cef9}>1.7, !- Program Line 1
+  SET {4f8b5518-a519-41c8-b3af-0e3774721a4f} = 29.4, !- Program Line 2
+  SET {3bd36a89-8714-4c29-99cc-691b4363d61f} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {f537f833-f347-4b96-856e-316b52e6cef9}<23.9 && {f537f833-f347-4b96-856e-316b52e6cef9}>1.7, !- Program Line 4
+  SET {4f8b5518-a519-41c8-b3af-0e3774721a4f} = 29.4, !- Program Line 5
+  SET {3bd36a89-8714-4c29-99cc-691b4363d61f} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {f537f833-f347-4b96-856e-316b52e6cef9}<23.9 && {f537f833-f347-4b96-856e-316b52e6cef9}>1.7, !- Program Line 7
+  SET {4f8b5518-a519-41c8-b3af-0e3774721a4f} = 29.4, !- Program Line 8
+  SET {3bd36a89-8714-4c29-99cc-691b4363d61f} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {f537f833-f347-4b96-856e-316b52e6cef9}<23.9 && {f537f833-f347-4b96-856e-316b52e6cef9}>1.7, !- Program Line 10
+  SET {4f8b5518-a519-41c8-b3af-0e3774721a4f} = 29.4, !- Program Line 11
+  SET {3bd36a89-8714-4c29-99cc-691b4363d61f} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {516de1ab-2990-4fb2-8bf1-7e5498c3245f} = NULL, !- Program Line 14
-  SET {64d34aa9-2fdd-49d2-bace-8b5d9c25933c} = NULL, !- Program Line 15
+  SET {4f8b5518-a519-41c8-b3af-0e3774721a4f} = NULL, !- Program Line 14
+  SET {3bd36a89-8714-4c29-99cc-691b4363d61f} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000003},  !- Handle
   ems_sys_3_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}<23.9 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}>1.7, !- Program Line 1
-  SET {102e68c8-0487-490b-a205-718c04424471} = 29.4, !- Program Line 2
-  SET {07cea3ab-e784-4bef-97cd-51be812b5ef5} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}<23.9 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}>1.7, !- Program Line 4
-  SET {102e68c8-0487-490b-a205-718c04424471} = 29.4, !- Program Line 5
-  SET {07cea3ab-e784-4bef-97cd-51be812b5ef5} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}<23.9 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}>1.7, !- Program Line 7
-  SET {102e68c8-0487-490b-a205-718c04424471} = 29.4, !- Program Line 8
-  SET {07cea3ab-e784-4bef-97cd-51be812b5ef5} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}<23.9 && {2ef24a19-2f12-4f32-80dd-d32bb44c309c}>1.7, !- Program Line 10
-  SET {102e68c8-0487-490b-a205-718c04424471} = 29.4, !- Program Line 11
-  SET {07cea3ab-e784-4bef-97cd-51be812b5ef5} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {88902aaf-726c-4d8f-8822-a8c3f65da614}<23.9 && {88902aaf-726c-4d8f-8822-a8c3f65da614}>1.7, !- Program Line 1
+  SET {2017b1d8-ee5e-4002-a87a-65375b624190} = 29.4, !- Program Line 2
+  SET {82835568-23f7-4948-acad-748c1b84e6ba} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {88902aaf-726c-4d8f-8822-a8c3f65da614}<23.9 && {88902aaf-726c-4d8f-8822-a8c3f65da614}>1.7, !- Program Line 4
+  SET {2017b1d8-ee5e-4002-a87a-65375b624190} = 29.4, !- Program Line 5
+  SET {82835568-23f7-4948-acad-748c1b84e6ba} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {88902aaf-726c-4d8f-8822-a8c3f65da614}<23.9 && {88902aaf-726c-4d8f-8822-a8c3f65da614}>1.7, !- Program Line 7
+  SET {2017b1d8-ee5e-4002-a87a-65375b624190} = 29.4, !- Program Line 8
+  SET {82835568-23f7-4948-acad-748c1b84e6ba} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {88902aaf-726c-4d8f-8822-a8c3f65da614}<23.9 && {88902aaf-726c-4d8f-8822-a8c3f65da614}>1.7, !- Program Line 10
+  SET {2017b1d8-ee5e-4002-a87a-65375b624190} = 29.4, !- Program Line 11
+  SET {82835568-23f7-4948-acad-748c1b84e6ba} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {102e68c8-0487-490b-a205-718c04424471} = NULL, !- Program Line 14
-  SET {07cea3ab-e784-4bef-97cd-51be812b5ef5} = NULL, !- Program Line 15
+  SET {2017b1d8-ee5e-4002-a87a-65375b624190} = NULL, !- Program Line 14
+  SET {82835568-23f7-4948-acad-748c1b84e6ba} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000004},  !- Handle
   ems_sys_4_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {455da294-8db9-404f-ba7c-d7523c2f5e44}<23.9 && {455da294-8db9-404f-ba7c-d7523c2f5e44}>1.7, !- Program Line 1
-  SET {7258aabf-b00d-468a-a960-4dff7ee656fa} = 29.4, !- Program Line 2
-  SET {d9f58a95-26f8-44d3-a684-ba3cd2ae5418} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {455da294-8db9-404f-ba7c-d7523c2f5e44}<23.9 && {455da294-8db9-404f-ba7c-d7523c2f5e44}>1.7, !- Program Line 4
-  SET {7258aabf-b00d-468a-a960-4dff7ee656fa} = 29.4, !- Program Line 5
-  SET {d9f58a95-26f8-44d3-a684-ba3cd2ae5418} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {455da294-8db9-404f-ba7c-d7523c2f5e44}<23.9 && {455da294-8db9-404f-ba7c-d7523c2f5e44}>1.7, !- Program Line 7
-  SET {7258aabf-b00d-468a-a960-4dff7ee656fa} = 29.4, !- Program Line 8
-  SET {d9f58a95-26f8-44d3-a684-ba3cd2ae5418} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {455da294-8db9-404f-ba7c-d7523c2f5e44}<23.9 && {455da294-8db9-404f-ba7c-d7523c2f5e44}>1.7, !- Program Line 10
-  SET {7258aabf-b00d-468a-a960-4dff7ee656fa} = 29.4, !- Program Line 11
-  SET {d9f58a95-26f8-44d3-a684-ba3cd2ae5418} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}<23.9 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}>1.7, !- Program Line 1
+  SET {20dc848c-2e2b-478b-928e-b8de7013448c} = 29.4, !- Program Line 2
+  SET {c236bf1a-5d80-4751-b73f-a2ab621fdfc4} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}<23.9 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}>1.7, !- Program Line 4
+  SET {20dc848c-2e2b-478b-928e-b8de7013448c} = 29.4, !- Program Line 5
+  SET {c236bf1a-5d80-4751-b73f-a2ab621fdfc4} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}<23.9 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}>1.7, !- Program Line 7
+  SET {20dc848c-2e2b-478b-928e-b8de7013448c} = 29.4, !- Program Line 8
+  SET {c236bf1a-5d80-4751-b73f-a2ab621fdfc4} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}<23.9 && {2b3a2225-4fd1-4f47-82e7-8343a98c9ebd}>1.7, !- Program Line 10
+  SET {20dc848c-2e2b-478b-928e-b8de7013448c} = 29.4, !- Program Line 11
+  SET {c236bf1a-5d80-4751-b73f-a2ab621fdfc4} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {7258aabf-b00d-468a-a960-4dff7ee656fa} = NULL, !- Program Line 14
-  SET {d9f58a95-26f8-44d3-a684-ba3cd2ae5418} = NULL, !- Program Line 15
+  SET {20dc848c-2e2b-478b-928e-b8de7013448c} = NULL, !- Program Line 14
+  SET {c236bf1a-5d80-4751-b73f-a2ab621fdfc4} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -18899,277 +18899,277 @@ OS:ModelObjectList,
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000081},  !- Handle
   Table Lookup 1 Independent Variable List 100, !- Name
-  {00000000-0000-0000-0096-000000000064};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000072};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000082},  !- Handle
   Table Lookup 1 Independent Variable List 101, !- Name
-  {00000000-0000-0000-0096-000000000062};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000071};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000083},  !- Handle
   Table Lookup 1 Independent Variable List 102, !- Name
-  {00000000-0000-0000-0096-000000000063};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000069};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000084},  !- Handle
   Table Lookup 1 Independent Variable List 103, !- Name
-  {00000000-0000-0000-0096-000000000061};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000024};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000085},  !- Handle
   Table Lookup 1 Independent Variable List 104, !- Name
-  {00000000-0000-0000-0096-000000000004};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000022};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000086},  !- Handle
   Table Lookup 1 Independent Variable List 105, !- Name
-  {00000000-0000-0000-0096-000000000002};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000023};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000087},  !- Handle
   Table Lookup 1 Independent Variable List 106, !- Name
-  {00000000-0000-0000-0096-000000000003};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000021};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000088},  !- Handle
   Table Lookup 1 Independent Variable List 107, !- Name
-  {00000000-0000-0000-0096-000000000001};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000056};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000089},  !- Handle
   Table Lookup 1 Independent Variable List 108, !- Name
-  {00000000-0000-0000-0096-000000000076};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000054};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000090},  !- Handle
   Table Lookup 1 Independent Variable List 109, !- Name
-  {00000000-0000-0000-0096-000000000074};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000055};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000091},  !- Handle
   Table Lookup 1 Independent Variable List 110, !- Name
-  {00000000-0000-0000-0096-000000000075};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000053};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000092},  !- Handle
   Table Lookup 1 Independent Variable List 111, !- Name
-  {00000000-0000-0000-0096-000000000073};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000044};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000093},  !- Handle
   Table Lookup 1 Independent Variable List 112, !- Name
-  {00000000-0000-0000-0096-000000000024};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000042};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000094},  !- Handle
   Table Lookup 1 Independent Variable List 113, !- Name
-  {00000000-0000-0000-0096-000000000022};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000043};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000095},  !- Handle
   Table Lookup 1 Independent Variable List 114, !- Name
-  {00000000-0000-0000-0096-000000000023};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000041};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000096},  !- Handle
   Table Lookup 1 Independent Variable List 115, !- Name
-  {00000000-0000-0000-0096-000000000021};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000008};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000097},  !- Handle
   Table Lookup 1 Independent Variable List 116, !- Name
-  {00000000-0000-0000-0096-000000000008};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000006};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000098},  !- Handle
   Table Lookup 1 Independent Variable List 117, !- Name
-  {00000000-0000-0000-0096-000000000006};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000007};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000099},  !- Handle
   Table Lookup 1 Independent Variable List 118, !- Name
-  {00000000-0000-0000-0096-000000000007};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000005};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000100},  !- Handle
   Table Lookup 1 Independent Variable List 119, !- Name
-  {00000000-0000-0000-0096-000000000005};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000028};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000101},  !- Handle
   Table Lookup 1 Independent Variable List 120, !- Name
-  {00000000-0000-0000-0096-000000000016};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000026};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000102},  !- Handle
   Table Lookup 1 Independent Variable List 121, !- Name
-  {00000000-0000-0000-0096-000000000014};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000027};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000103},  !- Handle
   Table Lookup 1 Independent Variable List 122, !- Name
-  {00000000-0000-0000-0096-000000000015};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000025};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000104},  !- Handle
   Table Lookup 1 Independent Variable List 123, !- Name
-  {00000000-0000-0000-0096-000000000013};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000048};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000105},  !- Handle
   Table Lookup 1 Independent Variable List 124, !- Name
-  {00000000-0000-0000-0096-000000000012};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000046};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000106},  !- Handle
   Table Lookup 1 Independent Variable List 125, !- Name
-  {00000000-0000-0000-0096-000000000010};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000047};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000107},  !- Handle
   Table Lookup 1 Independent Variable List 126, !- Name
-  {00000000-0000-0000-0096-000000000011};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000045};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000108},  !- Handle
   Table Lookup 1 Independent Variable List 127, !- Name
-  {00000000-0000-0000-0096-000000000009};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000012};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000109},  !- Handle
   Table Lookup 1 Independent Variable List 128, !- Name
-  {00000000-0000-0000-0096-000000000020};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000010};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000110},  !- Handle
   Table Lookup 1 Independent Variable List 129, !- Name
-  {00000000-0000-0000-0096-000000000018};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000011};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000111},  !- Handle
   Table Lookup 1 Independent Variable List 130, !- Name
-  {00000000-0000-0000-0096-000000000019};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000009};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000112},  !- Handle
   Table Lookup 1 Independent Variable List 131, !- Name
-  {00000000-0000-0000-0096-000000000017};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000052};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000113},  !- Handle
   Table Lookup 1 Independent Variable List 132, !- Name
-  {00000000-0000-0000-0096-000000000028};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000050};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000114},  !- Handle
   Table Lookup 1 Independent Variable List 133, !- Name
-  {00000000-0000-0000-0096-000000000026};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000051};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000115},  !- Handle
   Table Lookup 1 Independent Variable List 134, !- Name
-  {00000000-0000-0000-0096-000000000027};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000049};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000116},  !- Handle
   Table Lookup 1 Independent Variable List 135, !- Name
-  {00000000-0000-0000-0096-000000000025};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000036};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000117},  !- Handle
   Table Lookup 1 Independent Variable List 136, !- Name
-  {00000000-0000-0000-0096-000000000044};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000034};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000118},  !- Handle
   Table Lookup 1 Independent Variable List 137, !- Name
-  {00000000-0000-0000-0096-000000000042};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000035};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000119},  !- Handle
   Table Lookup 1 Independent Variable List 138, !- Name
-  {00000000-0000-0000-0096-000000000043};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000033};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000120},  !- Handle
   Table Lookup 1 Independent Variable List 139, !- Name
-  {00000000-0000-0000-0096-000000000041};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000076};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000121},  !- Handle
   Table Lookup 1 Independent Variable List 140, !- Name
-  {00000000-0000-0000-0096-000000000032};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000074};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000122},  !- Handle
   Table Lookup 1 Independent Variable List 141, !- Name
-  {00000000-0000-0000-0096-000000000030};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000075};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000123},  !- Handle
   Table Lookup 1 Independent Variable List 142, !- Name
-  {00000000-0000-0000-0096-000000000031};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000073};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000124},  !- Handle
   Table Lookup 1 Independent Variable List 143, !- Name
-  {00000000-0000-0000-0096-000000000029};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000016};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000125},  !- Handle
   Table Lookup 1 Independent Variable List 144, !- Name
-  {00000000-0000-0000-0096-000000000072};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000014};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000126},  !- Handle
   Table Lookup 1 Independent Variable List 145, !- Name
-  {00000000-0000-0000-0096-000000000071};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000015};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000127},  !- Handle
   Table Lookup 1 Independent Variable List 146, !- Name
-  {00000000-0000-0000-0096-000000000069};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000013};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000128},  !- Handle
   Table Lookup 1 Independent Variable List 147, !- Name
-  {00000000-0000-0000-0096-000000000048};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000020};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000129},  !- Handle
   Table Lookup 1 Independent Variable List 148, !- Name
-  {00000000-0000-0000-0096-000000000046};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000018};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000130},  !- Handle
   Table Lookup 1 Independent Variable List 149, !- Name
-  {00000000-0000-0000-0096-000000000047};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000019};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000131},  !- Handle
   Table Lookup 1 Independent Variable List 150, !- Name
-  {00000000-0000-0000-0096-000000000045};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000017};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000132},  !- Handle
   Table Lookup 1 Independent Variable List 151, !- Name
-  {00000000-0000-0000-0096-000000000036};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000032};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000133},  !- Handle
   Table Lookup 1 Independent Variable List 152, !- Name
-  {00000000-0000-0000-0096-000000000034};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000030};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000134},  !- Handle
   Table Lookup 1 Independent Variable List 153, !- Name
-  {00000000-0000-0000-0096-000000000035};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000031};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000135},  !- Handle
   Table Lookup 1 Independent Variable List 154, !- Name
-  {00000000-0000-0000-0096-000000000033};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000029};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000136},  !- Handle
@@ -19214,82 +19214,82 @@ OS:ModelObjectList,
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000144},  !- Handle
   Table Lookup 1 Independent Variable List 84, !- Name
-  {00000000-0000-0000-0096-000000000060};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000064};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000145},  !- Handle
   Table Lookup 1 Independent Variable List 85, !- Name
-  {00000000-0000-0000-0096-000000000058};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000062};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000146},  !- Handle
   Table Lookup 1 Independent Variable List 86, !- Name
-  {00000000-0000-0000-0096-000000000059};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000063};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000147},  !- Handle
   Table Lookup 1 Independent Variable List 87, !- Name
-  {00000000-0000-0000-0096-000000000057};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000061};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000148},  !- Handle
   Table Lookup 1 Independent Variable List 88, !- Name
-  {00000000-0000-0000-0096-000000000056};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000080};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000149},  !- Handle
   Table Lookup 1 Independent Variable List 89, !- Name
-  {00000000-0000-0000-0096-000000000054};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000078};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000150},  !- Handle
   Table Lookup 1 Independent Variable List 90, !- Name
-  {00000000-0000-0000-0096-000000000055};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000079};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000151},  !- Handle
   Table Lookup 1 Independent Variable List 91, !- Name
-  {00000000-0000-0000-0096-000000000053};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000077};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000152},  !- Handle
   Table Lookup 1 Independent Variable List 92, !- Name
-  {00000000-0000-0000-0096-000000000052};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000060};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000153},  !- Handle
   Table Lookup 1 Independent Variable List 93, !- Name
-  {00000000-0000-0000-0096-000000000050};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000058};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000154},  !- Handle
   Table Lookup 1 Independent Variable List 94, !- Name
-  {00000000-0000-0000-0096-000000000051};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000059};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000155},  !- Handle
   Table Lookup 1 Independent Variable List 95, !- Name
-  {00000000-0000-0000-0096-000000000049};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000057};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000156},  !- Handle
   Table Lookup 1 Independent Variable List 96, !- Name
-  {00000000-0000-0000-0096-000000000080};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000004};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000157},  !- Handle
   Table Lookup 1 Independent Variable List 97, !- Name
-  {00000000-0000-0000-0096-000000000078};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000002};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000158},  !- Handle
   Table Lookup 1 Independent Variable List 98, !- Name
-  {00000000-0000-0000-0096-000000000079};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000003};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000159},  !- Handle
   Table Lookup 1 Independent Variable List 99, !- Name
-  {00000000-0000-0000-0096-000000000077};  !- Model Object 1
+  {00000000-0000-0000-0096-000000000001};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0049-000000000160},  !- Handle
@@ -20270,37 +20270,37 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000163},  !- Handle
-  Auditorium_ZN_1_FLR_1 WUC 0.5gpm 140F Inlet Water Node, !- Name
+  Auditorium_ZN_1_FLR_1 WUC 0.499gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000923},  !- Inlet Port
   {00000000-0000-0000-0017-000000000924};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000164},  !- Handle
-  Auditorium_ZN_1_FLR_1 WUC 0.5gpm 140F Outlet Water Node, !- Name
+  Auditorium_ZN_1_FLR_1 WUC 0.499gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000925},  !- Inlet Port
   {00000000-0000-0000-0017-000000000926};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000165},  !- Handle
-  Aux_Gym_ZN_1_FLR_1 WUC 1.89gpm 140F Inlet Water Node, !- Name
+  Aux_Gym_ZN_1_FLR_1 WUC 1.8911gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000927},  !- Inlet Port
   {00000000-0000-0000-0017-000000000928};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000166},  !- Handle
-  Aux_Gym_ZN_1_FLR_1 WUC 1.89gpm 140F Outlet Water Node, !- Name
+  Aux_Gym_ZN_1_FLR_1 WUC 1.8911gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000929},  !- Inlet Port
   {00000000-0000-0000-0017-000000000930};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000167},  !- Handle
-  Cafeteria_ZN_1_FLR_1 WUC 0.47gpm 140F Inlet Water Node, !- Name
+  Cafeteria_ZN_1_FLR_1 WUC 0.4728gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000931},  !- Inlet Port
   {00000000-0000-0000-0017-000000000932};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000168},  !- Handle
-  Cafeteria_ZN_1_FLR_1 WUC 0.47gpm 140F Outlet Water Node, !- Name
+  Cafeteria_ZN_1_FLR_1 WUC 0.4728gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000933},  !- Inlet Port
   {00000000-0000-0000-0017-000000000934};  !- Outlet Port
 
@@ -21218,157 +21218,157 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000321},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000935},  !- Inlet Port
   {00000000-0000-0000-0017-000000000936};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000322},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000937},  !- Inlet Port
   {00000000-0000-0000-0017-000000000938};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000323},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000939},  !- Inlet Port
   {00000000-0000-0000-0017-000000000940};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000324},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000941},  !- Inlet Port
   {00000000-0000-0000-0017-000000000942};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000325},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000943},  !- Inlet Port
   {00000000-0000-0000-0017-000000000944};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000326},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000945},  !- Inlet Port
   {00000000-0000-0000-0017-000000000946};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000327},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000947},  !- Inlet Port
   {00000000-0000-0000-0017-000000000948};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000328},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000949},  !- Inlet Port
   {00000000-0000-0000-0017-000000000950};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000329},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000951},  !- Inlet Port
   {00000000-0000-0000-0017-000000000952};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000330},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000953},  !- Inlet Port
   {00000000-0000-0000-0017-000000000954};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000331},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000955},  !- Inlet Port
   {00000000-0000-0000-0017-000000000956};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000332},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000957},  !- Inlet Port
   {00000000-0000-0000-0017-000000000958};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000333},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000959},  !- Inlet Port
   {00000000-0000-0000-0017-000000000960};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000334},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000961},  !- Inlet Port
   {00000000-0000-0000-0017-000000000962};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000335},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000963},  !- Inlet Port
   {00000000-0000-0000-0017-000000000964};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000336},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000965},  !- Inlet Port
   {00000000-0000-0000-0017-000000000966};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000337},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000967},  !- Inlet Port
   {00000000-0000-0000-0017-000000000968};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000338},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000969},  !- Inlet Port
   {00000000-0000-0000-0017-000000000970};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000339},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000971},  !- Inlet Port
   {00000000-0000-0000-0017-000000000972};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000340},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000973},  !- Inlet Port
   {00000000-0000-0000-0017-000000000974};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000341},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000975},  !- Inlet Port
   {00000000-0000-0000-0017-000000000976};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000342},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000977},  !- Inlet Port
   {00000000-0000-0000-0017-000000000978};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000343},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000979},  !- Inlet Port
   {00000000-0000-0000-0017-000000000980};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000344},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000981},  !- Inlet Port
   {00000000-0000-0000-0017-000000000982};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000345},  !- Handle
-  Gym_ZN_1_FLR_1 WUC 2.99gpm 140F Inlet Water Node, !- Name
+  Gym_ZN_1_FLR_1 WUC 2.9943gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000983},  !- Inlet Port
   {00000000-0000-0000-0017-000000000984};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000346},  !- Handle
-  Gym_ZN_1_FLR_1 WUC 2.99gpm 140F Outlet Water Node, !- Name
+  Gym_ZN_1_FLR_1 WUC 2.9943gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000985},  !- Inlet Port
   {00000000-0000-0000-0017-000000000986};  !- Outlet Port
 
@@ -21398,25 +21398,25 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000351},  !- Handle
-  Kitchen_ZN_1_FLR_1 WUC 0.11gpm 140F Inlet Water Node, !- Name
+  Kitchen_ZN_1_FLR_1 WUC 0.1091gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000987},  !- Inlet Port
   {00000000-0000-0000-0017-000000000988};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000352},  !- Handle
-  Kitchen_ZN_1_FLR_1 WUC 0.11gpm 140F Outlet Water Node, !- Name
+  Kitchen_ZN_1_FLR_1 WUC 0.1091gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000989},  !- Inlet Port
   {00000000-0000-0000-0017-000000000990};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000353},  !- Handle
-  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.32gpm 140F Inlet Water Node, !- Name
+  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.3182gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000991},  !- Inlet Port
   {00000000-0000-0000-0017-000000000992};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000354},  !- Handle
-  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.32gpm 140F Outlet Water Node, !- Name
+  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.3182gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000993},  !- Inlet Port
   {00000000-0000-0000-0017-000000000994};  !- Outlet Port
 
@@ -21452,169 +21452,169 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000360},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000995},  !- Inlet Port
   {00000000-0000-0000-0017-000000000996};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000361},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000997},  !- Inlet Port
   {00000000-0000-0000-0017-000000000998};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000362},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000999},  !- Inlet Port
   {00000000-0000-0000-0017-000000001000};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000363},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001001},  !- Inlet Port
   {00000000-0000-0000-0017-000000001002};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000364},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001003},  !- Inlet Port
   {00000000-0000-0000-0017-000000001004};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000365},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001005},  !- Inlet Port
   {00000000-0000-0000-0017-000000001006};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000366},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001007},  !- Inlet Port
   {00000000-0000-0000-0017-000000001008};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000367},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001009},  !- Inlet Port
   {00000000-0000-0000-0017-000000001010};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000368},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001011},  !- Inlet Port
   {00000000-0000-0000-0017-000000001012};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000369},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001013},  !- Inlet Port
   {00000000-0000-0000-0017-000000001014};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000370},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001015},  !- Inlet Port
   {00000000-0000-0000-0017-000000001016};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000371},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001017},  !- Inlet Port
   {00000000-0000-0000-0017-000000001018};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000372},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001019},  !- Inlet Port
   {00000000-0000-0000-0017-000000001020};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000373},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001021},  !- Inlet Port
   {00000000-0000-0000-0017-000000001022};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000374},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001023},  !- Inlet Port
   {00000000-0000-0000-0017-000000001024};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000375},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001025},  !- Inlet Port
   {00000000-0000-0000-0017-000000001026};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000376},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001027},  !- Inlet Port
   {00000000-0000-0000-0017-000000001028};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000377},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001029},  !- Inlet Port
   {00000000-0000-0000-0017-000000001030};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000378},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001031},  !- Inlet Port
   {00000000-0000-0000-0017-000000001032};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000379},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001033},  !- Inlet Port
   {00000000-0000-0000-0017-000000001034};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000380},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001035},  !- Inlet Port
   {00000000-0000-0000-0017-000000001036};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000381},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001037},  !- Inlet Port
   {00000000-0000-0000-0017-000000001038};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000382},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F Inlet Water Node, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001039},  !- Inlet Port
   {00000000-0000-0000-0017-000000001040};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000383},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F Outlet Water Node, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001041},  !- Inlet Port
   {00000000-0000-0000-0017-000000001042};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000384},  !- Handle
-  Offices_ZN_1_FLR_1 WUC 0.2gpm 140F Inlet Water Node, !- Name
+  Offices_ZN_1_FLR_1 WUC 0.2015gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001043},  !- Inlet Port
   {00000000-0000-0000-0017-000000001044};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000385},  !- Handle
-  Offices_ZN_1_FLR_1 WUC 0.2gpm 140F Outlet Water Node, !- Name
+  Offices_ZN_1_FLR_1 WUC 0.2015gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001045},  !- Inlet Port
   {00000000-0000-0000-0017-000000001046};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000386},  !- Handle
-  Offices_ZN_1_FLR_2 WUC 0.2gpm 140F Inlet Water Node, !- Name
+  Offices_ZN_1_FLR_2 WUC 0.2015gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001047},  !- Inlet Port
   {00000000-0000-0000-0017-000000001048};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000387},  !- Handle
-  Offices_ZN_1_FLR_2 WUC 0.2gpm 140F Outlet Water Node, !- Name
+  Offices_ZN_1_FLR_2 WUC 0.2015gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001049},  !- Inlet Port
   {00000000-0000-0000-0017-000000001050};  !- Outlet Port
 
@@ -44693,7 +44693,7 @@ OS:Table:IndependentVariable,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000001},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000088},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000159},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44708,7 +44708,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000002},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000086},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000157},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44723,7 +44723,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000003},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000087},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000158},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44738,7 +44738,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000004},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000085},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000156},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44753,7 +44753,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000005},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 10 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000100},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000099},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44768,7 +44768,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000006},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 10 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000098},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000097},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44783,7 +44783,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000007},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 10 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000099},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000098},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44798,7 +44798,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000008},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 10 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000097},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000096},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44813,7 +44813,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000009},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 11 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000108},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000111},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44828,7 +44828,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000010},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 11 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000106},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000109},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44843,7 +44843,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000011},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 11 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000107},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000110},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44858,7 +44858,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000012},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 11 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000105},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000108},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44873,7 +44873,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000013},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 12 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000104},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000127},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44888,7 +44888,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000014},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 12 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000102},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000125},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44903,7 +44903,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000015},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 12 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000103},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000126},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44918,7 +44918,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000016},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 12 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000101},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000124},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44933,7 +44933,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000017},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 13 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000112},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000131},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44948,7 +44948,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000018},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 13 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000110},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000129},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44963,7 +44963,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000019},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 13 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000111},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000130},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44978,7 +44978,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000020},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 13 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000109},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000128},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -44993,7 +44993,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000021},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 14 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000096},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000087},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45008,7 +45008,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000022},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 14 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000094},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000085},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45023,7 +45023,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000023},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 14 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000095},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000086},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45038,7 +45038,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000024},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 14 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000093},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000084},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45053,7 +45053,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000025},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 15 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000116},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000103},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45068,7 +45068,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000026},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 15 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000114},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000101},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45083,7 +45083,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000027},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 15 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000115},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000102},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45098,7 +45098,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000028},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 15 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000113},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000100},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45113,7 +45113,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000029},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 16 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000124},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000135},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45128,7 +45128,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000030},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 16 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000122},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000133},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45143,7 +45143,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000031},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 16 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000123},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000134},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45158,7 +45158,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000032},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 16 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000121},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000132},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45173,7 +45173,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000033},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 17 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000135},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000119},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45188,7 +45188,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000034},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 17 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000133},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000117},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45203,7 +45203,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000035},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 17 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000134},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000118},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45218,7 +45218,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000036},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 17 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000132},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000116},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45293,7 +45293,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000041},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 3 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000120},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000095},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45308,7 +45308,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000042},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 3 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000118},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000093},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45323,7 +45323,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000043},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 3 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000119},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000094},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45338,7 +45338,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000044},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 3 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000117},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000092},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45353,7 +45353,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000045},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 4 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000131},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000107},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45368,7 +45368,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000046},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 4 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000129},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000105},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45383,7 +45383,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000047},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 4 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000130},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000106},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45398,7 +45398,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000048},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 4 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000128},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000104},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45413,7 +45413,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000049},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 5 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000155},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000115},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45428,7 +45428,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000050},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 5 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000153},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000113},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45443,7 +45443,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000051},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 5 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000154},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000114},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45458,7 +45458,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000052},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 5 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000152},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000112},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45473,7 +45473,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000053},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 6 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000151},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000091},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45488,7 +45488,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000054},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 6 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000149},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000089},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45503,7 +45503,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000055},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 6 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000150},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000090},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45518,7 +45518,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000056},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 6 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000148},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000088},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45533,7 +45533,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000057},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 7 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000147},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000155},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45548,7 +45548,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000058},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 7 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000145},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000153},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45563,7 +45563,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000059},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 7 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000146},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000154},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45578,7 +45578,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000060},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 7 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000144},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000152},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45593,7 +45593,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000061},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 8 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000084},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000147},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45608,7 +45608,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000062},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 8 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000082},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000145},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45623,7 +45623,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000063},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 8 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000083},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000146},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45638,7 +45638,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000064},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 8 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000081},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000144},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45713,7 +45713,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000069},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000127},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000083},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45743,7 +45743,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000071},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000126},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000082},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45758,7 +45758,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000072},  !- Handle
   sys_3|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000125},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000081},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45773,7 +45773,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000073},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000092},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000123},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45788,7 +45788,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000074},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000090},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000121},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45803,7 +45803,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000075},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000091},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000122},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45818,7 +45818,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000076},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1 ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000089},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000120},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45833,7 +45833,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000077},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000159},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000151},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45848,7 +45848,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000078},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000157},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000149},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45863,7 +45863,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000079},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0049-000000000158},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000150},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -45878,7 +45878,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0097-000000000080},  !- Handle
   sys_4|mixed|shr>none|sc>ashp|sh>ashp>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0049-000000000156},  !- Independent Variable List Name
+  {00000000-0000-0000-0049-000000000148},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -47905,7 +47905,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000001},  !- Handle
-  Auditorium_ZN_1_FLR_1 WUC 0.5gpm 140F,   !- Name
+  Auditorium_ZN_1_FLR_1 WUC 0.499gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000924},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000925},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47919,7 +47919,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000002},  !- Handle
-  Aux_Gym_ZN_1_FLR_1 WUC 1.89gpm 140F,     !- Name
+  Aux_Gym_ZN_1_FLR_1 WUC 1.8911gpm 140F,   !- Name
   {00000000-0000-0000-0017-000000000928},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000929},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47933,7 +47933,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000003},  !- Handle
-  Cafeteria_ZN_1_FLR_1 WUC 0.47gpm 140F,   !- Name
+  Cafeteria_ZN_1_FLR_1 WUC 0.4728gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000932},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000933},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47947,7 +47947,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000004},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000936},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000937},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47961,7 +47961,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000005},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000940},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000941},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47975,7 +47975,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000006},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000944},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000945},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -47989,7 +47989,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000007},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000948},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000949},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48003,7 +48003,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000008},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000952},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000953},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48017,7 +48017,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000009},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000956},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000957},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48031,7 +48031,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000010},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000960},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000961},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48045,7 +48045,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000011},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000964},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000965},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48059,7 +48059,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000012},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000968},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000969},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48073,7 +48073,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000013},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000972},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000973},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48087,7 +48087,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000014},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000976},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000977},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48101,7 +48101,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000015},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000980},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000981},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48115,7 +48115,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000016},  !- Handle
-  Gym_ZN_1_FLR_1 WUC 2.99gpm 140F,         !- Name
+  Gym_ZN_1_FLR_1 WUC 2.9943gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000984},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000985},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48129,7 +48129,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000017},  !- Handle
-  Kitchen_ZN_1_FLR_1 WUC 0.11gpm 140F,     !- Name
+  Kitchen_ZN_1_FLR_1 WUC 0.1091gpm 140F,   !- Name
   {00000000-0000-0000-0017-000000000988},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000989},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48143,7 +48143,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000018},  !- Handle
-  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.32gpm 140F, !- Name
+  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 WUC 0.3182gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000992},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000993},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48157,7 +48157,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000019},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000000996},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000997},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48171,7 +48171,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000020},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001000},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001001},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48185,7 +48185,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000021},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001004},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001005},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48199,7 +48199,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000022},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001008},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001009},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48213,7 +48213,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000023},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001012},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001013},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48227,7 +48227,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000024},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001016},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001017},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48241,7 +48241,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000025},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001020},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001021},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48255,7 +48255,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000026},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001024},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001025},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48269,7 +48269,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000027},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001028},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001029},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48283,7 +48283,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000028},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001032},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001033},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48297,7 +48297,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000029},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_1 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001036},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001037},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48311,7 +48311,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000030},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_2 WUC 0.348gpm 140F, !- Name
   {00000000-0000-0000-0017-000000001040},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001041},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48325,7 +48325,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000031},  !- Handle
-  Offices_ZN_1_FLR_1 WUC 0.2gpm 140F,      !- Name
+  Offices_ZN_1_FLR_1 WUC 0.2015gpm 140F,   !- Name
   {00000000-0000-0000-0017-000000001044},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001045},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48339,7 +48339,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0104-000000000032},  !- Handle
-  Offices_ZN_1_FLR_2 WUC 0.2gpm 140F,      !- Name
+  Offices_ZN_1_FLR_2 WUC 0.2015gpm 140F,   !- Name
   {00000000-0000-0000-0017-000000001048},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001049},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -48353,231 +48353,231 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000001},  !- Handle
-  Auditorium_ZN_1_FLR_1 Service Water Use 0.5gpm 140F, !- Name
+  Auditorium_ZN_1_FLR_1 Service Water Use 0.499gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000001},  !- Space Name
   {00000000-0000-0000-0067-000000000025};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000002},  !- Handle
-  Aux_Gym_ZN_1_FLR_1 Service Water Use 1.89gpm 140F, !- Name
+  Aux_Gym_ZN_1_FLR_1 Service Water Use 1.8911gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000002},  !- Space Name
   {00000000-0000-0000-0067-000000000017};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000003},  !- Handle
-  Cafeteria_ZN_1_FLR_1 Service Water Use 0.47gpm 140F, !- Name
+  Cafeteria_ZN_1_FLR_1 Service Water Use 0.4728gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000003},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000005},  !- Space Name
   {00000000-0000-0000-0067-000000000025};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000004},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000004},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000006},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000005},  !- Handle
-  Corner_Class_1_Pod_1_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_1_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000005},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000007},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000006},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000006},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000008},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000007},  !- Handle
-  Corner_Class_1_Pod_2_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_2_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000007},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000009},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000008},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000008},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000010},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000009},  !- Handle
-  Corner_Class_1_Pod_3_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_1_Pod_3_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000009},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000011},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000010},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000010},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000012},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000011},  !- Handle
-  Corner_Class_2_Pod_1_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_1_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000011},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000013},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000012},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000012},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000014},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000013},  !- Handle
-  Corner_Class_2_Pod_2_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_2_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000013},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000015},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000014},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_1 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_1 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000014},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000016},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000015},  !- Handle
-  Corner_Class_2_Pod_3_ZN_1_FLR_2 Service Water Use 0.07gpm 140F, !- Name
+  Corner_Class_2_Pod_3_ZN_1_FLR_2 Service Water Use 0.0722gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000015},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000017},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000016},  !- Handle
-  Gym_ZN_1_FLR_1 Service Water Use 2.99gpm 140F, !- Name
+  Gym_ZN_1_FLR_1 Service Water Use 2.9943gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000016},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000024},  !- Space Name
   {00000000-0000-0000-0067-000000000017};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000017},  !- Handle
-  Kitchen_ZN_1_FLR_1 Service Water Use 0.11gpm 140F, !- Name
+  Kitchen_ZN_1_FLR_1 Service Water Use 0.1091gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000017},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000025},  !- Space Name
   {00000000-0000-0000-0067-000000000017};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000018},  !- Handle
-  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Service Water Use 0.32gpm 140F, !- Name
+  LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Service Water Use 0.3182gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000018},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000026},  !- Space Name
   {00000000-0000-0000-0067-000000000025};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000019},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000019},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000033},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000020},  !- Handle
-  Mult_Class_1_Pod_1_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_1_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000020},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000034},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000021},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000021},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000035},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000022},  !- Handle
-  Mult_Class_1_Pod_2_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_2_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000022},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000036},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000023},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000023},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000037},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000024},  !- Handle
-  Mult_Class_1_Pod_3_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_1_Pod_3_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000024},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000038},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000025},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000025},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000039},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000026},  !- Handle
-  Mult_Class_2_Pod_1_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_1_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000026},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000040},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000027},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000027},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000041},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000028},  !- Handle
-  Mult_Class_2_Pod_2_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_2_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000028},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000042},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000029},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_1 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_1 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000029},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000043},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000030},  !- Handle
-  Mult_Class_2_Pod_3_ZN_1_FLR_2 Service Water Use 0.35gpm 140F, !- Name
+  Mult_Class_2_Pod_3_ZN_1_FLR_2 Service Water Use 0.348gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000030},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000044},  !- Space Name
   {00000000-0000-0000-0067-000000000031};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000031},  !- Handle
-  Offices_ZN_1_FLR_1 Service Water Use 0.2gpm 140F, !- Name
+  Offices_ZN_1_FLR_1 Service Water Use 0.2015gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000031},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000045},  !- Space Name
   {00000000-0000-0000-0067-000000000010};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0105-000000000032},  !- Handle
-  Offices_ZN_1_FLR_2 Service Water Use 0.2gpm 140F, !- Name
+  Offices_ZN_1_FLR_2 Service Water Use 0.2015gpm 140F, !- Name
   {00000000-0000-0000-0106-000000000032},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0086-000000000046},  !- Space Name
   {00000000-0000-0000-0067-000000000010};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000001},  !- Handle
-  Auditorium_zn_1_flr_1 0.5gpm 140F,       !- Name
+  Auditorium_zn_1_flr_1 0.499gpm 140F,     !- Name
   ,                                        !- End-Use Subcategory
   3.14849867320224e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48586,7 +48586,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000002},  !- Handle
-  Aux_gym_zn_1_flr_1 1.89gpm 140F,         !- Name
+  Aux_gym_zn_1_flr_1 1.8911gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   0.000119311542793939,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48595,7 +48595,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000003},  !- Handle
-  Cafeteria_zn_1_flr_1 0.47gpm 140F,       !- Name
+  Cafeteria_zn_1_flr_1 0.4728gpm 140F,     !- Name
   ,                                        !- End-Use Subcategory
   2.98278856984847e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48604,7 +48604,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000004},  !- Handle
-  Corner_class_1_pod_1_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_1_pod_1_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48613,7 +48613,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000005},  !- Handle
-  Corner_class_1_pod_1_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_1_pod_1_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48622,7 +48622,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000006},  !- Handle
-  Corner_class_1_pod_2_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_1_pod_2_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48631,7 +48631,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000007},  !- Handle
-  Corner_class_1_pod_2_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_1_pod_2_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48640,7 +48640,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000008},  !- Handle
-  Corner_class_1_pod_3_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_1_pod_3_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48649,7 +48649,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000009},  !- Handle
-  Corner_class_1_pod_3_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_1_pod_3_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48658,7 +48658,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000010},  !- Handle
-  Corner_class_2_pod_1_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_2_pod_1_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48667,7 +48667,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000011},  !- Handle
-  Corner_class_2_pod_1_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_2_pod_1_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48676,7 +48676,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000012},  !- Handle
-  Corner_class_2_pod_2_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_2_pod_2_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48685,7 +48685,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000013},  !- Handle
-  Corner_class_2_pod_2_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_2_pod_2_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48694,7 +48694,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000014},  !- Handle
-  Corner_class_2_pod_3_zn_1_flr_1 0.07gpm 140F, !- Name
+  Corner_class_2_pod_3_zn_1_flr_1 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48703,7 +48703,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000015},  !- Handle
-  Corner_class_2_pod_3_zn_1_flr_2 0.07gpm 140F, !- Name
+  Corner_class_2_pod_3_zn_1_flr_2 0.0722gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   4.55703854932829e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48712,7 +48712,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000016},  !- Handle
-  Gym_zn_1_flr_1 2.99gpm 140F,             !- Name
+  Gym_zn_1_flr_1 2.9943gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   0.00018890994275707,                     !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48721,7 +48721,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000017},  !- Handle
-  Kitchen_zn_1_flr_1 0.11gpm 140F,         !- Name
+  Kitchen_zn_1_flr_1 0.1091gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   6.88335742319518e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48730,7 +48730,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000018},  !- Handle
-  Library_media_center_zn_1_flr_2 0.32gpm 140F, !- Name
+  Library_media_center_zn_1_flr_2 0.3182gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.00764662815068e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48739,7 +48739,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000019},  !- Handle
-  Mult_class_1_pod_1_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_1_pod_1_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48748,7 +48748,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000020},  !- Handle
-  Mult_class_1_pod_1_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_1_pod_1_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48757,7 +48757,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000021},  !- Handle
-  Mult_class_1_pod_2_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_1_pod_2_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48766,7 +48766,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000022},  !- Handle
-  Mult_class_1_pod_2_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_1_pod_2_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48775,7 +48775,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000023},  !- Handle
-  Mult_class_1_pod_3_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_1_pod_3_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48784,7 +48784,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000024},  !- Handle
-  Mult_class_1_pod_3_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_1_pod_3_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48793,7 +48793,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000025},  !- Handle
-  Mult_class_2_pod_1_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_2_pod_1_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48802,7 +48802,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000026},  !- Handle
-  Mult_class_2_pod_1_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_2_pod_1_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48811,7 +48811,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000027},  !- Handle
-  Mult_class_2_pod_2_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_2_pod_2_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48820,7 +48820,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000028},  !- Handle
-  Mult_class_2_pod_2_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_2_pod_2_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48829,7 +48829,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000029},  !- Handle
-  Mult_class_2_pod_3_zn_1_flr_1 0.35gpm 140F, !- Name
+  Mult_class_2_pod_3_zn_1_flr_1 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48838,7 +48838,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000030},  !- Handle
-  Mult_class_2_pod_3_zn_1_flr_2 0.35gpm 140F, !- Name
+  Mult_class_2_pod_3_zn_1_flr_2 0.348gpm 140F, !- Name
   ,                                        !- End-Use Subcategory
   2.19566402831272e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48847,7 +48847,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000031},  !- Handle
-  Offices_zn_1_flr_1 0.2gpm 140F,          !- Name
+  Offices_zn_1_flr_1 0.2015gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   1.2715095311621e-05,                     !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -48856,7 +48856,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0106-000000000032},  !- Handle
-  Offices_zn_1_flr_2 0.2gpm 140F,          !- Name
+  Offices_zn_1_flr_2 0.2015gpm 140F,       !- Name
   ,                                        !- End-Use Subcategory
   1.2715095311621e-05,                     !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name

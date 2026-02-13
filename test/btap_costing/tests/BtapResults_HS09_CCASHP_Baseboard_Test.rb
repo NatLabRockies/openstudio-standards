@@ -6,7 +6,7 @@ require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-class BTAPResults_Test < Minitest::Test
+class BTAPResults_HS09_Test < Minitest::Test
   def test_qaqc()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
