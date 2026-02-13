@@ -232,20 +232,16 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        if power > 0
-          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                          name: 'Building Facades',
-                                                                                          power: power,
-                                                                                          units: units,
-                                                                                          multiplier: multiplier,
-                                                                                          schedule: ext_lights_sch_facade_and_landscape,
-                                                                                          control_option: 'ScheduleNameOnly')
-          exterior_lights << ext_lights
-          installed_power += power * multiplier
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} #{units} of lighting for #{multiplier} #{units == 'W/ft' ? 'ft perimeter' : 'ft^2 area'} of building facade.")
-        else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for building facades, as power is 0 #{units}.")
-        end
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of building facade area.")
+        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                        name: 'Building Facades',
+                                                                                        power: power,
+                                                                                        units: 'W/ft^2',
+                                                                                        multiplier: multiplier,
+                                                                                        schedule: ext_lights_sch_facade_and_landscape,
+                                                                                        control_option: 'ScheduleNameOnly')
+        exterior_lights << ext_lights
+        installed_power += power * multiplier
       end
 
       # add exterior lights for main entries

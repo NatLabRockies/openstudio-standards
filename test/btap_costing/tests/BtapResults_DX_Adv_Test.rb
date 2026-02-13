@@ -6,7 +6,7 @@ require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-class BTAPResults_Test < Minitest::Test
+class BTAPResults_DX_Adv_Test < Minitest::Test
   def test_qaqc()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
@@ -180,7 +180,7 @@ class BTAPResults_Test < Minitest::Test
       model_out_path = "#{run_dir}/final.osm"
       sql_path = "#{run_dir}/run/eplusout.sql"
       model.save(model_out_path, true)
-      post_analysis = BTAP::DatapointAnalysis.new(
+      post_analysis = BTAPDatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
         template: template,
@@ -190,7 +190,6 @@ class BTAPResults_Test < Minitest::Test
       post_analysis = helper.get_analysis(output_folder: run_dir, template: template)
     end
 
-    # Run costing and compare the output of the regression test.
     cost_result = post_analysis.run_costing
     helper.evaluate_regression_files(test_instance: self, cost_result: cost_result)
   end

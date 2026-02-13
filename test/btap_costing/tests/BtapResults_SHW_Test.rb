@@ -6,7 +6,7 @@ require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-class BTAPResults_Test < Minitest::Test
+class BTAPResults_SHW_Test < Minitest::Test
   def test_qaqc()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
@@ -184,7 +184,7 @@ class BTAPResults_Test < Minitest::Test
       model_out_path = "#{run_dir}/final.osm"
       sql_path = "#{run_dir}/run/eplusout.sql"
       model.save(model_out_path, true)
-      post_analysis = BTAP::DatapointAnalysis.new(
+      post_analysis = BTAPDatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
         template: template,
