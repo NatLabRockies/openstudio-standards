@@ -443,18 +443,36 @@ module OpenstudioStandards
       return vrf_outdoor_unit
     end
 
-    # Return the capacity in W of a AirConditionerVariableRefrigerantFlow
+    # Return the cooling capacity in W of a AirConditionerVariableRefrigerantFlow
     #
     # @param air_conditioner_variable_refrigerant_flow [OpenStudio::Model::AirConditionerVariableRefrigerantFlow] vrf unit
-    # @return [Double] capacity in W
-    def self.air_conditioner_variable_refrigerant_flow_get_capacity(air_conditioner_variable_refrigerant_flow)
+    # @return [Double] cooling capacity in W
+    def self.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(air_conditioner_variable_refrigerant_flow)
       capacity_w = nil
       if air_conditioner_variable_refrigerant_flow.grossRatedTotalCoolingCapacity.is_initialized
         capacity_w = air_conditioner_variable_refrigerant_flow.grossRatedTotalCoolingCapacity.get
       elsif air_conditioner_variable_refrigerant_flow.autosizedGrossRatedTotalCoolingCapacity.is_initialized
         capacity_w = air_conditioner_variable_refrigerant_flow.autosizedGrossRatedTotalCoolingCapacity.get
       else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HVAC.air_conditioner_vrf', "For #{air_conditioner_variable_refrigerant_flow.name} capacity is not available.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HVAC.air_conditioner_vrf', "For #{air_conditioner_variable_refrigerant_flow.name} cooling capacity is not available.")
+        return 0.0
+      end
+
+      return capacity_w
+    end
+
+    # Return the heating capacity in W of a AirConditionerVariableRefrigerantFlow
+    #
+    # @param air_conditioner_variable_refrigerant_flow [OpenStudio::Model::AirConditionerVariableRefrigerantFlow] vrf unit
+    # @return [Double] heating capacity in W
+    def self.air_conditioner_variable_refrigerant_flow_get_heating_capacity(air_conditioner_variable_refrigerant_flow)
+      capacity_w = nil
+      if air_conditioner_variable_refrigerant_flow.grossRatedHeatingCapacity.is_initialized
+        capacity_w = air_conditioner_variable_refrigerant_flow.grossRatedHeatingCapacity.get
+      elsif air_conditioner_variable_refrigerant_flow.autosizedGrossRatedHeatingCapacity.is_initialized
+        capacity_w = air_conditioner_variable_refrigerant_flow.autosizedGrossRatedHeatingCapacity.get
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HVAC.air_conditioner_vrf', "For #{air_conditioner_variable_refrigerant_flow.name} heating capacity is not available.")
         return 0.0
       end
 

@@ -6,10 +6,6 @@ require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-# NOTE: Runs are cached automatically. To run this test with an annual
-# simulation and update the cache, pass the RERUN_CACHED=true environment
-# variable pair to the test file, for example:
-# RERUN_CACHED=true bundle exec ruby [test_file]
 class BTAPResults_HS14_Test < Minitest::Test
   def test_qaqc()
     #building_type = 'Outpatient'

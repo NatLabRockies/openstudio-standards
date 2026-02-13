@@ -2666,25 +2666,25 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0043-000000000018},  !- Handle
-  Dining WUC 0.09gpm 140F Inlet Water Node, !- Name
+  Dining WUC 0.088gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0015-000000000074},  !- Inlet Port
   {00000000-0000-0000-0015-000000000075};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0043-000000000019},  !- Handle
-  Dining WUC 0.09gpm 140F Outlet Water Node, !- Name
+  Dining WUC 0.088gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0015-000000000076},  !- Inlet Port
   {00000000-0000-0000-0015-000000000077};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0043-000000000020},  !- Handle
-  Kitchen WUC 0.06gpm 140F Inlet Water Node, !- Name
+  Kitchen WUC 0.0587gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0015-000000000078},  !- Inlet Port
   {00000000-0000-0000-0015-000000000079};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0043-000000000021},  !- Handle
-  Kitchen WUC 0.06gpm 140F Outlet Water Node, !- Name
+  Kitchen WUC 0.0587gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0015-000000000080},  !- Inlet Port
   {00000000-0000-0000-0015-000000000081};  !- Outlet Port
 
@@ -6552,7 +6552,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0093-000000000001},  !- Handle
-  Dining WUC 0.09gpm 140F,                 !- Name
+  Dining WUC 0.088gpm 140F,                !- Name
   {00000000-0000-0000-0015-000000000075},  !- Inlet Node Name
   {00000000-0000-0000-0015-000000000076},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -6566,7 +6566,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0093-000000000002},  !- Handle
-  Kitchen WUC 0.06gpm 140F,                !- Name
+  Kitchen WUC 0.0587gpm 140F,              !- Name
   {00000000-0000-0000-0015-000000000079},  !- Inlet Node Name
   {00000000-0000-0000-0015-000000000080},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -6580,21 +6580,21 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0094-000000000001},  !- Handle
-  Dining Service Water Use 0.09gpm 140F,   !- Name
+  Dining Service Water Use 0.088gpm 140F,  !- Name
   {00000000-0000-0000-0095-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0075-000000000001},  !- Space Name
   {00000000-0000-0000-0057-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0094-000000000002},  !- Handle
-  Kitchen Service Water Use 0.06gpm 140F,  !- Name
+  Kitchen Service Water Use 0.0587gpm 140F, !- Name
   {00000000-0000-0000-0095-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0075-000000000002},  !- Space Name
   {00000000-0000-0000-0057-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0095-000000000001},  !- Handle
-  Dining 0.09gpm 140F,                     !- Name
+  Dining 0.088gpm 140F,                    !- Name
   ,                                        !- End-Use Subcategory
   5.55312420699683e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0057-000000000006},  !- Target Temperature Schedule Name
@@ -6603,7 +6603,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0095-000000000002},  !- Handle
-  Kitchen 0.06gpm 140F,                    !- Name
+  Kitchen 0.0587gpm 140F,                  !- Name
   ,                                        !- End-Use Subcategory
   3.70208236637718e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0057-000000000006},  !- Target Temperature Schedule Name
