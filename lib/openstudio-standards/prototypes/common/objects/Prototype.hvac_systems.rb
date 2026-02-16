@@ -5259,34 +5259,34 @@ class Standard
       case control_strategy.downcase
       when 'proportional_control'
         # slab setpoint varies based on previous day zone conditions
-        model_add_radiant_proportional_controls(model, zone, radiant_loop,
-                                                radiant_temperature_control_type: radiant_temperature_control_type,
-                                                use_zone_occupancy_for_control: use_zone_occupancy_for_control,
-                                                occupied_percentage_threshold: occupied_percentage_threshold,
-                                                model_occ_hr_start: model_occ_hr_start,
-                                                model_occ_hr_end: model_occ_hr_end,
-                                                proportional_gain: proportional_gain,
-                                                switch_over_time: switch_over_time)
+        OpenstudioStandards::HVAC.model_add_radiant_proportional_controls(model, zone, radiant_loop,
+                                                                          radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                          use_zone_occupancy_for_control: use_zone_occupancy_for_control,
+                                                                          occupied_percentage_threshold: occupied_percentage_threshold,
+                                                                          model_occ_hr_start: model_occ_hr_start,
+                                                                          model_occ_hr_end: model_occ_hr_end,
+                                                                          proportional_gain: proportional_gain,
+                                                                          switch_over_time: switch_over_time)
       when 'oa_based_control'
         # slab setpoint varies based on outdoor weather
-        model_add_radiant_basic_controls(model, zone, radiant_loop,
-                                         radiant_temperature_control_type: radiant_temperature_control_type,
-                                         slab_setpoint_oa_control: true,
-                                         switch_over_time: switch_over_time,
-                                         slab_sp_at_oat_low: slab_sp_at_oat_low,
-                                         slab_oat_low: slab_oat_low,
-                                         slab_sp_at_oat_high: slab_sp_at_oat_high,
-                                         slab_oat_high: slab_oat_high)
+        OpenstudioStandards::HVAC.model_add_radiant_basic_controls(model, zone, radiant_loop,
+                                                                   radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                   slab_setpoint_oa_control: true,
+                                                                   switch_over_time: switch_over_time,
+                                                                   slab_sp_at_oat_low: slab_sp_at_oat_low,
+                                                                   slab_oat_low: slab_oat_low,
+                                                                   slab_sp_at_oat_high: slab_sp_at_oat_high,
+                                                                   slab_oat_high: slab_oat_high)
       when 'constant_control'
         # constant slab setpoint control
-        model_add_radiant_basic_controls(model, zone, radiant_loop,
-                                         radiant_temperature_control_type: radiant_temperature_control_type,
-                                         slab_setpoint_oa_control: false,
-                                         switch_over_time: switch_over_time,
-                                         slab_sp_at_oat_low: slab_sp_at_oat_low,
-                                         slab_oat_low: slab_oat_low,
-                                         slab_sp_at_oat_high: slab_sp_at_oat_high,
-                                         slab_oat_high: slab_oat_high)
+        OpenstudioStandards::HVAC.model_add_radiant_basic_controls(model, zone, radiant_loop,
+                                                                   radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                   slab_setpoint_oa_control: false,
+                                                                   switch_over_time: switch_over_time,
+                                                                   slab_sp_at_oat_low: slab_sp_at_oat_low,
+                                                                   slab_oat_low: slab_oat_low,
+                                                                   slab_sp_at_oat_high: slab_sp_at_oat_high,
+                                                                   slab_oat_high: slab_oat_high)
       end
     end
     return radiant_loops

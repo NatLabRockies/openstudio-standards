@@ -2951,7 +2951,7 @@ OS:DistrictHeating:Water,
   DistrictHeating GLHX,                    !- Name
   {00000000-0000-0000-0016-000000000177},  !- Hot Water Inlet Node Name
   {00000000-0000-0000-0016-000000000178},  !- Hot Water Outlet Node Name
-  18675.2467701304,                        !- Nominal Capacity {W}
+  18672.6729542239,                        !- Nominal Capacity {W}
   {00000000-0000-0000-0064-000000000002};  !- Capacity Fraction Schedule
 
 OS:ElectricEquipment,
@@ -3924,13 +3924,13 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0051-000000000046},  !- Handle
-  Dining WUC 0.38gpm 140F Inlet Water Node, !- Name
+  Dining WUC 0.3755gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000034},  !- Inlet Port
   {00000000-0000-0000-0016-000000000035};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0051-000000000047},  !- Handle
-  Dining WUC 0.38gpm 140F Outlet Water Node, !- Name
+  Dining WUC 0.3755gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000036},  !- Inlet Port
   {00000000-0000-0000-0016-000000000037};  !- Outlet Port
 
@@ -4002,13 +4002,13 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0051-000000000059},  !- Handle
-  Kitchen WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Kitchen WUC 0.0704gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000038},  !- Inlet Port
   {00000000-0000-0000-0016-000000000039};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0051-000000000060},  !- Handle
-  Kitchen WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Kitchen WUC 0.0704gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000040},  !- Inlet Port
   {00000000-0000-0000-0016-000000000041};  !- Outlet Port
 
@@ -5796,7 +5796,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000043},  !- Handle
   Schedule Day 5,                          !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   2,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5811,7 +5811,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000044},  !- Handle
   Schedule Day 6,                          !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5832,7 +5832,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000045},  !- Handle
   Schedule Day 7,                          !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   2,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5847,7 +5847,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000046},  !- Handle
   Schedule Day 8,                          !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5895,7 +5895,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000050},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| 1 Occ Sch Default, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5910,7 +5910,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000051},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| 1 Occ Sch Summer Design Day, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -5919,7 +5919,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000052},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| 1 Occ Sch Winter Design Day, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -5928,7 +5928,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000053},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| Occ Sch Default, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -5943,7 +5943,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000054},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| Occ Sch Summer Design Day, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -5952,7 +5952,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0065-000000000055},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| Occ Sch Winter Design Day, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -6571,7 +6571,7 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0067-000000000020},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| 1 Occ Sch, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   {00000000-0000-0000-0065-000000000050},  !- Default Day Schedule Name
   {00000000-0000-0000-0065-000000000051},  !- Summer Design Day Schedule Name
   {00000000-0000-0000-0065-000000000052};  !- Winter Design Day Schedule Name
@@ -6579,7 +6579,7 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0067-000000000021},  !- Handle
   sys_1|doas|shr>none|sh>none|ssf>cv|zh>fancoil_4pipe|zc>fancoil_4pipe|srf>none| Occ Sch, !- Name
-  {00000000-0000-0000-0068-000000000004},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0068-000000000005},  !- Schedule Type Limits Name
   {00000000-0000-0000-0065-000000000053},  !- Default Day Schedule Name
   {00000000-0000-0000-0065-000000000054},  !- Summer Design Day Schedule Name
   {00000000-0000-0000-0065-000000000055};  !- Winter Design Day Schedule Name
@@ -8487,7 +8487,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000001},  !- Handle
-  Dining WUC 0.38gpm 140F,                 !- Name
+  Dining WUC 0.3755gpm 140F,               !- Name
   {00000000-0000-0000-0016-000000000035},  !- Inlet Node Name
   {00000000-0000-0000-0016-000000000036},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -8501,7 +8501,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000002},  !- Handle
-  Kitchen WUC 0.07gpm 140F,                !- Name
+  Kitchen WUC 0.0704gpm 140F,              !- Name
   {00000000-0000-0000-0016-000000000039},  !- Inlet Node Name
   {00000000-0000-0000-0016-000000000040},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -8515,21 +8515,21 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000001},  !- Handle
-  Dining Service Water Use 0.38gpm 140F,   !- Name
+  Dining Service Water Use 0.3755gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000001},  !- Space Name
   {00000000-0000-0000-0067-000000000012};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000002},  !- Handle
-  Kitchen Service Water Use 0.07gpm 140F,  !- Name
+  Kitchen Service Water Use 0.0704gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000002},  !- Space Name
   {00000000-0000-0000-0067-000000000012};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000001},  !- Handle
-  Dining 0.38gpm 140F,                     !- Name
+  Dining 0.3755gpm 140F,                   !- Name
   ,                                        !- End-Use Subcategory
   2.36932898320809e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name
@@ -8538,7 +8538,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000002},  !- Handle
-  Kitchen 0.07gpm 140F,                    !- Name
+  Kitchen 0.0704gpm 140F,                  !- Name
   ,                                        !- End-Use Subcategory
   4.44248204859448e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0067-000000000006},  !- Target Temperature Schedule Name

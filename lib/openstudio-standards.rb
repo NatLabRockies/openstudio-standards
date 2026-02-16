@@ -22,6 +22,10 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/constructions/materials/information'
   require_relative 'openstudio-standards/constructions/materials/modify'
 
+  # Equipment Module
+  require_relative 'openstudio-standards/equipment/create_typical_equipment'
+  require_relative 'openstudio-standards/equipment/create_transformer'
+
   # Infiltration Module
   require_relative 'openstudio-standards/infiltration/infiltration'
   require_relative 'openstudio-standards/infiltration/nist_infiltration'
@@ -73,7 +77,6 @@ module OpenstudioStandards
   # HVAC Module
   require_relative 'openstudio-standards/hvac/air_loop/information'
   require_relative 'openstudio-standards/hvac/cbecs_hvac'
-  require_relative 'openstudio-standards/hvac/conversions'
   require_relative 'openstudio-standards/hvac/curves'
   require_relative 'openstudio-standards/hvac/components/air_conditioner_vrf'
   require_relative 'openstudio-standards/hvac/components/air_terminal'
@@ -96,6 +99,8 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/hvac/components/fan'
   require_relative 'openstudio-standards/hvac/components/heat_exchanger_air_to_air'
   require_relative 'openstudio-standards/hvac/components/pump'
+  require_relative 'openstudio-standards/hvac/controls/radiant_system_controls'
+  require_relative 'openstudio-standards/hvac/conversions'
   require_relative 'openstudio-standards/hvac/helpers'
   require_relative 'openstudio-standards/hvac/exhaust/create_exhaust_fan'
   require_relative 'openstudio-standards/hvac/setpoint_managers/information'
@@ -567,7 +572,6 @@ module OpenstudioStandards
   # Model Objects
   require_relative "#{proto}/common/objects/Prototype.AirTerminalSingleDuctVAVReheat"
   require_relative "#{proto}/common/objects/Prototype.CoolingTower"
-  require_relative "#{proto}/common/objects/Prototype.radiant_system_controls"
   require_relative "#{proto}/common/objects/Prototype.Fan"
   require_relative "#{proto}/common/objects/Prototype.FanConstantVolume"
   require_relative "#{proto}/common/objects/Prototype.FanOnOff"
@@ -576,7 +580,6 @@ module OpenstudioStandards
   require_relative "#{proto}/common/objects/Prototype.HeatExchangerAirToAirSensibleAndLatent"
   require_relative "#{proto}/common/objects/Prototype.hvac_systems"
   require_relative "#{proto}/common/objects/Prototype.Model.elevators"
-  require_relative "#{proto}/common/objects/Prototype.Model.transformers"
   require_relative "#{proto}/common/objects/Prototype.Model.hvac"
   require_relative "#{proto}/common/objects/Prototype.Model"
   require_relative "#{proto}/common/objects/Prototype.refrigeration"

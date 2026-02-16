@@ -18775,41 +18775,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0038-000000000001},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_e_sc_c_chw_ssf_vv_zh_b_e_zc_none_srf_vv__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 1
-  SET {92fef54c-90b7-4329-996c-a1cc7dc35064} = 29.4, !- Program Line 2
-  SET {fb8dce1f-a4c9-49c2-8494-ed8eb773a2ac} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 4
-  SET {92fef54c-90b7-4329-996c-a1cc7dc35064} = 29.4, !- Program Line 5
-  SET {fb8dce1f-a4c9-49c2-8494-ed8eb773a2ac} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 7
-  SET {92fef54c-90b7-4329-996c-a1cc7dc35064} = 29.4, !- Program Line 8
-  SET {fb8dce1f-a4c9-49c2-8494-ed8eb773a2ac} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 10
-  SET {92fef54c-90b7-4329-996c-a1cc7dc35064} = 29.4, !- Program Line 11
-  SET {fb8dce1f-a4c9-49c2-8494-ed8eb773a2ac} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 1
+  SET {034fde81-6e3c-4d9f-883c-27399d4917bd} = 29.4, !- Program Line 2
+  SET {2609bec8-c2b7-4c03-91fb-9210da6a5ba4} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 4
+  SET {034fde81-6e3c-4d9f-883c-27399d4917bd} = 29.4, !- Program Line 5
+  SET {2609bec8-c2b7-4c03-91fb-9210da6a5ba4} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 7
+  SET {034fde81-6e3c-4d9f-883c-27399d4917bd} = 29.4, !- Program Line 8
+  SET {2609bec8-c2b7-4c03-91fb-9210da6a5ba4} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 10
+  SET {034fde81-6e3c-4d9f-883c-27399d4917bd} = 29.4, !- Program Line 11
+  SET {2609bec8-c2b7-4c03-91fb-9210da6a5ba4} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {92fef54c-90b7-4329-996c-a1cc7dc35064} = NULL, !- Program Line 14
-  SET {fb8dce1f-a4c9-49c2-8494-ed8eb773a2ac} = NULL, !- Program Line 15
+  SET {034fde81-6e3c-4d9f-883c-27399d4917bd} = NULL, !- Program Line 14
+  SET {2609bec8-c2b7-4c03-91fb-9210da6a5ba4} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0038-000000000002},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_e_sc_c_chw_ssf_vv_zh_b_e_zc_none_srf_vv__OptimumStartProg1, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 1
-  SET {a04bd617-888f-473e-b26d-70ce21f903ca} = 29.4, !- Program Line 2
-  SET {49979004-6f25-4d06-8a6e-684c9949f597} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 4
-  SET {a04bd617-888f-473e-b26d-70ce21f903ca} = 29.4, !- Program Line 5
-  SET {49979004-6f25-4d06-8a6e-684c9949f597} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 7
-  SET {a04bd617-888f-473e-b26d-70ce21f903ca} = 29.4, !- Program Line 8
-  SET {49979004-6f25-4d06-8a6e-684c9949f597} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {a4966f06-b8d5-4b30-938c-f1f046eec281}<23.9 && {a4966f06-b8d5-4b30-938c-f1f046eec281}>1.7, !- Program Line 10
-  SET {a04bd617-888f-473e-b26d-70ce21f903ca} = 29.4, !- Program Line 11
-  SET {49979004-6f25-4d06-8a6e-684c9949f597} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 1
+  SET {67e6446d-8ca9-4904-b5aa-9c823dba0c9e} = 29.4, !- Program Line 2
+  SET {ef221ebb-779e-4a54-b8fe-fa8cd3eef906} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 4
+  SET {67e6446d-8ca9-4904-b5aa-9c823dba0c9e} = 29.4, !- Program Line 5
+  SET {ef221ebb-779e-4a54-b8fe-fa8cd3eef906} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 7
+  SET {67e6446d-8ca9-4904-b5aa-9c823dba0c9e} = 29.4, !- Program Line 8
+  SET {ef221ebb-779e-4a54-b8fe-fa8cd3eef906} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}<23.9 && {3e0dda1d-9725-46f9-806e-3e2b0773d89b}>1.7, !- Program Line 10
+  SET {67e6446d-8ca9-4904-b5aa-9c823dba0c9e} = 29.4, !- Program Line 11
+  SET {ef221ebb-779e-4a54-b8fe-fa8cd3eef906} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {a04bd617-888f-473e-b26d-70ce21f903ca} = NULL, !- Program Line 14
-  SET {49979004-6f25-4d06-8a6e-684c9949f597} = NULL, !- Program Line 15
+  SET {67e6446d-8ca9-4904-b5aa-9c823dba0c9e} = NULL, !- Program Line 14
+  SET {ef221ebb-779e-4a54-b8fe-fa8cd3eef906} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -20740,42 +20740,42 @@ OS:ModelObjectList,
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000037},  !- Handle
   Table Lookup 1 Independent Variable List 36, !- Name
-  {00000000-0000-0000-0097-000000000020};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000012};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000038},  !- Handle
   Table Lookup 1 Independent Variable List 37, !- Name
-  {00000000-0000-0000-0097-000000000018};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000010};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000039},  !- Handle
   Table Lookup 1 Independent Variable List 38, !- Name
-  {00000000-0000-0000-0097-000000000019};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000011};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000040},  !- Handle
   Table Lookup 1 Independent Variable List 39, !- Name
-  {00000000-0000-0000-0097-000000000017};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000009};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000041},  !- Handle
   Table Lookup 1 Independent Variable List 40, !- Name
-  {00000000-0000-0000-0097-000000000012};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000020};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000042},  !- Handle
   Table Lookup 1 Independent Variable List 41, !- Name
-  {00000000-0000-0000-0097-000000000010};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000018};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000043},  !- Handle
   Table Lookup 1 Independent Variable List 42, !- Name
-  {00000000-0000-0000-0097-000000000011};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000019};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000044},  !- Handle
   Table Lookup 1 Independent Variable List 43, !- Name
-  {00000000-0000-0000-0097-000000000009};  !- Model Object 1
+  {00000000-0000-0000-0097-000000000017};  !- Model Object 1
 
 OS:ModelObjectList,
   {00000000-0000-0000-0053-000000000045},  !- Handle
@@ -21723,25 +21723,25 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0054-000000000155},  !- Handle
-  Banquet_Flr_6 WUC 0.34gpm 140F Inlet Water Node, !- Name
+  Banquet_Flr_6 WUC 0.335gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000865},  !- Inlet Port
   {00000000-0000-0000-0017-000000000866};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000156},  !- Handle
-  Banquet_Flr_6 WUC 0.34gpm 140F Outlet Water Node, !- Name
+  Banquet_Flr_6 WUC 0.335gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000867},  !- Inlet Port
   {00000000-0000-0000-0017-000000000868};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000157},  !- Handle
-  Cafe_Flr_1 WUC 0.02gpm 140F Inlet Water Node, !- Name
+  Cafe_Flr_1 WUC 0.0238gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000869},  !- Inlet Port
   {00000000-0000-0000-0017-000000000870};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000158},  !- Handle
-  Cafe_Flr_1 WUC 0.02gpm 140F Outlet Water Node, !- Name
+  Cafe_Flr_1 WUC 0.0238gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000871},  !- Inlet Port
   {00000000-0000-0000-0017-000000000872};  !- Outlet Port
 
@@ -23163,49 +23163,49 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0054-000000000395},  !- Handle
-  Dining_Flr_6 WUC 0.34gpm 140F Inlet Water Node, !- Name
+  Dining_Flr_6 WUC 0.335gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000873},  !- Inlet Port
   {00000000-0000-0000-0017-000000000874};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000396},  !- Handle
-  Dining_Flr_6 WUC 0.34gpm 140F Outlet Water Node, !- Name
+  Dining_Flr_6 WUC 0.335gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000875},  !- Inlet Port
   {00000000-0000-0000-0017-000000000876};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000397},  !- Handle
-  Kitchen_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Kitchen_Flr_6 WUC 0.0522gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000877},  !- Inlet Port
   {00000000-0000-0000-0017-000000000878};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000398},  !- Handle
-  Kitchen_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Kitchen_Flr_6 WUC 0.0522gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000879},  !- Inlet Port
   {00000000-0000-0000-0017-000000000880};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000399},  !- Handle
-  Laundry_Flr_1 WUC 0.02gpm 140F Inlet Water Node, !- Name
+  Laundry_Flr_1 WUC 0.0197gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000881},  !- Inlet Port
   {00000000-0000-0000-0017-000000000882};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000400},  !- Handle
-  Laundry_Flr_1 WUC 0.02gpm 140F Outlet Water Node, !- Name
+  Laundry_Flr_1 WUC 0.0197gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000883},  !- Inlet Port
   {00000000-0000-0000-0017-000000000884};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000401},  !- Handle
-  Lobby_Flr_1 WUC 0.33gpm 140F Inlet Water Node, !- Name
+  Lobby_Flr_1 WUC 0.3304gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000885},  !- Inlet Port
   {00000000-0000-0000-0017-000000000886};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000402},  !- Handle
-  Lobby_Flr_1 WUC 0.33gpm 140F Outlet Water Node, !- Name
+  Lobby_Flr_1 WUC 0.3304gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000887},  !- Inlet Port
   {00000000-0000-0000-0017-000000000888};  !- Outlet Port
 
@@ -23349,661 +23349,661 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0054-000000000426},  !- Handle
-  Retail_1_Flr_1 WUC 0.01gpm 140F Inlet Water Node, !- Name
+  Retail_1_Flr_1 WUC 0.0075gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000889},  !- Inlet Port
   {00000000-0000-0000-0017-000000000890};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000427},  !- Handle
-  Retail_1_Flr_1 WUC 0.01gpm 140F Outlet Water Node, !- Name
+  Retail_1_Flr_1 WUC 0.0075gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000891},  !- Inlet Port
   {00000000-0000-0000-0017-000000000892};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000428},  !- Handle
-  Retail_2_Flr_1 WUC 0.01gpm 140F Inlet Water Node, !- Name
+  Retail_2_Flr_1 WUC 0.0087gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000893},  !- Inlet Port
   {00000000-0000-0000-0017-000000000894};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000429},  !- Handle
-  Retail_2_Flr_1 WUC 0.01gpm 140F Outlet Water Node, !- Name
+  Retail_2_Flr_1 WUC 0.0087gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000895},  !- Inlet Port
   {00000000-0000-0000-0017-000000000896};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000430},  !- Handle
-  Room_1_Flr_3 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_1_Flr_3 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000897},  !- Inlet Port
   {00000000-0000-0000-0017-000000000898};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000431},  !- Handle
-  Room_1_Flr_3 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_1_Flr_3 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000899},  !- Inlet Port
   {00000000-0000-0000-0017-000000000900};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000432},  !- Handle
-  Room_1_Flr_6 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_1_Flr_6 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000901},  !- Inlet Port
   {00000000-0000-0000-0017-000000000902};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000433},  !- Handle
-  Room_1_Flr_6 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_1_Flr_6 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000903},  !- Inlet Port
   {00000000-0000-0000-0017-000000000904};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000434},  !- Handle
-  Room_2_Flr_3 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_2_Flr_3 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000905},  !- Inlet Port
   {00000000-0000-0000-0017-000000000906};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000435},  !- Handle
-  Room_2_Flr_3 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_2_Flr_3 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000907},  !- Inlet Port
   {00000000-0000-0000-0017-000000000908};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000436},  !- Handle
-  Room_2_Flr_6 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_2_Flr_6 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000909},  !- Inlet Port
   {00000000-0000-0000-0017-000000000910};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000437},  !- Handle
-  Room_2_Flr_6 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_2_Flr_6 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000911},  !- Inlet Port
   {00000000-0000-0000-0017-000000000912};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000438},  !- Handle
-  Room_3_0_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_0_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000913},  !- Inlet Port
   {00000000-0000-0000-0017-000000000914};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000439},  !- Handle
-  Room_3_0_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_0_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000915},  !- Inlet Port
   {00000000-0000-0000-0017-000000000916};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000440},  !- Handle
-  Room_3_10_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_10_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000917},  !- Inlet Port
   {00000000-0000-0000-0017-000000000918};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000441},  !- Handle
-  Room_3_10_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_10_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000919},  !- Inlet Port
   {00000000-0000-0000-0017-000000000920};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000442},  !- Handle
-  Room_3_11_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_11_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000921},  !- Inlet Port
   {00000000-0000-0000-0017-000000000922};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000443},  !- Handle
-  Room_3_11_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_11_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000923},  !- Inlet Port
   {00000000-0000-0000-0017-000000000924};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000444},  !- Handle
-  Room_3_12_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_12_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000925},  !- Inlet Port
   {00000000-0000-0000-0017-000000000926};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000445},  !- Handle
-  Room_3_12_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_12_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000927},  !- Inlet Port
   {00000000-0000-0000-0017-000000000928};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000446},  !- Handle
-  Room_3_13_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_13_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000929},  !- Inlet Port
   {00000000-0000-0000-0017-000000000930};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000447},  !- Handle
-  Room_3_13_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_13_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000931},  !- Inlet Port
   {00000000-0000-0000-0017-000000000932};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000448},  !- Handle
-  Room_3_14_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_14_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000933},  !- Inlet Port
   {00000000-0000-0000-0017-000000000934};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000449},  !- Handle
-  Room_3_14_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_14_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000935},  !- Inlet Port
   {00000000-0000-0000-0017-000000000936};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000450},  !- Handle
-  Room_3_15_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_15_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000937},  !- Inlet Port
   {00000000-0000-0000-0017-000000000938};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000451},  !- Handle
-  Room_3_15_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_15_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000939},  !- Inlet Port
   {00000000-0000-0000-0017-000000000940};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000452},  !- Handle
-  Room_3_16_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_16_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000941},  !- Inlet Port
   {00000000-0000-0000-0017-000000000942};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000453},  !- Handle
-  Room_3_16_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_16_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000943},  !- Inlet Port
   {00000000-0000-0000-0017-000000000944};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000454},  !- Handle
-  Room_3_17_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_17_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000945},  !- Inlet Port
   {00000000-0000-0000-0017-000000000946};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000455},  !- Handle
-  Room_3_17_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_17_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000947},  !- Inlet Port
   {00000000-0000-0000-0017-000000000948};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000456},  !- Handle
-  Room_3_18_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_18_Flr_3 WUC 0.0497gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000949},  !- Inlet Port
   {00000000-0000-0000-0017-000000000950};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000457},  !- Handle
-  Room_3_18_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_18_Flr_3 WUC 0.0497gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000951},  !- Inlet Port
   {00000000-0000-0000-0017-000000000952};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000458},  !- Handle
-  Room_3_1_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_1_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000953},  !- Inlet Port
   {00000000-0000-0000-0017-000000000954};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000459},  !- Handle
-  Room_3_1_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_1_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000955},  !- Inlet Port
   {00000000-0000-0000-0017-000000000956};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000460},  !- Handle
-  Room_3_1_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_1_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000957},  !- Inlet Port
   {00000000-0000-0000-0017-000000000958};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000461},  !- Handle
-  Room_3_1_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_1_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000959},  !- Inlet Port
   {00000000-0000-0000-0017-000000000960};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000462},  !- Handle
-  Room_3_2_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_2_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000961},  !- Inlet Port
   {00000000-0000-0000-0017-000000000962};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000463},  !- Handle
-  Room_3_2_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_2_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000963},  !- Inlet Port
   {00000000-0000-0000-0017-000000000964};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000464},  !- Handle
-  Room_3_2_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_2_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000965},  !- Inlet Port
   {00000000-0000-0000-0017-000000000966};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000465},  !- Handle
-  Room_3_2_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_2_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000967},  !- Inlet Port
   {00000000-0000-0000-0017-000000000968};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000466},  !- Handle
-  Room_3_3_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_3_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000969},  !- Inlet Port
   {00000000-0000-0000-0017-000000000970};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000467},  !- Handle
-  Room_3_3_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_3_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000971},  !- Inlet Port
   {00000000-0000-0000-0017-000000000972};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000468},  !- Handle
-  Room_3_3_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_3_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000973},  !- Inlet Port
   {00000000-0000-0000-0017-000000000974};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000469},  !- Handle
-  Room_3_3_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_3_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000975},  !- Inlet Port
   {00000000-0000-0000-0017-000000000976};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000470},  !- Handle
-  Room_3_4_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_4_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000977},  !- Inlet Port
   {00000000-0000-0000-0017-000000000978};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000471},  !- Handle
-  Room_3_4_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_4_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000979},  !- Inlet Port
   {00000000-0000-0000-0017-000000000980};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000472},  !- Handle
-  Room_3_4_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_4_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000981},  !- Inlet Port
   {00000000-0000-0000-0017-000000000982};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000473},  !- Handle
-  Room_3_4_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_4_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000983},  !- Inlet Port
   {00000000-0000-0000-0017-000000000984};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000474},  !- Handle
-  Room_3_5_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_5_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000985},  !- Inlet Port
   {00000000-0000-0000-0017-000000000986};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000475},  !- Handle
-  Room_3_5_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_5_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000987},  !- Inlet Port
   {00000000-0000-0000-0017-000000000988};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000476},  !- Handle
-  Room_3_5_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_5_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000989},  !- Inlet Port
   {00000000-0000-0000-0017-000000000990};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000477},  !- Handle
-  Room_3_5_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_5_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000991},  !- Inlet Port
   {00000000-0000-0000-0017-000000000992};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000478},  !- Handle
-  Room_3_6_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_6_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000993},  !- Inlet Port
   {00000000-0000-0000-0017-000000000994};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000479},  !- Handle
-  Room_3_6_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_6_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000995},  !- Inlet Port
   {00000000-0000-0000-0017-000000000996};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000480},  !- Handle
-  Room_3_6_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_6_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000997},  !- Inlet Port
   {00000000-0000-0000-0017-000000000998};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000481},  !- Handle
-  Room_3_6_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_6_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000999},  !- Inlet Port
   {00000000-0000-0000-0017-000000001000};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000482},  !- Handle
-  Room_3_7_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_7_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001001},  !- Inlet Port
   {00000000-0000-0000-0017-000000001002};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000483},  !- Handle
-  Room_3_7_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_7_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001003},  !- Inlet Port
   {00000000-0000-0000-0017-000000001004};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000484},  !- Handle
-  Room_3_7_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_7_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001005},  !- Inlet Port
   {00000000-0000-0000-0017-000000001006};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000485},  !- Handle
-  Room_3_7_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_7_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001007},  !- Inlet Port
   {00000000-0000-0000-0017-000000001008};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000486},  !- Handle
-  Room_3_8_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_8_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001009},  !- Inlet Port
   {00000000-0000-0000-0017-000000001010};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000487},  !- Handle
-  Room_3_8_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_8_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001011},  !- Inlet Port
   {00000000-0000-0000-0017-000000001012};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000488},  !- Handle
-  Room_3_8_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_8_Flr_6 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001013},  !- Inlet Port
   {00000000-0000-0000-0017-000000001014};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000489},  !- Handle
-  Room_3_8_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_8_Flr_6 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001015},  !- Inlet Port
   {00000000-0000-0000-0017-000000001016};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000490},  !- Handle
-  Room_3_9_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_9_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001017},  !- Inlet Port
   {00000000-0000-0000-0017-000000001018};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000491},  !- Handle
-  Room_3_9_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_9_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001019},  !- Inlet Port
   {00000000-0000-0000-0017-000000001020};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000492},  !- Handle
-  Room_3_9_Flr_6 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_3_9_Flr_6 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001021},  !- Inlet Port
   {00000000-0000-0000-0017-000000001022};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000493},  !- Handle
-  Room_3_9_Flr_6 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_3_9_Flr_6 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001023},  !- Inlet Port
   {00000000-0000-0000-0017-000000001024};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000494},  !- Handle
-  Room_4_10_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_10_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001025},  !- Inlet Port
   {00000000-0000-0000-0017-000000001026};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000495},  !- Handle
-  Room_4_10_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_10_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001027},  !- Inlet Port
   {00000000-0000-0000-0017-000000001028};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000496},  !- Handle
-  Room_4_11_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_11_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001029},  !- Inlet Port
   {00000000-0000-0000-0017-000000001030};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000497},  !- Handle
-  Room_4_11_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_11_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001031},  !- Inlet Port
   {00000000-0000-0000-0017-000000001032};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000498},  !- Handle
-  Room_4_12_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_12_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001033},  !- Inlet Port
   {00000000-0000-0000-0017-000000001034};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000499},  !- Handle
-  Room_4_12_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_12_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001035},  !- Inlet Port
   {00000000-0000-0000-0017-000000001036};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000500},  !- Handle
-  Room_4_13_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_13_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001037},  !- Inlet Port
   {00000000-0000-0000-0017-000000001038};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000501},  !- Handle
-  Room_4_13_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_13_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001039},  !- Inlet Port
   {00000000-0000-0000-0017-000000001040};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000502},  !- Handle
-  Room_4_14_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_14_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001041},  !- Inlet Port
   {00000000-0000-0000-0017-000000001042};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000503},  !- Handle
-  Room_4_14_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_14_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001043},  !- Inlet Port
   {00000000-0000-0000-0017-000000001044};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000504},  !- Handle
-  Room_4_15_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_15_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001045},  !- Inlet Port
   {00000000-0000-0000-0017-000000001046};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000505},  !- Handle
-  Room_4_15_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_15_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001047},  !- Inlet Port
   {00000000-0000-0000-0017-000000001048};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000506},  !- Handle
-  Room_4_16_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_16_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001049},  !- Inlet Port
   {00000000-0000-0000-0017-000000001050};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000507},  !- Handle
-  Room_4_16_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_16_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001051},  !- Inlet Port
   {00000000-0000-0000-0017-000000001052};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000508},  !- Handle
-  Room_4_17_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_17_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001053},  !- Inlet Port
   {00000000-0000-0000-0017-000000001054};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000509},  !- Handle
-  Room_4_17_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_17_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001055},  !- Inlet Port
   {00000000-0000-0000-0017-000000001056};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000510},  !- Handle
-  Room_4_18_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_18_Flr_3 WUC 0.0495gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001057},  !- Inlet Port
   {00000000-0000-0000-0017-000000001058};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000511},  !- Handle
-  Room_4_18_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_18_Flr_3 WUC 0.0495gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001059},  !- Inlet Port
   {00000000-0000-0000-0017-000000001060};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000512},  !- Handle
-  Room_4_19_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_19_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001061},  !- Inlet Port
   {00000000-0000-0000-0017-000000001062};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000513},  !- Handle
-  Room_4_19_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_19_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001063},  !- Inlet Port
   {00000000-0000-0000-0017-000000001064};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000514},  !- Handle
-  Room_4_1_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_1_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001065},  !- Inlet Port
   {00000000-0000-0000-0017-000000001066};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000515},  !- Handle
-  Room_4_1_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_1_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001067},  !- Inlet Port
   {00000000-0000-0000-0017-000000001068};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000516},  !- Handle
-  Room_4_2_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_2_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001069},  !- Inlet Port
   {00000000-0000-0000-0017-000000001070};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000517},  !- Handle
-  Room_4_2_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_2_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001071},  !- Inlet Port
   {00000000-0000-0000-0017-000000001072};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000518},  !- Handle
-  Room_4_3_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_3_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001073},  !- Inlet Port
   {00000000-0000-0000-0017-000000001074};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000519},  !- Handle
-  Room_4_3_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_3_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001075},  !- Inlet Port
   {00000000-0000-0000-0017-000000001076};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000520},  !- Handle
-  Room_4_4_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_4_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001077},  !- Inlet Port
   {00000000-0000-0000-0017-000000001078};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000521},  !- Handle
-  Room_4_4_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_4_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001079},  !- Inlet Port
   {00000000-0000-0000-0017-000000001080};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000522},  !- Handle
-  Room_4_5_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_5_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001081},  !- Inlet Port
   {00000000-0000-0000-0017-000000001082};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000523},  !- Handle
-  Room_4_5_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_5_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001083},  !- Inlet Port
   {00000000-0000-0000-0017-000000001084};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000524},  !- Handle
-  Room_4_6_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_6_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001085},  !- Inlet Port
   {00000000-0000-0000-0017-000000001086};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000525},  !- Handle
-  Room_4_6_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_6_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001087},  !- Inlet Port
   {00000000-0000-0000-0017-000000001088};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000526},  !- Handle
-  Room_4_7_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_7_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001089},  !- Inlet Port
   {00000000-0000-0000-0017-000000001090};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000527},  !- Handle
-  Room_4_7_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_7_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001091},  !- Inlet Port
   {00000000-0000-0000-0017-000000001092};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000528},  !- Handle
-  Room_4_8_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_8_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001093},  !- Inlet Port
   {00000000-0000-0000-0017-000000001094};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000529},  !- Handle
-  Room_4_8_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_8_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001095},  !- Inlet Port
   {00000000-0000-0000-0017-000000001096};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000530},  !- Handle
-  Room_4_9_Flr_3 WUC 0.05gpm 140F Inlet Water Node, !- Name
+  Room_4_9_Flr_3 WUC 0.0496gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001097},  !- Inlet Port
   {00000000-0000-0000-0017-000000001098};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000531},  !- Handle
-  Room_4_9_Flr_3 WUC 0.05gpm 140F Outlet Water Node, !- Name
+  Room_4_9_Flr_3 WUC 0.0496gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001099},  !- Inlet Port
   {00000000-0000-0000-0017-000000001100};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000532},  !- Handle
-  Room_5_Flr_3 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_5_Flr_3 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001101},  !- Inlet Port
   {00000000-0000-0000-0017-000000001102};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000533},  !- Handle
-  Room_5_Flr_3 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_5_Flr_3 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001103},  !- Inlet Port
   {00000000-0000-0000-0017-000000001104};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000534},  !- Handle
-  Room_6_Flr_3 WUC 0.08gpm 140F Inlet Water Node, !- Name
+  Room_6_Flr_3 WUC 0.0788gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001105},  !- Inlet Port
   {00000000-0000-0000-0017-000000001106};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0054-000000000535},  !- Handle
-  Room_6_Flr_3 WUC 0.08gpm 140F Outlet Water Node, !- Name
+  Room_6_Flr_3 WUC 0.0788gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000001107},  !- Inlet Port
   {00000000-0000-0000-0017-000000001108};  !- Outlet Port
 
@@ -30844,7 +30844,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000169},  !- Handle
   Schedule Day 4,                          !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000010},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -30922,7 +30922,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000170},  !- Handle
   Schedule Day 5,                          !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -31000,7 +31000,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000171},  !- Handle
   Schedule Day 6,                          !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -31009,7 +31009,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000172},  !- Handle
   Schedule Day 7,                          !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -31057,7 +31057,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000176},  !- Handle
   Supply Air Temp Default,                 !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -31084,7 +31084,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000179},  !- Handle
   satCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000010},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -31240,7 +31240,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000181},  !- Handle
   satCW Temp 1,                            !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -31552,7 +31552,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000185},  !- Handle
   sunCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000010},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -31708,7 +31708,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000187},  !- Handle
   sunCW Temp 1,                            !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -32212,7 +32212,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000209},  !- Handle
   wkdCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000010},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -32368,7 +32368,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0067-000000000211},  !- Handle
   wkdCW Temp 1,                            !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -35156,13 +35156,13 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0069-000000000002},  !- Handle
   CHW Temp,                                !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000010},  !- Schedule Type Limits Name
   {00000000-0000-0000-0067-000000000169};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0069-000000000003},  !- Handle
   CW Temp,                                 !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   {00000000-0000-0000-0067-000000000170};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
@@ -35434,13 +35434,13 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0069-000000000048},  !- Handle
   Schedule Ruleset 1,                      !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   {00000000-0000-0000-0067-000000000171};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0069-000000000049},  !- Handle
   Schedule Ruleset 2,                      !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   {00000000-0000-0000-0067-000000000172};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
@@ -35452,7 +35452,7 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0069-000000000051},  !- Handle
   Supply Air Temp,                         !- Name
-  {00000000-0000-0000-0070-000000000008},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0070-000000000009},  !- Schedule Type Limits Name
   {00000000-0000-0000-0067-000000000176};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
@@ -52134,7 +52134,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000009},  !- Handle
   sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0053-000000000044},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000040},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52149,7 +52149,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000010},  !- Handle
   sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0053-000000000042},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000038},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52164,7 +52164,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000011},  !- Handle
   sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0053-000000000043},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000039},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52179,7 +52179,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000012},  !- Handle
   sys_3|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0053-000000000041},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000037},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52254,7 +52254,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000017},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_LatCoolEff 1, !- Name
-  {00000000-0000-0000-0053-000000000040},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000044},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52269,7 +52269,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000018},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_LatHeatEff 1, !- Name
-  {00000000-0000-0000-0053-000000000038},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000042},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52284,7 +52284,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000019},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_SensCoolEff 1, !- Name
-  {00000000-0000-0000-0053-000000000039},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000043},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -52299,7 +52299,7 @@ OS:Table:Lookup,
 OS:Table:Lookup,
   {00000000-0000-0000-0098-000000000020},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV_SensHeatEff 1, !- Name
-  {00000000-0000-0000-0053-000000000037},  !- Independent Variable List Name
+  {00000000-0000-0000-0053-000000000041},  !- Independent Variable List Name
   DivisorOnly,                             !- Normalization Method
   0.5,                                     !- Normalization Divisor
   0,                                       !- Minimum Output {BasedOnField A5}
@@ -55218,7 +55218,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000001},  !- Handle
-  Banquet_Flr_6 WUC 0.34gpm 140F,          !- Name
+  Banquet_Flr_6 WUC 0.335gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000000866},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000867},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55232,7 +55232,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000002},  !- Handle
-  Cafe_Flr_1 WUC 0.02gpm 140F,             !- Name
+  Cafe_Flr_1 WUC 0.0238gpm 140F,           !- Name
   {00000000-0000-0000-0017-000000000870},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000871},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55246,7 +55246,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000003},  !- Handle
-  Dining_Flr_6 WUC 0.34gpm 140F,           !- Name
+  Dining_Flr_6 WUC 0.335gpm 140F,          !- Name
   {00000000-0000-0000-0017-000000000874},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000875},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55260,7 +55260,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000004},  !- Handle
-  Kitchen_Flr_6 WUC 0.05gpm 140F,          !- Name
+  Kitchen_Flr_6 WUC 0.0522gpm 140F,        !- Name
   {00000000-0000-0000-0017-000000000878},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000879},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55274,7 +55274,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000005},  !- Handle
-  Laundry_Flr_1 WUC 0.02gpm 140F,          !- Name
+  Laundry_Flr_1 WUC 0.0197gpm 140F,        !- Name
   {00000000-0000-0000-0017-000000000882},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000883},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55288,7 +55288,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000006},  !- Handle
-  Lobby_Flr_1 WUC 0.33gpm 140F,            !- Name
+  Lobby_Flr_1 WUC 0.3304gpm 140F,          !- Name
   {00000000-0000-0000-0017-000000000886},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000887},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55302,7 +55302,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000007},  !- Handle
-  Retail_1_Flr_1 WUC 0.01gpm 140F,         !- Name
+  Retail_1_Flr_1 WUC 0.0075gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000890},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000891},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55316,7 +55316,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000008},  !- Handle
-  Retail_2_Flr_1 WUC 0.01gpm 140F,         !- Name
+  Retail_2_Flr_1 WUC 0.0087gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000894},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000895},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55330,7 +55330,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000009},  !- Handle
-  Room_1_Flr_3 WUC 0.08gpm 140F,           !- Name
+  Room_1_Flr_3 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000000898},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000899},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55344,7 +55344,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000010},  !- Handle
-  Room_1_Flr_6 WUC 0.08gpm 140F,           !- Name
+  Room_1_Flr_6 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000000902},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000903},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55358,7 +55358,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000011},  !- Handle
-  Room_2_Flr_3 WUC 0.08gpm 140F,           !- Name
+  Room_2_Flr_3 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000000906},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000907},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55372,7 +55372,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000012},  !- Handle
-  Room_2_Flr_6 WUC 0.08gpm 140F,           !- Name
+  Room_2_Flr_6 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000000910},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000911},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55386,7 +55386,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000013},  !- Handle
-  Room_3_0_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_0_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000914},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000915},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55400,7 +55400,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000014},  !- Handle
-  Room_3_10_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_10_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000918},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000919},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55414,7 +55414,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000015},  !- Handle
-  Room_3_11_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_11_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000922},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000923},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55428,7 +55428,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000016},  !- Handle
-  Room_3_12_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_12_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000926},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000927},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55442,7 +55442,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000017},  !- Handle
-  Room_3_13_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_13_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000930},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000931},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55456,7 +55456,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000018},  !- Handle
-  Room_3_14_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_14_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000934},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000935},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55470,7 +55470,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000019},  !- Handle
-  Room_3_15_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_15_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000938},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000939},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55484,7 +55484,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000020},  !- Handle
-  Room_3_16_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_16_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000942},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000943},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55498,7 +55498,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000021},  !- Handle
-  Room_3_17_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_17_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000946},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000947},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55512,7 +55512,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000022},  !- Handle
-  Room_3_18_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_3_18_Flr_3 WUC 0.0497gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000000950},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000951},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55526,7 +55526,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000023},  !- Handle
-  Room_3_1_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_1_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000954},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000955},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55540,7 +55540,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000024},  !- Handle
-  Room_3_1_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_1_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000958},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000959},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55554,7 +55554,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000025},  !- Handle
-  Room_3_2_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_2_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000962},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000963},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55568,7 +55568,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000026},  !- Handle
-  Room_3_2_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_2_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000966},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000967},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55582,7 +55582,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000027},  !- Handle
-  Room_3_3_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_3_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000970},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000971},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55596,7 +55596,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000028},  !- Handle
-  Room_3_3_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_3_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000974},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000975},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55610,7 +55610,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000029},  !- Handle
-  Room_3_4_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_4_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000978},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000979},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55624,7 +55624,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000030},  !- Handle
-  Room_3_4_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_4_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000982},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000983},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55638,7 +55638,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000031},  !- Handle
-  Room_3_5_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_5_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000986},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000987},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55652,7 +55652,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000032},  !- Handle
-  Room_3_5_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_5_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000990},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000991},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55666,7 +55666,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000033},  !- Handle
-  Room_3_6_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_6_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000994},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000995},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55680,7 +55680,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000034},  !- Handle
-  Room_3_6_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_6_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000000998},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000000999},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55694,7 +55694,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000035},  !- Handle
-  Room_3_7_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_7_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001002},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001003},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55708,7 +55708,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000036},  !- Handle
-  Room_3_7_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_7_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001006},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001007},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55722,7 +55722,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000037},  !- Handle
-  Room_3_8_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_8_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001010},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001011},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55736,7 +55736,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000038},  !- Handle
-  Room_3_8_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_8_Flr_6 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001014},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001015},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55750,7 +55750,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000039},  !- Handle
-  Room_3_9_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_3_9_Flr_3 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001018},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001019},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55764,7 +55764,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000040},  !- Handle
-  Room_3_9_Flr_6 WUC 0.05gpm 140F,         !- Name
+  Room_3_9_Flr_6 WUC 0.0495gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001022},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001023},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55778,7 +55778,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000041},  !- Handle
-  Room_4_10_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_10_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001026},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001027},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55792,7 +55792,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000042},  !- Handle
-  Room_4_11_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_11_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001030},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001031},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55806,7 +55806,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000043},  !- Handle
-  Room_4_12_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_12_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001034},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001035},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55820,7 +55820,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000044},  !- Handle
-  Room_4_13_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_13_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001038},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001039},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55834,7 +55834,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000045},  !- Handle
-  Room_4_14_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_14_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001042},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001043},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55848,7 +55848,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000046},  !- Handle
-  Room_4_15_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_15_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001046},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001047},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55862,7 +55862,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000047},  !- Handle
-  Room_4_16_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_16_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001050},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001051},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55876,7 +55876,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000048},  !- Handle
-  Room_4_17_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_17_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001054},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001055},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55890,7 +55890,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000049},  !- Handle
-  Room_4_18_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_18_Flr_3 WUC 0.0495gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001058},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001059},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55904,7 +55904,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000050},  !- Handle
-  Room_4_19_Flr_3 WUC 0.05gpm 140F,        !- Name
+  Room_4_19_Flr_3 WUC 0.0496gpm 140F,      !- Name
   {00000000-0000-0000-0017-000000001062},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001063},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55918,7 +55918,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000051},  !- Handle
-  Room_4_1_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_1_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001066},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001067},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55932,7 +55932,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000052},  !- Handle
-  Room_4_2_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_2_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001070},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001071},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55946,7 +55946,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000053},  !- Handle
-  Room_4_3_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_3_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001074},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001075},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55960,7 +55960,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000054},  !- Handle
-  Room_4_4_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_4_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001078},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001079},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55974,7 +55974,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000055},  !- Handle
-  Room_4_5_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_5_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001082},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001083},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -55988,7 +55988,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000056},  !- Handle
-  Room_4_6_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_6_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001086},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001087},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56002,7 +56002,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000057},  !- Handle
-  Room_4_7_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_7_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001090},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001091},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56016,7 +56016,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000058},  !- Handle
-  Room_4_8_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_8_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001094},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001095},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56030,7 +56030,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000059},  !- Handle
-  Room_4_9_Flr_3 WUC 0.05gpm 140F,         !- Name
+  Room_4_9_Flr_3 WUC 0.0496gpm 140F,       !- Name
   {00000000-0000-0000-0017-000000001098},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001099},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56044,7 +56044,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000060},  !- Handle
-  Room_5_Flr_3 WUC 0.08gpm 140F,           !- Name
+  Room_5_Flr_3 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000001102},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001103},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56058,7 +56058,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0105-000000000061},  !- Handle
-  Room_6_Flr_3 WUC 0.08gpm 140F,           !- Name
+  Room_6_Flr_3 WUC 0.0788gpm 140F,         !- Name
   {00000000-0000-0000-0017-000000001106},  !- Inlet Node Name
   {00000000-0000-0000-0017-000000001107},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -56072,434 +56072,434 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000001},  !- Handle
-  Banquet_Flr_6 Service Water Use 0.34gpm 140F, !- Name
+  Banquet_Flr_6 Service Water Use 0.335gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000001},  !- Space Name
   {00000000-0000-0000-0069-000000000020};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000002},  !- Handle
-  Cafe_Flr_1 Service Water Use 0.02gpm 140F, !- Name
+  Cafe_Flr_1 Service Water Use 0.0238gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000003},  !- Space Name
   {00000000-0000-0000-0069-000000000027};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000003},  !- Handle
-  Dining_Flr_6 Service Water Use 0.34gpm 140F, !- Name
+  Dining_Flr_6 Service Water Use 0.335gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000003},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000006},  !- Space Name
   {00000000-0000-0000-0069-000000000020};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000004},  !- Handle
-  Kitchen_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Kitchen_Flr_6 Service Water Use 0.0522gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000004},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000007},  !- Space Name
   {00000000-0000-0000-0069-000000000020};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000005},  !- Handle
-  Laundry_Flr_1 Service Water Use 0.02gpm 140F, !- Name
+  Laundry_Flr_1 Service Water Use 0.0197gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000005},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000008},  !- Space Name
   {00000000-0000-0000-0069-000000000027};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000006},  !- Handle
-  Lobby_Flr_1 Service Water Use 0.33gpm 140F, !- Name
+  Lobby_Flr_1 Service Water Use 0.3304gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000006},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000009},  !- Space Name
   {00000000-0000-0000-0069-000000000044};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000007},  !- Handle
-  Retail_1_Flr_1 Service Water Use 0.01gpm 140F, !- Name
+  Retail_1_Flr_1 Service Water Use 0.0075gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000007},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000011},  !- Space Name
   {00000000-0000-0000-0069-000000000027};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000008},  !- Handle
-  Retail_2_Flr_1 Service Water Use 0.01gpm 140F, !- Name
+  Retail_2_Flr_1 Service Water Use 0.0087gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000008},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000012},  !- Space Name
   {00000000-0000-0000-0069-000000000027};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000009},  !- Handle
-  Room_1_Flr_3 Service Water Use 0.08gpm 140F, !- Name
+  Room_1_Flr_3 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000009},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000013},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000010},  !- Handle
-  Room_1_Flr_6 Service Water Use 0.08gpm 140F, !- Name
+  Room_1_Flr_6 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000010},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000014},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000011},  !- Handle
-  Room_2_Flr_3 Service Water Use 0.08gpm 140F, !- Name
+  Room_2_Flr_3 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000011},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000015},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000012},  !- Handle
-  Room_2_Flr_6 Service Water Use 0.08gpm 140F, !- Name
+  Room_2_Flr_6 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000012},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000016},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000013},  !- Handle
-  Room_3_0_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_0_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000013},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000017},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000014},  !- Handle
-  Room_3_10_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_10_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000014},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000018},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000015},  !- Handle
-  Room_3_11_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_11_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000015},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000019},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000016},  !- Handle
-  Room_3_12_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_12_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000016},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000020},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000017},  !- Handle
-  Room_3_13_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_13_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000017},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000021},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000018},  !- Handle
-  Room_3_14_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_14_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000018},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000022},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000019},  !- Handle
-  Room_3_15_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_15_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000019},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000023},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000020},  !- Handle
-  Room_3_16_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_16_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000020},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000024},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000021},  !- Handle
-  Room_3_17_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_17_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000021},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000025},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000022},  !- Handle
-  Room_3_18_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_18_Flr_3 Service Water Use 0.0497gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000022},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000026},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000023},  !- Handle
-  Room_3_1_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_1_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000023},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000027},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000024},  !- Handle
-  Room_3_1_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_1_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000024},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000028},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000025},  !- Handle
-  Room_3_2_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_2_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000025},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000029},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000026},  !- Handle
-  Room_3_2_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_2_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000026},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000030},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000027},  !- Handle
-  Room_3_3_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_3_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000027},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000031},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000028},  !- Handle
-  Room_3_3_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_3_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000028},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000032},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000029},  !- Handle
-  Room_3_4_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_4_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000029},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000033},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000030},  !- Handle
-  Room_3_4_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_4_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000030},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000034},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000031},  !- Handle
-  Room_3_5_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_5_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000031},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000035},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000032},  !- Handle
-  Room_3_5_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_5_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000032},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000036},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000033},  !- Handle
-  Room_3_6_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_6_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000033},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000037},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000034},  !- Handle
-  Room_3_6_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_6_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000034},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000038},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000035},  !- Handle
-  Room_3_7_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_7_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000035},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000039},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000036},  !- Handle
-  Room_3_7_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_7_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000036},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000040},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000037},  !- Handle
-  Room_3_8_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_8_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000037},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000041},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000038},  !- Handle
-  Room_3_8_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_8_Flr_6 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000038},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000042},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000039},  !- Handle
-  Room_3_9_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_9_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000039},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000043},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000040},  !- Handle
-  Room_3_9_Flr_6 Service Water Use 0.05gpm 140F, !- Name
+  Room_3_9_Flr_6 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000040},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000044},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000041},  !- Handle
-  Room_4_10_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_10_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000041},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000045},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000042},  !- Handle
-  Room_4_11_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_11_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000042},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000046},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000043},  !- Handle
-  Room_4_12_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_12_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000043},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000047},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000044},  !- Handle
-  Room_4_13_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_13_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000044},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000048},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000045},  !- Handle
-  Room_4_14_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_14_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000045},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000049},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000046},  !- Handle
-  Room_4_15_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_15_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000046},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000050},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000047},  !- Handle
-  Room_4_16_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_16_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000047},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000051},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000048},  !- Handle
-  Room_4_17_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_17_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000048},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000052},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000049},  !- Handle
-  Room_4_18_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_18_Flr_3 Service Water Use 0.0495gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000049},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000053},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000050},  !- Handle
-  Room_4_19_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_19_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000050},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000054},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000051},  !- Handle
-  Room_4_1_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_1_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000051},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000055},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000052},  !- Handle
-  Room_4_2_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_2_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000052},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000056},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000053},  !- Handle
-  Room_4_3_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_3_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000053},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000057},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000054},  !- Handle
-  Room_4_4_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_4_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000054},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000058},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000055},  !- Handle
-  Room_4_5_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_5_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000055},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000059},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000056},  !- Handle
-  Room_4_6_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_6_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000056},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000060},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000057},  !- Handle
-  Room_4_7_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_7_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000057},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000061},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000058},  !- Handle
-  Room_4_8_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_8_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000058},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000062},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000059},  !- Handle
-  Room_4_9_Flr_3 Service Water Use 0.05gpm 140F, !- Name
+  Room_4_9_Flr_3 Service Water Use 0.0496gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000059},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000063},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000060},  !- Handle
-  Room_5_Flr_3 Service Water Use 0.08gpm 140F, !- Name
+  Room_5_Flr_3 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000060},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000064},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0106-000000000061},  !- Handle
-  Room_6_Flr_3 Service Water Use 0.08gpm 140F, !- Name
+  Room_6_Flr_3 Service Water Use 0.0788gpm 140F, !- Name
   {00000000-0000-0000-0107-000000000061},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0087-000000000065},  !- Space Name
   {00000000-0000-0000-0069-000000000038};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000001},  !- Handle
-  Banquet_flr_6 0.34gpm 140F,              !- Name
+  Banquet_flr_6 0.335gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   2.11381221258516e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56508,7 +56508,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000002},  !- Handle
-  Cafe_flr_1 0.02gpm 140F,                 !- Name
+  Cafe_flr_1 0.0238gpm 140F,               !- Name
   ,                                        !- End-Use Subcategory
   1.5046346134569e-06,                     !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56517,7 +56517,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000003},  !- Handle
-  Dining_flr_6 0.34gpm 140F,               !- Name
+  Dining_flr_6 0.335gpm 140F,              !- Name
   ,                                        !- End-Use Subcategory
   2.11381221258516e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56526,7 +56526,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000004},  !- Handle
-  Kitchen_flr_6 0.05gpm 140F,              !- Name
+  Kitchen_flr_6 0.0522gpm 140F,            !- Name
   ,                                        !- End-Use Subcategory
   3.29204414517076e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56535,7 +56535,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000005},  !- Handle
-  Laundry_flr_1 0.02gpm 140F,              !- Name
+  Laundry_flr_1 0.0197gpm 140F,            !- Name
   ,                                        !- End-Use Subcategory
   1.24345773645137e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56544,7 +56544,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000006},  !- Handle
-  Lobby_flr_1 0.33gpm 140F,                !- Name
+  Lobby_flr_1 0.3304gpm 140F,              !- Name
   ,                                        !- End-Use Subcategory
   2.08442495617534e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56553,7 +56553,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000007},  !- Handle
-  Retail_1_flr_1 0.01gpm 140F,             !- Name
+  Retail_1_flr_1 0.0075gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   4.74975808078123e-07,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56562,7 +56562,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000008},  !- Handle
-  Retail_2_flr_1 0.01gpm 140F,             !- Name
+  Retail_2_flr_1 0.0087gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   5.50023790186823e-07,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56571,7 +56571,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000009},  !- Handle
-  Room_1_flr_3 0.08gpm 140F,               !- Name
+  Room_1_flr_3 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97412145804838e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56580,7 +56580,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000010},  !- Handle
-  Room_1_flr_6 0.08gpm 140F,               !- Name
+  Room_1_flr_6 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97412145804838e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56589,7 +56589,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000011},  !- Handle
-  Room_2_flr_3 0.08gpm 140F,               !- Name
+  Room_2_flr_3 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97353866701639e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56598,7 +56598,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000012},  !- Handle
-  Room_2_flr_6 0.08gpm 140F,               !- Name
+  Room_2_flr_6 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97353866701639e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56607,7 +56607,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000013},  !- Handle
-  Room_3_0_flr_3 0.05gpm 140F,             !- Name
+  Room_3_0_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56616,7 +56616,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000014},  !- Handle
-  Room_3_10_flr_3 0.05gpm 140F,            !- Name
+  Room_3_10_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56625,7 +56625,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000015},  !- Handle
-  Room_3_11_flr_3 0.05gpm 140F,            !- Name
+  Room_3_11_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172773e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56634,7 +56634,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000016},  !- Handle
-  Room_3_12_flr_3 0.05gpm 140F,            !- Name
+  Room_3_12_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56643,7 +56643,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000017},  !- Handle
-  Room_3_13_flr_3 0.05gpm 140F,            !- Name
+  Room_3_13_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172771e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56652,7 +56652,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000018},  !- Handle
-  Room_3_14_flr_3 0.05gpm 140F,            !- Name
+  Room_3_14_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172771e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56661,7 +56661,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000019},  !- Handle
-  Room_3_15_flr_3 0.05gpm 140F,            !- Name
+  Room_3_15_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172773e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56670,7 +56670,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000020},  !- Handle
-  Room_3_16_flr_3 0.05gpm 140F,            !- Name
+  Room_3_16_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56679,7 +56679,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000021},  !- Handle
-  Room_3_17_flr_3 0.05gpm 140F,            !- Name
+  Room_3_17_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172771e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56688,7 +56688,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000022},  !- Handle
-  Room_3_18_flr_3 0.05gpm 140F,            !- Name
+  Room_3_18_flr_3 0.0497gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.13544736457677e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56697,7 +56697,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000023},  !- Handle
-  Room_3_1_flr_3 0.05gpm 140F,             !- Name
+  Room_3_1_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56706,7 +56706,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000024},  !- Handle
-  Room_3_1_flr_6 0.05gpm 140F,             !- Name
+  Room_3_1_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56715,7 +56715,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000025},  !- Handle
-  Room_3_2_flr_3 0.05gpm 140F,             !- Name
+  Room_3_2_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56724,7 +56724,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000026},  !- Handle
-  Room_3_2_flr_6 0.05gpm 140F,             !- Name
+  Room_3_2_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56733,7 +56733,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000027},  !- Handle
-  Room_3_3_flr_3 0.05gpm 140F,             !- Name
+  Room_3_3_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56742,7 +56742,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000028},  !- Handle
-  Room_3_3_flr_6 0.05gpm 140F,             !- Name
+  Room_3_3_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56751,7 +56751,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000029},  !- Handle
-  Room_3_4_flr_3 0.05gpm 140F,             !- Name
+  Room_3_4_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56760,7 +56760,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000030},  !- Handle
-  Room_3_4_flr_6 0.05gpm 140F,             !- Name
+  Room_3_4_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56769,7 +56769,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000031},  !- Handle
-  Room_3_5_flr_3 0.05gpm 140F,             !- Name
+  Room_3_5_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56778,7 +56778,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000032},  !- Handle
-  Room_3_5_flr_6 0.05gpm 140F,             !- Name
+  Room_3_5_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56787,7 +56787,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000033},  !- Handle
-  Room_3_6_flr_3 0.05gpm 140F,             !- Name
+  Room_3_6_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56796,7 +56796,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000034},  !- Handle
-  Room_3_6_flr_6 0.05gpm 140F,             !- Name
+  Room_3_6_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56805,7 +56805,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000035},  !- Handle
-  Room_3_7_flr_3 0.05gpm 140F,             !- Name
+  Room_3_7_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56814,7 +56814,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000036},  !- Handle
-  Room_3_7_flr_6 0.05gpm 140F,             !- Name
+  Room_3_7_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56823,7 +56823,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000037},  !- Handle
-  Room_3_8_flr_3 0.05gpm 140F,             !- Name
+  Room_3_8_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56832,7 +56832,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000038},  !- Handle
-  Room_3_8_flr_6 0.05gpm 140F,             !- Name
+  Room_3_8_flr_6 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56841,7 +56841,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000039},  !- Handle
-  Room_3_9_flr_3 0.05gpm 140F,             !- Name
+  Room_3_9_flr_3 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12604444172772e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56850,7 +56850,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000040},  !- Handle
-  Room_3_9_flr_6 0.05gpm 140F,             !- Name
+  Room_3_9_flr_6 0.0495gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12503411764208e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56859,7 +56859,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000041},  !- Handle
-  Room_4_10_flr_3 0.05gpm 140F,            !- Name
+  Room_4_10_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56868,7 +56868,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000042},  !- Handle
-  Room_4_11_flr_3 0.05gpm 140F,            !- Name
+  Room_4_11_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56877,7 +56877,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000043},  !- Handle
-  Room_4_12_flr_3 0.05gpm 140F,            !- Name
+  Room_4_12_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289583e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56886,7 +56886,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000044},  !- Handle
-  Room_4_13_flr_3 0.05gpm 140F,            !- Name
+  Room_4_13_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56895,7 +56895,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000045},  !- Handle
-  Room_4_14_flr_3 0.05gpm 140F,            !- Name
+  Room_4_14_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56904,7 +56904,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000046},  !- Handle
-  Room_4_15_flr_3 0.05gpm 140F,            !- Name
+  Room_4_15_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56913,7 +56913,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000047},  !- Handle
-  Room_4_16_flr_3 0.05gpm 140F,            !- Name
+  Room_4_16_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56922,7 +56922,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000048},  !- Handle
-  Room_4_17_flr_3 0.05gpm 140F,            !- Name
+  Room_4_17_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56931,7 +56931,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000049},  !- Handle
-  Room_4_18_flr_3 0.05gpm 140F,            !- Name
+  Room_4_18_flr_3 0.0495gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12091557471915e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56940,7 +56940,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000050},  !- Handle
-  Room_4_19_flr_3 0.05gpm 140F,            !- Name
+  Room_4_19_flr_3 0.0496gpm 140F,          !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56949,7 +56949,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000051},  !- Handle
-  Room_4_1_flr_3 0.05gpm 140F,             !- Name
+  Room_4_1_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56958,7 +56958,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000052},  !- Handle
-  Room_4_2_flr_3 0.05gpm 140F,             !- Name
+  Room_4_2_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56967,7 +56967,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000053},  !- Handle
-  Room_4_3_flr_3 0.05gpm 140F,             !- Name
+  Room_4_3_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56976,7 +56976,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000054},  !- Handle
-  Room_4_4_flr_3 0.05gpm 140F,             !- Name
+  Room_4_4_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56985,7 +56985,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000055},  !- Handle
-  Room_4_5_flr_3 0.05gpm 140F,             !- Name
+  Room_4_5_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -56994,7 +56994,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000056},  !- Handle
-  Room_4_6_flr_3 0.05gpm 140F,             !- Name
+  Room_4_6_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -57003,7 +57003,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000057},  !- Handle
-  Room_4_7_flr_3 0.05gpm 140F,             !- Name
+  Room_4_7_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -57012,7 +57012,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000058},  !- Handle
-  Room_4_8_flr_3 0.05gpm 140F,             !- Name
+  Room_4_8_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -57021,7 +57021,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000059},  !- Handle
-  Room_4_9_flr_3 0.05gpm 140F,             !- Name
+  Room_4_9_flr_3 0.0496gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   3.12689925289582e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -57030,7 +57030,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000060},  !- Handle
-  Room_5_flr_3 0.08gpm 140F,               !- Name
+  Room_5_flr_3 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97412145804838e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
@@ -57039,7 +57039,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0107-000000000061},  !- Handle
-  Room_6_flr_3 0.08gpm 140F,               !- Name
+  Room_6_flr_3 0.0788gpm 140F,             !- Name
   ,                                        !- End-Use Subcategory
   4.97353866701639e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0069-000000000009},  !- Target Temperature Schedule Name
