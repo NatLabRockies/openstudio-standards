@@ -309,7 +309,7 @@ module BTAP
     # Validates whether a space is targeted by ANSI/IES Recommended Practice RP28
     # 2007 - see store.accuristech.com/standards/ies-rp-28-07?product_id=1555565.
     #
-    # @param model [OpenStudio::Model::Space] an OpenStudio space
+    # @param space [OpenStudio::Model::Space] an OpenStudio space
     #
     # @return [Boolean] true if RP28'ed
     def rp28?(space = nil)
@@ -356,10 +356,10 @@ module BTAP
     # Validates whether a space is targeted for occupancy-sensing lighting
     # control, per NECB2011.
     #
-    # @param model [OpenStudio::Model::Space] an OpenStudio space
+    # @param space [OpenStudio::Model::Space] an OpenStudio space
     #
     # @return [Boolean] true if occsensing
-    def occsensing?(space = nil)
+    def occsensing_deprecated?(space = nil)
       return false unless space.is_a?(OpenStudio::Model::Space)
 
       # First check AdditionalProperty.
@@ -485,6 +485,7 @@ module BTAP
       # Determine activities of occupied spaces in the model, then building.
       @activities = self.spaceActivities(model)
       @activity   = self.buildingActivity(model)
+      puts @activity
       @liveload   = data[:bldg][:activity][@activity][:liveload]
 
       # Assign building category.
@@ -568,16 +569,6 @@ module BTAP
           end
 
           candidate = data[:space][:activity].keys.first if candidate.empty?
-
-          # Halt if:
-          #   - space is part of the total floor area
-          #   - 'candidate' spacetype is undefined
-          # if space.partofTotalFloorArea && candidate == "undefined::common"
-            # id  = space.nameString
-            # msg = "Unrecognized spacetype #{stdstype} for #{id} - revise."
-            # lgs << msg
-            # raise(msg)
-          # end
         else
           candidate = candidates.first
         end
@@ -731,6 +722,8 @@ module BTAP
         activity = "office"
       end
 
+      activity = "hospital" if activity == "health"
+
       activity
     end
 
@@ -873,7 +866,7 @@ module BTAP
 
         # Forcing schedule set 'J' for ancillary spaces in:
         #   - short-term accomodation (e.g. hotels, firestation quarters)
-        #   - housing (MURBs, dormitories) 
+        #   - housing (MURBs, dormitories)
         v[:schedule] = "j" if ["f", "g"].include?(v[:schedule])
       end
 
@@ -886,7 +879,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [String] a space's BTAP::Activity keyword - check logs if empty
-    def keyword(space = "")
+    def keyword(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -910,7 +903,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [String] a space's activity - check logs if empty
-    def act(space = "")
+    def act(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -934,7 +927,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [String] a space's building type - check logs if empty
-    def bldg(space = "")
+    def bldg(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -958,7 +951,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [Float] space's floor area - check logs if 0 m2
-    def m2(space = "")
+    def m2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -982,7 +975,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [Float] space's occupant density - check logs if 0 m2/occupant
-    def density(space = "")
+    def density(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -1006,7 +999,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [Float] space's peak equipment load - check logs if 0 W/m2
-    def eqpWm2(space = "")
+    def eqpWm2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -1030,7 +1023,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [Float] space's peak SWH load - check logs if 0 W/m2
-    def swhWm2(space = "")
+    def swhWm2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -1054,7 +1047,7 @@ module BTAP
     # @param space [OpenStudio::Model::Space] a space
     #
     # @return [String] schedule set. Check logs if empty string.
-    def schedule(space = "")
+    def schedule(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
       cl  = OpenStudio::Model::Space
@@ -1070,6 +1063,213 @@ module BTAP
       end
 
       @activities[space][:schedule]
+    end
+
+    ##
+    # Validates whether a space is targeted for occupancy-sensing lighting
+    # control, per NECB2011.
+    #
+    # @param space [OpenStudio::Model::Space] an OpenStudio space
+    #
+    # @return [Boolean] true if occsensing
+    def occsensing?(space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return false
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return false
+      end
+
+      activity = @activities[space][:keyword]
+      area = space.floorArea
+      return true if activity == "classroom::common"
+      return true if activity == "classroom::penitentiary"
+      return true if activity == "meeting::common"
+      return true if activity == "lounge::common"
+      return true if activity == "lounge::health"
+      return true if activity == "storage::common"  && area.round < 100
+      return true if activity == "supplies::health" && area.round < 100
+      return true if activity == "copiers::common"
+      return true if activity == "office::common"   && area.round < 25
+      return true if activity == "washroom::common"
+      return true if activity == "dressing::theatre"
+      return true if activity == "dressing::retail"
+      return true if activity == "locker::common"
+
+      false
+    end
+
+    ##
+    # Returns a space's "factor for occupancy control" of lighting (Focc), per
+    # NECB 4.3.2.10.1 (2015-2025).
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's Focc of lighting - 1.0 if N/A.
+    def fOCC(space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 1.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 1.0
+      end
+
+      activity = @activities[space][:keyword]
+
+      # Focc = 1 - Ca x Cocc, where:
+      #   Ca   = factor to account for the relative absence of occupants
+      #   Cocc = factor to account for the occupancy-sensing mechanism
+      cA = case activity
+           when "audience::convention"     then 0.2
+           when "audience::religious"      then 0.3
+           when "classroom::common"        then 0.5
+           when "classroom::penitentiary"  then 0.5
+           when "computer::common"         then 0.7
+           when "server::common"           then 0.7
+           when "meeting::common"          then 0.5
+           when "copiers::common"          then 0.2
+           when "tribunal::court"          then 0.2
+           when "dressing::theatre"        then 0.4
+           when "mechanical::common"       then 0.9
+           when "emergency::common"        then 0.5
+           when "teachinglab::common"      then 0.4
+           when "locker::common"           then 0.5
+           when "openplan::common"         then 0.2
+           when "office::common"           then 0.3
+           when "garage::parking"          then 0.4
+           when "storage::common"          then 0.6
+           when "washroom::common"         then 0.5
+           when "supplies::health"         then 0.5
+           when "exam::health"             then 0.3
+           when "operating::health"        then 0.1
+           when "patient::health"          then 0.1
+           when "therapy::health"          then 0.2
+           when "equipment::manufacturing" then 0.2
+           when "restoration::museum"      then 0.3
+           when "exhibit::museum"          then 0.2
+           when "refectory::religious"     then 0.3
+           when "pulpit::religious"        then 0.1
+           when "dressing::retail"         then 0.4
+           when "chapel::religious"        then 0.5
+           when "recreation::common"       then 0.2
+           when "bulk::warehouse"          then 0.5
+           when "fine::warehouse"          then 0.5
+           else                                 0.0
+           end
+
+      return 1.0 if cA.round(1) == 0.0
+
+      # NECB 2025 Table 4.3.2.10.-B :                                    Cocc
+      #   _____________________________________________________________  ____
+      #   automatic FULL OFF (FULL ON)                                   0.67
+      #   automatic FULL OFF (manual ON or automatic PARTIAL ON)         0.75
+      #   automatic PARTIAL OFF (manual ON)                              0.34
+      #   manual (ON/OFF or bi-level) – enclosed office less than 25 m2	 0.30
+      #   manual – all other spaces	                                     0.10
+      #   none	                                                         0.00
+      #
+      # The conditional application of lighting controls is often subject to
+      # professional judgment (as described in the NECB). Automating their
+      # assignment (e.g. Cocc within BTAP) becomes particularly challenging.
+      #
+      # The following are tentative postulates governing the automated
+      # application of Cocc - needs a deeper dive, @todo:
+      #
+      #   - almost all spaces require manual ON
+      #   - almost all spaces require automated or scheduled OFF (only)
+      #   - so by default, spaces with Ca > 0 (see above): Cocc of 0.75
+      #
+      #   - spaces with automated PARTIAL OFF control have a Cocc of 0.34
+      #
+      #   - all other (unlisted) spaces: Cocc of 0.10.
+      cOCC = case activity
+             when "audience::convention"     then 0.75
+             when "audience::religious"      then 0.75
+             when "classroom::common"        then 0.75
+             when "classroom::penitentiary"  then 0.75
+             when "computer::common"         then 0.75
+             when "server::common"           then 0.75
+             when "meeting::common"          then 0.75
+             when "copiers::common"          then 0.75
+             when "tribunal::court"          then 0.75
+             when "dressing::theatre"        then 0.75
+             when "mechanical::common"       then 0.75
+             when "emergency::common"        then 0.75
+             when "teachinglab::common"      then 0.34 #
+             when "locker::common"           then 0.75
+             when "openplan::common"         then 0.75
+             when "office::common"           then 0.75
+             when "garage::parking"          then 0.34 #
+             when "storage::common"          then 0.75
+             when "washroom::common"         then 0.75
+             when "supplies::health"         then 0.75
+             when "exam::health"             then 0.75
+             when "operating::health"        then 0.75
+             when "patient::health"          then 0.75
+             when "therapy::health"          then 0.75
+             when "equipment::manufacturing" then 0.75
+             when "restoration::museum"      then 0.75
+             when "exhibit::museum"          then 0.75
+             when "refectory::religious"     then 0.75
+             when "pulpit::religious"        then 0.75
+             when "dressing::retail"         then 0.75
+             when "chapel::religious"        then 0.75
+             when "recreation::common"       then 0.75
+             when "bulk::warehouse"          then 0.34 #
+             when "fine::warehouse"          then 0.34 #
+             else                                 0.10
+             end
+
+      # Reset cOCC if small enclosed offices.
+      cOCC = 0.30 if activity == "office::common" && space.floorArea < 25
+
+      1.0 - cA * cOCC
+    end
+
+    ##
+    # Returns a space's "factor for personal control" of lighting (Fpers),
+    # per NECB 4.3.2.10.2 (2015-2025).
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Float] space's Fpers of lighting - 1.0 if N/A.
+    def fPERS(space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+      cl  = OpenStudio::Model::Space
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return 1.0
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return 1.0
+      end
+
+      activity = @activities[space][:keyword]
+
+      return 0.9 if activity == "teachinglab::common"
+      return 0.9 if activity == "openplan::common"
+      return 0.9 if activity == "office::common"
+      return 0.9 if activity == "patient::health"
+
+      1.0
     end
   end
 end

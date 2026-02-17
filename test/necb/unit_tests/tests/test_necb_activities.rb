@@ -50,12 +50,12 @@ class NECB_Activity_Tests < Minitest::Test
       # 'NorthernEducation',  # * only works with NECB2011?
       # 'NorthernHealthCare', # * only works with NECB2011?
       # 'Outpatient',
-      'PrimarySchool',
+      # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
-      # 'SmallHotel',
+      'SmallHotel',
       # 'SmallOffice',
       # 'Warehouse'
     ]
@@ -202,11 +202,12 @@ class NECB_Activity_Tests < Minitest::Test
             err_msg  = "BTAP::Activity #{id} schedule (#{cas})?"
             refute_equal(schedule, "*", err_msg)
 
-            fdback << "- #{id}: #{sttype} | #{keyword} : #{schedule}"
+            # fdback << "- #{id}: #{sttype} | #{keyword} : #{schedule}"
 
-            # if a.occsensing?(space)
-            #   fdback << "#{id}: #{sttype} OCCSENSING"
-            # end
+            if a.occsensing_deprecated?(space)
+              # fdback << "#{id}: #{sttype} OCCSENSING"
+              assert(a.occsensing?(space))
+            end
 
             # if sttype.downcase.include?("corr")
             #   fdback << "BTAP::Activity #{id}: #{width.round(2)}m"
