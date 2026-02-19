@@ -6071,21 +6071,21 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000001},  !- Handle
   ems_sys_1_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}<23.9 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}>1.7, !- Program Line 1
-  SET {4e7f4476-d281-467b-9497-29361532ebad} = 29.4, !- Program Line 2
-  SET {d5a14b56-846b-4e09-b4c2-a690ec63e912} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}<23.9 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}>1.7, !- Program Line 4
-  SET {4e7f4476-d281-467b-9497-29361532ebad} = 29.4, !- Program Line 5
-  SET {d5a14b56-846b-4e09-b4c2-a690ec63e912} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}<23.9 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}>1.7, !- Program Line 7
-  SET {4e7f4476-d281-467b-9497-29361532ebad} = 29.4, !- Program Line 8
-  SET {d5a14b56-846b-4e09-b4c2-a690ec63e912} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}<23.9 && {5d151d3b-0d5f-4102-9aa4-754794f5282b}>1.7, !- Program Line 10
-  SET {4e7f4476-d281-467b-9497-29361532ebad} = 29.4, !- Program Line 11
-  SET {d5a14b56-846b-4e09-b4c2-a690ec63e912} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {e5065da5-1a7e-4937-ac34-10d028638e26}<23.9 && {e5065da5-1a7e-4937-ac34-10d028638e26}>1.7, !- Program Line 1
+  SET {747266d9-17e6-4a3b-9034-1833b6d489ff} = 29.4, !- Program Line 2
+  SET {12aed438-5795-48f6-8004-4ff6a1d3e106} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {e5065da5-1a7e-4937-ac34-10d028638e26}<23.9 && {e5065da5-1a7e-4937-ac34-10d028638e26}>1.7, !- Program Line 4
+  SET {747266d9-17e6-4a3b-9034-1833b6d489ff} = 29.4, !- Program Line 5
+  SET {12aed438-5795-48f6-8004-4ff6a1d3e106} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {e5065da5-1a7e-4937-ac34-10d028638e26}<23.9 && {e5065da5-1a7e-4937-ac34-10d028638e26}>1.7, !- Program Line 7
+  SET {747266d9-17e6-4a3b-9034-1833b6d489ff} = 29.4, !- Program Line 8
+  SET {12aed438-5795-48f6-8004-4ff6a1d3e106} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {e5065da5-1a7e-4937-ac34-10d028638e26}<23.9 && {e5065da5-1a7e-4937-ac34-10d028638e26}>1.7, !- Program Line 10
+  SET {747266d9-17e6-4a3b-9034-1833b6d489ff} = 29.4, !- Program Line 11
+  SET {12aed438-5795-48f6-8004-4ff6a1d3e106} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {4e7f4476-d281-467b-9497-29361532ebad} = NULL, !- Program Line 14
-  SET {d5a14b56-846b-4e09-b4c2-a690ec63e912} = NULL, !- Program Line 15
+  SET {747266d9-17e6-4a3b-9034-1833b6d489ff} = NULL, !- Program Line 14
+  SET {12aed438-5795-48f6-8004-4ff6a1d3e106} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -7708,85 +7708,85 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000164},  !- Handle
-  G N1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G N1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000378},  !- Inlet Port
   {00000000-0000-0000-0018-000000000379};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000165},  !- Handle
-  G N1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G N1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000380},  !- Inlet Port
   {00000000-0000-0000-0018-000000000381};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000166},  !- Handle
-  G N2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G N2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000382},  !- Inlet Port
   {00000000-0000-0000-0018-000000000383};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000167},  !- Handle
-  G N2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G N2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000384},  !- Inlet Port
   {00000000-0000-0000-0018-000000000385};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000168},  !- Handle
-  G NE Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G NE Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000386},  !- Inlet Port
   {00000000-0000-0000-0018-000000000387};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000169},  !- Handle
-  G NE Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G NE Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000388},  !- Inlet Port
   {00000000-0000-0000-0018-000000000389};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000170},  !- Handle
-  G NW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G NW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000390},  !- Inlet Port
   {00000000-0000-0000-0018-000000000391};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000171},  !- Handle
-  G NW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G NW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000392},  !- Inlet Port
   {00000000-0000-0000-0018-000000000393};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000172},  !- Handle
-  G S1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G S1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000394},  !- Inlet Port
   {00000000-0000-0000-0018-000000000395};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000173},  !- Handle
-  G S1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G S1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000396},  !- Inlet Port
   {00000000-0000-0000-0018-000000000397};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000174},  !- Handle
-  G S2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G S2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000398},  !- Inlet Port
   {00000000-0000-0000-0018-000000000399};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000175},  !- Handle
-  G S2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G S2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000400},  !- Inlet Port
   {00000000-0000-0000-0018-000000000401};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000176},  !- Handle
-  G SW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  G SW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000402},  !- Inlet Port
   {00000000-0000-0000-0018-000000000403};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000177},  !- Handle
-  G SW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  G SW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000404},  !- Inlet Port
   {00000000-0000-0000-0018-000000000405};  !- Outlet Port
 
@@ -7816,97 +7816,97 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000182},  !- Handle
-  M N1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M N1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000406},  !- Inlet Port
   {00000000-0000-0000-0018-000000000407};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000183},  !- Handle
-  M N1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M N1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000408},  !- Inlet Port
   {00000000-0000-0000-0018-000000000409};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000184},  !- Handle
-  M N2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M N2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000410},  !- Inlet Port
   {00000000-0000-0000-0018-000000000411};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000185},  !- Handle
-  M N2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M N2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000412},  !- Inlet Port
   {00000000-0000-0000-0018-000000000413};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000186},  !- Handle
-  M NE Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M NE Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000414},  !- Inlet Port
   {00000000-0000-0000-0018-000000000415};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000187},  !- Handle
-  M NE Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M NE Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000416},  !- Inlet Port
   {00000000-0000-0000-0018-000000000417};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000188},  !- Handle
-  M NW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M NW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000418},  !- Inlet Port
   {00000000-0000-0000-0018-000000000419};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000189},  !- Handle
-  M NW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M NW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000420},  !- Inlet Port
   {00000000-0000-0000-0018-000000000421};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000190},  !- Handle
-  M S1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M S1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000422},  !- Inlet Port
   {00000000-0000-0000-0018-000000000423};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000191},  !- Handle
-  M S1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M S1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000424},  !- Inlet Port
   {00000000-0000-0000-0018-000000000425};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000192},  !- Handle
-  M S2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M S2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000426},  !- Inlet Port
   {00000000-0000-0000-0018-000000000427};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000193},  !- Handle
-  M S2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M S2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000428},  !- Inlet Port
   {00000000-0000-0000-0018-000000000429};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000194},  !- Handle
-  M SE Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M SE Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000430},  !- Inlet Port
   {00000000-0000-0000-0018-000000000431};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000195},  !- Handle
-  M SE Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M SE Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000432},  !- Inlet Port
   {00000000-0000-0000-0018-000000000433};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000196},  !- Handle
-  M SW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  M SW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000434},  !- Inlet Port
   {00000000-0000-0000-0018-000000000435};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000197},  !- Handle
-  M SW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  M SW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000436},  !- Inlet Port
   {00000000-0000-0000-0018-000000000437};  !- Outlet Port
 
@@ -7942,13 +7942,13 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000203},  !- Handle
-  Office WUC 0.15gpm 140F Inlet Water Node, !- Name
+  Office WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000438},  !- Inlet Port
   {00000000-0000-0000-0018-000000000439};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000204},  !- Handle
-  Office WUC 0.15gpm 140F Outlet Water Node, !- Name
+  Office WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000440},  !- Inlet Port
   {00000000-0000-0000-0018-000000000441};  !- Outlet Port
 
@@ -8038,97 +8038,97 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0050-000000000219},  !- Handle
-  T N1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T N1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000442},  !- Inlet Port
   {00000000-0000-0000-0018-000000000443};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000220},  !- Handle
-  T N1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T N1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000444},  !- Inlet Port
   {00000000-0000-0000-0018-000000000445};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000221},  !- Handle
-  T N2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T N2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000446},  !- Inlet Port
   {00000000-0000-0000-0018-000000000447};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000222},  !- Handle
-  T N2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T N2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000448},  !- Inlet Port
   {00000000-0000-0000-0018-000000000449};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000223},  !- Handle
-  T NE Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T NE Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000450},  !- Inlet Port
   {00000000-0000-0000-0018-000000000451};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000224},  !- Handle
-  T NE Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T NE Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000452},  !- Inlet Port
   {00000000-0000-0000-0018-000000000453};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000225},  !- Handle
-  T NW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T NW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000454},  !- Inlet Port
   {00000000-0000-0000-0018-000000000455};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000226},  !- Handle
-  T NW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T NW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000456},  !- Inlet Port
   {00000000-0000-0000-0018-000000000457};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000227},  !- Handle
-  T S1 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T S1 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000458},  !- Inlet Port
   {00000000-0000-0000-0018-000000000459};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000228},  !- Handle
-  T S1 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T S1 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000460},  !- Inlet Port
   {00000000-0000-0000-0018-000000000461};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000229},  !- Handle
-  T S2 Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T S2 Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000462},  !- Inlet Port
   {00000000-0000-0000-0018-000000000463};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000230},  !- Handle
-  T S2 Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T S2 Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000464},  !- Inlet Port
   {00000000-0000-0000-0018-000000000465};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000231},  !- Handle
-  T SE Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T SE Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000466},  !- Inlet Port
   {00000000-0000-0000-0018-000000000467};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000232},  !- Handle
-  T SE Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T SE Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000468},  !- Inlet Port
   {00000000-0000-0000-0018-000000000469};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000233},  !- Handle
-  T SW Apartment WUC 0.15gpm 140F Inlet Water Node, !- Name
+  T SW Apartment WUC 0.1486gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000470},  !- Inlet Port
   {00000000-0000-0000-0018-000000000471};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0050-000000000234},  !- Handle
-  T SW Apartment WUC 0.15gpm 140F Outlet Water Node, !- Name
+  T SW Apartment WUC 0.1486gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000472},  !- Inlet Port
   {00000000-0000-0000-0018-000000000473};  !- Outlet Port
 
@@ -19326,7 +19326,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000001},  !- Handle
-  G N1 Apartment WUC 0.15gpm 140F,         !- Name
+  G N1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000379},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000380},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19340,7 +19340,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000002},  !- Handle
-  G N2 Apartment WUC 0.15gpm 140F,         !- Name
+  G N2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000383},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000384},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19354,7 +19354,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000003},  !- Handle
-  G NE Apartment WUC 0.15gpm 140F,         !- Name
+  G NE Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000387},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000388},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19368,7 +19368,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000004},  !- Handle
-  G NW Apartment WUC 0.15gpm 140F,         !- Name
+  G NW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000391},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000392},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19382,7 +19382,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000005},  !- Handle
-  G S1 Apartment WUC 0.15gpm 140F,         !- Name
+  G S1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000395},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000396},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19396,7 +19396,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000006},  !- Handle
-  G S2 Apartment WUC 0.15gpm 140F,         !- Name
+  G S2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000399},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000400},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19410,7 +19410,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000007},  !- Handle
-  G SW Apartment WUC 0.15gpm 140F,         !- Name
+  G SW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000403},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000404},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19424,7 +19424,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000008},  !- Handle
-  M N1 Apartment WUC 0.15gpm 140F,         !- Name
+  M N1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000407},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000408},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19438,7 +19438,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000009},  !- Handle
-  M N2 Apartment WUC 0.15gpm 140F,         !- Name
+  M N2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000411},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000412},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19452,7 +19452,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000010},  !- Handle
-  M NE Apartment WUC 0.15gpm 140F,         !- Name
+  M NE Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000415},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000416},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19466,7 +19466,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000011},  !- Handle
-  M NW Apartment WUC 0.15gpm 140F,         !- Name
+  M NW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000419},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000420},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19480,7 +19480,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000012},  !- Handle
-  M S1 Apartment WUC 0.15gpm 140F,         !- Name
+  M S1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000423},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000424},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19494,7 +19494,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000013},  !- Handle
-  M S2 Apartment WUC 0.15gpm 140F,         !- Name
+  M S2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000427},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000428},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19508,7 +19508,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000014},  !- Handle
-  M SE Apartment WUC 0.15gpm 140F,         !- Name
+  M SE Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000431},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000432},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19522,7 +19522,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000015},  !- Handle
-  M SW Apartment WUC 0.15gpm 140F,         !- Name
+  M SW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000435},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000436},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19536,7 +19536,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000016},  !- Handle
-  Office WUC 0.15gpm 140F,                 !- Name
+  Office WUC 0.1486gpm 140F,               !- Name
   {00000000-0000-0000-0018-000000000439},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000440},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19550,7 +19550,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000017},  !- Handle
-  T N1 Apartment WUC 0.15gpm 140F,         !- Name
+  T N1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000443},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000444},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19564,7 +19564,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000018},  !- Handle
-  T N2 Apartment WUC 0.15gpm 140F,         !- Name
+  T N2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000447},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000448},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19578,7 +19578,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000019},  !- Handle
-  T NE Apartment WUC 0.15gpm 140F,         !- Name
+  T NE Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000451},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000452},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19592,7 +19592,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000020},  !- Handle
-  T NW Apartment WUC 0.15gpm 140F,         !- Name
+  T NW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000455},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000456},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19606,7 +19606,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000021},  !- Handle
-  T S1 Apartment WUC 0.15gpm 140F,         !- Name
+  T S1 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000459},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000460},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19620,7 +19620,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000022},  !- Handle
-  T S2 Apartment WUC 0.15gpm 140F,         !- Name
+  T S2 Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000463},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000464},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19634,7 +19634,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000023},  !- Handle
-  T SE Apartment WUC 0.15gpm 140F,         !- Name
+  T SE Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000467},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000468},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19648,7 +19648,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0103-000000000024},  !- Handle
-  T SW Apartment WUC 0.15gpm 140F,         !- Name
+  T SW Apartment WUC 0.1486gpm 140F,       !- Name
   {00000000-0000-0000-0018-000000000471},  !- Inlet Node Name
   {00000000-0000-0000-0018-000000000472},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -19662,175 +19662,175 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000001},  !- Handle
-  G N1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  G N1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000002},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000002},  !- Handle
-  G N2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  G N2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000003},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000003},  !- Handle
-  G NE Apartment Service Water Use 0.15gpm 140F, !- Name
+  G NE Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000003},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000004},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000004},  !- Handle
-  G NW Apartment Service Water Use 0.15gpm 140F, !- Name
+  G NW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000004},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000005},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000005},  !- Handle
-  G S1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  G S1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000005},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000006},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000006},  !- Handle
-  G S2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  G S2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000006},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000007},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000007},  !- Handle
-  G SW Apartment Service Water Use 0.15gpm 140F, !- Name
+  G SW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000007},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000008},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000008},  !- Handle
-  M N1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  M N1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000008},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000010},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000009},  !- Handle
-  M N2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  M N2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000009},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000011},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000010},  !- Handle
-  M NE Apartment Service Water Use 0.15gpm 140F, !- Name
+  M NE Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000010},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000012},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000011},  !- Handle
-  M NW Apartment Service Water Use 0.15gpm 140F, !- Name
+  M NW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000011},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000013},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000012},  !- Handle
-  M S1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  M S1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000012},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000014},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000013},  !- Handle
-  M S2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  M S2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000013},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000015},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000014},  !- Handle
-  M SE Apartment Service Water Use 0.15gpm 140F, !- Name
+  M SE Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000014},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000016},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000015},  !- Handle
-  M SW Apartment Service Water Use 0.15gpm 140F, !- Name
+  M SW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000015},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000017},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000016},  !- Handle
-  Office Service Water Use 0.15gpm 140F,   !- Name
+  Office Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000016},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000018},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000017},  !- Handle
-  T N1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  T N1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000017},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000020},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000018},  !- Handle
-  T N2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  T N2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000018},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000021},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000019},  !- Handle
-  T NE Apartment Service Water Use 0.15gpm 140F, !- Name
+  T NE Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000019},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000022},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000020},  !- Handle
-  T NW Apartment Service Water Use 0.15gpm 140F, !- Name
+  T NW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000020},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000023},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000021},  !- Handle
-  T S1 Apartment Service Water Use 0.15gpm 140F, !- Name
+  T S1 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000021},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000024},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000022},  !- Handle
-  T S2 Apartment Service Water Use 0.15gpm 140F, !- Name
+  T S2 Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000022},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000025},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000023},  !- Handle
-  T SE Apartment Service Water Use 0.15gpm 140F, !- Name
+  T SE Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000023},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000026},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0104-000000000024},  !- Handle
-  T SW Apartment Service Water Use 0.15gpm 140F, !- Name
+  T SW Apartment Service Water Use 0.1486gpm 140F, !- Name
   {00000000-0000-0000-0105-000000000024},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0085-000000000027},  !- Space Name
   {00000000-0000-0000-0065-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000001},  !- Handle
-  G n1 apartment 0.15gpm 140F,             !- Name
+  G n1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19839,7 +19839,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000002},  !- Handle
-  G n2 apartment 0.15gpm 140F,             !- Name
+  G n2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19848,7 +19848,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000003},  !- Handle
-  G ne apartment 0.15gpm 140F,             !- Name
+  G ne apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19857,7 +19857,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000004},  !- Handle
-  G nw apartment 0.15gpm 140F,             !- Name
+  G nw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19866,7 +19866,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000005},  !- Handle
-  G s1 apartment 0.15gpm 140F,             !- Name
+  G s1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19875,7 +19875,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000006},  !- Handle
-  G s2 apartment 0.15gpm 140F,             !- Name
+  G s2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19884,7 +19884,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000007},  !- Handle
-  G sw apartment 0.15gpm 140F,             !- Name
+  G sw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19893,7 +19893,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000008},  !- Handle
-  M n1 apartment 0.15gpm 140F,             !- Name
+  M n1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19902,7 +19902,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000009},  !- Handle
-  M n2 apartment 0.15gpm 140F,             !- Name
+  M n2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19911,7 +19911,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000010},  !- Handle
-  M ne apartment 0.15gpm 140F,             !- Name
+  M ne apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19920,7 +19920,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000011},  !- Handle
-  M nw apartment 0.15gpm 140F,             !- Name
+  M nw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19929,7 +19929,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000012},  !- Handle
-  M s1 apartment 0.15gpm 140F,             !- Name
+  M s1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19938,7 +19938,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000013},  !- Handle
-  M s2 apartment 0.15gpm 140F,             !- Name
+  M s2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19947,7 +19947,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000014},  !- Handle
-  M se apartment 0.15gpm 140F,             !- Name
+  M se apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19956,7 +19956,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000015},  !- Handle
-  M sw apartment 0.15gpm 140F,             !- Name
+  M sw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19965,7 +19965,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000016},  !- Handle
-  Office 0.15gpm 140F,                     !- Name
+  Office 0.1486gpm 140F,                   !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19974,7 +19974,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000017},  !- Handle
-  T n1 apartment 0.15gpm 140F,             !- Name
+  T n1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19983,7 +19983,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000018},  !- Handle
-  T n2 apartment 0.15gpm 140F,             !- Name
+  T n2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -19992,7 +19992,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000019},  !- Handle
-  T ne apartment 0.15gpm 140F,             !- Name
+  T ne apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -20001,7 +20001,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000020},  !- Handle
-  T nw apartment 0.15gpm 140F,             !- Name
+  T nw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -20010,7 +20010,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000021},  !- Handle
-  T s1 apartment 0.15gpm 140F,             !- Name
+  T s1 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -20019,7 +20019,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000022},  !- Handle
-  T s2 apartment 0.15gpm 140F,             !- Name
+  T s2 apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -20028,7 +20028,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000023},  !- Handle
-  T se apartment 0.15gpm 140F,             !- Name
+  T se apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
@@ -20037,7 +20037,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0105-000000000024},  !- Handle
-  T sw apartment 0.15gpm 140F,             !- Name
+  T sw apartment 0.1486gpm 140F,           !- Name
   ,                                        !- End-Use Subcategory
   9.37425007600047e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0065-000000000006},  !- Target Temperature Schedule Name
