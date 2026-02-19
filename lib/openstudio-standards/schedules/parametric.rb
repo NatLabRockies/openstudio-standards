@@ -1191,6 +1191,11 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Parametric.ScheduleDay', "Time formula #{time} for #{schedule_day.name} is invalid. It can't be evaluated.")
         end
 
+        # snap time_float to the nearest timestep to handle floating-point imprecision in hoo_start/hoo_end
+        time_min = time_float.modulo(1) * 60
+        time_min_ts = timestep_minutes.min { |a, b| (a - time_min).abs <=> (b - time_min).abs }
+        time_float = time_float.floor + (time_min_ts / 60.0)
+
         # replace variables in array of values
         val_in_out_float = []
         val_in_out.each do |val|
