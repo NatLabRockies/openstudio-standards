@@ -1,10 +1,8 @@
 # Create a .json for new space type thermostat setpoint schedules
-private
-
 require 'openstudio-standards'
 
 # print gem version
-puts "Using openstudio-standards version #{Gem.loaded_specs['openstudio-standards'].version.to_s}"
+puts "Using openstudio-standards version #{Gem.loaded_specs['openstudio-standards'].version}"
 
 templates = [
   'ComStock DOE Ref Pre-1980',
@@ -28,26 +26,25 @@ templates = [
 
 prototype_map = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/prototype_space_type_map.json"), symbolize_names: true)
 
-# loop through sapce types and store thermostat data
+# loop through space types and store thermostat data
 all_data_json = []
 templates.each do |template|
   std = Standard.build(template)
   space_type_data = std.standards_data['space_types']
   space_type_data.each do |e|
+    standards_building_type = e['building_type']
+    standards_space_type = e['space_type']
+    map = prototype_map.find { |s| s[:standards_building_type] == standards_building_type && s[:standards_space_type] == standards_space_type }
+    new_space_type = map.nil? ? nil : map[:new_standards_space_type]
 
-  standards_building_type = e['building_type']
-  standards_space_type = e['space_type']
-  map = prototype_map.find { |s| s[:standards_building_type] == standards_building_type && s[:standards_space_type] == standards_space_type }
-  new_space_type = map.nil? ? nil : map[:new_standards_space_type]
-
-  all_data_json << {
-    template: e['template'],
-    standards_building_type: standards_building_type,
-    standards_space_type: standards_space_type,
-    heating_setpoint_schedule: e['heating_setpoint_schedule'],
-    cooling_setpoint_schedule: e['cooling_setpoint_schedule'],
-    new_space_type: new_space_type
-  }
+    all_data_json << {
+      template: e['template'],
+      standards_building_type: standards_building_type,
+      standards_space_type: standards_space_type,
+      heating_setpoint_schedule: e['heating_setpoint_schedule'],
+      cooling_setpoint_schedule: e['cooling_setpoint_schedule'],
+      new_space_type: new_space_type
+    }
   end
 end
 all_data_json = all_data_json.sort_by { |h| h[:standards_space_type] }

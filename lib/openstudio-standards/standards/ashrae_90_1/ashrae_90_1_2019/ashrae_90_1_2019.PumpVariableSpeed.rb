@@ -15,8 +15,7 @@ class ASHRAE9012019 < ASHRAE901
     design_sizing_factor = 1.25
 
     # Get climate zone
-    climate_zone = pump.plantLoop.get.model.getClimateZones.getClimateZone(0)
-    climate_zone = "#{climate_zone.institution} 169-#{climate_zone.year}-#{climate_zone.value}"
+    climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(pump.model)
 
     # Get nameplate hp threshold:
     # The thresholds below represent the nameplate
