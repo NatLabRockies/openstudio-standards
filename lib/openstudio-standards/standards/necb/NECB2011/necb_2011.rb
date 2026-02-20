@@ -475,6 +475,7 @@ class NECB2011 < Standard
                            airloop_fancoils_heating: nil,
                            oerd_utility_pricing: nil)
 
+    oerd_utility_pricing = false
     apply_weather_data(model: model,
                        epw_file: epw_file,
                        custom_weather_folder: custom_weather_folder,
