@@ -1391,6 +1391,7 @@ class NECB2011 < Standard
   # This method will validate that the space types in the model are indeed the correct NECB spacetypes names.
   def validate_and_upate_space_types(model)
     space_type_vintage = determine_spacetype_vintage(model)
+
     if space_type_vintage.nil?
       message = "These some of the spacetypes in the model are not part of any necb standard.\n  Please ensure all spacetype in model are correct."
       puts "Error: #{message}"
@@ -1408,6 +1409,7 @@ class NECB2011 < Standard
       st_target_vintage_string = "#{self.class.name}_space_type"
       bt_target_vintage_string = "#{self.class.name}_building_type"
       space_type_upgrade_map = @standards_data['space_type_upgrade_map']
+
       model.getSpaceTypes.sort.each do |st|
         space_type_map = space_type_upgrade_map.detect { |row| (row[st_model_vintage_string] == st.standardsSpaceType.get.to_s) && (row[bt_model_vintage_string] == st.standardsBuildingType.get.to_s) }
         st.setStandardsBuildingType(space_type_map[bt_target_vintage_string].to_s.strip)

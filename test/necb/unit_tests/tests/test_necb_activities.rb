@@ -25,10 +25,10 @@ class NECB_Activity_Tests < Minitest::Test
 
     # Range of NECB templates.
     @templates = [
-      "NECB2011",
+      # "NECB2011",
       # "NECB2015",
       # "NECB2017",
-      # "NECB2020"
+      "NECB2020"
     ]
 
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
@@ -47,15 +47,15 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',  # * only works with NECB2011?
-      # 'NorthernHealthCare', # * only works with NECB2011?
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
-      'SmallHotel',
+      # 'SmallHotel',
       # 'SmallOffice',
       # 'Warehouse'
     ]

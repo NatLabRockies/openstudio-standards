@@ -37,8 +37,8 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',  # * only works with NECB2011?
-      'NorthernHealthCare', # * only works with NECB2011?
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
@@ -51,10 +51,10 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @templates = [
-      "NECB2011",
+      # "NECB2011",
       # "NECB2015",
       # "NECB2017",
-      # "NECB2020"
+      "NECB2020"
     ]
 
     @options = [
@@ -75,7 +75,7 @@ class NECB_Structure_Tests < Minitest::Test
         @templates.sort.each do |template|
           @options.sort.each do |option  |
             cas   = "CASE #{building} (#{template})"
-            cas  += ":" unless option.empty?
+            cas  += " - #{option}" unless option.empty?
 
             st    = Standard.build(template)
             model = st.model_create_prototype_model(template: template,

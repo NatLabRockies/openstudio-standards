@@ -485,7 +485,6 @@ module BTAP
       # Determine activities of occupied spaces in the model, then building.
       @activities = self.spaceActivities(model)
       @activity   = self.buildingActivity(model)
-      puts @activity
       @liveload   = data[:bldg][:activity][@activity][:liveload]
 
       # Assign building category.

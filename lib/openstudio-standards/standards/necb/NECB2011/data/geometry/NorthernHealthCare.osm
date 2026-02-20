@@ -16465,18 +16465,18 @@ OS:ThermostatSetpoint:DualSetpoint,
 
 OS:SpaceType,
   {65c91c86-290b-463e-acf9-26aff7a0c162}, !- Handle
-  Space Function Hospital - medical supply - occsens, !- Name
+  Space Function Hospital - medical supply, !- Name
   ,                                       !- Default Construction Set Name
   {5d0b457b-16fc-4f0d-9172-cd993aa82222}, !- Default Schedule Set Name
   {b1f71afa-b694-40e3-b5d2-16bb24aca85b}, !- Group Rendering Name
   {491d19cf-dff0-4d86-8a19-507575dab903}, !- Design Specification Outdoor Air Object Name
   ,                                       !- Standards Template
   Space Function,                         !- Standards Building Type
-  Hospital - medical supply - occsens;    !- Standards Space Type
+  Hospital - medical supply;              !- Standards Space Type
 
 OS:People:Definition,
   {c27095c5-b216-4f34-82e8-cedfbcd3cf29}, !- Handle
-  Space Function Hospital - medical supply - occsens People Definition, !- Name
+  Space Function Hospital - medical supply People Definition, !- Name
   People/Area,                            !- Number of People Calculation Method
   ,                                       !- Number of People {people}
   0.0500521834377002,                     !- People per Space Floor Area {person/m2}
@@ -16485,7 +16485,7 @@ OS:People:Definition,
 
 OS:People,
   {caf4b67b-c4fa-45be-9862-5b6e56d0578f}, !- Handle
-  Space Function Hospital - medical supply - occsens People, !- Name
+  Space Function Hospital - medical supply People, !- Name
   {c27095c5-b216-4f34-82e8-cedfbcd3cf29}, !- People Definition Name
   {65c91c86-290b-463e-acf9-26aff7a0c162}, !- Space or SpaceType Name
   ,                                       !- Number of People Schedule Name
@@ -16498,7 +16498,7 @@ OS:People,
 
 OS:Lights:Definition,
   {702ffadd-fc9e-40fc-a678-4f8c2666f08e}, !- Handle
-  Space Function Hospital - medical supply - occsens Lights Definition, !- Name
+  Space Function Hospital - medical supply Lights Definition, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
   12.3298973854892,                       !- Watts per Space Floor Area {W/m2}
@@ -16508,7 +16508,7 @@ OS:Lights:Definition,
 
 OS:Lights,
   {cfd1d303-604f-4879-a680-813db8cea571}, !- Handle
-  Space Function Hospital - medical supply - occsens Lights, !- Name
+  Space Function Hospital - medical supply Lights, !- Name
   {702ffadd-fc9e-40fc-a678-4f8c2666f08e}, !- Lights Definition Name
   {65c91c86-290b-463e-acf9-26aff7a0c162}, !- Space or SpaceType Name
   ,                                       !- Schedule Name
@@ -16518,7 +16518,7 @@ OS:Lights,
 
 OS:ElectricEquipment:Definition,
   {8564d112-924c-4a7b-8702-f537dd902a6e}, !- Handle
-  Space Function Hospital - medical supply - occsens Elec Equip Definition, !- Name
+  Space Function Hospital - medical supply Elec Equip Definition, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Design Level {W}
   0.999991679497248,                      !- Watts per Space Floor Area {W/m2}
@@ -16528,7 +16528,7 @@ OS:ElectricEquipment:Definition,
 
 OS:ElectricEquipment,
   {f60ffd00-9169-49d8-ae37-c06e0770a700}, !- Handle
-  Space Function Hospital - medical supply - occsens Elec Equip, !- Name
+  Space Function Hospital - medical supply Elec Equip, !- Name
   {8564d112-924c-4a7b-8702-f537dd902a6e}, !- Electric Equipment Definition Name
   {65c91c86-290b-463e-acf9-26aff7a0c162}, !- Space or SpaceType Name
   ,                                       !- Schedule Name
@@ -16537,7 +16537,7 @@ OS:ElectricEquipment,
 
 OS:DesignSpecification:OutdoorAir,
   {491d19cf-dff0-4d86-8a19-507575dab903}, !- Handle
-  Space Function Hospital - medical supply - occsens Ventilation, !- Name
+  Space Function Hospital - medical supply Ventilation, !- Name
   Sum,                                    !- Outdoor Air Method
   ,                                       !- Outdoor Air Flow per Person {m3/s-person}
   0.001524,                               !- Outdoor Air Flow per Floor Area {m3/s-m2}
@@ -16547,7 +16547,7 @@ OS:DesignSpecification:OutdoorAir,
 
 OS:SpaceInfiltration:DesignFlowRate,
   {04f19dc4-91a9-455f-b162-369ed0503472}, !- Handle
-  Space Function Hospital - medical supply - occsens Infiltration, !- Name
+  Space Function Hospital - medical supply Infiltration, !- Name
   {65c91c86-290b-463e-acf9-26aff7a0c162}, !- Space or SpaceType Name
   ,                                       !- Schedule Name
   Flow/ExteriorArea,                      !- Design Flow Rate Calculation Method
@@ -16562,7 +16562,7 @@ OS:SpaceInfiltration:DesignFlowRate,
 
 OS:DefaultScheduleSet,
   {5d0b457b-16fc-4f0d-9172-cd993aa82222}, !- Handle
-  Space Function Hospital - medical supply - occsens Schedule Set, !- Name
+  Space Function Hospital - medical supply Schedule Set, !- Name
   ,                                       !- Hours of Operation Schedule Name
   {95d02e38-9abb-4c2f-a9f3-61dc3eaa2179}, !- Number of People Schedule Name
   {4105b59c-6ae2-4cca-9814-18a34a5538da}, !- People Activity Level Schedule Name
@@ -16576,7 +16576,7 @@ OS:DefaultScheduleSet,
 
 OS:ThermostatSetpoint:DualSetpoint,
   {e8130c67-456b-4e84-b6cb-d167336e5c65}, !- Handle
-  Space Function Hospital - medical supply - occsens Thermostat, !- Name
+  Space Function Hospital - medical supply Thermostat, !- Name
   {d4733072-0afe-43ed-8025-675767853a14}, !- Heating Setpoint Temperature Schedule Name
   {184c7485-d80d-4e9c-831c-c3d156a61037}; !- Cooling Setpoint Temperature Schedule Name
 
