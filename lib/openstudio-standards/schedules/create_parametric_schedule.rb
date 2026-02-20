@@ -402,9 +402,28 @@ module OpenstudioStandards
       default_parametric_sch_set = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_parametric_schedule_set.json"), symbolize_names: true)
 
       # Get the default parametric schedule set for this space type
+      standards_building_type = nil
+      if space_type.standardsBuildingType.is_initialized
+        standards_building_type = space_type.standardsBuildingType.get
+      end
+
       if space_type.additionalProperties.getFeatureAsString('schedule_set').is_initialized
         schedule_set_name = space_type.additionalProperties.getFeatureAsString('schedule_set').get
-        space_type_properties = default_parametric_sch_set.find { |s| s[:space_type_name] == schedule_set_name }
+        possible_schedule_sets = default_parametric_sch_set.select { |s| s[:space_type_name] == schedule_set_name }
+
+        if standards_building_type.nil?
+          space_type_properties = possible_schedule_sets.find { |s| s[:standards_building_type].nil? }
+        else
+          space_type_properties = possible_schedule_sets.find { |s| s[:standards_building_type] == standards_building_type }
+          space_type_properties = possible_schedule_sets.find { |s| s[:standards_building_type].nil? } if space_type_properties.nil?
+        end
+
+        space_type_properties = possible_schedule_sets[0] if space_type_properties.nil?
+
+        if space_type_properties.nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Unable to find schedule set '#{schedule_set_name}' for #{space_type.name} with standards building type '#{standards_building_type}'.")
+          return false
+        end
       else
         standards_space_type = 'not defined'
         if space_type.additionalProperties.getFeatureAsString('standards_space_type').is_initialized
@@ -417,10 +436,7 @@ module OpenstudioStandards
 
       # Find occupancy schedule
       occupancy_schedules = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/default_parametric_occupancy_schedules.json"), symbolize_names: true)
-      puts "Attempting to create occupancy schedule with name '#{space_type_properties[:occupancy_schedule]}' for space type '#{space_type.name}'"
       occupancy_sch = OpenstudioStandards::Schedules.create_parametric_schedule_full(space_type.model, occupancy_schedules, space_type_properties[:occupancy_schedule], {})
-
-      puts "Created occupancy schedule '#{occupancy_sch.name}'"
 
       # Add occupancy schedule to the default schedule set
       if set_people

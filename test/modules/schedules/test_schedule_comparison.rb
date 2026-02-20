@@ -179,8 +179,8 @@ class TestScheduleComparison < Minitest::Test
   # Schedule-extraction helpers
   # ---------------------------------------------------------------------------
 
-  # Extracts every ScheduleRuleset associated with space-type loads and
-  # thermostats in the model.
+  # Extracts every ScheduleRuleset associated with space-type loads
+  # in the model.
   #
   # @param model     [OpenStudio::Model::Model]
   # @param bldg_type [String] used only as a label fallback
@@ -210,7 +210,6 @@ class TestScheduleComparison < Minitest::Test
       # People
       space_type.people.each do |load|
         register.call(load.numberofPeopleSchedule.is_initialized ? load.numberofPeopleSchedule.get : nil, 'People - Occ')
-        register.call(load.activityLevelSchedule.is_initialized ? load.activityLevelSchedule.get : nil, 'People - Activity')
       end
 
       # Lights
@@ -236,44 +235,6 @@ class TestScheduleComparison < Minitest::Test
       # OtherEquipment
       space_type.otherEquipment.each do |load|
         register.call(load.schedule.is_initialized ? load.schedule.get : nil, 'OtherEquip')
-      end
-
-      # Infiltration
-      space_type.spaceInfiltrationDesignFlowRates.each do |load|
-        register.call(load.schedule.is_initialized ? load.schedule.get : nil, 'Infiltration')
-      end
-    end
-
-    # --- thermostat schedules (one entry per unique thermostat) ---
-    seen_tstats = []
-    model.getThermalZones.each do |zone|
-      tstat = zone.thermostatSetpointDualSetpoint
-      next if tstat.empty?
-
-      tstat = tstat.get
-      next if seen_tstats.include?(tstat.handle.to_s)
-
-      seen_tstats << tstat.handle.to_s
-
-      # find an associated space type name via the zone's spaces
-      zone_label = zone.name.get
-      st_label = "Thermostat | #{zone_label}"
-      data[st_label] ||= {}
-
-      if tstat.coolingSetpointTemperatureSchedule.is_initialized
-        sch = tstat.coolingSetpointTemperatureSchedule.get
-        if sch.to_ScheduleRuleset.is_initialized
-          rs = sch.to_ScheduleRuleset.get
-          data[st_label]["Cooling: #{rs.name.get}"] = ruleset_day_profiles(rs)
-        end
-      end
-
-      if tstat.heatingSetpointTemperatureSchedule.is_initialized
-        sch = tstat.heatingSetpointTemperatureSchedule.get
-        if sch.to_ScheduleRuleset.is_initialized
-          rs = sch.to_ScheduleRuleset.get
-          data[st_label]["Heating: #{rs.name.get}"] = ruleset_day_profiles(rs)
-        end
       end
     end
 

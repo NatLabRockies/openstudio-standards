@@ -1205,7 +1205,7 @@
     "base_std": 0.0,
     "peak_std": 0.7,
     "st_std": 7,
-    "et_std": 25,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+1", "peak*0.7142857142857143"],
@@ -1215,8 +1215,6 @@
       ["st+6", "peak*0.7142857142857143"],
       ["st+7", "peak*0.7142857142857143"],
       ["et-9", "peak*0.28571428571428575"],
-      ["et-9", "peak*0.28571428571428575"],
-      ["et-4", "peak"],
       ["et-4", "peak"],
       ["et-2", "peak*0.28571428571428575"],
       ["et", "peak*0.07142857142857144"],
@@ -1268,7 +1266,7 @@
     "base_std": 0.0,
     "peak_std": 0.9,
     "st_std": 7,
-    "et_std": 35,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+1", "peak*0.5555555555555556"],
@@ -1295,7 +1293,7 @@
     "base_std": 0.0,
     "peak_std": 0.8,
     "st_std": 6,
-    "et_std": 35,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+2", "peak*0.5"],
@@ -1311,7 +1309,6 @@
       ["et-9", "base"]
     ]
   },
-
   {
     "name": "restaurant kitchen occupancy",
     "day_types": "Default",
@@ -1323,7 +1320,7 @@
     "base_std": 0.0,
     "peak_std": 0.7,
     "st_std": 7,
-    "et_std": 25,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+1", "peak*0.7142857142857143"],
@@ -1332,7 +1329,6 @@
       ["st+4", "peak*0.28571428571428575"],
       ["st+6", "peak*0.7142857142857143"],
       ["st+7", "peak*0.7142857142857143"],
-      ["et-9", "peak*0.28571428571428575"],
       ["et-9", "peak*0.28571428571428575"],
       ["et-4", "peak"],
       ["et-4", "peak"],
@@ -1386,7 +1382,7 @@
     "base_std": 0.0,
     "peak_std": 0.9,
     "st_std": 7,
-    "et_std": 35,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+1", "peak*0.5555555555555556"],
@@ -1398,8 +1394,8 @@
       ["st+9", "peak*0.3333333333333333"],
       ["st+11", "peak*0.3333333333333333"],
       ["st+13", "peak"],
-      ["et+9", "peak"],
-      ["et-9", "base"]
+      ["et-1", "peak"],
+      ["et+1", "base"]
     ]
   },
   {
@@ -1413,7 +1409,7 @@
     "base_std": 0.0,
     "peak_std": 0.8,
     "st_std": 6,
-    "et_std": 35,
+    "et_std": 23,
     "control_points": [
       ["st-1", "base"],
       ["st+2", "peak*0.5"],
@@ -1425,8 +1421,8 @@
       ["st+10", "peak*0.25"],
       ["st+10", "peak*0.25"],
       ["st+13", "peak"],
-      ["et+10", "peak"],
-      ["et-9", "base"]
+      ["et-10", "peak"],
+      ["et+1", "base"]
     ]
   },
   {
