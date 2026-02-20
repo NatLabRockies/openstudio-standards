@@ -94,7 +94,8 @@ class BTAPDatapoint
       @standard = Standard.build(@options[:template])
 
       # Set use the convert_arg_to_bool method from the standard class to set the @oerd_utility_pricing_flag
-      @oerd_utility_pricing = @standard.convert_arg_to_bool(variable: @options[:oerd_utility_pricing], default: false)
+      # Always set oerd_utility_pricing to false until it can be shared freely.
+      @oerd_utility_pricing = false
       @utility_pricing_year = @standard.convert_arg_to_f(variable: @options[:utility_pricing_year], default: 2020)
 
       # This allows you to select the skeleton model from our built in starting points. You can add a custom file as

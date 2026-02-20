@@ -6,21 +6,22 @@ class BTAPData
   attr_accessor :btap_data
 
   def initialize(
-    model:, 
-    runner: nil, 
-    cost_result:, 
+    model:,
+    runner: nil,
+    cost_result:,
     carbon_result:,
     baseline_cost_equipment_total_cost_per_m_sq: -1.0,
-    baseline_cost_utility_neb_total_cost_per_m_sq: -1.0, 
-    baseline_energy_eui_total_gj_per_m_sq: -1.0, 
+    baseline_cost_utility_neb_total_cost_per_m_sq: -1.0,
+    baseline_energy_eui_total_gj_per_m_sq: -1.0,
     qaqc:,
-    npv_start_year: 2022, 
-    npv_end_year: 2041, 
-    npv_discount_rate: 0.03, 
-    npv_discount_rate_carbon: 0.03, 
+    npv_start_year: 2022,
+    npv_end_year: 2041,
+    npv_discount_rate: 0.03,
+    npv_discount_rate_carbon: 0.03,
     oerd_utility_pricing: nil,
     utility_pricing_year: 2020)
 
+    oerd_utility_pricing = false
     @model = model
     @error_warning = []
     # sets sql file.
@@ -30,7 +31,7 @@ class BTAPData
     @btap_data = {}
     @btap_results_version = 1.00
     @neb_prices_csv_file_name = File.join(__dir__, 'neb_end_use_prices.csv')
-    @neb_prices_csv_file_name = File.join(__dir__, 'utility_pricing_2025-02-20.csv') if oerd_utility_pricing.to_bool
+    #@neb_prices_csv_file_name = File.join(__dir__, 'utility_pricing_2025-02-20.csv') if oerd_utility_pricing.to_bool
     @necb_reference_runs_csv_file_name = File.join(__dir__, 'necb_reference_runs.csv')
     @eccc_ghg_electricity = File.join(__dir__, 'eccc_electric_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for ECCC's emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions": https://data-donnees.az.ec.gc.ca/data/substances/monitor/canada-s-greenhouse-gas-emissions-projections/Current-Projections-Actuelles/Energy-Energie/AM%20Scenario%20AMS/Grid-O%26G-Intensities-Intensites-Reseau-Delectricite-P%26G?lang=en
     @nir_ghg_gas = File.join(__dir__, 'nir_gas_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for Year 2022 of "Table A6.1–1 CO2 Emission Factors for Marketable Natural Gas" of National Inventory Report: https://data-donnees.az.ec.gc.ca/api/file?path=%2Fsubstances%2Fmonitor%2Fcanada-s-official-greenhouse-gas-inventory%2FD-Emission-Factors%2FEN_Annex6_Emission_Factors.pdf
