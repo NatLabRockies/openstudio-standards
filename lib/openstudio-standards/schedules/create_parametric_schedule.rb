@@ -409,7 +409,7 @@ module OpenstudioStandards
 
       if space_type.additionalProperties.getFeatureAsString('schedule_set').is_initialized
         schedule_set_name = space_type.additionalProperties.getFeatureAsString('schedule_set').get
-        possible_schedule_sets = default_parametric_sch_set.select { |s| s[:space_type_name] == schedule_set_name }
+        possible_schedule_sets = default_parametric_sch_set.select { |s| s[:schedule_set_name] == schedule_set_name }
 
         if standards_building_type.nil?
           space_type_properties = possible_schedule_sets.find { |s| s[:standards_building_type].nil? }
