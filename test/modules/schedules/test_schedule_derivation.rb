@@ -61,6 +61,37 @@ class TestSchedulesDerivation < Minitest::Test
     model.save(File.dirname(__FILE__) + '/output/test_schedule_derivation_slope.osm', true)
   end
 
+  def test_schedule_derivation_up_down
+    # create a new model
+    model = OpenStudio::Model::Model.new
+    model.getTimestep.setNumberOfTimestepsPerHour(4)
+
+    # create occupancy schedule and derive with up_down methodology
+    occ_sch = OpenstudioStandards::Schedules.create_parametric_schedule_full(model, @schedule_data, 'slope occupancy', {})
+    params = {
+      "name": "up_down lighting",
+      "category": "Lighting",
+      "derivation_type": "up_down",
+      "base": 0.1,
+      "peak": 0.85,
+      "response": 1.0,
+      "start_slope": 0.4,
+      "end_slope": 0.6,
+      "winter_design_day_peak": 0.0,
+      "summer_design_day_base": 1.0
+    }
+
+    light_sch = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occ_sch, params)
+
+    refute_nil(light_sch)
+    default_vals = light_sch.defaultDaySchedule.values
+    assert(default_vals.size.positive?)
+    assert_operator(default_vals.max, :<=, params[:peak] + 0.001)
+    assert_operator(default_vals.min, :>=, params[:base] - 0.001)
+
+    model.save(File.dirname(__FILE__) + '/output/test_schedule_derivation_up_down.osm', true)
+  end
+
   def test_derivation_school
     # create a new model
     model = OpenStudio::Model::Model.new

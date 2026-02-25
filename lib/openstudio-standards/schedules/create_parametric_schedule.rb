@@ -373,15 +373,33 @@ module OpenstudioStandards
       return schedule
     end
 
+    # Infer start and end times from a time-value profile.
+    #
+    # @param time_value_pairs [Array] array of [time, value] pairs
+    # @param threshold [Float] minimum value considered active
+    # @return [Array<Float>] [start_time, end_time]
+    def self.infer_start_end_times_from_profile(time_value_pairs, threshold = 0.0)
+      active_pairs = time_value_pairs.select { |pair| pair[1].to_f > threshold }
+      return [0.0, 24.0] if active_pairs.empty?
+
+      [active_pairs.first[0].to_f, active_pairs.last[0].to_f]
+    end
+
     # Method to derive time-value pairs from a set of time-value pairs. The derived values are determined by applying the given parameters and derivation type.
     #
-    # @param derivation_type [String] type of derivation to perform. Options are 'linear', 'exponential', and 'exponential-inverse'
+    # @param derivation_type [String] type of derivation to perform. Options are 'linear', 'exponential', 'exponential-inverse', and 'up_down'
     # @param base [Float] base value for schedule derivation
     # @param peak [Float] peak value for schedule derivation
-    # @param response [Float] response factor for schedule derivation, which modifies the influence
+    # @param response [Float] response factor for schedule derivation, which modifies the influence for non up_down derivation types
     # @param initial_values [Array] array of time value pairs to derive from
+    # @param start_slope [Float, nil] optional start slope used by 'up_down'
+    # @param end_slope [Float, nil] optional end slope used by 'up_down'
+    # @param start_time [Float, nil] optional explicit start time used by 'up_down'
+    # @param end_time [Float, nil] optional explicit end time used by 'up_down'
+    # @param timesteps_per_hour [Integer] timestep resolution used by 'up_down'
+    # @param schedule_name [String, nil] optional schedule name for logging used by 'up_down'
     # @return [Array] array of derived time value pairs
-    def self.derive_values(derivation_type, base, peak, response, initial_values)
+    def self.derive_values(derivation_type, base, peak, response, initial_values, start_slope: nil, end_slope: nil, start_time: nil, end_time: nil, timesteps_per_hour: 1, schedule_name: nil)
       # correct values if base > peak or peak < base to ensure base is always the lower value and peak is the higher value
       peak = base if (base > peak) && (base > 0.5)
       base = peak if (peak < base) && (peak < 0.5)
@@ -404,6 +422,34 @@ module OpenstudioStandards
           derived_value = base + ((peak - base) * (initial_pair[1]**(1 / response.to_f)))
           derived_pairs << [initial_pair[0], derived_value]
         end
+      when 'up_down'
+        if start_slope.nil? || end_slope.nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Cannot derive 'up_down' schedule#{schedule_name.nil? ? '' : " '#{schedule_name}'"} without start_slope and end_slope.")
+          return []
+        end
+
+        st = start_time
+        et = end_time
+        if st.nil? || et.nil?
+          st, et = OpenstudioStandards::Schedules.infer_start_end_times_from_profile(initial_values)
+        end
+
+        slope_schedule_data = {
+          name: schedule_name || 'derived up_down schedule',
+          start_slope: start_slope,
+          end_slope: end_slope
+        }
+
+        derived_pairs = OpenstudioStandards::Schedules.expand_schedule_start_end_slope(
+          slope_schedule_data,
+          base,
+          peak,
+          st,
+          et,
+          timesteps_per_hour
+        )
+
+        return [] if derived_pairs.nil?
       end
       return derived_pairs
     end
@@ -411,17 +457,31 @@ module OpenstudioStandards
     # Add a schedule derived from an occupancy schedule and parametric inputs. The derived schedule is created by modifying the occupancy schedule time-value pairs according to the given parameters.
     #
     # @param occupancy_schedule [OpenStudio::Model::ScheduleRuleset] input occupancy schedule to derive information from
-    # @param params [Hash] hash of schedule input parameters. Specific key/values will depend on the schedule type
+    # @param params [Hash] hash of schedule input parameters.
+    #   Supported keys include:
+    #   - :derivation_type [String] required; one of 'linear', 'exponential', 'exponential-inverse', 'up_down'
+    #   - :base [Float] required
+    #   - :peak [Float] required
+    #   - :response [Float] required for non up_down derivation types
+    #   - :start_slope [Float] required for up_down
+    #   - :end_slope [Float] required for up_down
+    #   - :st [Float] optional explicit start time for up_down
+    #   - :et [Float] optional explicit end time for up_down
     # @return [ScheduleRuleset] the resulting schedule ruleset
     def self.create_derived_schedule_from_occupancy_schedule(occupancy_schedule, params)
       # get model object from existing schedule
       model = occupancy_schedule.model
+      timesteps_per_hour = model.getTimestep.numberOfTimestepsPerHour
 
       # get values from params
       derivation_type = params[:derivation_type]
       base = params[:base]
       peak = params[:peak]
       response = params[:response]
+      start_slope = params[:start_slope]
+      end_slope = params[:end_slope]
+      derivation_start_time = params[:st]
+      derivation_end_time = params[:et]
       winter_design_day_base = params[:winter_design_day_base].nil? ? base : params[:winter_design_day_base]
       winter_design_day_peak = params[:winter_design_day_peak].nil? ? peak : params[:winter_design_day_peak]
       winter_design_day_response = params[:winter_design_day_response].nil? ? response : params[:winter_design_day_response]
@@ -437,7 +497,12 @@ module OpenstudioStandards
       default_occ_day_sch = occupancy_schedule.defaultDaySchedule
       default_occ_times = default_occ_day_sch.times.map(&:totalHours)
       occ_time_values = default_occ_times.zip(default_occ_day_sch.values)
-      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, base, peak, response, occ_time_values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(
+        derivation_type, base, peak, response, occ_time_values,
+        start_slope: start_slope, end_slope: end_slope,
+        start_time: derivation_start_time, end_time: derivation_end_time,
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+      )
       default_day = derived_schedule.defaultDaySchedule
       default_day.setName("#{params[:name]} Default Day")
       OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(default_day, derived_pairs)
@@ -446,7 +511,12 @@ module OpenstudioStandards
       smr_occ_day_sch = occupancy_schedule.summerDesignDaySchedule
       smr_occ_times = smr_occ_day_sch.times.map(&:totalHours)
       occ_time_values = smr_occ_times.zip(smr_occ_day_sch.values)
-      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, summer_design_day_base, summer_design_day_peak, summer_design_day_response, occ_time_values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(
+        derivation_type, summer_design_day_base, summer_design_day_peak, summer_design_day_response, occ_time_values,
+        start_slope: start_slope, end_slope: end_slope,
+        start_time: derivation_start_time, end_time: derivation_end_time,
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+      )
       summer_day = OpenStudio::Model::ScheduleDay.new(model)
       summer_day.setName("#{params[:name]} Summer Design Day")
       OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(summer_day, derived_pairs)
@@ -456,7 +526,12 @@ module OpenstudioStandards
       wnt_occ_day_sch = occupancy_schedule.winterDesignDaySchedule
       wnt_occ_times = wnt_occ_day_sch.times.map(&:totalHours)
       occ_time_values = wnt_occ_times.zip(wnt_occ_day_sch.values)
-      derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, winter_design_day_base, winter_design_day_peak, winter_design_day_response, occ_time_values)
+      derived_pairs = OpenstudioStandards::Schedules.derive_values(
+        derivation_type, winter_design_day_base, winter_design_day_peak, winter_design_day_response, occ_time_values,
+        start_slope: start_slope, end_slope: end_slope,
+        start_time: derivation_start_time, end_time: derivation_end_time,
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+      )
       winter_day = OpenStudio::Model::ScheduleDay.new(model)
       winter_day.setName("#{params[:name]} Winter Design Day")
       OpenstudioStandards::Schedules.add_time_value_pairs_to_schedule(winter_day, derived_pairs)
@@ -470,7 +545,12 @@ module OpenstudioStandards
         occ_time_values = occ_times.zip(occ_day_sch.values)
 
         # derive time-value pairs
-        derived_pairs = OpenstudioStandards::Schedules.derive_values(derivation_type, base, peak, response, occ_time_values)
+        derived_pairs = OpenstudioStandards::Schedules.derive_values(
+          derivation_type, base, peak, response, occ_time_values,
+          start_slope: start_slope, end_slope: end_slope,
+          start_time: derivation_start_time, end_time: derivation_end_time,
+          timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+        )
 
         # Make the Rule
         sch_rule = OpenStudio::Model::ScheduleRule.new(derived_schedule)
