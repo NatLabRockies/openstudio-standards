@@ -94,6 +94,42 @@ module OpenstudioStandards
       result.sort_by { |time, _| time }
     end
 
+    # Wrap time/value rows to a bounded hour range while preserving row count.
+    # This mirrors the helper used by the slope-based schedule expansion workflow.
+    #
+    # @param time_value_pairs [Array] array of [time, value] pairs
+    # @param upper_bound [Float] upper time bound (typically 24)
+    # @return [Array] adjusted array of [time, value] pairs
+    def self.wrap_around_time_values(time_value_pairs, upper_bound)
+      keep = time_value_pairs.select { |pair| pair[0] > 0 && pair[0] <= upper_bound }.map(&:dup)
+      remove_below = time_value_pairs.select { |pair| pair[0] <= 0 }.map(&:dup)
+      remove_above = time_value_pairs.select { |pair| pair[0] > upper_bound }.map(&:dup)
+
+      if !remove_below.empty? && remove_below[0][0] == 0
+        remove_below.shift
+      end
+
+      if !remove_below.empty? && !keep.empty?
+        start_index = keep.length - remove_below.length
+        remove_below.each_with_index do |pair, i|
+          idx = start_index + i
+          next if idx.negative? || idx >= keep.length
+
+          keep[idx][1] = pair[1]
+        end
+      end
+
+      if !remove_above.empty? && !keep.empty?
+        remove_above.each_with_index do |pair, i|
+          break if i >= keep.length
+
+          keep[i][1] = pair[1]
+        end
+      end
+
+      keep
+    end
+
     # Expands parametric schedule control points
     #
     # @param schedule_data [Hash] hash of schedule data
@@ -174,6 +210,73 @@ module OpenstudioStandards
       # wrap_schedule_pairs(expanded_tv_pairs)
     end
 
+    # Expands a profile using start/end times with start/end slopes.
+    # Methodology is aligned with the notebook's expand_schedule_profile_from_start_end_slope flow.
+    #
+    # @param schedule_data [Hash] hash of schedule data containing :start_slope and :end_slope
+    # @param base [Float] input schedule base value
+    # @param peak [Float] input schedule peak value
+    # @param start_time [Float] input start time
+    # @param end_time [Float] input end time
+    # @param timesteps_per_hour [Integer] number of timesteps per hour
+    # @return [Array] array of time value pairs
+    def self.expand_schedule_start_end_slope(schedule_data, base, peak, start_time, end_time, timesteps_per_hour)
+      start_slope = schedule_data[:start_slope]
+      end_slope = schedule_data[:end_slope]
+
+      if start_slope.nil? || end_slope.nil?
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Schedule '#{schedule_data[:name]}' is missing start_slope and/or end_slope.")
+        return nil
+      end
+
+      timestep = 1.0 / timesteps_per_hour.to_f
+      round_to_nearest = ->(val) { (val / timestep).round * timestep }
+
+      st = start_time.clamp(0, 24)
+      et = end_time.clamp(0, 24)
+      start_slope = [start_slope.to_f, 0.001].max
+      end_slope = [end_slope.to_f, 0.001].max
+
+      st = round_to_nearest.call(st)
+      et = round_to_nearest.call(et)
+
+      start_range = (start_slope * (et - st)).round(0)
+      end_range = (end_slope * (et - st)).round(0)
+
+      start_lower = st - round_to_nearest.call(start_range / 2.0)
+      start_upper = st + round_to_nearest.call(start_range / 2.0)
+      end_lower = et - round_to_nearest.call(end_range / 2.0)
+      end_upper = et + round_to_nearest.call(end_range / 2.0)
+
+      startup = OpenstudioStandards::Schedules.smooth_schedule_from_time_values([[start_lower, 0], [start_upper, 1], [start_upper + timestep, 0]], timesteps_per_hour)
+      endup = OpenstudioStandards::Schedules.smooth_schedule_from_time_values([[end_lower - timestep, 1], [end_lower, 0], [end_upper, 1]], timesteps_per_hour)
+      endup = endup.map { |time, value| [time, 1 + (value * -1)] }
+
+      start_wrap = OpenstudioStandards::Schedules.wrap_around_time_values(startup, 24.0)
+      end_wrap = OpenstudioStandards::Schedules.wrap_around_time_values(endup, 24.0)
+
+      if start_wrap.size != end_wrap.size
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Slope profile expansion failed due to incompatible array lengths for '#{schedule_data[:name]}'.")
+        return nil
+      end
+
+      combined = start_wrap.each_with_index.map do |pair, i|
+        sum_val = pair[1] + end_wrap[i][1]
+        max_val = [sum_val, 1.0].max
+        [pair[0], sum_val / max_val]
+      end
+
+      start_upper_mod = start_upper % 24.0
+      end_lower_mod = end_lower % 24.0
+      combined.each do |pair|
+        pair[1] = 1 if pair[0] >= start_upper_mod && pair[0] <= end_lower_mod
+      end
+
+      combined.map do |time, value|
+        [time, base + ((peak - base) * value)]
+      end
+    end
+
     # Add time value pairs to OpenStudio ScheduleDay
     #
     # @param day_sch [OpenStudio::Model::ScheduleDay] OpenStudio ScheduleDay object
@@ -199,7 +302,20 @@ module OpenstudioStandards
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param schedule_array [Array] array of default schedule data objects to load from - TODO: extract this part out
     # @param schedule_name [String] name of schedule to create
-    # @param params [Hash] hash of schedule input parameters. Specific key/values will depend on the schedule type
+    # @param params [Hash] optional schedule input overrides used during expansion.
+    #   Supported keys:
+    #   - :st [Float] start time in hours. Defaults to schedule object :st_std.
+    #   - :et [Float] end time in hours. Defaults to schedule object :et_std.
+    #   - :base [Float] base schedule value (typically 0.0..1.0). Defaults to :base_std.
+    #   - :peak [Float] peak schedule value (typically 0.0..1.0). Defaults to :peak_std.
+    #   - :start_slope [Float] optional start transition slope factor for slope-based profile expansion.
+    #     If provided together with :end_slope, uses expand_schedule_start_end_slope.
+    #   - :end_slope [Float] optional end transition slope factor for slope-based profile expansion.
+    #     If omitted (or :start_slope omitted), falls back to expand_schedule_control_points.
+    #
+    #   Notes:
+    #   - All keys are optional and apply to every matching schedule object in schedule_array.
+    #   - When a key is omitted, the method uses the corresponding value from the schedule object.
     # @return [ScheduleRuleset] the resulting schedule ruleset
     def self.create_parametric_schedule_full(model, schedule_array, schedule_name, params)
       timesteps_per_hour = model.getTimestep.numberOfTimestepsPerHour
@@ -216,7 +332,17 @@ module OpenstudioStandards
         base = params[:base].nil? ? obj[:base_std] : params[:base]
         peak = params[:peak].nil? ? obj[:peak_std] : params[:peak]
 
-        time_value_pairs = OpenstudioStandards::Schedules.expand_schedule_control_points(obj, base, peak, st, et, timesteps_per_hour)
+        start_slope = params[:start_slope].nil? ? obj[:start_slope] : params[:start_slope]
+        end_slope = params[:end_slope].nil? ? obj[:end_slope] : params[:end_slope]
+
+        if !start_slope.nil? && !end_slope.nil?
+          obj_with_slope = obj.merge(start_slope: start_slope, end_slope: end_slope)
+          time_value_pairs = OpenstudioStandards::Schedules.expand_schedule_start_end_slope(obj_with_slope, base, peak, st, et, timesteps_per_hour)
+        else
+          time_value_pairs = OpenstudioStandards::Schedules.expand_schedule_control_points(obj, base, peak, st, et, timesteps_per_hour)
+        end
+
+        next if time_value_pairs.nil?
 
         tv_pairs_reduced = time_value_pairs.reject.with_index { |e, i| e[1] == time_value_pairs[i + 1][1] unless i == (time_value_pairs.size - 1) }
 

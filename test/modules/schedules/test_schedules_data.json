@@ -21,6 +21,21 @@
     ]
   },
   {
+    "name": "slope occupancy",
+    "day_types": "Default|SmrDsn|Wkdy",
+    "start_date": "2018-01-01T00:00:00+00:00",
+    "end_date": "2018-12-31T00:00:00+00:00",
+    "category": "Occupancy",
+    "units": null,
+    "type": "parametric",
+    "base_std": 0.0,
+    "peak_std": 0.9,
+    "st_std": 8.0,
+    "et_std": 19.0,
+    "start_slope": 0.8,
+    "end_slope": 0.5
+  },
+  {
     "name": "school classroom occupancy",
     "day_types": "Default",
     "start_date": "2018-01-01T00:00:00+00:00",
