@@ -1,5 +1,74 @@
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000001},  !- Handle
+  {00000000-0000-0000-0072-000000000003},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  unconditioned;                           !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0072-000000000001},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  nonresconditioned;                       !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000003},  !- Handle
+  {00000000-0000-0000-0072-000000000002},  !- Object Name
+  space_conditioning_category,             !- Feature Name 1
+  String,                                  !- Feature Data Type 1
+  nonresconditioned;                       !- Feature Value 1
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000004},  !- Handle
+  {00000000-0000-0000-0009-000000000001};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000005},  !- Handle
+  {00000000-0000-0000-0028-000000000002},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0,                                       !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  20,                                      !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  70,                                      !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62.1-2010 Occupancy (See NECB2011 ASHRAE Space Types), !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Food and Beverage Service-Dining rooms;  !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000006},  !- Handle
+  {00000000-0000-0000-0028-000000000003},  !- Object Name
+  Ref OA per area,                         !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0,                                       !- Feature Value 1
+  Ref OA per person,                       !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  15,                                      !- Feature Value 2
+  Ref OA ach,                              !- Feature Name 3
+  Double,                                  !- Feature Data Type 3
+  0,                                       !- Feature Value 3
+  Ref occupancy per 1000ft2,               !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  20,                                      !- Feature Value 4
+  Ref standard,                            !- Feature Name 5
+  String,                                  !- Feature Data Type 5
+  ASHRAE 62.1-2010 Occupancy (See NECB2011 ASHRAE Space Types), !- Feature Value 5
+  Ref space type,                          !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  Food and Beverage Serices-Kitchens (cooking); !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000007},  !- Handle
   {00000000-0000-0000-0055-000000000020},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -15,7 +84,7 @@ OS:AdditionalProperties,
   2024-01-01 01:00:00 UTC;                 !- Feature Value 4
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000002},  !- Handle
+  {00000000-0000-0000-0001-000000000008},  !- Handle
   {00000000-0000-0000-0055-000000000019},  !- Object Name
   max_occ_in_spaces,                       !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -2260,25 +2329,25 @@ OS:Node,
 
 OS:Node,
   {00000000-0000-0000-0041-000000000016},  !- Handle
-  Dining WUC 0.38gpm 140F Inlet Water Node, !- Name
+  Dining WUC 0.3796gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000078},  !- Inlet Port
   {00000000-0000-0000-0014-000000000079};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0041-000000000017},  !- Handle
-  Dining WUC 0.38gpm 140F Outlet Water Node, !- Name
+  Dining WUC 0.3796gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000080},  !- Inlet Port
   {00000000-0000-0000-0014-000000000081};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0041-000000000018},  !- Handle
-  Kitchen WUC 0.07gpm 140F Inlet Water Node, !- Name
+  Kitchen WUC 0.0713gpm 140F Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000082},  !- Inlet Port
   {00000000-0000-0000-0014-000000000083};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0041-000000000019},  !- Handle
-  Kitchen WUC 0.07gpm 140F Outlet Water Node, !- Name
+  Kitchen WUC 0.0713gpm 140F Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000084},  !- Inlet Port
   {00000000-0000-0000-0014-000000000085};  !- Outlet Port
 
@@ -5804,7 +5873,7 @@ OS:WaterHeater:Sizing,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0088-000000000001},  !- Handle
-  Dining WUC 0.38gpm 140F,                 !- Name
+  Dining WUC 0.3796gpm 140F,               !- Name
   {00000000-0000-0000-0014-000000000079},  !- Inlet Node Name
   {00000000-0000-0000-0014-000000000080},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -5818,7 +5887,7 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Connections,
   {00000000-0000-0000-0088-000000000002},  !- Handle
-  Kitchen WUC 0.07gpm 140F,                !- Name
+  Kitchen WUC 0.0713gpm 140F,              !- Name
   {00000000-0000-0000-0014-000000000083},  !- Inlet Node Name
   {00000000-0000-0000-0014-000000000084},  !- Outlet Node Name
   ,                                        !- Supply Water Storage Tank Name
@@ -5832,21 +5901,21 @@ OS:WaterUse:Connections,
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0089-000000000001},  !- Handle
-  Dining Service Water Use 0.38gpm 140F,   !- Name
+  Dining Service Water Use 0.3796gpm 140F, !- Name
   {00000000-0000-0000-0090-000000000001},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0072-000000000001},  !- Space Name
   {00000000-0000-0000-0055-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment,
   {00000000-0000-0000-0089-000000000002},  !- Handle
-  Kitchen Service Water Use 0.07gpm 140F,  !- Name
+  Kitchen Service Water Use 0.0713gpm 140F, !- Name
   {00000000-0000-0000-0090-000000000002},  !- Water Use Equipment Definition Name
   {00000000-0000-0000-0072-000000000002},  !- Space Name
   {00000000-0000-0000-0055-000000000011};  !- Flow Rate Fraction Schedule Name
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0090-000000000001},  !- Handle
-  Dining 0.38gpm 140F,                     !- Name
+  Dining 0.3796gpm 140F,                   !- Name
   ,                                        !- End-Use Subcategory
   2.39515451281452e-05,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0055-000000000006},  !- Target Temperature Schedule Name
@@ -5855,7 +5924,7 @@ OS:WaterUse:Equipment:Definition,
 
 OS:WaterUse:Equipment:Definition,
   {00000000-0000-0000-0090-000000000002},  !- Handle
-  Kitchen 0.07gpm 140F,                    !- Name
+  Kitchen 0.0713gpm 140F,                  !- Name
   ,                                        !- End-Use Subcategory
   4.49574007408925e-06,                    !- Peak Flow Rate {m3/s}
   {00000000-0000-0000-0055-000000000006},  !- Target Temperature Schedule Name
