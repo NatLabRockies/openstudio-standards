@@ -286,4 +286,27 @@ class TestCreateTypical < Minitest::Test
     assert(result)
     assert(starting_size < ending_size)
   end
+
+  def test_create_typical_old_pthp
+    # load model and set up weather file
+    template = 'ComStock DOE Ref Pre-1980'
+    climate_zone = 'ASHRAE 169-2013-3A'
+    std = Standard.build(template)
+    model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESmallOffice.osm")
+    OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+
+    # set output directory
+    output_dir = "#{__dir__}/output/#{__method__}"
+    FileUtils.mkdir output_dir unless Dir.exist? output_dir
+
+    # apply create typical
+    starting_size = model.getModelObjects.size
+    result = @create.create_typical_building_from_model(model, template,
+                                                        climate_zone: climate_zone,
+                                                        hvac_system_type: 'PTHP',
+                                                        sizing_run_directory: output_dir)
+    ending_size = model.getModelObjects.size
+    assert(result)
+    assert(starting_size < ending_size)
+  end
 end
