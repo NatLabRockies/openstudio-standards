@@ -114,7 +114,7 @@ module BTAP
         "ExteriorDoor"                    => "BTAP-ExteriorDoor-Metal-1",
         "ExteriorGlassDoor"               => "BTAP-ExteriorWindow-GlazedDoor-4",
         "ExteriorOverheadDoor"            => "BTAP-ExteriorOverheadDoor-Metal-1",
-        "GroundContactWall"               => "BTAP-GroundContactWall-Mass2",
+        "GroundContactWall"               => "BTAP-GroundContactWall-Mass-2",
         "GroundContactRoof"               => "BTAP-GroundContactRoof-Mass-2",
         "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
       }
