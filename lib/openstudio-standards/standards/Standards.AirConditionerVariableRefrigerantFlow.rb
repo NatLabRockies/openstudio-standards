@@ -35,7 +35,7 @@ class Standard
     search_criteria = air_conditioner_variable_refrigerant_flow_find_search_criteria(air_conditioner_variable_refrigerant_flow)
 
     # Get the capacity
-    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_capacity(air_conditioner_variable_refrigerant_flow)
+    capacity_w = OpenstudioStandards::HVAC.air_conditioner_variable_refrigerant_flow_get_cooling_capacity(air_conditioner_variable_refrigerant_flow)
 
     # Convert capacity to Btu/hr
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get

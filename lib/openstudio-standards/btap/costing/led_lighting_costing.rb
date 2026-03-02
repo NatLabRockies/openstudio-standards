@@ -4,7 +4,8 @@ class BTAPCosting
     a = 0 # This is for reporting purposes.
     standards_template = model.building.get.standardsTemplate.to_s
     if standards_template.include?('NECB')
-      standards_template = standards_template.gsub(/(?<=\p{L})(?=\d)/, ' ') #insert a space between NECB and 2011/2015/2017
+      # insert a space between NECB and 2011/2015/2017
+      standards_template = standards_template.gsub(/NECB(\d)/, 'NECB \1')
     end
     # puts standards_template
 

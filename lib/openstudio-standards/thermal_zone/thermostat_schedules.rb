@@ -107,10 +107,10 @@ module OpenstudioStandards
         elsif zone_thermostats_options.size > 1
           # otherwise find the zone thermostat with the most restrictive setpoints
           # @todo logic here to pick between options
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ThermalZone', "Multiple thermostat options for thermal zone #{zone.name} depending on space types.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ThermalZone', "Multiple thermostat options for thermal zone #{thermal_zone.name} depending on space types.")
           thermal_zone.setThermostatSetpointDualSetpoint(zone_thermostats_options[0])
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ThermalZone', "Unable to find valid thermostat options for thermal zone #{zone.name} depending on space types.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ThermalZone', "Unable to find valid thermostat options for thermal zone #{thermal_zone.name} depending on space types.")
         end
       end
 
