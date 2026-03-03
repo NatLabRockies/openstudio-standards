@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   else
     spec.add_development_dependency 'bundler', '~> 2.4.10'
     spec.add_development_dependency 'nokogiri', '~> 1.16'
-    spec.add_development_dependency 'parallel_tests', '~> 3.7.0'
+    spec.add_development_dependency 'parallel_tests', '~> 5.6'
   end
   spec.add_development_dependency 'codecov'
   spec.add_development_dependency 'minitest', '~> 5.26.0'
