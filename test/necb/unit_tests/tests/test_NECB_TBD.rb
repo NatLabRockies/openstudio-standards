@@ -113,8 +113,6 @@ class NECB_TBD_Tests < Minitest::Test
         @structure.sort.each  do |structure|
           @options.sort.each  do |option   |
             @interpolate.each do |inter    |
-              # next if building == "NorthernEducation"
-              # next if building == "NorthernHealthCare"
               next if inter && option != "uprate"
 
               cas  = "CASE #{option} | #{building} (#{template})"

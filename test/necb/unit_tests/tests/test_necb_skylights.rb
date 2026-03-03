@@ -44,9 +44,6 @@ class NECB_Skylights_Tests < Minitest::Test
       # 'SmallOffice'
     ]
 
-    # NOTE: Skipping NorthernEducation for now:
-    #   Minitest::UnexpectedError: RuntimeError: validation of model failed.
-
     # Range of test options. NECB2011 for now. Skipping later NECBs - they're
     # systematically easier to deploy, given their lower reference building SRR
     # targets (e.g. 2% vs 5%). BTAPPRE1980 cases are likely worth testing at

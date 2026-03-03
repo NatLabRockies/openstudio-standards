@@ -727,7 +727,7 @@ module BTAP
     end
 
     ##
-    # Validates whether user has explicitely set a valid building activity
+    # Validates whether user has explicitly set a valid building activity
     # AdditionalProperty.
     #
     # @param model [OpenStudio::Model::Model] a model
@@ -798,7 +798,7 @@ module BTAP
     ##
     # Sets schedules to auxiliary spaces.
     #
-    # @param uset [Boolean] whether user has explicitely set building activity.
+    # @param uset [Boolean] whether user has explicitly set a building activity.
     #
     # @return [Boolean] true if successful
     def assignAuxiliarySchedules(uset = false)
