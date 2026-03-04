@@ -4,16 +4,16 @@ require 'minitest'
 # BTAPResultsHelper
 #   Helper methods for the BtapResults suite of tests.
 class BTAPResultsHelper < Minitest::Test
-  @@cached = false
+  @@cached = (not ENV["BTAP_RESULTS_USE_CACHE"].nil?)
 
   def initialize(test_path:, model_name:, run_dir:)
     @test_path             = File.expand_path(test_path) 
     @test_filename         = File.basename(test_path, '.rb')
     @model_name            = model_name
     @run_dir               = File.expand_path(run_dir)
-    cached_folder          = ""
-    @model_cached_path     = cached_folder + "/output.osm"
-    @sql_cached_path       = cached_folder + "/eplusout.sql"
+    @cache_folder          = File.expand_path("#{__dir__}/../../../test/btap_costing/tests/cache/#{@test_filename}")
+    @model_cached_path     = @cache_folder + "/output.osm"
+    @sql_cached_path       = @cache_folder + "/eplusout.sql"
   end
 
   class << self
@@ -22,9 +22,12 @@ class BTAPResultsHelper < Minitest::Test
     end
   end
 
-  def cache_osm_and_sql(model_path:, sql_path:)
-    FileUtils.cp(model_path, @model_cached_path)
-    FileUtils.cp(sql_path, @sql_cached_path)
+  def cache_osm_and_sql_if_env(model_path:, sql_path:)
+    if (not ENV["BTAP_RESULTS_CACHE_FILES"].nil?)
+      FileUtils.cp(model_path, @model_cached_path)
+      FileUtils.cp(sql_path, @sql_cached_path)
+      puts "Wrote cache files to #{@cache_folder}"
+    end
   end
 
   def get_analysis(output_folder:, template:)
