@@ -42,33 +42,37 @@ class BTAPResultsHelper < Minitest::Test
   def evaluate_regression_files(test_instance:, cost_result:)
     cost_result_json_path = "#{@run_dir}/cost_results.json"
     cost_list_json_path   = "#{@run_dir}/btap_items.json"
-    test_instance.assert(File.exist?(cost_result_json_path), "Could not find costing json at this path:#{cost_result_json_path}")
-    regression_files_folder = "#{File.dirname(@test_path)}/regression_files"
+    test_instance.assert(
+      File.exist?(cost_result_json_path),
+      "Could not find costing json at this path:#{cost_result_json_path}")
+    
+    regression_files_folder  = "#{File.dirname(@test_path)}/regression_files"
     expected_result_filename = "#{regression_files_folder}/#{@model_name}_expected_result.cost.json"
-    test_result_filename = "#{regression_files_folder}/#{@model_name}_test_result.cost.json"
+    test_result_filename     = "#{regression_files_folder}/#{@model_name}_test_result.cost.json"
+    expected_result_json     = JSON.parse(File.read(expected_result_filename))
+    test_result_json         = JSON.parse(File.read(cost_result_json_path))
 
     FileUtils.rm(test_result_filename) if File.exist?(test_result_filename)
     if File.exist?(expected_result_filename)
-      unless FileUtils.compare_file(cost_result_json_path, expected_result_filename)
+      unless expected_result_json == test_result_json
         FileUtils.cp(cost_result_json_path, test_result_filename)
-        test_instance.assert(false, "Regression test for #{@model_name} produces differences. Examine expected and test result differences in the #{File.dirname(@test_filename)}/regression_files folder ")
+        test_instance.assert(false, "Regression test for #{@model_name} produces differences. Examine expected and test result differences in test/btap_costing/tests/regression_files/")
       end
     else
-      puts "No expected test file...Generating expected file #{expected_result_filename}. Please verify."
+      puts "No expected test file present. Generating expected file #{expected_result_filename}. Please ensure the results are correct."
       FileUtils.cp(cost_result_json_path, expected_result_filename)
     end
     puts "Regression test for #{@model_name} passed."
 
-    # Do comparison of direct btap_costing results and those derived from the itemized cost list
-    # Check if an itemized cost list file exists.  If it exists, do the comparison.  If not, Ignore the comparison.
+    # Do a comparison of btap_costing results and those derived from the
+    # itemized cost list. Check if an itemized cost list file exists. If it
+    # exists, do the comparison. If not, ignore the comparison.
     if File.exist?(cost_list_json_path)
-      # Get the itemized cost list file.
-      cost_list = JSON.parse(File.read(cost_list_json_path))
-      # Cost the building based on the itemized cost list.
+      cost_list        = JSON.parse(File.read(cost_list_json_path))
       cost_list_output = BTAPCosting.new().cost_list_items(btap_items: cost_list)
-      # Get the detailed btap_costing result file:
-      cost_result = JSON.parse(File.read(cost_result_json_path))
-      cost_sum = cost_result['totals']
+      cost_result      = JSON.parse(File.read(cost_result_json_path))
+      cost_sum         = cost_result['totals']
+      
       # Compare the results and let the user know if there are differences.  Do not fail test if there are.
       puts("")
       puts("Comparing BTAP_Costing results and itemized costing list cost results:")
