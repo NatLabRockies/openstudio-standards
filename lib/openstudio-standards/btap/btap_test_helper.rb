@@ -5,6 +5,7 @@ require 'minitest'
 #   Helper methods for the BtapResults suite of tests.
 class BTAPResultsHelper < Minitest::Test
   @@cached = (not ENV["BTAP_RESULTS_USE_CACHE"].nil?)
+  puts "BTAP Results caching enabled." if @@cached
 
   def initialize(test_path:, model_name:, run_dir:)
     @test_path             = File.expand_path(test_path) 

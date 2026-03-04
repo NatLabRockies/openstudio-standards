@@ -354,6 +354,7 @@ class BTAPResults_Test < Minitest::Test
       sql_path = "#{run_dir}/run/eplusout.sql"
       #create osm file to use mimic PAT/OS server called final
       model.save(model_out_path, true)
+      helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
       post_analysis = BTAPDatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
@@ -364,7 +365,6 @@ class BTAPResults_Test < Minitest::Test
       post_analysis = helper.get_analysis(output_folder: run_dir, template: template)
     end
 
-    helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
     cost_result = post_analysis.run_costing
     helper.evaluate_regression_files(test_instance: self, cost_result: cost_result)
   end
