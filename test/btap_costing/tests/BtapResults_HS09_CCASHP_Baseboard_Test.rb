@@ -7,7 +7,7 @@ require 'minitest/unit'
 require 'optparse'
 
 class BTAPResults_HS09_Test < Minitest::Test
-  def test_qaqc()
+  def test_results_hs09()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     building_type = 'FullServiceRestaurant'

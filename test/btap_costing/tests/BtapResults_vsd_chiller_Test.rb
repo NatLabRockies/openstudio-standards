@@ -7,7 +7,7 @@ require 'minitest/unit'
 require 'optparse'
 
 class BTAPResults_VSD_Test < Minitest::Test
-  def test_qaqc()
+  def test_results_vsd()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     # building_type = 'FullServiceRestaurant'

@@ -7,7 +7,7 @@ require 'minitest/unit'
 require 'optparse'
 
 class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
-  def test_qaqc()
+  def test_results_daylighting_sensor_control()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     # building_type = 'FullServiceRestaurant'
