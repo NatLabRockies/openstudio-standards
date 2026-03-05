@@ -231,6 +231,15 @@ class NECB_Activity_Tests < Minitest::Test
             # fdback << "   WETSPACES: #{id} (#{keyword})"
           end
 
+          ecm = ECMS.new
+
+          model.getThermalZones.each do |zone|
+            id = zone.nameString
+            next if ecm.zone_terminal_vrf?(zone, a)
+
+            # fdback << "#{id} can't have a terminal VRF unit (#{cas})"
+          end
+
           a.feedback[:logs].each { |log| puts log }
         end                   # |template |
       end                     # |building |

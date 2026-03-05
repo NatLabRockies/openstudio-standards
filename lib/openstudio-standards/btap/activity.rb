@@ -510,7 +510,6 @@ module BTAP
     def spaceActivities(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Model
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
@@ -599,7 +598,6 @@ module BTAP
     def buildingActivity(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Model
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
@@ -736,7 +734,6 @@ module BTAP
     def buildingActivity?(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Model
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
@@ -765,7 +762,6 @@ module BTAP
     def neighbours(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -881,7 +877,6 @@ module BTAP
     def keyword(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -905,7 +900,6 @@ module BTAP
     def act(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -929,7 +923,6 @@ module BTAP
     def bldg(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -953,7 +946,6 @@ module BTAP
     def m2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -977,7 +969,6 @@ module BTAP
     def density(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1001,7 +992,6 @@ module BTAP
     def eqpWm2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1025,7 +1015,6 @@ module BTAP
     def swhWm2(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1049,7 +1038,6 @@ module BTAP
     def schedule(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1074,7 +1062,6 @@ module BTAP
     def occsensing?(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1115,7 +1102,6 @@ module BTAP
     def fOCC(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1249,7 +1235,6 @@ module BTAP
     def fPERS(space = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Space
 
       unless space.is_a?(OpenStudio::Model::Space)
         lgs << "Invalid or empty OpenStudio space (#{mth})"
@@ -1269,6 +1254,47 @@ module BTAP
       return 0.9 if activity == "patient::health"
 
       1.0
+    end
+
+    ##
+    # Validates whether a space can be considered as having 'transient'
+    # occupancy, e.g. locker room, washroom, corridor.
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [Boolean] whether space is 'transient' in nature.
+    def transient?(space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return false
+      end
+
+      unless @activities.key?(space)
+        lgs << "Unlisted space #{space.nameString} (#{mth})"
+        return false
+      end
+
+      activity = @activities[space][:keyword]
+      return true if activity.include?("atrium")
+      return true if activity.include?("corridor")
+      return true if activity.include?("mechanical")
+      return true if activity.include?("lobby")
+      return true if activity.include?("locker")
+      return true if activity.include?("garage")
+      return true if activity.include?("stairway")
+      return true if activity.include?("storage")
+      return true if activity.include?("washroom")
+      return true if activity.include?("bulk")
+      return true if activity.include?("fine")
+      return true if activity.include?("computer")
+      return true if activity.include?("server")
+      return true if activity.include?("copiers")
+      return true if activity.include?("emergency")
+
+      false
     end
   end
 end

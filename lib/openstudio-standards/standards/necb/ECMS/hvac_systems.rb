@@ -313,110 +313,22 @@ class ECMS
     return outdoor_vrf_unit
   end
 
-  # =============================================================================================================================
-  # Method to determine whether zone can have terminal vrf equipment. Zones with no vrf terminal equipment are characterized by
-  # transient occupancy such is the case for corridors, stairwells, storage, ...
-  def zone_with_no_vrf_eqpt?(zone)
-    space_types_to_skip = {}
-    space_types_to_skip['NECB2011'] = ['Atrium - H < 13m',
-                                       'Atrium - H > 13m',
-                                       'Audience - auditorium',
-                                       'Corr. < 2.4m wide',
-                                       'Corr. >= 2.4m wide',
-                                       'Electrical/Mechanical',
-                                       'Hospital corr. < 2.4m',
-                                       'Hospital corr. >= 2.4m',
-                                       'Mfg - corr. < 2.4m',
-                                       'Mfg - corr. >= 2.4m',
-                                       'Lobby - elevator',
-                                       'Lobby - hotel',
-                                       'Lobby - motion picture',
-                                       'Lobby - other',
-                                       'Lobby - performance arts',
-                                       'Locker room',
-                                       'Parking garage space',
-                                       'Stairway',
-                                       'Storage area',
-                                       'Storage area - occsens',
-                                       'Storage area - refrigerated',
-                                       'Storage area - refrigerated - occsens',
-                                       'Washroom',
-                                       'Warehouse - fine',
-                                       'Warehouse - fine - refrigerated',
-                                       'Warehouse - med/blk',
-                                       'Warehouse - med/blk - refrigerated',
-                                       'Warehouse - med/blk2',
-                                       'Warehouse - med/blk2 - refrigerated',
-                                       'Hotel/Motel - lobby']
+  ##
+  # Validates whether zone can have terminal VRF equipment, i.e. all zones
+  # except those with transient occupancy, e.g. corridors, stairwells, storage.
+  # 2026-03: revised by rd2 ... method is currently unused - purge?
+  #
+  # @param zone [OpenStudio::Model::ThermalZone] a thermal zone
+  # @param activity [BTAP::Activity] a BTAP building ACTIVITY object
+  #
+  # @return [Boolean] true if zone can have terminal VRF equipment
+  def zone_terminal_vrf?(zone = nil, activity = nil)
+    return false unless zone.is_a?(OpenStudio::Model::ThermalZone)
+    return false unless activity.is_a?(BTAP::Activity)
 
-    space_types_to_skip['NECB2015'] = ['Atrium (height < 6m)',
-                                       'Atrium (6 =< height <= 12m)',
-                                       'Atrium (height > 12m)',
-                                       'Computer/Server room-sch-A',
-                                       'Copy/Print room',
-                                       'Corridor/Transition area - hospital',
-                                       'Corridor/Transition area - manufacturing facility',
-                                       'Corridor/Transition area - space designed to ANSI/IES RP-28',
-                                       'Corridor/Transition area other',
-                                       'Electrical/Mechanical room',
-                                       'Emergency vehicle garage',
-                                       'Lobby - elevator',
-                                       'Lobby - hotel',
-                                       'Lobby - motion picture theatre',
-                                       'Lobby - performing arts theatre',
-                                       'Lobby - space designed to ANSI/IES RP-28',
-                                       'Lobby - other',
-                                       'Locker room',
-                                       'Storage garage interior',
-                                       'Storage room < 5 m2',
-                                       'Storage room <= 5 m2 <= 100 m2',
-                                       'Storage room > 100 m2',
-                                       'Washroom - space designed to ANSI/IES RP-28',
-                                       'Washroom - other',
-                                       'Warehouse storage area medium to bulky palletized items',
-                                       'Warehouse storage area small hand-carried items(4)']
+    zone.spaces.each { |space| return false if activity.transient?(space) }
 
-    space_types_to_skip['NECB2017'] = ['Atrium (height < 6m)',
-                                       'Atrium (6 =< height <= 12m)',
-                                       'Atrium (height > 12m)',
-                                       'Computer/Server room',
-                                       'Copy/Print room',
-                                       'Corridor/Transition area - hospital',
-                                       'Corridor/Transition area - manufacturing facility',
-                                       'Corridor/Transition area - space designed to ANSI/IES RP-28',
-                                       'Corridor/Transition area other',
-                                       'Electrical/Mechanical room',
-                                       'Emergency vehicle garage',
-                                       'Lobby - elevator',
-                                       'Lobby - hotel',
-                                       'Lobby - motion picture theatre',
-                                       'Lobby - performing arts theatre',
-                                       'Lobby - space designed to ANSI/IES RP-28',
-                                       'Lobby - other',
-                                       'Locker room',
-                                       'Stairway/Stairwell',
-                                       'Storage garage interior',
-                                       'Storage room < 5 m2',
-                                       'Storage room <= 5 m2 <= 100 m2',
-                                       'Storage room > 100 m2',
-                                       'Washroom - space designed to ANSI/IES RP-28',
-                                       'Washroom - other',
-                                       'Warehouse storage area medium to bulky palletized items',
-                                       'Warehouse storage area small hand-carried items(4)']
-
-    zone_does_not_have_vrf_eqpt = false
-    zone.spaces.each do |space|
-      space_types_to_skip.each do |std, spfs|
-        spfs.each do |spf|
-          if space.spaceType.get.name.to_s.downcase.include? spf.downcase
-            zone_does_not_have_vrf_eqpt = true
-            break
-          end
-        end
-        break if zone_does_not_have_vrf_eqpt
-      end
-      break if zone_does_not_have_vrf_eqpt
-    end
+    true
   end
 
   #=============================================================================================================================
