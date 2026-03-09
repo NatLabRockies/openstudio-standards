@@ -1,13 +1,3 @@
-class String
-  def underscore
-    self.gsub(/::/, '/').
-        gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2').
-        gsub(/([a-z\d])([A-Z])/, '\1_\2').
-        tr("-", "_").
-        downcase
-  end
-end
-
 class BTAPCosting
 
   # @param prototype_creator [Standard]
@@ -16,9 +6,9 @@ class BTAPCosting
     # Populate the `costing_report` hash to report costing details per surface
     # type.
     @attributes.surface_types.each do |surface_type|
-      @costing_report["envelope"]["#{surface_type.underscore}_cost"]        = 0.0
-      @costing_report["envelope"]["#{surface_type.underscore}_area_m2"]     = 0.0
-      @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = 0.0
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost"]        = 0.0
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"]     = 0.0
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"] = 0.0
     end
 
     # Cost all the constructions found by BTAP Attributes.
@@ -81,11 +71,11 @@ class BTAPCosting
               cost * region_factor / 100.0 }.inject(0, :+)
           end
 
-          surfArea   = surface.netArea * space.thermalZone.get.multiplier
-          surfAreaft = (OpenStudio.convert(surfArea, "m^2", "ft^2").get).to_f
-          surfCost   = (cost + film_cost) * surfAreaft
-          totEnvCost = totEnvCost + surfCost
-          name       = ""
+          surfArea    = surface.netArea * space.thermalZone.get.multiplier
+          surfAreaft  = (OpenStudio.convert(surfArea, "m^2", "ft^2").get).to_f
+          surfCost    = (cost + film_cost) * surfAreaft
+          totEnvCost += surfCost
+          name        = ""
 
           # Bin the costing by construction standard type and rsi.
           if surface.btap_constructions.nil?
@@ -112,16 +102,16 @@ class BTAPCosting
             row['note']         += " / #{num_surface_types}: #{notes}"
           end
 
-          # Not using += for @costing_report additions so that output can be
-          # properly rounded.
-          @costing_report["envelope"]["#{surface_type.underscore}_cost"] = (
-            @costing_report["envelope"]["#{surface_type.underscore}_cost"] + surfCost).round(2)
-          @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] = (
-            @costing_report["envelope"]["#{surface_type.underscore}_area_m2"] + surfArea).round(2)
-          @costing_report["envelope"]["#{surface_type.underscore}_cost_per_m2"] = (
-            @costing_report["envelope"]["#{surface_type.underscore}_cost"] / \
-            @costing_report["envelope"]["#{surface_type.underscore}_area_m2"]).round(2)
+          @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost"]    += surfCost
+          @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] += surfArea
         end # surfaces of surface type
+        @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"] = (
+          @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost"] /
+          @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"])
+
+        if @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"].nan?
+          @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"] = 0.0
+        end
       end # surface_type
     end # spaces
 
@@ -136,6 +126,16 @@ class BTAPCosting
       totEnvCost += parapet_cost
     end
 
+    # Round everything at the end.
+    @attributes.surface_types.each do |surface_type|
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost"] = \
+        @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost"].round(2)
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = \
+        @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"].round(2)
+      @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"] = \
+        @costing_report["envelope"]["#{@attributes.surface_type_to_snake[surface_type]}_cost_per_m2"].round(2)
+    end
+    
     @costing_report["envelope"]["total_envelope_cost"] = totEnvCost.to_f.round(2)
     puts "\nEnvelope costing data successfully generated. Total envelope cost is $#{totEnvCost.to_f.round(2)}"
 
