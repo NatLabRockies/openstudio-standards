@@ -31,13 +31,6 @@ class BTAPCosting
     totEnvCost = 0
 
     @attributes.spaces.each do |space|
-
-      # Get SpaceType defined for space. If not defined it will skip the
-      # spacetype. May have to deal with Attic spaces.
-      #
-      # rd2: Once BTAP finally switches over to the 'structure'-based
-      #      construction assignment approach, spacetypes will no longer be
-      #      required. Check may no longer be necessary?
       if space.spaceType.empty? or
          space.spaceType.get.standardsSpaceType.empty? or
          space.spaceType.get.standardsBuildingType.empty?
@@ -46,23 +39,6 @@ class BTAPCosting
       end
 
       @attributes.surface_types.each do |surface_type|
-
-        # Iterate through actual surfaces in the model of surface_type.
-        #
-        # rd2: For NECB 2017, 2020, etc., a surface-specific construction's RSi
-        #      is the end result of TBD 'derating' calculations based on linear
-        #      thermal bridging - done strictly for OpenStudio modelling
-        #      purposes. These end-of-the-line, surface-specific 'derated'
-        #      construction RSi values are unsuitable for BTAP's costing or
-        #      embodied carbon calculations, as they do not reflect the initial
-        #      'uprated' (real-world) clear-field constructions. Better to rely
-        #      on TBD-reported 'uprated' Uo-factors.
-        #
-        #      In btap/bridging.rb, I added (to each 'derated' surface in the
-        #      OSM) an AdditionalProperty ("uprated_Uo"). This provides
-        #      post-simulation processes like BTAP costing and embodied GHG
-        #      calculations, a reliable way to retrieve the initial, clear-field
-        #      Uo factors. This is demonstrated in the NECB unit test_NECB_TBD.
         num_surface_types = 0
         space.surfaces_hash[surface_type].each do |surface|
           if surface.btap_constructions.nil?
@@ -72,68 +48,13 @@ class BTAPCosting
           num_surface_types += 1
           surface_is_glazing = surface.btap_constructions.first["type"] == "glazing"
           construction_name  = surface.btap_constructions.first["name"]
-
-          # We don't need all the information, just the rsi and cost. Window
-          # costs from the API data use U-value, which was converted to rsi for
-          # cost_range_array above.
-          if surface_is_glazing
-            cost_range_array = surface.btap_constructions.map do |construction|
-              [1 / surface.rsi, construction["cost"]]
-            end
-          else
-            cost_range_array = surface.btap_constructions.map do |construction|
-              [surface.rsi, construction["cost"]]
-            end
-          end
-
-          # Sorted based on rsi.
-          cost_range_array.sort! { |a, b| a[0] <=> b[0] }
+          cost_range_array   = surface.btap_constructions.map { |construction|
+            [construction["rsi"], construction["cost"]] }
 
           # Use the cost_range_array to interpolate the estimated cost for the
-          # given rsi.
-          exterpolate_percentage_range = 30.0
-          cost = interpolate(
-            x_y_array: cost_range_array,
-            x2: surface.rsi,
-            exterpolate_percentage_range: exterpolate_percentage_range)
-
-          # If the cost is nil, that means the rsi is out of range. Flag in the report.
-          if cost.nil?
-            unless cost_range_array.empty?
-              notes = "Warning! RSI out of the range (#{'%.2f' % surface.rsi}) or cost is 0!. Range for " \
-                      "#{construction_name} is " \
-                      "#{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}."
-
-              # rd2: Shouldn't default to 0$ if beyond range in database.
-              #      Should instead retain the $ of the highest RSi on file.
-              #      This will happen frequently for NECB 2017, 2020, etc.
-              cost = 0.0
-            else
-              notes = "No cost found for this! So Cost is set to 0.0!"
-
-              # rd2: Shouldn't default to 0$ if beyond range in database.
-              #      Should simply retain the $ of the highest RSi on file.
-              #      This will happen frequently for NECB 2017, 2020, etc.
-              cost = 0.0
-            end
-          elsif cost.nan?
-            raise("The values for cost and conductance for #{construction_name} cannot be interpolated. Cannot " \
-                  "create an equation of a line from #{cost_range_array.sort.uniq}. Check the construction database " \
-                  "and either eliminate the errant row, or set the x value to an appropriate number.")
-          else
-
-            # Tell user if we are extrapolating outside of library.
-            array = cost_range_array.sort { |a, b| a[0] <=> b[0] }
-            if surface.rsi < (array.first[0].to_f) || surface.rsi > (array.last[0].to_f)
-              notes = "RSI out of the range (#{'%.2f' % surface.rsi}). Range for " \
-                      "#{construction_name} is " \
-                      "#{'%.2f' % cost_range_array.first[0]}-#{'%.2f' % cost_range_array.last[0]}. " \
-                      "Using extrapolation up to +/-30% of library boundaries."
-            else
-              notes = "OK"
-            end
-          end
-
+          # RSI of the current surface.
+          cost, notes = BTAP::LinearRegression.interpolate(x_y_array: cost_range_array, x2: surface.rsi)
+          
           # Calculate SHGC/film cost.
           film_cost = 0.0
           if surface_is_glazing

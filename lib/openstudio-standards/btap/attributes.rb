@@ -34,22 +34,16 @@ module BTAP
 
   # For surfaces and subsurfaces, BTAP Costing requires a list of constructions
   # for each U-value in order to perform a linear regression to best estimate
-  # the respective cost and carbon emissions per surface. BTAP Carbon requires
-  # only the construction with the closest U-value since constructions have to
-  # be calculated per-surface to account for window frame perimeters. Also,
-  # store the R-value of each surface.
-  # TODO: BTAP Carbon could use the same regression technique as BTAP Costing,
-  # but that isn't implemented yet.
+  # the respective cost and carbon emissions per surface. Also, store the
+  # R-value of each surface.
   class OpenStudio::Model::Surface
-    attr_reader :rsi                       # [Float]
-    attr_reader :btap_construction_closest # [Hash]
-    attr_reader :btap_constructions        # [Array[Hash]]
+    attr_reader :rsi                # [Float]
+    attr_reader :btap_constructions # [Array[Hash]]
   end
 
   class OpenStudio::Model::SubSurface
-    attr_reader :rsi                       # [Float]
-    attr_reader :btap_construction_closest # [Hash]
-    attr_reader :btap_constructions        # [Array[Hash]]
+    attr_reader :rsi                # [Float]
+    attr_reader :btap_constructions # [Array[Hash]]
   end
 
   # Class for accessing and pre-processing model attributes.
@@ -119,6 +113,8 @@ module BTAP
         "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
       }
 
+      @glazing_surface_types = Set.new(["door_glass", "skylight", "window"])
+
       @zones         = []
       @spaces        = []
       @constructions = {}
@@ -173,59 +169,56 @@ module BTAP
       return if surface.rsi < 1.0
 
       if @surface_type_assembly_map.has_key?(surface_type)
-        tbd_surface_type          = @surface_type_assembly_map[surface_type]
-        construction_name         = @surface_types_to_assemblies[surface_type]
+        tbd_surface_type  = @surface_type_assembly_map[surface_type]
+        construction_name = @surface_types_to_assemblies[surface_type]
       else # TODO: Temporary branching for temporary defaults.
         construction_name = @default_surface_constructions_by_type[surface_type]
       end
 
-      construction_candidates   = @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"]
-      surface_usi               = 1 / surface.rsi
-      closest_usi               = construction_candidates.keys.map(&:to_f).min_by { |usi|
-                                    (surface_usi - usi).abs }.to_s
-      btap_constructions        = []
-      btap_construction_closest = construction_candidates[closest_usi]
+      btap_constructions = []
+      is_opaque          = !(@glazing_surface_types.include?(tbd_surface_type.to_s))
 
-      # Initialize the construction with the closest U-value if it doesn't exist
-      # yet.
-      unless @constructions.has_key?(btap_construction_closest["id"])
-
-        # Process each construction into a hash. This hash will also store the
-        # cost for the construction in `envelope_costing.rb`. Carbon emissions
-        # aren't stored per-construction since they vary per surface due to
-        # window perimeter differences, and this class is stored as a reference
-        # in the Surface and SubSurfaces classes. Here are a list of parameters
-        # of the hash:
-        #
-        # @param name        [String]
-        # @param description [String]
-        # @param type        [String] Material type, either "opaque" or
-        #                             "glazing".
-        # @param id_layers   [Array[Integer]]
-        # @param usi         [Float]
-        # @param fenestration_number_of_panes [String] ExteriorWindow only.
-        # @param frame_material               [String] ExteriorWindow only.
-        # @param fenestration_type            [String] ExteriorWindow only.
-        btap_construction_closest["name"]               = construction_name
-        btap_construction_closest["usi"]                = closest_usi
-        @constructions[btap_construction_closest["id"]] = btap_construction_closest
-
-        btap_construction_closest = @constructions[btap_construction_closest["id"]]
+      # Opaque entries are listed by USI while glazing ones are listed by RSI.
+      # Convert the opaque entries to RSI.
+      if is_opaque
+        construction_candidates = \
+          @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"].transform_keys { |usi|
+            1 / usi.to_f }
+      else
+        construction_candidates = \
+          @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"].transform_keys(&:to_f)
       end
 
-      construction_candidates.each do |construction_usi, construction_hash|
+
+      # Process each construction into a hash. This hash will also store the
+      # cost for the construction in `envelope_costing.rb`. Carbon emissions
+      # aren't stored per-construction since they vary per surface due to
+      # window perimeter differences, and this class is stored as a reference
+      # in the Surface and SubSurfaces classes. Here are a list of parameters
+      # of the hash:
+      #
+      # @param name        [String]
+      # @param description [String]
+      # @param type        [String] Material type, either "opaque" or
+      #                             "glazing".
+      # @param id_layers   [Array[Integer]]
+      # @param rsi         [Float]
+      # @param fenestration_number_of_panes [String] ExteriorWindow only.
+      # @param frame_material               [String] ExteriorWindow only.
+      # @param fenestration_type            [String] ExteriorWindow only.
+      construction_candidates.each do |construction_rsi, construction_hash|
 
         # Store all candidate constructions for reference when doing linear
         # regression for construction takeoffs.
         unless @constructions.has_key?(construction_hash["id"])
           construction_hash["name"]               = construction_name
-          construction_hash["usi"]                = closest_usi
+          construction_hash["rsi"]                = construction_rsi
           @constructions[construction_hash["id"]] = construction_hash
         end
+
         btap_constructions << @constructions[construction_hash["id"]]
       end
 
-      surface.instance_variable_set(:@btap_construction_closest, btap_construction_closest)
       surface.instance_variable_set(:@btap_constructions, btap_constructions)
     end
 
