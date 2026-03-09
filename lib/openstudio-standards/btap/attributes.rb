@@ -48,12 +48,13 @@ module BTAP
 
   # Class for accessing and pre-processing model attributes.
   class Attributes
-    attr_reader :model            # [OpenStudio::Model::Model]
-    attr_reader :zones            # [Array[OpenStudio::Model::Zone]]
-    attr_reader :spaces           # [Array[OpenStudio::Model::Space]]
-    attr_reader :surface_types    # [Array]
-    attr_reader :use_tbd          # [Boolean]
-    attr_reader :tbd_edge_tallies # [Hash]
+    attr_reader :model                 # [OpenStudio::Model::Model]
+    attr_reader :zones                 # [Array[OpenStudio::Model::Zone]]
+    attr_reader :spaces                # [Array[OpenStudio::Model::Space]]
+    attr_reader :surface_types         # [Array]
+    attr_reader :use_tbd               # [Boolean]
+    attr_reader :tbd_edge_tallies      # [Hash]
+    attr_reader :surface_type_to_snake # [Hash]
 
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]
@@ -87,6 +88,11 @@ module BTAP
         "GroundContactRoof",
         "GroundContactFloor"
       ]
+
+      # Formatted dictionary of surface types from camel case to snake case
+      # for neat reporting.
+      @surface_type_to_snake = @surface_types.map { 
+        |type| [type, type.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase] }.to_h
 
       # Surface type map for converting between surface type strings and the
       # `costed_assembly()` `surface_type` parameter.

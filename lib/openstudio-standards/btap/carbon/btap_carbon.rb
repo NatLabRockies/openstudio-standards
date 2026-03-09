@@ -73,17 +73,19 @@ class BTAPCarbon
   end
 
   def audit_embodied_carbon
+    total_emissions = 0
+
     @attributes.surface_types.each do |surface_type|
-      @carbon_report["#{surface_type.underscore}_area_m2"] = 0.0
-      @carbon_report["#{surface_type.underscore}_carbon"]  = 0.0
+      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = 0.0
+      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"]  = 0.0
     end
 
     @attributes.spaces.each do |space|
       @attributes.surface_types.each do |surface_type|
         space.surfaces_hash[surface_type].each do |surface|
           surface_area = surface.netArea * space.thermalZone.get.multiplier
-          @carbon_report["#{surface_type.underscore}_area_m2"] = \
-            (@carbon_report["#{surface_type.underscore}_area_m2"] + surface_area).round(2)
+          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = \
+            @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] + surface_area
 
           # Get the carbon emissions for each material in the space.
           if surface.btap_construction_closest.nil?
@@ -92,54 +94,62 @@ class BTAPCarbon
 
             # Note that the carbon tallying method must be called per-surface
             # to account for the perimeter values for each surface.
-
-            # rd2: Reiterating a note in envelope_costing.rb:
-            #
-            #      For NECB 2017, 2020, etc., a surface-specific construction's RSi
-            #      is the end result of TBD 'derating' calculations based on linear
-            #      thermal bridging - done strictly for OpenStudio modelling
-            #      purposes. These end-of-the-line, surface-specific 'derated'
-            #      construction RSi values are unsuitable for BTAP's costing or
-            #      embodied carbon calculations, as they do not reflect the initial
-            #      'uprated' (real-world) clear-field constructions. Better to rely
-            #      on TBD-reported 'uprated' Uo-factors.
-            #
-            #      In btap/bridging.rb, I added (to each 'derated' surface in the
-            #      OSM) an AdditionalProperty ("uprated_Uo"). This provides
-            #      post-simulation processes like BTAP costing and embodied GHG
-            #      calculations, a reliable way to retrieve the initial, clear-field
-            #      Uo factors. This is demonstrated in the NECB unit test_NECB_TBD.
             emissions = get_carbon_emissions(surface.btap_construction_closest, surface.vertices, surface_area)
           end
 
-          # Calculate the carbon emissions
-          @carbon_report["#{surface_type.underscore}_carbon"] = \
-            (@carbon_report["#{surface_type.underscore}_carbon"] + emissions).round(2)
+          # Calculate the carbon emissions for the surface and append the result
+          # to the total emissions.
+          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] = \
+            @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] + emissions
+          total_emissions += emissions
+        end
+        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = (
+          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] /
+          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"])
+
+        if @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"].nan?
+          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = 0.0
         end
       end
     end
 
     # Get the total emissions from all the surface types.
-    total_emissions = 0
     @attributes.surface_types.each do |surface_type|
-      total_emissions += @carbon_report["#{surface_type.underscore}_carbon"]
+      total_emissions += @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"]
     end
 
     # Add the embodied carbon tallied from TBD which tallies carbon emissions
     # of items that aren't explicitly modeled 
-    structure_carbon = \
-      @attributes.model.getBuilding.additionalProperties.getFeatureAsDouble("co2_structure").get.round(2)
-    @carbon_report["structure_carbon"] = structure_carbon
+    structure_carbon = @attributes.model.getBuilding.additionalProperties.getFeatureAsDouble("co2_structure").get
+    @carbon_report["structure_carbon"] = structure_carbon.round(2)
     total_emissions += structure_carbon
 
-    puts "\nEmbodied carbon data successfully generated. Total emboded carbon emissions is " \
+    # Factor in parapets likewise for costing in `envelope_costing.rb`.
+    if @attributes.use_tbd
+      wall_carbon_per_m2 = @costing_report["exterior_wall_carbon_per_m2"]
+      parapet_carbon = @attributes.tbd_edge_tallies["parapet"].values.first * wall_carbon_per_m2
+      @carbon_report["parapet_carbon"] = parapet_carbon.round(2)
+      total_emissions += parapet_carbon
+    end
+
+    # Round everything at the end.
+    @attributes.surface_types.each do |surface_type|
+      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] = \
+        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"].round(2)
+      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = \
+        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"].round(2)
+      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = \
+        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"].round(2)
+    end
+
+    puts "\nEmbodied carbon data successfully generated. Total embodied carbon emissions is " \
          "#{total_emissions.to_f.round(2)} kg/m^2"
     @carbon_report["total"] = total_emissions
     return @carbon_report
   end
 
   # Retrieve the carbon emissions given a surface, its construction, and its
-  # area. Surface vertice are required to calculate the perimeter of window
+  # area. Surface vertices are required to calculate the perimeter of window
   # frames.
   #
   # @param construction [Hash]
