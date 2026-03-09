@@ -32,6 +32,7 @@ require_relative 'envelope'
 require_relative 'bridging'
 require_relative 'schedules'
 require_relative 'btap_result'
+require_relative 'linear_regression'
 
 class String
   #This method converts to Boolean.

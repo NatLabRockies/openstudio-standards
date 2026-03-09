@@ -1,41 +1,6 @@
 require 'json'
 require_relative 'btap_database'
 
-class SimpleLinearRegression
-  #https://gist.github.com/rweald/3516193#file-full-slr-class-snippet-rb
-  def initialize(xs, ys)
-    @xs, @ys = xs, ys
-    if @xs.length != @ys.length
-      raise "Unbalanced data. xs need to be same length as ys"
-    end
-  end
-
-  def y_intercept
-    return mean(@ys) - (slope * mean(@xs))
-  end
-
-  def slope
-    x_mean = mean(@xs)
-    y_mean = mean(@ys)
-
-    numerator = (0...@xs.length).reduce(0) do |sum, i|
-      sum + ((@xs[i] - x_mean) * (@ys[i] - y_mean))
-    end
-
-    denominator = @xs.reduce(0) do |sum, x|
-      sum + ((x - x_mean) ** 2)
-    end
-
-    return (numerator / denominator)
-  end
-
-  def mean(values)
-    total = values.reduce(0) { |sum, x| x + sum }
-    return Float(total) / Float(values.length)
-  end
-end
-
-
 class BTAPCosting
 
   # Class to initialize BTAP Costing.
@@ -153,56 +118,6 @@ class BTAPCosting
     error = [material, "Could not find regional adjustment factor for material used in #{city}, #{province_state}."]
     @costing_database['db_errors'] << error unless @costing_database['db_errors'].include?(error)
     return 100.0, 100.0, 100.0
-  end
-
-  # Interpolate array of hashes that contain 2 values (key=rsi, data=cost)
-  def interpolate(x_y_array:, x2:, exterpolate_percentage_range: 30.0)
-    ratio_range = exterpolate_percentage_range / 100.0
-    array = x_y_array.uniq.sort { |a, b| a[0] <=> b[0] }
-    #if there is only one...return what you got.
-    if array.size == 1
-      return array.first[1].to_f
-    end
-    # Check if value x2 is within range of array for interpolation
-    # Extrapolate when x2 is out-of-range by +/- 10% of end values.
-    if array.empty? || x2 < ((1.0 - ratio_range) * array.first[0].to_f) || x2 > ((1.0 + ratio_range) * array.last[0].to_f)
-      return nil
-    elsif x2 < array.first[0].to_f
-      # Extrapolate down using first and second cost value to this out-of-range input
-      x_array = [array[0][0].to_f, array[1][0].to_f]
-      y_array = [array[0][1].to_f, array[1][1].to_f]
-      linear_model = SimpleLinearRegression.new(x_array, y_array)
-      y2 = linear_model.y_intercept + linear_model.slope * x2
-      return y2
-    elsif x2 > array.last[0].to_f
-      # Extrapolate up using second to last and last cost value to this out-of-range input
-      x_array = [array[-2][0].to_f, array[-1][0].to_f]
-      y_array = [array[-2][1].to_f, array[-1][1].to_f]
-      linear_model = SimpleLinearRegression.new(x_array, y_array)
-      y2 = linear_model.y_intercept + linear_model.slope * x2
-      return y2
-    else
-      array.each_index do |counter|
-
-        # skip last value.
-        next if array[counter] == array.last
-
-        x0 = array[counter][0]
-        y0 = array[counter][1]
-        x1 = array[counter + 1][0]
-        y1 = array[counter + 1][1]
-
-        # skip to next if x2 is not between x0 and x1
-        next if x2 < x0 || x2 > x1
-
-        # Do interpolation
-        y2 = y0 # just in-case x0, x1 and x2 are identical!
-        if (x1 - x0) > 0.0
-          y2 = y0.to_f + ((y1 - y0).to_f * (x2 - x0).to_f / (x1 - x0).to_f)
-        end
-        return y2
-      end
-    end
   end
 
   # Enter in [latitude, longitude] for each loc and this method will return the distance.
@@ -445,5 +360,4 @@ class BTAPCosting
     }
     return costRetHash
   end
-
 end
