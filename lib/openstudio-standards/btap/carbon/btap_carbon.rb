@@ -94,16 +94,16 @@ class BTAPCarbon
     total_emissions = 0
 
     @attributes.surface_types.each do |surface_type|
-      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = 0.0
-      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"]  = 0.0
+      @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = 0.0
+      @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]  = 0.0
     end
 
     @attributes.spaces.each do |space|
       @attributes.surface_types.each do |surface_type|
         space.surfaces_hash[surface_type].each do |surface|
           surface_area = surface.netArea * space.thermalZone.get.multiplier
-          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = \
-            @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] + surface_area
+          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = \
+            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] + surface_area
 
           # Get the carbon emissions for each material in the space.
           if surface.btap_construction_closest.nil?
@@ -117,22 +117,22 @@ class BTAPCarbon
 
           # Calculate the carbon emissions for the surface and append the result
           # to the total emissions.
-          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] = \
-            @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] + emissions
+          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] = \
+            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] + emissions
           total_emissions += emissions
         end
-        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = (
-          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] /
-          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"])
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = (
+          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] /
+          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"])
 
-        if @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"].nan?
-          @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = 0.0
+        if @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"].nan?
+          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = 0.0
         end
       end
     end
     # Get the total emissions from all the surface types.
     @attributes.surface_types.each do |surface_type|
-      total_emissions += @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"]
+      total_emissions += @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]
     end
 
     # Add the embodied carbon tallied from TBD which tallies carbon emissions
@@ -151,12 +151,12 @@ class BTAPCarbon
 
     # Round everything at the end.
     @attributes.surface_types.each do |surface_type|
-      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"] = \
-        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon"].round(2)
-      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"] = \
-        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_area_m2"].round(2)
-      @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"] = \
-        @carbon_report["#{@attributes.surface_type_to_snake[surface_type]}_carbon_per_m2"].round(2)
+      @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] = \
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"].round(2)
+      @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = \
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"].round(2)
+      @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = \
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"].round(2)
     end
 
     puts "\nEmbodied carbon data successfully generated. Total embodied carbon emissions is " \
