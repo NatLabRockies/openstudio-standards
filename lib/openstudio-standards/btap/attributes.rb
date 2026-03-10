@@ -196,17 +196,10 @@ module BTAP
       is_opaque          = !(@glazing_surface_types.include?(construction_sheet))
       btap_constructions = []
 
-      # Opaque entries are listed by USI while glazing ones are listed by RSI.
-      # Convert the opaque entries to RSI.
-      if is_opaque
-        construction_candidates = \
-          @costing_database["constructions"][construction_sheet][construction_name]["usi"].transform_keys { |usi|
-            1 / usi.to_f }
-      else
-        construction_candidates = \
-          @costing_database["constructions"][construction_sheet][construction_name]["rsi"].transform_keys(&:to_f)
-      end
-
+      # Construction database entries use U-factors, convert them to R-factors.
+      construction_candidates = \
+        @costing_database["constructions"][construction_sheet][construction_name]["usi"].transform_keys { |usi|
+          1 / usi.to_f }
 
       # Process each construction into a hash. This hash will also store the
       # cost for the construction in `envelope_costing.rb`. Carbon emissions
