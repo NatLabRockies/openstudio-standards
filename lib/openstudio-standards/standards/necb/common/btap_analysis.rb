@@ -31,7 +31,7 @@ class BTAPAnalysis
     File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f|
       f.write(JSON.pretty_generate(cost_result, allow_nan: true))
     end
-    puts "Wrote File cost_results.json in #{@output_folder} "
+    puts "Wrote cost_results.json in #{@output_folder} "
 
     return cost_result
   end
@@ -47,7 +47,7 @@ class BTAPAnalysis
     File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f|
       f.write(JSON.pretty_generate(carbon_result, allow_nan: true))
     end
-    puts "Wrote File carbon_results.json in #{@output_folder} "
+    puts "Wrote carbon_results.json in #{@output_folder} "
 
     return carbon_result
   end
