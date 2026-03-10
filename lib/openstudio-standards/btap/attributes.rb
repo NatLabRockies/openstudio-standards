@@ -48,13 +48,13 @@ module BTAP
 
   # Class for accessing and pre-processing model attributes.
   class Attributes
-    attr_reader :model                 # [OpenStudio::Model::Model]
-    attr_reader :zones                 # [Array[OpenStudio::Model::Zone]]
-    attr_reader :spaces                # [Array[OpenStudio::Model::Space]]
-    attr_reader :surface_types         # [Array]
-    attr_reader :use_tbd               # [Boolean]
-    attr_reader :tbd_edge_tallies      # [Hash]
-    attr_reader :surface_type_to_snake # [Hash]
+    attr_reader :model                  # [OpenStudio::Model::Model]
+    attr_reader :zones                  # [Array[OpenStudio::Model::Zone]]
+    attr_reader :spaces                 # [Array[OpenStudio::Model::Space]]
+    attr_reader :surface_types          # [Array]
+    attr_reader :use_tbd                # [Boolean]
+    attr_reader :tbd_edge_tallies       # [Hash]
+    attr_reader :surface_types_to_snake # [Hash]
 
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]
@@ -91,12 +91,12 @@ module BTAP
 
       # Formatted dictionary of surface types from camel case to snake case
       # for neat reporting.
-      @surface_type_to_snake = @surface_types.map { 
-        |type| [type, type.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase] }.to_h
+      @surface_types_to_snake = @surface_types.map { |type|
+        [type, type.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase] }.to_h
 
       # Surface type map for converting between surface type strings and the
       # `costed_assembly()` `surface_type` parameter.
-      @surface_type_assembly_map = {
+      @surface_types_to_costed_assembly = {
         "ExteriorWall"            => :walls,
         "ExteriorRoof"            => :roofs,
         "ExteriorFloor"           => :floors,
@@ -119,6 +119,25 @@ module BTAP
         "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
       }
 
+      @surface_types_to_construction_sheet = {
+        "ExteriorWall"                    => "wall",
+        "ExteriorRoof"                    => "roof",
+        "ExteriorFloor"                   => "floor",
+        "InterzonalRoof"                  => "roof",
+        "InterzonalSkylightWalls"         => "wall",
+        "ExteriorFixedWindow"             => "window",
+        "ExteriorOperableWindow"          => "window",
+        "ExteriorSkylight"                => "skylight",
+        "ExteriorTubularDaylightDiffuser" => "skylight",
+        "ExteriorTubularDaylightDome"     => "skylight",
+        "ExteriorDoor"                    => "door",
+        "ExteriorGlassDoor"               => "door_glass",
+        "ExteriorOverheadDoor"            => "door",
+        "GroundContactWall"               => "bg_wall",
+        "GroundContactRoof"               => "bg_roof",
+        "GroundContactFloor"              => "slab"
+      }
+
       @glazing_surface_types = Set.new(["door_glass", "skylight", "window"])
 
       @zones         = []
@@ -127,7 +146,7 @@ module BTAP
 
 
       self.compile_model
-      self.compile_constructions(@use_tbd)
+      self.compile_constructions
     end
 
     # Helper method which retrieves all compiled constructions.
@@ -138,19 +157,22 @@ module BTAP
     # Compile all the constructions associated with each surface and subsurface.
     #
     # @param use_tbd [Bool] Use TBD takeoffs for surfaces where available.
-    def compile_constructions(use_tbd)
+    def compile_constructions
 
       # Create a hash of surface types referencing construction type names.
       # These references are shared across all surfaces of the same type because
       # the `costed_assembly` method assigns assemblies according to building
       # categories.
-      if use_tbd
-        @surface_types_to_assemblies = @surface_type_assembly_map.keys.map { |surface_type|
-          [surface_type, BTAP::Constructions.costed_assembly(
+      @surface_types_to_assembly_names = @surface_types.map { |surface_type|
+        if @surface_types_to_costed_assembly.has_key?(surface_type)
+          assembly = BTAP::Constructions.costed_assembly(
             @standard.structure,
-            @surface_type_assembly_map[surface_type],
-            @building_performance)]}.to_h
-      end
+            @surface_types_to_costed_assembly[surface_type],
+            @building_performance)
+        else
+          assembly = @default_surface_constructions_by_type[surface_type]
+        end
+        [surface_type, assembly] }.to_h
 
       @spaces.each do |space|
         @surface_types.each do |surface_type|
@@ -169,30 +191,20 @@ module BTAP
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_surface_construction(surface, surface_type)
-
-      # Only consider insulated surfaces for further analysis. If the RSI of a
-      # surface is less than 1, then skip it.
-      return if surface.rsi < 1.0
-
-      if @surface_type_assembly_map.has_key?(surface_type)
-        tbd_surface_type  = @surface_type_assembly_map[surface_type]
-        construction_name = @surface_types_to_assemblies[surface_type]
-      else # TODO: Temporary branching for temporary defaults.
-        construction_name = @default_surface_constructions_by_type[surface_type]
-      end
-
+      construction_sheet = @surface_types_to_construction_sheet[surface_type]
+      construction_name  = @surface_types_to_assembly_names[surface_type]
+      is_opaque          = !(@glazing_surface_types.include?(construction_sheet))
       btap_constructions = []
-      is_opaque          = !(@glazing_surface_types.include?(tbd_surface_type.to_s))
 
       # Opaque entries are listed by USI while glazing ones are listed by RSI.
       # Convert the opaque entries to RSI.
       if is_opaque
         construction_candidates = \
-          @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["usi"].transform_keys { |usi|
+          @costing_database["constructions"][construction_sheet][construction_name]["usi"].transform_keys { |usi|
             1 / usi.to_f }
       else
         construction_candidates = \
-          @costing_database["constructions"][tbd_surface_type.to_s][construction_name]["rsi"].transform_keys(&:to_f)
+          @costing_database["constructions"][construction_sheet][construction_name]["rsi"].transform_keys(&:to_f)
       end
 
 
@@ -264,12 +276,10 @@ module BTAP
       @spaces.each do |space|
         # Exterior Surfaces
         exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
-        space.surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
-        space.surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
-        space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
-        exterior_surfaces.each do |surface|
-          surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
-        end
+        space.surfaces_hash["ExteriorWall"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          exterior_surfaces, "Wall").sort
+        space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          exterior_surfaces, "Floor").sort
 
         # Interzonal Surfaces
         # In models with attics, roofs may be unconditioned and as a result
@@ -281,14 +291,15 @@ module BTAP
         # TODO: Eventually crawlspaces should also be considered, however they
         # are not present in any of the NECB template buildings.
         if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
-           interzonal_roof_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
-            space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
-           interzonal_skylight_wall_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
-            space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
+          space.surfaces_hash["ExteriorRoof"] = []
+          interzonal_roof_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
+          interzonal_skylight_wall_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
 
-           # Since the mirrored surface is used, the space type will likely be
-           # different, so match the space type correctly.
-          interzonal_roof_surfaces .each do |surface|
+          # Since the mirrored surface is used, the space type will likely be
+          # different, so match the space type correctly.
+          interzonal_roof_surfaces.each do |surface|
             matched_space = @spaces.find { |matching_space| surface.space.get == matching_space }
             matched_space.surfaces_hash["InterzonalRoof"] << surface
             surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
@@ -299,6 +310,16 @@ module BTAP
             matched_space.surfaces_hash["InterzonalSkylightWalls"] << surface
             surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
+        else
+
+          # Only store roofs if they are conditioned by assessing the additional
+          # property above.
+          space.surfaces_hash["ExteriorRoof"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+            exterior_surfaces, "RoofCeiling").sort
+        end
+
+        exterior_surfaces.each do |surface|
+          surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
         end
 
         # Exterior Subsurfaces
@@ -326,9 +347,12 @@ module BTAP
         # Ground Surfaces
         ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
         ground_surfaces += BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Foundation")
-        space.surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Wall").sort
-        space.surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "RoofCeiling").sort
-        space.surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Floor").sort
+        space.surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          ground_surfaces, "Wall").sort
+        space.surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          ground_surfaces, "RoofCeiling").sort
+        space.surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+          ground_surfaces, "Floor").sort
         ground_surfaces.each do |surface|
           surface.instance_variable_set(:@rsi, TBD.rsi(
             surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
