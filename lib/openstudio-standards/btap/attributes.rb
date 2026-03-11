@@ -210,8 +210,7 @@ module BTAP
       #
       # @param name        [String]
       # @param description [String]
-      # @param type        [String] Material type, either "opaque" or
-      #                             "glazing".
+      # @param type        [String] Material type, either "opaque" or "glazing".
       # @param id_layers   [Array[Integer]]
       # @param rsi         [Float]
       # @param fenestration_number_of_panes [String] ExteriorWindow only.
