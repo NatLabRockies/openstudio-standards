@@ -1,35 +1,55 @@
 module BTAP
   module LinearRegression
+    @@extrapolation_bounds_exceeded = false
+
+    # Read and reset the error to not carry over from previous calls in the case
+    # of using this module across different facilities.
+    # @return [TrueClass|FalseClass]
+    def self.extrapolation_error?
+      value = @@extrapolation_bounds_exceeded
+      @@extrapolation_bounds_exceeded = false
+      return value
+    end
+
+    # @param message [String]
+    # @return [String]
+    def self.fmt(message)
+      return "#{[BTAP::LinearRegression]} #{message}"
+    end
 
     # Interpolate a 2D array for the dependent variable `x2` and get the
-    # y-intercept.
-    # @param x_y_array [Array[Array]] 2D array of floats.
-    # @param x2        [Float]        Dependent variable to be interpolated.
-    # @param extrapolate_percent_range [Float]
+    # y-intercept. Sets the extrapolation class variable if extrapolation
+    # boundaries were exceeded.
+    # @param x_y_array           [Array[Array]] 2D array of floats.
+    # @param x2                  [Float]        Dependent variable to be
+    #                                           interpolated.
+    # @param extrapolation_range [Float]
     # @return [[Float, String]] The interpolated y-intercept and the warning
     #                           message, "OK" if none.
-    def self.interpolate(x_y_array:, x2:, extrapolate_percentage_range: 50.0)
+    def self.interpolate(x_y_array:, x2:, extrapolation_range: 0.02)
       notes = "OK"
       array = x_y_array.uniq.sort { |a, b| a[0] <=> b[0] }
+      extrapolation_percent = extrapolation_range * 100
 
       if array.empty? 
-        return 0.0, "[BTAP::LinearRegression] Empty array given for interpolation, returning zero."
+        return 0.0, fmt("Empty array given for interpolation, returning zero.")
       elsif array.size == 1
         return array.first[1].to_f, notes
       end
 
-      ratio_range = extrapolate_percentage_range / 100.0
-      lower_bound = (1.0 - ratio_range) * array[0][0] 
-      upper_bound = (1.0 + ratio_range) * array[-1][0]
+      lower_bound = (1.0 - extrapolation_range) * array[0][0]
+      upper_bound = (1.0 + extrapolation_range) * array[-1][0]
 
       if x2 < lower_bound
-        return lower_bound, "[BTAP::LinearRegression] Dependent variable #{x2} precedes the lower bound " \
-                            "(#{lower_bound}) for the #{extrapolate_percentage_range}% range. Returning the lower " \
-                            "bound."
+        @@extrapolation_bounds_exceeded = true
+        return lower_bound, fmt("Warning: Dependent variable #{x2} precedes the lower bound " \
+                            "(#{lower_bound}) for the #{extrapolation_percent}% range. Returning the lower " \
+                            "bound.")
       elsif x2 > upper_bound
-        return upper_bound, "[BTAP::LinearRegression] Dependent variable #{x2} exceeds the upper bound " \
-                            "(#{upper_bound}) for the #{extrapolate_percentage_range}% range. Returning the upper " \
-                            "bound."
+        @@extrapolation_bounds_exceeded = true
+        return upper_bound, fmt("Warning: Dependent variable #{x2} exceeds the upper bound " \
+                            "(#{upper_bound}) for the #{extrapolation_percent}% range. Returning the upper " \
+                            "bound.")
       elsif x2 < array.first[0].to_f
 
         # Extrapolate down using first and second cost value to this
