@@ -250,8 +250,7 @@ module BTAP
           if space.spaceType.empty? or
              space.spaceType.get.standardsSpaceType.empty? or
              space.spaceType.get.standardsBuildingType.empty?
-            raise (
-              "standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space.")
+            raise ("Error: Space type not defined for #{space.name.get}")
           end
           zone    << space
           @spaces << space
