@@ -21,13 +21,6 @@ class BTAPCosting
     totEnvCost = 0
 
     @attributes.spaces.each do |space|
-      if space.spaceType.empty? or
-         space.spaceType.get.standardsSpaceType.empty? or
-         space.spaceType.get.standardsBuildingType.empty?
-        raise("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this " \
-              "space for costing.")
-      end
-
       @attributes.surface_types.each do |surface_type|
         num_surface_types = 0
         space.surfaces_hash[surface_type].each do |surface|
