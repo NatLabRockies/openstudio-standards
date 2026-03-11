@@ -363,8 +363,7 @@ module BTAP
     def get_correct_rsi(surface)
 
       # Uninsulated surfaces are not derated by TBD. These surfaces will not
-      # have a stored U-value. In those cases, the fallback method should return
-      # zero accordingly.
+      # have a stored U-value. In those cases, use the fallback method.
       if @use_tbd and surface.additionalProperties.getFeatureAsDouble("uprated_Uo").is_initialized
         return 1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
       else

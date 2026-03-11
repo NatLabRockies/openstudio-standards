@@ -474,6 +474,58 @@ module BTAP
     def self.extended(base)
       base.send(:include, self)
     end
+
+    # Retrieve the material quantities for TBD edge tallies.
+    # @param edge_tallies [Hash] Wall references mapped to costs.
+    # @return [Hash] IDs mapped to their quantities in feet.
+    def self.get_material_quantities_for_edges(edge_tallies)
+      cp                  = CommonPaths.instance
+      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+      material_quantities = {}
+
+      # The "convex/concave" suffix on tally edges can be safely ignored since
+      # they currently aren't relevant to any NECB standard, but they are to
+      # ASHRAE 90.1.
+      edge_tallies.transform_keys! { |key| key.gsub(/concave|convex/, '') }
+      edge_tallies.each do |edge_type, value|
+        value.each do |wall_reference_and_quality, quantity|
+
+          # "transition" edges aren't considered.
+          if edge_type == "transition"
+            next
+
+          # "jamb", "sill", and "head" may all be grouped under fenestration
+          # when referencing the thermal bridging CSV. Same for "skylightjamb",
+          # "skylightsill", and "skylighthead".
+          elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
+            edge_type = "fenestration"
+          end
+
+          result = csv.find do |row|
+            row["edge_type"]      == edge_type &&
+            row["wall_reference"] == wall_reference_and_quality
+          end
+
+          if result.nil?
+            raise("Wall with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
+                  " could not be found in the thermal bridging database.")
+            next
+          end
+
+          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
+          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
+          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
+            if material_quantities[id].nil?
+              material_quantities[id] = 0.0
+            end
+
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
+          end
+        end
+      end
+
+      return material_quantities
+    end
   end
 
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
