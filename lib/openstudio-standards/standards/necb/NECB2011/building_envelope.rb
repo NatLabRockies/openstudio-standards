@@ -305,258 +305,11 @@ class NECB2011
   #
   # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
   def max_u_necb(stype = "roofceiling", condition = "outdoors", hdd = 8000)
-    hdd = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
-
-    # Admissible surface types.
-    stypes = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
-    stype  = stype.respond_to?(:to_s) ? stype.to_s.downcase : "roofceiling"
-    stype  = stypes.include?(stype) ? stype : "roofceiling"
-
-    # Admissible outside boundary conditions.
-    conditions = ["outdoors", "ground"]
-    condition  = condition.respond_to?(:to_s) ? condition.to_s.downcase : "outdoors"
-    condition  = conditions.include?(condition) ? condition : "outdoors"
-
-    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020"]
-
-    data = {}
-
-    # Initialize data.
-    templates.each do |tp|
-      data[tp] = {}
-
-      conditions.each do |cd|
-        data[tp][cd] = {}
-
-        stypes.each { |st| data[tp][cd][st] = {} }
-      end
-    end
-
-    # From NECB Part 3 tables. Moving away from BTAP formulas. Should be CSV.
-    data["NECB2011"]["outdoors"]["wall"       ][3000] = 0.315
-    data["NECB2011"]["outdoors"]["wall"       ][4000] = 0.278
-    data["NECB2011"]["outdoors"]["wall"       ][5000] = 0.247
-    data["NECB2011"]["outdoors"]["wall"       ][6000] = 0.210
-    data["NECB2011"]["outdoors"]["wall"       ][7000] = 0.210
-    data["NECB2011"]["outdoors"]["wall"       ][9999] = 0.183
-    data["NECB2011"]["outdoors"]["roofceiling"][3000] = 0.227
-    data["NECB2011"]["outdoors"]["roofceiling"][4000] = 0.183
-    data["NECB2011"]["outdoors"]["roofceiling"][5000] = 0.183
-    data["NECB2011"]["outdoors"]["roofceiling"][6000] = 0.162
-    data["NECB2011"]["outdoors"]["roofceiling"][7000] = 0.162
-    data["NECB2011"]["outdoors"]["roofceiling"][9999] = 0.142
-    data["NECB2011"]["outdoors"]["floor"      ][3000] = 0.227
-    data["NECB2011"]["outdoors"]["floor"      ][4000] = 0.183
-    data["NECB2011"]["outdoors"]["floor"      ][5000] = 0.183
-    data["NECB2011"]["outdoors"]["floor"      ][6000] = 0.162
-    data["NECB2011"]["outdoors"]["floor"      ][7000] = 0.162
-    data["NECB2011"]["outdoors"]["floor"      ][9999] = 0.142
-    data["NECB2011"]["outdoors"]["window"     ][3000] = 2.400
-    data["NECB2011"]["outdoors"]["window"     ][4000] = 2.200
-    data["NECB2011"]["outdoors"]["window"     ][5000] = 2.200
-    data["NECB2011"]["outdoors"]["window"     ][6000] = 2.200
-    data["NECB2011"]["outdoors"]["window"     ][7000] = 2.200
-    data["NECB2011"]["outdoors"]["window"     ][9999] = 1.600
-    data["NECB2011"]["outdoors"]["skylight"   ][3000] = 2.400
-    data["NECB2011"]["outdoors"]["skylight"   ][4000] = 2.200
-    data["NECB2011"]["outdoors"]["skylight"   ][5000] = 2.200
-    data["NECB2011"]["outdoors"]["skylight"   ][6000] = 2.200
-    data["NECB2011"]["outdoors"]["skylight"   ][7000] = 2.200
-    data["NECB2011"]["outdoors"]["skylight"   ][9999] = 1.600
-    data["NECB2011"]["outdoors"]["door"       ][3000] = 2.400
-    data["NECB2011"]["outdoors"]["door"       ][4000] = 2.200
-    data["NECB2011"]["outdoors"]["door"       ][5000] = 2.200
-    data["NECB2011"]["outdoors"]["door"       ][6000] = 2.200
-    data["NECB2011"]["outdoors"]["door"       ][7000] = 2.200
-    data["NECB2011"]["outdoors"]["door"       ][9999] = 1.600
-    data["NECB2011"]["ground"  ]["wall"       ][3000] = 0.568
-    data["NECB2011"]["ground"  ]["wall"       ][4000] = 0.379
-    data["NECB2011"]["ground"  ]["wall"       ][5000] = 0.284
-    data["NECB2011"]["ground"  ]["wall"       ][6000] = 0.284
-    data["NECB2011"]["ground"  ]["wall"       ][7000] = 0.284
-    data["NECB2011"]["ground"  ]["wall"       ][9999] = 0.210
-    data["NECB2011"]["ground"  ]["roofceiling"][3000] = 0.568
-    data["NECB2011"]["ground"  ]["roofceiling"][4000] = 0.379
-    data["NECB2011"]["ground"  ]["roofceiling"][5000] = 0.284
-    data["NECB2011"]["ground"  ]["roofceiling"][6000] = 0.284
-    data["NECB2011"]["ground"  ]["roofceiling"][7000] = 0.284
-    data["NECB2011"]["ground"  ]["roofceiling"][9999] = 0.210
-    data["NECB2011"]["ground"  ]["floor"      ][3000] = 0.757
-    data["NECB2011"]["ground"  ]["floor"      ][4000] = 0.757
-    data["NECB2011"]["ground"  ]["floor"      ][5000] = 0.757
-    data["NECB2011"]["ground"  ]["floor"      ][6000] = 0.757
-    data["NECB2011"]["ground"  ]["floor"      ][7000] = 0.757
-    data["NECB2011"]["ground"  ]["floor"      ][9999] = 0.379
-
-    data["NECB2015"]["outdoors"]["wall"       ][3000] = 0.315
-    data["NECB2015"]["outdoors"]["wall"       ][4000] = 0.278
-    data["NECB2015"]["outdoors"]["wall"       ][5000] = 0.247
-    data["NECB2015"]["outdoors"]["wall"       ][6000] = 0.210
-    data["NECB2015"]["outdoors"]["wall"       ][7000] = 0.210
-    data["NECB2015"]["outdoors"]["wall"       ][9999] = 0.183
-    data["NECB2015"]["outdoors"]["roofceiling"][3000] = 0.227
-    data["NECB2015"]["outdoors"]["roofceiling"][4000] = 0.183
-    data["NECB2015"]["outdoors"]["roofceiling"][5000] = 0.183
-    data["NECB2015"]["outdoors"]["roofceiling"][6000] = 0.162
-    data["NECB2015"]["outdoors"]["roofceiling"][7000] = 0.162
-    data["NECB2015"]["outdoors"]["roofceiling"][9999] = 0.142
-    data["NECB2015"]["outdoors"]["floor"      ][3000] = 0.227
-    data["NECB2015"]["outdoors"]["floor"      ][4000] = 0.183
-    data["NECB2015"]["outdoors"]["floor"      ][5000] = 0.183
-    data["NECB2015"]["outdoors"]["floor"      ][6000] = 0.162
-    data["NECB2015"]["outdoors"]["floor"      ][7000] = 0.162
-    data["NECB2015"]["outdoors"]["floor"      ][9999] = 0.142
-    data["NECB2015"]["outdoors"]["window"     ][3000] = 2.400
-    data["NECB2015"]["outdoors"]["window"     ][4000] = 2.200
-    data["NECB2015"]["outdoors"]["window"     ][5000] = 2.200
-    data["NECB2015"]["outdoors"]["window"     ][6000] = 2.200
-    data["NECB2015"]["outdoors"]["window"     ][7000] = 2.200
-    data["NECB2015"]["outdoors"]["window"     ][9999] = 1.600
-    data["NECB2015"]["outdoors"]["skylight"   ][3000] = 2.400
-    data["NECB2015"]["outdoors"]["skylight"   ][4000] = 2.200
-    data["NECB2015"]["outdoors"]["skylight"   ][5000] = 2.200
-    data["NECB2015"]["outdoors"]["skylight"   ][6000] = 2.200
-    data["NECB2015"]["outdoors"]["skylight"   ][7000] = 2.200
-    data["NECB2015"]["outdoors"]["skylight"   ][9999] = 1.600
-    data["NECB2015"]["outdoors"]["door"       ][3000] = 2.400
-    data["NECB2015"]["outdoors"]["door"       ][4000] = 2.200
-    data["NECB2015"]["outdoors"]["door"       ][5000] = 2.200
-    data["NECB2015"]["outdoors"]["door"       ][6000] = 2.200
-    data["NECB2015"]["outdoors"]["door"       ][7000] = 2.200
-    data["NECB2015"]["outdoors"]["door"       ][9999] = 1.600
-    data["NECB2015"]["ground"  ]["wall"       ][3000] = 0.568
-    data["NECB2015"]["ground"  ]["wall"       ][4000] = 0.379
-    data["NECB2015"]["ground"  ]["wall"       ][5000] = 0.284
-    data["NECB2015"]["ground"  ]["wall"       ][6000] = 0.284
-    data["NECB2015"]["ground"  ]["wall"       ][7000] = 0.284
-    data["NECB2015"]["ground"  ]["wall"       ][9999] = 0.210
-    data["NECB2015"]["ground"  ]["roofceiling"][3000] = 0.568
-    data["NECB2015"]["ground"  ]["roofceiling"][4000] = 0.379
-    data["NECB2015"]["ground"  ]["roofceiling"][5000] = 0.284
-    data["NECB2015"]["ground"  ]["roofceiling"][6000] = 0.284
-    data["NECB2015"]["ground"  ]["roofceiling"][7000] = 0.284
-    data["NECB2015"]["ground"  ]["roofceiling"][9999] = 0.210
-    data["NECB2015"]["ground"  ]["floor"      ][3000] = 0.757
-    data["NECB2015"]["ground"  ]["floor"      ][4000] = 0.757
-    data["NECB2015"]["ground"  ]["floor"      ][5000] = 0.757
-    data["NECB2015"]["ground"  ]["floor"      ][6000] = 0.757
-    data["NECB2015"]["ground"  ]["floor"      ][7000] = 0.757
-    data["NECB2015"]["ground"  ]["floor"      ][9999] = 0.379
-
-    data["NECB2017"]["outdoors"]["wall"       ][3000] = 0.315
-    data["NECB2017"]["outdoors"]["wall"       ][4000] = 0.278
-    data["NECB2017"]["outdoors"]["wall"       ][5000] = 0.247
-    data["NECB2017"]["outdoors"]["wall"       ][6000] = 0.210
-    data["NECB2017"]["outdoors"]["wall"       ][7000] = 0.210
-    data["NECB2017"]["outdoors"]["wall"       ][9999] = 0.183
-    data["NECB2017"]["outdoors"]["roofceiling"][3000] = 0.193
-    data["NECB2017"]["outdoors"]["roofceiling"][4000] = 0.156
-    data["NECB2017"]["outdoors"]["roofceiling"][5000] = 0.156
-    data["NECB2017"]["outdoors"]["roofceiling"][6000] = 0.138
-    data["NECB2017"]["outdoors"]["roofceiling"][7000] = 0.138
-    data["NECB2017"]["outdoors"]["roofceiling"][9999] = 0.121
-    data["NECB2017"]["outdoors"]["floor"      ][3000] = 0.227
-    data["NECB2017"]["outdoors"]["floor"      ][4000] = 0.183
-    data["NECB2017"]["outdoors"]["floor"      ][5000] = 0.183
-    data["NECB2017"]["outdoors"]["floor"      ][6000] = 0.162
-    data["NECB2017"]["outdoors"]["floor"      ][7000] = 0.162
-    data["NECB2017"]["outdoors"]["floor"      ][9999] = 0.142
-    data["NECB2017"]["outdoors"]["window"     ][3000] = 2.100
-    data["NECB2017"]["outdoors"]["window"     ][4000] = 1.900
-    data["NECB2017"]["outdoors"]["window"     ][5000] = 1.900
-    data["NECB2017"]["outdoors"]["window"     ][6000] = 1.900
-    data["NECB2017"]["outdoors"]["window"     ][7000] = 1.900
-    data["NECB2017"]["outdoors"]["window"     ][9999] = 1.400
-    data["NECB2017"]["outdoors"]["skylight"   ][3000] = 2.100
-    data["NECB2017"]["outdoors"]["skylight"   ][4000] = 1.900
-    data["NECB2017"]["outdoors"]["skylight"   ][5000] = 1.900
-    data["NECB2017"]["outdoors"]["skylight"   ][6000] = 1.900
-    data["NECB2017"]["outdoors"]["skylight"   ][7000] = 1.900
-    data["NECB2017"]["outdoors"]["skylight"   ][9999] = 1.400
-    data["NECB2017"]["outdoors"]["door"       ][3000] = 2.100
-    data["NECB2017"]["outdoors"]["door"       ][4000] = 1.900
-    data["NECB2017"]["outdoors"]["door"       ][5000] = 1.900
-    data["NECB2017"]["outdoors"]["door"       ][6000] = 1.900
-    data["NECB2017"]["outdoors"]["door"       ][7000] = 1.900
-    data["NECB2017"]["outdoors"]["door"       ][9999] = 1.400
-    data["NECB2017"]["ground"  ]["wall"       ][3000] = 0.568
-    data["NECB2017"]["ground"  ]["wall"       ][4000] = 0.379
-    data["NECB2017"]["ground"  ]["wall"       ][5000] = 0.284
-    data["NECB2017"]["ground"  ]["wall"       ][6000] = 0.284
-    data["NECB2017"]["ground"  ]["wall"       ][7000] = 0.284
-    data["NECB2017"]["ground"  ]["wall"       ][9999] = 0.210
-    data["NECB2017"]["ground"  ]["roofceiling"][3000] = 0.568
-    data["NECB2017"]["ground"  ]["roofceiling"][4000] = 0.379
-    data["NECB2017"]["ground"  ]["roofceiling"][5000] = 0.284
-    data["NECB2017"]["ground"  ]["roofceiling"][6000] = 0.284
-    data["NECB2017"]["ground"  ]["roofceiling"][7000] = 0.284
-    data["NECB2017"]["ground"  ]["roofceiling"][9999] = 0.210
-    data["NECB2017"]["ground"  ]["floor"      ][3000] = 0.757
-    data["NECB2017"]["ground"  ]["floor"      ][4000] = 0.757
-    data["NECB2017"]["ground"  ]["floor"      ][5000] = 0.757
-    data["NECB2017"]["ground"  ]["floor"      ][6000] = 0.757
-    data["NECB2017"]["ground"  ]["floor"      ][7000] = 0.757
-    data["NECB2017"]["ground"  ]["floor"      ][9999] = 0.379
-
-    data["NECB2020"]["outdoors"]["wall"       ][3000] = 0.290
-    data["NECB2020"]["outdoors"]["wall"       ][4000] = 0.265
-    data["NECB2020"]["outdoors"]["wall"       ][5000] = 0.240
-    data["NECB2020"]["outdoors"]["wall"       ][6000] = 0.215
-    data["NECB2020"]["outdoors"]["wall"       ][7000] = 0.190
-    data["NECB2020"]["outdoors"]["wall"       ][9999] = 0.165
-    data["NECB2020"]["outdoors"]["roofceiling"][3000] = 0.164
-    data["NECB2020"]["outdoors"]["roofceiling"][4000] = 0.156
-    data["NECB2020"]["outdoors"]["roofceiling"][5000] = 0.138
-    data["NECB2020"]["outdoors"]["roofceiling"][6000] = 0.121
-    data["NECB2020"]["outdoors"]["roofceiling"][7000] = 0.117
-    data["NECB2020"]["outdoors"]["roofceiling"][9999] = 0.110
-    data["NECB2020"]["outdoors"]["floor"      ][3000] = 0.193
-    data["NECB2020"]["outdoors"]["floor"      ][4000] = 0.175
-    data["NECB2020"]["outdoors"]["floor"      ][5000] = 0.156
-    data["NECB2020"]["outdoors"]["floor"      ][6000] = 0.138
-    data["NECB2020"]["outdoors"]["floor"      ][7000] = 0.121
-    data["NECB2020"]["outdoors"]["floor"      ][9999] = 0.117
-    data["NECB2020"]["outdoors"]["window"     ][3000] = 1.900
-    data["NECB2020"]["outdoors"]["window"     ][4000] = 1.900
-    data["NECB2020"]["outdoors"]["window"     ][5000] = 1.730
-    data["NECB2020"]["outdoors"]["window"     ][6000] = 1.730
-    data["NECB2020"]["outdoors"]["window"     ][7000] = 1.440
-    data["NECB2020"]["outdoors"]["window"     ][9999] = 1.440
-    data["NECB2020"]["outdoors"]["skylight"   ][3000] = 2.690
-    data["NECB2020"]["outdoors"]["skylight"   ][4000] = 2.690
-    data["NECB2020"]["outdoors"]["skylight"   ][5000] = 2.410
-    data["NECB2020"]["outdoors"]["skylight"   ][6000] = 2.410
-    data["NECB2020"]["outdoors"]["skylight"   ][7000] = 2.010
-    data["NECB2020"]["outdoors"]["skylight"   ][9999] = 2.010
-    data["NECB2020"]["outdoors"]["door"       ][3000] = 2.120
-    data["NECB2020"]["outdoors"]["door"       ][4000] = 1.900
-    data["NECB2020"]["outdoors"]["door"       ][5000] = 1.900
-    data["NECB2020"]["outdoors"]["door"       ][6000] = 1.900
-    data["NECB2020"]["outdoors"]["door"       ][7000] = 1.900
-    data["NECB2020"]["outdoors"]["door"       ][9999] = 1.440
-    data["NECB2020"]["ground"  ]["wall"       ][3000] = 0.568
-    data["NECB2020"]["ground"  ]["wall"       ][4000] = 0.379
-    data["NECB2020"]["ground"  ]["wall"       ][5000] = 0.284
-    data["NECB2020"]["ground"  ]["wall"       ][6000] = 0.284
-    data["NECB2020"]["ground"  ]["wall"       ][7000] = 0.284
-    data["NECB2020"]["ground"  ]["wall"       ][9999] = 0.210
-    data["NECB2020"]["ground"  ]["roofceiling"][3000] = 0.568
-    data["NECB2020"]["ground"  ]["roofceiling"][4000] = 0.379
-    data["NECB2020"]["ground"  ]["roofceiling"][5000] = 0.284
-    data["NECB2020"]["ground"  ]["roofceiling"][6000] = 0.284
-    data["NECB2020"]["ground"  ]["roofceiling"][7000] = 0.284
-    data["NECB2020"]["ground"  ]["roofceiling"][9999] = 0.210
-    data["NECB2020"]["ground"  ]["floor"      ][3000] = 0.757
-    data["NECB2020"]["ground"  ]["floor"      ][4000] = 0.757
-    data["NECB2020"]["ground"  ]["floor"      ][5000] = 0.757
-    data["NECB2020"]["ground"  ]["floor"      ][6000] = 0.757
-    data["NECB2020"]["ground"  ]["floor"      ][7000] = 0.757
-    data["NECB2020"]["ground"  ]["floor"      ][9999] = 0.379
 
     # Return required U-factor if provided HDD < stored HDD.
-    data[@template][condition][stype].each { |hdd18, u| return u if hdd < hdd18 }
-
-    0.110
+    @standards_data["surface_thermal_transmittance"][condition][stype].transform_keys(&:to_i).each { |hdd18, u|
+      return u if hdd < hdd18 }
+    return 0.110
   end
 
   ##
@@ -977,38 +730,47 @@ class NECB2011
 
   def apply_standard_construction_properties(model:,
                                              runner: nil,
-                                             # ext surfaces
+
+                                             # Exterior surfaces
                                              ext_wall_cond: nil,
                                              ext_floor_cond: nil,
                                              ext_roof_cond: nil,
-                                             # ground surfaces
+
+                                             # Ground surfaces
                                              ground_wall_cond: nil,
                                              ground_floor_cond: nil,
                                              ground_roof_cond: nil,
-                                             # fixed Windows
+
+                                             # Fixed windows
                                              fixed_window_cond: nil,
                                              fixed_wind_solar_trans: nil,
                                              fixed_wind_vis_trans: nil,
-                                             # operable windows
+
+                                             # Operable windows
                                              operable_wind_solar_trans: nil,
                                              operable_window_cond: nil,
                                              operable_wind_vis_trans: nil,
-                                             # glass doors
+
+                                             # Glass doors
                                              glass_door_cond: nil,
                                              glass_door_solar_trans: nil,
                                              glass_door_vis_trans: nil,
-                                             # opaque doors
+
+                                             # Opaque doors
                                              door_construction_cond: nil,
                                              overhead_door_cond: nil,
-                                             # skylights
+
+                                             # Skylights
                                              skylight_cond: nil,
                                              skylight_solar_trans: nil,
                                              skylight_vis_trans: nil,
-                                             # tubular daylight dome
+
+                                             # Tubular daylight domes
                                              tubular_daylight_dome_cond: nil,
                                              tubular_daylight_dome_solar_trans: nil,
                                              tubular_daylight_dome_vis_trans: nil,
-                                             # tubular daylight diffuser
+
+                                             # Tubular daylight diffusers
                                              tubular_daylight_diffuser_cond: nil,
                                              tubular_daylight_diffuser_solar_trans: nil,
                                              tubular_daylight_diffuser_vis_trans: nil,
@@ -1021,12 +783,12 @@ class NECB2011
         BTAP.runner_register('Error', 'Weather file is not defined. Please ensure the weather file is defined and exists.', runner)
         return false
       end
-
-      # hdd required in scope for eval function.
       hdd = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
-      # Lambdas are preferred over methods in methods for small utility methods.
-      correct_cond = lambda do |conductivity, surface_type|
-        return conductivity.nil? || conductivity.to_f <= 0.0 || conductivity == 'NECB_Default' ? eval(model_find_objects(@standards_data['surface_thermal_transmittance'], surface_type)[0]['formula']) : conductivity.to_f
+      correct_cond = lambda do |conductivity, surface_type, boundary_condition|
+        return conductivity.nil? ||
+               conductivity.to_f <= 0.0 ||
+               conductivity == 'NECB_Default' ?
+               max_u_necb(surface_type, boundary_condition, hdd) : conductivity.to_f
       end
 
       # Converts trans and vis to nil if requesting default.. or casts the string to a float.
@@ -1034,44 +796,52 @@ class NECB2011
         return value.nil? || value.to_f <= 0.0 || value == 'NECB_Default' ? nil : value.to_f
       end
 
-      BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set!(model: model,
-                                                                                              name: "#{default_surface_construction_set.name.get} at hdd = #{get_necb_hdd18(model: model, necb_hdd: necb_hdd)}",
-                                                                                              default_surface_construction_set: default_surface_construction_set,
-                                                                                              # ext surfaces
-                                                                                              ext_wall_cond: correct_cond.call(ext_wall_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Wall'),
-                                                                                              ext_floor_cond: correct_cond.call(ext_floor_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Floor'),
-                                                                                              ext_roof_cond: correct_cond.call(ext_roof_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'RoofCeiling'),
-                                                                                              # ground surfaces
-                                                                                              ground_wall_cond: correct_cond.call(ground_wall_cond, 'boundary_condition' => 'Ground', 'surface' => 'Wall'),
-                                                                                              ground_floor_cond: correct_cond.call(ground_floor_cond, 'boundary_condition' => 'Ground', 'surface' => 'Floor'),
-                                                                                              ground_roof_cond: correct_cond.call(ground_roof_cond, 'boundary_condition' => 'Ground', 'surface' => 'RoofCeiling'),
-                                                                                              # fixed Windows
-                                                                                              fixed_window_cond: correct_cond.call(fixed_window_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              fixed_wind_solar_trans: correct_vis_trans.call(fixed_wind_solar_trans),
-                                                                                              fixed_wind_vis_trans: correct_vis_trans.call(fixed_wind_vis_trans),
-                                                                                              # operable windows
-                                                                                              operable_wind_solar_trans: correct_vis_trans.call(operable_wind_solar_trans),
-                                                                                              operable_window_cond: correct_cond.call(fixed_window_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              operable_wind_vis_trans: correct_vis_trans.call(operable_wind_vis_trans),
-                                                                                              # glass doors
-                                                                                              glass_door_cond: correct_cond.call(glass_door_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              glass_door_solar_trans: correct_vis_trans.call(glass_door_solar_trans),
-                                                                                              glass_door_vis_trans: correct_vis_trans.call(glass_door_vis_trans),
-                                                                                              # opaque doors
-                                                                                              door_construction_cond: correct_cond.call(door_construction_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Door'),
-                                                                                              overhead_door_cond: correct_cond.call(overhead_door_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Door'),
-                                                                                              # skylights
-                                                                                              skylight_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              skylight_solar_trans: correct_vis_trans.call(skylight_solar_trans),
-                                                                                              skylight_vis_trans: correct_vis_trans.call(skylight_vis_trans),
-                                                                                              # tubular daylight dome
-                                                                                              tubular_daylight_dome_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              tubular_daylight_dome_solar_trans: correct_vis_trans.call(tubular_daylight_dome_solar_trans),
-                                                                                              tubular_daylight_dome_vis_trans: correct_vis_trans.call(tubular_daylight_dome_vis_trans),
-                                                                                              # tubular daylight diffuser
-                                                                                              tubular_daylight_diffuser_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              tubular_daylight_diffuser_solar_trans: correct_vis_trans.call(tubular_daylight_diffuser_solar_trans),
-                                                                                              tubular_daylight_diffuser_vis_trans: correct_vis_trans.call(tubular_daylight_diffuser_vis_trans))
+      BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set!(
+        model: model,
+        name: "#{default_surface_construction_set.name.get} at hdd = #{get_necb_hdd18(model: model, necb_hdd: necb_hdd)}",
+        default_surface_construction_set: default_surface_construction_set,
+
+        # Exterior surfaces
+        ext_wall_cond: correct_cond.call(ext_wall_cond, 'wall', 'outdoors'),
+        ext_floor_cond: correct_cond.call(ext_floor_cond, 'floor', 'outdoors'),
+        ext_roof_cond: correct_cond.call(ext_roof_cond, 'roofceiling', 'outdoors'),
+
+        # Ground surfaces
+        ground_wall_cond: correct_cond.call(ground_wall_cond, 'wall', 'ground'),
+        ground_floor_cond: correct_cond.call(ground_floor_cond, 'floor', 'ground'),
+        ground_roof_cond: correct_cond.call(ground_roof_cond, 'roofceiling', 'ground'),
+        fixed_window_cond: correct_cond.call(fixed_window_cond, 'window', 'outdoors'),
+        fixed_wind_solar_trans: correct_vis_trans.call(fixed_wind_solar_trans),
+        fixed_wind_vis_trans: correct_vis_trans.call(fixed_wind_vis_trans),
+
+        # Operable windows
+        operable_wind_solar_trans: correct_vis_trans.call(operable_wind_solar_trans),
+        operable_window_cond: correct_cond.call(fixed_window_cond, 'window', 'outdoors'),
+        operable_wind_vis_trans: correct_vis_trans.call(operable_wind_vis_trans),
+
+        # Glass doors
+        glass_door_cond: correct_cond.call(glass_door_cond, 'window', 'outdoors'),
+        glass_door_solar_trans: correct_vis_trans.call(glass_door_solar_trans),
+        glass_door_vis_trans: correct_vis_trans.call(glass_door_vis_trans),
+
+        # Opaque doors
+        door_construction_cond: correct_cond.call(door_construction_cond, 'door', 'outdoors'),
+        overhead_door_cond: correct_cond.call(overhead_door_cond, 'door', 'outdoors'),
+
+        # Skylights
+        skylight_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        skylight_solar_trans: correct_vis_trans.call(skylight_solar_trans),
+        skylight_vis_trans: correct_vis_trans.call(skylight_vis_trans),
+
+        # Tubular daylight domes
+        tubular_daylight_dome_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        tubular_daylight_dome_solar_trans: correct_vis_trans.call(tubular_daylight_dome_solar_trans),
+        tubular_daylight_dome_vis_trans: correct_vis_trans.call(tubular_daylight_dome_vis_trans),
+
+        # Tubular daylight diffusers
+        tubular_daylight_diffuser_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        tubular_daylight_diffuser_solar_trans: correct_vis_trans.call(tubular_daylight_diffuser_solar_trans),
+        tubular_daylight_diffuser_vis_trans: correct_vis_trans.call(tubular_daylight_diffuser_vis_trans))
     end
     # sets all surfaces to use default constructions sets except adiabatic, where it does a hard assignment of the interior wall construction type.
     model.getPlanarSurfaces.sort.each(&:resetConstruction)
