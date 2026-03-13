@@ -7,7 +7,7 @@ require 'minitest/unit'
 require 'optparse'
 
 class BTAPResults_SHW_Scaling_Test < Minitest::Test
-  def test_qaqc()
+  def test_results_shw_scaling()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     building_type = 'FullServiceRestaurant'
@@ -119,6 +119,7 @@ class BTAPResults_SHW_Scaling_Test < Minitest::Test
       model_out_path = "#{run_dir}/final.osm"
       sql_path = "#{run_dir}/run/eplusout.sql"
       model.save(model_out_path, true)
+      helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
       post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,

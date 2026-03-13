@@ -7,7 +7,7 @@ require 'minitest/unit'
 require 'optparse'
 
 class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
-  def test_qaqc()
+  def test_results_daylighting_sensor_control()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     # building_type = 'FullServiceRestaurant'
@@ -120,6 +120,7 @@ class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
       sql_path = "#{run_dir}/run/eplusout.sql"
       #create osm file to use mimic PAT/OS server called final
       model.save(model_out_path, true)
+      helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
       post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
@@ -127,8 +128,6 @@ class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
         standard: standard,
         qaqc: nil)
     else
-      puts "Using cached results from #{run_dir}"
-      puts "Template: #{template}"
       post_analysis = helper.get_analysis(output_folder: run_dir, template: template)
     end
 

@@ -250,10 +250,11 @@ class NECB2011
       space_peak_flow = 0
       data = nil
       space_type_name = space.spaceType.get.standardsSpaceType.get.to_s
+      space_type_building = space.spaceType.get.standardsBuildingType.get.to_s
       tank_temperature = 60
       # find the specific space_type properties from standard.json
       space_types_table.each do |space_type|
-        if (space_type['building_type'] + ' ' + space_type_name) == (space_type['building_type'] + ' ' + space_type['space_type'])
+        if (space_type_building + ' ' + space_type_name) == (space_type['building_type'] + ' ' + space_type['space_type'])
           break if space_type['necb_hvac_system_selection_type'] == '- undefined -'
           # If there is no service hot water load.. Don't bother adding anything.
           break if (space_type['service_water_heating_peak_flow_per_area'].to_f == 0.0 && space_type['service_water_heating_peak_flow_rate'].to_f == 0.0) || space_type['service_water_heating_schedule'].nil?
