@@ -146,18 +146,23 @@ module BTAP
 
   # BTAP Cache
   #
-  # Interface for storing and loading useful data members not found in either the
-  # OSM or SQL file that are required for further analysis.
+  # Interface for storing and loading useful data members not found in either
+  # the OSM or SQL file that are required for further analysis.
   class Cache
     attr_reader :data
 
     # @param standard [Standard]
     def initialize(standard)
       @data = {}
-      data["use_tbd"]              = !(standard.tbd.nil?)
+      data["use_tbd"] = !(standard.tbd.nil?)
       if data["use_tbd"]
         data["building_performance"] = standard.tbd.model[:perform] == :lp ? "low" : "high"
-        data["tbd_edge_tallies"]     = standard.tbd.tally[:edges].transform_keys { |key| key.to_s }
+
+        # The "convex/concave" suffix on tally edges can be safely ignored since
+        # they currently aren't relevant to any NECB standard, but they are to
+        # ASHRAE 90.1.
+        data["tbd_edge_tallies"] = standard.tbd.tally[:edges].transform_keys { |key|
+          key.to_s.gsub(/concave|convex/, '') }
       end
     end
 

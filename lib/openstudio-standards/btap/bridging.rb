@@ -483,10 +483,6 @@ module BTAP
       csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
       material_quantities = {}
 
-      # The "convex/concave" suffix on tally edges can be safely ignored since
-      # they currently aren't relevant to any NECB standard, but they are to
-      # ASHRAE 90.1.
-      edge_tallies.transform_keys! { |key| key.gsub(/concave|convex/, '') }
       edge_tallies.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
 
