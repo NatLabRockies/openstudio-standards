@@ -168,13 +168,11 @@ class BTAPCosting
     construction["id_layers"].each do |material_index|
       material = materials_database.find { |data| data[material_id] == material_index }
       if material.nil?
-        puts "Material ID #{material_index} was not found in the materials_#{construction["type"]} database. " \
-             "Skipping. This construction will be inaccurate."
+        raise("Material ID #{material_index} was not found in the materials_#{construction["type"]} database.")
       else
         costing_data = @costing_database['costs'].detect { |data| data['id'] == material['id'] }
         if costing_data.nil?
-          puts "Material ID #{material_index} was not found in the costing database. Skipping. This construction " \
-               "will be inaccurate."
+          raise("Material ID #{material_index} was not found in the costing database")
         else
           regional_material, regional_installation = get_regional_cost_factors(province_state, city, material)
 
