@@ -1,13 +1,13 @@
 module BTAP
   module LinearRegression
-    @@extrapolation_bounds_exceeded = false
+    @extrapolation_bounds_exceeded = false
 
     # Read and reset the error to not carry over from previous calls in the case
     # of using this module across different facilities.
     # @return [TrueClass|FalseClass]
     def self.extrapolation_error?
-      value = @@extrapolation_bounds_exceeded
-      @@extrapolation_bounds_exceeded = false
+      value = @extrapolation_bounds_exceeded
+      @extrapolation_bounds_exceeded = false
       return value
     end
 
@@ -37,18 +37,20 @@ module BTAP
         return array.first[1].to_f, notes
       end
 
-      lower_bound = (1.0 - extrapolation_range) * array[0][0]
-      upper_bound = (1.0 + extrapolation_range) * array[-1][0]
+      x_lower_bound = (1.0 - extrapolation_range) * array[0][0]
+      x_upper_bound = (1.0 + extrapolation_range) * array[-1][0]
+      y_lower_bound = (1.0 - extrapolation_range) * array[0][1]
+      y_upper_bound = (1.0 + extrapolation_range) * array[-1][1]
 
-      if x2 < lower_bound
-        @@extrapolation_bounds_exceeded = true
-        return lower_bound, fmt("Warning: Dependent variable #{x2} precedes the lower bound " \
-                            "(#{lower_bound}) for the #{extrapolation_percent}% range. Returning the lower " \
+      if x2 < x_lower_bound
+        @extrapolation_bounds_exceeded = true
+        return y_lower_bound, fmt("Warning: Dependent variable #{x2} precedes the lower bound " \
+                            "(#{x_lower_bound}) for the #{extrapolation_percent}% range. Returning the lower " \
                             "bound.")
-      elsif x2 > upper_bound
-        @@extrapolation_bounds_exceeded = true
-        return upper_bound, fmt("Warning: Dependent variable #{x2} exceeds the upper bound " \
-                            "(#{upper_bound}) for the #{extrapolation_percent}% range. Returning the upper " \
+      elsif x2 > x_upper_bound
+        @extrapolation_bounds_exceeded = true
+        return y_upper_bound, fmt("Warning: Dependent variable #{x2} exceeds the upper bound " \
+                            "(#{x_upper_bound}) for the #{extrapolation_percent}% range. Returning the upper " \
                             "bound.")
       elsif x2 < array.first[0].to_f
 
