@@ -1230,6 +1230,7 @@ module BTAP
     end
 
     def self.rename_handles(osm_data)
+
       hash = Digest::SHA1.hexdigest("fixed_seed")
       handle_map = {}
       new_handle_index = 0
@@ -1310,6 +1311,9 @@ module BTAP
           data << current_hash
         elsif line.include?('!-')
           key, value = line.split('!-').map(&:strip)
+          current_hash[value] = key.chomp(',;').strip
+        elsif line.include?('! ') # for lines that have '! ' but not '!-'
+          key, value = line.split('! ').map(&:strip)
           current_hash[value] = key.chomp(',;').strip
         else
           current_hash[:id] ||= line.chomp(',;').strip
