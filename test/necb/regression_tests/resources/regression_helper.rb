@@ -102,7 +102,7 @@ class NECBRegressionHelper < Minitest::Test
       puts "saved test result osm file to #{test_osm_file}"
       BTAP::FileIO.save_idf(@model, test_idf_file)
       puts "saved test result idf file to #{test_idf_file}"
-      
+
       # Load the expected osm
       unless File.exist?(expected_osm_file)
         raise("The initial osm path: #{expected_osm_file} does not exist.")
