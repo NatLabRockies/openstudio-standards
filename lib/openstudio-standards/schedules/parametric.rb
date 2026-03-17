@@ -839,8 +839,10 @@ module OpenstudioStandards
                 tstat_start_val = value_array_var.dup
               else
                 time = 'hoo_end + 0'
-                # use the same value as hoo_start to produce a step function without ramp interpolation
-                value_array_var = tstat_start_val unless tstat_start_val.nil?
+                # use the reversed values from hoo_start to produce a step function without ramp interpolation.
+                # reversing a 2-element [setback, occupied] pair gives [occupied, setback] — the correct mirror
+                # transition at hoo_end. for single-element (ramp) entries, reverse is a no-op.
+                value_array_var = tstat_start_val.reverse unless tstat_start_val.nil?
               end
             end
           end
