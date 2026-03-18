@@ -269,20 +269,19 @@ module BTAP
         exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
         space.surfaces_hash["ExteriorWall"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
           exterior_surfaces, "Wall").sort
-        space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
-          exterior_surfaces, "Floor").sort
 
         # Interzonal Surfaces
-        # In models with attics, roofs may be unconditioned and as a result
-        # will not be considered for further analysis. However, attic floors
-        # and skylight well walls will be insulated and these surfaces will
-        # need to be properly categorized. Since these are unconditioned and
-        # unaffected by TBD, get the mirrored surface of these surfaces via
-        # `adjacentSurface` which is conditioned.
+        # In models with attics, roofs and their overhanging floors may be
+        # unconditioned and as a result will not be considered for further
+        # analysis. However, attic floors and skylight well walls will be
+        # insulated and these surfaces will need to be properly categorized.
+        # Since these are unconditioned and unaffected by TBD, get the mirrored
+        # surface of these surfaces via `adjacentSurface` which is conditioned.
         # TODO: Eventually crawlspaces should also be considered, however they
         # are not present in any of the NECB template buildings.
         if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
           space.surfaces_hash["ExteriorRoof"] = []
+          space.surfaces_hash["ExteriorFloor"] = []
 
           # Roofs with overhangs for example in the SmallOffice prototype
           # don't have adjacent surfaces, so make sure the adjacentSurface for
@@ -308,10 +307,12 @@ module BTAP
           end
         else
 
-          # Only store roofs if they are conditioned by assessing the additional
-          # property above.
+          # Only store roofs and floors if they are conditioned by assessing the
+          # additional property above.
           space.surfaces_hash["ExteriorRoof"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
             exterior_surfaces, "RoofCeiling").sort
+          space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
+            exterior_surfaces, "Floor").sort
         end
 
         exterior_surfaces.each do |surface|
