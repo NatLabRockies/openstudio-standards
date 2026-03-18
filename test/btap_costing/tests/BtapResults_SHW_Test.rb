@@ -188,7 +188,6 @@ class BTAPResults_SHW_Test < Minitest::Test
       post_analysis = BTAPDatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
-        template: template,
         standard: standard,
         qaqc: nil)
     else
