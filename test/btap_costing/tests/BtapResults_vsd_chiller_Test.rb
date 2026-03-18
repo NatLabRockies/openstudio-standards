@@ -122,7 +122,6 @@ class BTAPResults_VSD_Test < Minitest::Test
       post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
-        template: template,
         standard: standard,
         qaqc: nil)
     else

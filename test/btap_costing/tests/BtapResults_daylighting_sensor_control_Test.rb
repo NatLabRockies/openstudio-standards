@@ -124,7 +124,6 @@ class BTAPResults_Daylighting_Sensor_Control_Test < Minitest::Test
       post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
-        template: template,
         standard: standard,
         qaqc: nil)
     else
