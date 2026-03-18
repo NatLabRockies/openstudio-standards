@@ -11,17 +11,15 @@ module BTAP
   class Analysis
     attr_accessor :attributes
 
-    # @param output_folder [String] 
-    # @param template      [String] The standard as a string.
-    def initialize(output_folder:, template:)
+    # @param output_folder [String]
+    def initialize(output_folder:)
       @output_folder = output_folder
-      @template      = template
       @cp            = CommonPaths.instance
     end
 
     # Run BTAP Costing.
     #
-    # @param costs_csv [String] Path to a custom costing CSV file if custom 
+    # @param costs_csv [String] Path to a custom costing CSV file if custom
     #   costing is desired.
     # @param costs_local_factors_path [String] Path to a custom costing
     #   localization factors CSV file if custom costing is desired.
@@ -29,19 +27,19 @@ module BTAP
       costing = BTAPCosting.new(costs_csv: costs_csv, factors_csv: factors_csv, attributes: @attributes)
 
       cost_result, _ = costing.cost_audit_all(
-        model: @model, 
-        prototype_creator: @standard, 
-        template_type: @template)
+        model: @model,
+        prototype_creator: @standard,
+        template_type: @cache.data["template"])
 
       if not @qaqc.nil?
         @qaqc[:costing_information] = cost_result
       end
 
-      File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f| 
+      File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f|
         f.write(JSON.pretty_generate(cost_result, allow_nan: true))
       end
       puts "Wrote File cost_results.json in #{@output_folder} "
-    
+
       return cost_result
     end
 
@@ -53,11 +51,11 @@ module BTAP
       if not @qaqc.nil?
         @qaqc[:carbon_information] = carbon_result
       end
-    
-      File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f| 
+
+      File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f|
         f.write(JSON.pretty_generate(carbon_result, allow_nan: true))
       end
-      puts "Wrote File carbon_results.json in #{@output_folder} "    
+      puts "Wrote File carbon_results.json in #{@output_folder} "
 
       return carbon_result
     end
@@ -71,7 +69,7 @@ module BTAP
   end
 
   # BTAP No Simulation Analysis
-  # 
+  #
   # Instantiate this class and run `run_costing` and/or `run_carbon` to run one
   # of those modules without performing a full annual simulation or building a
   # standard. This requires a number of parameters to be passed, all of which are
@@ -80,11 +78,11 @@ module BTAP
   # Therefore, a no-simulation analysis requires a full simulation to be run to
   # retrieve the files necessary. Those files and other parameters are listed
   # below:
-  # 
+  #
   # @param model_path      [String] The path of the OSM file for a model.
-  # @param sql_file_path   [String] SQL file of the model required for hourly 
+  # @param sql_file_path   [String] SQL file of the model required for hourly
   #                                 data.
-  # @param cache_file_path [String] More attributes required for simulation. See 
+  # @param cache_file_path [String] More attributes required for simulation. See
   #                                 the `write_cache` function.
   # @param output_folder   [String]
   # @param template        [String]
@@ -100,23 +98,22 @@ module BTAP
       datapoint_id:,
       analysis_id: SecureRandom.uuid)
 
-      super(output_folder: output_folder, template: template)
+      @cache = BTAP::Cache.load_cache(cache_file_path)
+      super(output_folder: output_folder)
       @model    = BTAP::FileIO.load_osm(model_path)
-      @template = template
-      @standard = Standard.build(template)
+      @standard = Standard.build(@cache.data["template"])
       @standard.assign_building_activity(model: @model)
       @standard.assign_building_structure(model: @model, activity: @standard.activity, massive: true)
       @datapoint_id = datapoint_id
       @analysis_id  = analysis_id
-      @cache_data   = BTAP::Cache.load_cache(cache_file_path)
       @attributes   = BTAP::Attributes.new(
-        @model, 
-        @standard, 
-        @cache_data["use_tbd"],
-        @cache_data["building_performance"], 
-        @cache_data["tbd_edge_tallies"])
+        @model,
+        @standard,
+        @cache.data["use_tbd"],
+        @cache.data["building_performance"],
+        @cache.data["tbd_edge_tallies"])
       @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
-      @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)             
+      @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
     end
   end
 
@@ -129,17 +126,17 @@ module BTAP
   # @param qaqc     [Hash] Doesn't seem to be currently relevant but still
   #                        required.
   class DatapointAnalysis < Analysis
-    def initialize(model:, output_folder:, template:, standard:, qaqc:)
-      super(output_folder: output_folder, template: template)
+    def initialize(model:, output_folder:, standard:, qaqc:)
+      super(output_folder: output_folder)
       @model      = model
       @standard   = standard
       @qaqc       = qaqc
       @cache      = BTAP::Cache.new(@standard)
       @attributes = BTAP::Attributes.new(
-        @model, 
-        @standard, 
+        @model,
+        @standard,
         @cache.data["use_tbd"],
-        @cache.data["building_performance"], 
+        @cache.data["building_performance"],
         @cache.data["tbd_edge_tallies"])
     end
   end
@@ -153,8 +150,10 @@ module BTAP
 
     # @param standard [Standard]
     def initialize(standard)
+
       @data = {}
-      data["use_tbd"] = !(standard.tbd.nil?)
+      data["template"] = standard.template
+      data["use_tbd"]  = !(standard.tbd.nil?)
       if data["use_tbd"]
         data["building_performance"] = standard.tbd.model[:perform] == :hp
 
@@ -175,7 +174,14 @@ module BTAP
 
     # @param path [String]
     def self.load_cache(path)
-      return File.open(path, "r") { |file| JSON.load(file) }
+      return LoadedCache.new(File.open(path, "r") { |file| JSON.load(file) })
+    end
+  end
+
+  class LoadedCache < Cache
+    def initialize(data)
+      @data = data
+      return
     end
   end
 end
