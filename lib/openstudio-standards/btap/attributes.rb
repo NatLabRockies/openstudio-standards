@@ -283,8 +283,13 @@ module BTAP
         # are not present in any of the NECB template buildings.
         if space.additionalProperties.getFeatureAsString("space_conditioning_category").get == "unconditioned"
           space.surfaces_hash["ExteriorRoof"] = []
+
+          # Roofs with overhangs for example in the SmallOffice prototype
+          # don't have adjacent surfaces, so make sure the adjacentSurface for
+          # interzonal roofs are initialized.
           interzonal_roof_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
-          space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get }
+          space.surfaces, "Floor").sort.map { |surface| surface.adjacentSurface.get if
+            surface.adjacentSurface.is_initialized }.filter { |surface| not surface.nil? }
           interzonal_skylight_wall_surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(
           space.surfaces, "Wall").sort.map { |surface| surface.adjacentSurface.get }
 
