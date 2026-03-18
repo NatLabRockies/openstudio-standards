@@ -233,7 +233,6 @@ class BTAPDatapoint
           post_analysis = BTAP::DatapointAnalysis.new(
             model: model,
             output_folder: @dp_temp_folder,
-            template: @options[:template],
             standard: @standard,
             qaqc: @qaqc)
         end
@@ -265,13 +264,13 @@ class BTAPDatapoint
                                   utility_pricing_year: @utility_pricing_year).btap_data
 
         # Write files
-        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') do |file| 
+        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') do |file|
           file.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true))
           puts "Wrote File btap_data.json in #{Dir.pwd} "
         end
 
-        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') do |file| 
-          file.write(JSON.pretty_generate(@qaqc, allow_nan: true)) 
+        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') do |file|
+          file.write(JSON.pretty_generate(@qaqc, allow_nan: true))
           puts "Wrote File qaqc.json in #{Dir.pwd} "
         end
 
