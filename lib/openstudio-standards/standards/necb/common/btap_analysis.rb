@@ -66,7 +66,7 @@ module BTAP
     #
     # @param file [String] File path to save to.
     def write_cache(path)
-      BTAP::Cache.new(@standard).write_cache(path)
+      @cache.write_cache(path)
     end
   end
 
@@ -156,7 +156,7 @@ module BTAP
       @data = {}
       data["use_tbd"] = !(standard.tbd.nil?)
       if data["use_tbd"]
-        data["building_performance"] = standard.tbd.model[:perform] == :lp ? "low" : "high"
+        data["building_performance"] = standard.tbd.model[:perform] == :hp
 
         # The "convex/concave" suffix on tally edges can be safely ignored since
         # they currently aren't relevant to any NECB standard, but they are to
