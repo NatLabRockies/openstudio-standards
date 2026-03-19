@@ -18,6 +18,7 @@
 # **************************************************************************** /
 
 require "csv"
+require "json"
 
 module BTAP
   module ActivityData
@@ -50,17 +51,125 @@ module BTAP
     # which in turn sets building-wide 'structural' options, e.g. wood-framed
     # (small-scale "housing") vs reinforced concrete flat slab & post-beam (mid-
     # & large-scale "housing"). See lib/openstudio-standards/btap/structure.rb.
-    @@data = {bldg: {}, space: {}, ancillaries: [], auxiliaries: []}
+    @@data               = {}
+    @@data[:bldg       ] = {}
+    @@data[:space      ] = {}
+    @@data[:udef       ] = {}
+    @@data[:typs       ] = {}
+    @@data[:ancillaries] = []
+    @@data[:auxiliaries] = []
 
-    # Hard setting path for both files (temporary @todo).
+    # Hard setting path for files (temporary @todo).
     @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
     @@data[:space][:file      ] = File.join(__dir__, "btap_space_types.csv")
+    @@data[:udef ][:file      ] = File.join(__dir__, "udef.json")
+    @@data[:typs ][:file      ] = File.join(__dir__, "space_types.json")
     @@data[:bldg ][:table     ] = nil
     @@data[:space][:table     ] = nil
+    @@data[:udef ][:table     ] = nil
+    @@data[:typs ][:table     ] = nil
     @@data[:bldg ][:activity  ] = {}
     @@data[:space][:activity  ] = {}
     @@data[:bldg ][:activities] = []
     @@data[:bldg ][:categories] = []
+
+    # Load common spacetype JSON entries.
+    u_file = File.read(@@data[:udef][:file])
+    t_file = File.read(@@data[:typs][:file])
+    udef   = JSON.parse(u_file, symbolize_names: true)
+    typs   = JSON.parse(t_file, symbolize_names: true)
+
+    # ------------------------------ EDIT -------------------------------------
+    # ancillaries = []
+    # ancillaries <<     "atrium::common"
+    # ancillaries <<   "audience::common"
+    # ancillaries <<   "computer::common"
+    # ancillaries <<   "corridor::common"
+    # ancillaries <<   "corridor::health"
+    # ancillaries <<   "corridor::manufacturing"
+    # ancillaries << "mechanical::common"
+    # ancillaries <<     "locker::common"
+    # ancillaries <<    "seating::common"
+    # ancillaries <<   "stairway::common"
+    # ancillaries <<    "storage::common"
+    # ancillaries <<   "washroom::common"
+
+    # auxiliaries = []
+    # auxiliaries <<   "elevator::common"
+    # auxiliaries <<      "lobby::common"
+    # auxiliaries <<   "audience::theatre"
+    # auxiliaries <<   "audience::gym"
+    # auxiliaries <<   "audience::arena"
+    # auxiliaries <<   "audience::auditorium"
+    # auxiliaries <<         "c1::arena"
+    # auxiliaries <<         "c2::arena"
+    # auxiliaries <<         "c3::arena"
+    # auxiliaries <<         "c4::arena"
+    # auxiliaries <<    "octogon::arena"
+    # auxiliaries <<   "exercise::gym"
+    # auxiliaries <<      "court::gym"
+    # auxiliaries <<   "dressing::theatre"
+    # auxiliaries <<     "dining::common"
+    # auxiliaries <<    "cuisine::common"
+    # auxiliaries << "recreation::common"
+    # auxiliaries <<    "meeting::common"
+    # auxiliaries <<    "reading::library"
+    # auxiliaries <<     "stacks::library"
+    # auxiliaries <<    "catalog::library"
+    # auxiliaries <<   "supplies::health"
+    # auxiliaries <<       "exam::health"
+    # auxiliaries <<    "nursery::health"
+    # auxiliaries <<     "nurses::health"
+    # auxiliaries <<  "operating::health"
+    # auxiliaries <<    "patient::health"
+    # auxiliaries <<    "therapy::health"
+    # auxiliaries <<    "imaging::health"
+    # auxiliaries <<   "recovery::health"
+    # auxiliaries <<    "laundry::health"
+    # auxiliaries <<     "lounge::common"
+    # auxiliaries <<     "lounge::health"
+    # auxiliaries <<   "pharmacy::health"
+    # auxiliaries <<  "emergency::common"
+    # auxiliaries <<  "emergency::health"
+    # auxiliaries <<       "dock::common"
+
+    # keepers = []
+    # keepers << :building_type
+    # keepers << :space_type
+    # keepers << :necb_schedule_type
+    # keepers << :occupancy_per_area
+    # keepers << :electric_equipment_per_area
+    # keepers << :service_water_heating_peak_flow_per_area
+
+
+    # ------------------------------ END of EDIT ------------------------------
+
+    # The 'udef' table (Hash) holds:
+    #   - all 80 BTAP/NECB building/space type/activity data keys, e.g.:
+    #       - lighting_per_area
+    #       - lighting_fraction_radiant
+    #       - target_illuminance_setpoint
+    #       - infiltration_per_exterior_area
+    #   - default values applicable to all "undefined::common" spaces, e.g.:
+    #       - lighting_per_area: 0.0
+    #       - target_illuminance_setpoint: null
+    #   - default values applicable to all building/space types/activities, e.g.:
+    #       - lighting_fraction_radiant: 0.5
+    #       - infiltration_per_exterior_area: 0.049225
+    @@data[:udef][:table] = udef[:tables][:space_types][:table].first.freeze
+
+    # The 'types' table (Array) holds:
+    #   - all 143 BTAP/NECB building/space type/activity choices, e.g.:
+    #       - building_type: "fastfood"
+    #       - building_type: "clinic"
+    #       - space_type:    "audience::theatre"
+    #       - space_type:    "meeting::common"
+    #   - default values assigned to each building/space type/activity, e.g.:
+    #       - necb_schedule_type
+    #       - occupancy_per_area
+    #       - electric_equipment_per_area
+    #       - service_water_heating_peak_flow_per_area
+    @@data[:typs][:table] = typs[:tables][:space_types][:table].freeze
 
     # Key notes, common to NECB editions.
     #
@@ -88,30 +197,30 @@ module BTAP
     #
     # This last note refers to the following NECB 'ancillary' spacetypes:
     #
-    #                                                     2011  2015  2017  2020
-    # @@data[:ancillaries] <<     "atrium::common"        #  C     *     *     *
-    # @@data[:ancillaries] <<   "audience::common"        #        *     *     *
-    # @@data[:ancillaries] <<   "computer::common"        #        *     *     *
-    # @@data[:ancillaries] <<   "corridor::common"        #  *     *     *     *
-    # @@data[:ancillaries] <<   "corridor::hospital"      #  *     *     *     *
-    # @@data[:ancillaries] <<   "corridor::manufacturing" #  *     *     *     *
-    # @@data[:ancillaries] << "mechanical::common"        #  *     *     *     *
-    # @@data[:ancillaries] <<     "locker::common"        #  *     *     *     *
-    # @@data[:ancillaries] <<    "seating::common"        #        *     *     *
-    # @@data[:ancillaries] <<   "stairway::common"        #  *     *     *     *
-    # @@data[:ancillaries] <<    "storage::common"        #  *     *     *     *
-    # @@data[:ancillaries] <<   "washroom::common"        #  *     *     *     *
+    #                               2011  2015  2017  2020
+    #       "atrium::common"          C     *     *     *
+    #     "audience::common"                *     *     *
+    #     "computer::common"                *     *     *
+    #     "corridor::common"          *     *     *     *
+    #     "corridor::health"          *     *     *     *
+    #     "corridor::manufacturing"   *     *     *     *
+    #   "mechanical::common"          *     *     *     *
+    #       "locker::common"          *     *     *     *
+    #      "seating::common"                *     *     *
+    #     "stairway::common"          *     *     *     *
+    #      "storage::common"          *     *     *     *
+    #     "washroom::common"          *     *     *     *
 
     # Note that NECB2011 recommends schedule set "C" for atria, while all other
     # NECB editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
     # inheritance). To facilitate cross-comparisons between NECB editions, the
     # NECB 2011 atrium schedule set will harmonize with other NECB editions.
     #
-    # With respect to other NECB editions, NECB2011 also has a few missing
-    # entries: There is neither GENERAL 'seating' (e.g. a waiting area) nor
-    # GENERAL 'audience seating' types: 'seating' is either building-SPECIFIC
-    # (e.g. transportation facility) or SPECIFIC 'audience seating' (e.g.
-    # theatre, convention centre). And there is no entry for computer or server
+    # Compared to other NECB editions, NECB2011 also has a few missing entries:
+    # There is neither GENERAL 'seating' (e.g. a waiting area) nor GENERAL
+    # 'audience seating' types: 'seating' is either building-SPECIFIC (e.g.
+    # transportation facility) or SPECIFIC 'audience seating' (e.g. theatre,
+    # convention centre). Similarly, there is no entry for computer or server
     # rooms. Within the scope of BTAP::Activity, missing space types inherit
     # fallbacks (e.g. audience seating, office).
 
@@ -157,6 +266,21 @@ module BTAP
       # single selected row. See NECB unit test test_necb_activities.rb.
       table.each do |row|
         key = row[0].to_s
+
+        # unless key == "undefined::common"
+        #   missing = true
+        #
+        #   @@data[:typs][:table].each do |tbl|
+        #     next if tbl[:space_type].to_s.include?("::")
+        #
+        #     if tbl[:building_type] == key
+        #       missing = false
+        #       break
+        #     end
+        #   end
+        #
+        #   puts "#{key} missing" if missing == true
+        # end
 
         @@data[:bldg][:activity][key]            = {}
         @@data[:bldg][:activity][key][:density ] = row[1].to_f
@@ -227,6 +351,21 @@ module BTAP
         key = row[0].to_s
         str = key.split("::")
 
+        # unless key == "undefined::common"
+        #   missing = true
+        #
+        #   @@data[:typs][:table].each do |tbl|
+        #     next unless tbl.key?(:space_type)
+        #     next unless tbl[:space_type].include?("::")
+        #     next unless tbl[:space_type] == key
+        #
+        #     missing = false
+        #     break
+        #   end
+        #
+        #   puts "#{key} missing" if missing == true
+        # end
+
         activity = str[0].to_s
         bldgtype = str[1].to_s
         schedule = row[4].to_s
@@ -253,6 +392,125 @@ module BTAP
     else
       # raise?
     end
+
+    # @@data[:typs][:table].each do |tbl|
+    #   if tbl.key?(:space_type)
+    #     found = false
+    #
+    #     @@data[:space][:activity].each do |k, v|
+    #       next unless tbl[:space_type] == k
+    #
+    #       unless tbl[:necb_schedule_type].downcase == @@data[:space][:activity][k][:schedule]
+    #         raise "what? #{tbl[:space_type]}"
+    #       end
+    #
+    #       tbl[:includes] = @@data[:space][:activity][k][:includes]
+    #       tbl[:excludes] = @@data[:space][:activity][k][:excludes]
+    #       tbl[:fallback] = @@data[:space][:activity][k][:fallback]
+    #       found = true
+    #     end
+    #
+    #     raise "WTF 3? #{tbl[:space_type]}" unless found
+    #   else
+    #     found = false
+    #
+    #     @@data[:bldg][:activity].each do |k, v|
+    #       next unless tbl[:building_type] == k
+    #
+    #       unless tbl[:necb_schedule_type].downcase == @@data[:bldg][:activity][k][:schedule]
+    #         raise "what? #{tbl[:building_type]}"
+    #       end
+    #
+    #       tbl[:liveload] = @@data[:bldg][:activity][k][:liveload]
+    #       tbl[:category] = @@data[:bldg][:activity][k][:category]
+    #       tbl[:includes] = @@data[:bldg][:activity][k][:includes]
+    #       tbl[:excludes] = @@data[:bldg][:activity][k][:excludes]
+    #       tbl[:fallback] = @@data[:bldg][:activity][k][:fallback]
+    #       found = true
+    #     end
+    #
+    #     raise "WTF 2? #{tbl[:building_type]}" unless found
+    #   end
+    # end
+
+    # Save.
+    # out2 = JSON.pretty_generate(typs)
+    # t_file_final = File.join(__dir__, "space_types_FINAL.json")
+    # File.open(t_file_final, "w") { |f| f.puts out2 }
+
+    # keepers = []
+    # keepers << :building_type
+    # keepers << :space_type
+    # keepers << :lighting_per_area
+    # keepers << :target_illuminance_setpoint
+    # keepers << :ventilation_per_area
+    # keepers << :ventilation_per_person
+    # keepers << :ventilation_air_changes
+    # keepers << :ventilation_occupancy_standard
+    # keepers << :necb_hvac_system_selection_type
+    # keepers << :ventilation_occupancy_rate_people_per_1000ft2
+    # keepers << :ventilation_occupancy_standard
+    # keepers << :ventilation_standard_space_type
+
+    # necb_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types_FINAL.json")
+    # necb_file = File.read(necb_path)
+    # necb_json = JSON.parse(necb_file, symbolize_names: true)
+
+    # puts necb_json[:tables][:space_types][:table].size
+    #   - NECB2011 : 127 entries
+    #   - NECB2015 : 125 entries
+    #   - NECB2017 : 125 entries
+    #   - NECB2020 : 125 entries
+
+    # necb_json[:tables][:space_types][:table].each do |tbl|
+      # tbl.delete(:building_type) if tbl[:building_type] == "Space Function"
+      # tbl.delete(:space_type)    if tbl[:space_type   ] == "WholeBuilding"
+      #
+      # tbl.each do |k, v|
+      #   tbl.delete(k) unless keepers.include?(k)
+      # end
+
+      # if tbl[:space_type].to_s.include?("::")
+      #   found = false
+      #
+      #   @@data[:typs][:table].each do |tbl2|
+      #     next unless tbl2.key?(:space_type)
+      #
+      #     if tbl[:space_type] == tbl2[:space_type]
+      #       found = true
+      #       break
+      #     end
+      #   end
+      #
+      #   raise "WTF? #{tbl[:space_type]}" unless found
+      #
+      #   # puts tbl[:space_type]
+      # else
+      #   found = false
+      #
+      #   @@data[:typs][:table].each do |tbl2|
+      #     next unless tbl2.key?(:building_type)
+      #
+      #     if tbl[:building_type] == tbl2[:building_type]
+      #       found = true
+      #       break
+      #     end
+      #   end
+      #
+      #   raise "WTF 2? #{tbl[:building_type]}" unless found
+      #   # puts tbl[:building_type]
+      # end
+    # end
+
+    # Save.
+    # out2 = JSON.pretty_generate(necb_json)
+    # t_file2 = File.join(__dir__, "../standards/necb/NECB2011/data/space_types_FINAL2.json")
+    # File.open(t_file2, "w") { |f| f.puts out2 }
+
+    # Reopen.
+    # @@data[:typs][:file] = File.join(__dir__, "_space_types.json")
+    # t_file = File.read(@@data[:typs][:file])
+    # typs = JSON.parse(t_file, symbolize_names: true)
 
     ##
     # Validates whether an activity is 'ancillary' to other(s). See relevant
@@ -782,8 +1040,8 @@ module BTAP
         espace = espace.get
         next if espace == space
         next if nghbours.include?(espace)
+        next if @activities[espace][:schedule] == "*"
         next unless @activities.key?(espace)
-        next unless @activities[espace][:schedule] != "*"
 
         nghbours << espace
       end

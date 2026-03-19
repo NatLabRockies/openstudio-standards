@@ -1,0 +1,2249 @@
+{
+  "tables": {
+    "space_types": {
+      "data_type": "table",
+      "refs": [
+        "assumption"
+      ],
+      "table": [
+        {
+          "building_type": "automotive",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "E",
+          "liveload": 37.0,
+          "category": "industry",
+          "includes": [
+            "automotive"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "convention",
+          "occupancy_per_area": 11.61,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001759729,
+          "necb_schedule_type": "C",
+          "liveload": 6.0,
+          "category": "public",
+          "includes": [
+            "convention"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "court",
+          "occupancy_per_area": 6.19,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.001877045,
+          "necb_schedule_type": "A",
+          "liveload": 15.0,
+          "category": "public",
+          "includes": [
+            "court"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "leisure",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005396503,
+          "necb_schedule_type": "B",
+          "liveload": 23.0,
+          "category": "commerce",
+          "includes": [
+            "leisure",
+            "lounge",
+            "bar"
+          ],
+          "excludes": [
+            "fast",
+            "cafeteria",
+            "family"
+          ],
+          "fallback": "leisure"
+        },
+        {
+          "building_type": "fastfood",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005396503,
+          "necb_schedule_type": "B",
+          "liveload": 23.0,
+          "category": "commerce",
+          "includes": [
+            "fast",
+            "cafeteria"
+          ],
+          "excludes": [
+            "leisure",
+            "lounge",
+            "bar",
+            "family"
+          ],
+          "fallback": "fastfood"
+        },
+        {
+          "building_type": "restaurant",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005396503,
+          "necb_schedule_type": "B",
+          "liveload": 23.0,
+          "category": "commerce",
+          "includes": [
+            "family",
+            "restaurant"
+          ],
+          "excludes": [
+            "leisure",
+            "lounge",
+            "bar",
+            "fast",
+            "cafeteria"
+          ],
+          "fallback": "restaurant"
+        },
+        {
+          "building_type": "dorm",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.007821019,
+          "necb_schedule_type": "G",
+          "liveload": 14.0,
+          "category": "housing",
+          "includes": [
+            "dorm"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "exercise",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "B",
+          "liveload": 23.0,
+          "category": "commerce",
+          "includes": [
+            "exercise"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "firehouse",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.007508179,
+          "necb_schedule_type": "F",
+          "liveload": 37.0,
+          "category": "industry",
+          "includes": [
+            "fire"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "gym",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "B",
+          "liveload": 16.0,
+          "category": "recreation",
+          "includes": [
+            "gym"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "clinic",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "A",
+          "liveload": 20.0,
+          "category": "public",
+          "includes": [
+            "health",
+            "clinic",
+            "outpatient"
+          ],
+          "excludes": [
+            "hospital"
+          ],
+          "fallback": "hospital"
+        },
+        {
+          "building_type": "hospital",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "H",
+          "liveload": 20.0,
+          "category": "public",
+          "includes": [
+            "health",
+            "hospital"
+          ],
+          "excludes": [
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "hospital"
+        },
+        {
+          "building_type": "hotel",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "F",
+          "liveload": 21.0,
+          "category": "lodging",
+          "includes": [
+            "hotel"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "library",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "C",
+          "liveload": 37.0,
+          "category": "public",
+          "includes": [
+            "library"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "manufacturing",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "liveload": 58.0,
+          "category": "industry",
+          "includes": [
+            "manufacturing"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "motel",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "F",
+          "liveload": 21.0,
+          "category": "lodging",
+          "includes": [
+            "motel"
+          ],
+          "excludes": [
+            "hotel"
+          ],
+          "fallback": "hotel"
+        },
+        {
+          "building_type": "cineplex",
+          "occupancy_per_area": 11.61,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001759729,
+          "necb_schedule_type": "C",
+          "liveload": 10.0,
+          "category": "public",
+          "includes": [
+            "motion",
+            "picture",
+            "cineplex"
+          ],
+          "excludes": [
+            "perform",
+            "art"
+          ],
+          "fallback": "cineplex"
+        },
+        {
+          "building_type": "residential",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.464684015,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "G",
+          "liveload": 13.0,
+          "category": "housing",
+          "includes": [
+            "multi",
+            "residential",
+            "apartment"
+          ],
+          "excludes": [
+            "health",
+            "care"
+          ],
+          "fallback": "residential"
+        },
+        {
+          "building_type": "care",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.139405204,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "J",
+          "liveload": 13.0,
+          "category": "housing",
+          "includes": [
+            "care"
+          ],
+          "excludes": [
+            "health",
+            "clinic",
+            "multi",
+            "residential"
+          ],
+          "fallback": "residential"
+        },
+        {
+          "building_type": "museum",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "C",
+          "liveload": 12.0,
+          "category": "public",
+          "includes": [
+            "museum"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "office",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.00168934,
+          "necb_schedule_type": "A",
+          "liveload": 21.0,
+          "category": "commerce",
+          "includes": [
+            "office"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "parking",
+          "occupancy_per_area": 0.09,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "K",
+          "liveload": 41.0,
+          "category": "robust",
+          "includes": [
+            "storage",
+            "garage",
+            "parking"
+          ],
+          "excludes": [
+            "automotive"
+          ],
+          "fallback": "parking"
+        },
+        {
+          "building_type": "penitentiary",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.006256816,
+          "necb_schedule_type": "H",
+          "liveload": 22.0,
+          "category": "robust",
+          "includes": [
+            "penitentiary"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "theatre",
+          "occupancy_per_area": 11.61,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001759729,
+          "necb_schedule_type": "C",
+          "liveload": 10.0,
+          "category": "public",
+          "includes": [
+            "perform",
+            "art",
+            "theatre"
+          ],
+          "excludes": [
+            "motion",
+            "picture",
+            "cineplex"
+          ],
+          "fallback": "theatre"
+        },
+        {
+          "building_type": "precinct",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.00168934,
+          "necb_schedule_type": "H",
+          "liveload": 17.0,
+          "category": "public",
+          "includes": [
+            "precinct",
+            "police"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "postal",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.00168934,
+          "necb_schedule_type": "A",
+          "liveload": 37.0,
+          "category": "public",
+          "includes": [
+            "post"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "religious",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "I",
+          "liveload": 4.0,
+          "category": "public",
+          "includes": [
+            "religious"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "retail",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.000625682,
+          "necb_schedule_type": "C",
+          "liveload": 38.0,
+          "category": "commerce",
+          "includes": [
+            "retail"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "school",
+          "occupancy_per_area": 11.61,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.003519459,
+          "necb_schedule_type": "D",
+          "liveload": 14.0,
+          "category": "public",
+          "includes": [
+            "school",
+            "university"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "atrium::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "atrium"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "audience::common",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092936803,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "*",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "arena"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "audience::auditorium",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "arena"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "audience::cineplex",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "C",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "audience::theatre",
+          "occupancy_per_area": 12.39,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001877045,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "convention",
+            "gym",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "repair::automotive",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "E",
+          "includes": [
+            "repair",
+            "maintenance"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "dock::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "dock"
+          ],
+          "excludes": [],
+          "fallback": "bulk::warehouse"
+        },
+        {
+          "space_type": "bank::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.001126227,
+          "necb_schedule_type": "A",
+          "includes": [
+            "bank"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "copiers::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.000422335,
+          "necb_schedule_type": "A",
+          "includes": [
+            "copier",
+            "copy",
+            "print"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "computer::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 18.58736059,
+          "service_water_heating_peak_flow_per_area": 0.000422335,
+          "necb_schedule_type": "*",
+          "includes": [
+            "computer"
+          ],
+          "excludes": [
+            "server"
+          ],
+          "fallback": "office::common"
+        },
+        {
+          "space_type": "server::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 18.58736059,
+          "service_water_heating_peak_flow_per_area": 0.000422335,
+          "necb_schedule_type": "H",
+          "includes": [
+            "server"
+          ],
+          "excludes": [
+            "computer"
+          ],
+          "fallback": "office::common"
+        },
+        {
+          "space_type": "classroom::common",
+          "occupancy_per_area": 12.39,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.00406693,
+          "necb_schedule_type": "D",
+          "includes": [
+            "classroom",
+            "lecture",
+            "training"
+          ],
+          "excludes": [
+            "penitentiary"
+          ],
+          "fallback": "classroom::common"
+        },
+        {
+          "space_type": "meeting::common",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "conf",
+            "meet",
+            "multi-purpose"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "audience::convention",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "C",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "gym",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "exhibit::convention",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "C",
+          "includes": [
+            "exhibit"
+          ],
+          "excludes": [
+            "museum"
+          ],
+          "fallback": "exhibit::museum"
+        },
+        {
+          "space_type": "corridor::common",
+          "occupancy_per_area": 0.93,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "corr"
+          ],
+          "excludes": [
+            "manufacturing",
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "corridor::common"
+        },
+        {
+          "space_type": "cell::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.006100395,
+          "necb_schedule_type": "G",
+          "includes": [
+            "cell"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "chambers::court",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "A",
+          "includes": [
+            "chambers"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "tribunal::court",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "A",
+          "includes": [
+            "tribunal",
+            "courtroom"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "dining::leisure",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "cafeteria",
+            "fast",
+            "family",
+            "restaurant",
+            "penitentiary",
+            "otel",
+            "lodging",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "dining::fastfood",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005631134,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "penitentiary",
+            "leisure",
+            "lounge",
+            "bar",
+            "family",
+            "restaurant",
+            "otel",
+            "lodging",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "dining::restaurant",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005631134,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "penitentiary",
+            "leisure",
+            "lounge",
+            "bar",
+            "cafeteria",
+            "fast",
+            "otel",
+            "lodging",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "dining::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005631134,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "penitentiary",
+            "leisure",
+            "lounge",
+            "bar",
+            "cafeteria",
+            "fast",
+            "family",
+            "restaurant",
+            "otel",
+            "lodging"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "quarters::dorm",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "G",
+          "includes": [
+            "quarter"
+          ],
+          "excludes": [
+            "fire"
+          ],
+          "fallback": "quarters::dorm"
+        },
+        {
+          "space_type": "dressing::theatre",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.000625682,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "dress",
+            "fitt"
+          ],
+          "excludes": [
+            "retail"
+          ],
+          "fallback": "dressing::retail"
+        },
+        {
+          "space_type": "units::residential",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "G",
+          "includes": [
+            "unit"
+          ],
+          "excludes": [
+            "care"
+          ],
+          "fallback": "units::residential"
+        },
+        {
+          "space_type": "units::care",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232342007,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "J",
+          "includes": [
+            "unit"
+          ],
+          "excludes": [
+            "dwelling",
+            "residential"
+          ],
+          "fallback": "units::residential"
+        },
+        {
+          "space_type": "mechanical::common",
+          "occupancy_per_area": 0.46,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "electric",
+            "mechanic"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "engineroom::firehouse",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.006100395,
+          "necb_schedule_type": "H",
+          "includes": [
+            "engine"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "quarters::firehouse",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.009385223,
+          "necb_schedule_type": "G",
+          "includes": [
+            "quarter"
+          ],
+          "excludes": [
+            "dorm"
+          ],
+          "fallback": "quarters::dorm"
+        },
+        {
+          "space_type": "cuisine::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "food",
+            "preparation"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "audience::gym",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "court::gym",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "court",
+            "play",
+            "gym"
+          ],
+          "excludes": [
+            "class 1",
+            "class 2",
+            "class 3",
+            "class 4",
+            "class I",
+            "class II",
+            "class III",
+            "class IV",
+            "courthouse",
+            "courtroom",
+            "chambers",
+            "tribunal"
+          ],
+          "fallback": "court::gym"
+        },
+        {
+          "space_type": "emergency::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.006100395,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "emergency"
+          ],
+          "excludes": [
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "emergency::health"
+        },
+        {
+          "space_type": "emergency::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "emergency"
+          ],
+          "excludes": [
+            "vehicle",
+            "garage"
+          ],
+          "fallback": "emergency::common"
+        },
+        {
+          "space_type": "exam::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "exam",
+            "treatment"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "laundry::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 1.858045336,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "laundry",
+            "washing"
+          ],
+          "excludes": [
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "laundry::common"
+        },
+        {
+          "space_type": "laundry::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 1.858045336,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "laundry",
+            "washing"
+          ],
+          "excludes": [
+            "common"
+          ],
+          "fallback": "laundry::common"
+        },
+        {
+          "space_type": "lounge::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "lounge"
+          ],
+          "excludes": [
+            "dining",
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "lounge::common"
+        },
+        {
+          "space_type": "lounge::health",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "lounge"
+          ],
+          "excludes": [
+            "dining",
+            "common",
+            "other"
+          ],
+          "fallback": "lounge::common"
+        },
+        {
+          "space_type": "supplies::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "suppl"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "nursery::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "nursery"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "nurses::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001055838,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "nurses"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "operating::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.007038918,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "operat"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "patient::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "patient"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "pharmacy::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001055838,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "pharmacy"
+          ],
+          "excludes": [
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "pharmacy::common"
+        },
+        {
+          "space_type": "pharmacy::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001055838,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "pharmacy"
+          ],
+          "excludes": [
+            "common",
+            "other"
+          ],
+          "fallback": "pharmacy::common"
+        },
+        {
+          "space_type": "therapy::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001055838,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "therapy"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "imaging::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "radiology",
+            "imaging"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "recovery::health",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "*H",
+          "includes": [
+            "recovery"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "corridor::health",
+          "occupancy_per_area": 0.93,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "corr"
+          ],
+          "excludes": [
+            "manufacturing",
+            "common",
+            "other"
+          ],
+          "fallback": "corridor::common"
+        },
+        {
+          "space_type": "dining::hotel",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005396503,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "penitentiary",
+            "leisure",
+            "lounge",
+            "bar",
+            "cafeteria",
+            "fast",
+            "family",
+            "restaurant",
+            "motel",
+            "lodging",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "lobby::hotel",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "H",
+          "includes": [
+            "lobby"
+          ],
+          "excludes": [
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "common",
+            "other"
+          ],
+          "fallback": "lobby::common"
+        },
+        {
+          "space_type": "rooms::hotel",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.011262268,
+          "necb_schedule_type": "F",
+          "includes": [
+            "guest",
+            "otel"
+          ],
+          "excludes": [
+            "motel",
+            "hway",
+            "lodging"
+          ],
+          "fallback": "rooms::common"
+        },
+        {
+          "space_type": "dining::motel",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005396503,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "penitentiary",
+            "leisure",
+            "lounge",
+            "bar",
+            "cafeteria",
+            "fast",
+            "family",
+            "restaurant",
+            "hotel",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "rooms::motel",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.011262268,
+          "necb_schedule_type": "F",
+          "includes": [
+            "guest",
+            "lodging",
+            "otel"
+          ],
+          "excludes": [
+            "hotel"
+          ],
+          "fallback": "rooms::common"
+        },
+        {
+          "space_type": "rooms::common",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.011262268,
+          "necb_schedule_type": "F",
+          "includes": [
+            "guest",
+            "lodging"
+          ],
+          "excludes": [
+            "otel"
+          ],
+          "fallback": "rooms::hotel"
+        },
+        {
+          "space_type": "teachinglab::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "D",
+          "includes": [
+            "lab"
+          ],
+          "excludes": [
+            "research",
+            "industr",
+            "medical",
+            "common",
+            "other"
+          ],
+          "fallback": "researchlab::common"
+        },
+        {
+          "space_type": "researchlab::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "A",
+          "includes": [
+            "lab"
+          ],
+          "excludes": [
+            "teaching"
+          ],
+          "fallback": "researchlab::common"
+        },
+        {
+          "space_type": "catalog::library",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "catalog"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "reading::library",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "reading"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "stacks::library",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "stacks"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "elevator::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "elevator",
+            "foyer"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "lobby::cineplex",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "C",
+          "includes": [
+            "lobby"
+          ],
+          "excludes": [
+            "otel",
+            "perform",
+            "art",
+            "common",
+            "other"
+          ],
+          "fallback": "lobby::common"
+        },
+        {
+          "space_type": "lobby::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*C",
+          "includes": [
+            "lobby"
+          ],
+          "excludes": [
+            "otel",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre"
+          ],
+          "fallback": "lobby::common"
+        },
+        {
+          "space_type": "lobby::theatre",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "C",
+          "includes": [
+            "lobby"
+          ],
+          "excludes": [
+            "otel",
+            "motion",
+            "picture",
+            "cineplex",
+            "common",
+            "other"
+          ],
+          "fallback": "lobby::common"
+        },
+        {
+          "space_type": "locker::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "locker"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "recreation::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "recreation"
+          ],
+          "excludes": [
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient"
+          ],
+          "fallback": "recreation::common"
+        },
+        {
+          "space_type": "bay::manufacturing",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "includes": [
+            "bay"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "corridor::manufacturing",
+          "occupancy_per_area": 0.93,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "corr"
+          ],
+          "excludes": [
+            "health",
+            "hospital",
+            "clinic",
+            "outpatient",
+            "common",
+            "other"
+          ],
+          "fallback": "corridor::common"
+        },
+        {
+          "space_type": "detailed::manufacturing",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "includes": [
+            "detailed"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "equipment::manufacturing",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "includes": [
+            "equipment"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "exhibit::museum",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.005631134,
+          "necb_schedule_type": "C",
+          "includes": [
+            "exhibit"
+          ],
+          "excludes": [
+            "convention"
+          ],
+          "fallback": "exhibit::museum"
+        },
+        {
+          "space_type": "restoration::museum",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.001173153,
+          "necb_schedule_type": "A",
+          "includes": [
+            "restoration"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "office::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "A",
+          "includes": [
+            "office",
+            "enclosed"
+          ],
+          "excludes": [
+            "bank",
+            "open"
+          ],
+          "fallback": "office::common"
+        },
+        {
+          "space_type": "openplan::common",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "A",
+          "includes": [
+            "open"
+          ],
+          "excludes": [
+            "enclosed",
+            "bank"
+          ],
+          "fallback": "office::common"
+        },
+        {
+          "space_type": "garage::parking",
+          "occupancy_per_area": 0.09,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "K",
+          "includes": [
+            "garage"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "audience::penitentiary",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "C",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "classroom::penitentiary",
+          "occupancy_per_area": 12.39,
+          "electric_equipment_per_area": 0.464511334,
+          "service_water_heating_peak_flow_per_area": 0.00406693,
+          "necb_schedule_type": "D",
+          "includes": [
+            "classroom"
+          ],
+          "excludes": [
+            "lecture",
+            "training"
+          ],
+          "fallback": "classroom::common"
+        },
+        {
+          "space_type": "dining::penitentiary",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.005692514,
+          "necb_schedule_type": "B",
+          "includes": [
+            "dining"
+          ],
+          "excludes": [
+            "leisure",
+            "lounge",
+            "bar",
+            "cafeteria",
+            "fast",
+            "family",
+            "restaurant",
+            "otel",
+            "lodging",
+            "common",
+            "other"
+          ],
+          "fallback": "dining::common"
+        },
+        {
+          "space_type": "sorting::postal",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.002111675,
+          "necb_schedule_type": "A",
+          "includes": [
+            "sorting"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "audience::religious",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "I",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "arena",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "refectory::religious",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "C",
+          "includes": [
+            "fellowship",
+            "refectory"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "pulpit::religious",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "I",
+          "includes": [
+            "pulpit",
+            "choir"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "chapel::religious",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.000703892,
+          "necb_schedule_type": "I",
+          "includes": [
+            "chapel"
+          ],
+          "excludes": [],
+          "fallback": "seating::common"
+        },
+        {
+          "space_type": "dressing::retail",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.000625682,
+          "necb_schedule_type": "C",
+          "includes": [
+            "dress",
+            "fitt"
+          ],
+          "excludes": [
+            "perform",
+            "art",
+            "theatre"
+          ],
+          "fallback": "dressing::retail"
+        },
+        {
+          "space_type": "concourse::retail",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.000703892,
+          "necb_schedule_type": "C",
+          "includes": [
+            "concourse"
+          ],
+          "excludes": [
+            "airport",
+            "terminal",
+            "transp"
+          ],
+          "fallback": "corridor::common"
+        },
+        {
+          "space_type": "sales::retail",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.000625682,
+          "necb_schedule_type": "C",
+          "includes": [
+            "retail"
+          ],
+          "excludes": [
+            "dress",
+            "fitt",
+            "mall",
+            "concourse"
+          ],
+          "fallback": "sales::common"
+        },
+        {
+          "space_type": "sales::common",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.000625682,
+          "necb_schedule_type": "C",
+          "includes": [
+            "sales"
+          ],
+          "excludes": [
+            "retail"
+          ],
+          "fallback": "sales::common"
+        },
+        {
+          "space_type": "audience::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "audience"
+          ],
+          "excludes": [
+            "auditorium",
+            "religious",
+            "penitentiary",
+            "motion",
+            "picture",
+            "cineplex",
+            "perform",
+            "art",
+            "theatre",
+            "convention",
+            "gym",
+            "common",
+            "other"
+          ],
+          "fallback": "audience::common"
+        },
+        {
+          "space_type": "c1::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "class 1",
+            "class I"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "c2::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "class 2",
+            "class II"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "c3::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "class 3",
+            "class III"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "c4::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "class 4",
+            "class IV"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "octogon::arena",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.1393534,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "ring",
+            "octogon"
+          ],
+          "excludes": [
+            "manufacturing"
+          ],
+          "fallback": "court::gym"
+        },
+        {
+          "space_type": "exercise::gym",
+          "occupancy_per_area": 18.58,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.008446701,
+          "necb_schedule_type": "*B",
+          "includes": [
+            "exercise",
+            "fitness"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "stairway::common",
+          "occupancy_per_area": 0.46,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "stair"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "storage::common",
+          "occupancy_per_area": 0.93,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "*",
+          "includes": [
+            "storage"
+          ],
+          "excludes": [
+            "suppl",
+            "garage"
+          ],
+          "fallback": "storage::common"
+        },
+        {
+          "space_type": "baggage::terminal",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001525099,
+          "necb_schedule_type": "H",
+          "includes": [
+            "baggage",
+            "carousel"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "concourse::terminal",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.001525099,
+          "necb_schedule_type": "H",
+          "includes": [
+            "concourse"
+          ],
+          "excludes": [
+            "retail",
+            "mall"
+          ],
+          "fallback": "corridor::common"
+        },
+        {
+          "space_type": "counter::terminal",
+          "occupancy_per_area": 4.65,
+          "electric_equipment_per_area": 0.232255667,
+          "service_water_heating_peak_flow_per_area": 0.001525099,
+          "necb_schedule_type": "H",
+          "includes": [
+            "counter"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "seating::common",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.003050198,
+          "necb_schedule_type": "*",
+          "includes": [
+            "seating"
+          ],
+          "excludes": [
+            "airport",
+            "terminal",
+            "transp",
+            "audience"
+          ],
+          "fallback": "seating::common"
+        },
+        {
+          "space_type": "seating::terminal",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.0,
+          "service_water_heating_peak_flow_per_area": 0.003050198,
+          "necb_schedule_type": "H",
+          "includes": [
+            "seating"
+          ],
+          "excludes": [
+            "general",
+            "common",
+            "other",
+            "audience"
+          ],
+          "fallback": "seating::common"
+        },
+        {
+          "space_type": "fine::warehouse",
+          "occupancy_per_area": 1.86,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.00061004,
+          "necb_schedule_type": "A",
+          "includes": [
+            "fine"
+          ],
+          "excludes": [
+            "undefined",
+            "medium",
+            "bulk",
+            "pallet"
+          ],
+          "fallback": "bulk::warehouse"
+        },
+        {
+          "space_type": "bulk::warehouse",
+          "occupancy_per_area": 0.93,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.00030502,
+          "necb_schedule_type": "A",
+          "includes": [
+            "blk",
+            "bulk",
+            "pallet"
+          ],
+          "excludes": [
+            "fine"
+          ],
+          "fallback": "bulk::warehouse"
+        },
+        {
+          "space_type": "washroom::common",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.0,
+          "necb_schedule_type": "*",
+          "includes": [
+            "washroom"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "space_type": "workshop::common",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "includes": [
+            "workshop"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "arena",
+          "occupancy_per_area": 9.29,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.004223351,
+          "necb_schedule_type": "B",
+          "liveload": 16.0,
+          "category": "recreation",
+          "includes": [
+            "arena"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "townhall",
+          "occupancy_per_area": 3.72,
+          "electric_equipment_per_area": 0.696767001,
+          "service_water_heating_peak_flow_per_area": 0.00168934,
+          "necb_schedule_type": "D",
+          "liveload": 21.0,
+          "category": "public",
+          "includes": [
+            "town"
+          ],
+          "excludes": [
+            "house"
+          ],
+          "fallback": "townhall"
+        },
+        {
+          "building_type": "terminal",
+          "occupancy_per_area": 6.19,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.002033465,
+          "necb_schedule_type": "H",
+          "liveload": 15.0,
+          "category": "public",
+          "includes": [
+            "transportation",
+            "terminal"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "warehouse",
+          "occupancy_per_area": 0.06,
+          "electric_equipment_per_area": 0.092902267,
+          "service_water_heating_peak_flow_per_area": 0.000093852,
+          "necb_schedule_type": "A",
+          "liveload": 61.0,
+          "category": "industry",
+          "includes": [
+            "warehouse"
+          ],
+          "excludes": [],
+          "fallback": ""
+        },
+        {
+          "building_type": "workshop",
+          "occupancy_per_area": 3.1,
+          "electric_equipment_per_area": 0.929022668,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
+          "necb_schedule_type": "A",
+          "liveload": 38.0,
+          "category": "industry",
+          "includes": [
+            "workshop"
+          ],
+          "excludes": [],
+          "fallback": ""
+        }
+      ]
+    }
+  }
+}
