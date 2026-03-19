@@ -81,7 +81,9 @@ class BTAPCosting
 
           if row.nil?
             @costing_report["envelope"]["construction_costs"] << {
-              'name'          => name,
+              'assembly_name' => name,
+              'surface_type'  => surface_type,
+              'surface_name'  => surface.nameString,
               'conductance'   => (surface.rsi.round(3)),
               'area'          => (surfArea.round(2)),
               'cost'          => (surfCost.round(2)),
