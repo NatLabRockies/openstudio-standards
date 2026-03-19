@@ -94,7 +94,6 @@ module BTAP
       sql_file_path:,
       cache_file_path:,
       output_folder:,
-      template:,
       datapoint_id:,
       analysis_id: SecureRandom.uuid)
 
