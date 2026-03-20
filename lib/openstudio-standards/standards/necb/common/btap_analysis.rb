@@ -102,7 +102,7 @@ module BTAP
       @model    = BTAP::FileIO.load_osm(model_path)
       @standard = Standard.build(@cache.data["template"])
       @standard.assign_building_activity(model: @model)
-      @standard.assign_building_structure(model: @model, activity: @standard.activity, massive: true)
+      @standard.assign_building_structure(model: @model, activity: @standard.activity)
       @datapoint_id = datapoint_id
       @analysis_id  = analysis_id
       @attributes   = BTAP::Attributes.new(
