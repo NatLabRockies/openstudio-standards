@@ -189,7 +189,6 @@ class BTAPDatapoint
                                        baseline_system_zones_map_option: @options[:baseline_system_zones_map_option],
                                        tbd_interpolate: @options[:tbd_interpolate],
                                        tbd_option: @options[:tbd_option],
-                                       construction_opt: @options[:construction_opt],
                                        necb_hdd: @options[:necb_hdd],
                                        boiler_fuel: @options[:boiler_fuel],
                                        boiler_cap_ratio: @options[:boiler_cap_ratio],

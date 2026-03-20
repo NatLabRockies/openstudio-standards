@@ -283,12 +283,10 @@ module BTAP
     #
     # @param model [OpenStudio::Model::Model] a model
     # @param activity [BTAP::Activity] a BTAP building ACTIVITY object
-    # @param massive [Boolean] whether requesting internal mass generation
-    def initialize(model = nil, activity = nil, massive = true)
+    def initialize(model = nil, activity = nil)
       mth       = "BTAP::Structure::#{__callee__}"
       @feedback = {logs: []}
       lgs       = @feedback[:logs]
-      massive   = false unless [true, false].include?(massive)
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
@@ -520,8 +518,6 @@ module BTAP
 
       # Add internal mass objects, 1x instance per occupied space.
       cspaces.each do |space|
-        break unless massive
-
         matID = "#{space.nameString} : Mass Material"
         conID = "#{space.nameString} : Mass Construction"
         defID = "#{space.nameString} : Mass Definition"
