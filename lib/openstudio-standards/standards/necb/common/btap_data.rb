@@ -184,6 +184,8 @@ class BTAPData
     building_data['cost_equipment_ventilation_total_cost_per_m_sq'] = (cost_result['totals']['ventilation']) / @conditioned_floor_area_m_sq
     building_data['cost_equipment_renewables_total_cost_per_m_sq'] = (cost_result['totals']['renewables']) / @conditioned_floor_area_m_sq
     building_data['cost_equipment_total_cost_per_m_sq'] = (cost_result['totals']['grand_total']) / @conditioned_floor_area_m_sq
+    building_data['unrealistic_assemblies'] = \
+      cost_result['envelope'].has_key?('unrealistic_assembly_cost') ? true : false
     # building_data.merge!(cost_result['envelope'].select{|k,v| k!='construction_costs' && k!='total_envelope_cost'})
     # building_data.merge!(cost_result['shw'].select{|k,v| k!='shw_total'})
     # building_data.merge!(flatten_mix(cost_result['ventilation'].select{|k,v| k=='mech_to_roof'.to_sym}))
