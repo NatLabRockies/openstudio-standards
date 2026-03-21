@@ -36,26 +36,29 @@ module BTAP
     #   storage or parking of motor vehicles and containing no provision for
     #   the repair or servicing of such vehicles.
     #
-    # This mismatch, and other related issues of a similar nature, make it
-    # challenging to cross-compare NECB editions for instance. The 'exact' NECB
-    # spacetype strings shouldn't matter - they almost always reference the same
-    # building 'activity' (e.g. a facility where vehicles are parked/stored).
-    # BTAP should instead rely on abstract 'activity' designations, e.g.
-    # 'parking'. This requires module/class methods to extract specific keywords
-    # embedded in existing BTAP NECB building/space type datasets - see below.
+    # Such mismatches make it challenging to cross-compare NECB editions, for
+    # instance. The 'exact' NECB spacetype strings shouldn't matter - they
+    # almost always reference the same building 'activity' (e.g. a facility
+    # where vehicles are parked/stored). Behind the scenes, BTAP should only
+    # rely on abstract 'activity' designations, e.g. 'parking'. This requires
+    # functionality to extract specific keywords user-set building or space type
+    # designations.
     #
     # Once 'activity' assignments are completed (for spaces and building),
     # building 'categories' are auto-assigned (e.g. "housing" vs "industry").
     # For instance, multi-unit residential buildings (MURBs), university/school
     # dormitories and long-term care facilities are all grouped under "housing",
-    # which in turn sets building-wide 'structural' options, e.g. wood-framed
-    # (small-scale "housing") vs reinforced concrete flat slab & post-beam (mid-
-    # & large-scale "housing"). See lib/openstudio-standards/btap/structure.rb.
+    # which in turn sets building-wide 'structural' options, e.g.
+    #
+    #   - wood-framed (small-scale "housing")
+    #   - reinforced concrete flat slab & post-beam (mid/large-scale "housing")
+    #
+    # See lib/openstudio-standards/btap/structure.rb.
     @@data               = {}
     @@data[:bldg       ] = {}
     @@data[:space      ] = {}
     @@data[:udef       ] = {}
-    @@data[:typs       ] = {}
+    @@data[:types      ] = {}
     @@data[:ancillaries] = []
     @@data[:auxiliaries] = []
 
@@ -63,21 +66,21 @@ module BTAP
     @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
     @@data[:space][:file      ] = File.join(__dir__, "btap_space_types.csv")
     @@data[:udef ][:file      ] = File.join(__dir__, "udef.json")
-    @@data[:typs ][:file      ] = File.join(__dir__, "space_types.json")
+    @@data[:types][:file      ] = File.join(__dir__, "space_types.json")
     @@data[:bldg ][:table     ] = nil
     @@data[:space][:table     ] = nil
     @@data[:udef ][:table     ] = nil
-    @@data[:typs ][:table     ] = nil
+    @@data[:types][:table     ] = nil
     @@data[:bldg ][:activity  ] = {}
     @@data[:space][:activity  ] = {}
     @@data[:bldg ][:activities] = []
     @@data[:bldg ][:categories] = []
 
     # Load common spacetype JSON entries.
-    u_file = File.read(@@data[:udef][:file])
-    t_file = File.read(@@data[:typs][:file])
+    u_file = File.read(@@data[:udef ][:file])
+    t_file = File.read(@@data[:types][:file])
     udef   = JSON.parse(u_file, symbolize_names: true)
-    typs   = JSON.parse(t_file, symbolize_names: true)
+    types  = JSON.parse(t_file, symbolize_names: true)
 
     # ------------------------------ EDIT -------------------------------------
     # ancillaries = []
@@ -145,7 +148,7 @@ module BTAP
     # ------------------------------ END of EDIT ------------------------------
 
     # The 'udef' table (Hash) holds:
-    #   - all 80 BTAP/NECB building/space type/activity data keys, e.g.:
+    #   - all BTAP/NECB building/space type/activity data keys, e.g.:
     #       - lighting_per_area
     #       - lighting_fraction_radiant
     #       - target_illuminance_setpoint
@@ -159,7 +162,7 @@ module BTAP
     @@data[:udef][:table] = udef[:tables][:space_types][:table].first.freeze
 
     # The 'types' table (Array) holds:
-    #   - all 143 BTAP/NECB building/space type/activity choices, e.g.:
+    #   - all BTAP/NECB building/space type/activity choices, e.g.:
     #       - building_type: "fastfood"
     #       - building_type: "clinic"
     #       - space_type:    "audience::theatre"
@@ -169,7 +172,7 @@ module BTAP
     #       - occupancy_per_area
     #       - electric_equipment_per_area
     #       - service_water_heating_peak_flow_per_area
-    @@data[:typs][:table] = typs[:tables][:space_types][:table].freeze
+    @@data[:types][:table] = types[:tables][:space_types][:table].freeze
 
     # Key notes, common to NECB editions.
     #
@@ -267,20 +270,20 @@ module BTAP
       table.each do |row|
         key = row[0].to_s
 
-        # unless key == "undefined::common"
-        #   missing = true
-        #
-        #   @@data[:typs][:table].each do |tbl|
-        #     next if tbl[:space_type].to_s.include?("::")
-        #
-        #     if tbl[:building_type] == key
-        #       missing = false
-        #       break
-        #     end
-        #   end
-        #
-        #   puts "#{key} missing" if missing == true
-        # end
+        unless key == "undefined::common"
+          missing = true
+
+          @@data[:types][:table].each do |tbl|
+            next if tbl[:space_type].to_s.include?("::")
+
+            if tbl[:building_type] == key
+              missing = false
+              break
+            end
+          end
+
+          puts "#{key} missing" if missing == true
+        end
 
         @@data[:bldg][:activity][key]            = {}
         @@data[:bldg][:activity][key][:density ] = row[1].to_f
@@ -351,20 +354,20 @@ module BTAP
         key = row[0].to_s
         str = key.split("::")
 
-        # unless key == "undefined::common"
-        #   missing = true
-        #
-        #   @@data[:typs][:table].each do |tbl|
-        #     next unless tbl.key?(:space_type)
-        #     next unless tbl[:space_type].include?("::")
-        #     next unless tbl[:space_type] == key
-        #
-        #     missing = false
-        #     break
-        #   end
-        #
-        #   puts "#{key} missing" if missing == true
-        # end
+        unless key == "undefined::common"
+          missing = true
+
+          @@data[:types][:table].each do |tbl|
+            next unless tbl.key?(:space_type)
+            next unless tbl[:space_type].include?("::")
+            next unless tbl[:space_type] == key
+
+            missing = false
+            break
+          end
+
+          puts "#{key} missing" if missing == true
+        end
 
         activity = str[0].to_s
         bldgtype = str[1].to_s
@@ -393,7 +396,7 @@ module BTAP
       # raise?
     end
 
-    # @@data[:typs][:table].each do |tbl|
+    # @@data[:types][:table].each do |tbl|
     #   if tbl.key?(:space_type)
     #     found = false
     #
@@ -433,11 +436,6 @@ module BTAP
     #   end
     # end
 
-    # Save.
-    # out2 = JSON.pretty_generate(typs)
-    # t_file_final = File.join(__dir__, "space_types_FINAL.json")
-    # File.open(t_file_final, "w") { |f| f.puts out2 }
-
     # keepers = []
     # keepers << :building_type
     # keepers << :space_type
@@ -452,7 +450,7 @@ module BTAP
     # keepers << :ventilation_occupancy_standard
     # keepers << :ventilation_standard_space_type
 
-    # necb_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types_FINAL.json")
+    # necb_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types.json")
     # necb_file = File.read(necb_path)
     # necb_json = JSON.parse(necb_file, symbolize_names: true)
 
@@ -473,7 +471,7 @@ module BTAP
       # if tbl[:space_type].to_s.include?("::")
       #   found = false
       #
-      #   @@data[:typs][:table].each do |tbl2|
+      #   @@data[:types][:table].each do |tbl2|
       #     next unless tbl2.key?(:space_type)
       #
       #     if tbl[:space_type] == tbl2[:space_type]
@@ -488,7 +486,7 @@ module BTAP
       # else
       #   found = false
       #
-      #   @@data[:typs][:table].each do |tbl2|
+      #   @@data[:types][:table].each do |tbl2|
       #     next unless tbl2.key?(:building_type)
       #
       #     if tbl[:building_type] == tbl2[:building_type]
@@ -501,16 +499,6 @@ module BTAP
       #   # puts tbl[:building_type]
       # end
     # end
-
-    # Save.
-    # out2 = JSON.pretty_generate(necb_json)
-    # t_file2 = File.join(__dir__, "../standards/necb/NECB2011/data/space_types_FINAL2.json")
-    # File.open(t_file2, "w") { |f| f.puts out2 }
-
-    # Reopen.
-    # @@data[:typs][:file] = File.join(__dir__, "_space_types.json")
-    # t_file = File.read(@@data[:typs][:file])
-    # typs = JSON.parse(t_file, symbolize_names: true)
 
     ##
     # Validates whether an activity is 'ancillary' to other(s). See relevant
