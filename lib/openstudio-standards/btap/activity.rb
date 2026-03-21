@@ -396,109 +396,108 @@ module BTAP
       # raise?
     end
 
-    # @@data[:types][:table].each do |tbl|
+    keepers = []
+    keepers << :building_type
+    keepers << :space_type
+    keepers << :lighting_per_area
+    keepers << :target_illuminance_setpoint
+    keepers << :ventilation_per_area
+    keepers << :ventilation_per_person
+    keepers << :ventilation_air_changes
+    keepers << :necb_hvac_system_selection_type
+    keepers << :ventilation_occupancy_rate_people_per_1000ft2
+    keepers << :ventilation_occupancy_standard
+    keepers << :ventilation_standard_space_type
+
+    b1980_path = File.join(__dir__, "../standards/necb/BTAPPRE1980/data/space_types.json")
+    b2010_path = File.join(__dir__, "../standards/necb/BTAP1980TO2010/data/space_types.json")
+    n2011_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types.json")
+    n2015_path = File.join(__dir__, "../standards/necb/NECB2015/data/space_types.json")
+    n2017_path = File.join(__dir__, "../standards/necb/NECB2017/data/space_types.json")
+    n2020_path = File.join(__dir__, "../standards/necb/NECB2020/data/space_types.json")
+
+    b1980_file = File.read(b1980_path)
+    b2010_file = File.read(b2010_path)
+    n2011_file = File.read(n2011_path)
+    n2015_file = File.read(n2015_path)
+    n2017_file = File.read(n2017_path)
+    n2020_file = File.read(n2020_path)
+
+    b1980_json = JSON.parse(b1980_file, symbolize_names: true)
+    b2010_json = JSON.parse(b2010_file, symbolize_names: true)
+    n2011_json = JSON.parse(n2011_file, symbolize_names: true)
+    n2015_json = JSON.parse(n2015_file, symbolize_names: true)
+    n2017_json = JSON.parse(n2017_file, symbolize_names: true)
+    n2020_json = JSON.parse(n2020_file, symbolize_names: true)
+
+    editions = []
+    editions << b1980_json
+    editions << b2010_json
+    editions << n2011_json
+    editions << n2015_json
+    editions << n2017_json
+    editions << n2020_json
+
+    # editions.each do |edition|
+      # puts edition[:tables][:space_types][:table].size
+      #   - BTAPPRE1980    : 126 entries ... 1x "motel", 0x "care"
+      #   - BTAP1980TO2010 : 126 entries ... 1x "motel", 0x "care"
+      #   - NECB2011       : 126 entries ... 1x "motel", 0x "care"
+      #   - NECB2015       : 126 entries ... 0x "motel", 1x "care"
+      #   - NECB2017       : 126 entries ... 0x "motel", 1x "care"
+      #   - NECB2020       : 126 entries ... 0x "motel", 1x "care"
+    # end
+
+    # b2010_json[:tables][:space_types][:table].each do |tbl|
+    #   tbl.delete(:building_type) if tbl[:building_type] == "Space Function"
+    #   tbl.delete(:space_type)    if tbl[:space_type   ] == "WholeBuilding"
+    #
+    #   tbl.each do |k, v|
+    #     tbl.delete(k) unless keepers.include?(k)
+    #   end
+    #
     #   if tbl.key?(:space_type)
-    #     found = false
-    #
-    #     @@data[:space][:activity].each do |k, v|
-    #       next unless tbl[:space_type] == k
-    #
-    #       unless tbl[:necb_schedule_type].downcase == @@data[:space][:activity][k][:schedule]
-    #         raise "what? #{tbl[:space_type]}"
-    #       end
-    #
-    #       tbl[:includes] = @@data[:space][:activity][k][:includes]
-    #       tbl[:excludes] = @@data[:space][:activity][k][:excludes]
-    #       tbl[:fallback] = @@data[:space][:activity][k][:fallback]
-    #       found = true
+    #     unless tbl[:space_type].to_s.include?("::")
+    #       raise "what? #{tbl[:space_type]}"
     #     end
     #
-    #     raise "WTF 3? #{tbl[:space_type]}" unless found
-    #   else
     #     found = false
     #
-    #     @@data[:bldg][:activity].each do |k, v|
-    #       next unless tbl[:building_type] == k
+    #     @@data[:types][:table].each do |tbl2|
+    #       next unless tbl2.key?(:space_type)
     #
-    #       unless tbl[:necb_schedule_type].downcase == @@data[:bldg][:activity][k][:schedule]
-    #         raise "what? #{tbl[:building_type]}"
+    #       if tbl[:space_type] == tbl2[:space_type]
+    #         found = true
+    #         break
     #       end
+    #     end
     #
-    #       tbl[:liveload] = @@data[:bldg][:activity][k][:liveload]
-    #       tbl[:category] = @@data[:bldg][:activity][k][:category]
-    #       tbl[:includes] = @@data[:bldg][:activity][k][:includes]
-    #       tbl[:excludes] = @@data[:bldg][:activity][k][:excludes]
-    #       tbl[:fallback] = @@data[:bldg][:activity][k][:fallback]
-    #       found = true
+    #     raise "WTF? #{tbl[:space_type]}" unless found
+    #   else
+    #     unless tbl.key?(:building_type)
+    #       puts tbl
+    #       raise "now what!"
+    #     end
+    #
+    #     found = false
+    #
+    #     @@data[:types][:table].each do |tbl2|
+    #       next unless tbl2.key?(:building_type)
+    #
+    #       if tbl[:building_type] == tbl2[:building_type]
+    #         found = true
+    #         break
+    #       end
     #     end
     #
     #     raise "WTF 2? #{tbl[:building_type]}" unless found
     #   end
     # end
 
-    # keepers = []
-    # keepers << :building_type
-    # keepers << :space_type
-    # keepers << :lighting_per_area
-    # keepers << :target_illuminance_setpoint
-    # keepers << :ventilation_per_area
-    # keepers << :ventilation_per_person
-    # keepers << :ventilation_air_changes
-    # keepers << :ventilation_occupancy_standard
-    # keepers << :necb_hvac_system_selection_type
-    # keepers << :ventilation_occupancy_rate_people_per_1000ft2
-    # keepers << :ventilation_occupancy_standard
-    # keepers << :ventilation_standard_space_type
-
-    # necb_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types.json")
-    # necb_file = File.read(necb_path)
-    # necb_json = JSON.parse(necb_file, symbolize_names: true)
-
-    # puts necb_json[:tables][:space_types][:table].size
-    #   - NECB2011 : 127 entries
-    #   - NECB2015 : 125 entries
-    #   - NECB2017 : 125 entries
-    #   - NECB2020 : 125 entries
-
-    # necb_json[:tables][:space_types][:table].each do |tbl|
-      # tbl.delete(:building_type) if tbl[:building_type] == "Space Function"
-      # tbl.delete(:space_type)    if tbl[:space_type   ] == "WholeBuilding"
-      #
-      # tbl.each do |k, v|
-      #   tbl.delete(k) unless keepers.include?(k)
-      # end
-
-      # if tbl[:space_type].to_s.include?("::")
-      #   found = false
-      #
-      #   @@data[:types][:table].each do |tbl2|
-      #     next unless tbl2.key?(:space_type)
-      #
-      #     if tbl[:space_type] == tbl2[:space_type]
-      #       found = true
-      #       break
-      #     end
-      #   end
-      #
-      #   raise "WTF? #{tbl[:space_type]}" unless found
-      #
-      #   # puts tbl[:space_type]
-      # else
-      #   found = false
-      #
-      #   @@data[:types][:table].each do |tbl2|
-      #     next unless tbl2.key?(:building_type)
-      #
-      #     if tbl[:building_type] == tbl2[:building_type]
-      #       found = true
-      #       break
-      #     end
-      #   end
-      #
-      #   raise "WTF 2? #{tbl[:building_type]}" unless found
-      #   # puts tbl[:building_type]
-      # end
-    # end
+    # Save.
+    # out = JSON.pretty_generate(b2010_json)
+    # t_file_final = File.join(__dir__, "space_types_FINAL.json")
+    # File.open(t_file_final, "w") { |f| f.puts out }
 
     ##
     # Validates whether an activity is 'ancillary' to other(s). See relevant

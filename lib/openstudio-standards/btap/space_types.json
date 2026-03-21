@@ -1561,10 +1561,10 @@
           "fallback": ""
         },
         {
-          "space_type": "recreation::common",
-          "occupancy_per_area": 9.29,
+          "space_type": "recreation::care",
+          "occupancy_per_area": 4.65,
           "electric_equipment_per_area": 0.092902267,
-          "service_water_heating_peak_flow_per_area": 0.002815567,
+          "service_water_heating_peak_flow_per_area": 0.001407784,
           "necb_schedule_type": "*B",
           "includes": [
             "recreation"
@@ -1575,7 +1575,7 @@
             "clinic",
             "outpatient"
           ],
-          "fallback": "recreation::common"
+          "fallback": "lounge::common"
         },
         {
           "space_type": "bay::manufacturing",
