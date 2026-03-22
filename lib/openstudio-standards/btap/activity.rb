@@ -36,13 +36,13 @@ module BTAP
     #   storage or parking of motor vehicles and containing no provision for
     #   the repair or servicing of such vehicles.
     #
-    # Such mismatches make it challenging to cross-compare NECB editions, for
-    # instance. The 'exact' NECB spacetype strings shouldn't matter - they
-    # almost always reference the same building 'activity' (e.g. a facility
-    # where vehicles are parked/stored). Behind the scenes, BTAP should only
-    # rely on abstract 'activity' designations, e.g. 'parking'. This requires
-    # functionality to extract specific keywords user-set building or space type
-    # designations.
+    # Such mismatches make it challenging to cross-compare NECB editions. The
+    # 'exact' NECB building (or space) type strings shouldn't matter - they
+    # almost always reference the same real-life building 'activity' (e.g. a
+    # facility where vehicles are parked/stored). Behind the scenes, BTAP should
+    # only rely on abstract 'activity' designations, e.g. 'parking'. This
+    # requires functionality to extract key sub-strings in user-assigned
+    # building or space type designations.
     #
     # Once 'activity' assignments are completed (for spaces and building),
     # building 'categories' are auto-assigned (e.g. "housing" vs "industry").
@@ -54,125 +54,182 @@ module BTAP
     #   - reinforced concrete flat slab & post-beam (mid/large-scale "housing")
     #
     # See lib/openstudio-standards/btap/structure.rb.
-    @@data               = {}
-    @@data[:bldg       ] = {}
-    @@data[:space      ] = {}
-    @@data[:udef       ] = {}
-    @@data[:types      ] = {}
+
+    # Activity data Hash.
+    @@data           = {}
+    @@data[:bldg   ] = {} # common BTAP building type/activity data
+    @@data[:space  ] = {} # common BTAP space type/activity data
+    @@data[:udef   ] = {} # common BTAP undefined/constant data
+    @@data[:edition] = {} # similar entries, specific to each NECB edition
+
+    # Quick access tables to:
+    #   - 'ancillary' space types/activities
+    #   - 'auxiliary' space types/activities
+    #   - building activities
+    #   - building categories
     @@data[:ancillaries] = []
     @@data[:auxiliaries] = []
+    @@data[:activities ] = []
+    @@data[:categories ] = []
 
-    # Hard setting path for files (temporary @todo).
-    @@data[:bldg ][:file      ] = File.join(__dir__, "btap_building_types.csv")
-    @@data[:space][:file      ] = File.join(__dir__, "btap_space_types.csv")
-    @@data[:udef ][:file      ] = File.join(__dir__, "udef.json")
-    @@data[:types][:file      ] = File.join(__dir__, "space_types.json")
-    @@data[:bldg ][:table     ] = nil
-    @@data[:space][:table     ] = nil
-    @@data[:udef ][:table     ] = nil
-    @@data[:types][:table     ] = nil
-    @@data[:bldg ][:activity  ] = {}
-    @@data[:space][:activity  ] = {}
-    @@data[:bldg ][:activities] = []
-    @@data[:bldg ][:categories] = []
+    # Load common BTAP 'space_types' and 'udef' JSON file content.
+    t_path = File.join(__dir__, "space_types.json")
+    u_path = File.join(__dir__, "udef.json")
 
-    # Load common spacetype JSON entries.
-    u_file = File.read(@@data[:udef ][:file])
-    t_file = File.read(@@data[:types][:file])
-    udef   = JSON.parse(u_file, symbolize_names: true)
-    types  = JSON.parse(t_file, symbolize_names: true)
+    t_json = JSON.parse(File.read(t_path), symbolize_names: true)
+    u_json = JSON.parse(File.read(u_path), symbolize_names: true)
 
-    # ------------------------------ EDIT -------------------------------------
-    # ancillaries = []
-    # ancillaries <<     "atrium::common"
-    # ancillaries <<   "audience::common"
-    # ancillaries <<   "computer::common"
-    # ancillaries <<   "corridor::common"
-    # ancillaries <<   "corridor::health"
-    # ancillaries <<   "corridor::manufacturing"
-    # ancillaries << "mechanical::common"
-    # ancillaries <<     "locker::common"
-    # ancillaries <<    "seating::common"
-    # ancillaries <<   "stairway::common"
-    # ancillaries <<    "storage::common"
-    # ancillaries <<   "washroom::common"
+    # The 'bldg' Hash holds (as keys) BTAP/NECB building types/activities, e.g.:
+    #   - "fastfood"
+    #   - "clinic"
+    #
+    # Its values are unique parameters (regardless of NECB edition), e.g.:
+    #   - liveload:           23.0
+    #   - category:           "commerce"
+    #   - necb_schedule_type: "B"
+    t_json[:tables][:space_types][:table].each do |tbl|
+      next unless tbl.key?(:building_type)
 
-    # auxiliaries = []
-    # auxiliaries <<   "elevator::common"
-    # auxiliaries <<      "lobby::common"
-    # auxiliaries <<   "audience::theatre"
-    # auxiliaries <<   "audience::gym"
-    # auxiliaries <<   "audience::arena"
-    # auxiliaries <<   "audience::auditorium"
-    # auxiliaries <<         "c1::arena"
-    # auxiliaries <<         "c2::arena"
-    # auxiliaries <<         "c3::arena"
-    # auxiliaries <<         "c4::arena"
-    # auxiliaries <<    "octogon::arena"
-    # auxiliaries <<   "exercise::gym"
-    # auxiliaries <<      "court::gym"
-    # auxiliaries <<   "dressing::theatre"
-    # auxiliaries <<     "dining::common"
-    # auxiliaries <<    "cuisine::common"
-    # auxiliaries << "recreation::common"
-    # auxiliaries <<    "meeting::common"
-    # auxiliaries <<    "reading::library"
-    # auxiliaries <<     "stacks::library"
-    # auxiliaries <<    "catalog::library"
-    # auxiliaries <<   "supplies::health"
-    # auxiliaries <<       "exam::health"
-    # auxiliaries <<    "nursery::health"
-    # auxiliaries <<     "nurses::health"
-    # auxiliaries <<  "operating::health"
-    # auxiliaries <<    "patient::health"
-    # auxiliaries <<    "therapy::health"
-    # auxiliaries <<    "imaging::health"
-    # auxiliaries <<   "recovery::health"
-    # auxiliaries <<    "laundry::health"
-    # auxiliaries <<     "lounge::common"
-    # auxiliaries <<     "lounge::health"
-    # auxiliaries <<   "pharmacy::health"
-    # auxiliaries <<  "emergency::common"
-    # auxiliaries <<  "emergency::health"
-    # auxiliaries <<       "dock::common"
+      type = tbl[:building_type]
+      next if @@data[:bldg].key?(type)
 
-    # keepers = []
-    # keepers << :building_type
-    # keepers << :space_type
-    # keepers << :necb_schedule_type
-    # keepers << :occupancy_per_area
-    # keepers << :electric_equipment_per_area
-    # keepers << :service_water_heating_peak_flow_per_area
+      @@data[:bldg][type] = {}
 
+      tbl.each do |k, v|
+        @@data[:bldg][type][k] = v unless k == :building_type
 
-    # ------------------------------ END of EDIT ------------------------------
+        if k == :category
+          unless @@data[:categories].include?(v)
+            @@data[:categories] << v
+          end
+        end
+      end
 
-    # The 'udef' table (Hash) holds:
+      unless @@data[:activities].include?(type)
+        @@data[:activities] << type
+      end
+    end
+
+    # The 'space' Hash holds (as keys) BTAP/NECB space types/activities, e.g.:
+    #   - "audience::cineplex"
+    #   - "meeting::common"
+    #
+    # Its values are similar to @@data[:bldg] entries (regardless of NECB
+    # edition), except :liveload and :category, e.g.:
+    #   - necb_schedule_type: "C"
+    t_json[:tables][:space_types][:table].each do |tbl|
+      next unless tbl.key?(:space_type)
+
+      type = tbl[:space_type]
+      next if @@data[:space].key?(type)
+
+      @@data[:space][type] = {}
+
+      tbl.each do |k, v|
+        @@data[:space][type][k] = v unless k == :space_type
+
+        if k == :necb_schedule_type
+          if v == "*"
+            @@data[:ancillaries] << type
+          elsif v.include?("*")
+            @@data[:auxiliaries] << type
+          end
+        end
+      end
+    end
+
+    @@data[:activities ] << "common"
+    @@data[:activities ].freeze # 35
+    @@data[:categories ].freeze #  7
+    @@data[:ancillaries].freeze # 12
+    @@data[:auxiliaries].freeze # 39
+
+    # puts @@data[:bldg].keys.size   #  34
+    # puts @@data[:space].keys.size  # 107
+    # puts @@data[:activities].size  #  35
+    # puts @@data[:categories].size  #   7
+    # puts @@data[:ancillaries].size #  12
+    # puts @@data[:auxiliaries].size #  38
+
+    # The common BTAP 'udef' table (Hash) holds:
     #   - all BTAP/NECB building/space type/activity data keys, e.g.:
-    #       - lighting_per_area
-    #       - lighting_fraction_radiant
-    #       - target_illuminance_setpoint
-    #       - infiltration_per_exterior_area
+    #       - :lighting_per_area
+    #       - :lighting_fraction_radiant
+    #       - :target_illuminance_setpoint
+    #       - :infiltration_per_exterior_area
     #   - default values applicable to all "undefined::common" spaces, e.g.:
     #       - lighting_per_area: 0.0
     #       - target_illuminance_setpoint: null
-    #   - default values applicable to all building/space types/activities, e.g.:
+    #   - constants applicable to all building/space types/activities, e.g.:
     #       - lighting_fraction_radiant: 0.5
     #       - infiltration_per_exterior_area: 0.049225
-    @@data[:udef][:table] = udef[:tables][:space_types][:table].first.freeze
+    u_json[:tables][:space_types][:table].first.each do |k, v|
+      @@data[:udef][k] = v
+    end
 
-    # The 'types' table (Array) holds:
-    #   - all BTAP/NECB building/space type/activity choices, e.g.:
-    #       - building_type: "fastfood"
-    #       - building_type: "clinic"
-    #       - space_type:    "audience::theatre"
-    #       - space_type:    "meeting::common"
-    #   - default values assigned to each building/space type/activity, e.g.:
-    #       - necb_schedule_type
-    #       - occupancy_per_area
-    #       - electric_equipment_per_area
-    #       - service_water_heating_peak_flow_per_area
-    @@data[:types][:table] = types[:tables][:space_types][:table].freeze
+    # BTAP-supported NECB editions (and older vintages).
+    editions = []
+    editions << "BTAPPRE1980"
+    editions << "BTAP1980TO2010"
+    editions << "NECB2011"
+    editions << "NECB2015"
+    editions << "NECB2017"
+    editions << "NECB2020"
+
+    # Load 'space_types' and 'udef' JSON content for each NECB edition.
+    editions.each do |ed|
+      @@data[:edition][ed] = { bldg: {}, space: {}, udef: {} }
+
+      t_str = "../standards/necb/" + ed + "/data/space_types.json"
+      u_str = "../standards/necb/" + ed + "/data/udef.json"
+
+      t_path = File.join(__dir__, t_str)
+      u_path = File.join(__dir__, u_str)
+
+      t_json = JSON.parse(File.read(t_path), symbolize_names: true)
+      u_json = JSON.parse(File.read(u_path), symbolize_names: true)
+
+      # Edition-specific building type entries.
+      t_json[:tables][:space_types][:table].each do |tbl|
+        next unless tbl.key?(:building_type)
+
+        type = tbl[:building_type]
+        next if @@data[:edition][ed][:bldg].key?(type)
+
+        @@data[:edition][ed][:bldg][type] = {}
+
+        tbl.each do |k, v|
+          @@data[:edition][ed][:bldg][type][k] = v unless k == :building_type
+        end
+      end
+
+      # Edition-specific space type entries.
+      t_json[:tables][:space_types][:table].each do |tbl|
+        next unless tbl.key?(:space_type)
+
+        type = tbl[:space_type]
+        next if @@data[:edition][ed][:space].key?(type)
+
+        @@data[:edition][ed][:space][type] = {}
+
+        tbl.each do |k, v|
+          @@data[:edition][ed][:space][type][k] = v unless k == :space_type
+        end
+      end
+
+      # Edition-specific 'udef' entries.
+      u_json[:tables][:space_types][:table].first.each do |k, v|
+        @@data[:edition][ed][:udef][k] = v
+      end
+
+      # puts "#{ed}: #{@@data[:edition][ed][:bldg].size} vs #{@@data[:edition][ed][:space].size}"
+      # BTAPPRE1980:    33 vs 93 ... 1x "motel", 0x "care"
+      # BTAP1980TO2010: 33 vs 93 ... 1x "motel", 0x "care"
+      # NECB2011:       33 vs 93 ... 1x "motel", 0x "care"
+      # NECB2015:       33 vs 93 ... 0x "motel", 1x "care"
+      # NECB2017:       33 vs 93 ... 0x "motel", 1x "care"
+      # NECB2020:       33 vs 93 ... 0x "motel", 1x "care"
+    end
 
     # Key notes, common to NECB editions.
     #
@@ -228,276 +285,154 @@ module BTAP
     # fallbacks (e.g. audience seating, office).
 
     # Parse building type data on file.
-    if File.exist?(@@data[:bldg][:file])
-      table = CSV.open(@@data[:bldg][:file], headers: true).read
-
-      # 35 unique entries (rows), 10 columns per row, e.g.:
-      #    C01  C02 C03  C04 C05 C06      C07   C08               C09        C10
-      #   ____ ___ ____ ____ ___ ___ ________ _____ _______________ ____________
-      #   care, 25, 1.5, 500,  j, 13, housing, care, health/clinic/, residential
-      #
-      #   C01: BTAP building ACTIVITY e.g. "care"
-      #   C02: occupant density       e.g. 25.0 m2/occupant
-      #   C03: peak equipment load    e.g. 1.5 W/m2
-      #   C04: peak SWH load          e.g. 500.0 W/occupant
-      #   C05: schedule set           e.g. "j"
-      #   C06: non-occupant liveload  e.g. 13 kg/m2, ~1/12 of NBC min liveload
-      #   C07: BTAP building CATEGORY e.g. "housing"
-      #   C08: selected sub-string(s) e.g. "care", as in "Long-term care"
-      #   C09: rejected sub-string(s) e.g. "health", "multi", "residential"
-      #   C10: fallback (if missing)  e.g. "residential"
-      #
-      # Contrary to the aforementioned 'parking' case (where fortunately there
-      # is an obvious one-to-one match between "Parking garage" (NECB2011) and
-      # "Storage garage" (NECB2020)), there is no direct match here for a
-      # long-term care facility when using the NECB2011. In this case, the
-      # fallback 'activity' is 'residential' (COL10). So in any cross-comparison
-      # of long-term care facilities between NECB editions, the NECB2011 variant
-      # would be akin to a MURB.
-      #
-      # A "long-term care" facility (e.g. NECB2020 building type, currently
-      # found in BTAP datasets) would be identified as belonging to activity
-      # 'care' by catching the substring "care" (COL4) in any of the
-      # NECB building types (e.g. JSON, CSV, XLSX files). Yet the same substring
-      # "care" is found in both NECB building types:
-      #
-      #   - "Long-term care"
-      #   - "Health-care clinic"
-      #
-      # ... rejected substrings (COL5) prune out unwanted picks. By selecting
-      # COL4 substrings, then rejecting COL5 substrings, there should be a
-      # single selected row. See NECB unit test test_necb_activities.rb.
-      table.each do |row|
-        key = row[0].to_s
-
-        unless key == "undefined::common"
-          missing = true
-
-          @@data[:types][:table].each do |tbl|
-            next if tbl[:space_type].to_s.include?("::")
-
-            if tbl[:building_type] == key
-              missing = false
-              break
-            end
-          end
-
-          puts "#{key} missing" if missing == true
-        end
-
-        @@data[:bldg][:activity][key]            = {}
-        @@data[:bldg][:activity][key][:density ] = row[1].to_f
-        @@data[:bldg][:activity][key][:eqpload ] = row[2].to_f
-        @@data[:bldg][:activity][key][:swhload ] = row[3].to_f
-        @@data[:bldg][:activity][key][:schedule] = row[4].to_s
-        @@data[:bldg][:activity][key][:liveload] = row[5].to_f
-        @@data[:bldg][:activity][key][:category] = row[6].to_s
-        @@data[:bldg][:activity][key][:includes] = row[7].to_s.split("/")
-        @@data[:bldg][:activity][key][:excludes] = row[8].to_s.split("/")
-        @@data[:bldg][:activity][key][:fallback] = row[9].to_s
-      end
-
-      # Keep CSV table. Ensure building activities & categories uniqueness. Add
-      # "common" building type, e.g. mixed use. Freeze.
-      @@data[:bldg][:table     ] = table
-      @@data[:bldg][:activities] = table.by_col[0].uniq
-      @@data[:bldg][:categories] = table.by_col[1].uniq
-      @@data[:bldg][:activities] << "common"
-      @@data[:bldg][:activities].freeze
-      @@data[:bldg][:categories].freeze
-    else
-      # raise?
-    end
+    # if File.exist?(@@data[:bldg][:file])
+    #   table = CSV.open(@@data[:bldg][:file], headers: true).read
+    #
+    #   # 35 unique entries (rows), 10 columns per row, e.g.:
+    #   #    C01  C02 C03  C04 C05 C06      C07   C08               C09        C10
+    #   #   ____ ___ ____ ____ ___ ___ ________ _____ _______________ ____________
+    #   #   care, 25, 1.5, 500,  j, 13, housing, care, health/clinic/, residential
+    #   #
+    #   #   C01: BTAP building ACTIVITY e.g. "care"
+    #   #   C02: occupant density       e.g. 25.0 m2/occupant
+    #   #   C03: peak equipment load    e.g. 1.5 W/m2
+    #   #   C04: peak SWH load          e.g. 500.0 W/occupant
+    #   #   C05: schedule set           e.g. "j"
+    #   #   C06: non-occupant liveload  e.g. 13 kg/m2, ~1/12 of NBC min liveload
+    #   #   C07: BTAP building CATEGORY e.g. "housing"
+    #   #   C08: selected sub-string(s) e.g. "care", as in "Long-term care"
+    #   #   C09: rejected sub-string(s) e.g. "health", "multi", "residential"
+    #   #   C10: fallback (if missing)  e.g. "residential"
+    #   #
+    #   # Contrary to the aforementioned 'parking' case (where fortunately there
+    #   # is an obvious one-to-one match between "Parking garage" (NECB2011) and
+    #   # "Storage garage" (NECB2020)), there is no direct match here for a
+    #   # long-term care facility when using the NECB2011. In this case, the
+    #   # fallback 'activity' is 'residential' (COL10). So in any cross-comparison
+    #   # of long-term care facilities between NECB editions, the NECB2011 variant
+    #   # would be akin to a MURB.
+    #   #
+    #   # A "long-term care" facility (e.g. NECB2020 building type, currently
+    #   # found in BTAP datasets) would be identified as belonging to activity
+    #   # 'care' by catching the substring "care" (COL4) in any of the
+    #   # NECB building types (e.g. JSON, CSV, XLSX files). Yet the same substring
+    #   # "care" is found in both NECB building types:
+    #   #
+    #   #   - "Long-term care"
+    #   #   - "Health-care clinic"
+    #   #
+    #   # ... rejected substrings (COL5) prune out unwanted picks. By selecting
+    #   # COL4 substrings, then rejecting COL5 substrings, there should be a
+    #   # single selected row. See NECB unit test test_necb_activities.rb.
+    #   table.each do |row|
+    #     key = row[0].to_s
+    #
+    #     @@data[:bldg][:activity][key]            = {}
+    #     @@data[:bldg][:activity][key][:density ] = row[1].to_f
+    #     @@data[:bldg][:activity][key][:eqpload ] = row[2].to_f
+    #     @@data[:bldg][:activity][key][:swhload ] = row[3].to_f
+    #     @@data[:bldg][:activity][key][:schedule] = row[4].to_s
+    #     @@data[:bldg][:activity][key][:liveload] = row[5].to_f
+    #     @@data[:bldg][:activity][key][:category] = row[6].to_s
+    #     @@data[:bldg][:activity][key][:includes] = row[7].to_s.split("/")
+    #     @@data[:bldg][:activity][key][:excludes] = row[8].to_s.split("/")
+    #     @@data[:bldg][:activity][key][:fallback] = row[9].to_s
+    #   end
+    #
+    #   # Keep CSV table. Ensure building activities & categories uniqueness. Add
+    #   # "common" building type, e.g. mixed use. Freeze.
+    #   @@data[:bldg][:table     ] = table
+    #   @@data[:bldg][:activities] = table.by_col[0].uniq
+    #   @@data[:bldg][:categories] = table.by_col[6].uniq
+    #   @@data[:bldg][:activities] << "common"
+    #   @@data[:bldg][:activities].freeze
+    #   @@data[:bldg][:categories].freeze
+    # else
+    #   # raise?
+    # end
 
     # Parse space data on file.
-    if File.exist?(@@data[:space][:file])
-      table = CSV.open(@@data[:space][:file], headers: true).read
-
-      # 108 unique rows, 8 columns per row, e.g.:
-      #          C01 C02  C03  C04  C05 C06           C07                 C08
-      #  ___________ ___ ____ ____ ____ ____ ____________ ___________________
-      #  units::care, 25, 2.5, 500,  j, unit, residential, units::residential
-      #
-      #   C01: BTAP space ACTIVITY    e.g. "units::care"
-      #   C02: occupant density       e.g. 25.0 m2/occupant
-      #   C03: peak equipment load    e.g. 2.5 W/m2
-      #   C04: peak SWH load          e.g. 500.0 W/occupant
-      #   C05: schedule set           e.g. "j"
-      #   C06: selected sub-string(s) e.g. "unit"
-      #   C07: rejected sub-string(s) e.g. "residential"
-      #   C08: fallback (if missing)  e.g. "units::residential"
-      #
-      # First, BTAP space 'activity' entries are namespaced, e.g.:
-      #   - "units": 1-word descriptor on the nature of the space 'activity'
-      #   - "care": references a building 'activity', see @@data[:bldg]
-      #
-      # There are 2 entries for BTAP space activity "units":
-      #   - "units::residential"
-      #   - "units::care"
-      #
-      # The entries designate either typical residential dwelling 'units' or
-      # long-term care dwelling 'units'. Both are expected to offer individual
-      # bathroom and cooking facilities. This differs from:
-      #   - "quarters::dorm"
-      #   - "quarters::firehouse"
-      #
-      # ... which typically offer shared sleeping/bathroom/cooking facilities.
-      # Both "units" and "quarters" differ from:
-      #  - "rooms::motel"
-      #  - "rooms::hotel"
-      #  - "rooms::common"
-      #
-      # ... which designate short-term, rental lodgings. All three activities
-      # share many features (e.g. sleeping, showers), yet each remains specific
-      # to an NECB space type entry (as required).
-      table.each do |row|
-        key = row[0].to_s
-        str = key.split("::")
-
-        unless key == "undefined::common"
-          missing = true
-
-          @@data[:types][:table].each do |tbl|
-            next unless tbl.key?(:space_type)
-            next unless tbl[:space_type].include?("::")
-            next unless tbl[:space_type] == key
-
-            missing = false
-            break
-          end
-
-          puts "#{key} missing" if missing == true
-        end
-
-        activity = str[0].to_s
-        bldgtype = str[1].to_s
-        schedule = row[4].to_s
-
-        @@data[:space][:activity][key]            = {}
-        @@data[:space][:activity][key][:activity] = activity
-        @@data[:space][:activity][key][:bldgtype] = bldgtype
-        @@data[:space][:activity][key][:density ] = row[1].to_f
-        @@data[:space][:activity][key][:eqpload ] = row[2].to_f
-        @@data[:space][:activity][key][:swhload ] = row[3].to_f
-        @@data[:space][:activity][key][:schedule] = schedule
-        @@data[:space][:activity][key][:includes] = row[5].to_s.split("/")
-        @@data[:space][:activity][key][:excludes] = row[6].to_s.split("/")
-        @@data[:space][:activity][key][:fallback] = row[7].to_s
-
-        if schedule == "*"
-          @@data[:ancillaries] << key
-        elsif schedule.include?("*")
-          @@data[:auxiliaries] << key
-        end
-      end
-
-      @@data[:space][:table] = table
-    else
-      # raise?
-    end
-
-    keepers = []
-    keepers << :building_type
-    keepers << :space_type
-    keepers << :lighting_per_area
-    keepers << :target_illuminance_setpoint
-    keepers << :ventilation_per_area
-    keepers << :ventilation_per_person
-    keepers << :ventilation_air_changes
-    keepers << :necb_hvac_system_selection_type
-    keepers << :ventilation_occupancy_rate_people_per_1000ft2
-    keepers << :ventilation_occupancy_standard
-    keepers << :ventilation_standard_space_type
-
-    b1980_path = File.join(__dir__, "../standards/necb/BTAPPRE1980/data/space_types.json")
-    b2010_path = File.join(__dir__, "../standards/necb/BTAP1980TO2010/data/space_types.json")
-    n2011_path = File.join(__dir__, "../standards/necb/NECB2011/data/space_types.json")
-    n2015_path = File.join(__dir__, "../standards/necb/NECB2015/data/space_types.json")
-    n2017_path = File.join(__dir__, "../standards/necb/NECB2017/data/space_types.json")
-    n2020_path = File.join(__dir__, "../standards/necb/NECB2020/data/space_types.json")
-
-    b1980_file = File.read(b1980_path)
-    b2010_file = File.read(b2010_path)
-    n2011_file = File.read(n2011_path)
-    n2015_file = File.read(n2015_path)
-    n2017_file = File.read(n2017_path)
-    n2020_file = File.read(n2020_path)
-
-    b1980_json = JSON.parse(b1980_file, symbolize_names: true)
-    b2010_json = JSON.parse(b2010_file, symbolize_names: true)
-    n2011_json = JSON.parse(n2011_file, symbolize_names: true)
-    n2015_json = JSON.parse(n2015_file, symbolize_names: true)
-    n2017_json = JSON.parse(n2017_file, symbolize_names: true)
-    n2020_json = JSON.parse(n2020_file, symbolize_names: true)
-
-    editions = []
-    editions << b1980_json
-    editions << b2010_json
-    editions << n2011_json
-    editions << n2015_json
-    editions << n2017_json
-    editions << n2020_json
-
-    # editions.each do |edition|
-      # puts edition[:tables][:space_types][:table].size
-      #   - BTAPPRE1980    : 126 entries ... 1x "motel", 0x "care"
-      #   - BTAP1980TO2010 : 126 entries ... 1x "motel", 0x "care"
-      #   - NECB2011       : 126 entries ... 1x "motel", 0x "care"
-      #   - NECB2015       : 126 entries ... 0x "motel", 1x "care"
-      #   - NECB2017       : 126 entries ... 0x "motel", 1x "care"
-      #   - NECB2020       : 126 entries ... 0x "motel", 1x "care"
-    # end
-
-    # b2010_json[:tables][:space_types][:table].each do |tbl|
-    #   tbl.delete(:building_type) if tbl[:building_type] == "Space Function"
-    #   tbl.delete(:space_type)    if tbl[:space_type   ] == "WholeBuilding"
+    # if File.exist?(@@data[:space][:file])
+    #   table = CSV.open(@@data[:space][:file], headers: true).read
     #
-    #   tbl.each do |k, v|
-    #     tbl.delete(k) unless keepers.include?(k)
+    #   # 108 unique rows, 8 columns per row, e.g.:
+    #   #          C01 C02  C03  C04  C05 C06           C07                 C08
+    #   #  ___________ ___ ____ ____ ____ ____ ____________ ___________________
+    #   #  units::care, 25, 2.5, 500,  j, unit, residential, units::residential
+    #   #
+    #   #   C01: BTAP space ACTIVITY    e.g. "units::care"
+    #   #   C02: occupant density       e.g. 25.0 m2/occupant
+    #   #   C03: peak equipment load    e.g. 2.5 W/m2
+    #   #   C04: peak SWH load          e.g. 500.0 W/occupant
+    #   #   C05: schedule set           e.g. "j"
+    #   #   C06: selected sub-string(s) e.g. "unit"
+    #   #   C07: rejected sub-string(s) e.g. "residential"
+    #   #   C08: fallback (if missing)  e.g. "units::residential"
+    #   #
+    #   # First, BTAP space 'activity' entries are namespaced, e.g.:
+    #   #   - "units": 1-word descriptor on the nature of the space 'activity'
+    #   #   - "care": references a building 'activity', see @@data[:bldg]
+    #   #
+    #   # There are 2 entries for BTAP space activity "units":
+    #   #   - "units::residential"
+    #   #   - "units::care"
+    #   #
+    #   # The entries designate either typical residential dwelling 'units' or
+    #   # long-term care dwelling 'units'. Both are expected to offer individual
+    #   # bathroom and cooking facilities. This differs from:
+    #   #   - "quarters::dorm"
+    #   #   - "quarters::firehouse"
+    #   #
+    #   # ... which typically offer shared sleeping/bathroom/cooking facilities.
+    #   # Both "units" and "quarters" differ from:
+    #   #  - "rooms::motel"
+    #   #  - "rooms::hotel"
+    #   #  - "rooms::common"
+    #   #
+    #   # ... which designate short-term, rental lodgings. All three activities
+    #   # share many features (e.g. sleeping, showers), yet each remains specific
+    #   # to an NECB space type entry (as required).
+    #   table.each do |row|
+    #     key = row[0].to_s
+    #     str = key.split("::")
+    #
+    #     activity = str[0].to_s
+    #     bldgtype = str[1].to_s
+    #     schedule = row[4].to_s
+    #
+    #     @@data[:space][:activity][key]            = {}
+    #     @@data[:space][:activity][key][:activity] = activity
+    #     @@data[:space][:activity][key][:bldgtype] = bldgtype
+    #     @@data[:space][:activity][key][:density ] = row[1].to_f
+    #     @@data[:space][:activity][key][:eqpload ] = row[2].to_f
+    #     @@data[:space][:activity][key][:swhload ] = row[3].to_f
+    #     @@data[:space][:activity][key][:schedule] = schedule
+    #     @@data[:space][:activity][key][:includes] = row[5].to_s.split("/")
+    #     @@data[:space][:activity][key][:excludes] = row[6].to_s.split("/")
+    #     @@data[:space][:activity][key][:fallback] = row[7].to_s
+    #
+    #     if schedule == "*"
+    #       @@data[:ancillaries] << key
+    #     elsif schedule.include?("*")
+    #       @@data[:auxiliaries] << key
+    #     end
     #   end
     #
-    #   if tbl.key?(:space_type)
-    #     unless tbl[:space_type].to_s.include?("::")
-    #       raise "what? #{tbl[:space_type]}"
-    #     end
-    #
-    #     found = false
-    #
-    #     @@data[:types][:table].each do |tbl2|
-    #       next unless tbl2.key?(:space_type)
-    #
-    #       if tbl[:space_type] == tbl2[:space_type]
-    #         found = true
-    #         break
-    #       end
-    #     end
-    #
-    #     raise "WTF? #{tbl[:space_type]}" unless found
-    #   else
-    #     unless tbl.key?(:building_type)
-    #       puts tbl
-    #       raise "now what!"
-    #     end
-    #
-    #     found = false
-    #
-    #     @@data[:types][:table].each do |tbl2|
-    #       next unless tbl2.key?(:building_type)
-    #
-    #       if tbl[:building_type] == tbl2[:building_type]
-    #         found = true
-    #         break
-    #       end
-    #     end
-    #
-    #     raise "WTF 2? #{tbl[:building_type]}" unless found
-    #   end
+    #   @@data[:space][:table] = table
+    # else
+    #   # raise?
     # end
 
-    # Save.
-    # out = JSON.pretty_generate(b2010_json)
-    # t_file_final = File.join(__dir__, "space_types_FINAL.json")
-    # File.open(t_file_final, "w") { |f| f.puts out }
+    # @@data[:types][:table].each do |tbl|
+    #   next unless tbl.key?(:building_type)
+    #
+    #   raise "#{tbl[:building_type]} category?"          unless tbl.key?(:category)
+    #   raise "#{tbl[:building_type]} liveload?"          unless tbl.key?(:liveload)
+    #   raise "#{tbl[:building_type]} missing?"           unless @@data[:bldg][:activity].include?(tbl[:building_type].to_s)
+    #   raise "#{tbl[:building_type]} #{tbl[:category]}?" unless @@data[:bldg][:categories].include?(tbl[:category])
+    #   raise "#{tbl[:building_type]} #{tbl[:liveload]}?" unless @@data[:bldg][:activity][tbl[:building_type]][:liveload].round == tbl[:liveload].round
+    # end
+
 
     ##
     # Validates whether an activity is 'ancillary' to other(s). See relevant
