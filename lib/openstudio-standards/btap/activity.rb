@@ -60,11 +60,73 @@ module BTAP
     @@data[:bldg   ] = {} # common BTAP building type/activity data
     @@data[:space  ] = {} # common BTAP space type/activity data
     @@data[:udef   ] = {} # common BTAP undefined/constant data
-    @@data[:edition] = {} # similar entries, specific to each NECB edition
+    @@data[:edition] = {} # similar 3x entries, specific to each NECB edition
 
-    # Quick access tables to:
-    #   - 'ancillary' space types/activities
-    #   - 'auxiliary' space types/activities
+    # BTAP-supported NECB editions (and older vintages).
+    @@data[:editions] = []
+    @@data[:editions]editions << "BTAPPRE1980"
+    @@data[:editions]editions << "BTAP1980TO2010"
+    @@data[:editions]editions << "NECB2011"
+    @@data[:editions]editions << "NECB2015"
+    @@data[:editions]editions << "NECB2017"
+    @@data[:editions]editions << "NECB2020"
+
+    # Key notes, common to NECB editions.
+    #
+    #   Note to NECB Table 8.4.4.7.-A: (2) Small individual spaces in the
+    #   proposed building that are located among larger spaces of another space
+    #   type shall be considered ANCILLARY to that larger space: for example, a
+    #   conference room serving office spaces would be grouped with the office
+    #   spaces as one space type.
+    #
+    #   A-8.4.3.2.(1): Tables [...] contain default values of operating
+    #   schedules of building parameters for simulation purposes. These
+    #   schedules MAY be used with Table A-8.4.3.2.(2)-B IF more accurate
+    #   information IS NOT AVAILABLE.
+    #
+    #   A-8.4.3.2.(2): Tables [...] contain representative internal and service
+    #   water heating loads, operating schedules, and illuminance levels to be
+    #   used as modeling GUIDANCE when actual values are not known.
+    #
+    #   Note to Table A-8.4.3.3.(2)B. (1): An asterisk (*) in this column
+    #   indicates that there is no recommended default schedule for the space
+    #   type listed. In general, such space types will be simulated using a
+    #   schedule that is similar to the ADJACENT spaces served: e.g. a corridor
+    #   space serving an adjacent office space will be simulated using a
+    #   schedule that is similar to that of the office space.
+    #
+    # This last note refers to the following NECB 'ancillary' spacetypes:
+    #
+    #                               2011  2015  2017  2020
+    #       "atrium::common"          C     *     *     *
+    #     "audience::common"                *     *     *
+    #     "computer::common"                *     *     *
+    #     "corridor::common"          *     *     *     *
+    #     "corridor::health"          *     *     *     *
+    #     "corridor::manufacturing"   *     *     *     *
+    #   "mechanical::common"          *     *     *     *
+    #       "locker::common"          *     *     *     *
+    #      "seating::common"                *     *     *
+    #     "stairway::common"          *     *     *     *
+    #      "storage::common"          *     *     *     *
+    #     "washroom::common"          *     *     *     *
+
+    # Note that NECB2011 recommends schedule set "C" for atria, while all other
+    # NECB editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
+    # inheritance). To facilitate cross-comparisons between NECB editions, the
+    # NECB 2011 atrium schedule set will harmonize with other NECB editions.
+    #
+    # Compared to other NECB editions, NECB2011 also has a few missing entries:
+    # There is neither GENERAL 'seating' (e.g. a waiting area) nor GENERAL
+    # 'audience seating' types: 'seating' is either building-SPECIFIC (e.g.
+    # transportation facility) or SPECIFIC 'audience seating' (e.g. theatre,
+    # convention centre). Similarly, there is no entry for computer or server
+    # rooms. Within the scope of BTAP::Activity, missing space types inherit
+    # fallbacks (e.g. audience seating, office).
+
+    # Quick access lists of:
+    #   - ancillary space types/activities
+    #   - auxiliary space types/activities
     #   - building activities
     #   - building categories
     @@data[:ancillaries] = []
@@ -144,13 +206,6 @@ module BTAP
     @@data[:ancillaries].freeze # 12
     @@data[:auxiliaries].freeze # 39
 
-    # puts @@data[:bldg].keys.size   #  34
-    # puts @@data[:space].keys.size  # 107
-    # puts @@data[:activities].size  #  35
-    # puts @@data[:categories].size  #   7
-    # puts @@data[:ancillaries].size #  12
-    # puts @@data[:auxiliaries].size #  38
-
     # The common BTAP 'udef' table (Hash) holds:
     #   - all BTAP/NECB building/space type/activity data keys, e.g.:
     #       - :lighting_per_area
@@ -166,15 +221,6 @@ module BTAP
     u_json[:tables][:space_types][:table].first.each do |k, v|
       @@data[:udef][k] = v
     end
-
-    # BTAP-supported NECB editions (and older vintages).
-    editions = []
-    editions << "BTAPPRE1980"
-    editions << "BTAP1980TO2010"
-    editions << "NECB2011"
-    editions << "NECB2015"
-    editions << "NECB2017"
-    editions << "NECB2020"
 
     # Load 'space_types' and 'udef' JSON content for each NECB edition.
     editions.each do |ed|
@@ -221,68 +267,7 @@ module BTAP
       u_json[:tables][:space_types][:table].first.each do |k, v|
         @@data[:edition][ed][:udef][k] = v
       end
-
-      # puts "#{ed}: #{@@data[:edition][ed][:bldg].size} vs #{@@data[:edition][ed][:space].size}"
-      # BTAPPRE1980:    33 vs 93 ... 1x "motel", 0x "care"
-      # BTAP1980TO2010: 33 vs 93 ... 1x "motel", 0x "care"
-      # NECB2011:       33 vs 93 ... 1x "motel", 0x "care"
-      # NECB2015:       33 vs 93 ... 0x "motel", 1x "care"
-      # NECB2017:       33 vs 93 ... 0x "motel", 1x "care"
-      # NECB2020:       33 vs 93 ... 0x "motel", 1x "care"
     end
-
-    # Key notes, common to NECB editions.
-    #
-    #   Note to NECB Table 8.4.4.7.-A: (2) Small individual spaces in the
-    #   proposed building that are located among larger spaces of another space
-    #   type shall be considered ANCILLARY to that larger space: for example, a
-    #   conference room serving office spaces would be grouped with the office
-    #   spaces as one space type.
-    #
-    #   A-8.4.3.2.(1): Tables [...] contain default values of operating
-    #   schedules of building parameters for simulation purposes. These
-    #   schedules MAY be used with Table A-8.4.3.2.(2)-B IF more accurate
-    #   information IS NOT AVAILABLE.
-    #
-    #   A-8.4.3.2.(2): Tables [...] contain representative internal and service
-    #   water heating loads, operating schedules, and illuminance levels to be
-    #   used as modeling GUIDANCE when actual values are not known.
-    #
-    #   Note to Table A-8.4.3.3.(2)B. (1): An asterisk (*) in this column
-    #   indicates that there is no recommended default schedule for the space
-    #   type listed. In general, such space types will be simulated using a
-    #   schedule that is similar to the ADJACENT spaces served: e.g. a corridor
-    #   space serving an adjacent office space will be simulated using a
-    #   schedule that is similar to that of the office space.
-    #
-    # This last note refers to the following NECB 'ancillary' spacetypes:
-    #
-    #                               2011  2015  2017  2020
-    #       "atrium::common"          C     *     *     *
-    #     "audience::common"                *     *     *
-    #     "computer::common"                *     *     *
-    #     "corridor::common"          *     *     *     *
-    #     "corridor::health"          *     *     *     *
-    #     "corridor::manufacturing"   *     *     *     *
-    #   "mechanical::common"          *     *     *     *
-    #       "locker::common"          *     *     *     *
-    #      "seating::common"                *     *     *
-    #     "stairway::common"          *     *     *     *
-    #      "storage::common"          *     *     *     *
-    #     "washroom::common"          *     *     *     *
-
-    # Note that NECB2011 recommends schedule set "C" for atria, while all other
-    # NECB editions point to Note (1) of Table A-8.4.3.3.(2)B (on schedule set
-    # inheritance). To facilitate cross-comparisons between NECB editions, the
-    # NECB 2011 atrium schedule set will harmonize with other NECB editions.
-    #
-    # Compared to other NECB editions, NECB2011 also has a few missing entries:
-    # There is neither GENERAL 'seating' (e.g. a waiting area) nor GENERAL
-    # 'audience seating' types: 'seating' is either building-SPECIFIC (e.g.
-    # transportation facility) or SPECIFIC 'audience seating' (e.g. theatre,
-    # convention centre). Similarly, there is no entry for computer or server
-    # rooms. Within the scope of BTAP::Activity, missing space types inherit
-    # fallbacks (e.g. audience seating, office).
 
     # Parse building type data on file.
     # if File.exist?(@@data[:bldg][:file])
@@ -433,7 +418,6 @@ module BTAP
     #   raise "#{tbl[:building_type]} #{tbl[:liveload]}?" unless @@data[:bldg][:activity][tbl[:building_type]][:liveload].round == tbl[:liveload].round
     # end
 
-
     ##
     # Validates whether an activity is 'ancillary' to other(s). See relevant
     # comments above, and note to Table A-8.4.3.3.(2)B. (1).
@@ -533,38 +517,33 @@ module BTAP
     end
 
     ##
-    # Validates whether a space is targeted for occupancy-sensing lighting
-    # control, per NECB2011.
+    # Validates whether a space is tagged as 'vented' (e.g. cusine::common).
     #
     # @param space [OpenStudio::Model::Space] an OpenStudio space
     #
-    # @return [Boolean] true if occsensing
-    def occsensing_deprecated?(space = nil)
+    # @return [Boolean] true if vented
+    def vented?(space = nil)
       return false unless space.is_a?(OpenStudio::Model::Space)
 
       # First check AdditionalProperty.
-      tag  = "occsensing"
-      osns = space.additionalProperties.getFeatureAsBoolean(tag)
-      return osns.get unless osns.empty?
+      tag  = "vented"
+      rp28 = space.additionalProperties.getFeatureAsBoolean(tag)
+      return vented.get unless vented.empty?
 
       # Check spacetype strings.
-      variants = ["occ sens", "occ-sens", "occsens"]
-
       unless space.spaceType.empty?
         type = space.spaceType.get
         tID  = type.nameString.downcase
 
-        if variants.any? { |variant| tID.include?(variant) }
-          space.additionalProperties.setFeature(tag, true)
-          return true
+        if tID.include?(tag)
+          return space.additionalProperties.setFeature(tag, true)
         end
 
         unless type.standardsSpaceType.empty?
           stype = type.standardsSpaceType.get.downcase
 
-          if variants.any? { |variant| stype.include?(variant) }
-            space.additionalProperties.setFeature(tag, true)
-            return true
+          if stype.include?(tag)
+            return space.additionalProperties.setFeature(tag, true)
           end
         end
       end
@@ -572,9 +551,8 @@ module BTAP
       # Check space identifier.
       sID = space.nameString.downcase
 
-      if variants.any? { |variant| sID.include?(variant) }
-        space.additionalProperties.setFeature(tag, true)
-        return true
+      if sID.include?(tag)
+        return space.additionalProperties.setFeature(tag, true)
       end
 
       space.additionalProperties.setFeature(tag, false)
@@ -598,6 +576,18 @@ module BTAP
   class BTAP::Activity
     extend ActivityData
 
+    # @return [String] user-assigned BTAP/NECB template, e.g. "NECB2011"
+    attr_reader :template
+
+    # @return [Hash] default UDEF JSON entries, specific to each template
+    attr_reader :udef
+
+    # @return [Hash] default building type JSON entries (template specific)
+    attr_reader :bldg
+
+    # @return [Hash] default space type JSON entries (template specific)
+    attr_reader :space
+
     # @return [String] assigned or inferred building ACTIVITY, e.g. "warehouse"
     attr_reader :activity
 
@@ -618,18 +608,40 @@ module BTAP
     # Initialize BTAP Activity parameters.
     #
     # @param model [OpenStudio::Model::Model] a model
-    def initialize(model = nil)
+    # @param template [String] a BTAP/NECB template (e.g. "NECB2011")
+    def initialize(model = nil, template = "")
       mth         = "BTAP::Activity::#{__callee__}"
       @feedback   = {logs: []}
       lgs         = @feedback[:logs]
       @activity   = ""
       @activities = {}
       @category   = ""
+      @template   = ""
+      @udef       = {}
+      @bldg       = {}
+      @space      = {}
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
         return
       end
+
+      unless template.respond_to?(:to_sym)
+        lgs << "Invalid template string (#{mth})"
+        return
+      end
+
+      template = template.to_s.upcase
+
+      unless @@data[:editions].include?(template)
+        lgs << "Unregistered template '#{template}' (#{mth})"
+        return
+      end
+
+      @template = template
+      @udef     = data[:edition][@template][:udef]
+      @bldg     = data[:edition][@template][:bldg]
+      @space    = data[:edition][@template][:space]
 
       # Tag spaces as un/conditioned with "space_conditioning_category". For
       # now, this is simply determined based on whether spaces are:
@@ -645,7 +657,7 @@ module BTAP
       #
       # The solution could be further refined in future BTAP versions by e.g.:
       #   - relying on user-defined thermostats
-      #   - expanded to cover semi-heated and refrigerated spaces
+      #   - expanded to cover semi-heated and refrigerated spaces (see OSut)
       tag = "space_conditioning_category"
 
       model.getSpaces.each do |space|
@@ -665,11 +677,11 @@ module BTAP
       # Determine activities of occupied spaces in the model, then building.
       @activities = self.spaceActivities(model)
       @activity   = self.buildingActivity(model)
-      @liveload   = data[:bldg][:activity][@activity][:liveload]
+      @liveload   = data[:bldg][@activity][:liveload]
 
       # Assign building category.
       unless @activity.empty?
-        @category = data[:bldg][:activity][@activity][:category]
+        @category = data[:bldg][@activity][:category]
       end
 
       # Assign schedules to auxiliary spaces - if present.
@@ -679,6 +691,48 @@ module BTAP
       self.assignAncillarySchedules
 
       true
+    end
+
+    ##
+    # Returns a building/space type/activity parameter, matching a registered
+    # keyword (e.g. :lighting_per_area) for a given space.
+    #
+    # @param keyword [#to_sym] registered keyword (e.g. :lighting_per_area)
+    # @param space [OpenStudio::Model::Space] a space
+    #
+    # @return [] matching value - may be adjusted (e.g. :lighting_per_area)
+    # @return [NilClass] nil if keyword missing or invalid
+    def standards_data(keyword = "", space = nil)
+      lgs = @feedback[:logs]
+      mth = "BTAP::Activity::#{__callee__}"
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio model (#{mth})"
+        return nil
+      end
+
+      id = space.nameString
+
+      unless @activities.keys.include?(id)
+        lgs << "Unregistered space #{id} (#{mth})"
+        return nil
+      end
+
+      unless keyword.respond_to?(:to_sym)
+        lgs << "Invalid keyword class '#{keyword.class}' (#{mth})"
+        return nil
+      end
+
+      keyword = keyword.to_s.downcase.to_sym
+
+      unless data[:udef].keys.include?(keyword)
+        lgs << "Unregistered keyword #{keyword} (#{mth})"
+        return nil
+      end
+
+      a = @activities[id]
+
+      nil
     end
 
     ##
@@ -699,6 +753,7 @@ module BTAP
       activities = {}
 
       model.getSpaces.each do |space|
+        id = space.nameString
         next unless space.partofTotalFloorArea
 
         # Defaulted values (if missing or invalid entries).
@@ -717,7 +772,7 @@ module BTAP
         end
 
         # Fetch matching BTAP data, if keywords included.
-        data[:space][:activity].each do |k, v|
+        data[:space].each do |k, v|
           v[:includes].each do |kword|
             candidates << k if standards.include?(kword)
           end
@@ -725,12 +780,12 @@ module BTAP
 
         # Keep track of fallbacks, if applicable.
         candidates.each do |candidate|
-          fallback = data[:space][:activity][candidate][:fallback]
+          fallback = data[:space][candidate][:fallback]
           fallbacks << fallback unless fallback.empty?
         end
 
         # Reject if matching any excluded keyword.
-        data[:space][:activity].each do |k, v|
+        data[:space].each do |k, v|
           v[:excludes].each do |kword|
             candidates.delete(k) if standards.include?(kword)
           end
@@ -743,27 +798,25 @@ module BTAP
           fallbacks.each do |fallback|
             break unless candidate.empty?
 
-            candidate = fallback if data[:space][:activity].key?(fallback)
+            candidate = fallback if data[:space].key?(fallback)
           end
 
-          candidate = data[:space][:activity].keys.first if candidate.empty?
+          candidate = "undefined::common" if candidate.empty?
         else
           candidate = candidates.first
         end
 
-        entry             = {}
+        str   = candidate.split("::")
+        entry = {}
+
         entry[:m2       ] = space.floorArea * space.multiplier
         entry[:spacetype] = spacetype
         entry[:standards] = standards
         entry[:keyword  ] = candidate
-        entry[:activity ] = data[:space][:activity][candidate][:activity]
-        entry[:bldgtype ] = data[:space][:activity][candidate][:bldgtype]
-        entry[:density  ] = data[:space][:activity][candidate][:density]
-        entry[:eqpload  ] = data[:space][:activity][candidate][:eqpload]
-        entry[:swhload  ] = data[:space][:activity][candidate][:swhload]
-        entry[:schedule ] = data[:space][:activity][candidate][:schedule]
+        entry[:activity ] = str[0].to_s
+        entry[:bldgtype ] = str[1].to_s
 
-        activities[space] = entry
+        activities[id] = entry
       end
 
       activities
@@ -793,7 +846,7 @@ module BTAP
         activity = ""
       else
         activity = activity.get.downcase
-        return activity if data[:bldg][:activities].include?(activity)
+        return activity if @bldg.keys.include?(activity)
       end
 
       # OPTION B: Extract building activity from user-set 'building type'.
@@ -804,8 +857,10 @@ module BTAP
         candidates = []
         fallbacks  = []
 
+        return bldgtype if @bldg.keys.include?(bldgtype)
+
         # Fetch matching BTAP data, if keywords included.
-        data[:bldg][:activity].each do |k, v|
+        data[:bldg].each do |k, v|
           v[:includes].each do |kword|
             candidates << k if bldgtype.include?(kword)
           end
@@ -813,12 +868,12 @@ module BTAP
 
         # Keep track of fallbacks, if applicable.
         candidates.each do |candidate|
-          fallback = data[:bldg][:activity][candidate][:fallback]
+          fallback = data[:bldg][candidate][:fallback]
           fallbacks << fallback unless fallback.empty?
         end
 
         # Reject if matching excluded keywords.
-        data[:bldg][:activity].each do |k, v|
+        data[:bldg].each do |k, v|
           v[:excludes].each do |kword|
             candidates.delete(k) if bldgtype.include?(kword)
           end
@@ -827,7 +882,7 @@ module BTAP
         # Fallbacks?
         if candidates.empty?
           fallbacks.each do |fallback|
-            return fallback if data[:bldg][:activity].key?(fallback)
+            return fallback if data[:bldg].key?(fallback)
           end
         else
           return candidates.first
@@ -875,17 +930,20 @@ module BTAP
           activities[v[:activity]] += v[:m2]
         end
 
+        # Log (or raise) - @todo.
         activity = case activities.sort.reverse.to_h.keys.first
                    when "audience"    then "theatre"
+                   when "seating"     then "theatre"
                    when "sales"       then "retail"
                    when "dining"      then "restaurant"
                    when "cuisine"     then "restaurant"
                    when "rooms"       then "hotel"
-                   when "recreation"  then "exercise"
                    when "cell"        then "penitentiary"
                    when "classroom"   then "school"
                    when "teachinglab" then "school"
                    when "storage"     then "warehouse"
+                   when "locker"      then "warehouse"
+                   when "workshop"    then "workshop"
                    when "laundry"     then "retail"
                    when "lounge"      then "leisure"
                    when "pharmacy"    then "retail"
@@ -926,7 +984,7 @@ module BTAP
       return false if activity.empty?
 
       activity = activity.get.downcase
-      return false unless data[:bldg][:activities].include?(activity)
+      return false unless @bldg].include?(activity)
 
       true
     end
@@ -980,16 +1038,15 @@ module BTAP
     def assignAuxiliarySchedules(uset = false)
       lgs  = @feedback[:logs]
       mth  = "BTAP::Activity::#{__callee__}"
-      bkup = "a"
+      bkup = "A"
       uset = false unless [true, false].include?(uset)
 
-      if @@data[:bldg][:activity].key?(@activity)
-        bkup = @@data[:bldg][:activity][@activity][:schedule]
+      if @@data[:bldg].key?(@activity)
+        bkup = @@data[:bldg][@activity][:schedule]
       end
 
       # Loop through auxiliary spaces (largest to smallest in floor area).
       @activities.sort_by { |space, v| v[:m2] }.reverse.each do |space, v|
-        id  = space.nameString
         sch = self.schedule(space)
         next unless self.auxiliary?(v[:keyword])
 
@@ -1210,7 +1267,7 @@ module BTAP
     end
 
     ##
-    # Returns a space's (NECB-related) schedule set character, e.g. "a".
+    # Returns a space's (NECB-related) schedule set character, e.g. "A".
     #
     # @param space [OpenStudio::Model::Space] a space
     #
