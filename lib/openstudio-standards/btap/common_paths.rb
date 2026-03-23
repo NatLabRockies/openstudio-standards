@@ -7,28 +7,14 @@ class CommonPaths
   attr_reader :raw_paths
 
   attr_reader :locations_path
-  attr_reader :construction_sets_path
   attr_reader :materials_opaque_path
   attr_reader :materials_glazing_path
-  attr_reader :constructions_path
-  attr_reader :construction_properties_path
   attr_reader :lighting_sets_path
   attr_reader :lighting_path
   attr_reader :materials_lighting_path
   attr_reader :hvac_vent_ahu_path
   attr_reader :materials_hvac_path
-
-  # Construction data
-  attr_reader :constructions_door_path
-  attr_reader :constructions_door_glass_path
-  attr_reader :constructions_floor_path
-  attr_reader :constructions_roof_path
-  attr_reader :constructions_skylight_path
-  attr_reader :constructions_wall_path
-  attr_reader :constructions_window_path
-  attr_reader :constructions_bg_roof_path
-  attr_reader :constructions_bg_wall_path
-  attr_reader :constructions_slab_path
+  attr_reader :constructions_path
 
   # Costing data
   attr_accessor :costs_path
@@ -51,41 +37,25 @@ class CommonPaths
     dir_database                  = "#{__dir__}/common_resources"
 
     @locations_path               = "#{dir_database}/locations.csv"
-    @construction_sets_path       = "#{dir_database}/construction_sets.csv"
     @materials_opaque_path        = "#{dir_database}/materials_opaque.csv"
     @materials_glazing_path       = "#{dir_database}/materials_glazing.csv"
-    @constructions_path           = "#{dir_database}/Constructions.csv"
-    @construction_properties_path = "#{dir_database}/ConstructionProperties.csv"
     @lighting_sets_path           = "#{dir_database}/lighting_sets.csv"
     @lighting_path                = "#{dir_database}/lighting.csv"
     @materials_lighting_path      = "#{dir_database}/materials_lighting.csv"
     @hvac_vent_ahu_path           = "#{dir_database}/hvac_vent_ahu.csv"
     @materials_hvac_path          = "#{dir_database}/materials_hvac.csv"
+    @constructions_path           = "#{dir_database}/constructions.json"
 
     @raw_paths = [
       @locations_path,
-      @construction_sets_path,
       @materials_opaque_path,
       @materials_glazing_path,
-      @constructions_path,
-      @construction_properties_path,
       @lighting_sets_path,
       @lighting_path,
       @materials_lighting_path,
       @hvac_vent_ahu_path,
       @materials_hvac_path
     ]
-
-    @constructions_door_path       = "#{dir_database}/constructions_door.json"
-    @constructions_door_glass_path = "#{dir_database}/constructions_door_glass.json"
-    @constructions_floor_path      = "#{dir_database}/constructions_floor.json"
-    @constructions_roof_path       = "#{dir_database}/constructions_roof.json"
-    @constructions_skylight_path   = "#{dir_database}/constructions_skylight.json"
-    @constructions_wall_path       = "#{dir_database}/constructions_wall.json"
-    @constructions_window_path     = "#{dir_database}/constructions_window.json"
-    @constructions_bg_roof_path    = "#{dir_database}/constructions_bg_roof.json"
-    @constructions_bg_wall_path    = "#{dir_database}/constructions_bg_wall.json"
-    @constructions_slab_path       = "#{dir_database}/constructions_slab.json"
 
     @costs_path               = "#{dir_database}/costs.csv"
     @costs_local_factors_path = "#{dir_database}/costs_local_factors.csv"
@@ -95,7 +65,7 @@ class CommonPaths
     @carbon_frame_path   = "#{dir_database}/carbon_frame.csv"
 
     @thermal_bridging_path = "#{dir_database}/thermal_bridging.csv"
-    
+
     @error_log             = "#{__dir__}/errors.json"
     @cost_output_file      = "#{__dir__}/cost_output.json"
     @mech_sizing_data_file = "#{__dir__}/costing/mech_sizing.json"
