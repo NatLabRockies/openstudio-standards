@@ -13,7 +13,7 @@ class BTAPDatabase
     # Load the database from the individual CSV/JSON files
     @db["costs"]                = []
     @db["localization_factors"] = [] # Local costing factors
-    @db["raw"]                  = {}                
+    @db["raw"]                  = {}
     @db["constructions"]        = {}
     @db["db_errors"]            = []
 
@@ -60,25 +60,13 @@ class BTAPDatabase
     end
 
     # Load the construction data
-    @db["constructions"]["door"]       = File.open(@cp.constructions_door_path)       { |file| JSON.load(file) }
-    @db["constructions"]["door_glass"] = File.open(@cp.constructions_door_glass_path) { |file| JSON.load(file) }
-    @db["constructions"]["floor"]      = File.open(@cp.constructions_floor_path)      { |file| JSON.load(file) }
-    @db["constructions"]["roof"]       = File.open(@cp.constructions_roof_path)       { |file| JSON.load(file) }
-    @db["constructions"]["skylight"]   = File.open(@cp.constructions_skylight_path)   { |file| JSON.load(file) }
-    @db["constructions"]["wall"]       = File.open(@cp.constructions_wall_path)       { |file| JSON.load(file) }
-    @db["constructions"]["window"]     = File.open(@cp.constructions_window_path)     { |file| JSON.load(file) }
-    @db["constructions"]["bg_roof"]    = File.open(@cp.constructions_bg_roof_path)    { |file| JSON.load(file) }
-    @db["constructions"]["bg_wall"]    = File.open(@cp.constructions_bg_wall_path)    { |file| JSON.load(file) }
-    @db["constructions"]["slab"]       = File.open(@cp.constructions_slab_path)       { |file| JSON.load(file) }
+    @db["constructions"] = File.open(@cp.constructions_path) { |file| JSON.load(file) }
 
     # Load the raw data
     raw_data_names = [
       'locations',
-      'construction_sets',
       'materials_opaque',
       'materials_glazing',
-      'Constructions',
-      'ConstructionProperties',
       'lighting_sets',
       'lighting',
       'materials_lighting',
@@ -97,63 +85,8 @@ class BTAPDatabase
 
   # Validate the construction sets and the AHU items.
   def validate_database()
-    validate_constructions_sets()
     validate_ahu_items_and_quantities()
   end
-
-  def validate_constructions_sets()
-    construction_sets = @db['raw']['construction_sets']
-    failed = false
-    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020", "BTAPPRE1980", "BTAP1980TO2010"]
-    bad_records = {}
-    bad_records[:invalid_space_type_names] = []
-    bad_records[:min_max_floor_range_errors] = []
-    #  CHECK if spacetype names are valid in costing database
-    valid_space_types = []
-    templates.each do |template|
-      valid_space_types += Standard.build(template.gsub(/\s+/, "")).get_all_spacetype_names.map { |spacetype| (template + '-' + spacetype[0].to_s + '-' + spacetype[1].to_s).strip }
-    end
-    # construction_sets
-
-    construction_sets.each do |row|
-      target_space_type = "#{row['template'].gsub(/\s+/, "") + '-' + row['building_type']}-#{row['space_type']}".strip
-      unless valid_space_types.include?(target_space_type.to_s)
-        bad_records[:invalid_space_type_names] << {template: row['template'].gsub(/\s+/, ""), space_type: target_space_type}
-      end
-    end
-
-
-    # Check if # of floors contains 1 to 999
-    #Get Unique spacetypes.
-    bad_evelope_story_ranges = []
-    space_types = construction_sets.map { |row| {template: row["template"], building_type: row["building_type"], space_type: row["space_type"]} }.uniq
-    space_types.each do |space_type|
-      range = Array.new
-      instances = construction_sets.select { |row| row['template'] == space_type[:template] && row['building_type'] == space_type[:building_type] && row['space_type'] == space_type[:space_type] }
-      instances.each do |instance|
-        min_val = instance['min_stories'].to_i
-        min_val = 0 if min_val == 1
-        max_val = instance['max_stories'].to_i
-        range << min_val
-        range << max_val
-        failed = true
-      end
-      range.sort!
-      incomplete_range = (range.first != 0 or range.last < 999)
-      possible_duplicate = (range.uniq.size != range.size)
-      if incomplete_range or possible_duplicate
-        space_type[:range] = range
-        space_type[:error] = {incomplete_range: incomplete_range, possible_duplicate: possible_duplicate}
-        bad_records[:min_max_floor_range_errors] << space_type
-      end
-    end
-    if bad_records[:min_max_floor_range_errors].size > 0 or bad_records[:invalid_space_type_names].size > 0
-      puts "Errors in ConstructionSets Costing Table."
-      puts JSON.pretty_generate(bad_records)
-      raise("costing spreadsheet validation failed")
-    end
-  end
-
 
   # This method verifies that, for a given row the number of items listed in the 'id_layers' column is the same as the
   # number of quantities listed in the 'Id_layers_quantity_multipliers' column in the 'hvac_vent_ahu' sheet in the
