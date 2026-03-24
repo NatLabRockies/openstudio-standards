@@ -85,10 +85,9 @@ class Btap_results_helper
     model.save(model_out_path, true)
 
     # Do costing.
-    post_analysis = BTAPDatapointAnalysis.new(
+    post_analysis = BTAP::DatapointAnalysis.new(
       model: model,
       output_folder: run_dir,
-      template: template,
       standard: standard,
       qaqc: nil)
 
