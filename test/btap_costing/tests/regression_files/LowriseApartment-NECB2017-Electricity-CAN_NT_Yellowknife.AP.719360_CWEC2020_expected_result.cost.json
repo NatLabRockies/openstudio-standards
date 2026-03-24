@@ -1,0 +1,2613 @@
+{
+  "city": "YELLOWKNIFE",
+  "province_state": "NWT",
+  "envelope": {
+    "exterior_wall_cost": 647475.22,
+    "exterior_wall_area_m2": 755.79,
+    "exterior_wall_cost_per_m2": 856.69,
+    "exterior_roof_cost": 339688.41,
+    "exterior_roof_area_m2": 575.99,
+    "exterior_roof_cost_per_m2": 589.75,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "interzonal_roof_cost": 0.0,
+    "interzonal_roof_area_m2": 0.0,
+    "interzonal_roof_cost_per_m2": 0.0,
+    "interzonal_skylight_walls_cost": 0.0,
+    "interzonal_skylight_walls_area_m2": 0.0,
+    "interzonal_skylight_walls_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 747871.46,
+    "exterior_fixed_window_area_m2": 188.95,
+    "exterior_fixed_window_cost_per_m2": 3958.12,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 22646.27,
+    "exterior_skylight_area_m2": 11.75,
+    "exterior_skylight_cost_per_m2": 1926.55,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 240805.72,
+    "ground_contact_floor_area_m2": 587.74,
+    "ground_contact_floor_cost_per_m2": 409.71,
+    "construction_costs": [
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g EWall NEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g NWall NEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g EWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g NWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor NEA",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g NWall N1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g NWall N1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor N1A",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g SWall S1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g SWall S1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor S1A",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g EWall SEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g SWall SEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g EWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g SWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor SEA",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g NWall NWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g WWall NWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g NWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g WWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor NWA",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g SWall SWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g WWall SWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g SWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g WWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g GFloor SWA",
+        "conductance": 2.639,
+        "area": 88.25,
+        "cost": 36157.02,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m NWall N1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m NWall N1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m SWall SWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m WWall SWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m SWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m WWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m SWall S1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m SWall S1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m EWall NEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m NWall NEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m EWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m NWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m NWall NWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m WWall NWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m NWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m WWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m EWall SEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m SWall SEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m EWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m SWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t SWall S1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof S1A",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t SWall S1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof S1A_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t SWall SWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t WWall SWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof SWA",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t SWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t WWall SWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof SWA_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t NWall N1A",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof N1A",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t NWall N1A_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof N1A_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t NWall NWA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t WWall NWA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof NWA",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t NWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t WWall NWA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof NWA_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t EWall SEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t SWall SEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof SEA",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t EWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t SWall SEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof SEA_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t EWall NEA",
+        "conductance": 5.464,
+        "area": 18.58,
+        "cost": 15916.3,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t NWall NEA",
+        "conductance": 5.464,
+        "area": 28.24,
+        "cost": 24192.78,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof NEA",
+        "conductance": 8.26,
+        "area": 86.48,
+        "cost": 51004.27,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t EWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 4.64,
+        "cost": 18384.25,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t NWall NEA_FixedWindow",
+        "conductance": 0.714,
+        "area": 7.06,
+        "cost": 27944.07,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof NEA_Skylight",
+        "conductance": 0.714,
+        "area": 1.76,
+        "cost": 3400.34,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g EWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "g WWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g EWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "g WWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "g Floor C",
+        "conductance": 2.639,
+        "area": 58.24,
+        "cost": 23863.63,
+        "cost_per_area": 409.71,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m EWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "m WWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m EWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "m WWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t EWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-WoodFramed-5",
+        "surface_type": "ExteriorWall",
+        "surface_name": "t WWall C",
+        "conductance": 5.464,
+        "area": 4.09,
+        "cost": 3501.59,
+        "cost_per_area": 856.69,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "t Roof C",
+        "conductance": 8.26,
+        "area": 57.08,
+        "cost": 33662.81,
+        "cost_per_area": 589.75,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t EWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "t WWall C_FixedWindow",
+        "conductance": 0.714,
+        "area": 1.02,
+        "cost": 4044.54,
+        "cost_per_area": 3958.12,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "t Roof C_Skylight",
+        "conductance": 0.714,
+        "area": 1.16,
+        "cost": 2244.23,
+        "cost_per_area": 1926.55,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.7142857142857143 exceeds the upper bound (0.6375) for the 2.0% range. Returning the upper bound."
+      }
+    ],
+    "unrealistic_assembly_cost": 1000000000000,
+    "total_envelope_cost": 1000001998487.09
+  },
+  "lighting": {
+    "daylighting_sensor_control": [],
+    "led_lighting": [],
+    "fixture_report": [
+      {
+        "fixture_type": "6",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "floor_area_ft2": 17098.2,
+        "cost": 165986.46,
+        "cost_per_ft2": 9.71,
+        "spaces": [
+          "G NE Apartment",
+          "G N1 Apartment",
+          "G S1 Apartment",
+          "Office",
+          "G NW Apartment",
+          "G SW Apartment",
+          "M N1 Apartment",
+          "M SW Apartment",
+          "M S1 Apartment",
+          "M NE Apartment",
+          "M NW Apartment",
+          "M SE Apartment",
+          "T S1 Apartment",
+          "T SW Apartment",
+          "T N1 Apartment",
+          "T NW Apartment",
+          "T SE Apartment",
+          "T NE Apartment"
+        ],
+        "number_of_spaces": 18
+      },
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 1880.7,
+        "cost": 55892.88,
+        "cost_per_ft2": 29.72,
+        "spaces": [
+          "G Corridor",
+          "M Corridor",
+          "T Corridor"
+        ],
+        "number_of_spaces": 3
+      }
+    ],
+    "space_report": [
+      {
+        "space": "G NE Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "G N1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 10",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "G S1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 11",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "Office",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 7",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "G NW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 8",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "G SW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 9",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M N1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M SW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 10",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M S1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 11",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M NE Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 12",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M NW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 8",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "M SE Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 9",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T S1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T SW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 10",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T N1 Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 11",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T NW Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 12",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T SE Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 8",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "T NE Apartment",
+        "zone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 9",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 9221.47,
+        "cost_per_ft2": 9.71,
+        "note": ""
+      },
+      {
+        "space": "G Corridor",
+        "zone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 1_SCH=G",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 626.9,
+        "cost": 18630.96,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      },
+      {
+        "space": "M Corridor",
+        "zone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 2_SCH=G",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 626.9,
+        "cost": 18630.96,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      },
+      {
+        "space": "T Corridor",
+        "zone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 3_SCH=G",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 626.9,
+        "cost": 18630.96,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 221879.3
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 30.0,
+        "longest_distance_to_ext_ft": 59.0,
+        "wiring_and_gas_connections_distance_ft": 59.0,
+        "equipment_cost": 0,
+        "flue_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_to_pump_cost": 0,
+        "header_distribution_cost": 0,
+        "total_cost": 0
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 30.0,
+        "longest_distance_to_ext_ft": 59.0,
+        "wiring_and_gas_connections_distance_ft": 59.0,
+        "equipment_cost": 0,
+        "flue_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_to_pump_cost": 0,
+        "header_distribution_cost": 0,
+        "total_cost": 0
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 30.0,
+        "longest_distance_to_ext_ft": 59.0,
+        "wiring_and_gas_connections_distance_ft": 59.0,
+        "equipment_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_cost": 0,
+        "total_cost": 0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "PTAC",
+        "zone_number": 1,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0,
+        "cool_cost": 3830,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 5490
+      },
+      {
+        "systype": "BB",
+        "zone_number": 1,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2006,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.0912482766544116,
+        "cummultive_zonal_cost": 9156
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 2,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.8,
+        "cool_capacity(kW)": 1.2,
+        "heat_cost": 0,
+        "cool_cost": 6000,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 16158
+      },
+      {
+        "systype": "BB",
+        "zone_number": 2,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 2,
+        "cummultive_zonal_cost": 18458
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 3,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.8,
+        "cool_capacity(kW)": 1.2,
+        "heat_cost": 0,
+        "cool_cost": 6000,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 25459
+      },
+      {
+        "systype": "BB",
+        "zone_number": 3,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 2,
+        "cummultive_zonal_cost": 27759
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 4,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0,
+        "cool_cost": 3830,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 33249
+      },
+      {
+        "systype": "BB",
+        "zone_number": 4,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2000,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.081269583472593,
+        "cummultive_zonal_cost": 36909
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 5,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0,
+        "cool_cost": 3830,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 42399
+      },
+      {
+        "systype": "BB",
+        "zone_number": 5,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2011,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.0977588673963905,
+        "cummultive_zonal_cost": 46069
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 6,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0,
+        "cool_cost": 3830,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 51559
+      },
+      {
+        "systype": "BB",
+        "zone_number": 6,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2004,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.0877814797794114,
+        "cummultive_zonal_cost": 55224
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 7,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0,
+        "cool_cost": 3830,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 60055
+      },
+      {
+        "systype": "BB",
+        "zone_number": 7,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 2,
+        "cummultive_zonal_cost": 62354
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 8,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 4.5,
+        "heat_cost": 0,
+        "cool_cost": 5741,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 69756
+      },
+      {
+        "systype": "BB",
+        "zone_number": 8,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1993,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.069825263201871,
+        "cummultive_zonal_cost": 73408
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 9,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 3.5,
+        "heat_cost": 0,
+        "cool_cost": 9580,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 83990
+      },
+      {
+        "systype": "BB",
+        "zone_number": 9,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 2,
+        "cummultive_zonal_cost": 86289
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 10,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 12",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 3.0,
+        "heat_cost": 0,
+        "cool_cost": 9580,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 97530
+      },
+      {
+        "systype": "BB",
+        "zone_number": 10,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 12",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1997,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.0762073863636363,
+        "cummultive_zonal_cost": 101187
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 11,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 3.7,
+        "heat_cost": 0,
+        "cool_cost": 6473,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 109319
+      },
+      {
+        "systype": "BB",
+        "zone_number": 11,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2004,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.0871545475434488,
+        "cummultive_zonal_cost": 112983
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 12,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 4.3,
+        "heat_cost": 0,
+        "cool_cost": 6473,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 121116
+      },
+      {
+        "systype": "BB",
+        "zone_number": 12,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1986,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 3.05894181358623,
+        "cummultive_zonal_cost": 124761
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 13,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 4.6,
+        "heat_cost": 0,
+        "cool_cost": 5741,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 131504
+      },
+      {
+        "systype": "BB",
+        "zone_number": 13,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3245,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 5,
+        "cummultive_zonal_cost": 135751
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 14,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 5.6,
+        "heat_cost": 0,
+        "cool_cost": 28297,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 165708
+      },
+      {
+        "systype": "BB",
+        "zone_number": 14,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 10",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3894,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 6,
+        "cummultive_zonal_cost": 171262
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 15,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 2.7,
+        "heat_cost": 0,
+        "cool_cost": 9580,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 181844
+      },
+      {
+        "systype": "BB",
+        "zone_number": 15,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 11",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3245,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1001,
+        "num_units": 5,
+        "cummultive_zonal_cost": 186091
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 16,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 12",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 4.4,
+        "heat_cost": 0,
+        "cool_cost": 6473,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 194223
+      },
+      {
+        "systype": "BB",
+        "zone_number": 16,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 12",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3894,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 6,
+        "cummultive_zonal_cost": 199778
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 17,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 5.4,
+        "heat_cost": 0,
+        "cool_cost": 28297,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 229735
+      },
+      {
+        "systype": "BB",
+        "zone_number": 17,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3894,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 6,
+        "cummultive_zonal_cost": 235289
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 18,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 3.3,
+        "heat_cost": 0,
+        "cool_cost": 9580,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 246530
+      },
+      {
+        "systype": "BB",
+        "zone_number": 18,
+        "zone_name": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3894,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 1660,
+        "num_units": 6,
+        "cummultive_zonal_cost": 252084
+      },
+      {
+        "systype": "BB",
+        "zone_number": 19,
+        "zone_name": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 1_SCH=G",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 290,
+        "num_units": 2,
+        "cummultive_zonal_cost": 253672
+      },
+      {
+        "systype": "BB",
+        "zone_number": 20,
+        "zone_name": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 2_SCH=G",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1298,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 290,
+        "num_units": 2,
+        "cummultive_zonal_cost": 255260
+      },
+      {
+        "systype": "BB",
+        "zone_number": 21,
+        "zone_name": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 3_SCH=G",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2645,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 290,
+        "num_units": 4.074721392463235,
+        "cummultive_zonal_cost": 258195
+      }
+    ]
+  },
+  "shw": {
+    "shw_nom_flr2flr_hght_ft": 10.0,
+    "shw_ht_roof": 30.0,
+    "shw_longest_distance_to_ext_ft": 59.0,
+    "shw_utility_distance_ft": 59.0,
+    "shw_tanks": 163084.95,
+    "shw_num_of_modeled_tanks": 1,
+    "num_elec_tanks": 1.0,
+    "num_hphw_tanks": 0,
+    "shw_num_reg_eff_gas_tanks": 0,
+    "shw_num_high_eff_gas_tanks": 0,
+    "shw_num_reg_eff_oil_tanks": 0,
+    "shw_num_high_eff_oil_tanks": 0,
+    "shw_num_of_costed_tanks": 1.0,
+    "shw_flues": 0.0,
+    "shw_utilties": 1648.38,
+    "shw_pumps": 1124.14,
+    "shw_num_of_pumps": 1,
+    "shw_piping": 1974.17,
+    "shw_total": 167831.63
+  },
+  "ventilation": {
+    "system_1": [
+      {
+        "sys_type": 1,
+        "name": "sys_1|doas|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+        "airloop_flow_m3_per_s": 0.634,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 88697.43,
+        "revised_base_ahu_cost": 56248.52,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none| ERV",
+          "hrv_size_m3ps": 0.634,
+          "hrv_return_fan_size_m3ps": 0.634,
+          "hrv_cost": 48308.87,
+          "revised_hrv_cost": 35270.69
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 10.498,
+            "cost": 22443.89
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 62.159,
+            "cost": 59587.53
+          }
+        ],
+        "reheat_recool": []
+      },
+      {
+        "sys_type": 1,
+        "name": "sys_4|mixed|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+        "airloop_flow_m3_per_s": 0.302,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 104321.88,
+        "revised_base_ahu_cost": 31510.09,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV",
+          "hrv_size_m3ps": 0.044,
+          "hrv_return_fan_size_m3ps": 0.044,
+          "hrv_cost": 22678.14,
+          "revised_hrv_cost": 3729.89
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 5.0,
+            "cost": 17739.57
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 10.753,
+            "cost": 8254.87
+          }
+        ],
+        "reheat_recool": []
+      }
+    ],
+    "system_2": [],
+    "system_3": [],
+    "system_4": [],
+    "system_5": [],
+    "system_6": [],
+    "system_7": [],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 95.6,
+      "Total_cost": 2519.57
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 12,
+        "DuctLength_m": 6.1,
+        "NumberRuns": 1,
+        "DuctCost": 960.78
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 8.76,
+          "SupplyDuctLength_m": 36.0,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 9984.35,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "Building Story 2",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 9.08,
+          "SupplyDuctLength_m": 36.0,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 9984.35,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "Building Story 3",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 10.03,
+          "SupplyDuctLength_m": 36.0,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 9984.35,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 10",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 11",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 7",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 1_SCH=G",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.065,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            }
+          ]
+        },
+        {
+          "Story": "Building Story 2",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 10",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 11",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 12",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 2_SCH=G",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.086,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            }
+          ]
+        },
+        {
+          "Story": "Building Story 3",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 10",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 11",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 12",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "flex_duct_sz_in": 4,
+              "flex_duct_length_ft": 16,
+              "cost": 3338.14
+            },
+            {
+              "ThermalZone": "WILD_ST=Corridor/Transition area other-sch-G_FL=Building Story 3_SCH=G",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.151,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "flex_duct_sz_in": 6,
+              "flex_duct_length_ft": 24,
+              "cost": 7384.36
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": [
+          {
+            "air_system": "sys_1|doas|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+            "hrv": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none| ERV",
+            "floor_mult": 1.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 36.0,
+              "dia_in": 6,
+              "cost": 5500.07
+            },
+            "tz_dist": [
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 10",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 11",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 7",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 8",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 1_SCHG 9",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              }
+            ]
+          },
+          {
+            "air_system": "sys_4|mixed|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+            "hrv": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV",
+            "floor_mult": 1,
+            "hrv_ret_trunk": {},
+            "tz_dist": []
+          }
+        ]
+      },
+      {
+        "floor": "Building Story 2",
+        "air_systems": [
+          {
+            "air_system": "sys_1|doas|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+            "hrv": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none| ERV",
+            "floor_mult": 1.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 36.0,
+              "dia_in": 6,
+              "cost": 5500.07
+            },
+            "tz_dist": [
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 10",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 11",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 12",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 8",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 2_SCHG 9",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              }
+            ]
+          },
+          {
+            "air_system": "sys_4|mixed|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+            "hrv": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV",
+            "floor_mult": 1,
+            "hrv_ret_trunk": {},
+            "tz_dist": []
+          }
+        ]
+      },
+      {
+        "floor": "Building Story 3",
+        "air_systems": [
+          {
+            "air_system": "sys_1|doas|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+            "hrv": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none| ERV",
+            "floor_mult": 1.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 36.0,
+              "dia_in": 6,
+              "cost": 5500.07
+            },
+            "tz_dist": [
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 10",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 11",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 4.5,
+                "hrv_ret_size_in": 5,
+                "cost": 953.14
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 12",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 8",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 7.5,
+                "hrv_ret_size_in": 5,
+                "cost": 1588.56
+              },
+              {
+                "tz": "DU_BT=Space Function_ST=Dwelling units general_FL=Building Story 3_SCHG 9",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.5,
+                "hrv_ret_size_in": 5,
+                "cost": 317.71
+              }
+            ]
+          },
+          {
+            "air_system": "sys_4|mixed|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+            "hrv": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV",
+            "floor_mult": 1,
+            "hrv_ret_trunk": {},
+            "tz_dist": []
+          }
+        ]
+      },
+      {
+        "air_system": "sys_1|doas|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none|",
+        "hrv": "sys_1|doas|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>ptac|srf>none| ERV",
+        "hrv_building_trunk_length_m": 6.1,
+        "hrv_building_trunk_dia_in": 10,
+        "cost": 3384.34
+      },
+      {
+        "air_system": "sys_4|mixed|shr>erv|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none|",
+        "hrv": "sys_4|mixed|shr>none|sc>dx|sh>c-e|ssf>cv|zh>b-e|zc>none|srf>none| ERV",
+        "hrv_building_trunk_length_m": 6.1,
+        "hrv_building_trunk_dia_in": 5,
+        "cost": 2588.03
+      }
+    ],
+    "natural_ventilation": [],
+    "demand_controlled_ventilation": [],
+    "hrv_total_cost": 39000.58
+  },
+  "renewables": {
+    "pv": []
+  },
+  "totals": {
+    "envelope": 1000001998487,
+    "thermal_bridging": 0,
+    "lighting": 221879,
+    "heating_and_cooling": 258195,
+    "shw": 167832,
+    "ventilation": 381995,
+    "renewables": 0,
+    "grand_total": 1000003028388
+  },
+  "unrealistic_assembly_note": "Could not extrapolate beyond the given range. The given model might be unrealistic to build because no assemblies exist in the database with the given heat transfer requirements. This could be that the thermal bridging module created too demanding of a model given the performance constraints. Try changing the `tbd_option` parameter in your run options."
+}

@@ -1,0 +1,1277 @@
+{
+  "city": "YELLOWKNIFE",
+  "province_state": "NWT",
+  "envelope": {
+    "exterior_wall_cost": 1934653.53,
+    "exterior_wall_area_m2": 2411.7,
+    "exterior_wall_cost_per_m2": 802.19,
+    "exterior_roof_cost": 2579947.75,
+    "exterior_roof_area_m2": 4529.88,
+    "exterior_roof_cost_per_m2": 569.54,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "interzonal_roof_cost": 0.0,
+    "interzonal_roof_area_m2": 0.0,
+    "interzonal_roof_cost_per_m2": 0.0,
+    "interzonal_skylight_walls_cost": 0.0,
+    "interzonal_skylight_walls_area_m2": 0.0,
+    "interzonal_skylight_walls_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 18889.24,
+    "exterior_fixed_window_area_m2": 17.66,
+    "exterior_fixed_window_cost_per_m2": 1069.51,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 114754.47,
+    "exterior_skylight_area_m2": 68.38,
+    "exterior_skylight_cost_per_m2": 1678.27,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 35233.36,
+    "exterior_door_area_m2": 67.63,
+    "exterior_door_cost_per_m2": 521.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 1411186.95,
+    "ground_contact_floor_area_m2": 4598.25,
+    "ground_contact_floor_cost_per_m2": 306.9,
+    "construction_costs": [
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Office Front Wall",
+        "conductance": 3.745,
+        "area": 95.49,
+        "cost": 76599.6,
+        "cost_per_area": 802.19,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Office Left Wall",
+        "conductance": 3.745,
+        "area": 30.56,
+        "cost": 24513.29,
+        "cost_per_area": 802.19,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Office Front Wall Window 1",
+        "conductance": 0.339,
+        "area": 5.58,
+        "cost": 5965.02,
+        "cost_per_area": 1069.51,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Office Front Wall Window2",
+        "conductance": 0.339,
+        "area": 5.58,
+        "cost": 5965.02,
+        "cost_per_area": 1069.51,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Office Left Wall Window1",
+        "conductance": 0.339,
+        "area": 3.25,
+        "cost": 3479.6,
+        "cost_per_area": 1069.51,
+        "note": "Surf #3: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Office Left Wall Window2",
+        "conductance": 0.339,
+        "area": 3.25,
+        "cost": 3479.6,
+        "cost_per_area": 1069.51,
+        "note": "Surf #4: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Office Front Door",
+        "conductance": 0.189,
+        "area": 3.9,
+        "cost": 2032.69,
+        "cost_per_area": 521.0,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Office Left Wall Door",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "Office Floor",
+        "conductance": 1.475,
+        "area": 236.88,
+        "cost": 72697.51,
+        "cost_per_area": 306.9,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Fine Storage Front Wall",
+        "conductance": 3.745,
+        "area": 169.07,
+        "cost": 135624.63,
+        "cost_per_area": 802.19,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Fine Storage Left Wall",
+        "conductance": 3.745,
+        "area": 180.12,
+        "cost": 144492.39,
+        "cost_per_area": 802.19,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Fine Storage Office Front Wall",
+        "conductance": 3.745,
+        "area": 110.54,
+        "cost": 88677.64,
+        "cost_per_area": 802.19,
+        "note": "Surf #3: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Fine Storage Office Left Wall",
+        "conductance": 3.745,
+        "area": 39.02,
+        "cost": 31297.99,
+        "cost_per_area": 802.19,
+        "note": "Surf #4: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Fine Storage Right Wall",
+        "conductance": 3.745,
+        "area": 258.15,
+        "cost": 207088.37,
+        "cost_per_area": 802.19,
+        "note": "Surf #5: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "Fine Storage Roof",
+        "conductance": 5.678,
+        "area": 1372.6,
+        "cost": 781751.04,
+        "cost_per_area": 569.54,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_10",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_11",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #3: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_12",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #4: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_13",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #5: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_14",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #6: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #7: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #8: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #9: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_5",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #10: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_6",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #11: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_7",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #12: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_8",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #13: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "FineStorage_skylight_9",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #14: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Fine Storage Left Door",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Fine Storage Right Door",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "Fine Storage Floor",
+        "conductance": 1.475,
+        "area": 1156.53,
+        "cost": 354934.9,
+        "cost_per_area": 306.9,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Bulk Storage Left Wall",
+        "conductance": 3.745,
+        "area": 546.22,
+        "cost": 438171.87,
+        "cost_per_area": 802.19,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Bulk Storage Rear Wall",
+        "conductance": 3.745,
+        "area": 390.15,
+        "cost": 312979.91,
+        "cost_per_area": 802.19,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Bulk Storage Right Wall",
+        "conductance": 3.745,
+        "area": 592.38,
+        "cost": 475207.83,
+        "cost_per_area": 802.19,
+        "note": "Surf #3: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "ExteriorRoof",
+        "surface_name": "Bulk Storage Roof",
+        "conductance": 5.678,
+        "area": 3157.28,
+        "cost": 1798196.71,
+        "cost_per_area": 569.54,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r1c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r1c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r1c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #3: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r1c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #4: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r2c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #5: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r2c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #6: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r2c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #7: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r2c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #8: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r3c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #9: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r3c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #10: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r3c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #11: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r3c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #12: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r4c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #13: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r4c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #14: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r4c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #15: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r4c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #16: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r5c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #17: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r5c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #18: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r5c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #19: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r5c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #20: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r6c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #21: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r6c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #22: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r6c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #23: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r6c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #24: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r7c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #25: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r7c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #26: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r7c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #27: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r7c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #28: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r8c1",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #29: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r8c2",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #30: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r8c3",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #31: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-Skylight-2",
+        "surface_type": "ExteriorSkylight",
+        "surface_name": "Skylight_r8c4",
+        "conductance": 0.339,
+        "area": 1.49,
+        "cost": 2494.66,
+        "cost_per_area": 1678.27,
+        "note": "Surf #32: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Bulk Storage Door-1",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Bulk Storage Door-2",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Bulk Storage Door-3",
+        "conductance": 0.189,
+        "area": 1.95,
+        "cost": 1016.35,
+        "cost_per_area": 521.0,
+        "note": "Surf #3: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 1",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #4: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 2",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #5: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 3",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #6: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 4",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #7: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 5",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #8: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 6",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #9: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorDoor-Metal-1",
+        "surface_type": "ExteriorDoor",
+        "surface_name": "Overhead Door 7",
+        "conductance": 0.189,
+        "area": 7.43,
+        "cost": 3871.8,
+        "cost_per_area": 521.0,
+        "note": "Surf #10: [BTAP::LinearRegression] Warning: Dependent variable 0.18898305084745773 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "Bulk Storage Floor",
+        "conductance": 1.475,
+        "area": 3204.84,
+        "cost": 983554.54,
+        "cost_per_area": 306.9,
+        "note": "Surf #1: OK"
+      }
+    ],
+    "total_envelope_cost": 6094665.3
+  },
+  "lighting": {
+    "daylighting_sensor_control": [
+      {
+        "zone": "ALL_ST=Office - enclosed_FL=Building Story 1_SCH=A",
+        "zone_area": 236.87964658059664,
+        "zone_multiplier": 1,
+        "number_of_fixtures_required_without_considering_daylighted_area_under_sidelighting_and_skylights": 18.0,
+        "primary_sidelighted_area": 39.971677798462714,
+        "primary_sidelighted_number_fixtures": 4,
+        "primary_sidelighted_number_sensors": 1,
+        "skylights_daylighted_area": 0.0,
+        "skylights_number_fixtures": 0,
+        "skylights_number_sensors": 0,
+        "daylighting_sensor_control_cost_for_this_zone": 1138.5606999999998
+      }
+    ],
+    "led_lighting": [],
+    "fixture_report": [
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 2549.8,
+        "cost": 75771.85,
+        "cost_per_ft2": 29.72,
+        "spaces": [
+          "Zone1 Office"
+        ],
+        "number_of_spaces": 1
+      },
+      {
+        "fixture_type": "17",
+        "fixture_description": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "floor_area_ft2": 49495.1,
+        "cost": 1337611.48,
+        "cost_per_ft2": 27.03,
+        "spaces": [
+          "Zone2 Fine Storage",
+          "Zone3 Bulk Storage"
+        ],
+        "number_of_spaces": 2
+      }
+    ],
+    "space_report": [
+      {
+        "space": "Zone1 Office",
+        "zone": "ALL_ST=Office - enclosed_FL=Building Story 1_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "Office - enclosed",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 14.0,
+        "floor_area_ft2": 2549.8,
+        "cost": 75771.85,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      },
+      {
+        "space": "Zone2 Fine Storage",
+        "zone": "ALL_ST=Warehouse - fine_FL=Building Story 1_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "Warehouse - fine",
+        "zone_multiplier": 1,
+        "fixture_type": "17",
+        "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "height_avg_ft": 25.6,
+        "floor_area_ft2": 14998.5,
+        "cost": 405336.81,
+        "cost_per_ft2": 27.03,
+        "note": ""
+      },
+      {
+        "space": "Zone3 Bulk Storage",
+        "zone": "ALL_ST=Warehouse - med/blk_FL=Building Story 1_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "Warehouse - med/blk",
+        "zone_multiplier": 1,
+        "fixture_type": "17",
+        "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "height_avg_ft": 28.0,
+        "floor_area_ft2": 34496.6,
+        "cost": 932274.67,
+        "cost_per_ft2": 27.03,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 1414521.9
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 26.6,
+        "ht_roof_ft": 26.6,
+        "longest_distance_to_ext_ft": 217.4,
+        "wiring_and_gas_connections_distance_ft": 217.4,
+        "equipment_cost": 212985,
+        "flue_cost": 2576,
+        "wiring_and_gas_connections_cost": 10276,
+        "pump_cost": 11534,
+        "piping_to_pump_cost": 1974,
+        "header_distribution_cost": 10586,
+        "total_cost": 249932
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 26.6,
+        "ht_roof_ft": 26.6,
+        "longest_distance_to_ext_ft": 217.4,
+        "wiring_and_gas_connections_distance_ft": 217.4,
+        "equipment_cost": 0,
+        "flue_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_to_pump_cost": 0,
+        "header_distribution_cost": 0,
+        "total_cost": 0
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 26.6,
+        "ht_roof_ft": 26.6,
+        "longest_distance_to_ext_ft": 217.4,
+        "wiring_and_gas_connections_distance_ft": 217.4,
+        "equipment_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_cost": 0,
+        "total_cost": 0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "HW",
+        "zone_number": 1,
+        "zone_name": "ALL_ST=Office - enclosed_FL=Building Story 1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 18.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 15185,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 8475,
+        "wiring_cost": 0,
+        "num_units": 6,
+        "cummultive_zonal_cost": 23660
+      },
+      {
+        "systype": "HW",
+        "zone_number": 2,
+        "zone_name": "ALL_ST=Warehouse - fine_FL=Building Story 1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 148.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 117698,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 43111,
+        "wiring_cost": 0,
+        "num_units": 44,
+        "cummultive_zonal_cost": 184469
+      },
+      {
+        "systype": null,
+        "zone_number": 2,
+        "zone_name": "ALL_ST=Warehouse - fine_FL=Building Story 1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 148.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 0,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 0,
+        "num_units": null,
+        "cummultive_zonal_cost": 184469
+      },
+      {
+        "systype": "HW",
+        "zone_number": 3,
+        "zone_name": "ALL_ST=Warehouse - med/blk_FL=Building Story 1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 336.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 265644,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 89907,
+        "wiring_cost": 0,
+        "num_units": 99.0,
+        "cummultive_zonal_cost": 540019
+      },
+      {
+        "systype": null,
+        "zone_number": 3,
+        "zone_name": "ALL_ST=Warehouse - med/blk_FL=Building Story 1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 336.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 0,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 0,
+        "wiring_cost": 0,
+        "num_units": null,
+        "cummultive_zonal_cost": 540019
+      }
+    ]
+  },
+  "shw": {
+    "shw_nom_flr2flr_hght_ft": 26.6,
+    "shw_ht_roof": 26.6,
+    "shw_longest_distance_to_ext_ft": 217.4,
+    "shw_utility_distance_ft": 217.4,
+    "shw_tanks": 16001.07,
+    "shw_num_of_modeled_tanks": 1,
+    "num_elec_tanks": 0,
+    "num_hphw_tanks": 0,
+    "shw_num_reg_eff_gas_tanks": 1.0,
+    "shw_num_high_eff_gas_tanks": 0,
+    "shw_num_reg_eff_oil_tanks": 0,
+    "shw_num_high_eff_oil_tanks": 0,
+    "shw_num_of_costed_tanks": 1.0,
+    "shw_flues": 2576.43,
+    "shw_utilties": 10276.21,
+    "shw_pumps": 1124.14,
+    "shw_num_of_pumps": 1,
+    "shw_piping": 1974.17,
+    "shw_total": 31952.02
+  },
+  "ventilation": {
+    "system_1": [
+      {
+        "sys_type": 1,
+        "name": "sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+        "airloop_flow_m3_per_s": 0.354,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 104832.78,
+        "revised_base_ahu_cost": 37103.05,
+        "hrv": {},
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 5.859,
+            "cost": 18399.51
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 34.691,
+            "cost": 4213.2
+          }
+        ],
+        "reheat_recool": []
+      },
+      {
+        "sys_type": 1,
+        "name": "sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
+        "airloop_flow_m3_per_s": 0.814,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 67559.97,
+        "revised_base_ahu_cost": 54995.84,
+        "hrv": {},
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 13.475,
+            "cost": 31429.43
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 79.789,
+            "cost": 11245.2
+          }
+        ],
+        "reheat_recool": []
+      }
+    ],
+    "system_2": [],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+        "airloop_flow_m3_per_s": 0.721,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 81574.62,
+        "revised_base_ahu_cost": 58838.84,
+        "hrv": {},
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 12.039,
+            "cost": 23655.24
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 26.773,
+            "cost": 5406.16
+          }
+        ],
+        "reheat_recool": []
+      }
+    ],
+    "system_4": [],
+    "system_5": [],
+    "system_6": [],
+    "system_7": [],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 176.4,
+      "Total_cost": 8030.38
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 16,
+        "DuctLength_m": 4.3,
+        "NumberRuns": 2,
+        "DuctCost": 3264.18
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Warehouse - med/blk",
+          "SupplyDuctSize_in": 22.9,
+          "SupplyDuctLength_m": 102.5,
+          "ReturnDuctSize_in": 14.15,
+          "ReturnDuctLength_m": 102.5,
+          "TotalDuctCost": 142073.71,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "ALL_ST=Office - enclosed_FL=Building Story 1_SCH=A",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.721,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "flex_duct_sz_in": 10,
+              "flex_duct_length_ft": 64,
+              "cost": 16613.44
+            },
+            {
+              "ThermalZone": "ALL_ST=Office - enclosed_FL=Building Story 1_SCH=A",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.721,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "flex_duct_sz_in": 10,
+              "flex_duct_length_ft": 64,
+              "cost": 16613.44
+            },
+            {
+              "ThermalZone": "ALL_ST=Warehouse - fine_FL=Building Story 1_SCH=A",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.354,
+              "num_diff": 4,
+              "ducting_lbs": 225,
+              "duct_insulation_ft2": 196,
+              "flex_duct_sz_in": 6,
+              "flex_duct_length_ft": 32,
+              "cost": 4983.53
+            },
+            {
+              "ThermalZone": "ALL_ST=Warehouse - med/blk_FL=Building Story 1_SCH=A",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.814,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "flex_duct_sz_in": 10,
+              "flex_duct_length_ft": 64,
+              "cost": 16613.44
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": []
+      }
+    ],
+    "natural_ventilation": [],
+    "demand_controlled_ventilation": [],
+    "hrv_total_cost": 0
+  },
+  "renewables": {
+    "pv": []
+  },
+  "totals": {
+    "envelope": 6094665,
+    "thermal_bridging": 0,
+    "lighting": 1414522,
+    "heating_and_cooling": 789951,
+    "shw": 31952,
+    "ventilation": 453479,
+    "renewables": 0,
+    "grand_total": 8784569
+  }
+}
