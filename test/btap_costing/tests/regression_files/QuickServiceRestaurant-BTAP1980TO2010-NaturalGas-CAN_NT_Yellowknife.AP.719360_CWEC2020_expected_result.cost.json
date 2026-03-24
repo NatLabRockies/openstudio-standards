@@ -1,0 +1,530 @@
+{
+  "city": "YELLOWKNIFE",
+  "province_state": "NWT",
+  "envelope": {
+    "exterior_wall_cost": 128243.07,
+    "exterior_wall_area_m2": 159.87,
+    "exterior_wall_cost_per_m2": 802.19,
+    "exterior_roof_cost": 0.0,
+    "exterior_roof_area_m2": 0.0,
+    "exterior_roof_cost_per_m2": 0.0,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "interzonal_roof_cost": 114015.88,
+    "interzonal_roof_area_m2": 232.34,
+    "interzonal_roof_cost_per_m2": 490.72,
+    "interzonal_skylight_walls_cost": 0.0,
+    "interzonal_skylight_walls_area_m2": 0.0,
+    "interzonal_skylight_walls_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 27832.53,
+    "exterior_fixed_window_area_m2": 26.02,
+    "exterior_fixed_window_cost_per_m2": 1069.51,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 0.0,
+    "exterior_skylight_area_m2": 0.0,
+    "exterior_skylight_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 71305.21,
+    "ground_contact_floor_area_m2": 232.34,
+    "ground_contact_floor_cost_per_m2": 306.9,
+    "construction_costs": [
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Dining_Wall_East",
+        "conductance": 3.745,
+        "area": 16.73,
+        "cost": 13420.95,
+        "cost_per_area": 802.19,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Dining_Wall_South",
+        "conductance": 3.745,
+        "area": 33.46,
+        "cost": 26841.61,
+        "cost_per_area": 802.19,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Dining_Wall_West",
+        "conductance": 3.745,
+        "area": 16.73,
+        "cost": 13420.95,
+        "cost_per_area": 802.19,
+        "note": "Surf #3: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "InterzonalRoof",
+        "surface_name": "Dining_Ceiling",
+        "conductance": 1.343,
+        "area": 116.17,
+        "cost": 57007.94,
+        "cost_per_area": 490.72,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 1.3425200258816616 precedes the lower bound (4.317180616740088) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Dining_Wall_East_Window",
+        "conductance": 0.339,
+        "area": 6.51,
+        "cost": 6958.03,
+        "cost_per_area": 1069.51,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Dining_Wall_South_Window",
+        "conductance": 0.339,
+        "area": 13.01,
+        "cost": 13916.46,
+        "cost_per_area": 1069.51,
+        "note": "Surf #2: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "surface_name": "Dining_Wall_West_Window",
+        "conductance": 0.339,
+        "area": 6.51,
+        "cost": 6958.03,
+        "cost_per_area": 1069.51,
+        "note": "Surf #3: [BTAP::LinearRegression] Warning: Dependent variable 0.3389830508474576 precedes the lower bound (0.4083333333333333) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "Dining_Floor",
+        "conductance": 1.475,
+        "area": 116.17,
+        "cost": 35652.61,
+        "cost_per_area": 306.9,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Kitchen_Wall_East",
+        "conductance": 3.745,
+        "area": 23.24,
+        "cost": 18639.89,
+        "cost_per_area": 802.19,
+        "note": "Surf #1: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Kitchen_Wall_North",
+        "conductance": 3.745,
+        "area": 46.47,
+        "cost": 37279.78,
+        "cost_per_area": 802.19,
+        "note": "Surf #2: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "surface_type": "ExteriorWall",
+        "surface_name": "Kitchen_Wall_West",
+        "conductance": 3.745,
+        "area": 23.24,
+        "cost": 18639.89,
+        "cost_per_area": 802.19,
+        "note": "Surf #3: OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
+        "surface_type": "InterzonalRoof",
+        "surface_name": "Kitchen_Ceiling",
+        "conductance": 1.343,
+        "area": 116.17,
+        "cost": 57007.94,
+        "cost_per_area": 490.72,
+        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 1.3425200258816616 precedes the lower bound (4.317180616740088) for the 2.0% range. Returning the lower bound."
+      },
+      {
+        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
+        "surface_type": "GroundContactFloor",
+        "surface_name": "Kitchen_Floor",
+        "conductance": 1.475,
+        "area": 116.17,
+        "cost": 35652.61,
+        "cost_per_area": 306.9,
+        "note": "Surf #1: OK"
+      }
+    ],
+    "total_envelope_cost": 341396.7
+  },
+  "lighting": {
+    "daylighting_sensor_control": [],
+    "led_lighting": [],
+    "fixture_report": [
+      {
+        "fixture_type": "Nil",
+        "fixture_description": "",
+        "floor_area_ft2": 2500.9,
+        "cost": 0,
+        "cost_per_ft2": 0.0,
+        "spaces": [
+          "attic"
+        ],
+        "number_of_spaces": 1
+      },
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 2501.0,
+        "cost": 74320.68,
+        "cost_per_ft2": 29.72,
+        "spaces": [
+          "Dining",
+          "Kitchen"
+        ],
+        "number_of_spaces": 2
+      }
+    ],
+    "space_report": [
+      {
+        "space": "attic",
+        "zone": "ALL_ST=- undefined -_FL=Building Story 2_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "- undefined -",
+        "zone_multiplier": 1,
+        "fixture_type": "Nil",
+        "fixture_desciption": "",
+        "height_avg_ft": 3.7,
+        "floor_area_ft2": 2500.9,
+        "cost": 0,
+        "cost_per_ft2": 0.0,
+        "note": ""
+      },
+      {
+        "space": "Dining",
+        "zone": "ALL_ST=Dining - bar lounge/leisure_FL=Building Story 1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Dining - bar lounge/leisure",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1250.5,
+        "cost": 37160.34,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      },
+      {
+        "space": "Kitchen",
+        "zone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Food preparation",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1250.5,
+        "cost": 37160.34,
+        "cost_per_ft2": 29.72,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 74320.68
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 13.7,
+        "ht_roof_ft": 13.7,
+        "longest_distance_to_ext_ft": 37.5,
+        "wiring_and_gas_connections_distance_ft": 37.5,
+        "equipment_cost": 17507,
+        "flue_cost": 1552,
+        "wiring_and_gas_connections_cost": 1801,
+        "pump_cost": 9774,
+        "piping_to_pump_cost": 1974,
+        "header_distribution_cost": 6623,
+        "total_cost": 39231
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 13.7,
+        "ht_roof_ft": 13.7,
+        "longest_distance_to_ext_ft": 37.5,
+        "wiring_and_gas_connections_distance_ft": 37.5,
+        "equipment_cost": 0,
+        "flue_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_to_pump_cost": 0,
+        "header_distribution_cost": 0,
+        "total_cost": 0
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 13.7,
+        "ht_roof_ft": 13.7,
+        "longest_distance_to_ext_ft": 37.5,
+        "wiring_and_gas_connections_distance_ft": 37.5,
+        "equipment_cost": 0,
+        "wiring_and_gas_connections_cost": 0,
+        "pump_cost": 0,
+        "piping_cost": 0,
+        "total_cost": 0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "HW",
+        "zone_number": 2,
+        "zone_name": "ALL_ST=Dining - bar lounge/leisure_FL=Building Story 1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 13.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 10733,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 10231,
+        "wiring_cost": 0,
+        "num_units": 4.0,
+        "cummultive_zonal_cost": 20964
+      },
+      {
+        "systype": "HW",
+        "zone_number": 3,
+        "zone_name": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 10.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 8050,
+        "cool_cost": 0,
+        "heatcool_cost": 0,
+        "piping_cost": 10231,
+        "wiring_cost": 0,
+        "num_units": 3.0,
+        "cummultive_zonal_cost": 39245
+      }
+    ]
+  },
+  "shw": {
+    "shw_nom_flr2flr_hght_ft": 13.7,
+    "shw_ht_roof": 13.7,
+    "shw_longest_distance_to_ext_ft": 37.5,
+    "shw_utility_distance_ft": 37.5,
+    "shw_tanks": 16001.07,
+    "shw_num_of_modeled_tanks": 1,
+    "num_elec_tanks": 0,
+    "num_hphw_tanks": 0,
+    "shw_num_reg_eff_gas_tanks": 1.0,
+    "shw_num_high_eff_gas_tanks": 0,
+    "shw_num_reg_eff_oil_tanks": 0,
+    "shw_num_high_eff_oil_tanks": 0,
+    "shw_num_of_costed_tanks": 1.0,
+    "shw_flues": 1551.93,
+    "shw_utilties": 1800.9,
+    "shw_pumps": 1124.14,
+    "shw_num_of_pumps": 1,
+    "shw_piping": 1974.17,
+    "shw_total": 22452.21
+  },
+  "ventilation": {
+    "system_1": [],
+    "system_2": [],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
+        "airloop_flow_m3_per_s": 0.403,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 1000,
+        "base_ahu_cost": 81574.62,
+        "revised_base_ahu_cost": 32905.49,
+        "hrv": {},
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 6.677,
+            "cost": 17284.77
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 22.984,
+            "cost": 5406.16
+          }
+        ],
+        "reheat_recool": []
+      },
+      {
+        "sys_type": 3,
+        "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
+        "airloop_flow_m3_per_s": 1.77,
+        "num_rooftop_units": 1,
+        "ind_ahu_max_airflow_l_per_s": 2500,
+        "base_ahu_cost": 103240.72,
+        "revised_base_ahu_cost": 73113.15,
+        "hrv": {},
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "total_modeled_capacity_kw": 29.307,
+            "cost": 28729.37
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "total_modeled_capacity_kw": 173.536,
+            "cost": 22490.4
+          }
+        ],
+        "reheat_recool": []
+      }
+    ],
+    "system_4": [],
+    "system_5": [],
+    "system_6": [],
+    "system_7": [],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 92.0,
+      "Total_cost": 4188.19
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 18,
+        "DuctLength_m": 1.2,
+        "NumberRuns": 2,
+        "DuctCost": 433.67
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Dining - bar lounge/leisure",
+          "SupplyDuctSize_in": 24.56,
+          "SupplyDuctLength_m": 17.0,
+          "ReturnDuctSize_in": 24.56,
+          "ReturnDuctLength_m": 17.0,
+          "TotalDuctCost": 39787.45,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.403,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "flex_duct_sz_in": 6,
+              "flex_duct_length_ft": 40,
+              "cost": 6096.78
+            },
+            {
+              "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.403,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "flex_duct_sz_in": 6,
+              "flex_duct_length_ft": 40,
+              "cost": 6096.78
+            },
+            {
+              "ThermalZone": "ALL_ST=Dining - bar lounge/leisure_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.77,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "flex_duct_sz_in": 12,
+              "flex_duct_length_ft": 150,
+              "cost": 16677.08
+            },
+            {
+              "ThermalZone": "ALL_ST=Dining - bar lounge/leisure_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.77,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "flex_duct_sz_in": 12,
+              "flex_duct_length_ft": 150,
+              "cost": 16677.08
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": []
+      }
+    ],
+    "natural_ventilation": [],
+    "demand_controlled_ventilation": [],
+    "hrv_total_cost": 0
+  },
+  "renewables": {
+    "pv": []
+  },
+  "totals": {
+    "envelope": 341397,
+    "thermal_bridging": 0,
+    "lighting": 74321,
+    "heating_and_cooling": 78476,
+    "shw": 22452,
+    "ventilation": 269886,
+    "renewables": 0,
+    "grand_total": 786532
+  }
+}
