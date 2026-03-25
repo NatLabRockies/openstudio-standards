@@ -7,7 +7,6 @@ require 'fileutils'
 #require 'optparse'
 
 class Btap_results_helper
-
   def btap_results_regression_test()
     cp = CommonPaths.instance
     args = {}
