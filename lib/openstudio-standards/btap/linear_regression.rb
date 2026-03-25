@@ -1,13 +1,13 @@
 module BTAP
   module LinearRegression
-    @extrapolation_bounds_exceeded = false
+    @extrapolation_boundaries_exceeded = false
 
     # Read and reset the error to not carry over from previous calls in the case
     # of using this module across different facilities.
     # @return [TrueClass|FalseClass]
-    def self.extrapolation_error?
-      value = @extrapolation_bounds_exceeded
-      @extrapolation_bounds_exceeded = false
+    def self.extrapolation_boundaries_exceeded?
+      value = @extrapolation_boundaries_exceeded
+      @extrapolation_boundaries_exceeded = false
       return value
     end
 
@@ -43,16 +43,11 @@ module BTAP
       y_upper_bound = (1.0 + extrapolation_range) * array[-1][1]
 
       if x2 < x_lower_bound
-
-        # TODO: Commented out for now. If only the lower bound was preceded,
-        # then it shouldn't be a cause for concern (e.g. unintentionally
-        # uninsulated assemblies)
-        # @extrapolation_bounds_exceeded = true
         return y_lower_bound, fmt("Warning: Dependent variable #{x2} precedes the lower bound " \
                             "(#{x_lower_bound}) for the #{extrapolation_percent}% range. Returning the lower " \
                             "bound.")
       elsif x2 > x_upper_bound
-        @extrapolation_bounds_exceeded = true
+        @extrapolation_boundaries_exceeded = true
         return y_upper_bound, fmt("Warning: Dependent variable #{x2} exceeds the upper bound " \
                             "(#{x_upper_bound}) for the #{extrapolation_percent}% range. Returning the upper " \
                             "bound.")
