@@ -844,24 +844,48 @@ class NECB2011 < Standard
     model.getInsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
     model.getOutsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
 
-    argh            = {}
-    argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
-    argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
-    argh[:eRoofU  ] = ext_roof_cond          if ext_roof_cond
-    argh[:gWallU  ] = ground_wall_cond       if ground_wall_cond
-    argh[:gFloorU ] = ground_floor_cond      if ground_floor_cond
-    argh[:gRoofU  ] = ground_roof_cond       if ground_roof_cond
-    argh[:doorU   ] = door_construction_cond if door_construction_cond
-    argh[:fenU    ] = fixed_window_cond      if fixed_window_cond
-    argh[:skyU    ] = skylight_solar_trans   if skylight_solar_trans
-    argh[:doorSHGC] = glass_door_solar_trans if glass_door_solar_trans
-    argh[:fenSHGC ] = fixed_wind_solar_trans if fixed_wind_solar_trans
-    argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
+    bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
+    bldg_structure   = bldg_structure.to_s.downcase.to_sym
+    bldg_structures  = @structure.data[:structure].keys
 
-    assign_contruction_to_adiabatic_surfaces(model)
-    ok = add_construction_sets(model, necb_hdd, argh)
+    if bldg_structures.include?(bldg_structure)
+      argh            = {}
+      argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
+      argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
+      argh[:eRoofU  ] = ext_roof_cond          if ext_roof_cond
+      argh[:gWallU  ] = ground_wall_cond       if ground_wall_cond
+      argh[:gFloorU ] = ground_floor_cond      if ground_floor_cond
+      argh[:gRoofU  ] = ground_roof_cond       if ground_roof_cond
+      argh[:doorU   ] = door_construction_cond if door_construction_cond
+      argh[:fenU    ] = fixed_window_cond      if fixed_window_cond
+      argh[:skyU    ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:doorSHGC] = glass_door_solar_trans if glass_door_solar_trans
+      argh[:fenSHGC ] = fixed_wind_solar_trans if fixed_wind_solar_trans
+      argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
 
-    raise('NECB2011: Failed to assign default construction sets') unless ok
+      assign_contruction_to_adiabatic_surfaces(model)
+      ok = add_construction_sets(model, necb_hdd, argh)
+
+      raise('NECB2011: Failed to assign default construction sets') unless ok
+    else
+      model_add_constructions(model)
+      apply_standard_construction_properties(model: model,
+                                             ext_wall_cond: ext_wall_cond,
+                                             ext_floor_cond: ext_floor_cond,
+                                             ext_roof_cond: ext_roof_cond,
+                                             ground_wall_cond: ground_wall_cond,
+                                             ground_floor_cond: ground_floor_cond,
+                                             ground_roof_cond: ground_roof_cond,
+                                             door_construction_cond: door_construction_cond,
+                                             fixed_window_cond: fixed_window_cond,
+                                             glass_door_cond: glass_door_cond,
+                                             overhead_door_cond: overhead_door_cond,
+                                             skylight_cond: skylight_cond,
+                                             glass_door_solar_trans: glass_door_solar_trans,
+                                             fixed_wind_solar_trans: fixed_wind_solar_trans,
+                                             skylight_solar_trans: skylight_solar_trans,
+                                             necb_hdd: necb_hdd)
+    end
 
     model_create_thermal_zones(model, @space_multiplier_map)
   end
