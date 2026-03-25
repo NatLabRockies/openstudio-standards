@@ -121,12 +121,12 @@ class BTAPCosting
       totEnvCost += parapet_cost
     end
 
-    # Sometimes when using thermal bridging creates too demanding of a model
-    # or when data is just insufficient, some R-factors will be outside of the
-    # data and BTAP::LinearRegression will refuse to extrapolate beyond its
-    # default range. If that occured, don't raise an error but add a really high
-    # number to the envelope cost to make the user aware of what happened.
-    if BTAP::LinearRegression.extrapolation_error?
+    # When using thermal bridging it may create too demanding of a model, or
+    # when data is insufficient, some R-factors will be outside of the data
+    # and BTAP::LinearRegression will refuse to extrapolate beyond its default
+    # range. If that occured, don't raise an error but add a really high number
+    # to the envelope cost to make the user aware of what happened.
+    if BTAP::LinearRegression.extrapolation_boundaries_exceeded?
       revolutionary_engineering_technology_fudge_factor = 1000000000000
       totEnvCost += revolutionary_engineering_technology_fudge_factor
       @costing_report["envelope"]["unrealistic_assembly_cost"] = revolutionary_engineering_technology_fudge_factor
