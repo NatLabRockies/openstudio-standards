@@ -73,7 +73,6 @@ class BTAPResultsHelper < Minitest::Test
       cost_list_output = BTAPCosting.new().cost_list_items(btap_items: cost_list)
       cost_result      = JSON.parse(File.read(cost_result_json_path))
       cost_sum         = cost_result['totals']
-
       # Compare the results and let the user know if there are differences.  Do not fail test if there are.
       puts("")
       puts("Comparing BTAP_Costing results and itemized costing list cost results:")
