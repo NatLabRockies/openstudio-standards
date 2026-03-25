@@ -173,9 +173,9 @@ module BTAP
 
     # @param path [String]
     def self.load_cache(path)
-      cache = LoadedCache.new(File.open(path, "r") { |file| JSON.load(file) })
+      cache = File.open(path, "r") { |file| JSON.load(file) }
       cache["building_performance"] = cache["building_performance"].to_sym
-      return cache
+      return LoadedCache.new(cache)
     end
   end
 
