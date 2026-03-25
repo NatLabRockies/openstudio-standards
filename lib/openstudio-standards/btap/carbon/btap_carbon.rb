@@ -145,7 +145,7 @@ class BTAPCarbon
     end
 
     # Add the embodied carbon tallied from TBD which tallies carbon emissions
-    # of items that aren't explicitly modeled 
+    # of items that aren't explicitly modeled
     structure_carbon = @attributes.model.getBuilding.additionalProperties.getFeatureAsDouble("co2_structure").get
     @carbon_report["structure_carbon"] = structure_carbon.round(2)
     total_emissions += structure_carbon
@@ -158,7 +158,7 @@ class BTAPCarbon
       total_emissions += parapet_carbon
     end
 
-    puts "Warning: Interpolation limits exceeded." if BTAP::LinearRegression.extrapolation_error?
+    puts "Warning: Interpolation limits exceeded." if BTAP::LinearRegression.extrapolation_boundaries_exceeded?
 
     # Round everything at the end.
     @attributes.surface_types.each do |surface_type|
