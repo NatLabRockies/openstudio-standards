@@ -154,7 +154,7 @@ module BTAP
       data["template"] = standard.template
       data["use_tbd"]  = !(standard.tbd.nil?)
       if data["use_tbd"]
-        data["building_performance"] = standard.tbd.model[:perform] == :hp
+        data["building_performance"] = standard.tbd.model[:perform]
 
         # The "convex/concave" suffix on tally edges can be safely ignored since
         # they currently aren't relevant to any NECB standard, but they are to
@@ -173,7 +173,9 @@ module BTAP
 
     # @param path [String]
     def self.load_cache(path)
-      return LoadedCache.new(File.open(path, "r") { |file| JSON.load(file) })
+      cache = LoadedCache.new(File.open(path, "r") { |file| JSON.load(file) })
+      cache["building_performance"] = cache["building_performance"].to_sym
+      return cache
     end
   end
 

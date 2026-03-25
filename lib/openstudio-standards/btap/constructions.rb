@@ -84,12 +84,12 @@ module BTAP
     #
     # @param structure    [BTAP::Structure] BTAP Structure object
     # @param surface_type [:walls, :floors or :roofs] surface type
-    # @param performance  [false or true] false for low performance, true for
-    #                                     high
+    # @param performance  [:low or :high] high or low-performance variant
     #
     # @return [String] BTAP assembly identifier for costing
-    def self.costed_assembly(structure = nil, surface_type = :walls, performance = false)
+    def self.costed_assembly(structure = nil, surface_type = :walls, performance = :lp)
       surface_type = :walls unless [:roofs, :floors].include?(surface_type)
+      performance  = :lp    unless performance == :hp
       return STEL1 unless structure.is_a?(BTAP::Structure)
 
       # Select BTAP-costed assembly, matching:
@@ -143,7 +143,7 @@ module BTAP
         end
       end
 
-      performance ? c2 : c1
+      performance == :lp ? c1 : c2
     end
   end
 end
