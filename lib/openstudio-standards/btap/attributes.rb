@@ -191,6 +191,12 @@ module BTAP
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_surface_construction(surface, surface_type)
+
+      # TODO: Currently we don't have the right assemblies to properly cost
+      # skylight well walls, so don't cost them for now. Wall constructions
+      # aren't suitable.
+      return if surface_type == "InterzonalSkylightWalls"
+
       construction_sheet = @surface_types_to_construction_sheet[surface_type]
       construction_name  = @surface_types_to_assembly_names[surface_type]
       is_opaque          = !(@glazing_surface_types.include?(construction_sheet))
