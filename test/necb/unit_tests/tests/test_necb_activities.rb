@@ -5,6 +5,38 @@ require 'json'
 
 # Checks if BTAP::Activity instances are correctly deployed within BTAP.
 class NECB_Activity_Tests < Minitest::Test
+  def test_btap_activities()
+    model = OpenStudio::Model::Model.new
+    space = OpenStudio::Model::Space.new(model)
+    type  = OpenStudio::Model::SpaceType.new(model)
+    id    = space.setName("Room")
+    name  = type.setName("Type")
+
+    type.setStandardsSpaceType("office")
+    space.setFloorArea(20)
+    space.setSpaceType(type)
+
+    a = BTAP::Activity.new(model, "NECB2011")
+
+    assert_equal(a.activity, "office", "Activity BLDG?")
+    assert_equal(a.m2(space), 20, "Activity #{id} m2?")
+    assert_equal(a.keyword(space), "office::common", "Activity #{id} office?")
+    assert(a.occsensing?(space), "Activity #{id} occsensing?")
+
+    # NECB2011 enclosed office LPD = 1.105536975 W/ft2
+    #               -10% reduction = 0.994983278 W/ft2
+    lpd = a.standards_data("lighting_per_area", space)
+    assert_equal(lpd.round(4), 0.9950, "Activity LPD #{id}?")
+
+    # (unused?) RGB colour.
+    rgb = a.standards_data(:rgb, space)
+    assert_equal(rgb, "255_255_255", "Activity RGB #{id}?")
+
+    # BTAP liveload.
+    lload = a.standards_data(:liveload, model)
+    assert_equal(lload, 21, "Activity Live Load #{id}?")
+  end
+
   def test_necb_activities()
     outd = "output/test_necb_activities"
     eres = "../expected_results/necb_activities_expected_results.json"

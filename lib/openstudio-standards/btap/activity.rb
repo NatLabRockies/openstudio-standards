@@ -64,12 +64,12 @@ module BTAP
 
     # BTAP-supported NECB editions (and older vintages).
     @@data[:editions] = []
-    @@data[:editions]editions << "BTAPPRE1980"
-    @@data[:editions]editions << "BTAP1980TO2010"
-    @@data[:editions]editions << "NECB2011"
-    @@data[:editions]editions << "NECB2015"
-    @@data[:editions]editions << "NECB2017"
-    @@data[:editions]editions << "NECB2020"
+    @@data[:editions] << "BTAPPRE1980"
+    @@data[:editions] << "BTAP1980TO2010"
+    @@data[:editions] << "NECB2011"
+    @@data[:editions] << "NECB2015"
+    @@data[:editions] << "NECB2017"
+    @@data[:editions] << "NECB2020"
 
     # Key notes, common to NECB editions.
     #
@@ -223,7 +223,7 @@ module BTAP
     end
 
     # Load 'space_types' and 'udef' JSON content for each NECB edition.
-    editions.each do |ed|
+    @@data[:editions].each do |ed|
       @@data[:edition][ed] = { bldg: {}, space: {}, udef: {} }
 
       t_str = "../standards/necb/" + ed + "/data/space_types.json"
@@ -709,6 +709,10 @@ module BTAP
       mth = "BTAP::Activity::#{__callee__}"
       id  = ""
 
+      # Converters (from m-to-ft, or m2-to-ft2).
+      toFT  =  3.280839895
+      toFT2 = 10.763910417
+
       unless k.respond_to?(:to_sym)
         lgs << "Invalid keyword class '#{k.class}' (#{mth})"
         return nil
@@ -757,12 +761,13 @@ module BTAP
         return data[:udef][k]                                               # 5.
       elsif obj.is_a?(OpenStudio::Model::Space)
         id = obj.nameString
+        m2 = obj.floorArea
 
         unless @activities.key?(id)
           return @udef.key?(k) ? @udef[k] : data[:udef][k]
         end
 
-        type = self.keyword(space) # e.g. "corridor::common"
+        type = self.keyword(obj) # e.g. "corridor::common"
 
         if type == "undefined::common"
           return @udef.key?(k) ? @udef[k] : data[:udef][k]
@@ -778,37 +783,122 @@ module BTAP
 
         btap = data[:space][type]
         necb = @space[type]
-        sch  = "NECB-#{self.schedule(space)}-"
+        sch  = "NECB-#{self.schedule(obj)}-"
 
         # Search for space-level parameter, in sequence:
-        #   1. NECB-specific (& space-specific) entries, e.g.:
+        #   1. "lighting_per_area"
+        #   2. NECB-specific (& space-specific) entries, e.g.:
         #        - target_illuminance_setpoint: 400
-        #   2. NECB-specific (general) entries, e.g.:
+        #   3. NECB-specific (general) entries, e.g.:
         #        - ventilation_standard: "ASHRAE 62.1-2016 Table 6-1"
-        #   3. NECB-independent (yet space-specific) entries, e.g.:
+        #   4. NECB-independent (yet space-specific) entries, e.g.:
         #        - occupancy_per_area: 18.58
-        #   4. Inferred/calculated values, e.g. (based on schedules):
+        #   5. Inferred/calculated values, e.g. (based on schedules):
         #        - occupancy_schedule: "NECB-E-Occupancy"
-        #   5. NECB-independent (general) entries, e.g.:
+        #   6. NECB-independent (general) entries, e.g.:
         #        - rgb: "255_255_255"
-        return type            if k == :space_type
-        return necb[k]         if necb.key?(k) # 1.
-        return @udef[k]        if @udef.key?(k) # 2.
-        return btap[k]         if btap.key?(k) # 3.
 
-        return "Space Function" if k == :building_type # 4.
-        return "Space Function" if k == :lighting_primary_space_type
-        return type             if k == :lighting_secondary_space_type
-        return sch + "Lighting" if k == :lighting_schedule
-        return "Space Function" if k == :ventilation_primary_space_type
-        return type             if k == :ventilation_secondary_space_type
+        # Some LPDs require adjustments, based on:
+        #   - geometry
+        #   - occupancy control
+        if k == :lighting_per_area                                          # 1.
+          lpd = necb[k]
+
+          if ["NECB2020", "NECB2025"].include?(@template)
+            case type
+            when "atrium::common"
+              h   = BTAP::Geometry.space_height(obj)
+              lpd = 5.2 / toFT2
+              lpd = 4.2 / toFT2 if h < 6
+              lpd = 6.5 / toFT2 if h > 12
+            when "office::common"
+              lpd = 8.0 / toFT2
+              lpd = 7.1 / toFT2 if m2 > 25
+            when "storage::common"
+              lpd = 4.1 / toFT2
+              lpd = 5.5 / toFT2 if m2 < 5
+            when "bay::manufacturing"
+              lpd = 13.4 / toFT2
+              lpd = 15.3 / toFT2 if h > 15
+              lpd =  9.3 / toFT2 if h < 7.5
+            end
+
+            lpd *= self.fPERS
+            lpd *= self.fOCC
+          elsif ["NECB2015", "NECB2017"].include?(@template)
+            case type
+            when "atrium::common"
+              h   = BTAP::Geometry.space_height(obj)
+              lpd =       (1.06 * h) / toFT2
+              lpd = (4.3 + 0.71 * h) / toFT2 if h > 12
+            when "storage::common"
+              if m2 < 5
+                lpd = (@template == "NECB2015" ? 13.3 : 10.4) / toFT2
+              else
+                lpd = 6.8 / toFT2
+              end
+            when "bay::manufacturing"
+              h   = BTAP::Geometry.space_height(obj)
+              lpd = (@template == "NECB2015" ? 13.3 :  8.1) / toFT2
+              lpd = 11.3 / toFT2 if h > 15
+              lpd = (@template == "NECB2015" ? 12.9 : 10.3) / toFT2 if h < 7.5
+            end
+
+            lpd *= self.fPERS
+            lpd *= self.fOCC
+          elsif ["NECB2011"].include?(@template)
+            case type
+            when "atrium::common"
+              h0  = BTAP::Geometry.space_height(obj)
+              h2  = h0 - 13
+              h2  = 0 if h2 < 0
+              h1  = h0 - h2
+              lpd = (0.1 * h1 + 0.07 * h2) / toFT2
+            when "corridor::common"
+              w   = BTAP::Geometry.space_width(obj)
+              lpd = 7.1 / toFT2
+              lpd = 8.4 / toFT2 if w < 2.4
+            when "corridor::health"
+              w   = BTAP::Geometry.space_width(obj)
+              lpd =  9.6 / toFT2
+              lpd = 11.7 / toFT2 if w < 2.4
+            when "corridor::manufacturing"
+              w   = BTAP::Geometry.space_width(obj)
+              lpd = 5.5 / toFT2
+              lpd = 4.4 / toFT2 if w < 2.4
+            when "bay::manufacturing"
+              h   = BTAP::Geometry.space_height(obj)
+              lpd = 13.2 / toFT2
+              lpd = 11.3 / toFT2 if h > 15
+              lpd = 12.8 / toFT2 if h < 7.5
+
+              # @todo : "high_shelving" AdditionalProperty option (10.2 W/m2)
+            end
+
+            lpd *= 0.9 if self.occsensing?(obj)
+          end
+
+          return lpd
+        end
+
+        return type                                if k == :space_type
+        return necb[k]                             if necb.key?(k)          # 2.
+        return @udef[k]                            if @udef.key?(k)         # 3.
+        return btap[k]                             if btap.key?(k)          # 4.
+
+        return "Space Function"                    if k == :building_type   # 5.
+        return "Space Function"                    if k == :lighting_primary_space_type
+        return type                                if k == :lighting_secondary_space_type
+        return sch + "Lighting"                    if k == :lighting_schedule
+        return "Space Function"                    if k == :ventilation_primary_space_type
+        return type                                if k == :ventilation_secondary_space_type
         return sch + "Occupancy"                   if k == :occupancy_schedule
         return sch + "Electric-Equipment"          if k == :electric_equipment_schedule
         return sch + "Thermostat Setpoint-Heating" if k == :heating_setpoint_schedule
         return sch + "Thermostat Setpoint-Cooling" if k == :cooling_setpoint_schedule
         return sch + "Service Water Heating"       if k == :service_water_heating_schedule
         return sch + "FAN"                         if k == :exhaust_schedule
-        return data[:udef][k]                                               # 5.
+        return data[:udef][k]                                               # 6.
       else
         lgs << "Invalid input #{obj.class} (#{mth})"
         return nil
@@ -892,7 +982,12 @@ module BTAP
         entry[:keyword  ] = candidate
         entry[:activity ] = str[0].to_s.strip
         entry[:bldgtype ] = str[1].to_s.strip
-        entry[:schedule ] = data[:space][candidate][:necb_schedule_type]
+
+        if candidate == "undefined::common"
+          entry[:schedule] = data[:udef][:necb_schedule_type]
+        else
+          entry[:schedule] = data[:space][candidate][:necb_schedule_type]
+        end
 
         activities[id] = entry
       end
@@ -1125,8 +1220,14 @@ module BTAP
 
       # Loop through auxiliary spaces (largest to smallest in floor area).
       @activities.sort_by { |id, v| v[:m2] }.reverse.each do |id, v|
-        k   = v[:keyword]
-        sch = data[:space][k][:necb_schedule_type]
+        k = v[:keyword]
+
+        if k == "undefined::common"
+          sch = data[:udef][:necb_schedule_type]
+        else
+          sch = data[:space][k][:necb_schedule_type]
+        end
+
         next unless self.auxiliary?(k)
 
         v[:schedule] = uset ? bkup : sch.delete("*")
@@ -1147,6 +1248,13 @@ module BTAP
       # Loop through ancillary spaces (largest to smallest in floor area).
       @activities.sort_by { |id, v| v[:m2] }.reverse.each do |id, v|
         k = v[:keyword]
+
+        if k == "undefined::common"
+          sch = data[:udef][:necb_schedule_type]
+        else
+          sch = data[:space][k][:necb_schedule_type]
+        end
+
         next unless self.ancillary?(k)
 
         # Retrieve each space's non-ancillary neighbours.
