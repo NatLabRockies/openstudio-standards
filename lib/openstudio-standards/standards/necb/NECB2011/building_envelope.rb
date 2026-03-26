@@ -798,7 +798,7 @@ class NECB2011
 
       BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set!(
         model: model,
-        name: "#{default_surface_construction_set.name.get} at hdd = #{get_necb_hdd18(model: model, necb_hdd: necb_hdd)}",
+        name: "#{default_surface_construction_set.name.get} at hdd = #{hdd}",
         default_surface_construction_set: default_surface_construction_set,
 
         # Exterior surfaces
@@ -843,6 +843,7 @@ class NECB2011
         tubular_daylight_diffuser_solar_trans: correct_vis_trans.call(tubular_daylight_diffuser_solar_trans),
         tubular_daylight_diffuser_vis_trans: correct_vis_trans.call(tubular_daylight_diffuser_vis_trans))
     end
+
     # sets all surfaces to use default constructions sets except adiabatic, where it does a hard assignment of the interior wall construction type.
     model.getPlanarSurfaces.sort.each(&:resetConstruction)
     # if the default construction set is defined..try to assign the interior wall to the adiabatic surfaces
