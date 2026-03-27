@@ -486,8 +486,8 @@ module BTAP
       edge_tallies.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
 
-          # "transition" edges aren't considered.
-          if edge_type == "transition"
+          # "transition" or "ceiling" edges aren't considered.
+          if edge_type == "transition" || edge_type == "ceiling"
             next
 
           # "jamb", "sill", and "head" may all be grouped under fenestration
@@ -503,7 +503,7 @@ module BTAP
           end
 
           if result.nil?
-            raise("Wall with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
+            raise("Entry with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
                   " could not be found in the thermal bridging database.")
             next
           end
