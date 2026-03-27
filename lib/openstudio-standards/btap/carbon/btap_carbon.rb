@@ -106,6 +106,10 @@ class BTAPCarbon
     @attributes.spaces.each do |space|
       @attributes.surface_types.each do |surface_type|
         space.surfaces_hash[surface_type].each do |surface|
+          if surface.btap_constructions.nil?
+            next
+          end
+
           surface_area = surface.netArea * space.thermalZone.get.multiplier
           @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = \
             @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] + surface_area
