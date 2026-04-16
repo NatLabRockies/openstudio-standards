@@ -250,6 +250,16 @@ class TestCreateTypical < Minitest::Test
     model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESuperMarket.osm")
     OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
 
+    outvar1 = OpenStudio::Model::OutputVariable.new('Refrigeration Case Defrost Electricity Energy', model)
+    outvar2 = OpenStudio::Model::OutputVariable.new('Refrigeration Walk In Defrost Electricity Energy', model)
+    outvar3 = OpenStudio::Model::OutputVariable.new('Zone Air Relative Humidity', model)
+    outvar1.setReportingFrequency('hourly')
+    outvar1.setKeyValue('*')
+    outvar2.setReportingFrequency('hourly')
+    outvar2.setKeyValue('*')
+    outvar3.setReportingFrequency('hourly')
+    outvar3.setKeyValue('*')
+
     # set output directory
     output_dir = "#{__dir__}/output/#{__method__}"
     FileUtils.mkdir output_dir unless Dir.exist? output_dir
@@ -263,6 +273,33 @@ class TestCreateTypical < Minitest::Test
     ending_size = model.getModelObjects.size
     assert(result)
     assert(starting_size < ending_size)
+
+    # # baseline run
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_0KW_latent")
+
+    # # add latent load
+    # space = model.getSpaceByName('Main Sales').get
+    # latent_load_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    # latent_load_def.setName('latent load')
+    # latent_load_def.setDesignLevel(8000.0)
+    # latent_load_def.setFractionLatent(1.0)
+    # latent_load_def.setFractionRadiant(0.0)
+    # latent_load_def.setFractionLost(0.0)
+
+    # latent_load = OpenStudio::Model::ElectricEquipment.new(latent_load_def)
+    # latent_load.setName('latent load')
+    # latent_load.setSchedule(model.alwaysOnDiscreteSchedule)
+    # latent_load.setSpace(space)
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_8KW_latent")
+
+    # latent_load_def.setDesignLevel(4000.0)
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_4KW_latent")
+
+    # latent_load_def.setDesignLevel(6000.0)
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_6KW_latent")
+
+    # latent_load_def.setDesignLevel(10000.0)
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_10KW_latent")
   end
 
   def test_create_typical_deer_gro

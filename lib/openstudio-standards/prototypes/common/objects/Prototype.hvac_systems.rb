@@ -5791,8 +5791,8 @@ class Standard
   #   options are 'NoEconomizer', 'DifferentialDryBulb', 'DifferentialEnthalpy'
   # @param heat_recovery_type [String] heat recovery type
   #   options are 'None', 'Sensible', 'Enthalpy'
-  # @param heat_recovery_sensible_eff [Double] heat recovery sensible effectivness if heat recovery specified
-  # @param heat_recovery_latent_eff [Double] heat recovery latent effectivness if heat recovery specified
+  # @param heat_recovery_sensible_eff [Double] heat recovery sensible effectiveness if heat recovery specified
+  # @param heat_recovery_latent_eff [Double] heat recovery latent effectiveness if heat recovery specified
   # @param add_output_meters [Boolean] include and output custom meter objects to sum all ideal air loads values
   # @return [Array<OpenStudio::Model::ZoneHVACIdealLoadsAirSystem>] an array of ideal air loads systems
   def model_add_ideal_air_loads(model,
