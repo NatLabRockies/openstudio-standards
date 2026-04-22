@@ -274,23 +274,23 @@ class TestCreateTypical < Minitest::Test
     assert(result)
     assert(starting_size < ending_size)
 
-    # # baseline run
-    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_0KW_latent")
+    # baseline run
+    std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_0KW_latent")
 
-    # # add latent load
-    # space = model.getSpaceByName('Main Sales').get
-    # latent_load_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    # latent_load_def.setName('latent load')
-    # latent_load_def.setDesignLevel(8000.0)
-    # latent_load_def.setFractionLatent(1.0)
-    # latent_load_def.setFractionRadiant(0.0)
-    # latent_load_def.setFractionLost(0.0)
+    # add latent load
+    space = model.getSpaceByName('Main Sales').get
+    latent_load_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    latent_load_def.setName('latent load')
+    latent_load_def.setDesignLevel(2000.0)
+    latent_load_def.setFractionLatent(1.0)
+    latent_load_def.setFractionRadiant(0.0)
+    latent_load_def.setFractionLost(0.0)
 
-    # latent_load = OpenStudio::Model::ElectricEquipment.new(latent_load_def)
-    # latent_load.setName('latent load')
-    # latent_load.setSchedule(model.alwaysOnDiscreteSchedule)
-    # latent_load.setSpace(space)
-    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_8KW_latent")
+    latent_load = OpenStudio::Model::ElectricEquipment.new(latent_load_def)
+    latent_load.setName('latent load')
+    latent_load.setSchedule(model.alwaysOnDiscreteSchedule)
+    latent_load.setSpace(space)
+    std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_2KW_latent")
 
     # latent_load_def.setDesignLevel(4000.0)
     # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_4KW_latent")
@@ -298,8 +298,14 @@ class TestCreateTypical < Minitest::Test
     # latent_load_def.setDesignLevel(6000.0)
     # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_6KW_latent")
 
+    # latent_load_def.setDesignLevel(8000.0)
+    # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_8KW_latent")
+
     # latent_load_def.setDesignLevel(10000.0)
     # std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_10KW_latent")
+
+    latent_load_def.setDesignLevel(20000.0)
+    std.model_run_simulation_and_log_errors(model, "#{output_dir}/AR_20KW_latent")
   end
 
   def test_create_typical_deer_gro

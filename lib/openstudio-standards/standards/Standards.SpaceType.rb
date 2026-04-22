@@ -105,8 +105,9 @@ class Standard
   # @param set_electric_equipment [Boolean] if true, set the electric equipment density
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
   # @param set_ventilation [Boolean] if true, set the ventilation rates (per-person and per-area)
+  # @param set_latent_load [Boolean] if true, set the latent load from water use not already included in water use equipment
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_loads(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
+  def space_type_apply_internal_loads(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true, set_latent_load: true)
     # Skip plenums
     if space_type.name.get.to_s.downcase.include?('plenum')
       return false
@@ -309,6 +310,42 @@ class Standard
 
     # Ventilation
     space_type_apply_ventilation(space_type) if set_ventilation
+
+    # Latent Load
+    if set_latent_load
+      standards_building_type = if space_type.standardsBuildingType.is_initialized
+                                  space_type.standardsBuildingType.get
+                                end
+      standards_space_type = if space_type.standardsSpaceType.is_initialized
+                               space_type.standardsSpaceType.get
+                             end
+
+      if standards_building_type == 'SuperMarket' && standards_space_type == 'Sales'
+        # add 10 kW of latent load per store to the sales area, dependent on floor area ratio
+        base_load = 10000.0
+        base_ratio = 0.5495
+        base_area = OpenStudio.convert(45_000, 'ft^2', 'm^2').get
+        latent_load_per_area = base_load / (base_ratio * base_area)
+
+        space_type.spaces.each do |space|
+          space_area = space.floorArea
+          latent_load_amount_w = latent_load_per_area * space_area
+
+          # add latent load
+          latent_load_def = OpenStudio::Model::OtherEquipmentDefinition.new(space_type.model)
+          latent_load_def.setName("#{space.name} Latent Load")
+          latent_load_def.setDesignLevel(latent_load_amount_w)
+          latent_load_def.setFractionLatent(1.0)
+          latent_load_def.setFractionRadiant(0.0)
+          latent_load_def.setFractionLost(0.0)
+
+          latent_load = OpenStudio::Model::OtherEquipment.new(latent_load_def)
+          latent_load.setName("#{space.name} Latent Load")
+          latent_load.setSchedule(space_type.model.alwaysOnDiscreteSchedule)
+          latent_load.setSpace(space)
+        end
+      end
+    end
 
     return true
   end
