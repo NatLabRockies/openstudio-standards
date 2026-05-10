@@ -217,8 +217,12 @@ EOF
 
 # Install Claude if requested and configure it to use the same MCP servers
 if [ "$INSTALL_CLAUDE" = true ]; then
-    echo "   🤖 Installing Claude..."
-    sudo NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt npm install -g @anthropic-ai/claude-code >/dev/null 2>&1
+    echo "   🤖 Installing Claude Code..."
+    if curl -fsSL https://claude.ai/install.sh | bash; then
+        echo "   ✅ Claude Code installed successfully"
+    else
+        echo "   ⚠️  Claude Code installation failed - you may need to install it manually"
+    fi
     
     echo "   🔗 Configuring Claude to use standalone MCP servers..."
     # Configure Claude to use the same Serena MCP server (ignore if already exists)

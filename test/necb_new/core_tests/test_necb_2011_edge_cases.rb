@@ -313,28 +313,33 @@ class TestNECB2011EdgeCases < Minitest::Test
   private
 
   def create_baseline_necb_model(template:, climate:)
-    # Create a minimal NECB model for testing using necb_helper
-    # Just create a basic model with weather file - no complex geometry needed for these tests
-    model = OpenStudio::Model::Model.new
     standard = Standard.build(template)
 
-    # Set weather file if climate specified
-    if climate
-      weather_file_path = File.join(File.dirname(__FILE__), '..', '..', '..', 'data', 'weather', "CAN_ON_#{climate}.*.epw")
-      weather_files = Dir.glob(weather_file_path)
-      if weather_files.any?
-        epw_file = OpenStudio::EpwFile.new(weather_files.first)
-        OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      end
+    # Load the standard NECB test resource model with proper geometry
+    resource_path = File.join(File.dirname(__FILE__), '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model = translator.loadModel(resource_path).get
+
+    # Set weather file based on climate
+    epw_file = if climate
+      "CAN_ON_#{climate}.Pearson.Intl.AP.716240_CWEC2016.epw"
+    else
+      'CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw'
     end
 
-    # Add minimal space and zone for tests that need it
-    space = OpenStudio::Model::Space.new(model)
-    zone = OpenStudio::Model::ThermalZone.new(model)
-    space.setThermalZone(zone)
+    epw_path = OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file)
+    OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: epw_path) if epw_path
 
-    # Note: Building floorArea is calculated from spaces, not set directly
-    # The minimal space will provide some floor area
+    # Apply NECB space types - CRITICAL for NECB methods to work properly
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
+    end
+
+    # Set building properties
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(2)
+    building.setStandardsNumberOfAboveGroundStories(2)
 
     return model, standard
   end

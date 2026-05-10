@@ -223,8 +223,21 @@ class NECB2011
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.autozone', "Required ThermalZone methods .autosizedHeatingDesignLoad and .autosizedCoolingDesignLoad are not available in pre-OpenStudio 3.6.0 versions. Use a more recent version of OpenStudio.")
       end
 
-      @stored_space_heating_sizing_loads[space] = space_type == '- undefined -' ? 0.0 : space.thermalZone.get.autosizedHeatingDesignLoad.get / space.floorArea
-      @stored_space_cooling_sizing_loads[space] = space_type == '- undefined -' ? 0.0 : space.thermalZone.get.autosizedCoolingDesignLoad.get / space.floorArea
+      # Get heating design load with Optional handling
+      if space_type == '- undefined -'
+        @stored_space_heating_sizing_loads[space] = 0.0
+      else
+        heating_load = space.thermalZone.get.autosizedHeatingDesignLoad
+        @stored_space_heating_sizing_loads[space] = heating_load.is_initialized ? heating_load.get / space.floorArea : 0.0
+      end
+
+      # Get cooling design load with Optional handling
+      if space_type == '- undefined -'
+        @stored_space_cooling_sizing_loads[space] = 0.0
+      else
+        cooling_load = space.thermalZone.get.autosizedCoolingDesignLoad
+        @stored_space_cooling_sizing_loads[space] = cooling_load.is_initialized ? cooling_load.get / space.floorArea : 0.0
+      end
     end
   end
 

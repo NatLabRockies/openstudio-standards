@@ -334,9 +334,15 @@ class TestNECBEnvelopeCalculations < Minitest::Test
   def add_simple_building_geometry(model)
     # Add a simple rectangular building for testing
 
+    # Create space type with NECB standards info - CRITICAL for NECB methods
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setStandardsBuildingType('Space Function')
+    space_type.setStandardsSpaceType('Office - open plan')
+
     # Create space
     space = OpenStudio::Model::Space.new(model)
     space.setName('Test Space')
+    space.setSpaceType(space_type)
 
     # Floor
     floor_vertices = OpenStudio::Point3dVector.new

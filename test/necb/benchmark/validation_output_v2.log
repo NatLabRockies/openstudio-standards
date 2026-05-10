@@ -1,0 +1,225 @@
+================================================================================
+NECB Test Validation
+================================================================================
+Validating all unit tests pass in current state...
+
+[1/60] Validating test_NECB_TBD...
+  ✗ FAIL (exit code: 124)
+
+[2/60] Validating test_daylighting_sensor_control...
+  ✓ PASS
+
+[3/60] Validating test_dcv_co2_fsr_necb2011...
+  ✓ PASS
+
+[4/60] Validating test_dcv_co2_fsr_necb2015...
+  ✓ PASS
+
+[5/60] Validating test_dcv_co2_fsr_necb2017...
+  ✓ PASS
+
+[6/60] Validating test_dcv_co2_largeoffice_necb2011...
+  ✓ PASS
+
+[7/60] Validating test_dcv_co2_largeoffice_necb2015...
+  ✓ PASS
+
+[8/60] Validating test_dcv_co2_largeoffice_necb2017...
+  ✓ PASS
+
+[9/60] Validating test_dcv_occ_fsr_necb2011...
+  ✓ PASS
+
+[10/60] Validating test_dcv_occ_fsr_necb2015...
+  ✓ PASS
+
+[11/60] Validating test_dcv_occ_fsr_necb2017...
+  ✓ PASS
+
+[12/60] Validating test_dcv_occ_largeoffice_necb2011...
+  ✓ PASS
+
+[13/60] Validating test_dcv_occ_largeoffice_necb2015...
+  ✓ PASS
+
+[14/60] Validating test_dcv_occ_largeoffice_necb2017...
+  ✓ PASS
+
+[15/60] Validating test_ecm_chiller...
+  ✓ PASS
+
+[16/60] Validating test_ecm_envelope...
+  ✓ PASS
+
+[17/60] Validating test_ecm_erv...
+  ✗ FAIL (exit code: 1)
+
+[18/60] Validating test_ecm_hs14_cgshp_fancoils...
+  ✓ PASS
+
+[19/60] Validating test_ecm_led_lighting...
+  ✓ PASS
+
+[20/60] Validating test_ecm_modify_unitary_rules...
+  ✗ FAIL (exit code: 1)
+
+[21/60] Validating test_ecm_scaling_loads...
+  ✓ PASS
+
+[22/60] Validating test_ecm_swh...
+  ✗ FAIL (exit code: 1)
+
+[23/60] Validating test_insuite_central_doas_highriseapartment_one_sys_per_bldg...
+  ✓ PASS
+
+[24/60] Validating test_insuite_central_doas_highriseapartment_one_sys_per_dwelling_unit...
+  ✓ PASS
+
+[25/60] Validating test_insuite_central_doas_largehotel_one_sys_per_bldg...
+  ✓ PASS
+
+[26/60] Validating test_insuite_central_doas_largehotel_one_sys_per_dwelling_unit...
+  ✓ PASS
+
+[27/60] Validating test_necb_activities...
+  ✗ FAIL (exit code: 124)
+     Error: #<Thread:0x000075e288ad7768 /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665 run> terminated with exception (report_on_exception is true):
+            /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665:in `read': stream closed in another thread (IOError)
+            	from /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665:in `block (2 levels) in capture3'
+
+[28/60] Validating test_necb_airloop_sizing_parameters...
+  ✓ PASS
+
+[29/60] Validating test_necb_auto_zone_test...
+  ✗ FAIL (exit code: 124)
+     Error: #<Thread:0x0000730a62acb1a8 /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665 run> terminated with exception (report_on_exception is true):
+            /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665:in `read': stream closed in another thread (IOError)
+            	from /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:665:in `block (2 levels) in capture3'
+
+[30/60] Validating test_necb_boiler_rules...
+  ✗ FAIL (exit code: 124)
+
+[31/60] Validating test_necb_btap_data...
+  ✓ PASS
+
+[32/60] Validating test_necb_chiller_rules...
+  ✗ FAIL (exit code: 124)
+
+[33/60] Validating test_necb_coolingtower_rules...
+  ✓ PASS
+
+[34/60] Validating test_necb_default_spacetypes...
+  ✓ PASS
+
+[35/60] Validating test_necb_default_system_selection...
+  ✓ PASS
+
+[36/60] Validating test_necb_dimensions...
+  ✗ FAIL (exit code: 1)
+
+[37/60] Validating test_necb_fan_rules...
+  ✗ FAIL (exit code: 1)
+
+[38/60] Validating test_necb_furnace_rules...
+  ✓ PASS
+
+[39/60] Validating test_necb_hdd_based_rules...
+  ✓ PASS
+
+[40/60] Validating test_necb_heatpump_rules...
+  ✓ PASS
+
+[41/60] Validating test_necb_hrv_rules...
+  ✗ FAIL (exit code: 1)
+
+[42/60] Validating test_necb_loop_rules...
+  ✓ PASS
+
+[43/60] Validating test_necb_pumppower_rules...
+  ✓ PASS
+
+[44/60] Validating test_necb_qaqc_reporting...
+  ✓ PASS
+
+[45/60] Validating test_necb_reference_heatpump_rules...
+  ✗ FAIL (exit code: 1)
+
+[46/60] Validating test_necb_schedules...
+  ✗ FAIL (exit code: 124)
+
+[47/60] Validating test_necb_shw_fuel...
+  ✓ PASS
+
+[48/60] Validating test_necb_skylights...
+  ✗ FAIL (exit code: 124)
+     Error: #<Thread:0x0000796f2ede7418 /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:664 run> terminated with exception (report_on_exception is true):
+            /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:664:in `read': stream closed in another thread (IOError)
+            	from /workspaces/openstudio-standards/vendor/bundle/ruby/3.2.0/gems/open3-0.2.1/lib/open3.rb:664:in `block (2 levels) in capture3'
+
+[49/60] Validating test_necb_space_types_default_constructions_set...
+  ✓ PASS
+
+[50/60] Validating test_necb_structures...
+  ✗ FAIL (exit code: 1)
+
+[51/60] Validating test_necb_total_and_tz_ceiling_centroid...
+  ✓ PASS
+
+[52/60] Validating test_necb_unitary_rules...
+  ✓ PASS
+
+[53/60] Validating test_necb_ventilation_rules...
+  ✓ PASS
+
+[54/60] Validating test_necb_waterheater_rules...
+  ✓ PASS
+
+[55/60] Validating test_necb_weather_file_download...
+  ✓ PASS
+
+[56/60] Validating test_necb_weather_hdd...
+  ✓ PASS
+
+[57/60] Validating test_nv...
+  ✓ PASS
+
+[58/60] Validating test_pv_ground...
+  ✓ PASS
+
+[59/60] Validating test_remove_duplicate_materials_and_constructions...
+  ✓ PASS
+
+[60/60] Validating test_space_type_vintage_map...
+  ✓ PASS
+
+================================================================================
+Validation Summary
+================================================================================
+Total tests: 60
+Passing: 45 (75.0%)
+Failing: 15 (25.0%)
+
+⚠️  WARNING: Some tests are currently failing!
+
+Failing tests:
+  - test_NECB_TBD
+  - test_ecm_erv
+  - test_ecm_modify_unitary_rules
+  - test_ecm_swh
+  - test_necb_activities
+  - test_necb_auto_zone_test
+  - test_necb_boiler_rules
+  - test_necb_chiller_rules
+  - test_necb_dimensions
+  - test_necb_fan_rules
+  - test_necb_hrv_rules
+  - test_necb_reference_heatpump_rules
+  - test_necb_schedules
+  - test_necb_skylights
+  - test_necb_structures
+
+See /workspaces/openstudio-standards/test/necb/benchmark/test_validation.json for full error details.
+
+These failures should be:
+  1. Fixed before proceeding with test improvements, OR
+  2. Documented as known failures and excluded from improvement work

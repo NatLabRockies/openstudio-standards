@@ -283,98 +283,26 @@ class TestNECBAutozoneEdgeCases < Minitest::Test
   private
 
   def create_simple_model(width:, length:, num_floors:, floor_height: 4.0)
-    # Create a simple rectangular building model for testing
+    # Load the standard NECB test resource model with proper geometry
+    resource_path = File.join(File.dirname(__FILE__), '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model = translator.loadModel(resource_path).get
 
-    model = OpenStudio::Model::Model.new
+    # Set weather file
+    epw_file = 'CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw'
+    epw_path = OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file)
+    OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: epw_path) if epw_path
 
-    # Create spaces for each floor
-    (0...num_floors).each do |floor_num|
-      z = floor_num * floor_height
-
-      # Create a single space for this floor (autozone will subdivide it)
-      space = OpenStudio::Model::Space.new(model)
-      space.setName("Floor #{floor_num + 1} Space")
-
-      # Floor surface
-      floor_vertices = OpenStudio::Point3dVector.new
-      floor_vertices << OpenStudio::Point3d.new(0, 0, z)
-      floor_vertices << OpenStudio::Point3d.new(width, 0, z)
-      floor_vertices << OpenStudio::Point3d.new(width, length, z)
-      floor_vertices << OpenStudio::Point3d.new(0, length, z)
-
-      floor = OpenStudio::Model::Surface.new(floor_vertices, model)
-      floor.setSpace(space)
-      floor.setSurfaceType('Floor')
-      if floor_num == 0
-        floor.setOutsideBoundaryCondition('Ground')
-      else
-        floor.setOutsideBoundaryCondition('Surface') # Adjacent to floor below
-      end
-
-      # Ceiling/roof surface
-      ceiling_vertices = OpenStudio::Point3dVector.new
-      ceiling_vertices << OpenStudio::Point3d.new(0, length, z + floor_height)
-      ceiling_vertices << OpenStudio::Point3d.new(width, length, z + floor_height)
-      ceiling_vertices << OpenStudio::Point3d.new(width, 0, z + floor_height)
-      ceiling_vertices << OpenStudio::Point3d.new(0, 0, z + floor_height)
-
-      ceiling = OpenStudio::Model::Surface.new(ceiling_vertices, model)
-      ceiling.setSpace(space)
-      ceiling.setSurfaceType('RoofCeiling')
-      if floor_num == num_floors - 1
-        ceiling.setOutsideBoundaryCondition('Outdoors')
-      else
-        ceiling.setOutsideBoundaryCondition('Surface') # Adjacent to floor above
-      end
-
-      # South wall
-      south_wall_vertices = OpenStudio::Point3dVector.new
-      south_wall_vertices << OpenStudio::Point3d.new(0, 0, z + floor_height)
-      south_wall_vertices << OpenStudio::Point3d.new(0, 0, z)
-      south_wall_vertices << OpenStudio::Point3d.new(width, 0, z)
-      south_wall_vertices << OpenStudio::Point3d.new(width, 0, z + floor_height)
-
-      south_wall = OpenStudio::Model::Surface.new(south_wall_vertices, model)
-      south_wall.setSpace(space)
-      south_wall.setSurfaceType('Wall')
-      south_wall.setOutsideBoundaryCondition('Outdoors')
-
-      # North wall
-      north_wall_vertices = OpenStudio::Point3dVector.new
-      north_wall_vertices << OpenStudio::Point3d.new(width, length, z + floor_height)
-      north_wall_vertices << OpenStudio::Point3d.new(width, length, z)
-      north_wall_vertices << OpenStudio::Point3d.new(0, length, z)
-      north_wall_vertices << OpenStudio::Point3d.new(0, length, z + floor_height)
-
-      north_wall = OpenStudio::Model::Surface.new(north_wall_vertices, model)
-      north_wall.setSpace(space)
-      north_wall.setSurfaceType('Wall')
-      north_wall.setOutsideBoundaryCondition('Outdoors')
-
-      # East wall
-      east_wall_vertices = OpenStudio::Point3dVector.new
-      east_wall_vertices << OpenStudio::Point3d.new(width, 0, z + floor_height)
-      east_wall_vertices << OpenStudio::Point3d.new(width, 0, z)
-      east_wall_vertices << OpenStudio::Point3d.new(width, length, z)
-      east_wall_vertices << OpenStudio::Point3d.new(width, length, z + floor_height)
-
-      east_wall = OpenStudio::Model::Surface.new(east_wall_vertices, model)
-      east_wall.setSpace(space)
-      east_wall.setSurfaceType('Wall')
-      east_wall.setOutsideBoundaryCondition('Outdoors')
-
-      # West wall
-      west_wall_vertices = OpenStudio::Point3dVector.new
-      west_wall_vertices << OpenStudio::Point3d.new(0, length, z + floor_height)
-      west_wall_vertices << OpenStudio::Point3d.new(0, length, z)
-      west_wall_vertices << OpenStudio::Point3d.new(0, 0, z)
-      west_wall_vertices << OpenStudio::Point3d.new(0, 0, z + floor_height)
-
-      west_wall = OpenStudio::Model::Surface.new(west_wall_vertices, model)
-      west_wall.setSpace(space)
-      west_wall.setSurfaceType('Wall')
-      west_wall.setOutsideBoundaryCondition('Outdoors')
+    # Apply NECB space types - CRITICAL for NECB autozone methods to work properly
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
     end
+
+    # Set building properties based on parameters
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(num_floors)
+    building.setStandardsNumberOfAboveGroundStories(num_floors)
 
     model
   end

@@ -1,0 +1,15 @@
+# Coverage reports (generated locally)
+coverage/
+
+# Sized model fixtures (too large for git, auto-generated)
+fixtures/sized_models/*.osm
+fixtures/sized_models/.sizing_runs/
+
+# Benchmark results (generated)
+benchmark/*.json
+benchmark/*.csv
+
+# Keep the directories but ignore generated content
+!fixtures/sized_models/.gitkeep
+!fixtures/geometry/.gitkeep
+!fixtures/with_loads/.gitkeep

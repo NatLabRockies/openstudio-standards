@@ -1998,9 +1998,11 @@ class ECMS
     chiller_water_cooled.setReferenceCapacity(chiller_siz_f*cap)
     chiller_air_cooled.setReferenceCapacity((1.0-chiller_siz_f)*cap)
     # call standard efficiency method again for water-cooled chiller
-    new_chlr_name = chiller_water_cooled.name.to_s.chomp!(chiller_water_cooled.name.to_s.split.last).strip
-    new_chlr_name = new_chlr_name.chomp!(new_chlr_name.split.last).strip
-    new_chlr_name = new_chlr_name.chomp!(new_chlr_name.split.last).strip
+    # Remove last 3 words from chiller name (e.g., "ChillerWaterCooled Hermetic Screw 500kW" → "ChillerWaterCooled")
+    name_parts = chiller_water_cooled.name.to_s.split
+    new_chlr_name = name_parts[0...-3].join(' ').strip
+    # If name has fewer than 3 parts, just use the first word
+    new_chlr_name = name_parts[0] if new_chlr_name.empty? && !name_parts.empty?
     chiller_water_cooled.setName(new_chlr_name)
     standard.chiller_electric_eir_apply_efficiency_and_curves(chiller_water_cooled,nil)
     # set curves and cop of air-cooled chiller
