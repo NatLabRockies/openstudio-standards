@@ -50,9 +50,10 @@ class NECBParallelTestRunner
     Parallel.map(@test_files, in_processes: @processors) do |test_file|
       file_name = File.basename(test_file)
 
-      # Run the test
+      # Run the test (disable SimpleCov to avoid coverage minimum failures on individual files)
       start = Time.now
-      stdout, stderr, status = Open3.capture3("bundle exec ruby #{test_file}")
+      env = {'COVERAGE' => 'false', 'DISABLE_SIMPLECOV' => 'true'}
+      stdout, stderr, status = Open3.capture3(env, "bundle exec ruby #{test_file}")
       elapsed = Time.now - start
 
       # Update progress
