@@ -1,0 +1,141 @@
+Program Version,EnergyPlus, Version 24.2.0-94a887817b, YMD=2026.05.10 20:21,
+   ************* Beginning Zone Sizing Calculations
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 1", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 2", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** CheckUsedConstructions: There are 29 nominally unused constructions in input.
+   **   ~~~   ** For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;
+   ** Warning ** GetInternalHeatGains: People="SPACE FUNCTION OFFICE - ENCLOSED PEOPLE" has comfort related schedules but no thermal comfort model selected.
+   **   ~~~   ** If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort
+   **   ~~~   ** thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.
+   **   ~~~   ** To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.
+   ** Warning ** GetInternalHeatGains: People="SPACE FUNCTION OFFICE - ENCLOSED PEOPLE" has comfort related schedules but no thermal comfort model selected.
+   **   ~~~   ** If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort
+   **   ~~~   ** thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.
+   **   ~~~   ** To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.
+   ** Warning ** GetInternalHeatGains: People="SPACE FUNCTION OFFICE - ENCLOSED PEOPLE" has comfort related schedules but no thermal comfort model selected.
+   **   ~~~   ** If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort
+   **   ~~~   ** thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.
+   **   ~~~   ** To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.
+   ** Warning ** GetInternalHeatGains: People="SPACE FUNCTION OFFICE - ENCLOSED PEOPLE" has comfort related schedules but no thermal comfort model selected.
+   **   ~~~   ** If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort
+   **   ~~~   ** thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.
+   **   ~~~   ** To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.
+   ** Warning ** GetInternalHeatGains: People="SPACE FUNCTION OFFICE - ENCLOSED PEOPLE" has comfort related schedules but no thermal comfort model selected.
+   **   ~~~   ** If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort
+   **   ~~~   ** thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.
+   **   ~~~   ** To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.
+   ************* Beginning System Sizing Calculations
+   ************* Beginning Plant Sizing Calculations
+   ** Warning ** GetOAControllerInputs: Controller:MechanicalVentilation="CONTROLLER MECHANICAL VENTILATION 1"
+   **   ~~~   ** Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone="ALL_ST=OFFICE - ENCLOSED_FL=BUILDING STORY 1_SCH=A".
+   **   ~~~   ** Using default zone air distribution effectiveness of 1.0 for heating and cooling.
+   ** Warning ** GetOAControllerInputs: Controller:MechanicalVentilation="CONTROLLER MECHANICAL VENTILATION 2"
+   **   ~~~   ** Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone="ALL_ST=OFFICE - ENCLOSED_FL=BUILDING STORY 1_SCH=A 1".
+   **   ~~~   ** Using default zone air distribution effectiveness of 1.0 for heating and cooling.
+   ** Warning ** GetOAControllerInputs: Controller:MechanicalVentilation="CONTROLLER MECHANICAL VENTILATION 3"
+   **   ~~~   ** Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone="ALL_ST=OFFICE - ENCLOSED_FL=BUILDING STORY 1_SCH=A 2".
+   **   ~~~   ** Using default zone air distribution effectiveness of 1.0 for heating and cooling.
+   ** Warning ** GetOAControllerInputs: Controller:MechanicalVentilation="CONTROLLER MECHANICAL VENTILATION 4"
+   **   ~~~   ** Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone="ALL_ST=OFFICE - ENCLOSED_FL=BUILDING STORY 1_SCH=A 3".
+   **   ~~~   ** Using default zone air distribution effectiveness of 1.0 for heating and cooling.
+   ** Warning ** GetOAControllerInputs: Controller:MechanicalVentilation="CONTROLLER MECHANICAL VENTILATION 5"
+   **   ~~~   ** Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone="ALL_ST=OFFICE - ENCLOSED_FL=BUILDING STORY 1_SCH=A 4".
+   **   ~~~   ** Using default zone air distribution effectiveness of 1.0 for heating and cooling.
+   ** Warning ** Output:Meter: invalid Key Name="NATURALGAS:FACILITY" - not found.
+   ** Warning ** Output:Meter: invalid Key Name="DISTRICTHEATINGWATER:FACILITY" - not found.
+   ** Warning ** Output:Meter: invalid Key Name="DISTRICTCOOLING:FACILITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="NATURALGAS:FACILITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="NATURALGAS:FACILITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly requested for "Electricity:Facility" (TimeStep), already on "Output:Meter". Will report to both eplusout.eso and eplusout.mtr
+   ************* Testing Individual Branch Integrity
+   ************* All Branches passed integrity testing
+   ************* Testing Individual Supply Air Path Integrity
+   ************* All Supply Air Paths passed integrity testing
+   ************* Testing Individual Return Air Path Integrity
+   ************* All Return Air Paths passed integrity testing
+   ************* No node connection errors were found.
+   ** Warning ** CalcEquipmentFlowRates: "CORE_ZN SERVICE WATER USE 0.0574GPM 140F" - Target water temperature is greater than the hot water temperature by (0.92 C)
+   **   ~~~   **  Environment=CALGARY INTL AP ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1, at Simulation time=07/21 00:00 - 00:10
+   **   ~~~   ** ...target water temperature     = 60.00 C
+   **   ~~~   ** ...hot water temperature        = 59.08 C
+   **   ~~~   ** ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.
+   ** Warning ** CalcEquipmentFlowRates: "PERIMETER_ZN_1 SERVICE WATER USE 0.0435GPM 140F" - Target water temperature is greater than the hot water temperature by (0.92 C)
+   **   ~~~   **  Environment=CALGARY INTL AP ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1, at Simulation time=07/21 00:00 - 00:10
+   **   ~~~   ** ...target water temperature     = 60.00 C
+   **   ~~~   ** ...hot water temperature        = 59.08 C
+   **   ~~~   ** ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.
+   ** Warning ** CalcEquipmentFlowRates: "PERIMETER_ZN_2 SERVICE WATER USE 0.0258GPM 140F" - Target water temperature is greater than the hot water temperature by (0.92 C)
+   **   ~~~   **  Environment=CALGARY INTL AP ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1, at Simulation time=07/21 00:00 - 00:10
+   **   ~~~   ** ...target water temperature     = 60.00 C
+   **   ~~~   ** ...hot water temperature        = 59.08 C
+   **   ~~~   ** ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.
+   ** Warning ** CalcEquipmentFlowRates: "PERIMETER_ZN_3 SERVICE WATER USE 0.0435GPM 140F" - Target water temperature is greater than the hot water temperature by (0.92 C)
+   **   ~~~   **  Environment=CALGARY INTL AP ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1, at Simulation time=07/21 00:00 - 00:10
+   **   ~~~   ** ...target water temperature     = 60.00 C
+   **   ~~~   ** ...hot water temperature        = 59.08 C
+   **   ~~~   ** ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.
+   ** Warning ** CalcEquipmentFlowRates: "PERIMETER_ZN_4 SERVICE WATER USE 0.0258GPM 140F" - Target water temperature is greater than the hot water temperature by (0.92 C)
+   **   ~~~   **  Environment=CALGARY INTL AP ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1, at Simulation time=07/21 00:00 - 00:10
+   **   ~~~   ** ...target water temperature     = 60.00 C
+   **   ~~~   ** ...hot water temperature        = 59.08 C
+   **   ~~~   ** ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.
+   ** Warning ** Output:Table:Monthly requested with SimulationControl Run Simulation for Weather File Run Periods set to No so Output:Table:Monthly will not be generated
+   ************* Beginning Simulation
+   ************* Simulation Error Summary *************
+   ************* There are 8 unused objects in input.
+   ************* Use Output:Diagnostics,DisplayUnusedObjects; to see them.
+   ************* There are 7 unused schedules in input.
+   ************* There are 7 unused week schedules in input.
+   ************* There are 10 unused day schedules in input.
+   ************* Use Output:Diagnostics,DisplayUnusedSchedules; to see them.
+   *************
+   ************* ===== Recurring Error Summary =====
+   ************* The following recurring error messages occurred.
+   *************
+   *************  ** Warning ** Plant loop falling below lower temperature limit, PlantLoop="MAIN SERVICE WATER LOOP"
+   *************  **   ~~~   **   This error occurred 6086 total times;
+   *************  **   ~~~   **   during Warmup 5182 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Min=9.629567
+   *************
+   *************  ** Warning ** "CORE_ZN SERVICE WATER USE 0.0574GPM 140F" - Target water temperature should be less than or equal to the hot water temperature error continues...
+   *************  **   ~~~   **   This error occurred 15551 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.910061  Min=0.154201
+   *************
+   *************  ** Warning ** "PERIMETER_ZN_1 SERVICE WATER USE 0.0435GPM 140F" - Target water temperature should be less than or equal to the hot water temperature error continues...
+   *************  **   ~~~   **   This error occurred 15551 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.910061  Min=0.154201
+   *************
+   *************  ** Warning ** "PERIMETER_ZN_2 SERVICE WATER USE 0.0258GPM 140F" - Target water temperature should be less than or equal to the hot water temperature error continues...
+   *************  **   ~~~   **   This error occurred 15551 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.910061  Min=0.154201
+   *************
+   *************  ** Warning ** "PERIMETER_ZN_3 SERVICE WATER USE 0.0435GPM 140F" - Target water temperature should be less than or equal to the hot water temperature error continues...
+   *************  **   ~~~   **   This error occurred 15551 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.910061  Min=0.154201
+   *************
+   *************  ** Warning ** "PERIMETER_ZN_4 SERVICE WATER USE 0.0258GPM 140F" - Target water temperature should be less than or equal to the hot water temperature error continues...
+   *************  **   ~~~   **   This error occurred 15551 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.910061  Min=0.154201
+   *************
+   *************
+   ************* ===== Final Error Summary =====
+   ************* The following error categories occurred.  Consider correcting or noting.
+   ************* Nominally Unused Constructions
+   ************* ..The nominally unused constructions warning is provided to alert you to potential conditions that can cause
+   ************* ..extra time during simulation. Each construction is calculated by the algorithm indicated in the HeatBalanceAlgorithm
+   ************* ..object. You may remove the constructions indicated (when you use the DisplayExtraWarnings option).
+   *************
+   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 8 Warning; 0 Severe Errors.
+   ************* EnergyPlus Completed Successfully-- 83866 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  5.12sec

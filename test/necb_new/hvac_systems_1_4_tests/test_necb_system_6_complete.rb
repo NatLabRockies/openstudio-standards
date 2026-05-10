@@ -328,70 +328,28 @@ class TestNECBSystem6Complete < Minitest::Test
   private
 
   def create_necb_model_with_geometry(standard, floor_area: 10000, climate: 'Toronto')
-    # Create a model with simple building geometry for testing
+    # Load the standard NECB test resource model with proper geometry
+    resource_path = File.join(File.dirname(__FILE__), '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model = translator.loadModel(resource_path).get
 
-    model = OpenStudio::Model::Model.new
+    # Set weather file based on climate
+    epw_file = "CAN_ON_#{climate}.Pearson.Intl.AP.716240_CWEC2016.epw"
+    epw_path = OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file)
+    OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: epw_path) if epw_path
 
-    # Set weather file if climate specified
-    if climate
-      weather_file_path = File.join(File.dirname(__FILE__), '..', '..', 'data', 'weather', "CAN_ON_#{climate}.*.epw")
-      weather_files = Dir.glob(weather_file_path)
-      if weather_files.any?
-        epw_file = OpenStudio::EpwFile.new(weather_files.first)
-        OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      end
+    # Apply NECB space types - CRITICAL for NECB methods to work properly
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
     end
 
-    # Create simple multi-zone building
-    num_floors = 1
-    floor_to_floor_height = 4.0
-    width = Math.sqrt(floor_area)
-    length = width
-
-    # Create spaces for core and perimeter
-    create_core_perimeter_zones(model, length, width, floor_to_floor_height, num_floors)
+    # Set building properties
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(2)
+    building.setStandardsNumberOfAboveGroundStories(2)
 
     model
   end
 
-  def create_core_perimeter_zones(model, length, width, floor_to_floor_height, num_floors)
-    # Create core and perimeter zones
-
-    perimeter_depth = 4.0 # meters
-
-    # Create spaces for each floor
-    (0...num_floors).each do |floor|
-      z = floor * floor_to_floor_height
-
-      # Core space
-      core_space = OpenStudio::Model::Space.new(model)
-      core_space.setName("Floor #{floor + 1} Core")
-
-      # Core floor
-      core_vertices = OpenStudio::Point3dVector.new
-      core_vertices << OpenStudio::Point3d.new(perimeter_depth, perimeter_depth, z)
-      core_vertices << OpenStudio::Point3d.new(width - perimeter_depth, perimeter_depth, z)
-      core_vertices << OpenStudio::Point3d.new(width - perimeter_depth, length - perimeter_depth, z)
-      core_vertices << OpenStudio::Point3d.new(perimeter_depth, length - perimeter_depth, z)
-
-      core_floor = OpenStudio::Model::Surface.new(core_vertices, model)
-      core_floor.setSpace(core_space)
-      core_floor.setSurfaceType('Floor')
-
-      # Core thermal zone
-      core_zone = OpenStudio::Model::ThermalZone.new(model)
-      core_zone.setName("Floor #{floor + 1} Core Zone")
-      core_space.setThermalZone(core_zone)
-
-      # South perimeter space
-      south_space = OpenStudio::Model::Space.new(model)
-      south_space.setName("Floor #{floor + 1} South Perimeter")
-
-      south_zone = OpenStudio::Model::ThermalZone.new(model)
-      south_zone.setName("Floor #{floor + 1} South Zone")
-      south_space.setThermalZone(south_zone)
-    end
-
-    model
-  end
 end

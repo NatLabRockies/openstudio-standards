@@ -233,6 +233,61 @@ module NecbHelper
     return standard
   end
 
+  # Load a sized model from fixture cache.
+  # If fixture doesn't exist, returns nil.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @return [OpenStudio::Model::Model, nil] The sized model, or nil if not cached
+  def get_sized_model_from_fixture(template:, building_type:, epw_file:, system_type: nil)
+    require_relative './necb_fixture_manager'
+
+    # Check if fixture exists
+    config = {
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      openstudio_version: OpenStudio.openStudioVersion,
+      fixture_version: NecbFixtureManager::FIXTURE_VERSION
+    }
+
+    fixture_path = NecbFixtureManager.fixture_path(config)
+
+    if File.exist?(fixture_path)
+      logger.debug "Loading sized model from fixture: #{File.basename(fixture_path)}"
+      NecbFixtureManager.send(:load_fixture, fixture_path)
+    else
+      logger.debug "No fixture found for: #{template} #{building_type} #{system_type}"
+      nil
+    end
+  end
+
+  # Get or create a sized model using fixture cache.
+  # First tries to load from cache, if not found creates and caches the sized model.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @param customize_block [Proc, nil] Optional block to customize model before sizing
+  # @return [OpenStudio::Model::Model, nil] The sized model
+  def get_or_create_sized_model_with_cache(template:, building_type:, epw_file:, system_type: nil, &customize_block)
+    require_relative './necb_fixture_manager'
+
+    logger.debug "Requesting sized model: #{template} #{building_type} #{system_type}"
+
+    NecbFixtureManager.get_or_create_sized_model(
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      &customize_block
+    )
+  end
+
   # Standard method to run sizing for NECB testing. Parameters:
   #   model - the model object to be operated on
   #   template - version of NECB to use
