@@ -27,7 +27,7 @@
 # creation because the method requires either a sizing run or manual zone setup.
 # Full integration tests with sizing runs are in the legacy test suite.
 
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 class TestNECBSystems2And3 < Minitest::Test
 

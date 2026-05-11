@@ -1,5 +1,4 @@
-require_relative '../../helpers/minitest_helper'
-require_relative '../../helpers/necb_helper'
+require_relative '../../test_helper'
 
 # Comprehensive test suite to complete HVAC base methods testing for NECB
 # This file tests the remaining ~1,256 lines not covered in test_necb_hvac_systems.rb
@@ -941,7 +940,7 @@ class TestNECBHVACSystemsComplete < Minitest::Test
     standard = Standard.build(template)
 
     # Load the standard NECB test resource model
-    resource_path = File.join(File.dirname(__FILE__), '../../necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    resource_path = File.join(File.dirname(__FILE__), '..', '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
     translator = OpenStudio::OSVersion::VersionTranslator.new
     model = translator.loadModel(resource_path).get
 

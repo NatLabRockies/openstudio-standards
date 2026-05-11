@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 # Test NECB Systems 4, 5, and 6
 # Integration tests for NECB System 4 (MAU), System 5 (TPFC), and System 6 (VAV Built-up)
