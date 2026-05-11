@@ -3,10 +3,9 @@
 # Test Helper for NECB New Test Suite
 # Provides SimpleCov coverage tracking for new tests
 
-require 'simplecov'
-
 # Configure SimpleCov for new test suite (unless disabled for parallel execution)
 unless ENV['DISABLE_SIMPLECOV'] == 'true'
+  require 'simplecov'
   SimpleCov.start do
   # Coverage output directory
   coverage_dir 'test/necb_new/coverage'
