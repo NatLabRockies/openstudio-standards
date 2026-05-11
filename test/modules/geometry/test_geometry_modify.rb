@@ -90,14 +90,32 @@ class TestGeometryModify < Minitest::Test
     assert_in_delta(starting_area * 0.6, ending_area, 0.1)
   end
 
-  def test_model_set_building_north_axis
-    result = @geo.model_set_building_north_axis(@model, 45.0)
-    assert(result)
-    assert(45.0, @model.getBuilding.northAxis)
+  def test_space_rename_surfaces_and_subsurfaces
+    space = @model.getSpaceByName('Gym_ZN_1_FLR_1').get
+    result = @geo.space_rename_surfaces_and_subsurfaces(space)
+    surface = @model.getSurfaceByName('Gym_ZN_1_FLR_1 RoofCeiling 1')
+    assert(surface.is_initialized)
+    sub_surface = @model.getSubSurfaceByName('Gym_ZN_1_FLR_1 RoofCeiling 1 Skylight 1')
+    assert(sub_surface.is_initialized)
   end
 
   def test_model_assign_spaces_to_building_stories
     result = @geo.model_assign_spaces_to_building_stories(@model)
     assert(result)
+  end
+
+  def test_model_rename_surfaces_and_subsurfaces
+    result = @geo.model_rename_surfaces_and_subsurfaces(@model)
+    surface = @model.getSurfaceByName('Gym_ZN_1_FLR_1 RoofCeiling 1')
+    assert(surface.is_initialized)
+    sub_surface = @model.getSubSurfaceByName('Gym_ZN_1_FLR_1 RoofCeiling 1 Skylight 1')
+    assert(sub_surface.is_initialized)
+    assert(result)
+  end
+
+  def test_model_set_building_north_axis
+    result = @geo.model_set_building_north_axis(@model, 45.0)
+    assert(result)
+    assert(45.0, @model.getBuilding.northAxis)
   end
 end

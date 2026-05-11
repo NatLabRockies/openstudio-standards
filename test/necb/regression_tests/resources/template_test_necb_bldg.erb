@@ -1,23 +1,28 @@
 require_relative '../../../helpers/minitest_helper'
-require_relative '../../../helpers/create_doe_prototype_helper'
-require_relative '../../../helpers/compare_models_helper'
 require_relative '../resources/regression_helper'
 
 class Test_<%=building_type%>_<%=template%>_<%=primary_heating_fuel%> < NECBRegressionHelper
-def setup()
-super()
-end
-def test_<%=template%>_<%=building_type%>_regression_<%=primary_heating_fuel%>()
-result, diff = create_model_and_regression_test(building_type: '<%=building_type%>',primary_heating_fuel: '<%=primary_heating_fuel%>', epw_file:  '<%=epw_file%>',template: '<%=template%>', run_simulation: <%=@run_simulation%>)
-if result == false
-puts "JSON terse listing of diff-errors."
-puts diff
-puts "Pretty listing of diff-errors for readability."
-puts JSON.pretty_generate( diff )
-puts "You can find the saved json diff file here test/necb/regression_models/<%=building_type%>-<%=template%>-<%=primary_heating_fuel%>_<%=File.basename(epw_file, ".epw")%>_diffs.json"
-puts "outputing errors here. "
-puts diff["diffs-errors"] if result == false
-end
-assert(result, diff)
-end
+  def setup()
+    super()
+  end
+
+  def test_<%=template%>_<%=building_type%>_regression_<%=primary_heating_fuel%>()
+    result, diff = create_model_and_regression_test(
+      building_type:        '<%=building_type%>',
+      primary_heating_fuel: '<%=primary_heating_fuel%>', 
+      epw_file:             '<%=epw_file%>',
+      template:             '<%=template%>', 
+      run_simulation:       <%=@run_simulation%>
+    )
+    if result == false
+      puts "JSON terse listing of diff-errors."
+      puts diff
+      puts "Pretty listing of diff-errors for readability."
+      puts JSON.pretty_generate( diff )
+      puts "You can find the saved json diff file here test/necb/regression_tests/expected/<%=building_type%>-<%=template%>-<%=primary_heating_fuel%>_<%=File.basename(epw_file, '.epw').split('.')[0]%>_diffs.json"
+      puts "outputing errors here. "
+      puts diff["diffs-errors"] if result == false
+    end
+    assert(result, diff)
+  end
 end

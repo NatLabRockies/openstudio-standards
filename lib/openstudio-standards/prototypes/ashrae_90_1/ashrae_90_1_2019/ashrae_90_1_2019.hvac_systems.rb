@@ -20,10 +20,10 @@ class ASHRAE9012019 < ASHRAE901
   #
   # @return [OpenStudio::Model::ScheduleRuleset] Generated maximum outdoor air fraction schedule for later use
   def set_maximum_fraction_outdoor_air_schedule(air_loop_hvac, oa_control, snc)
-    max_oa_sch_name = "#{snc}maxOASch"
+    max_oa_sch_name = "#{snc}_maxOASch"
     max_oa_sch = OpenStudio::Model::ScheduleRuleset.new(air_loop_hvac.model)
     max_oa_sch.setName(max_oa_sch_name)
-    max_oa_sch.defaultDaySchedule.setName("#{max_oa_sch_name}Default")
+    max_oa_sch.defaultDaySchedule.setName("#{max_oa_sch_name}_Default")
     max_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.75)
     oa_control.setMaximumFractionofOutdoorAirSchedule(max_oa_sch)
     max_oa_sch

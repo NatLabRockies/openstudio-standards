@@ -224,6 +224,10 @@ class NECB2011
     qaqc = {}
     qaqc[:sql_data] = get_sql_tables_to_json(model)
     error_warning = []
+    qaqc[:os_standards_revision] = OpenstudioStandards.git_revision
+    qaqc[:os_standards_version] = OpenstudioStandards::VERSION
+    qaqc[:openstudio_version] = os_version.strip
+    qaqc[:energyplus_version] = eplus_version.strip
     # Store Building data.
     qaqc[:building] = {}
     qaqc[:building][:name] = model.building.get.name.get
@@ -1919,7 +1923,7 @@ class NECB2011
     matches = nil
     # save a copy of the headers
     headers = nil
-    CSV.open(csv_fname, 'r', options) do |csv|
+    CSV.open(csv_fname, 'r', **options) do |csv|
       # Since CSV includes Enumerable we can use 'find_all'
       # which will return all the elements of the Enumerble for
       # which the block returns true

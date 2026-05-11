@@ -341,11 +341,7 @@ class Standard
     fan.setAvailabilitySchedule(avail_sch)
 
     # Clean name of zone HVAC
-    equip_name_clean = zone_hvac.name.get.to_s.gsub(/\W/, '').delete('_')
-    # If the name starts with a number, prepend with a letter
-    if equip_name_clean[0] =~ /[0-9]/
-      equip_name_clean = "EQUIP#{equip_name_clean}"
-    end
+    equip_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(zone_hvac.name)
 
     # Sensors
     # Get existing OAT sensor if present
@@ -360,12 +356,12 @@ class Standard
 
     # Actuators
     avail_sch_act = OpenStudio::Model::EnergyManagementSystemActuator.new(avail_sch, 'Schedule:Constant', 'Schedule Value')
-    avail_sch_act.setName("#{equip_name_clean}VestHtgAvailSch")
+    avail_sch_act.setName("#{equip_name_clean}_VestHtgAvailSch")
 
     # Programs
     htg_lim_f = 45
     vestibule_htg_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    vestibule_htg_prg.setName("#{equip_name_clean}VestHtgPrg")
+    vestibule_htg_prg.setName("#{equip_name_clean}_VestHtgPrg")
     vestibule_htg_prg_body = <<-EMS
     IF #{oat_db_c_sen.handle} > #{OpenStudio.convert(htg_lim_f, 'F', 'C').get}
       SET #{avail_sch_act.handle} = 0
@@ -375,7 +371,7 @@ class Standard
 
     # Program Calling Managers
     vestibule_htg_mgr = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    vestibule_htg_mgr.setName("#{equip_name_clean}VestHtgMgr")
+    vestibule_htg_mgr.setName("#{equip_name_clean}_VestHtgMgr")
     vestibule_htg_mgr.setCallingPoint('BeginTimestepBeforePredictor')
     vestibule_htg_mgr.addProgram(vestibule_htg_prg)
 

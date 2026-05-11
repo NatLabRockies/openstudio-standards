@@ -1,0 +1,49 @@
+{
+  "title": "ASHRAE 90.1 PRM Design Specification Outdoor Air User Data",
+  "definitions": {
+    "UserDataDesignSpecificationOutdoorAirData": {
+      "type": "object",
+      "properties": {
+        "userdata_design_specification_outdoor_air": {
+          "type": "array",
+          "description": "List of userdata_design_specification_outdoor_air rows",
+          "items": {
+            "$ref": "#/definitions/UserDataDesignSpecificationOutdoorAir"
+          }
+        }
+      }
+    },
+    "UserDataDesignSpecificationOutdoorAir": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Identifier or name for the design specifiction outdoor air object"
+        },
+        "outdoor_airflow_per_person": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Design outdoor air volume flow rate per person, in cfm/person."
+        },
+        "outdoor_airflow_per_floor_area": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Design outdoor air volume flow rate per square meter of floor area, in cfm/ft²."
+        },
+        "outdoor_air_flowrate": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Design outdoor air flow rate, in cfm."
+        },
+        "outdoor_air_flow_air_changes_per_hour": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Design outdoor air volume flow air changes per hour. It is a factor."
+        }
+      },
+      "description": "User data design specification outdoor air object",
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  }
+}

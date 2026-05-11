@@ -1,5 +1,5 @@
 module OpenstudioStandards
-  # This Module provides methods to create, modify, and get information about model geometry
+  # The Geometry module provides methods to create, modify, and get information about model geometry
   module Geometry
     # @!group CreateBar
     # Methods to create bar geometry
@@ -1044,7 +1044,7 @@ module OpenstudioStandards
         facade_area = typical_width_facade_area
         until (width_area + facade_area >= target_party_wall_area) || (width_counter == (args[:num_stories_above_grade].ceil * 2))
           # update facade area for top story
-          if width_counter == args[:num_stories_above_grade].ceil - 1 || ((width_counter == (args[:num_stories_above_grade].ceil * 2)) - 1)
+          if (width_counter == (args[:num_stories_above_grade].ceil - 1)) || (width_counter == ((args[:num_stories_above_grade].ceil * 2) - 1))
             facade_area = top_story_width_facade_area
           else
             facade_area = typical_width_facade_area
@@ -1061,7 +1061,7 @@ module OpenstudioStandards
         facade_area = typical_length_facade_area
         until (length_area + facade_area >= target_party_wall_area) || (length_counter == args[:num_stories_above_grade].ceil * 2)
           # update facade area for top story
-          if length_counter == args[:num_stories_above_grade].ceil - 1 || ((length_counter == args[:num_stories_above_grade].ceil * 2) - 1)
+          if (length_counter == (args[:num_stories_above_grade].ceil - 1)) || (length_counter == ((args[:num_stories_above_grade].ceil * 2) - 1))
             facade_area = top_story_length_facade_area
           else
             facade_area = typical_length_facade_area
@@ -2128,6 +2128,9 @@ module OpenstudioStandards
       # call create_bar_from_args_and_building_type_hash to generate bar
       args[:primary_building_type] = bldg_type_a
       OpenstudioStandards::Geometry.create_bar_from_args_and_building_type_hash(model, args, building_type_hash)
+
+      # rename all surfaces and subsurfaces
+      OpenstudioStandards::Geometry.model_rename_surfaces_and_subsurfaces(model)
 
       return true
     end

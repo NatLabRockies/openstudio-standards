@@ -22,16 +22,17 @@
 require 'fileutils'
 require 'csv'
 require 'securerandom'
+require 'digest'
 
 
 module BTAP
   module FileIO
 
-    #Test Constructions Module
+  #Test Constructions Module
     if __FILE__ == $0
       require 'test/unit'
-      class FileIOTests < Test::Unit::TestCase
-
+      class FileIOTests < Test::Unit::TestCase 
+ 
         def setup
         end
 
@@ -1191,10 +1192,175 @@ module BTAP
       return new_model
     end
 
+
+    def self.clean_osm_file( file_path: , 
+                        output_path:  )
+
+      def self.read_osm_file(file_path)
+        data = []
+        current_hash = {}
+      
+        File.foreach(file_path) do |line|
+          line.strip!
+          next if line.empty?
+      
+          if line.start_with?('OS:')
+            current_hash = { type: line.split(/[;,]/).first }
+            data << current_hash
+          elsif line.include?('!-')
+            key, value = line.split('!-').map(&:strip)
+            current_hash[value] = key.chomp(',;').strip
+          else
+            current_hash[:id] ||= line.chomp(',;').strip
+          end
+        end
+      
+        data
+      end
+      
+      def self.remove_special_characters(hash)
+        hash.keys.each do |key|
+            new_key = key.to_s.sub(/[;,]$/, '')
+          hash[new_key] = hash.delete(key)
+        end
+      
+        hash.each do |key, value|
+          next unless value.is_a?(String)
+        
+          hash[key] = value.gsub(/[;,]$/, '')
+        end
+      end
+      
+      def self.rename_handles(osm_data)
+
+        hash = Digest::SHA1.hexdigest("fixed_seed")
+        handle_map = {}
+        new_handle_index = 0
+        object_type_index = 0
+        last_object_type = nil
+      
+        osm_data.each do |hash|
+          if hash['Handle']
+            #puts hash
+            #puts "#{hash['type']} == #{last_object_type}"
+            if hash['type'] != last_object_type
+              last_object_type = hash['type']
+              object_type_index += 1
+              new_handle_index = 1
+            else
+              new_handle_index += 1
+            end
+
+            # create a formatted string that is 12 charecters created with new_handle_index, but padded with 0s on the left.
+            formatted_index = new_handle_index.to_s.rjust(12, '0')
+            formatted_index_object_type = object_type_index.to_s.rjust(4, '0')
+            new_handle = "{00000000-0000-0000-#{formatted_index_object_type}-#{formatted_index}}"
+            handle_map[hash['Handle']] = new_handle
+            hash['Handle'] = new_handle
+          end
+        end
+      
+        osm_data.each do |hash|
+          hash.each do |key, value|
+            if handle_map.key?(value)
+              hash[key] = handle_map[value]
+            end
+          end
+        end
+        
+       # Go through all hashes in osm_data and if the "Name" field value fits this pattern {9386c18d-e70a-447e-8b69-9a0a39fd8f06} replace it with an incremented value.
+      name_map = {}
+      new_name_index = 0
+      osm_data.each do |hash|
+        if hash['Name'] && hash['Name'].match?(/\{[a-fA-F0-9\-]{36}\}/)
+          new_name_index += 1
+          formatted_new_name_index = new_name_index.to_s.rjust(4, '0')
+          new_name = "{00000000-0000-#{formatted_new_name_index}-0000-000000000000}"
+          name_map[hash['Name']] = new_name
+          hash['Name'] = new_name
+        end
+      end
+
+      osm_data.each do |hash|
+        hash.each do |key, value|
+          if name_map.key?(value)
+            hash[key] = name_map[value]
+          end
+        end
+      end
+
+
+      end
+      
+
+
+
+      def self.save_osm_file(osm_data, output_path)
+        File.open(output_path, 'w') do |file|
+          osm_data.each do |hash|
+            file.puts "#{hash["type"]},"
+            hash.each do |key, value|
+              next if key == "type"
+              is_last_key = (hash.keys - [:type]).last == key
+              if key == :id
+                file.puts "  #{value},"
+              else
+                file.puts "  #{value}#{is_last_key ? ';' : ','}".ljust(42) + " !- #{key}"
+              end
+            end
+            file.puts
+          end
+        end
+      end
+
+      def self.set_all_data_time(osm_data)
+        osm_data.each do |hash|
+          hash.each do |key, value|
+            #Check if value is in a date-time format like this "2024-10-17 01:19:35 UTC"
+            if value.match?(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/)
+              hash[key] = "2024-01-01 01:00:00 UTC"
+            end
+          end
+        end
+      end
+
+      def self.set_all_epw_paths(osm_data)
+        osm_data.each do |hash|
+          hash.each do |key, value|
+            #Check if value is in a epw file path format like this "USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw"
+            if value.match?(/.*\.epw/)
+              # Get name of file without path from value
+              hash[key] = File.basename(value)
+            end
+          end
+        end
+      end
+
+              
+      osm_data = read_osm_file(file_path)
+      osm_data.sort_by! { |hash| [hash[:type], hash['Name'] || ''] }
+
+      handles = osm_data.map { |hash| hash['Handle'] }.compact
+      duplicates = handles.select { |e| handles.count(e) > 1 }
+      raise "Duplicate handles found: #{duplicates.uniq}" if duplicates.any?
+
+      osm_data.each { |hash| remove_special_characters(hash) }
+      set_all_data_time(osm_data)
+      set_all_epw_paths(osm_data)
+      rename_handles(osm_data)
+      save_osm_file(osm_data, output_path)
+    end
+
+    def self.get_relative_path(abs_path_to_file, working_folder)
+      path = Pathname.new(abs_path_to_file).relative_path_from(Pathname.new(working_folder)).to_s
+      file = File.basename(abs_path_to_file)
+      rel_path= File.join(path)
+      # Check if file exists
+      if File.file?(File.join(working_folder, rel_path))
+        return rel_path
+      else
+        raise "File does not exist at #{File.join(working_folder, rel_path)}"
+      end
+    end
   end #FileIO
-
-
-
-
-
 end #BTAP

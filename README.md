@@ -19,7 +19,7 @@ If you are a user, see the [User Quick Start Guide](docs/UserQuickStartGuide.md)
 
 ## Online Documentation
 
-If you are a user, please see the [Online Documentation](http://www.rubydoc.info/gems/openstudio-standards) for an overview of how the library is structured and how it is used.
+If you are a user, please see the [Online Documentation](https://gemdocs.org/gems/openstudio-standards) for an overview of how the library is structured and how it is used.
 
 ## Developer Information
 

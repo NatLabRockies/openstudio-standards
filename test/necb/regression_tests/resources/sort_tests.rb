@@ -9,7 +9,7 @@ folder_path = "#{File.dirname(__FILE__)}/../tests/"
 files = Dir.glob(folder_path + "/test_necb_bldg_*").sort
 files = files.grep(vintages).grep(building_types).grep(fuel_type_sets)
 files.each do |file|
-  puts "necb/building_regression_tests/tests/" + File.basename(file)
+  puts "necb/regression_tests/tests/" + File.basename(file)
 end
 
 # New Construction
@@ -23,6 +23,6 @@ folder_path = "#{File.dirname(__FILE__)}/../tests/"
 files = Dir.glob(folder_path + "/test_necb_bldg_*").sort
 files = files.grep(vintages).grep(building_types).grep(fuel_type_sets)
 files.each do |file|
-  puts "necb/building_regression_tests/tests/" + File.basename(file)
+  puts "necb/regression_tests/tests/" + File.basename(file)
 end
 

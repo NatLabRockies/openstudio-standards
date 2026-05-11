@@ -37,12 +37,17 @@ Standard.class_eval do
     OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
     model_custom_geometry_tweaks(model, building_type, climate_zone, @prototype_input)
     model.getThermostatSetpointDualSetpoints(&:remove)
+
+    # set building name and standards building type
     model.getBuilding.setName(self.class.to_s)
+    unless model.getBuilding.standardsBuildingType.is_initialized
+      model.getBuilding.setStandardsBuildingType(@instvarbuilding_type)
+    end
+
     # save new basefile to new geometry folder as class name.
     model.getBuilding.setName("-#{@instvarbuilding_type}-#{climate_zone} created: #{Time.new}")
     model_add_loads(model)
-    model_apply_infiltration_standard(model)
-    model_modify_infiltration_coefficients(model, @instvarbuilding_type, climate_zone)
+    OpenstudioStandards::Infiltration.model_set_nist_infiltration(model)
     model_add_door_infiltration(model, climate_zone)
     model_modify_surface_convection_algorithm(model)
     model_create_thermal_zones(model, @space_multiplier_map)
@@ -55,7 +60,7 @@ Standard.class_eval do
     end
     model_add_constructions(model, @instvarbuilding_type, climate_zone)
     model_fenestration_orientation(model, climate_zone)
-    model_custom_hvac_tweaks(model, building_type, climate_zone, @prototype_input)
+    model_custom_hvac_tweaks(model, @instvarbuilding_type, climate_zone, @prototype_input)
     model_add_transfer_air(model)
     model_add_internal_mass(model, @instvarbuilding_type)
     model_add_swh(model, @instvarbuilding_type, @prototype_input)
@@ -64,7 +69,7 @@ Standard.class_eval do
     model_add_daylight_savings(model)
     model_apply_sizing_parameters(model, @instvarbuilding_type)
     model.yearDescription.get.setDayofWeekforStartDay('Sunday')
-    model.getBuilding.setStandardsBuildingType(building_type)
+    model.getBuilding.setStandardsBuildingType(@instvarbuilding_type)
     model_add_lights_shutoff(model)
     # Perform a sizing model_run(model)
     return false if model_run_sizing_run(model, "#{sizing_run_dir}/SR1") == false
@@ -76,7 +81,7 @@ Standard.class_eval do
     # Apply the prototype HVAC assumptions
     # which include sizing the fan pressure rises based
     # on the flow rate of the system.
-    model_apply_prototype_hvac_assumptions(model, building_type, climate_zone)
+    model_apply_prototype_hvac_assumptions(model, @instvarbuilding_type, climate_zone)
     # custom economizer controls
     # For 90.1-2010 Outpatient, AHU1 doesn't have economizer and AHU2 set minimum outdoor air flow rate as 0
     model_modify_oa_controller(model)
@@ -87,6 +92,8 @@ Standard.class_eval do
     # Apply prototype changes that supersede the HVAC efficiency standard
     model_apply_prototype_hvac_efficiency_adjustments(model)
     model_custom_swh_tweaks(model, @instvarbuilding_type, climate_zone, @prototype_input)
+    # adjust infiltration schedules to match HVAC operating schedule
+    OpenstudioStandards::Infiltration.model_set_nist_infiltration_schedules(model)
     # Fix EMS references.
     # Temporary workaround for OS issue #2598
     model_temp_fix_ems_references(model)
@@ -94,12 +101,12 @@ Standard.class_eval do
     # only four zones in large hotel have daylighting controls
     # @todo YXC to merge to the main function
     model_add_daylighting_controls(model)
-    model_custom_daylighting_tweaks(model, building_type, climate_zone, @prototype_input)
+    model_custom_daylighting_tweaks(model, @instvarbuilding_type, climate_zone, @prototype_input)
     model_update_exhaust_fan_efficiency(model)
     model_update_fan_efficiency(model)
     # rename air loop and plant loop nodes for readability
-    rename_air_loop_nodes(model)
-    rename_plant_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_air_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_plant_loop_nodes(model)
     # remove unused objects
     model_remove_unused_resource_objects(model)
     # Add output variables for debugging
@@ -109,6 +116,28 @@ Standard.class_eval do
 
     model_replace_model(measure_model, model)
     return measure_model
+  end
+
+  # Loads a JSON file containing the space type map into a hash
+  #
+  # @param hvac_map_file [String] path to JSON file, relative to the /data folder
+  # @return [Hash] returns a hash that contains the space type map
+  def load_hvac_map(hvac_map_file)
+    # Load the geometry .osm from relative to the data folder
+    rel_path_to_hvac_map = "../../../../../data/#{hvac_map_file}"
+
+    # Load the JSON depending on whether running from normal gem location
+    # or from the embedded location in the OpenStudio CLI
+    if File.dirname(__FILE__)[0] == ':'
+      # running from embedded location in OpenStudio CLI
+      hvac_map_string = load_resource_relative(rel_path_to_hvac_map)
+      hvac_map = JSON.parse(hvac_map_string)
+    else
+      abs_path = File.join(File.dirname(__FILE__), rel_path_to_hvac_map)
+      hvac_map = JSON.parse(File.read(abs_path)) if File.exist?(abs_path)
+    end
+
+    return hvac_map
   end
 
   # Replaces the contents of 'model_to_replace' with the contents of 'new_model.'
@@ -176,6 +205,105 @@ Standard.class_eval do
     return true
   end
 
+
+  # load a model into OS & version translates, exiting and erroring if a problem is found
+  #
+  # @param model_path_string [String] file path to OpenStudio model file
+  # @return [OpenStudio::Model::Model] OpenStudio model object
+  def safe_load_model(model_path_string)
+    model_path = OpenStudio::Path.new(model_path_string)
+    if OpenStudio.exists(model_path)
+      version_translator = OpenStudio::OSVersion::VersionTranslator.new
+      model = version_translator.loadModel(model_path)
+      if model.empty?
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Version translation failed for #{model_path_string}")
+        return false
+      else
+        model = model.get
+      end
+    else
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "#{model_path_string} couldn't be found")
+      return false
+    end
+    return model
+  end
+
+  # Remove all resource objects in the model
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @return [OpenStudio::Model::Model] OpenStudio model object
+  def strip_model(model)
+    # remove all materials
+    model.getMaterials.each(&:remove)
+
+    # remove all constructions
+    model.getConstructions.each(&:remove)
+
+    # remove performance curves
+    model.getCurves.each do |curve|
+      model.removeObject(curve.handle)
+    end
+
+    # remove all zone equipment
+    model.getThermalZones.sort.each do |zone|
+      zone.equipment.each(&:remove)
+    end
+
+    # remove all thermostats
+    model.getThermostatSetpointDualSetpoints.each(&:remove)
+
+    # remove all people
+    model.getPeoples.each(&:remove)
+    model.getPeopleDefinitions.each(&:remove)
+
+    # remove all lights
+    model.getLightss.each(&:remove)
+    model.getLightsDefinitions.each(&:remove)
+
+    # remove all electric equipment
+    model.getElectricEquipments.each(&:remove)
+    model.getElectricEquipmentDefinitions.each(&:remove)
+
+    # remove all gas equipment
+    model.getGasEquipments.each(&:remove)
+    model.getGasEquipmentDefinitions.each(&:remove)
+
+    # remove all outdoor air
+    model.getDesignSpecificationOutdoorAirs.each(&:remove)
+
+    # remove all infiltration
+    model.getSpaceInfiltrationDesignFlowRates.each(&:remove)
+
+    # Remove all internal mass
+    model.getInternalMasss.each(&:remove)
+
+    # Remove all internal mass defs
+    model.getInternalMassDefinitions.each(&:remove)
+
+    # Remove all thermal zones
+    model.getThermalZones.each(&:remove)
+
+    # Remove all schedules
+    model.getSchedules.each(&:remove)
+
+    # Remove all schedule type limits
+    model.getScheduleTypeLimitss.each(&:remove)
+
+    # Remove the sizing parameters
+    model.getSizingParameters.remove
+
+    # Remove the design days
+    model.getDesignDays.each(&:remove)
+
+    # Remove the rendering colors
+    model.getRenderingColors.each(&:remove)
+
+    # Remove the daylight controls
+    model.getDaylightingControls.each(&:remove)
+
+    return model
+  end
+
   # Read the space type to space map from the model
   # instead of relying on an externally-defined mapping.
   def get_space_type_maps_from_model(model)
@@ -220,7 +348,7 @@ Standard.class_eval do
   # Adds the loads and associated schedules for each space type
   # as defined in the OpenStudio_Standards_space_types.json file.
   # This includes lights, plug loads, occupants, ventilation rate requirements,
-  # infiltration, gas equipment (for kitchens, etc.) and typical schedules for each.
+  # gas equipment (for kitchens, etc.) and typical schedules for each.
   # Some loads are governed by the standard, others are typical values
   # pulled from sources such as the DOE Reference and DOE Prototype Buildings.
   #
@@ -235,10 +363,13 @@ Standard.class_eval do
       space_type_apply_rendering_color(space_type)
 
       # Loads
-      space_type_apply_internal_loads(space_type, true, true, true, true, true, true)
+      space_type_apply_internal_loads(space_type)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type, true, true, true, true, true, true, true)
+      space_type_apply_internal_load_schedules(space_type)
+
+      # Thermostat Schedules
+      space_type_apply_thermostat_schedules(space_type)
     end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying space types (loads)')
@@ -677,35 +808,48 @@ Standard.class_eval do
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished creating thermal zones')
   end
 
-  # Loop through thermal zones and model_run(model)  thermal_zone.add_exhaust
-  # If kitchen_makeup is "None" then exhaust will be modeled in every kitchen zone without makeup air
-  # If kitchen_makeup is "Adjacent" then exhaust will be modeled in every kitchen zone. Makeup air will be provided when there as an adjacent dining,cafe, or cafeteria zone of the same building type.
-  # If kitchen_makeup is "Largest Zone" then exhaust will only be modeled in the largest kitchen zone, but the flow rate will be based on the kitchen area for all zones. Makeup air will be modeled in the largest dining,cafe, or cafeteria zone of the same building type.
+  # Add exhaust fans and makeup air to the model
   #
-  # @param kitchen_makeup [String] Valid choices are None, Largest Zone, Adjacent
-  # @return [Hash] Hash of newly made exhaust fan objects along with secondary exhaust and zone mixing objects
-  def model_add_exhaust(model, kitchen_makeup = 'Adjacent')
-    zone_exhaust_fans = {}
-
-    # apply use specified kitchen_makup logic
-    if ['Adjacent', 'Largest Zone'].include?(kitchen_makeup)
-      # common code for Adjacent and Largest Zone
-
-      # populate standard_space_types_with_makup_air
-      standard_space_types_with_makup_air = {}
-      standard_space_types_with_makup_air[['FullServiceRestaurant', 'Kitchen']] = ['FullServiceRestaurant', 'Dining']
-      standard_space_types_with_makup_air[['QuickServiceRestaurant', 'Kitchen']] = ['QuickServiceRestaurant', 'Dining']
-      standard_space_types_with_makup_air[['Hospital', 'Kitchen']] = ['Hospital', 'Dining']
-      standard_space_types_with_makup_air[['SecondarySchool', 'Kitchen']] = ['SecondarySchool', 'Cafeteria']
-      standard_space_types_with_makup_air[['PrimarySchool', 'Kitchen']] = ['PrimarySchool', 'Cafeteria']
-      standard_space_types_with_makup_air[['LargeHotel', 'Kitchen']] = ['LargeHotel', 'Cafe']
-
-      # gather information on zones organized by standards building type and space type. zone may be in this multiple times if it has multiple space types
-      zones_by_standards = {}
-
+  # @param makeup_source [String] Valid choices are 'None', 'Adjacent'
+  #   'None' (default) does not add makeup air
+  #   'Adjacent' makeup air provided from the thermal zone of the largest adjacent dining, cafe, or cafeteria space of the same building type
+  # @param remove_existing_exhaust_fans [Boolean] remove existing exhaust fans
+  # @return [Array<OpenStudio::Model::FanZoneExhaust>] Array of zone exhuast fans
+  def model_add_exhaust(model,
+                        makeup_source: 'None',
+                        remove_existing_exhaust_fans: true)
+    # remove existing exhaust fans
+    if remove_existing_exhaust_fans
       model.getThermalZones.sort.each do |thermal_zone|
-        # get space type ratio for spaces in zone
-        space_type_hash = {} # key is  space type,  value hash with floor area, standards building type, standards space type, and array of adjacent zones
+        thermal_zone.equipment.each { |equip| equip.remove if equip.to_FanZoneExhaust.is_initialized }
+      end
+    end
+
+    # placeholder for zone exhaust fans
+    zone_exhaust_fans = []
+
+    # populate standard_space_types_with_makup_air
+    standard_space_types_with_makup_air = {}
+    standard_space_types_with_makup_air[['FullServiceRestaurant', 'Kitchen']] = ['FullServiceRestaurant', 'Dining']
+    standard_space_types_with_makup_air[['QuickServiceRestaurant', 'Kitchen']] = ['QuickServiceRestaurant', 'Dining']
+    standard_space_types_with_makup_air[['Hospital', 'Kitchen']] = ['Hospital', 'Dining']
+    standard_space_types_with_makup_air[['SecondarySchool', 'Kitchen']] = ['SecondarySchool', 'Cafeteria']
+    standard_space_types_with_makup_air[['PrimarySchool', 'Kitchen']] = ['PrimarySchool', 'Cafeteria']
+    standard_space_types_with_makup_air[['LargeHotel', 'Kitchen']] = ['LargeHotel', 'Cafe']
+
+    # apply make up air kitchen spaces
+    if makeup_source == 'Adjacent'
+      # loop through thermal zones and add exhaust
+      model.getThermalZones.sort.each do |thermal_zone|
+        has_exhaust_fan = false
+        thermal_zone.equipment.each { |equip| has_exhaust_fan = true if equip.to_FanZoneExhaust.is_initialized }
+
+        if has_exhaust_fan
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Thermal zone #{thermal_zone.name} already has an exhaust fan. None will be added.")
+          next
+        end
+
+        # loop through space types and add exhaust fans to kitchen spaces
         thermal_zone.spaces.each do |space|
           next unless space.spaceType.is_initialized
           next unless space.partofTotalFloorArea
@@ -714,182 +858,81 @@ Standard.class_eval do
           next unless space_type.standardsBuildingType.is_initialized
           next unless space_type.standardsSpaceType.is_initialized
 
-          # add entry in hash for space_type_standardsif it doesn't already exist
-          unless space_type_hash.key?(space_type)
-            space_type_hash[space_type] = {}
-            space_type_hash[space_type][:effective_floor_area] = 0.0
-            space_type_hash[space_type][:standards_array] = [space_type.standardsBuildingType.get, space_type.standardsSpaceType.get]
-            if kitchen_makeup == 'Adjacent'
-              space_type_hash[space_type][:adjacent_zones] = []
+          standards_building_type = space_type.standardsBuildingType.get
+          standards_space_type = space_type.standardsSpaceType.get
+
+          # get makeup air source
+          makeup_target_space_type = [standards_building_type, standards_space_type]
+          makeup_source_space_type = standard_space_types_with_makup_air[makeup_target_space_type]
+
+          # skip if nil
+          next if makeup_source_space_type.nil?
+
+          # get largest adjacent zone matching the makeup_source_space_type
+          makeup_space = nil
+          adjacent_zones = OpenstudioStandards::Geometry.thermal_zone_get_adjacent_zones_with_shared_walls(thermal_zone)
+          adjacent_zones.each do |adjacent_zone|
+            adjacent_zone.spaces.each do |adjacent_space|
+              next unless adjacent_space.spaceType.is_initialized
+              next unless adjacent_space.partofTotalFloorArea
+
+              adjacent_space_type = adjacent_space.spaceType.get
+              next unless adjacent_space_type.standardsBuildingType.is_initialized
+              next unless adjacent_space_type.standardsSpaceType.is_initialized
+
+              adjacent_standards_building_type = adjacent_space_type.standardsBuildingType.get
+              adjacent_standards_space_type = adjacent_space_type.standardsSpaceType.get
+
+              # filter out adjacent spaces not matching the makeup_source_space_type criteria
+              next unless (makeup_source_space_type[0] == adjacent_standards_building_type) && (makeup_source_space_type[1] == adjacent_standards_space_type)
+
+              # set makeup_space if not set or if adjacent space is larger
+              if makeup_space.nil? || (adjacent_space.floorArea > makeup_space.floorArea)
+                makeup_space = adjacent_space
+              end
             end
           end
 
-          # populate floor area
-          space_type_hash[space_type][:effective_floor_area] += space.floorArea * space.multiplier
-
-          # @todo populate adjacent zones (need to add methods to space and zone for this)
-          if kitchen_makeup == 'Adjacent'
-            space_type_hash[space_type][:adjacent_zones] << nil
+          if makeup_space.nil?
+            OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Model has zone #{thermal_zone.name} with standards types #{makeup_target_space_type} but no adjacent zone with #{makeup_source_space_type}. Exhaust will be added, but no makeup air.")
+            makeup_thermal_zone = nil
+          else
+            makeup_thermal_zone = makeup_space.thermalZone.get
           end
 
-          # populate zones_by_standards
-          unless zones_by_standards.key?(space_type_hash[space_type][:standards_array])
-            zones_by_standards[space_type_hash[space_type][:standards_array]] = {}
+          zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone, make_up_air_source_zone: makeup_thermal_zone)
+          unless zone_exhaust_fan.nil?
+            # set fan pressure rise
+            fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
+
+            # update efficiency and pressure rise
+            prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
+
+            zone_exhaust_fans << zone_exhaust_fan
           end
-          zones_by_standards[space_type_hash[space_type][:standards_array]][thermal_zone] = space_type_hash
         end
       end
+    end
 
-      if kitchen_makeup == 'Largest Zone'
+    # loop through thermal zones and add exhaust fans
+    model.getThermalZones.sort.each do |thermal_zone|
+      has_exhaust_fan = false
+      thermal_zone.equipment.each { |equip| has_exhaust_fan = true if equip.to_FanZoneExhaust.is_initialized }
 
-        zones_applied = [] # add thermal zones to this ones they have had thermal_zone.add_exhaust model_run(model)  on it
-
-        # loop through standard_space_types_with_makup_air
-        standard_space_types_with_makup_air.each do |makeup_target, makeup_source|
-          # hash to manage lookups
-          markup_target_effective_floor_area = {}
-          markup_source_effective_floor_area = {}
-
-          if zones_by_standards.key?(makeup_target)
-
-            # process zones of each makeup_target
-            zones_by_standards[makeup_target].each do |thermal_zone, space_type_hash|
-              effective_floor_area = 0.0
-              space_type_hash.each do |space_type, hash|
-                effective_floor_area += space_type_hash[space_type][:effective_floor_area]
-              end
-              markup_target_effective_floor_area[thermal_zone] = effective_floor_area
-            end
-
-            # find zone with largest effective area of this space type
-            largest_target_zone = markup_target_effective_floor_area.key(markup_target_effective_floor_area.values.max)
-
-            # find total effective area to calculate exhaust, then divide by zone multiplier when add exhaust
-            target_effective_floor_area = markup_target_effective_floor_area.values.reduce(0, :+)
-
-            # find zones that match makeup_target with makeup_source
-            if zones_by_standards.key?(makeup_source)
-
-              # process zones of each makeup_source
-              zones_by_standards[makeup_source].each do |thermal_zone, space_type_hash|
-                effective_floor_area = 0.0
-                space_type_hash.each do |space_type, hash|
-                  effective_floor_area += space_type_hash[space_type][:effective_floor_area]
-                end
-
-                markup_source_effective_floor_area[thermal_zone] = effective_floor_area
-              end
-              # find zone with largest effective area of this space type
-              largest_source_zone = markup_source_effective_floor_area.key(markup_source_effective_floor_area.values.max)
-            else
-
-              # issue warning that makeup air wont be made but still make exhaust
-              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', "Model has zone with #{makeup_target} but not #{makeup_source}. Exhaust will be added, but no makeup air.")
-              next
-
-            end
-
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Largest #{makeup_target} is #{largest_target_zone.name} which will provide exhaust for #{target_effective_floor_area} m^2")
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Largest #{makeup_source} is #{largest_source_zone.name} which will provide makeup air for #{makeup_target}")
-
-            # add in extra arguments for makeup air
-            exhaust_makeup_inputs = {}
-            exhaust_makeup_inputs[makeup_target] = {} # for now only one makeup target per zone, but method could have multiple
-            exhaust_makeup_inputs[makeup_target][:target_effective_floor_area] = target_effective_floor_area
-            exhaust_makeup_inputs[makeup_target][:source_zone] = largest_source_zone
-
-            # add exhaust
-            next if zones_applied.include?(largest_target_zone) # would only hit this if zone has two space types each requesting makeup air
-
-            zone_exhaust_hash = thermal_zone_add_exhaust(largest_target_zone, exhaust_makeup_inputs)
-            zones_applied << largest_target_zone
-            zone_exhaust_fans.merge!(zone_exhaust_hash)
-
-          end
-        end
-
-        # add exhaust to zones that did not contain space types with standard_space_types_with_makup_air
-        zones_by_standards.each do |standards_array, zones_hash|
-          next if standard_space_types_with_makup_air.key?(standards_array)
-
-          # loop through zones adding exhaust
-          zones_hash.each do |thermal_zone, space_type_hash|
-            next if zones_applied.include?(thermal_zone)
-
-            # add exhaust
-            zone_exhaust_hash = thermal_zone_add_exhaust(thermal_zone)
-            zones_applied << thermal_zone
-            zone_exhaust_fans.merge!(zone_exhaust_hash)
-          end
-        end
-
-      else # kitchen_makeup == "Adjacent"
-
-        zones_applied = [] # add thermal zones to this ones they have had thermal_zone.add_exhaust model_run(model)  on it
-
-        standard_space_types_with_makup_air.each do |makeup_target, makeup_source|
-          if zones_by_standards.key?(makeup_target)
-            # process zones of each makeup_target
-            zones_by_standards[makeup_target].each do |thermal_zone, space_type_hash|
-              # get adjacent zones
-              adjacent_zones = OpenstudioStandards::Geometry.thermal_zone_get_adjacent_zones_with_shared_walls(thermal_zone)
-
-              # find adjacent zones matching key and value from standard_space_types_with_makup_air
-              first_adjacent_makeup_source = nil
-              adjacent_zones.each do |adjacent_zone|
-                next unless first_adjacent_makeup_source.nil?
-
-                if zones_by_standards.key?(makeup_source) && zones_by_standards[makeup_source].key?(adjacent_zone)
-                  first_adjacent_makeup_source = adjacent_zone
-
-                  # @todo add in extra arguments for makeup air
-                  exhaust_makeup_inputs = {}
-                  exhaust_makeup_inputs[makeup_target] = {} # for now only one makeup target per zone, but method could have multiple
-                  exhaust_makeup_inputs[makeup_target][:source_zone] = first_adjacent_makeup_source
-
-                  # add exhaust
-                  zone_exhaust_hash = thermal_zone_add_exhaust(thermal_zone, exhaust_makeup_inputs)
-                  zones_applied << thermal_zone
-                  zone_exhaust_fans.merge!(zone_exhaust_hash)
-                end
-              end
-
-              if first_adjacent_makeup_source.nil?
-
-                # issue warning that makeup air wont be made but still make exhaust
-                OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', "Model has zone with #{makeup_target} but no adjacent zone with #{makeup_source}. Exhaust will be added, but no makeup air.")
-
-                # add exhaust
-                zone_exhaust_hash = thermal_zone_add_exhaust(thermal_zone)
-                zones_applied << thermal_zone
-                zone_exhaust_fans.merge!(zone_exhaust_hash)
-
-              end
-            end
-
-          end
-        end
-
-        # add exhaust for rest of zones
-        model.getThermalZones.sort.each do |thermal_zone|
-          next if zones_applied.include?(thermal_zone)
-
-          # add exhaust
-          zone_exhaust_hash = thermal_zone_add_exhaust(thermal_zone)
-          zone_exhaust_fans.merge!(zone_exhaust_hash)
-        end
-      end
-    else
-      if kitchen_makeup != 'None'
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', "#{kitchen_makeup} is an unexpected value for kitchen_makup arg, will use None.")
+      if has_exhaust_fan
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Thermal zone #{thermal_zone.name} already has an exhaust fan. None will be added.")
+        next
       end
 
-      # loop through thermal zones
-      model.getThermalZones.sort.each do |thermal_zone|
-        zone_exhaust_hash = thermal_zone_add_exhaust(thermal_zone)
+      zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone)
+      unless zone_exhaust_fan.nil?
+        # set fan pressure rise
+        fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
 
-        # populate zone_exhaust_fans
-        zone_exhaust_fans.merge!(zone_exhaust_hash)
+        # update efficiency and pressure rise
+        prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
+
+        zone_exhaust_fans << zone_exhaust_fan
       end
     end
 
@@ -1395,51 +1438,6 @@ Standard.class_eval do
     return true
   end
 
-  # Changes the infiltration coefficients for the prototype vintages.
-  #
-  # @param (see #add_constructions)
-  # @return [Boolean] returns true if successful, false if not
-  # @todo Consistency - make prototype and reference vintages consistent
-  def model_modify_infiltration_coefficients(model, building_type, climate_zone)
-    # Select the terrain type, which
-    # impacts wind speed, and in turn infiltration
-    terrain = 'City'
-    case template
-      when '90.1-2004', '90.1-2007', '90.1-2010', '90.1-2013', '90.1-2016', '90.1-2019', 'NREL ZNE Ready 2017'
-        case building_type
-          when 'Warehouse'
-            terrain = 'Urban'
-          when 'SmallHotel'
-            terrain = 'Suburbs'
-        end
-    end
-    # Set the terrain type
-    model.getSite.setTerrain(terrain)
-
-    # modify the infiltration coefficients
-    case template
-      when 'DOE Ref Pre-1980', 'DOE Ref 1980-2004'
-        # @todo make this consistent with newer prototypes
-        const_coeff = 1.0
-        temp_coeff = 0.0
-        velo_coeff = 0.0
-        velo_sq_coeff = 0.0
-      else
-        # Includes a wind-velocity-based term
-        const_coeff = 0.0
-        temp_coeff = 0.0
-        velo_coeff = 0.224
-        velo_sq_coeff = 0.0
-    end
-
-    model.getSpaceInfiltrationDesignFlowRates.sort.each do |infiltration|
-      infiltration.setConstantTermCoefficient(const_coeff)
-      infiltration.setTemperatureTermCoefficient(temp_coeff)
-      infiltration.setVelocityTermCoefficient(velo_coeff)
-      infiltration.setVelocitySquaredTermCoefficient(velo_sq_coeff)
-    end
-  end
-
   # Sets the inside and outside convection algorithms for different vintages
   #
   # @param (see #add_constructions)
@@ -1547,17 +1545,8 @@ Standard.class_eval do
     model.getFanOnOffs.sort.each { |obj| prototype_fan_apply_prototype_fan_efficiency(obj) }
     model.getFanZoneExhausts.sort.each { |obj| prototype_fan_apply_prototype_fan_efficiency(obj) }
 
-    # Gas Heating Coil
-    model.getCoilHeatingGass.sort.each { |obj| coil_heating_gas_apply_prototype_efficiency(obj) }
-
     # Add Economizers
     apply_economizers(climate_zone, model)
-
-    # @todo What is the logic behind hard-sizing hot water coil convergence tolerances?
-    model.getControllerWaterCoils.sort.each { |obj| controller_water_coil_set_convergence_limits(obj) }
-
-    # Adjust defrost curve limits for coil heating dx single speed
-    model.getCoilHeatingDXSingleSpeeds.sort.each { |obj| coil_heating_dx_single_speed_apply_defrost_eir_curve_limits(obj) }
 
     # Pump part load performances
     model.getPumpVariableSpeeds.sort.each { |obj| pump_variable_speed_control_type(obj) }
@@ -1632,9 +1621,9 @@ Standard.class_eval do
           oa_cfm_per_ft2 = 0.0578940512546562
           oa_m3_per_m2 = OpenStudio.convert(OpenStudio.convert(oa_cfm_per_ft2, 'cfm', 'm^3/s').get, '1/ft^2', '1/m^2').get
           if has_erv
-            model_add_residential_erv(model, zone, oa_m3_per_m2)
+            model_add_residential_erv(model, [zone], oa_m3_per_m2)
           else
-            model_add_residential_ventilator(model, zone, oa_m3_per_m2)
+            model_add_residential_ventilator(model, [zone], oa_m3_per_m2)
           end
 
           # Shut-off air loop level OA intake
@@ -2057,6 +2046,9 @@ Standard.class_eval do
     econ_max_70_pct_oa_sch.defaultDaySchedule.setName('Economizer Max OA Fraction 70 pct Default')
     econ_max_70_pct_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.7)
 
+    # Store original climate zones
+    climate_zone_code = climate_zone
+
     # Check each airloop
     model.getAirLoopHVACs.sort.each do |air_loop|
       economizer_required = false
@@ -2088,6 +2080,11 @@ Standard.class_eval do
         # specified, economizer requirements were aimed at comfort
         # cooling, not computer room cooling (as per input from the MSC).
 
+        # Process climate zone:
+        # Moisture regime is not needed for climate zone 8
+        climate_zone = climate_zone.split('-')[-1]
+        climate_zone = '8' if climate_zone.include?('8')
+
         # Get the size threshold requirement
         search_criteria = {
           'template' => template,
@@ -2095,7 +2092,7 @@ Standard.class_eval do
           'data_center' => true
         }
         econ_limits = model_find_object(standards_data['economizers'], search_criteria)
-        minimum_capacity_btu_per_hr = econ_limits['capacity_limit']
+        minimum_capacity_btu_per_hr = econ_limits['minimum_capacity']
         economizer_required = !minimum_capacity_btu_per_hr.nil?
       elsif @instvarbuilding_type == 'LargeOffice' && air_loop_hvac_include_wshp?(air_loop)
         # WSHP serving the IT closets are assumed to always be too
@@ -2108,7 +2105,7 @@ Standard.class_eval do
       if economizer_required
         # If an economizer is required, determine the economizer type
         # in the prototype buildings, which depends on climate zone.
-        economizer_type = model_economizer_type(model, climate_zone)
+        economizer_type = model_economizer_type(model, climate_zone_code)
 
         # Set the economizer type
         # Get the OA system and OA controller
@@ -2125,7 +2122,7 @@ Standard.class_eval do
 
         # Check that the economizer type set by the prototypes
         # is not prohibited by code.  If it is, change to no economizer.
-        unless air_loop_hvac_economizer_type_allowable?(air_loop, climate_zone)
+        unless air_loop_hvac_economizer_type_allowable?(air_loop, climate_zone_code)
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.prototype.Model', "#{air_loop.name} is required to have an economizer, but the type chosen, #{economizer_type} is prohibited by code for climate zone #{climate_zone}. Economizer type will be switched to No Economizer.")
           oa_control.setEconomizerControlType('NoEconomizer')
         end

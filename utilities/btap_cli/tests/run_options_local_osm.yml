@@ -3,6 +3,8 @@
 :analysis_name: test_analysis_para
 :algorithm_type: osm_batch
 :boiler_eff: NECB_Default
+:boiler_fuel: NECB_Default
+:boiler_cap_ratio: NECB_Default
 :building_type: LocalCompleteModel
 :chiller_type: NECB_Default
 :compute_environment: local
@@ -11,6 +13,7 @@
 :dcv_type: NECB_Default
 :door_construction_cond: NECB_Default
 :ecm_system_name: NECB_Default
+:enable_costing: false
 :electrical_loads_scale: NECB_Default
 :epw_file: CAN_QC_Montreal.Intl.AP.716270_CWEC2020.epw
 :erv_package: NECB_Default

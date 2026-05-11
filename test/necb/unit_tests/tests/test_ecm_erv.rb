@@ -1,6 +1,4 @@
 require_relative '../../../helpers/minitest_helper'
-require_relative '../../../helpers/create_doe_prototype_helper'
-require 'json'
 require_relative '../../../helpers/necb_helper'
 include(NecbHelper)
 
@@ -16,7 +14,7 @@ class ECM_ERV_Tests < Minitest::Test
     # File paths.
     @output_folder = File.join(__dir__, 'output/test_ecm_erv')
     @expected_results_file = File.join(__dir__, '../expected_results/ecm_erv_expected_results.json')
-    @test_results_file = File.join(__dir__, '../expected_results/ecm_erv_test_results.json')
+    @test_results_file = File.join(__dir__, '../expected_results/ecm_erv-test_results.json')
     @sizing_run_dir = File.join(@output_folder, 'sizing_folder')
 
     # Intial test condition
@@ -45,9 +43,17 @@ class ECM_ERV_Tests < Minitest::Test
         #'Warehouse'
     ]
     @epw_files = ['CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw']
+    #@epw_files = ['CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw']
     @primary_heating_fuels = ['Electricity']
     @erv_packages = ["NECB_Default","NECB_Default_All","Plate-Existing", 'Plate-All','Rotary-All']
 
+    # Helper to print out numerical data to 3 sig figs.
+    def roundOrNA(data, figs = 3)
+      if data.is_a?(Numeric)
+        return data.signif(figs)
+      end
+      return 'NA'
+    end
 
     # Test results storage array.
     @test_results_array = []
@@ -58,6 +64,7 @@ class ECM_ERV_Tests < Minitest::Test
           @primary_heating_fuels.sort.each do |primary_heating_fuel|
             @erv_packages.sort.each do |erv_package|
               standard = Standard.build(template)
+              #puts "************* #{template}; #{erv_package}; #{epw_file}; #{building_type}; #{primary_heating_fuel}"
               model  = standard.model_create_prototype_model(template:template,
                                                building_type: building_type,
                                                epw_file: epw_file,
@@ -73,23 +80,32 @@ class ECM_ERV_Tests < Minitest::Test
 
               ervs = model.getHeatExchangerAirToAirSensibleAndLatents
               result['number_of_ervs'] = ervs.length
+              ervs.each { |erv| puts "##### #{erv}"}
+              model.getAirLoopHVACs.each do |air_loop_hvac| 
+                #puts "####### air loop kW #{standard.calculate_exhaust_heat(air_loop_hvac)}"
+                #puts "####### has ERV #{standard.air_loop_hvac_energy_recovery_ventilator_required?(air_loop_hvac, 'NECB')}"
+                erv_comp = air_loop_hvac.components('OS:HeatExchanger:AirToAir:SensibleAndLatent'.to_IddObjectType).first
+                #puts "### ERV: #{erv_comp}"
+                #puts "####### components #{air_loop_hvac.components('OS:HeatExchanger:AirToAir:SensibleAndLatent'.to_IddObjectType).first.name}"
+              end
               if ervs.length >0
                 heat_exchanger_air_to_air_sensible_and_latent = ervs[0]
                 result['heatExchangerType'] = heat_exchanger_air_to_air_sensible_and_latent.heatExchangerType()
-                result['sensibleEffectivenessat100HeatingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat100HeatingAirFlow()
-                result['latentEffectivenessat100HeatingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat100HeatingAirFlow()
-                result['sensibleEffectivenessat75HeatingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat75HeatingAirFlow()
-                result['latentEffectivenessat75HeatingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat75HeatingAirFlow()
-                result['sensibleEffectivenessat100CoolingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat100CoolingAirFlow()
-                result['latentEffectivenessat100CoolingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat100CoolingAirFlow()
-                result['sensibleEffectivenessat75CoolingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat75CoolingAirFlow()
-                result['latentEffectivenessat75CoolingAirFlow'] = heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat75CoolingAirFlow()
+                result['sensibleEffectivenessat100HeatingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat100HeatingAirFlow())
+                result['latentEffectivenessat100HeatingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat100HeatingAirFlow())
+                result['sensibleEffectivenessat75HeatingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat75HeatingAirFlow())
+                result['latentEffectivenessat75HeatingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat75HeatingAirFlow())
+                result['sensibleEffectivenessat100CoolingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat100CoolingAirFlow())
+                result['latentEffectivenessat100CoolingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat100CoolingAirFlow())
+                result['sensibleEffectivenessat75CoolingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.sensibleEffectivenessat75CoolingAirFlow())
+                result['latentEffectivenessat75CoolingAirFlow'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.latentEffectivenessat75CoolingAirFlow())
                 result['supplyAirOutletTemperatureControl'] = heat_exchanger_air_to_air_sensible_and_latent.supplyAirOutletTemperatureControl()
                 result['frostControlType'] = heat_exchanger_air_to_air_sensible_and_latent.frostControlType()
                 result['economizerLockout'] = heat_exchanger_air_to_air_sensible_and_latent.economizerLockout()
-                result['thresholdTemperature'] = heat_exchanger_air_to_air_sensible_and_latent.thresholdTemperature()
-                result['initialDefrostTimeFraction'] = heat_exchanger_air_to_air_sensible_and_latent.initialDefrostTimeFraction().get
+                result['thresholdTemperature'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.thresholdTemperature())
+                result['initialDefrostTimeFraction'] = roundOrNA(heat_exchanger_air_to_air_sensible_and_latent.initialDefrostTimeFraction().get)
               end
+              #puts ">> #{result}"
               @test_results_array << result
 
             end #@erv_package.sort.each do |dcv_type|

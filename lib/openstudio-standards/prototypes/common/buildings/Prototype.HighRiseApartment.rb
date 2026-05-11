@@ -37,13 +37,12 @@ module HighriseApartment
                                         'Electric Equipment Electricity Energy'
                                       end
 
-    model_add_transformer(model,
-                          wired_lighting_frac: 0.0015,
-                          transformer_size: 75000,
-                          transformer_efficiency: transformer_efficiency,
-                          excluded_interiorequip_key: 'T Corridor_Elevators_Equip',
-                          excluded_interiorequip_meter: excluded_interiorequip_variable)
-
+    OpenstudioStandards::Equipment.create_transformer(model,
+                                                      wired_lighting_frac: 0.0015,
+                                                      transformer_size: 75000,
+                                                      transformer_efficiency: transformer_efficiency,
+                                                      excluded_interiorequip_key: 'T Corridor_Elevators_Equip',
+                                                      excluded_interiorequip_meter: excluded_interiorequip_variable)
     return true
   end
 

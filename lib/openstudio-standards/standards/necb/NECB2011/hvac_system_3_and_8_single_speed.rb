@@ -81,7 +81,8 @@ class NECB2011
                                             system_data,
                                             determine_control_zone(zones),
                                             necb_reference_hp: necb_reference_hp,
-                                            necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel)
+                                            necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel,
+                                            hw_loop: hw_loop)
       # Add Zone equipment
       zones.each do |zone| # Zone sizing temperature difference
         sizing_zone = zone.sizingZone
@@ -101,11 +102,10 @@ class NECB2011
                                   hw_loop,
                                   model,
                                   zone)
-
       end
     else
       zones.each do |zone|
-        air_loop = add_system_3_and_8_airloop(heating_coil_type, model, system_data, zone, necb_reference_hp: necb_reference_hp, necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel)
+        air_loop = add_system_3_and_8_airloop(heating_coil_type, model, system_data, zone, necb_reference_hp: necb_reference_hp, necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel, hw_loop: hw_loop)
         add_sys3_and_8_zone_equip(air_loop,
                                   baseboard_type,
                                   hw_loop,
@@ -118,19 +118,20 @@ class NECB2011
     sys_name_pars['sys_clg'] = 'dx'
     sys_name_pars['sys_clg'] = 'ashp' if necb_reference_hp
     sys_name_pars['sys_htg'] = heating_coil_type
-    sys_name_pars['sys_htg'] = 'ashp' if necb_reference_hp
+    sys_name_pars['sys_htg'] = 'ashp>c-g' if necb_reference_hp && (necb_reference_hp_supp_fuel == "NaturalGas" || necb_reference_hp_supp_fuel == "Gas")
+    sys_name_pars['sys_htg'] = 'ashp>c-e' if necb_reference_hp && (necb_reference_hp_supp_fuel == "Electricity" || necb_reference_hp_supp_fuel == "Electric" || necb_reference_hp_supp_fuel == "FuelOilNo2")
+    sys_name_pars['sys_htg'] = 'ashp>c-hw' if necb_reference_hp && (necb_reference_hp_supp_fuel == "Hot Water" || necb_reference_hp_supp_fuel == "HotWater")
     sys_name_pars['sys_sf'] = 'cv'
     sys_name_pars['zone_htg'] = baseboard_type
     sys_name_pars['zone_clg'] = 'none'
     sys_name_pars['sys_rf'] = 'none'
-    assign_base_sys_name(air_loop,
+    return assign_base_sys_name( air_loop: air_loop,
                          sys_abbr: 'sys_3',
                          sys_oa: 'mixed',
                          sys_name_pars: sys_name_pars)
-    return true
   end
 
-  def add_system_3_and_8_airloop(heating_coil_type, model, system_data, control_zone, necb_reference_hp:false, necb_reference_hp_supp_fuel:'DefaultFuel')
+  def add_system_3_and_8_airloop(heating_coil_type, model, system_data, control_zone, necb_reference_hp:false, necb_reference_hp_supp_fuel:'DefaultFuel', necb_reference_hp_fancoil: false, hw_loop: nil)
     # System Type 3: PSZ-AC
     # This measure creates:
     # -a constant volume packaged single-zone A/C unit
@@ -160,12 +161,14 @@ class NECB2011
       sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
     end
 
-    if necb_reference_hp
+    #if necb_reference_hp
       #AirLoopHVACUnitaryHeatPumpAirToAir needs FanOnOff in order for the fan to turn off during off hours
-      fan = OpenStudio::Model::FanOnOff.new(model, always_on)
-    else
-      fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
-    end
+    #  fan = OpenStudio::Model::FanOnOff.new(model, always_on)
+    #else
+    #  fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
+    #end
+    # Not using unitary heat pump model until it works with backup hot water coils.  Fan stays as contant volume.# Not using unitary heat pump model until it works with backup hot water coils.  Fan stays as contant volume.
+    fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
 
     # Set up DX coil
     if necb_reference_hp #NECB curve characteristics
@@ -178,10 +181,13 @@ class NECB2011
 
     raise("Flag 'necb_reference_hp' is set to true while parameter 'heating_coil_type' is not set to DX") if (necb_reference_hp && (heating_coil_type != 'DX'))
     case heating_coil_type
-    when 'Electric' # electric coil
+    when 'Electric', 'Electricity', "FuelOilNo2" # electric coil
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-    when 'Gas'
+    when 'Gas', 'NaturalGas'
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
+    when 'Hot Water', 'HotWater'
+      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+      hw_loop.addDemandBranchForComponent(htg_coil)
     when 'DX'
       #create main DX heating coil
       htg_coil = add_onespeed_htg_DX_coil(model, always_on)
@@ -210,31 +216,33 @@ class NECB2011
     # Add the components to the air loop
     # in order from closest to zone to furthest from zone
     supply_inlet_node = air_loop.supplyInletNode
+    fan.addToNode(supply_inlet_node)
     if necb_reference_hp
-
       #create supplemental heating coil based on default regional fuel type
       if necb_reference_hp_supp_fuel == 'DefaultFuel'
         epw = OpenStudio::EpwFile.new(model.weatherFile.get.path.get)
         necb_reference_hp_supp_fuel = @standards_data['regional_fuel_use'].detect { |fuel_sources| fuel_sources['state_province_regions'].include?(epw.stateProvinceRegion) }['fueltype_set']
       end
-      if necb_reference_hp_supp_fuel == 'NaturalGas'
+      if necb_reference_hp_supp_fuel == 'NaturalGas' || necb_reference_hp_supp_fuel == 'Gas'
         supplemental_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
-      elsif necb_reference_hp_supp_fuel == 'Electricity' or  necb_reference_hp_supp_fuel == 'FuelOilNo2'
+      elsif necb_reference_hp_supp_fuel == 'Electricity' || necb_reference_hp_supp_fuel == 'Electric' || necb_reference_hp_supp_fuel == 'FuelOilNo2'
         supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-      else #hot water coils is an option in the future
+      elsif necb_reference_hp_supp_fuel == 'Hot Water' || necb_reference_hp_supp_fuel == "HotWater"
+        supplemental_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+        hw_loop.addDemandBranchForComponent(supplemental_htg_coil)
+      else
         raise('Invalid fuel type selected for heat pump supplemental coil')
       end
       # This method will seem like an error in number of args..but this is due to swig voodoo.
-      air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, fan, htg_coil, clg_coil, supplemental_htg_coil)
-      air_to_air_heatpump.setName("#{control_zone.name} ASHP")
-      air_to_air_heatpump.setControllingZone(control_zone)
-      air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
-      air_to_air_heatpump.addToNode(supply_inlet_node)
-    else
-      fan.addToNode(supply_inlet_node)
-      htg_coil.addToNode(supply_inlet_node)
-      clg_coil.addToNode(supply_inlet_node)
+      #air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, fan, htg_coil, clg_coil, supplemental_htg_coil)
+      #air_to_air_heatpump.setName("#{control_zone.name} ASHP")
+      #air_to_air_heatpump.setControllingZone(control_zone)
+      #air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
+      #air_to_air_heatpump.addToNode(supply_inlet_node)
+      supplemental_htg_coil.addToNode(supply_inlet_node)
     end
+    htg_coil.addToNode(supply_inlet_node)
+    clg_coil.addToNode(supply_inlet_node)
     oa_system.addToNode(supply_inlet_node)
 
     # Add a setpoint manager single zone reheat to control the

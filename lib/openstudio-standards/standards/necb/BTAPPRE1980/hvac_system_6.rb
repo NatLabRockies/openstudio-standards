@@ -131,18 +131,18 @@ class BTAPPRE1980
             reheat_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
           end
 
+                    # Set zone baseboards
+                    add_zone_baseboards(model: model,
+                    zone: zone,
+                    baseboard_type: baseboard_type,
+                    hw_loop: hw_loop)
+
           vav_terminal = OpenStudio::Model::AirTerminalSingleDuctVAVReheat.new(model, always_on, reheat_coil)
           air_loop.addBranchForZone(zone, vav_terminal.to_StraightComponent)
           # NECB2011 minimum zone airflow setting
           vav_terminal.setFixedMinimumAirFlowRate(system_data[:ZoneVAVMinFlowFactorPerFloorArea] * zone.floorArea)
           vav_terminal.setMaximumReheatAirTemperature(system_data[:ZoneVAVMaxReheatTemp])
           vav_terminal.setDamperHeatingAction(system_data[:ZoneVAVDamperAction])
-
-          # Set zone baseboards
-          add_zone_baseboards(model: model,
-                              zone: zone,
-                              baseboard_type: baseboard_type,
-                              hw_loop: hw_loop)
         end
 
         # Modifying airloop name.
@@ -154,17 +154,15 @@ class BTAPPRE1980
         sys_name_pars['zone_htg'] = baseboard_type
         sys_name_pars['zone_clg'] = 'none'
         sys_name_pars['sys_rf'] = 'vv'
-        assign_base_sys_name(air_loop,
+        assign_base_sys_name(air_loop: air_loop,
                              sys_abbr: 'sys_6',
                              sys_oa: 'mixed',
                              sys_name_pars: sys_name_pars)
       end
+      # next story
     end
-    # next story
-
     # for debugging
     # puts "end add_sys6_multi_zone_built_up_with_baseboard_heating"
-
     return true
   end
 
@@ -227,7 +225,6 @@ class BTAPPRE1980
     # Make a Packaged VAV w/ PFP Boxes for each story of the building
     model.getBuildingStorys.sort.each do |story|
       unless (OpenstudioStandards::Geometry.building_story_get_thermal_zones(story) & zones).empty?
-
         air_loop = common_air_loop(model: model, system_data: system_data)
         air_loop.setName(system_data[:name])
         air_loop_sizing = air_loop.sizingSystem
@@ -323,12 +320,10 @@ class BTAPPRE1980
                               hw_loop: hw_loop)
         end
       end
+      # next story
     end
-    # next story
-
     # for debugging
     # puts "end add_sys6_multi_zone_built_up_with_baseboard_heating"
-
     return true
   end
 end

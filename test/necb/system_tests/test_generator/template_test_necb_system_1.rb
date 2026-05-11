@@ -53,7 +53,7 @@ class NECB_HVAC_System_1_Test < Minitest::Test
     OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
     if (baseboard_type == "Hot Water") || (mau_heating_coil_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys1_unitary_ac_baseboard_heating(model: model,
                                                    zones: model.getThermalZones,

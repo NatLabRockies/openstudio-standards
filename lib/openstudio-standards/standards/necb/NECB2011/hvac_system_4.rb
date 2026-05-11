@@ -54,9 +54,7 @@ class NECB2011
     # NOTE: This is the same as system type 3 (single zone make-up air unit and single zone rooftop unit are both PSZ systems)
     # SHOULD WE COMBINE sys3 and sys4 into one script?
     #
-    # control_zone = determine_control_zone(zones)
-    # Todo change this when control zone method is working.
-    control_zone = zones.first
+    control_zone = determine_control_zone(zones)
 
     always_on = model.alwaysOnDiscreteSchedule
 
@@ -83,12 +81,14 @@ class NECB2011
       sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
     end
 
-    if necb_reference_hp
+    #if necb_reference_hp
       # AirLoopHVACUnitaryHeatPumpAirToAir needs FanOnOff in order for the fan to turn off during off hours
-      fan = OpenStudio::Model::FanOnOff.new(model, always_on)
-    else
-      fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
-    end
+    #  fan = OpenStudio::Model::FanOnOff.new(model, always_on)
+    #else
+    #  fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
+    #end
+    # Not using unitary heat pump model until it works with backup hot water coils.  Fan stays as contant volume.
+    fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
 
     # Set up DX coil with NECB performance curve characteristics;
     clg_coil = add_onespeed_DX_coil(model, always_on)
@@ -96,13 +96,16 @@ class NECB2011
     clg_coil.setName('CoilCoolingDXSingleSpeed_ashp') if necb_reference_hp
 
     raise("Flag 'necb_reference_hp' is set to true while parameter 'heating_coil_type' is not set to DX") if (necb_reference_hp && (heating_coil_type != 'DX'))
-    if heating_coil_type == 'Electric' # electric coil
+    if heating_coil_type == 'Electric' || heating_coil_type == 'FuelOilNo2' # electric coil
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
     elsif heating_coil_type == 'Gas'
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
     elsif heating_coil_type == 'DX'
       htg_coil = add_onespeed_htg_DX_coil(model, always_on)
       htg_coil.setName('CoilHeatingDXSingleSpeed_ashp')
+    elsif heating_coil_type == 'Hot Water'
+      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+      hw_loop.addDemandBranchForComponent(htg_coil)
     end
 
     # TO DO: other fuel-fired heating coil types? (not available in OpenStudio/E+ - may need to play with efficiency to mimic other fuel types)
@@ -121,6 +124,7 @@ class NECB2011
     # Add the components to the air loop
     # in order from closest to zone to furthest from zone
     supply_inlet_node = air_loop.supplyInletNode
+    fan.addToNode(supply_inlet_node)
     if necb_reference_hp
       #create supplemental heating coil based on default regional fuel type
       if necb_reference_hp_supp_fuel == 'DefaultFuel'
@@ -131,21 +135,27 @@ class NECB2011
         supplemental_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
       elsif necb_reference_hp_supp_fuel == 'Electricity' or  necb_reference_hp_supp_fuel == 'FuelOilNo2'
         supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-      else #hot water coils is an option in the future
+      elsif necb_reference_hp_supp_fuel == 'Hot Water'
+        supplemental_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+        hw_loop.addDemandBranchForComponent(supplemental_htg_coil)
+      else
         raise('Invalid fuel type selected for heat pump supplemental coil')
       end
+      supplemental_htg_coil.addToNode(supply_inlet_node)
       # This method will seem like an error in number of args..but this is due to swig voodoo.
-      air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, fan, htg_coil, clg_coil, supplemental_htg_coil)
-      air_to_air_heatpump.setName("#{control_zone.name} ASHP")
-      air_to_air_heatpump.setControllingZone(control_zone)
-      air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
-      air_to_air_heatpump.addToNode(supply_inlet_node)
-    else
-      fan.addToNode(supply_inlet_node)
-      htg_coil.addToNode(supply_inlet_node)
-      clg_coil.addToNode(supply_inlet_node)
-
+      #air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, fan, htg_coil, clg_coil, supplemental_htg_coil)
+      #air_to_air_heatpump.setName("#{control_zone.name} ASHP")
+      #air_to_air_heatpump.setControllingZone(control_zone)
+      #air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
+      #air_to_air_heatpump.addToNode(supply_inlet_node)
     end
+    htg_coil.addToNode(supply_inlet_node)
+    clg_coil.addToNode(supply_inlet_node)
+    #fan.addToNode(supply_inlet_node)
+    #htg_coil.addToNode(supply_inlet_node)
+    #clg_coil.addToNode(supply_inlet_node)
+    #supplemental_htg_coil.addToNode(supply_inlet_node) if necb_reference_hp
+
     oa_system.addToNode(supply_inlet_node)
     # Add a setpoint manager single zone reheat to control the
     # supply air temperature based on the needs of this zone
@@ -198,17 +208,18 @@ class NECB2011
     sys_name_pars['sys_clg'] = 'dx'
     sys_name_pars['sys_clg'] = 'ashp' if necb_reference_hp
     sys_name_pars['sys_htg'] = heating_coil_type
-    sys_name_pars['sys_htg'] = 'ashp' if necb_reference_hp
+    sys_name_pars['sys_htg'] = 'ashp>c-g' if necb_reference_hp and necb_reference_hp_supp_fuel == "NaturalGas"
+    sys_name_pars['sys_htg'] = 'ashp>c-e' if necb_reference_hp and necb_reference_hp_supp_fuel == "Electricity"
+    sys_name_pars['sys_htg'] = 'ashp>c-hw' if necb_reference_hp and necb_reference_hp_supp_fuel == "Hot Water"
     sys_name_pars['sys_sf'] = 'cv'
     sys_name_pars['zone_htg'] = baseboard_type
     sys_name_pars['zone_clg'] = 'none'
     sys_name_pars['sys_rf'] = 'none'
-    assign_base_sys_name(air_loop,
+    return assign_base_sys_name(air_loop: air_loop,
                          sys_abbr: 'sys_4',
                          sys_oa: 'mixed',
                          sys_name_pars: sys_name_pars)
 
-    return true
   end
   # end add_sys4_single_zone_make_up_air_unit_with_baseboard_heating
 end

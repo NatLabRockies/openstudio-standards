@@ -17,9 +17,8 @@ class ASHRAE901PRM < Standard
   # @param set_electric_equipment [Boolean] if true, set the electric equipment density
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
   # @param set_ventilation [Boolean] if true, set the ventilation rates (per-person and per-area)
-  # @param set_infiltration [Boolean] if true, set the infiltration rates
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
+  def space_type_apply_internal_loads(space_type, set_people: false, set_lights: true, set_electric_equipment: false, set_gas_equipment: false, set_ventilation: false)
     # Skip plenums
     # Check if the space type name
     # contains the word plenum.
@@ -552,7 +551,7 @@ class ASHRAE901PRM < Standard
       space_area = space.floorArea
       space_height = OpenStudio.convert(space_volume / space_area, 'm', 'ft').get
       # calculate the new lpd values
-      space_lighting_per_area = (lighting_per_length * space_height) + lighting_per_area
+      space_lighting_per_area = ((lighting_per_length * space_height) / space_area) + lighting_per_area
 
       # Adjust the occupancy control sensor reduction factor from dataset
       if manon_or_partauto == 1
@@ -652,7 +651,7 @@ class ASHRAE901PRM < Standard
         space_area = space.floorArea
         space_height = OpenStudio.convert(space_volume / space_area, 'm', 'ft').get
         # calculate and add new lpd values
-        user_space_type_lighting_per_area = ((lighting_per_length * space_height) + lighting_per_area) * sub_space_type_frac
+        user_space_type_lighting_per_area = (((lighting_per_length * space_height) / space_area) + lighting_per_area) * sub_space_type_frac
         space_lighting_per_area += user_space_type_lighting_per_area
 
         # Adjust the occupancy control sensor reduction factor from dataset

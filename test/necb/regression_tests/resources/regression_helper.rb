@@ -1,20 +1,23 @@
 require 'minitest/unit'
 require 'json'
+require 'csv'
+require 'digest'
 
 
 class NECBRegressionHelper < Minitest::Test
+
+
 
   def setup()
     @building_type = 'FullServiceRestaurant'
     @epw_file = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
     @template = 'NECB2011'
     @test_dir = "#{File.dirname(__FILE__)}/output"
-    @expected_results_folder = "#{File.dirname(__FILE__)}/../expected_results/"
+    @expected_results_folder = "#{File.dirname(__FILE__)}/../expected/"
     @model = nil
     @model_name = nil
     @run_simulation = false
     @primary_heating_fuel = "Electricity"
-    @reference_hp = false
   end
 
 
@@ -24,8 +27,7 @@ class NECBRegressionHelper < Minitest::Test
                                        test_dir: @test_dir,
                                        expected_results_folder: @expected_results_folder,
                                        run_simulation: @run_simulation,
-                                       primary_heating_fuel: @primary_heating_fuel,
-                                       reference_hp: @reference_hp
+                                       primary_heating_fuel: @primary_heating_fuel
   )
     @epw_file = epw_file
     @template = template
@@ -33,7 +35,6 @@ class NECBRegressionHelper < Minitest::Test
     @test_dir = test_dir
     @expected_results_folder = expected_results_folder
     @primary_heating_fuel = primary_heating_fuel
-    @reference_hp = reference_hp
     self.create_model(building_type: @building_type,
                       epw_file: @epw_file,
                       template: @template,
@@ -83,18 +84,25 @@ class NECBRegressionHelper < Minitest::Test
   def osm_regression(expected_results_folder: @expected_results_folder)
     begin
       diffs = []
+      osm_results_folder = File.join(File.expand_path('..', expected_results_folder), 'output_osm')
+      idf_results_folder = File.join(File.expand_path('..', expected_results_folder), 'output_idf')
+      diff_results_folder = File.join(File.expand_path('..', expected_results_folder), 'output_diff')
+      [osm_results_folder, idf_results_folder, diff_results_folder].each do |folder|
+        FileUtils.mkdir_p(folder) unless Dir.exist?(folder)
+      end
 
-
-      expected_osm_file = "#{expected_results_folder}#{@model_name}_expected_result.osm"
-      test_osm_file = "#{expected_results_folder}#{@model_name}_test_result.osm"
-      test_idf_file = "#{expected_results_folder}#{@model_name}_test_result.idf"
+      expected_osm_file = File.join(expected_results_folder, @model_name + '.osm')
+      test_osm_file = File.join(osm_results_folder, @model_name + '.osm')
+      test_idf_file = File.join(idf_results_folder, @model_name + '.idf')
 
       #save test results by default
       BTAP::FileIO.save_osm(@model, test_osm_file)
+      BTAP::FileIO::clean_osm_file(file_path: test_osm_file, output_path: test_osm_file)
+      @model = BTAP::FileIO::load_osm(test_osm_file)
       puts "saved test result osm file to #{test_osm_file}"
       BTAP::FileIO.save_idf(@model, test_idf_file)
       puts "saved test result idf file to #{test_idf_file}"
-
+      
       # Load the expected osm
       unless File.exist?(expected_osm_file)
         raise("The initial osm path: #{expected_osm_file} does not exist.")
@@ -113,7 +121,7 @@ class NECBRegressionHelper < Minitest::Test
       diffs << "#{@model_name}: Error \n#{error}"
     end
     #Write out diff or error message
-    diff_file = "#{expected_results_folder}#{@model_name}_diffs.json"
+    diff_file = File.join(diff_results_folder,@model_name+'_diffs.json')
     FileUtils.rm(diff_file) if File.exist?(diff_file)
     if diffs.size > 0
       File.write(diff_file, JSON.pretty_generate(diffs))

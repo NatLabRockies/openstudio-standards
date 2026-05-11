@@ -38,6 +38,14 @@ namespace :test do
     t.verbose = false
   end
 
+  desc 'Run costing on each permutation of building type, fuel, and template.'
+  Rake::TestTask.new('costing_tests') do |t|
+    file_list = FileList.new('lib/openstudio-standards/btap/costing/test_run_costing_tests.rb')
+    t.libs << 'test'
+    t.test_files = file_list
+    t.verbose = false
+  end
+
   # These tests only available in the CI environment
   if ENV['CI'] == 'true'
 
@@ -160,25 +168,16 @@ namespace :data do
   spreadsheet_titles = spreadsheets_ashrae + spreadsheets_deer + spreadsheets_comstock + spreadsheets_cbes
   spreadsheet_titles = spreadsheet_titles.uniq
 
-  desc 'Check Google Drive configuration'
-  task 'apicheck' do
-    check_google_drive_configuration
-  end
-
-  desc 'Download OpenStudio_Standards spreadsheets from Google Drive'
-  task 'download' do
-    download_google_spreadsheets(spreadsheet_titles)
-  end
-
-  desc 'Download OpenStudio_Standards spreadsheets and generate JSONs'
-  task 'update' do
-    download_google_spreadsheets(spreadsheet_titles)
-    export_spreadsheet_to_json(spreadsheet_titles)
-  end
-
   desc 'Generate JSONs from OpenStudio_Standards spreadsheets'
-  task 'update:manual' do
+  task 'update' do
     export_spreadsheet_to_json(spreadsheet_titles)
+  end
+
+  desc 'BTAP Costing: Validate the costing database'
+  task 'validate_costing' do
+    require_relative './lib/openstudio-standards/btap/costing/btap_costing'
+    data = BTAPCosting.new
+    data.validate_database
   end
 
   desc 'Export JSONs from OpenStudio_Standards to data library'

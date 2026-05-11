@@ -76,10 +76,10 @@ class Standard
           # Part Load Fan Pressure Control
           if plr_req
             vsd_curve_type = air_loop_hvac_set_vsd_curve_type
-            fan_variable_volume_set_control_type(fan, vsd_curve_type)
+            OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: vsd_curve_type)
           # No Part Load Fan Pressure Control
           else
-            fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with discharge dampers')
+            OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Discharge Dampers')
           end
         else
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{fan}: This is not a multizone VAV fan system.")
@@ -95,16 +95,16 @@ class Standard
       ##     plr_req = fan_variable_volume_part_load_fan_power_limitation?(fan, template)
       ##     # Part Load Fan Pressure Control & Static Pressure Reset
       ##     if plr_req && spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Static Pressure Reset')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Static Pressure Setpoint Reset')
       ##     # Part Load Fan Pressure Control only
       ##     elsif plr_req && !spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
       ##     # Static Pressure Reset only
       ##     elsif !plr_req && spr_req
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
       ##     # No Control Required
       ##     else
-      ##       fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with AF or BI Riding Curve')
+      ##       OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Airfoil or Backward Incline riding the curve')
       ##     end
       ##   else
       ##     OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.AirLoopHVAC', "For #{name}: there is a constant volume fan on a multizone vav system.  Cannot apply static pressure reset controls.")
@@ -159,7 +159,7 @@ class Standard
     if air_loop_hvac.thermalZones.size == 1
       air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
         if fan.to_FanVariableVolume.is_initialized
-          fan_variable_volume_set_control_type(fan, 'Single Zone VAV Fan')
+          OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Single Zone VAV')
         end
       end
       air_loop_hvac_apply_single_zone_controls(air_loop_hvac, climate_zone)
@@ -211,7 +211,7 @@ class Standard
       air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac).each do |fan|
         if fan.to_FanVariableVolume.is_initialized
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Setting fan part load curve per G3.1.3.15.")
-          fan_variable_volume_set_control_type(fan, 'Multi Zone VAV with VSD and Fixed SP Setpoint')
+          OpenstudioStandards::HVAC.fan_variable_volume_set_control_type(fan, control_type: 'Multi Zone VAV with Fixed Static Pressure Setpoint')
         end
       end
 
@@ -289,7 +289,7 @@ class Standard
   # Set default fan curve to be VSD with static pressure reset
   # @return [String name of appropriate curve for this code version
   def air_loop_hvac_set_vsd_curve_type
-    return 'Multi Zone VAV with VSD and SP Setpoint Reset'
+    return 'Multi Zone VAV with Static Pressure Setpoint Reset'
   end
 
   # Calculate and apply the performance rating method baseline fan power to this air loop.
@@ -809,7 +809,7 @@ class Standard
         # CoilCoolingDXMultSpeed
         if clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
           coil = clg_coil.to_CoilCoolingDXMultiSpeed.get
-          total_cooling_capacity_w = coil_cooling_dx_multi_speed_find_capacity(coil)
+          total_cooling_capacity_w = OpenstudioStandards::HVAC.coil_cooling_dx_multi_speed_get_capacity(coil)
         end
       elsif sc.to_CoilCoolingDXVariableSpeed.is_initialized
         coil = sc.to_CoilCoolingDXVariableSpeed.get
@@ -882,6 +882,11 @@ class Standard
       is_dc = true
     end
 
+    # Process climate zone:
+    # Moisture regime is not needed for climate zone 8
+    climate_zone = climate_zone.split('-')[-1]
+    climate_zone = '8' if climate_zone.include?('8')
+
     # Retrieve economizer limits from JSON
     search_criteria = {
       'template' => template,
@@ -895,7 +900,7 @@ class Standard
     end
 
     # Determine the minimum capacity and whether or not it is a data center
-    minimum_capacity_btu_per_hr = econ_limits['capacity_limit']
+    minimum_capacity_btu_per_hr = econ_limits['minimum_capacity']
 
     # A big number of btu per hr as the minimum requirement if nil in spreadsheet
     infinity_btu_per_hr = 999_999_999_999
@@ -1032,6 +1037,11 @@ class Standard
     when 'NoEconomizer'
       return [nil, nil, nil]
     when 'FixedDryBulb'
+      # Process climate zone:
+      # Moisture regime is not needed for climate zone 8
+      climate_zone = climate_zone.split('-')[-1]
+      climate_zone = '8' if climate_zone.include?('8')
+
       search_criteria = {
         'template' => template,
         'climate_zone' => climate_zone
@@ -1039,10 +1049,10 @@ class Standard
       econ_limits = model_find_object(standards_data['economizers'], search_criteria)
       drybulb_limit_f = econ_limits['fixed_dry_bulb_high_limit_shutoff_temp']
     when 'FixedEnthalpy'
-      enthalpy_limit_btu_per_lb = 28
+      enthalpy_limit_btu_per_lb = 28.0
     when 'FixedDewPointAndDryBulb'
-      drybulb_limit_f = 75
-      dewpoint_limit_f = 55
+      drybulb_limit_f = 75.0
+      dewpoint_limit_f = 55.0
     end
 
     return [drybulb_limit_f, enthalpy_limit_btu_per_lb, dewpoint_limit_f]
@@ -1807,14 +1817,27 @@ class Standard
   # @param heat_exchanger_type [String] heat exchanger type Rotary or Plate
   # @return [OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent] erv to apply efficiency values
   def air_loop_hvac_apply_energy_recovery_ventilator_efficiency(erv, erv_type: 'ERV', heat_exchanger_type: 'Rotary')
-    erv.setSensibleEffectivenessat100HeatingAirFlow(0.7)
-    erv.setLatentEffectivenessat100HeatingAirFlow(0.6)
-    erv.setSensibleEffectivenessat75HeatingAirFlow(0.7)
-    erv.setLatentEffectivenessat75HeatingAirFlow(0.6)
-    erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
-    erv.setLatentEffectivenessat100CoolingAirFlow(0.6)
-    erv.setSensibleEffectivenessat75CoolingAirFlow(0.75)
-    erv.setLatentEffectivenessat75CoolingAirFlow(0.6)
+    if erv.model.version < OpenStudio::VersionString.new('3.8.0')
+      erv.setSensibleEffectivenessat100HeatingAirFlow(0.7)
+      erv.setLatentEffectivenessat100HeatingAirFlow(0.6)
+      erv.setSensibleEffectivenessat75HeatingAirFlow(0.7)
+      erv.setLatentEffectivenessat75HeatingAirFlow(0.6)
+      erv.setSensibleEffectivenessat100CoolingAirFlow(0.75)
+      erv.setLatentEffectivenessat100CoolingAirFlow(0.6)
+      erv.setSensibleEffectivenessat75CoolingAirFlow(0.75)
+      erv.setLatentEffectivenessat75CoolingAirFlow(0.6)
+    else
+      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values['Sensible Heating'][0.75] = 0.7
+      values['Sensible Heating'][1.0] = 0.7
+      values['Latent Heating'][0.75] = 0.6
+      values['Latent Heating'][1.0] = 0.6
+      values['Sensible Cooling'][0.75] = 0.75
+      values['Sensible Cooling'][1.0] = 0.75
+      values['Latent Cooling'][0.75] = 0.6
+      values['Latent Cooling'][1.0] = 0.6
+      erv = OpenstudioStandards::HVAC.heat_exchanger_air_to_air_set_effectiveness_values(erv, defaults: false, values: values)
+    end
     return erv
   end
 
@@ -1993,7 +2016,7 @@ class Standard
           v_pz = clg_dsn_flow
         end
       else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: #{zone.name} clg_dsn_flow could not be found.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: #{zone.name}, zone CoolingDesignAirFlowRate could not be found.")
       end
       htg_dsn_flow = zone.autosizedHeatingDesignAirFlowRate
       if htg_dsn_flow.is_initialized
@@ -2002,7 +2025,11 @@ class Standard
           v_pz = htg_dsn_flow
         end
       else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: #{zone.name} htg_dsn_flow could not be found.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: #{zone.name}, zone HeatingDesignAirFlowRate could not be found.")
+      end
+
+      if v_pz.zero?
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: #{zone.name}, neither the CoolingDesignAirFlowRate nor the HeatingDesignAirFlowRate could be found. The primary design air flow rate, v_pz, is zero. The zone may be missing a DesignSpecificationOutdoorAir object, or both heating and cooling load may be zero.")
       end
 
       # Get the minimum damper position
@@ -2048,7 +2075,7 @@ class Standard
       v_dz = v_pz * mdp
 
       # Zone discharge air fraction
-      z_d = v_oz / v_dz
+      z_d = v_dz.zero? || v_oz.zero? ? 0.0 : v_oz / v_dz
 
       # Zone ventilation effectiveness
       e_vz = 1.0 + x_s - z_d
@@ -2070,7 +2097,8 @@ class Standard
         v_dz_adj = v_oz / z_d_adj
 
         # Adjusted minimum damper position
-        mdp_adj = v_dz_adj / v_pz
+        # default to 0.2 if either values are zero
+        mdp_adj = v_dz_adj.zero? || v_pz.zero? ? 0.2 : v_dz_adj / v_pz
 
         # Don't allow values > 1
         if mdp_adj > 1.0
@@ -2844,17 +2872,11 @@ class Standard
     fan_control = air_loop_hvac_multi_stage_dx_cooling?(air_loop_hvac)
 
     # Scrub special characters from the system name
-    sn = air_loop_hvac.name.get.to_s
-    snc = sn.gsub(/\W/, '').delete('_')
-    # If the name starts with a number, prepend with a letter
-    if snc[0] =~ /[0-9]/
-      snc = "SYS#{snc}"
-    end
+    snc = OpenstudioStandards::HVAC.ems_friendly_name(air_loop_hvac.name)
 
     # Get the zone name
     zone = air_loop_hvac.thermalZones[0]
-    zone_name = zone.name.get.to_s
-    zn_name_clean = zone_name.gsub(/\W/, '_')
+    zn_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(zone.name)
 
     # Zone air node
     zone_air_node = zone.zoneAirNode
@@ -2931,36 +2953,36 @@ class Standard
     oat_wb_c_sen.setKeyName('Environment')
 
     oa_sch_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Schedule Value')
-    oa_sch_sen.setName("#{snc}OASch")
+    oa_sch_sen.setName("#{snc}_OASch")
     oa_sch_sen.setKeyName(min_oa_sch.handle.to_s)
 
     oa_flow_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'System Node Mass Flow Rate')
-    oa_flow_sen.setName("#{snc}OAFlowMass")
+    oa_flow_sen.setName("#{snc}_OAFlowMass")
     oa_flow_sen.setKeyName(oa_node.handle.to_s)
 
     dat_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'System Node Setpoint Temperature')
-    dat_sen.setName("#{snc}DATRqd")
+    dat_sen.setName("#{snc}_DATRqd")
     dat_sen.setKeyName(sup_out_node.handle.to_s)
 
     # Internal Variables
     oa_flow_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(air_loop_hvac.model, 'Outdoor Air Controller Minimum Mass Flow Rate')
-    oa_flow_var.setName("#{snc}OADesignMass")
+    oa_flow_var.setName("#{snc}_OADesignMass")
     oa_flow_var.setInternalDataIndexKeyName(oa_control.handle.to_s)
 
     # Global Variables
-    gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}NumberofStages")
+    gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_NumberofStages")
 
     # Programs
     num_stg_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(air_loop_hvac.model)
-    num_stg_prg.setName("#{snc}SetNumberofStages")
+    num_stg_prg.setName("#{snc}_SetNumberofStages")
     num_stg_prg_body = <<-EMS
-      SET #{snc}NumberofStages = #{num_stages}
+      SET #{snc}_NumberofStages = #{num_stages}
     EMS
     num_stg_prg.setBody(num_stg_prg_body)
 
     # Program Calling Managers
     setup_mgr = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(air_loop_hvac.model)
-    setup_mgr.setName("#{snc}SetNumberofStagesCallingManager")
+    setup_mgr.setName("#{snc}_SetNumberofStagesCallingManager")
     setup_mgr.setCallingPoint('BeginNewEnvironment')
     setup_mgr.addProgram(num_stg_prg)
 
@@ -2970,11 +2992,11 @@ class Standard
       ### Economizer Control ###
       # Actuators
       econ_eff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(max_oa_sch, 'Schedule:Year', 'Schedule Value')
-      econ_eff_act.setName("#{snc}TimestepEconEff")
+      econ_eff_act.setName("#{snc}_TimestepEconEff")
 
       # Programs
       econ_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(air_loop_hvac.model)
-      econ_prg.setName("#{snc}EconomizerCTRLProg")
+      econ_prg.setName("#{snc}_EconomizerCTRLProg")
       econ_prg_body = <<-EMS
         SET #{econ_eff_act.handle} = 0.7
         SET MaxE = 0.7
@@ -2995,7 +3017,7 @@ class Standard
           SET CoolLoad = 0
         ENDIF
         IF EconoActive == 1
-          SET Stage = #{snc}NumberofStages
+          SET Stage = #{snc}_NumberofStages
           IF Stage == 2
             IF CoolLoad < 0.6
               SET #{econ_eff_act.handle} = MaxE
@@ -3027,72 +3049,72 @@ class Standard
 
       # Program Calling Managers
       econ_mgr = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(air_loop_hvac.model)
-      econ_mgr.setName("#{snc}EcoManager")
+      econ_mgr.setName("#{snc}_EcoManager")
       econ_mgr.setCallingPoint('InsideHVACSystemIterationLoop')
       econ_mgr.addProgram(econ_prg)
 
       # Sensors
       zn_temp_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'System Node Temperature')
-      zn_temp_sen.setName("#{zn_name_clean}Temp")
+      zn_temp_sen.setName("#{zn_name_clean}_Temp")
       zn_temp_sen.setKeyName(zone_air_node.handle.to_s)
 
       htg_rtf_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Heating Coil Runtime Fraction')
-      htg_rtf_sen.setName("#{snc}HeatingRTF")
+      htg_rtf_sen.setName("#{snc}_HeatingRTF")
       htg_rtf_sen.setKeyName(htg_coil.handle.to_s)
 
       clg_rtf_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Cooling Coil Runtime Fraction')
-      clg_rtf_sen.setName("#{snc}RTF")
+      clg_rtf_sen.setName("#{snc}_RTF")
       clg_rtf_sen.setKeyName(dx_coil.handle.to_s)
 
       spd_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Coil System Compressor Speed Ratio')
-      spd_sen.setName("#{snc}SpeedRatio")
+      spd_sen.setName("#{snc}_SpeedRatio")
       spd_sen.setKeyName("#{dx_coil.handle} CoilSystem")
 
       # Internal Variables
       fan_pres_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(air_loop_hvac.model, 'Fan Nominal Pressure Rise')
-      fan_pres_var.setName("#{snc}FanDesignPressure")
+      fan_pres_var.setName("#{snc}_FanDesignPressure")
       fan_pres_var.setInternalDataIndexKeyName(fan.handle.to_s)
 
       dsn_flow_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(air_loop_hvac.model, 'Outdoor Air Controller Maximum Mass Flow Rate')
-      dsn_flow_var.setName("#{snc}DesignFlowMass")
+      dsn_flow_var.setName("#{snc}_DesignFlowMass")
       dsn_flow_var.setInternalDataIndexKeyName(oa_control.handle.to_s)
 
       # Actuators
       fan_pres_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, 'Fan', 'Fan Pressure Rise')
-      fan_pres_act.setName("#{snc}FanPressure")
+      fan_pres_act.setName("#{snc}_FanPressure")
 
       # Global Variables
-      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}FanPwrExp")
-      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}Stg1Spd")
-      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}Stg2Spd")
-      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}HeatSpeed")
-      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}VenSpeed")
+      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_FanPwrExp")
+      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_Stg1Spd")
+      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_Stg2Spd")
+      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_HeatSpeed")
+      gvar = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(air_loop_hvac.model, "#{snc}_VenSpeed")
 
       # Programs
       fan_par_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(air_loop_hvac.model)
-      fan_par_prg.setName("#{snc}SetFanPar")
+      fan_par_prg.setName("#{snc}_SetFanPar")
       fan_par_prg_body = <<-EMS
-        IF #{snc}NumberofStages == 1
+        IF #{snc}_NumberofStages == 1
           Return
         ENDIF
-        SET #{snc}FanPwrExp = 2.2
+        SET #{snc}_FanPwrExp = 2.2
         SET OAFrac = #{oa_flow_sen.handle}/#{dsn_flow_var.handle}
         IF  OAFrac < 0.66
-          SET #{snc}VenSpeed = 0.66
-          SET #{snc}Stg1Spd = 0.66
+          SET #{snc}_VenSpeed = 0.66
+          SET #{snc}_Stg1Spd = 0.66
         ELSE
-          SET #{snc}VenSpeed = OAFrac
-          SET #{snc}Stg1Spd = OAFrac
+          SET #{snc}_VenSpeed = OAFrac
+          SET #{snc}_Stg1Spd = OAFrac
         ENDIF
-        SET #{snc}Stg2Spd = 1.0
-        SET #{snc}HeatSpeed = 1.0
+        SET #{snc}_Stg2Spd = 1.0
+        SET #{snc}_HeatSpeed = 1.0
       EMS
       fan_par_prg.setBody(fan_par_prg_body)
 
       fan_ctrl_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(air_loop_hvac.model)
-      fan_ctrl_prg.setName("#{snc}FanControl")
+      fan_ctrl_prg.setName("#{snc}_FanControl")
       fan_ctrl_prg_body = <<-EMS
-        IF #{snc}NumberofStages == 1
+        IF #{snc}_NumberofStages == 1
           Return
         ENDIF
         IF #{htg_rtf_sen.handle} > 0
@@ -3103,7 +3125,7 @@ class Standard
           SET Stage2 = 0
         ELSE
           SET Heating = 0
-          SET EcoSpeed = #{snc}VenSpeed
+          SET EcoSpeed = #{snc}_VenSpeed
           IF #{spd_sen.handle} == 0
             IF #{clg_rtf_sen.handle} > 0
               SET Stage1 = #{clg_rtf_sen.handle}
@@ -3111,7 +3133,7 @@ class Standard
               SET Ven = 1-#{clg_rtf_sen.handle}
               SET Eco = 0
               IF #{oa_flow_sen.handle} > (#{oa_flow_var.handle}*#{oa_sch_sen.handle})
-                SET #{snc}Stg1Spd = 1.0
+                SET #{snc}_Stg1Spd = 1.0
               ENDIF
             ELSE
               SET Stage1 = 0
@@ -3120,10 +3142,10 @@ class Standard
                 SET Eco = 1.0
                 SET Ven = 0
                 !Calculate the expected discharge air temperature if the system runs at its low speed
-                SET ExpDAT = #{dat_sen.handle}-(1-#{snc}VenSpeed)*#{zn_temp_sen.handle}
-                SET ExpDAT = ExpDAT/#{snc}VenSpeed
+                SET ExpDAT = #{dat_sen.handle}-(1-#{snc}_VenSpeed)*#{zn_temp_sen.handle}
+                SET ExpDAT = ExpDAT/#{snc}_VenSpeed
                 IF #{oat_db_c_sen.handle} > ExpDAT
-                  SET EcoSpeed = #{snc}Stg2Spd
+                  SET EcoSpeed = #{snc}_Stg2Spd
                 ENDIF
               ELSE
                 SET Eco = 0
@@ -3136,18 +3158,18 @@ class Standard
             SET Ven = 0
             SET Eco = 0
             IF #{oa_flow_sen.handle} > (#{oa_flow_var.handle}*#{oa_sch_sen.handle})
-              SET #{snc}Stg1Spd = 1.0
+              SET #{snc}_Stg1Spd = 1.0
             ENDIF
           ENDIF
         ENDIF
         ! For each mode (percent time in mode)*(fanSpeer^PwrExp) is the contribution to weighted fan power over time step
-        SET FPR = Ven*(#{snc}VenSpeed ^ #{snc}FanPwrExp)
-        SET FPR = FPR+Eco*(EcoSpeed^#{snc}FanPwrExp)
-        SET FPR1 = Stage1*(#{snc}Stg1Spd^#{snc}FanPwrExp)
+        SET FPR = Ven*(#{snc}_VenSpeed ^ #{snc}_FanPwrExp)
+        SET FPR = FPR+Eco*(EcoSpeed^#{snc}_FanPwrExp)
+        SET FPR1 = Stage1*(#{snc}_Stg1Spd^#{snc}_FanPwrExp)
         SET FPR = FPR+FPR1
-        SET FPR2 = Stage2*(#{snc}Stg2Spd^#{snc}FanPwrExp)
+        SET FPR2 = Stage2*(#{snc}_Stg2Spd^#{snc}_FanPwrExp)
         SET FPR = FPR+FPR2
-        SET FPR3 = Heating*(#{snc}HeatSpeed^#{snc}FanPwrExp)
+        SET FPR3 = Heating*(#{snc}_HeatSpeed^#{snc}_FanPwrExp)
         SET FanPwrRatio = FPR+ FPR3
         ! system fan power is directly proportional to static pressure so this change linearly adjusts fan energy for speed control
         SET #{fan_pres_act.handle} = #{fan_pres_var.handle}*FanPwrRatio
@@ -3160,7 +3182,7 @@ class Standard
       setup_mgr.addProgram(fan_par_prg)
 
       fan_ctrl_mgr = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(air_loop_hvac.model)
-      fan_ctrl_mgr.setName("#{snc}FanMainManager")
+      fan_ctrl_mgr.setName("#{snc}_FanMainManager")
       fan_ctrl_mgr.setCallingPoint('BeginTimestepBeforePredictor')
       fan_ctrl_mgr.addProgram(fan_ctrl_prg)
 
@@ -3779,10 +3801,10 @@ class Standard
   # @param snc [String] System name
   # @return [OpenStudio::Model::ScheduleRuleset] Generated maximum outdoor air fraction schedule for later use
   def set_maximum_fraction_outdoor_air_schedule(air_loop_hvac, oa_control, snc)
-    max_oa_sch_name = "#{snc}maxOASch"
+    max_oa_sch_name = "#{snc}_maxOASch"
     max_oa_sch = OpenStudio::Model::ScheduleRuleset.new(air_loop_hvac.model)
     max_oa_sch.setName(max_oa_sch_name)
-    max_oa_sch.defaultDaySchedule.setName("#{max_oa_sch_name}Default")
+    max_oa_sch.defaultDaySchedule.setName("#{max_oa_sch_name}_Default")
     max_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.7)
     oa_control.setMaximumFractionofOutdoorAirSchedule(max_oa_sch)
     return max_oa_sch

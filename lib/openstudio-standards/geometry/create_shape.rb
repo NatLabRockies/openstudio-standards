@@ -1,5 +1,5 @@
 module OpenstudioStandards
-  # This Module provides methods to create, modify, and get information about model geometry
+  # The Geometry module provides methods to create, modify, and get information about model geometry
   module Geometry
     # Methods to create basic shapes
 

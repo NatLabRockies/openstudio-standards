@@ -79,7 +79,7 @@ module OpenstudioStandards
       end
 
       # set ground temperature shallow values based on .stat file
-      ground_temperature_shallow = OpenStudio::Model::SiteGroundTemperatureShallow.new(model)
+      ground_temperature_shallow = model.getSiteGroundTemperatureShallow
       ground_temperature_shallow.setJanuarySurfaceGroundTemperature(stat_file.monthly_undis_ground_temps_0p5m[0])
       ground_temperature_shallow.setFebruarySurfaceGroundTemperature(stat_file.monthly_undis_ground_temps_0p5m[1])
       ground_temperature_shallow.setMarchSurfaceGroundTemperature(stat_file.monthly_undis_ground_temps_0p5m[2])
@@ -113,7 +113,7 @@ module OpenstudioStandards
       end
 
       # set ground temperature deep values based on .stat file
-      ground_temperature_deep = OpenStudio::Model::SiteGroundTemperatureDeep.new(model)
+      ground_temperature_deep = model.getSiteGroundTemperatureDeep
       ground_temperature_deep.setJanuaryDeepGroundTemperature(stat_file.monthly_undis_ground_temps_4p0m[0])
       ground_temperature_deep.setFebruaryDeepGroundTemperature(stat_file.monthly_undis_ground_temps_4p0m[1])
       ground_temperature_deep.setMarchDeepGroundTemperature(stat_file.monthly_undis_ground_temps_4p0m[2])
@@ -147,7 +147,7 @@ module OpenstudioStandards
             full_epw_path = epw_path.get.to_s
           else
             # If this is an always-run Measure, need to check a different path
-            alt_weath_path = File.expand_path(File.join(Dir.pwd, '../../resources'))
+            alt_weath_path = File.expand_path(File.join(__dir__, '../../resources'))
             alt_epw_path = File.expand_path(File.join(alt_weath_path, epw_path.get.to_s))
             if File.exist?(alt_epw_path)
               full_epw_path = alt_epw_path

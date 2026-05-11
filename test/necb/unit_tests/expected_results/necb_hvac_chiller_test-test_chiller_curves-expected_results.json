@@ -1,0 +1,387 @@
+{
+  "VarType": "vintage",
+  "NECB2011": {
+    "VarType": "chiller_type",
+    "Reference": "NECB 2011 p3 Table 8.4.4.22.C",
+    "Scroll": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Scroll_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.94418,
+            "x": 0.0337102,
+            "x2": 0.0000975564,
+            "y": -0.00322114,
+            "y2": -0.0000491832,
+            "xy": -0.000177584,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Centrifugal_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.707908,
+            "x": -0.00200657,
+            "x2": -0.00259605,
+            "y": 0.0300588,
+            "y2": -0.00105643,
+            "xy": 0.0020457,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Screw_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.812998,
+            "x": -0.0142532,
+            "x2": -0.00161799,
+            "y": 0.0263844,
+            "y2": -0.00091543,
+            "xy": 0.00169601,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Reciprocating_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 1.03031,
+            "x": 0.0334698,
+            "x2": 0.00023639,
+            "y": -0.00729587,
+            "y2": -0.000023166,
+            "xy": -0.000148943,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2015": {
+    "VarType": "chiller_type",
+    "Reference": "xx",
+    "Scroll": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Scroll_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.94418,
+            "x": 0.0337102,
+            "x2": 0.0000975564,
+            "y": -0.00322114,
+            "y2": -0.0000491832,
+            "xy": -0.000177584,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Centrifugal_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.707908,
+            "x": -0.00200657,
+            "x2": -0.00259605,
+            "y": 0.0300588,
+            "y2": -0.00105643,
+            "xy": 0.0020457,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Screw_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.812998,
+            "x": -0.0142532,
+            "x2": -0.00161799,
+            "y": 0.0263844,
+            "y2": -0.00091543,
+            "xy": 0.00169601,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Reciprocating_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 1.03031,
+            "x": 0.0334698,
+            "x2": 0.00023639,
+            "y": -0.00729587,
+            "y2": -0.000023166,
+            "xy": -0.000148943,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2017": {
+    "VarType": "chiller_type",
+    "Reference": "xx",
+    "Scroll": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Scroll_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.94418,
+            "x": 0.0337102,
+            "x2": 0.0000975564,
+            "y": -0.00322114,
+            "y2": -0.0000491832,
+            "xy": -0.000177584,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Centrifugal 28tons 0.6kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Centrifugal_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.707908,
+            "x": -0.00200657,
+            "x2": -0.00259605,
+            "y": 0.0300588,
+            "y2": -0.00105643,
+            "xy": 0.0020457,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Screw_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.812998,
+            "x": -0.0142532,
+            "x2": -0.00161799,
+            "y": 0.0263844,
+            "y2": -0.00091543,
+            "xy": 0.00169601,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Reciprocating_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 1.03031,
+            "x": 0.0334698,
+            "x2": 0.00023639,
+            "y": -0.00729587,
+            "y2": -0.000023166,
+            "xy": -0.000148943,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "chiller_type",
+    "Reference": "xx",
+    "Scroll": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Scroll 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Scroll_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.94418,
+            "x": 0.0337102,
+            "x2": 0.0000975564,
+            "y": -0.00322114,
+            "y2": -0.0000491832,
+            "xy": -0.000177584,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Centrifugal": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Centrifugal 28tons 0.7kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Centrifugal 28tons 0.7kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Centrifugal_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.707908,
+            "x": -0.00200657,
+            "x2": -0.00259605,
+            "y": 0.0300588,
+            "y2": -0.00105643,
+            "xy": 0.0020457,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Rotary Screw": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Rotary Screw 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Screw_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 0.812998,
+            "x": -0.0142532,
+            "x2": -0.00161799,
+            "y": 0.0263844,
+            "y2": -0.00091543,
+            "xy": 0.00169601,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    },
+    "Reciprocating": {
+      "VarType": "TestCase",
+      "small": {
+        "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton": {
+          "chiller_name": "Primary Chiller WaterCooled Reciprocating 28tons 0.8kW/ton",
+          "capacity_kW": 100,
+          "eff_curve_name": "WaterCooled_Reciprocating_CAPFT_NECB2011",
+          "eff_curve_type": "OS_Curve_Biquadratic",
+          "curve_coefficients": {
+            "const": 1.03031,
+            "x": 0.0334698,
+            "x2": 0.00023639,
+            "y": -0.00729587,
+            "y2": -0.000023166,
+            "xy": -0.000148943,
+            "minX": 5.0,
+            "maxX": 10.0,
+            "minY": 24.0,
+            "maxY": 35.0
+          }
+        }
+      }
+    }
+  }
+}

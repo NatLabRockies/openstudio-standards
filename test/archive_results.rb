@@ -1,7 +1,7 @@
 require 'fileutils'
 require 'find'
 
-output_dir = "#{Dir.pwd}/output"
+output_dir = "#{__dir__}/output"
 # list the building types, vintages and climate zones that will be archived.
 building_types = ['RetailStandalone', 'RetailStripmall', 'FullServiceRestaurant', 'QuickServiceRestaurant', 'LargeHotel',
                  'SmallHotel', 'HighriseApartment', 'MidriseApartment', 'Outpatient']
@@ -9,10 +9,10 @@ vintages = ['DOE Ref 1980-2004', 'DOE Ref Pre-1980', '90.1-2004', '90.1-2007', '
 climate_zones = ['ASHRAE 169-2013-1A', 'ASHRAE 169-2013-2A','ASHRAE 169-2013-2B',
                  'ASHRAE 169-2013-3A', 'ASHRAE 169-2013-3B', 'ASHRAE 169-2013-3C', 'ASHRAE 169-2013-4A',
                  'ASHRAE 169-2013-4B', 'ASHRAE 169-2013-4C', 'ASHRAE 169-2013-5A', 'ASHRAE 169-2013-5B',
-                 'ASHRAE 169-2013-6A', 'ASHRAE 169-2013-6B', 'ASHRAE 169-2013-7A', 'ASHRAE 169-2013-8A'] 
+                 'ASHRAE 169-2013-6A', 'ASHRAE 169-2013-6B', 'ASHRAE 169-2013-7A', 'ASHRAE 169-2013-8A']
 
 # create archive folder
-archive_dir = "#{Dir.pwd}/Archive"
+archive_dir = "#{__dir__}/Archive"
 Dir.mkdir(archive_dir) unless Dir.exist?(archive_dir)
 # copy the key results to the Archive folder
 building_types.each do |building_type|
@@ -20,7 +20,7 @@ building_types.each do |building_type|
     climate_zones.each do |climate_zone|
       puts "Archiving #{building_type}-#{vintage}-#{climate_zone}"
       archive_files = Array.new
-      archive_file_dir = "#{Dir.pwd}/Archive/#{building_type}-#{vintage}-#{climate_zone}"
+      archive_file_dir = "#{__dir__}/Archive/#{building_type}-#{vintage}-#{climate_zone}"
       Dir.mkdir(archive_file_dir) unless Dir.exist?(archive_file_dir)
       Find.find(output_dir) do |path|
         # # narrow down to the building_type-climate-vintage, and create a folder for archived files

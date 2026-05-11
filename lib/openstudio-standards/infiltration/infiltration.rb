@@ -96,7 +96,7 @@ module OpenstudioStandards
           infil_rate_cfm_per_ft2 = component_infil_rates_cfm_per_ft2[type]['slab_on_grade']
         end
       else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration', "Could not determine infiltration surface type for #{surface.name}, defaulting to 0 component infiltration rate.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.infiltration', "Could not determine infiltration surface type for #{surface.name}, defaulting to 0 component infiltration rate.")
         return 0.0
       end
 
@@ -156,14 +156,14 @@ module OpenstudioStandards
       when 'OverheadDoor'
         infil_rate_cfm_per_ft2 = component_infil_rates_cfm_per_ft2[type]['loading_dock_door']
       when 'GlassDoor'
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration', "Assuming swinging_or_revolving_glass_door for #{sub_surface.name} for component infiltration rate.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Infiltration.infiltration', "Assuming swinging_or_revolving_glass_door for #{sub_surface.name} for component infiltration rate.")
         infil_rate_cfm_per_ft2 = component_infil_rates_cfm_per_ft2[type]['swinging_or_revolving_glass_door']
       when 'FixedWindow', 'OperableWindow'
         infil_rate_cfm_per_ft2 = component_infil_rates_cfm_per_ft2[type]['window']
       when 'Skylight', 'TubularDaylightDome', 'TubularDaylightDiffuser'
         infil_rate_cfm_per_ft2 = component_infil_rates_cfm_per_ft2[type]['skylight']
       else
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration', "Could not determine infiltration sub surface type for #{sub_surface.name}, defaulting to 0 component infiltration rate.")
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.infiltration', "Could not determine infiltration sub surface type for #{sub_surface.name}, defaulting to 0 component infiltration rate.")
         return 0.0
       end
 

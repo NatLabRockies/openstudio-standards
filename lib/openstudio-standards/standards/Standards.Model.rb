@@ -1,5 +1,6 @@
 require 'csv'
 require 'date'
+require 'parallel'
 
 class Standard
   attr_accessor :space_multiplier_map, :standards_data
@@ -12,6 +13,12 @@ class Standard
   end
 
   # @!group Model
+
+  # Returns the PRM building envelope infiltration rate at a pressure differential of 75 Pa in cfm per ft^2
+  # @return [Double] infiltration rate in cfm per ft^2 at 75 Pa
+  def prm_building_envelope_infiltration_rate
+    return 1.0
+  end
 
   # Creates a Performance Rating Method (aka Appendix G aka LEED) baseline building model
   # Method used for 90.1-2016 and onward
@@ -60,8 +67,9 @@ class Standard
   # @param sizing_run_dir [String] the directory where the sizing runs will be performed
   # @param run_all_orients [Boolean] indicate weather a baseline model should be created for all 4 orientations: same as user model, +90 deg, +180 deg, +270 deg
   # @param debug [Boolean] If true, will report out more detailed debugging output
+  # @param use_parallel [Boolean] If true, when measure will run simulation for four orientations in parallel, else keep runinig one at a time.
   # @return [Boolean] returns true if successful, false if not
-  def model_create_prm_any_baseline_building(user_model, building_type, climate_zone, hvac_building_type = 'All others', wwr_building_type = 'All others', swh_building_type = 'All others', model_deep_copy = false, create_proposed_model = false, custom = nil, sizing_run_dir = Dir.pwd, run_all_orients = false, unmet_load_hours_check = true, debug = false)
+  def model_create_prm_any_baseline_building(user_model, building_type, climate_zone, hvac_building_type = 'All others', wwr_building_type = 'All others', swh_building_type = 'All others', model_deep_copy = false, create_proposed_model = false, custom = nil, sizing_run_dir = Dir.pwd, run_all_orients = false, unmet_load_hours_check = true, debug = false, use_parallel=false)
     # User data process
     # bldg_type_hvac_zone_hash could be an empty hash if all zones in the models are unconditioned
     # TODO - move this portion to the top of the function
@@ -102,6 +110,9 @@ class Standard
 
     # Check proposed model unmet load hours
     if unmet_load_hours_check
+      # Set proposed model export data in json format
+      OpenStudioStandards::RulesetChecking.export_json_output(proposed_model)
+
       # Run user model; need annual simulation to get unmet load hours
       if model_run_simulation_and_log_errors(proposed_model, run_dir = "#{sizing_run_dir}/PROP")
         umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
@@ -128,8 +139,17 @@ class Standard
       proposed_model.save(OpenStudio::Path.new("#{sizing_run_dir}/proposed_final.osm"), true)
       forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
       idf = forward_translator.translateModel(proposed_model)
+
+      proposed_model.getSpaces.sort.each do |space|
+        space_cond_type = space_conditioning_category(space)
+        next if space_cond_type == 'Unconditioned'
+        OpenStudioStandards::RulesetChecking.tag_spaces(idf, space)
+      end
       idf_path = OpenStudio::Path.new("#{sizing_run_dir}/proposed_final.idf")
       idf.save(idf_path, true)
+
+      # export to epjson
+      OpenStudioStandards::RulesetChecking.export_epjson(proposed_model, sizing_run_dir, 'proposed_final')
     end
 
     # Define different orientation from original orientation
@@ -137,8 +157,11 @@ class Standard
     # Need to run proposed model sizing simulation if no sql data is available
     degs_from_org = run_all_orientations(run_all_orients, user_model) ? [0, 90, 180, 270] : [0]
 
+    # loop method
+    each_method = use_parallel && degs_from_org.size > 1 ? ->(collection, &block) { Parallel.each(collection, in_process: 4, &block) } : ->(collection, &block) { collection.each(&block) }
+
     # Create baseline model for each orientation
-    degs_from_org.each do |degs|
+    each_method.call(degs_from_org) do |degs|
       # New baseline model:
       # Starting point is the original proposed model
       # Create a deep copy of the user model if requested
@@ -214,14 +237,8 @@ class Standard
       # Modify the internal loads in each space type, keeping user-defined schedules.
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Changing Lighting Loads ***')
       model.getSpaceTypes.sort.each do |space_type|
-        set_people = false
-        set_lights = true
-        set_electric_equipment = false
-        set_gas_equipment = false
-        set_ventilation = false
-        set_infiltration = false
-        # For PRM, it only applies lights for now.
-        space_type_apply_internal_loads(space_type, set_people, set_lights, set_electric_equipment, set_gas_equipment, set_ventilation, set_infiltration)
+        # For PRM, only apply lights for now
+        space_type_apply_internal_loads(space_type, set_people: false, set_lights: true, set_electric_equipment: false, set_gas_equipment: false, set_ventilation: false)
       end
 
       # Modify the lighting schedule to handle lighting occupancy sensors
@@ -239,7 +256,7 @@ class Standard
       model_add_prm_elevators(model)
 
       # Calculate infiltration as per 90.1 PRM rules
-      model_apply_standard_infiltration(model)
+      model_apply_standard_infiltration(model, infiltration_rate: prm_building_envelope_infiltration_rate)
 
       # Apply user outdoor air specs as per 90.1 PRM rules exceptions
       model_apply_userdata_outdoor_air(model)
@@ -255,11 +272,9 @@ class Standard
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adding Daylighting Controls ***')
 
       # Run a sizing run to calculate VLT for layer-by-layer windows.
-      if model_create_prm_baseline_building_requires_vlt_sizing_run(model)
-        if model_run_sizing_run(model, "#{sizing_run_dir}/SRVLT") == false
+      if model_create_prm_baseline_building_requires_vlt_sizing_run(model) && (model_run_sizing_run(model, "#{sizing_run_dir}/SRVLT") == false)
           return false
         end
-      end
 
       # Add or remove daylighting controls to each space
       # Add daylighting controls for 90.1-2013 and prior
@@ -287,7 +302,7 @@ class Standard
       zone_fan_scheds = get_fan_schedule_for_each_zone(model)
 
       # Set the construction properties of all the surfaces in the model
-      model_apply_constructions(model, climate_zone, wwr_building_type, wwr_info)
+      model_apply_standard_constructions(model, climate_zone, wwr_building_type: wwr_building_type, wwr_info: wwr_info)
 
       # Update ground temperature profile (for F/C-factor construction objects)
       model_update_ground_temperature_profile(model, climate_zone)
@@ -323,7 +338,7 @@ class Standard
 
       # Modify the service water heating loops per the baseline rules
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Cleaning up Service Water Heating Loops ***')
-      model_apply_baseline_swh_loops(model, building_type)
+      model_apply_baseline_swh_loops(model, building_type, swh_building_type)
 
       # Determine the baseline HVAC system type for each of the groups of zones and add that system type.
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adding Baseline HVAC Systems ***')
@@ -414,7 +429,7 @@ class Standard
       end
 
       # Run sizing run with the HVAC equipment
-      if model_run_sizing_run(model, "#{sizing_run_dir}/SR1") == false
+      if model_run_sizing_run(model, "#{sizing_run_dir}/SR1-#{degs}") == false
         return false
       end
 
@@ -456,7 +471,7 @@ class Standard
       end
 
       # Run sizing run with the new chillers, boilers, and cooling towers to determine capacities
-      if model_run_sizing_run(model, "#{sizing_run_dir}/SR2") == false
+      if model_run_sizing_run(model, "#{sizing_run_dir}/SR2-#{degs}") == false
         return false
       end
 
@@ -494,15 +509,21 @@ class Standard
       # @todo: turn off self shading
       # Set Solar Distribution to MinimalShadowing... problem is when you also have detached shading such as surrounding buildings etc
       # It won't be taken into account, while it should: only self shading from the building itself should be turned off but to my knowledge there isn't a way to do this in E+
-
       model_status = degs > 0 ? "baseline_final_#{degs}" : 'baseline_final'
+      OpenStudioStandards::RulesetChecking.export_json_output(model)
       model.save(OpenStudio::Path.new("#{sizing_run_dir}/#{model_status}.osm"), true)
 
       # Translate to IDF and save for debugging
       forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
       idf = forward_translator.translateModel(model)
+      model.getSpaces.sort.each do |space|
+        space_cond_type = space_conditioning_category(space)
+        next if space_cond_type == 'Unconditioned'
+        OpenStudioStandards::RulesetChecking.tag_spaces(idf, space)
+      end
       idf_path = OpenStudio::Path.new("#{sizing_run_dir}/#{model_status}.idf")
       idf.save(idf_path, true)
+      OpenStudioStandards::RulesetChecking.export_epjson(model, sizing_run_dir, "#{model_status}")
 
       # Check unmet load hours
       if unmet_load_hours_check
@@ -529,7 +550,7 @@ class Standard
           # the PRM-RM; Note that the PRM-RM only suggest to increase
           # air zone air flow, but the zone sizing factor in EnergyPlus
           # increase both air flow and load.
-          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(proposed_model)
+          umlh = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(model)
           if umlh > 300
             model.getThermalZones.each do |thermal_zone|
               # Cooling adjustments
@@ -598,20 +619,23 @@ class Standard
       end
 
       # Calculate total infiltration flow rate per envelope area
-      building_envelope_area_m2 = model_building_envelope_area(proposed_model)
+      building_envelope_area_m2 = OpenstudioStandards::Geometry.model_get_envelope_area(proposed_model)
       curr_tot_infil_m3_per_s_per_envelope_area = model_current_building_envelope_infiltration_at_75pa(proposed_model, building_envelope_area_m2)
       curr_tot_infil_cfm_per_envelope_area = OpenStudio.convert(curr_tot_infil_m3_per_s_per_envelope_area, 'm^3/s*m^2', 'cfm/ft^2').get
 
       # Warn users if the infiltration modeling in the user/proposed model is not based on field verification
-      # If not modeled based on field verification, it should be modeled as 0.6 cfm/ft2
-      unless infiltration_modeled_from_field_verification_results.casecmp('true')
+      # If model based on field verification use 0.6 cfm/ft^2, otherwise use 1.0 cfm/ft^2
+      if infiltration_modeled_from_field_verification_results == 'true'
         if curr_tot_infil_cfm_per_envelope_area < 0.6
           OpenStudio.logFree(OpenStudio::Info, 'prm.log', "The user model's I_75Pa is estimated to be #{curr_tot_infil_cfm_per_envelope_area} m3/s per m2 of total building envelope")
         end
-      end
 
-      # Modify model to follow the PRM infiltration modeling method
-      model_apply_standard_infiltration(proposed_model, curr_tot_infil_cfm_per_envelope_area)
+        # Modify model to follow the PRM infiltration modeling method
+        model_apply_standard_infiltration(proposed_model, infiltration_rate: 0.6)
+      else
+        # Modify model to follow the PRM infiltration modeling method with the default infiltration rate
+        model_apply_standard_infiltration(proposed_model, infiltration_rate: prm_building_envelope_infiltration_rate)
+      end
     end
 
     # If needed, remove all non-adiabatic pipes of SWH loops
@@ -675,11 +699,9 @@ class Standard
 
       # Check if the object needs to be checked for autosizing
       obj_to_be_checked_for_autosizing = false
-      if obj_type.include?('chiller') || obj_type.include?('boiler') || obj_type.include?('coil') || obj_type.include?('fan') || obj_type.include?('pump') || obj_type.include?('waterheater')
-        if !obj_type.include?('controller')
+      if (obj_type.include?('chiller') || obj_type.include?('boiler') || obj_type.include?('coil') || obj_type.include?('fan') || obj_type.include?('pump') || obj_type.include?('waterheater')) && !obj_type.include?('controller')
           obj_to_be_checked_for_autosizing = true
         end
-      end
 
       # Check for autosizing
       if obj_to_be_checked_for_autosizing
@@ -688,12 +710,10 @@ class Standard
         next if casted_obj.nil?
 
         casted_obj.methods.each do |method|
-          if method.to_s.include?('is') && method.to_s.include?('Autosized')
-            if casted_obj.public_send(method) == true
+          if method.to_s.include?('is') && method.to_s.include?('Autosized') && (casted_obj.public_send(method) == true)
               is_hvac_autosized = true
               OpenStudio.logFree(OpenStudio::Info, 'prm.log', "The #{method.to_s.sub('is', '').sub('Autosized', '').sub(':', '')} field of the #{obj_type} named #{casted_obj.name} is autosized. It should be hard sized.")
             end
-          end
         end
       end
     end
@@ -748,12 +768,10 @@ class Standard
         next
       end
 
-      if !applicable_zones.nil?
-        # This is only used for the stable baseline (2016 and later)
-        if !applicable_zones.include?(zone)
-          # This zone is not part of the current hvac_building_type
-          next
-        end
+      # This is only used for the stable baseline (2016 and later)
+      if !applicable_zones.nil? && !applicable_zones.include?(zone)
+        # This zone is not part of the current hvac_building_type
+        next
       end
 
       # Skip unconditioned zones
@@ -2293,6 +2311,9 @@ class Standard
     model.getCoilHeatingGass.sort.each { |obj| coil_heating_gas_apply_efficiency_and_curves(obj) }
     model.getCoilHeatingGasMultiStages.each { |obj| coil_heating_gas_multi_stage_apply_efficiency_and_curves(obj) }
 
+    # VRFs
+    model.getAirConditionerVariableRefrigerantFlows.sort.each { |obj| air_conditioner_variable_refrigerant_flow_apply_efficiency_and_curves(obj) }
+
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "Finished applying HVAC efficiency standards for #{template} template.")
     return true
   end
@@ -2313,32 +2334,28 @@ class Standard
     return true
   end
 
-  # For backward compatibility, infiltration standard not used for 2013 and earlier
-  #
-  # @return [Boolean] true if successful, false if not
-  def model_apply_standard_infiltration(model, specific_space_infiltration_rate_75_pa = nil)
-    return true
+  # Default 5-sided (exterior walls and roof) airtightness design value (m^3/h-m^2) from a building pressurization test at 75 Pascals.
+  def default_airtightness
+    airtightness_value = 13.8
+    return airtightness_value
   end
 
-  # Apply the air leakage requirements to the model, as described in PNNL section 5.2.1.6.
-  # This method creates customized infiltration objects for each space
-  # and removes the SpaceType-level infiltration objects.
+  # Buildings by default are assumed to not have an air barrier
+  def default_air_barrier
+    return false
+  end
+
+  # Get the maximum value for a field of a hash
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @return [Boolean] returns true if successful, false if not
-  # @todo This infiltration method is not used by the Reference buildings, fix this inconsistency.
-  def model_apply_infiltration_standard(model)
-    # Set the infiltration rate at each space
-    model.getSpaces.sort.each do |space|
-      space_apply_infiltration_rate(space)
+  # @param hash_of_objects [Hash] hash of objects to search through
+  # @param field [String] field name from the hash
+  # @return [float] Return the first matching object hash if successful, nil if not.
+  def model_find_maximum_value(hash_of_objects, field)
+    maximum_value = 0
+    hash_of_objects.each do |set|
+      maximum_value = [maximum_value, set[field]].max if set[field].to_f > 0
     end
-
-    # Remove infiltration rates set at the space type
-    model.getSpaceTypes.sort.each do |space_type|
-      space_type.spaceInfiltrationDesignFlowRates.each(&:remove)
-    end
-
-    return true
+    return maximum_value
   end
 
   # Method to search through a hash for the objects that meets the desired search criteria, as passed via a hash.
@@ -2471,7 +2488,7 @@ class Standard
       matching_capacity_objects = matching_objects.reject { |object| fan_motor_bhp.to_f <= object['minimum_capacity'].to_f || fan_motor_bhp.to_f > object['maximum_capacity'].to_f }
 
       # Filter based on motor type
-      matching_capacity_objects = matching_capacity_objects.select { |object| object['type'].downcase == search_criteria['type'].downcase } if search_criteria.keys.include?('type')
+      matching_capacity_objects = matching_capacity_objects.select { |object| object['type'].to_s.downcase == search_criteria['type'].to_s.downcase } if search_criteria.keys.include?('type')
 
       # If no object was found, round the fan_motor_bhp down in case the number fell between the limits in the json file.
       if matching_capacity_objects.empty?
@@ -2540,7 +2557,7 @@ class Standard
   #   the objects will only be returned if the specified area is between the minimum_area and maximum_area values.
   # @param num_floors [Double] capacity of the object in question.  If num_floors is supplied,
   #   the objects will only be returned if the specified num_floors is between the minimum_floors and maximum_floors values.
-  # @return [Hash] Return tbe first matching object hash if successful, nil if not.
+  # @return [Hash] Return the first matching object hash if successful, nil if not.
   # @example Find the motor that meets these size criteria
   #   search_criteria = {
   #   'template' => template,
@@ -2712,7 +2729,7 @@ class Standard
   #   the objects will only be returned if the specified capacity is between the minimum_capacity and maximum_capacity values.
   # @param date [<OpenStudio::Date>] date of the object in question.  If date is supplied,
   #   the objects will only be returned if the specified date is between the start_date and end_date.
-  # @return [Hash] Return tbe first matching object hash if successful, nil if not.
+  # @return [Hash] Return the first matching object hash if successful, nil if not.
   # @example Find the motor that meets these size criteria
   #   search_criteria = {
   #   'template' => template,
@@ -3032,11 +3049,24 @@ class Standard
   # @return [OpenStudio::Model::Construction] construction object
   # @todo make return an OptionalConstruction
   def model_add_construction(model, construction_name, construction_props = nil, surface = nil)
+    intended_surface_type = construction_props&.[]('intended_surface_type') || ''
+
     # First check model and return construction if it already exists
     model.getConstructions.sort.each do |construction|
       if construction.name.get.to_s == construction_name
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Model', "Already added construction: #{construction_name}")
-        return construction
+        valid = true
+        if !surface.nil?
+          if intended_surface_type == 'GroundContactFloor' && construction.iddObjectType.valueName != 'OS_Construction_FfactorGroundFloor'
+            valid = false
+          elsif intended_surface_type == 'GroundContactWall' && construction.iddObjectType.valueName != 'OS_Construction_CfactorUndergroundWall'
+            valid = false
+          end
+        end
+        if valid
+          return construction
+        end
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Already added construction: '#{construction_name}' but its type '#{construction.iddObjectType.valueName}' is not valid for the intended surface type '#{intended_surface_type}'. A new construction will be created.")
       end
     end
 
@@ -3054,12 +3084,31 @@ class Standard
       return OpenStudio::Model::OptionalConstruction.new
     end
 
+    intended_surface_type = data["intended_surface_type"]
+    intended_surface_type ||= ''
+
     # Make a new construction and set the standards details
-    if data['intended_surface_type'] == 'GroundContactFloor' && !surface.nil?
-      construction = OpenStudio::Model::FFactorGroundFloorConstruction.new(model)
-    elsif data['intended_surface_type'] == 'GroundContactWall' && !surface.nil?
-      construction = OpenStudio::Model::CFactorUndergroundWallConstruction.new(model)
-    else
+    is_layered_construction = true
+
+    if intended_surface_type == 'GroundContactFloor' && !surface.nil?
+      if construction_props
+        construction = OpenStudio::Model::FFactorGroundFloorConstruction.new(model)
+        is_layered_construction = false
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Construction properties not specified for '#{construction_name}', cannot create F-Factor Ground Floor Construction.  A regular construction will be created instead, and Surface '#{surface.name}' will be set to use the 'Ground' outside boundary condition (previously '#{surface.outsideBoundaryCondition}').")
+        surface.setOutsideBoundaryCondition('Ground')
+      end
+    elsif intended_surface_type == 'GroundContactWall' && !surface.nil?
+      if construction_props
+        construction = OpenStudio::Model::CFactorUndergroundWallConstruction.new(model)
+        is_layered_construction = false
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Construction properties not specified for '#{construction_name}', cannot create C-Factor Underground Wall Construction.  A regular construction will be created instead, and Surface '#{surface.name}' will be set to use the 'Ground' outside boundary condition (previously '#{surface.outsideBoundaryCondition}').")
+        surface.setOutsideBoundaryCondition('Ground')
+      end
+    end
+
+    if is_layered_construction
       construction = OpenStudio::Model::Construction.new(model)
       # Add the material layers to the construction
       layers = OpenStudio::Model::MaterialVector.new
@@ -3074,8 +3123,6 @@ class Standard
     construction.setName(construction_name)
     standards_info = construction.standardsInformation
 
-    intended_surface_type = data['intended_surface_type']
-    intended_surface_type ||= ''
     standards_info.setIntendedSurfaceType(intended_surface_type)
 
     standards_construction_type = data['standards_construction_type']
@@ -3290,6 +3337,12 @@ class Standard
       # Second search: In case need to use climate zone (e.g: 3) instead of sub-climate zone (e.g: 3A) for search
       climate_zone = climate_zone_set[0..-2]
       search_criteria['climate_zone_set'] = climate_zone
+      props = model_find_object(standards_data['construction_properties'], search_criteria)
+    end
+
+    if !props
+      # Third search for legacy energy codes (2016 or earlier), which does not have standards_construction_type
+      search_criteria.delete('standards_construction_type')
       props = model_find_object(standards_data['construction_properties'], search_criteria)
     end
 
@@ -4061,6 +4114,17 @@ class Standard
     # Surface
     # Outdoors
     # Ground
+    # Foundation
+    # GroundFCfactorMethod
+    # OtherSideCoefficients
+    # OtherSideConditionsModel
+    # GroundSlabPreprocessorAverage
+    # GroundSlabPreprocessorCore
+    # GroundSlabPreprocessorPerimeter
+    # GroundBasementPreprocessorAverageWall
+    # GroundBasementPreprocessorAverageFloor
+    # GroundBasementPreprocessorUpperWall
+    # GroundBasementPreprocessorLowerWall
 
     # Possible surface types are
     # AtticFloor
@@ -4117,17 +4181,123 @@ class Standard
     types_to_modify << ['Outdoors', 'ExteriorWall', 'SteelFramed']
     types_to_modify << ['Outdoors', 'ExteriorRoof', 'IEAD']
     types_to_modify << ['Outdoors', 'ExteriorFloor', 'SteelFramed']
+    types_to_modify << ['Outdoors', 'ExteriorWindow', 'Any Vertical Glazing']
+    types_to_modify << ['Outdoors', 'GlassDoor', 'Any Vertical Glazing']
+    types_to_modify << ['Outdoors', 'ExteriorDoor', 'NonSwinging']
+    types_to_modify << ['Outdoors', 'ExteriorDoor', 'Swinging']
     types_to_modify << ['Ground', 'GroundContactFloor', 'Unheated']
     types_to_modify << ['Ground', 'GroundContactWall', 'Mass']
 
-    # Modify all constructions of each type
-    types_to_modify.each do |boundary_cond, surf_type, const_type|
-      constructions = OpenstudioStandards::Constructions.model_get_constructions(model, boundary_cond, surf_type)
+    # Surface
+    types_to_modify << ['Surface', 'ExteriorWall', 'SteelFramed']
+    types_to_modify << ['Surface', 'ExteriorRoof', 'IEAD']
+    types_to_modify << ['Surface', 'ExteriorFloor', 'SteelFramed']
+    types_to_modify << ['Surface', 'ExteriorWindow', 'Any Vertical Glazing']
+    types_to_modify << ['Surface', 'GlassDoor', 'Any Vertical Glazing']
+    types_to_modify << ['Surface', 'ExteriorDoor', 'NonSwinging']
+    types_to_modify << ['Surface', 'ExteriorDoor', 'Swinging']
 
-      constructions.sort.each do |const|
-        standards_info = const.standardsInformation
-        standards_info.setIntendedSurfaceType(surf_type)
-        standards_info.setStandardsConstructionType(const_type)
+    # Foundation
+    types_to_modify << ['Foundation', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['Foundation', 'GroundContactWall', 'Mass']
+
+    # F/C-Factor methods
+    types_to_modify << ['GroundFCfactorMethod', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['GroundFCfactorMethod', 'GroundContactWall', 'Mass']
+
+    # Other side coefficients
+    types_to_modify << ['OtherSideCoefficients', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['OtherSideConditionsModel', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['OtherSideCoefficients', 'GroundContactWall', 'Mass']
+    types_to_modify << ['OtherSideConditionsModel', 'GroundContactWall', 'Mass']
+
+    # Slab preprocessor
+    types_to_modify << ['GroundSlabPreprocessorAverage', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['GroundSlabPreprocessorCore', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['GroundSlabPreprocessorPerimeter', 'GroundContactFloor', 'Unheated']
+
+    # Basement preprocessor
+    types_to_modify << ['GroundBasementPreprocessorAverageWall', 'GroundContactWall', 'Mass']
+    types_to_modify << ['GroundBasementPreprocessorAverageFloor', 'GroundContactFloor', 'Unheated']
+    types_to_modify << ['GroundBasementPreprocessorUpperWall', 'GroundContactWall', 'Mass']
+    types_to_modify << ['GroundBasementPreprocessorLowerWall', 'GroundContactWall', 'Mass']
+
+    # Modify all constructions of each type
+    construction_modified = {}
+    types_to_modify.each do |boundary_cond, surf_type, const_type|
+      # constructions = OpenstudioStandards::Constructions.model_get_constructions(model, boundary_cond, surf_type)
+      # Hard-assigned surfaces
+      model.getSurfaces.sort.each do |surface|
+        # surfaces with outside / ground / underground boundary conditions
+        next unless surface.outsideBoundaryCondition == boundary_cond
+
+        # identify true interior surface from surfaces that is next to unconditioned spaces
+        if has_space_conditioning_category && surface.outsideBoundaryCondition == 'Surface'
+          space_cond_type = space_conditioning_category(surface.space.get)
+          adj_space_cond_type = space_conditioning_category(surface.adjacentSurface.get.space.get)
+          next unless (space_cond_type != 'Unconditioned') && (adj_space_cond_type == 'Unconditioned')
+        elsif boundary_cond == 'Surface'
+          # Legacy code will skip processing surfaces.
+          next
+        end
+
+        if surface.surfaceType == 'Floor' || surface.surfaceType == 'Wall'
+          next unless surf_type.include?(surface.surfaceType)
+        elsif surface.surfaceType == 'RoofCeiling'
+          next unless surf_type.include?('Roof') || surf_type.include?('Ceiling')
+        end
+
+        # check if need to duplicate the construction for the surface
+        const = surface.construction
+        next unless const.is_initialized
+
+        const = const.get
+        const_name = const.name.to_s
+        # Reset the name by including surf_type and boundary_cond
+        new_const_name = "#{const_name}_#{surf_type}_#{boundary_cond}"
+        unless construction_modified.key?(new_const_name)
+          # create a copy for each of constructions to meet its unique boundary_cond, surf_type and const_type
+          new_const = OpenstudioStandards::Constructions.construction_deep_copy(const)
+          new_const.setName(new_const_name)
+          standards_info = new_const.standardsInformation
+          standards_info.setIntendedSurfaceType(surf_type)
+          standards_info.setStandardsConstructionType(const_type)
+          construction_modified[new_const_name] = new_const
+        end
+        surface.setConstruction(construction_modified[new_const_name])
+      end
+
+      # Hard-assigned subsurfaces
+      model.getSubSurfaces.sort.each do |surface|
+        next unless surface.outsideBoundaryCondition == boundary_cond
+
+        case surface.subSurfaceType
+        when 'FixedWindow', 'OperableWindow'
+          next unless surf_type == 'ExteriorWindow'
+        when 'Door'
+          next unless surf_type.include?('Door')
+        else
+          next unless surface.subSurfaceType == surf_type
+        end
+
+        # check if need to duplicate the construction for the surface
+        const = surface.construction
+        next unless const.is_initialized
+
+        const = const.get
+        const_name = const.name.to_s
+        # Reset the name by including surf_type and boundary_cond
+        new_const_name = "#{const_name}_#{surf_type}_#{boundary_cond}"
+        unless construction_modified.key?(new_const_name)
+          # create a copy for each of constructions to meet its unique boundary_cond, surf_type and const_type
+          new_const = OpenstudioStandards::Constructions.construction_deep_copy(const)
+          new_const.setName(new_const_name)
+          standards_info = new_const.standardsInformation
+          standards_info.setIntendedSurfaceType(surf_type)
+          standards_info.setStandardsConstructionType(const_type)
+          construction_modified[new_const_name] = new_const
+        end
+        surface.setConstruction(construction_modified[new_const_name])
       end
     end
 
@@ -4138,6 +4308,8 @@ class Standard
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object
   # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
+  # @param wwr_building_type [String] building type used for defining window to wall ratio, e.g. 'Office > 50,000 sq ft'
+  # @param wwr_info [Hash] A map that maps each building area type to its correspondent wwr.
   # @return [Boolean] returns true if successful, false if not
   def model_apply_standard_constructions(model, climate_zone, wwr_building_type: nil, wwr_info: {})
     types_to_modify = []
@@ -4147,6 +4319,17 @@ class Standard
     # Surface
     # Outdoors
     # Ground
+    # Foundation
+    # GroundFCfactorMethod
+    # OtherSideCoefficients
+    # OtherSideConditionsModel
+    # GroundSlabPreprocessorAverage
+    # GroundSlabPreprocessorCore
+    # GroundSlabPreprocessorPerimeter
+    # GroundBasementPreprocessorAverageWall
+    # GroundBasementPreprocessorAverageFloor
+    # GroundBasementPreprocessorUpperWall
+    # GroundBasementPreprocessorLowerWall
 
     # Possible surface types are
     # Floor
@@ -4169,23 +4352,69 @@ class Standard
     types_to_modify << ['Outdoors', 'OperableWindow']
     types_to_modify << ['Outdoors', 'Door']
     types_to_modify << ['Outdoors', 'GlassDoor']
+    types_to_modify << ['Outdoors', 'ExteriorDoor']
     types_to_modify << ['Outdoors', 'OverheadDoor']
     types_to_modify << ['Outdoors', 'Skylight']
+    types_to_modify << ['Surface', 'Floor']
+    types_to_modify << ['Surface', 'Wall']
+    types_to_modify << ['Surface', 'RoofCeiling']
+    types_to_modify << ['Surface', 'FixedWindow']
+    types_to_modify << ['Surface', 'OperableWindow']
+    types_to_modify << ['Surface', 'Door']
+    types_to_modify << ['Surface', 'GlassDoor']
+    types_to_modify << ['Surface', 'OverheadDoor']
     types_to_modify << ['Ground', 'Floor']
     types_to_modify << ['Ground', 'Wall']
+    types_to_modify << ['Foundation', 'Wall']
+    types_to_modify << ['GroundFCfactorMethod', 'Wall']
+    types_to_modify << ['OtherSideCoefficients', 'Wall']
+    types_to_modify << ['OtherSideConditionsModel', 'Wall']
+    types_to_modify << ['GroundBasementPreprocessorAverageWall', 'Wall']
+    types_to_modify << ['GroundBasementPreprocessorUpperWall', 'Wall']
+    types_to_modify << ['GroundBasementPreprocessorLowerWall', 'Wall']
+    types_to_modify << ['Foundation', 'Floor']
+    types_to_modify << ['GroundFCfactorMethod', 'Floor']
+    types_to_modify << ['OtherSideCoefficients', 'Floor']
+    types_to_modify << ['OtherSideConditionsModel', 'Floor']
+    types_to_modify << ['GroundSlabPreprocessorAverage', 'Floor']
+    types_to_modify << ['GroundSlabPreprocessorCore', 'Floor']
+    types_to_modify << ['GroundSlabPreprocessorPerimeter', 'Floor']
 
     # Find just those surfaces
     surfaces_to_modify = []
     surface_category = {}
+    org_surface_boundary_conditions = {}
     types_to_modify.each do |boundary_condition, surface_type|
       # Surfaces
       model.getSurfaces.sort.each do |surf|
         next unless surf.outsideBoundaryCondition == boundary_condition
         next unless surf.surfaceType == surface_type
+        # legacy energy code does not require processing surface type surface.
+        if surf.outsideBoundaryCondition == 'Surface' && !has_space_conditioning_category
+          next
+        end
 
-        if boundary_condition == 'Outdoors'
+        # Check if surface is adjacent to an unenclosed or unconditioned space (e.g. attic or parking garage)
+        if has_space_conditioning_category && surf.outsideBoundaryCondition == 'Surface'
+          adj_space = surf.adjacentSurface.get.space.get
+          adj_space_cond_type = space_conditioning_category(adj_space)
+          if adj_space_cond_type == 'Unconditioned'
+            # Get adjacent surface
+            adjacent_surf = surf.adjacentSurface.get
+
+            # Store original boundary condition type
+            org_surface_boundary_conditions[surf.name.to_s] = adjacent_surf
+
+            # Identify this surface as exterior
+            surface_category[surf] = 'ExteriorSurface'
+
+            # Temporary change the surface's boundary condition to 'Outdoors' so it can be assigned a baseline construction
+            surf.setOutsideBoundaryCondition('Outdoors')
+            adjacent_surf.setOutsideBoundaryCondition('Outdoors')
+          end
+        elsif boundary_condition == 'Outdoors'
           surface_category[surf] = 'ExteriorSurface'
-        elsif boundary_condition == 'Ground'
+        elsif ['Ground', 'Foundation', 'GroundFCfactorMethod', 'OtherSideCoefficients', 'OtherSideConditionsModel', 'GroundSlabPreprocessorAverage', 'GroundSlabPreprocessorCore', 'GroundSlabPreprocessorPerimeter', 'GroundBasementPreprocessorAverageWall', 'GroundBasementPreprocessorAverageFloor', 'GroundBasementPreprocessorUpperWall', 'GroundBasementPreprocessorLowerWall'].include?(boundary_condition)
           surface_category[surf] = 'GroundSurface'
         else
           surface_category[surf] = 'NA'
@@ -4206,7 +4435,21 @@ class Standard
     # Modify these surfaces
     prev_created_consts = {}
     surfaces_to_modify.sort.each do |surf|
-      prev_created_consts = planar_surface_apply_standard_construction(surf, climate_zone, prev_created_consts, wwr_building_type, wwr_info, surface_category[surf])
+      if has_space_conditioning_category
+        # Get space conditioning
+        space = surf.space.get
+        space_cond_type = space_conditioning_category(space)
+        # Do not modify constructions for unconditioned spaces
+        prev_created_consts = planar_surface_apply_standard_construction(surf, climate_zone, prev_created_consts, wwr_building_type, wwr_info, surface_category[surf]) unless space_cond_type == 'Unconditioned'
+      else
+        # No space conditioning requirements for legacy code
+        prev_created_consts = planar_surface_apply_standard_construction(surf, climate_zone, prev_created_consts, wwr_building_type, wwr_info, surface_category[surf])
+      end
+
+      # Reset boundary conditions to original if they were temporary modified
+      if org_surface_boundary_conditions.include?(surf.name.to_s)
+        surf.setAdjacentSurface(org_surface_boundary_conditions[surf.name.to_s])
+      end
     end
 
     # List the unique array of constructions
@@ -4218,7 +4461,7 @@ class Standard
       end
     end
 
-    return true
+    true
   end
 
   # Returns standards data for selected construction
@@ -5504,7 +5747,7 @@ class Standard
   def model_does_require_wwr_adjustment?(wwr_limit, wwr_list)
     require_adjustment = false
     wwr_list.each do |wwr|
-      require_adjustment = true unless wwr > wwr_limit
+      require_adjustment = true if wwr > wwr_limit
     end
     return require_adjustment
   end
@@ -5542,7 +5785,7 @@ class Standard
     if sch_type == 'Constant'
       day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), values[0])
     elsif sch_type == 'Hourly'
-      (0..23).each do |i|
+      24.times do |i|
         next if values[i] == values[i + 1]
 
         day_sch.addValue(OpenStudio::Time.new(0, i + 1, 0, 0), values[i])
@@ -5558,7 +5801,9 @@ class Standard
   # @param building_type [String] the building type
   # @return [Boolean] returns true if successful, false if not
   # @author Julien Marrec
-  def model_apply_baseline_swh_loops(model, building_type)
+  def model_apply_baseline_swh_loops(model,
+                                     building_type,
+                                     swh_building_type = 'All others')
     model.getPlantLoops.sort.each do |plant_loop|
       # Skip non service water heating loops
       next unless plant_loop_swh_loop?(plant_loop)
@@ -6069,25 +6314,14 @@ class Standard
     reporting_tolerances.setToleranceforTimeHeatingSetpointNotMet(heating_tolerance_deg_c)
     reporting_tolerances.setToleranceforTimeCoolingSetpointNotMet(cooling_tolerance_deg_c)
 
-    return true
-  end
-
-  # Apply the standard construction to each surface in the model, based on the construction type currently assigned.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio model object
-  # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
-  # @return [Boolean] returns true if successful, false if not
-  def model_apply_constructions(model, climate_zone, wwr_building_type, wwr_info)
-    model_apply_standard_constructions(model, climate_zone, wwr_building_type: nil, wwr_info: {})
-
-    return true
+    true
   end
 
   # Generate baseline log to a specific file directory
   # @param file_directory [String] file directory
   # @return [Boolean] returns true if successful, false if not
   def generate_baseline_log(file_directory)
-    return true
+    true
   end
 
   # Update ground temperature profile based on the weather file specified in the model
@@ -6096,6 +6330,20 @@ class Standard
   # @param climate_zone [String] ASHRAE climate zone, e.g. 'ASHRAE 169-2013-4A'
   # @return [Boolean] returns true if successful, false if not
   def model_update_ground_temperature_profile(model, climate_zone)
-    return true
+    true
   end
+end
+
+# Flag function to indicate whether the energy code uses conditioning category
+# for PRM calculation - default to false for legacy energy codes
+def has_space_conditioning_category
+  false
+end
+
+# Dummy method to avoid adjusting infiltration in PRM models using older ASHRAE 90.1 PRM methodology.
+# @param model [OpenStudio::Model::Model] openstudio model
+# @param infiltration_rate [Double] space infiltration rate at a pressure differential of 75 Pa in cfm per ft^2
+# @return [Boolean] true if successful, false if not
+def model_apply_standard_infiltration(model, infiltration_rate: nil)
+  true
 end

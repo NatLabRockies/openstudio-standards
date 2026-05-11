@@ -52,7 +52,10 @@ class BTAPPRE1980
       air_loop = add_system_3_and_8_airloop(heating_coil_type,
                                             model,
                                             system_data,
-                                            determine_control_zone(zones))
+                                            determine_control_zone(zones),
+                                            necb_reference_hp: necb_reference_hp,
+                                            necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel,
+                                            hw_loop: hw_loop)
       # Add Zone equipment
       zones.each do |zone| # Zone sizing temperature
         sizing_zone = zone.sizingZone
@@ -60,8 +63,13 @@ class BTAPPRE1980
         sizing_zone.setZoneCoolingDesignSupplyAirTemperatureDifference(system_data[:ZoneCoolingDesignSupplyAirTemperatureDifference])
         sizing_zone.setZoneHeatingDesignSupplyAirTemperatureInputMethod(system_data[:ZoneHeatingDesignSupplyAirTemperatureInputMethod])
         sizing_zone.setZoneHeatingDesignSupplyAirTemperatureDifference(system_data[:ZoneHeatingDesignSupplyAirTemperatureDifference])
-        sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
-        sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+        if necb_reference_hp
+          sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneDXCoolingSizingFactor])
+          sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneDXHeatingSizingFactor])
+        else
+          sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
+          sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+        end
         add_sys3_and_8_zone_equip(air_loop,
                                   baseboard_type,
                                   hw_loop,
@@ -70,7 +78,7 @@ class BTAPPRE1980
       end
     else
       zones.each do |zone|
-        air_loop = add_system_3_and_8_airloop(heating_coil_type, model, system_data, zone)
+        air_loop = add_system_3_and_8_airloop(heating_coil_type, model, system_data, zone, necb_reference_hp: necb_reference_hp, necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel, hw_loop: hw_loop)
         add_sys3_and_8_zone_equip(air_loop,
                                   baseboard_type,
                                   hw_loop,
@@ -83,19 +91,22 @@ class BTAPPRE1980
     sys_name_pars = {}
     sys_name_pars['sys_hr'] = 'none'
     sys_name_pars['sys_clg'] = 'dx'
+    sys_name_pars['sys_clg'] = 'ashp' if necb_reference_hp
     sys_name_pars['sys_htg'] = heating_coil_type
+    sys_name_pars['sys_htg'] = 'ashp>c-g' if necb_reference_hp && (necb_reference_hp_supp_fuel == "NaturalGas" || necb_reference_hp_supp_fuel == "Gas")
+    sys_name_pars['sys_htg'] = 'ashp>c-e' if necb_reference_hp && (necb_reference_hp_supp_fuel == "Electricity" || necb_reference_hp_supp_fuel == "Electric" || necb_reference_hp_supp_fuel == "FuelOilNo2")
+    sys_name_pars['sys_htg'] = 'ashp>c-hw' if necb_reference_hp && (necb_reference_hp_supp_fuel == "Hot Water" || necb_reference_hp_supp_fuel == "HotWater")
     sys_name_pars['sys_sf'] = 'cv'
     sys_name_pars['zone_htg'] = baseboard_type
     sys_name_pars['zone_clg'] = 'none'
     sys_name_pars['sys_rf'] = 'none'
-    assign_base_sys_name(air_loop,
+    return assign_base_sys_name(air_loop: air_loop,
                          sys_abbr: 'sys_3',
                          sys_oa: 'mixed',
                          sys_name_pars: sys_name_pars)
-    return true
   end
 
-  def add_system_3_and_8_airloop(heating_coil_type, model, system_data, control_zone)
+  def add_system_3_and_8_airloop(heating_coil_type, model, system_data, control_zone, necb_reference_hp:false, necb_reference_hp_supp_fuel:'DefaultFuel', necb_reference_hp_fancoil: false, hw_loop: nil)
     # System Type 3: PSZ-AC
     # This measure creates:
     # -a constant volume packaged single-zone A/C unit
@@ -118,25 +129,43 @@ class BTAPPRE1980
     sizing_zone.setZoneCoolingDesignSupplyAirTemperatureDifference(system_data[:ZoneCoolingDesignSupplyAirTemperatureDifference])
     sizing_zone.setZoneHeatingDesignSupplyAirTemperatureInputMethod(system_data[:ZoneHeatingDesignSupplyAirTemperatureInputMethod])
     sizing_zone.setZoneHeatingDesignSupplyAirTemperatureDifference(system_data[:ZoneHeatingDesignSupplyAirTemperatureDifference])
-    sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
-    sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+    if necb_reference_hp
+      sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneDXCoolingSizingFactor])
+      sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneDXHeatingSizingFactor])
+    else
+      sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneCoolingSizingFactor])
+      sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneHeatingSizingFactor])
+    end
 
     fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
 
+    # Set up DX coil
+    if necb_reference_hp #NECB curve characteristics
+      clg_coil = add_onespeed_DX_coil(model, always_on)
+      clg_coil.setName('CoilCoolingDXSingleSpeed_ashp')
+    else
+      clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model) #sets default OS curve (but will be replaced with NECB curves later)
+      clg_coil.setName('CoilCoolingDXSingleSpeed_dx')
+    end
     # Create a return fan for BTAPPRE1980 system 3 systems
     return_fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
     return_fan.setName('Sys3 Return Fan')
     return_fan.setEndUseSubcategory('Return_Fan')
 
+    raise("Flag 'necb_reference_hp' is set to true while parameter 'heating_coil_type' is not set to DX") if (necb_reference_hp && (heating_coil_type != 'DX'))
     case heating_coil_type
-    when 'Electric' # electric coil
+    when 'Electric', 'Electricity', "FuelOilNo2" # electric coil
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-    when 'Gas'
+    when 'Gas', 'NaturalGas'
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
+    when 'Hot Water', 'HotWater'
+      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+      hw_loop.addDemandBranchForComponent(htg_coil)
     when 'DX'
-      htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model)
-      supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
+      #create main DX heating coil
+      htg_coil = add_onespeed_htg_DX_coil(model, always_on)
       htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(system_data[:MinimumOutdoorDryBulbTemperatureforCompressorOperation])
+      htg_coil.setName('CoilHeatingDXSingleSpeed_ashp')
       sizing_zone.setZoneHeatingSizingFactor(system_data[:ZoneDXHeatingSizingFactor])
       sizing_zone.setZoneCoolingSizingFactor(system_data[:ZoneDXCoolingSizingFactor])
     else
@@ -145,9 +174,7 @@ class BTAPPRE1980
 
     # TO DO: other fuel-fired heating coil types? (not available in OpenStudio/E+ - may need to play with efficiency to mimic other fuel types)
 
-    # Set up DX coil with NECB performance curve characteristics;
-    clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
-    clg_coil.setName('CoilCoolingDXSingleSpeed_dx')
+
 
     # oa_controller
     oa_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -163,17 +190,31 @@ class BTAPPRE1980
     # Add the components to the air loop
     # in order from closest to zone to furthest from zone
     supply_inlet_node = air_loop.supplyInletNode
-    if heating_coil_type == 'DX'
-      air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, fan, htg_coil, clg_coil, supplemental_htg_coil)
-      air_to_air_heatpump.setName("#{control_zone.name} ASHP")
-      air_to_air_heatpump.setControllingZone(control_zone)
-      air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
-      air_to_air_heatpump.addToNode(supply_inlet_node)
-    else
-      fan.addToNode(supply_inlet_node)
-      htg_coil.addToNode(supply_inlet_node)
-      clg_coil.addToNode(supply_inlet_node)
+    fan.addToNode(supply_inlet_node)
+    if necb_reference_hp
+      #create supplemental heating coil based on default regional fuel type
+      if necb_reference_hp_supp_fuel == 'DefaultFuel'
+        epw = OpenStudio::EpwFile.new(model.weatherFile.get.path.get)
+        necb_reference_hp_supp_fuel = @standards_data['regional_fuel_use'].detect { |fuel_sources| fuel_sources['state_province_regions'].include?(epw.stateProvinceRegion) }['fueltype_set']
+      end
+      if necb_reference_hp_supp_fuel == 'NaturalGas' || necb_reference_hp_supp_fuel == 'Gas'
+        supplemental_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
+      elsif necb_reference_hp_supp_fuel == 'Electricity' || necb_reference_hp_supp_fuel == 'Electric' || necb_reference_hp_supp_fuel == 'FuelOilNo2'
+        supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
+      elsif necb_reference_hp_supp_fuel == 'Hot Water' || necb_reference_hp_supp_fuel == "HotWater"
+        supplemental_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+        hw_loop.addDemandBranchForComponent(supplemental_htg_coil)
+      else
+        raise('Invalid fuel type selected for heat pump supplemental coil')
+      end
+      #air_to_air_heatpump.setName("#{control_zone.name} ASHP")
+      #air_to_air_heatpump.setControllingZone(control_zone)
+      #air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
+      #air_to_air_heatpump.addToNode(supply_inlet_node)
+      supplemental_htg_coil.addToNode(supply_inlet_node)
     end
+    htg_coil.addToNode(supply_inlet_node)
+    clg_coil.addToNode(supply_inlet_node)
     oa_system.addToNode(supply_inlet_node)
 
     # Find return air node and add a return air fan to it for BTAPPRE1980 system 3 airloops.
@@ -195,8 +236,8 @@ class BTAPPRE1980
                                 hw_loop, model,
                                 zone)
     always_on = model.alwaysOnDiscreteSchedule
+    add_zone_baseboards(baseboard_type: baseboard_type, hw_loop: hw_loop, model: model, zone: zone)
     diffuser = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, always_on)
     air_loop.addBranchForZone(zone, diffuser.to_StraightComponent)
-    add_zone_baseboards(baseboard_type: baseboard_type, hw_loop: hw_loop, model: model, zone: zone)
   end
 end

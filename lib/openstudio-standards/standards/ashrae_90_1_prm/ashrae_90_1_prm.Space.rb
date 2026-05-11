@@ -87,11 +87,10 @@ class ASHRAE901PRM < Standard
           infiltration.setFlowperSpaceFloorArea(adj_infil_flow_area.round(13)) if space.exteriorArea > 0
       end
       infiltration.setSchedule(infil_sch)
-      infiltration.setConstantTermCoefficient(infil_coefficients[0])
-      infiltration.setTemperatureTermCoefficient(infil_coefficients[1])
-      infiltration.setVelocityTermCoefficient(infil_coefficients[2])
-      infiltration.setVelocitySquaredTermCoefficient(infil_coefficients[3])
-
+      infiltration.setConstantTermCoefficient(infil_coefficients[0]) unless infil_coefficients[0].nil?
+      infiltration.setTemperatureTermCoefficient(infil_coefficients[1]) unless infil_coefficients[1].nil?
+      infiltration.setVelocityTermCoefficient(infil_coefficients[2]) unless infil_coefficients[2].nil?
+      infiltration.setVelocitySquaredTermCoefficient(infil_coefficients[3]) unless infil_coefficients[3].nil?
       infiltration.setSpace(space)
     end
 

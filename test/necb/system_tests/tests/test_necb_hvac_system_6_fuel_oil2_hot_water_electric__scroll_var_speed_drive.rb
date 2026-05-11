@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_6_Test_FO2_HW_E_S_VSD < Minitest::Test
+class NECB_HVAC_System_6_Test < Minitest::Test
 
   def test_necb_hvac_system_6_fuel_oil2_hot_water_electric__scroll_var_speed_drive()
 
@@ -33,7 +33,7 @@ class NECB_HVAC_System_6_Test_FO2_HW_E_S_VSD < Minitest::Test
     template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
     system_name = 'system_6'
     vintage = 'NECB2011'
-    boiler_fueltype = 'FuelOil#2'
+    boiler_fueltype = 'FuelOilNo2'
     heating_coil_type = 'Hot Water'
     baseboard_type = 'Electric'
     chiller_type = 'Scroll'
@@ -54,7 +54,7 @@ class NECB_HVAC_System_6_Test_FO2_HW_E_S_VSD < Minitest::Test
     hw_loop = nil
     if (baseboard_type == "Hot Water") || (heating_coil_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys6_multi_zone_built_up_system_with_baseboard_heating(
         model: model,

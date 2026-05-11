@@ -169,6 +169,14 @@ class TestAddHVACSystems < Minitest::Test
     group_hvac_test(hvac_systems)
   end
 
+  def test_residential_ervs
+    hvac_systems = [
+      {system_type: 'Residential ERVs', main_heat_fuel: 'NaturalGas', cool_fuel: 'Electricity', unmet_hrs_htg: 3250.0, unmet_hrs_clg: 3000.0},
+      {system_type: 'Residential Ventilators', main_heat_fuel: 'NaturalGas', cool_fuel: 'Electricity', unmet_hrs_htg: 3250.0, unmet_hrs_clg: 3000.0}
+    ]
+    group_hvac_test(hvac_systems)
+  end
+
   def test_add_hvac_systems_radiant
     hvac_systems = [
       {system_type: 'Radiant Slab with DOAS', main_heat_fuel: 'NaturalGas', cool_fuel: 'Electricity',

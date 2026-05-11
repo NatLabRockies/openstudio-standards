@@ -6,7 +6,7 @@ class TestSimControl < CreateDOEPrototypeBuildingTest
   def self.model_test(template, building_type)
     climate_zone = 'ASHRAE 169-2006-2A'
     epw_file = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
-    @test_dir = "#{Dir.pwd}/output"
+    @test_dir = "#{__dir__}/output"
     if !Dir.exist?(@test_dir)
       Dir.mkdir(@test_dir)
     end

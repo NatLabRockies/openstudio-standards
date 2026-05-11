@@ -1,5 +1,5 @@
 module OpenstudioStandards
-  # This Module provides methods to create, modify, and get information about model geometry
+  # The Geometry module provides methods to create, modify, and get information about model geometry
   module Geometry
     # Methods to modify geometry
 
@@ -87,6 +87,47 @@ module OpenstudioStandards
 
     # @!endgroup Modify:SubSurface
 
+    # @!group Modify:Space
+
+    # Rename space surfaces using the convention 'SpaceName SurfaceType #'.
+    # Rename sub surfaces using the convention 'SurfaceName SubSurfaceType #'.
+    #
+    # @param space [OpenStudio::Model::Space] OpenStudio space object
+    # @return [Boolean] returns true if successful, false if not
+    def self.space_rename_surfaces_and_subsurfaces(space)
+      # reset names
+      surf_i = 1
+      space.surfaces.each do |surface|
+        surface.setName("temp surf #{surf_i}")
+        sub_i = 1
+        surface.subSurfaces.each do |sub_surface|
+          sub_surface.setName("#{surface.name} sub #{sub_i}")
+          sub_i += 1
+        end
+        surf_i += 1
+      end
+
+      # rename surfaces based on space name and surface type
+      surface_type_counter = Hash.new(0)
+      space.surfaces.sort.each do |surface|
+        surface_type = surface.surfaceType
+        surface_type_counter[surface_type] += 1
+        surface.setName("#{space.name} #{surface_type} #{surface_type_counter[surface_type]}")
+
+        # rename sub surfaces based on surface name and subsurface type
+        sub_surface_type_counter = Hash.new(0)
+        surface.subSurfaces.sort.each do |sub_surface|
+          sub_surface_type = sub_surface.subSurfaceType
+          sub_surface_type_counter[sub_surface_type] += 1
+          sub_surface.setName("#{surface.name} #{sub_surface_type} #{sub_surface_type_counter[sub_surface_type]}")
+        end
+      end
+
+      return true
+    end
+
+    # @!endgroup Modify:Space
+
     # @!group Modify:Model
 
     # Assign each space in the model to a building story based on common z (height) values.
@@ -133,6 +174,17 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Space #{space[0].name} was not assigned to a story by the user.  It has been assigned to #{story.name}.")
         end
       end
+
+      return true
+    end
+
+    # Rename all model surfaces using the convention 'SpaceName SurfaceType #'.
+    # Rename all model sub surfaces using the convention 'SurfaceName SubSurfaceType #'.
+    #
+    # @param model [OpenStudio::Model::Model] OpenStudio model object
+    # @return [Boolean] returns true if successful, false if not
+    def self.model_rename_surfaces_and_subsurfaces(model)
+      model.getSpaces.each { |space| OpenstudioStandards::Geometry.space_rename_surfaces_and_subsurfaces(space) }
 
       return true
     end

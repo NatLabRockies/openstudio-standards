@@ -1,54 +1,70 @@
 class Standard
-  # @!group PumpVariableSpeed
-
   include Pump
 
-  # Set the pump curve coefficients based on the specified control type.
+  # Determine and set type of part load control type for heating and chilled
+  # water variable speed pumps
   #
-  # @param pump_variable_speed [OpenStudio::Model::PumpVariableSpeed] variable speed pump
-  # @param control_type [String] valid choices are Riding Curve, VSD No Reset, VSD DP Reset
-  def pump_variable_speed_set_control_type(pump_variable_speed, control_type)
-    # Determine the coefficients
-    coeff_a = nil
-    coeff_b = nil
-    coeff_c = nil
-    coeff_d = nil
-    case control_type
-    when 'Constant Flow'
-      coeff_a = 0.0
-      coeff_b = 1.0
-      coeff_c = 0.0
-      coeff_d = 0.0
-    when 'Riding Curve'
-      coeff_a = 0.0
-      coeff_b = 3.2485
-      coeff_c = -4.7443
-      coeff_d = 2.5294
-    when 'VSD No Reset'
-      coeff_a = 0.0
-      coeff_b = 0.5726
-      coeff_c = -0.301
-      coeff_d = 0.7347
-    when 'VSD DP Reset'
-      coeff_a = 0.0
-      coeff_b = 0.0205
-      coeff_c = 0.4101
-      coeff_d = 0.5753
+  # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio pump object
+  # @return [Boolean] Returns true if applicable, false otherwise
+  def pump_variable_speed_control_type(pump)
+    # Get plant loop
+    plant_loop = pump.plantLoop.get
+
+    # Get plant loop type
+    plant_loop_type = plant_loop.sizingPlant.loopType
+    return false unless plant_loop_type == 'Heating' || plant_loop_type == 'Cooling'
+
+    # Get rated pump power
+    if pump.ratedPowerConsumption.is_initialized
+      pump_rated_power_w = pump.ratedPowerConsumption.get
+    elsif pump.autosizedRatedPowerConsumption.is_initialized
+      pump_rated_power_w = pump.autosizedRatedPowerConsumption.get
     else
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.PumpVariableSpeed', "Pump control type '#{control_type}' not recognized, pump coefficients will not be changed.")
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Pump', "For #{pump.name}, could not find rated pump power consumption, cannot determine w per gpm correctly.")
       return false
     end
 
-    # Set the coefficients
-    pump_variable_speed.setCoefficient1ofthePartLoadPerformanceCurve(coeff_a)
-    pump_variable_speed.setCoefficient2ofthePartLoadPerformanceCurve(coeff_b)
-    pump_variable_speed.setCoefficient3ofthePartLoadPerformanceCurve(coeff_c)
-    pump_variable_speed.setCoefficient4ofthePartLoadPerformanceCurve(coeff_d)
-    pump_variable_speed.setPumpControlType('Intermittent')
+    # Get nominal nameplate HP
+    pump_nominal_hp = pump_rated_power_w * pump.motorEfficiency / 745.7
 
-    # Append the control type to the pump name
-    # self.setName("#{self.name} #{control_type}")
+    # Assign peformance curves
+    control_type = pump_variable_speed_get_control_type(pump, plant_loop_type, pump_nominal_hp)
+
+    # Set pump part load performance curve coefficients
+    OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: control_type) if control_type
 
     return true
+  end
+
+  # Determine type of pump part load control type
+  #
+  # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio pump object
+  # @param plant_loop_type [String] Type of plant loop
+  # @param pump_nominal_hp [Float] Pump nominal horsepower
+  # @return [String] Pump part load control type
+  def pump_variable_speed_get_control_type(pump, plant_loop_type, pump_nominal_hp)
+    # Get plant loop
+    plant_loop = pump.plantLoop.get
+
+    # Default assumptions are based on ASHRAE 90.1-2010 Appendix G (G3.1.3.5 and G3.1.3.10)
+    case plant_loop_type
+      when 'Heating'
+        # Determine the area served by the plant loop
+        area_served_m2 = plant_loop_total_floor_area_served(plant_loop)
+        area_served_ft2 = OpenStudio.convert(area_served_m2, 'm^2', 'ft^2').get
+
+        return 'VSD No Reset' if area_served_ft2 > 120_000
+
+        # else
+        return 'Riding Curve'
+      when 'Cooling'
+        # Get plant loop capacity capacity
+        cooling_capacity_w = plant_loop_total_cooling_capacity(plant_loop)
+
+        return 'VSD No Reset' if cooling_capacity_w >= 300
+
+        # else
+        return 'Riding Curve'
+    end
   end
 end

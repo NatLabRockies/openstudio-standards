@@ -22689,18 +22689,6 @@ OS:StandardsInformation:Construction,
   {0bf97eb7-cf83-43ac-b97b-e004ff2d0cbd}; !- Construction Name
 
 OS:Construction:FfactorGroundFloor,
-  {69298820-8f05-4092-ae32-5c6a8082c6bd}, !- Handle
-  Ffactor Ground Floor 4_005,             !- Name
-  1.263,                                  !- F-Factor {W/m-K}
-  38.46185856,                            !- Area {m2}
-  13.716,                                 !- PerimeterExposed {m}
-  {f6796a75-605e-4f99-98e0-458704c58c2d}; !- Surface Rendering Name
-
-OS:StandardsInformation:Construction,
-  {2c1c35ae-535e-476e-aa34-7410929e0322}, !- Handle
-  {69298820-8f05-4092-ae32-5c6a8082c6bd}; !- Construction Name
-
-OS:Construction:FfactorGroundFloor,
   {96bb0f20-4c6f-4417-b560-cfd613f5ba53}, !- Handle
   Ffactor Ground Floor 5_006,             !- Name
   1.263,                                  !- F-Factor {W/m-K}
@@ -28403,7 +28391,7 @@ OS:Surface,
   {7fee9566-a21e-4c8e-9375-a6ed3b82f8cc}, !- Handle
   Surface 1189,                           !- Name
   Floor,                                  !- Surface Type
-  {69298820-8f05-4092-ae32-5c6a8082c6bd}, !- Construction Name
+  ,                                       !- Construction Name
   {8f6dde70-d16f-4278-b31e-d3cba5029157}, !- Space Name
   Surface,                                !- Outside Boundary Condition
   {ad959825-77c1-49e3-9c32-17234db59cb0}, !- Outside Boundary Condition Object
@@ -30446,7 +30434,7 @@ OS:Surface,
   {eb7209a6-b041-43d5-89e6-1e90a58555e2}, !- Handle
   Surface 1293,                           !- Name
   Floor,                                  !- Surface Type
-  {69298820-8f05-4092-ae32-5c6a8082c6bd}, !- Construction Name
+  ,                                       !- Construction Name
   {c1defe43-9133-411b-80ef-e3dcc18bd600}, !- Space Name
   Surface,                                !- Outside Boundary Condition
   {dc3c4683-2af8-414f-be33-455ca0bf4de9}, !- Outside Boundary Condition Object

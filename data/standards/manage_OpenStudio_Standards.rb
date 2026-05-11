@@ -90,10 +90,10 @@ def unique_properties(sheet_name)
            ['template']
          when 'materials'
            ['name', 'code_category']
-         when 'space_types', 'space_types_lighting', 'space_types_rendering_color', 'space_types_ventilation', 'space_types_occupancy', 'space_types_infiltration', 'space_types_equipment', 'space_types_thermostats', 'space_types_swh', 'space_types_exhaust'
+         when 'space_types', 'space_types_lighting', 'space_types_rendering_color', 'space_types_ventilation', 'space_types_occupancy', 'space_types_infiltration', 'space_types_equipment', 'space_types_thermostats', 'space_types_swh'
            ['template', 'building_type', 'space_type']
          when 'exterior_lighting'
-           ['exterior_lighting_zone_number', 'template']
+           ['lighting_zone', 'template']
          when 'schedules'
            ['name', 'day_types', 'start_date', 'end_date']
          when 'construction_properties'
@@ -116,6 +116,8 @@ def unique_properties(sheet_name)
            ['template', 'cooling_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
          when 'unitary_acs'
            ['template', 'cooling_type', 'heating_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
+          when 'computer_room_acs'
+            ['template', 'cooling_type', 'heating_type', 'subcategory', 'minimum_capacity', 'maximum_capacity', 'start_date', 'end_date']
          when 'water_heaters'
            ['template', 'equipment_type', 'fuel_type', 'minimum_capacity', 'maximum_capacity', 'minimum_storage', 'maximum_storage', 'minimum_capacity_per_storage', 'maximum_capacity_per_storage', 'draw_profile', 'start_date', 'end_date']
          when 'elevators'
@@ -131,9 +133,7 @@ def unique_properties(sheet_name)
          when 'refrigeration_compressors'
            ['template', 'compressor_name', 'compressor_type']
          when 'economizers'
-           ['template', 'climate_zone', 'data_center']
-         when 'prm_economizers'
-           ['template', 'climate_ID']
+           ['climate_zone', 'data_center', 'minimum_capacity', 'fan_cooling_application', 'minimum_water_cooled_chilled_water_capacity_no_fan_cooling', 'minimum_air_cooled_chilled_water_or_district_chilled_water_capacity_no_fan_cooling', 'fixed_dry_bulb_is_allowed', 'differential_dry_bulb_is_allowed', 'electronic_enthalpy_is_allowed', 'differential_enthalpy_is_allowed', 'dew_point_dry_bulb_is_allowed', 'fixed_enthalpy_is_allowed', 'fixed_enthalpy_fixed_dry_bulb_is_allowed', 'differential_enthalpy_fixed_dry_bulb_is_allowed', 'fixed_dry_bulb_high_limit_shutoff_temp', 'fixed_enthalpy_high_limit_shutoff_enthalpy', 'dew_point_dry_bulb_high_limit_shutoff_dew_point_temp', 'dew_point_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'fixed_enthalpy_fixed_dry_bulb_high_limit_shutoff_enthalpy', 'fixed_enthalpy_fixed_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'differential_enthalpy_fixed_dry_bulb_high_limit_shutoff_dry_bulb_temp', 'percent_increase_cooling_efficiency_eliminate_requirement', 'heat_recovery_exempted']
          when 'motors'
            ['template', 'number_of_poles', 'type', 'synchronous_speed', 'minimum_capacity', 'maximum_capacity']
          when 'ground_temperatures'
@@ -151,7 +151,7 @@ def unique_properties(sheet_name)
          when 'climate_zones'
            ['name', 'standard']
          when 'energy_recovery'
-           ['template', 'climate_zone', 'under_8000_hours', 'nontransient_dwelling', 'enthalpy_recovery_ratio_design_conditions']
+           ['climate_zone', 'under_8000_hours', 'nontransient_dwelling', 'percent_oa_0_to_10', 'percent_oa_10_to_20 ', 'percent_oa_20_to_30', 'percent_oa_30_to_40', 'percent_oa_40_to_50', 'percent_oa_50_to_60', 'percent_oa_60_to_70', 'percent_oa_70_to_80', 'percent_oa_greater_than_80', 'design_conditions', 'energy_recovery_effectiveness', 'enthalpy_recovery_ratio', 'sensible_energy_recovery_ratio']
          when 'space_types_lighting_control'
            ['template', 'building_type', 'space_type']
          when 'prm_hvac_bldg_type'
@@ -199,53 +199,6 @@ def standard_directory_name_from_template(template)
   # puts "Extracting standard directory from template #{template} = #{directory_name}"
 
   return directory_name
-end
-
-# checks whether your authorization credentials are set up to access the spreadsheets
-# @return [Boolean] returns true if api is working, false if not
-def check_google_drive_configuration
-  require 'google_drive'
-  client_config_path = File.join(Dir.home, '.credentials', "client_secret.json")
-  unless File.exist? client_config_path
-    puts "Unable to locate client_secret.json file at #{client_config_path}."
-    return false
-  end
-  puts 'attempting to access spreadsheets...'
-  puts 'if you get an SSL error, disconnect from the VPN and try again'
-  session = GoogleDrive::Session.from_config(client_config_path)
-
-  # Gets list of remote files
-  session.files.each do |file|
-    puts file.title if file.title.include? 'OpenStudio'
-  end
-
-  puts 'Spreadsheets accessed successfully'
-  return true
-end
-
-# Downloads the OpenStudio_Standards.xlsx from Google Drive
-# @note This requires you to have a client_secret.json file saved in your
-# username/.credentials folder.  To get one of these files, please contact
-# marley.praprost@nrel.gov
-def download_google_spreadsheets(spreadsheet_titles)
-  require 'google_drive'
-  client_config_path = File.join(Dir.home, '.credentials', "client_secret.json")
-  unless File.exist? client_config_path
-    puts "Unable to locate client_secret.json file at #{client_config_path}."
-    return false
-  end
-
-  session = GoogleDrive::Session.from_config(client_config_path)
-
-  # Gets list of remote files
-  session.files.each do |file|
-    if spreadsheet_titles.include?(file.title)
-      puts "Found #{file.title}"
-      file.export_as_file("#{File.dirname(__FILE__)}/#{file.title}.xlsx")
-      puts "Downloaded #{file.title} to #{File.dirname(__FILE__)}/#{file.title}.xlsx"
-    end
-  end
-  return true
 end
 
 def exclusion_list
@@ -344,8 +297,8 @@ def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds')
     dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
     glob_string = "#{standards_dir}/#{new_dirs.join('/')}"
     puts "--spreadsheet title embedded search criteria: #{glob_string} yields:"
-#    template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') && !f.include?('prm')}
-    template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data')}
+    template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') && !f.include?('ashrae_90_1_prm') }
+    # template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') }
     template_dirs.each do |template_dir|
       puts "----#{template_dir}"
     end

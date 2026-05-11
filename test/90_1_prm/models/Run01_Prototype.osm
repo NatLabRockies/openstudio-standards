@@ -2639,7 +2639,7 @@ OS:Material,
 
 OS:Construction,
   {2eec3cae-85b7-4998-af1f-e594c24ad046}, !- Handle
-  U 1.22 SHGC 0.54 Simple Glazing Window, !- Name
+  U 1.22 SHGC 0.54 Simple Glazing,  !- Name
   ,                                       !- Surface Rendering Name
   {f109f335-6847-4a24-9bff-0d2a002be6b5}; !- Layer 1
 
@@ -5964,7 +5964,7 @@ OS:Exterior:Lights,
   {dc275200-4bc6-40ac-b864-539f9952cdd4}, !- Exterior Lights Definition Name
   {721973cb-e7ae-476c-9b84-6de8105d1513}, !- Schedule Name
   AstronomicalClock;                      !- Control Option
-  
+
 OS:WeatherFile,
   {6316daee-274c-4d61-9865-15fa4a372fb9}, !- Handle
   San Francisco Intl Ap,                  !- City
@@ -6766,7 +6766,7 @@ OS:StandardsInformation:Material,
 
 OS:Construction,
   {5e0ce838-a7d6-4584-9a4b-291705142468}, !- Handle
-  U 0.25 SHGC 0.20 VT 0.45 Simple Glazing Window, !- Name
+  U 0.25 SHGC 0.20 VT 0.45 Simple Glazing,  !- Name
   ,                                       !- Surface Rendering Name
   {fc3a2e22-fc70-46cb-9208-d717e9f3bf2f}; !- Layer 1
 

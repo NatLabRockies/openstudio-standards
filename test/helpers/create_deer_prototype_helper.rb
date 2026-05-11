@@ -3,7 +3,7 @@ class CreateDEERPrototypeBuildingTest < Minitest::Test
 
   def setup
     # Make a directory to save the resulting models
-    @test_dir = "#{Dir.pwd}/output"
+    @test_dir = "#{__dir__}/output"
     if !Dir.exist?(@test_dir)
       Dir.mkdir(@test_dir)
     end

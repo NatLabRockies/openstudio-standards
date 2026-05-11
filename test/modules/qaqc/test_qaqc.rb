@@ -43,14 +43,14 @@ class TestQAQC < Minitest::Test
     end
 
     @create.create_typical_building_from_model(model, template, climate_zone: climate_zone)
-    std.model_run_simulation_and_log_errors(model, "#{Dir.pwd}/annual_run")
+    std.model_run_simulation_and_log_errors(model, "#{__dir__}/annual_run")
   end
 
   def test_qaqc_checks
     target_standard = '90.1-2013'
     std = Standard.build(target_standard)
-    @model = std.safe_load_model("#{Dir.pwd}/annual_run/run/in.osm")
-    sql_path = OpenStudio::Path.new("#{Dir.pwd}/annual_run/run/eplusout.sql")
+    @model = std.safe_load_model("#{__dir__}/annual_run/run/in.osm")
+    sql_path = OpenStudio::Path.new("#{__dir__}/annual_run/run/eplusout.sql")
     @sql = OpenStudio::SqlFile.new(sql_path)
     assert(@sql.connectionOpen)
     @model.setSqlFile(@sql)

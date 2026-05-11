@@ -220,7 +220,8 @@ class AppendixGPRMTests < Minitest::Test
                                                                                  sizing_run_dir = run_dir_baseline,
                                                                                  run_all_orients = true,
                                                                                  unmet_load_hours_check = false,
-                                                                                 debug = GENERATE_PRM_LOG)
+                                                                                 debug = GENERATE_PRM_LOG,
+                                                                                 use_parallel = false)
 
       # Check if baseline model could be created
       assert(model_baseline, "Baseline model could not be generated for #{building_type}, #{template}, #{climate_zone}.")

@@ -1,5 +1,5 @@
-# Methods to obtain information about model spaces
 module OpenstudioStandards
+  # The Space module provides methods get information about model spaces
   module Space
     # @!group Space
 

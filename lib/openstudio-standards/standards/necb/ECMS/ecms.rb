@@ -43,11 +43,12 @@ class ECMS < NECB2011
                        ecm_system_name: nil,
                        template_standard:,
                        runner: nil,
-                       primary_heating_fuel: nil,
-                       swh_fuel: nil,
                        ecm_system_zones_map_option: 'NECB_Default')
     # Do nothing if nil or other usual suspects.. covering all bases for now.
     return if ecm_system_name.nil? || ecm_system_name == 'none' || ecm_system_name == 'NECB_Default'
+    # Verify the heating fuel
+    primary_heating_fuel = template_standard.fuel_type_set.ecm_fueltype
+    raise("Heating fuel for ECM #{ecm_system_name} is neither Electricity nor NaturalGas") if ((primary_heating_fuel != 'Electricity') && (primary_heating_fuel != 'NaturalGas'))
     ecm_system_zones_map_option = 'NECB_Default' if ecm_system_zones_map_option.nil? || ecm_system_zones_map_option == 'none'
 
     ecm_std = Standard.build('ECMS')
@@ -59,7 +60,7 @@ class ECMS < NECB2011
 
     # when the ecm is associated with adding a new HVAC system, then remove existing system components and loops
     ecm_std.remove_all_zone_eqpt(systems)
-    ecm_std.remove_air_loops(model)
+    OpenstudioStandards::HVAC.remove_air_loops(model)
     ecm_std.remove_hw_loops(model)
     ecm_std.remove_chw_loops(model)
     ecm_std.remove_cw_loops(model)
@@ -69,8 +70,7 @@ class ECMS < NECB2011
                  system_zones_map: map_system_to_zones,
                  system_doas_flags: system_doas_flags,
                  ecm_system_zones_map_option: ecm_system_zones_map_option,
-                 standard: template_standard,
-                 heating_fuel: primary_heating_fuel)
+                 standard: template_standard)
   end
 
   def apply_system_efficiencies_ecm(model:, ecm_system_name: nil, template_standard:)

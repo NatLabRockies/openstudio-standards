@@ -23,6 +23,11 @@ class ASHRAE9012010 < ASHRAE901
     when 'NoEconomizer'
       return [nil, nil, nil]
     when 'FixedDryBulb'
+      # Process climate zone:
+      # Moisture regime is not needed for climate zone 8
+      climate_zone = climate_zone.split('-')[-1]
+      climate_zone = '8' if climate_zone.include?('8')
+
       search_criteria = {
         'template' => template,
         'climate_zone' => climate_zone
@@ -30,10 +35,10 @@ class ASHRAE9012010 < ASHRAE901
       econ_limits = model_find_object(standards_data['economizers'], search_criteria)
       drybulb_limit_f = econ_limits['fixed_dry_bulb_high_limit_shutoff_temp']
     when 'FixedEnthalpy'
-      enthalpy_limit_btu_per_lb = 28
+      enthalpy_limit_btu_per_lb = 28.0
     when 'FixedDewPointAndDryBulb'
-      drybulb_limit_f = 75
-      dewpoint_limit_f = 55
+      drybulb_limit_f = 75.0
+      dewpoint_limit_f = 55.0
     end
 
     return [drybulb_limit_f, enthalpy_limit_btu_per_lb, dewpoint_limit_f]
@@ -364,6 +369,11 @@ class ASHRAE9012010 < ASHRAE901
   # @param pct_oa [Double] percentage of outdoor air
   # @return [Double] the flow rate above which an ERV is required. if nil, ERV is never required.
   def air_loop_hvac_energy_recovery_ventilator_flow_limit(air_loop_hvac, climate_zone, pct_oa)
+    # Process climate zone:
+    # Moisture regime is not needed for climate zone 8
+    climate_zone = climate_zone.split('-')[-1]
+    climate_zone = '8' if climate_zone.include?('8')
+
     # Table 6.5.6.1
     search_criteria = {
       'template' => template,
@@ -378,19 +388,19 @@ class ASHRAE9012010 < ASHRAE901
     if pct_oa < 0.2
       erv_cfm = nil
     elsif pct_oa >= 0.2 && pct_oa < 0.3
-      erv_cfm = energy_recovery_limits['20_to_30_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_20_to_30']
     elsif pct_oa >= 0.3 && pct_oa < 0.4
-      erv_cfm = energy_recovery_limits['30_to_40_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_30_to_40']
     elsif pct_oa >= 0.4 && pct_oa < 0.5
-      erv_cfm = energy_recovery_limits['40_to_50_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_40_to_50']
     elsif pct_oa >= 0.5 && pct_oa < 0.6
-      erv_cfm = energy_recovery_limits['50_to_60_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_50_to_60']
     elsif pct_oa >= 0.6 && pct_oa < 0.7
-      erv_cfm = energy_recovery_limits['60_to_70_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_60_to_70']
     elsif pct_oa >= 0.7 && pct_oa < 0.8
-      erv_cfm = energy_recovery_limits['70_to_80_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_70_to_80']
     elsif pct_oa >= 0.8
-      erv_cfm = energy_recovery_limits['greater_than_80_percent_oa']
+      erv_cfm = energy_recovery_limits['percent_oa_greater_than_80']
     end
 
     return erv_cfm

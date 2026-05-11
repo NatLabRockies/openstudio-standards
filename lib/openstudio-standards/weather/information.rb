@@ -136,7 +136,7 @@ module OpenstudioStandards
           when '16'
             ashrae_climate_zone = '5B'
           end
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Weather.information', "Using ASHRAE climate zone #{climate_zone} for California climate zone #{california_cz}.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Weather.information', "Using ASHRAE climate zone #{climate_zone} for California climate zone #{climate_zone.value}.")
         end
       end
 
@@ -170,7 +170,7 @@ module OpenstudioStandards
             full_epw_path = OpenStudio::OptionalPath.new(epw_path.get)
           else
             # If this is an always-run Measure, need to check a different path
-            alt_weath_path = File.expand_path(File.join(Dir.pwd, '../../resources'))
+            alt_weath_path = File.expand_path(File.join(__dir__, '../../resources'))
             alt_epw_path = File.expand_path(File.join(alt_weath_path, epw_path.get.to_s))
             if File.exist?(alt_epw_path)
               full_epw_path = OpenStudio::OptionalPath.new(OpenStudio::Path.new(alt_epw_path))
@@ -210,15 +210,15 @@ module OpenstudioStandards
         if path_length > 260
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Weather.information', "Weather file path length #{path_length} is >260 characters and may cause issues in Windows environments.")
         end
-        File.open("#{weather_dir}/#{weather_file_name}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name}", 'wb') do |f|
           f << epw_string
           f.flush
         end
-        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.ddy')}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.ddy')}", 'wb') do |f|
           f << ddy_string
           f.flush
         end
-        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.stat')}", 'wb').each do |f|
+        File.open("#{weather_dir}/#{weather_file_name.gsub('.epw', '.stat')}", 'wb') do |f|
           f << stat_string
           f.flush
         end
@@ -453,10 +453,66 @@ module OpenstudioStandards
     # @param base_humidity_ratio [Double] base humidity ratio, default is 0.010
     # @return [Double] dehumdification degree days
     def self.epw_file_get_dehumidification_degree_days(epw_file, base_humidity_ratio: 0.010)
-      db_temps_c = epw_file.getTimeSeries('Dry Bulb Temperature').get.values
+      # Workaround for case when the weather file contains the February from a leap year but that February only has 28
+      # days of data.
+      has_leap_day = false
+
+      # Find the first day in February
+      feb_index = epw_file.data.find_index { |entry| entry.date.monthOfYear.value == 2 }
+
+      # Find the year for February
+      feb_year = epw_file.data[feb_index].year
+      # Determine if February's year is a leap year
+      leap_year = false
+      if (feb_year % 100) > 0
+        leap_year = true if (feb_year % 4) == 0
+      else
+        leap_year = true if (feb_year % 400) == 0
+      end
+      # If the February is from a leap year determine if it contains a leap day
+      if leap_year
+
+        day = epw_file.data[feb_index].date.dayOfMonth
+        inc = 0
+
+        while epw_file.data[feb_index].date.dayOfMonth == day
+          feb_index += 1
+          inc       += 1
+        end
+
+        has_leap_day = epw_file.data[feb_index + (inc * 28)].date.dayOfMonth == 29
+      end
+
+      # If the February is from a leap year and there is no leap day then do not use the faulty OpenStudio Epw
+      # .getTimeSeries method.  Otherwise, use the method.
+      if has_leap_day || !leap_year
+        db_temps_c   = epw_file.getTimeSeries('Dry Bulb Temperature').get.values
+        rh_values    = epw_file.getTimeSeries('Relative Humidity').get.values
+        atm_p_values = epw_file.getTimeSeries('Atmospheric Station Pressure').get.values
+      else
+        # Access the data directly instead of using the OpenStudio API to avoid the faulty OpenStudioEpw
+        # .getTimeSeries method.
+
+        # Open the weather file
+        regex_csv = /[^,]+/
+        regex_num = /[0-9]/
+        f         = File.open(epw_file.path.to_s, 'r')
+        i         = 0
+
+        # Skip the header
+        i += 1 until f.readline[0] =~ regex_num
+
+        # Get all of the hourly weather data
+        lines         = IO.readlines(f)[i..-1]
+
+        # Get hourly weather data for a specific column
+        db_temps_c    = lines.map { |line| Float(line.scan(regex_csv)[6]) }
+        rh_values     = lines.map { |line| Float(line.scan(regex_csv)[8]) }
+        atm_p_values  = lines.map { |line| Float(line.scan(regex_csv)[9]) }
+      end
+
       db_temps_k = db_temps_c.map { |v| v + 273.15 }
-      rh_values = epw_file.getTimeSeries('Relative Humidity').get.values
-      atm_p_values = epw_file.getTimeSeries('Atmospheric Station Pressure').get.values
+
 
       # coefficients for the calculation of pws (Reference: ASHRAE Handbook - Fundamentals > CHAPTER 1. PSYCHROMETRICS)
       c1 = -5.6745359E+03

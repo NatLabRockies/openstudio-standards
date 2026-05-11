@@ -1,0 +1,54 @@
+{
+  "tables": {
+    "boiler_fuel_type_sets": {
+      "data_type": "table",
+      "notes": "This is a list of boiler fuel type combinations",
+      "refs": [
+        "Kamel.Haddad@nrcan-rncan.gc.ca",
+        "Phylroy.lopez@nrcan-rncan.gc.ca",
+        "Chris.Kirney@nrcan-rncan.gc.ca"      ],
+      "table": [
+        {
+          "name":"NaturalGas",
+          "boiler_fueltype": "NaturalGas",
+          "backup_boiler_fueltype": "NaturalGas",
+          "baseboard_type": "Hot Water",
+          "mau_heating_coil_type": "Hot Water",
+          "heating_coil_type_sys6": "Hot Water"
+        },
+        {
+          "name":"NaturalGasElecBackup",
+          "boiler_fueltype": "NaturalGas",
+          "backup_boiler_fueltype": "Electricity",
+          "baseboard_type": "Hot Water",
+          "mau_heating_coil_type": "Hot Water",
+          "heating_coil_type_sys6": "Hot Water"
+        },
+        {
+          "name":"Electricity",
+          "boiler_fueltype": "Electricity",
+          "backup_boiler_fueltype": "Electricity",
+          "baseboard_type": "Hot Water",
+          "mau_heating_coil_type": "Hot Water",
+          "heating_coil_type_sys6": "Hot Water"
+        },
+        {
+          "name":"ElectricityGasBackup",
+          "boiler_fueltype": "Electricity",
+          "backup_boiler_fueltype": "NaturalGas",
+          "baseboard_type": "Hot Water",
+          "mau_heating_coil_type": "Hot Water",
+          "heating_coil_type_sys6": "Hot Water"
+        },
+        {
+          "name":"FuelOilNo2",
+          "boiler_fueltype": "FuelOilNo2",
+          "backup_boiler_fueltype": "FuelOilNo2",
+          "baseboard_type": "Hot Water",
+          "mau_heating_coil_type": "Hot Water",
+          "heating_coil_type_sys6": "Hot Water"
+        }
+      ]
+    }
+  }
+}

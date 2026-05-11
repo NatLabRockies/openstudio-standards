@@ -185,16 +185,16 @@ module TallBuilding
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No story info in the SWH loop.')
           return false
         end
-        main_swh_loop = model_add_swh_loop(model,
-                                           swh_loop_name,
-                                           nil,
-                                           OpenStudio.convert(prototype_input['main_service_water_temperature'], 'F', 'C').get,
-                                           prototype_input['main_service_water_pump_head'].to_f,
-                                           prototype_input['main_service_water_pump_motor_efficiency'],
-                                           OpenStudio.convert(prototype_input['main_water_heater_capacity'], 'Btu/hr', 'W').get,
-                                           OpenStudio.convert(prototype_input['main_water_heater_volume'], 'gal', 'm^3').get,
-                                           swh_fueltype,
-                                           OpenStudio.convert(prototype_input['main_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get)
+        main_swh_loop = OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_loop(model,
+                                                                                                   system_name: swh_loop_name,
+                                                                                                   service_water_temperature: OpenStudio.convert(prototype_input['main_service_water_temperature'], 'F', 'C').get,
+                                                                                                   service_water_pump_head: prototype_input['main_service_water_pump_head'].to_f,
+                                                                                                   service_water_pump_motor_efficiency: prototype_input['main_service_water_pump_motor_efficiency'],
+                                                                                                   water_heater_capacity: OpenStudio.convert(prototype_input['main_water_heater_capacity'], 'Btu/hr', 'W').get,
+                                                                                                   water_heater_volume: OpenStudio.convert(prototype_input['main_water_heater_volume'], 'gal', 'm^3').get,
+                                                                                                   water_heater_fuel: swh_fueltype,
+                                                                                                   on_cycle_parasitic_fuel_consumption_rate: OpenStudio.convert(prototype_input['main_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get,
+                                                                                                   off_cycle_parasitic_fuel_consumption_rate: OpenStudio.convert(prototype_input['main_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get)
 
         # Attach the end uses based on floor function type
         # Office and retail: add to mechanical room only
@@ -225,11 +225,9 @@ module TallBuilding
             next if data['service_water_heating_peak_flow_rate'].to_f < 0.00001 && data['service_water_heating_peak_flow_per_area'].to_f < 0.00001
 
             # Add a service water use for each space
-            space_multiplier = space.multiplier
             water_fixture = model_add_swh_end_uses_by_space(model,
                                                             main_swh_loop,
-                                                            space,
-                                                            space_multiplier)
+                                                            space)
             unless water_fixture.nil?
               water_fixtures << water_fixture
             end
@@ -246,47 +244,44 @@ module TallBuilding
 
     # Add the booster water loop if there is any hotel floor
     if additional_params[:num_of_floor_hotel].to_i > 0
-      swh_booster_loop = model_add_swh_booster(model,
-                                               hotel_swh_loop,
-                                               OpenStudio.convert(prototype_input['booster_water_heater_capacity'], 'Btu/hr', 'W').get,
-                                               OpenStudio.convert(prototype_input['booster_water_heater_volume'], 'gal', 'm^3').get,
-                                               prototype_input['booster_water_heater_fuel'],
-                                               OpenStudio.convert(prototype_input['booster_water_temperature'], 'F', 'C').get,
-                                               0,
-                                               nil)
+      swh_booster_loop = OpenstudioStandards::ServiceWaterHeating.create_booster_water_heating_loop(model,
+                                                                                                    water_heater_capacity: OpenStudio.convert(prototype_input['booster_water_heater_capacity'], 'Btu/hr', 'W').get,
+                                                                                                    water_heater_volume: OpenStudio.convert(prototype_input['booster_water_heater_volume'], 'gal', 'm^3').get,
+                                                                                                    water_heater_fuel: prototype_input['booster_water_heater_fuel'],
+                                                                                                    service_water_temperature: OpenStudio.convert(prototype_input['booster_water_temperature'], 'F', 'C').get,
+                                                                                                    service_water_loop: hotel_swh_loop)
 
-      # Attach the end uses
-      model_add_booster_swh_end_uses(model,
-                                     swh_booster_loop,
-                                     OpenStudio.convert(prototype_input['booster_service_water_peak_flowrate'], 'gal/min', 'm^3/s').get,
-                                     prototype_input['booster_service_water_flowrate_schedule'],
-                                     OpenStudio.convert(prototype_input['booster_water_use_temperature'], 'F', 'C').get)
-
+      # add booster water use
+      OpenstudioStandards::ServiceWaterHeating.create_water_use(model,
+                                                                name: 'Booster',
+                                                                flow_rate: OpenStudio.convert(prototype_input['booster_service_water_peak_flowrate'], 'gal/min', 'm^3/s').get,
+                                                                flow_rate_fraction_schedule: model_add_schedule(model, prototype_input['booster_service_water_flowrate_schedule']),
+                                                                water_use_temperature: OpenStudio.convert(prototype_input['booster_water_use_temperature'], 'F', 'C').get,
+                                                                service_water_loop: swh_booster_loop)
     end
 
     # for tall and super tall buildings, there is laundry only if hotel has more than 1 floors
     # hotel_bot has laundry, if only one floor, doesn't have hotel_bot
     if additional_params[:num_of_floor_hotel].to_i > 1
       # Add the laundry service water heating loop
-      laundry_swh_loop = model_add_swh_loop(model,
-                                            'Laundry Service Water Loop',
-                                            nil,
-                                            OpenStudio.convert(prototype_input['laundry_service_water_temperature'], 'F', 'C').get,
-                                            prototype_input['laundry_service_water_pump_head'].to_f,
-                                            prototype_input['laundry_service_water_pump_motor_efficiency'],
-                                            OpenStudio.convert(prototype_input['laundry_water_heater_capacity'], 'Btu/hr', 'W').get,
-                                            OpenStudio.convert(prototype_input['laundry_water_heater_volume'], 'gal', 'm^3').get,
-                                            prototype_input['laundry_water_heater_fuel'],
-                                            OpenStudio.convert(prototype_input['laundry_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get)
+      laundry_swh_loop = OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_loop(model,
+                                                                                                    system_name: 'Laundry Service Water Loop',
+                                                                                                    service_water_temperature: OpenStudio.convert(prototype_input['laundry_service_water_temperature'], 'F', 'C').get,
+                                                                                                    service_water_pump_head: prototype_input['laundry_service_water_pump_head'].to_f,
+                                                                                                    service_water_pump_motor_efficiency: prototype_input['laundry_service_water_pump_motor_efficiency'],
+                                                                                                    water_heater_capacity: OpenStudio.convert(prototype_input['laundry_water_heater_capacity'], 'Btu/hr', 'W').get,
+                                                                                                    water_heater_volume: OpenStudio.convert(prototype_input['laundry_water_heater_volume'], 'gal', 'm^3').get,
+                                                                                                    water_heater_fuel: prototype_input['laundry_water_heater_fuel'],
+                                                                                                    on_cycle_parasitic_fuel_consumption_rate: OpenStudio.convert(prototype_input['laundry_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get,
+                                                                                                    off_cycle_parasitic_fuel_consumption_rate: OpenStudio.convert(prototype_input['laundry_service_water_parasitic_fuel_consumption_rate'], 'Btu/hr', 'W').get)
 
-      # Attach the end uses if specified in prototype inputs
-      model_add_swh_end_uses(model,
-                             'Laundry',
-                             laundry_swh_loop,
-                             OpenStudio.convert(prototype_input['laundry_service_water_peak_flowrate'], 'gal/min', 'm^3/s').get,
-                             prototype_input['laundry_service_water_flowrate_schedule'],
-                             OpenStudio.convert(prototype_input['laundry_water_use_temperature'], 'F', 'C').get,
-                             nil)
+      # add water use
+      OpenstudioStandards::ServiceWaterHeating.create_water_use(model,
+                                                                name: 'Laundry',
+                                                                flow_rate: OpenStudio.convert(prototype_input['laundry_service_water_peak_flowrate'], 'gal/min', 'm^3/s').get,
+                                                                flow_rate_fraction_schedule: model_add_schedule(model, prototype_input['laundry_service_water_flowrate_schedule']),
+                                                                water_use_temperature: OpenStudio.convert(prototype_input['laundry_water_use_temperature'], 'F', 'C').get,
+                                                                service_water_loop: laundry_swh_loop)
     end
     return true
   end

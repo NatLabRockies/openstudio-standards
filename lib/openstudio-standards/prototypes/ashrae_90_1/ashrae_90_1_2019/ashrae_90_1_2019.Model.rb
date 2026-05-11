@@ -300,8 +300,8 @@ class ASHRAE9012019 < ASHRAE901
         key_name = space.name.to_s
       end
       light_sensor.setKeyName(key_name)
-      light_sensor.setName("#{key_name}_LSr".gsub(/[\s-]/, ''))
-      light_sensor_name = light_sensor.name.to_s
+      light_sensor_name_ems = "#{OpenstudioStandards::HVAC.ems_friendly_name(key_name)}_LSr"
+      light_sensor.setName(light_sensor_name_ems)
 
       # get the space floor area for calculations
       space_floor_area = space.floorArea
@@ -328,28 +328,28 @@ class ASHRAE9012019 < ASHRAE901
         else
           light_x_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(light_x, 'Lights', 'Electricity Rate')
         end
-        light_x_actuator.setName("#{key_name}_Light#{light_id}_Actuator".gsub(/[\s-]/, ''))
-        light_x_actuator_name = light_x_actuator.name.to_s
-        add_lights_prog_null += "\n      SET #{light_x_actuator_name} = NULL,"
+        light_x_actuator_name_ems = "#{OpenstudioStandards::HVAC.ems_friendly_name(key_name)}_Light#{light_id}_Actuator"
+        light_x_actuator.setName(light_x_actuator_name_ems)
+        add_lights_prog_null += "\n      SET #{light_x_actuator_name_ems} = NULL,"
         if light_x == big_light
-          add_lights_prog_0 += "\n      SET #{light_x_actuator_name} = 0.02*#{space_floor_area}/0.09290304,"
+          add_lights_prog_0 += "\n      SET #{light_x_actuator_name_ems} = 0.02*#{space_floor_area}/0.09290304,"
           next
         end
-        add_lights_prog_0 += "\n      SET #{light_x_actuator_name} = 0,"
+        add_lights_prog_0 += "\n      SET #{light_x_actuator_name_ems} = 0,"
       end
 
       light_ems_prog = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      light_ems_prog.setName("SET_#{key_name}_Light_EMS_Program".gsub(/[\s-]/, ''))
+      light_ems_prog.setName("SET_#{OpenstudioStandards::HVAC.ems_friendly_name(key_name)}_Light_EMS_Program")
       light_ems_prog_body = <<-EMS
-      SET #{light_sensor_name}_IP=0.093*#{light_sensor_name}/#{space_floor_area},
-      IF (#{business_sensor_name} <= 0) && (#{light_sensor_name}_IP >= 0.02),#{add_lights_prog_0}
+      SET #{light_sensor_name_ems}_IP=0.093*#{light_sensor_name_ems}/#{space_floor_area},
+      IF (#{business_sensor_name} <= 0) && (#{light_sensor_name_ems}_IP >= 0.02),#{add_lights_prog_0}
       ELSE,#{add_lights_prog_null}
       ENDIF
       EMS
       light_ems_prog.setBody(light_ems_prog_body)
 
       light_ems_prog_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      light_ems_prog_manager.setName("SET_#{key_name}_Light_EMS_Program_Manager")
+      light_ems_prog_manager.setName("SET_#{OpenstudioStandards::HVAC.ems_friendly_name(key_name)}_Light_EMS_Program_Manager")
       light_ems_prog_manager.setCallingPoint('AfterPredictorAfterHVACManagers')
       light_ems_prog_manager.addProgram(light_ems_prog)
     end

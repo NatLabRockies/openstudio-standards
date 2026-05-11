@@ -147,7 +147,7 @@ class Standard
         ambient_loop.addDemandBranchForComponent(water_to_water_hp)
       # Central Air Source Heat Pump
       when 'AirSourceHeatPump', 'ASHP'
-        create_central_air_source_heat_pump(model, hot_water_loop)
+        OpenstudioStandards::HVAC.create_central_air_source_heat_pump(model, hot_water_loop)
       # Boiler
       when 'Electricity', 'Gas', 'NaturalGas', 'Propane', 'PropaneGas', 'FuelOilNo1', 'FuelOilNo2'
         if boiler_lvg_temp_dsgn.nil?
@@ -162,16 +162,16 @@ class Standard
           out_temp_lmt_f = boiler_out_temp_lmt
         end
 
-        boiler = create_boiler_hot_water(model,
-                                         hot_water_loop: hot_water_loop,
-                                         fuel_type: boiler_fuel_type,
-                                         draft_type: boiler_draft_type,
-                                         nominal_thermal_efficiency: 0.78,
-                                         eff_curve_temp_eval_var: boiler_eff_curve_temp_eval_var,
-                                         lvg_temp_dsgn_f: lvg_temp_dsgn_f,
-                                         out_temp_lmt_f: out_temp_lmt_f,
-                                         max_plr: boiler_max_plr,
-                                         sizing_factor: boiler_sizing_factor)
+        boiler = OpenstudioStandards::HVAC.create_boiler_hot_water(model,
+                                                                   hot_water_loop: hot_water_loop,
+                                                                   fuel_type: boiler_fuel_type,
+                                                                   draft_type: boiler_draft_type,
+                                                                   nominal_thermal_efficiency: 0.78,
+                                                                   eff_curve_temp_eval_var: boiler_eff_curve_temp_eval_var,
+                                                                   lvg_temp_dsgn_f: lvg_temp_dsgn_f,
+                                                                   out_temp_lmt_f: out_temp_lmt_f,
+                                                                   max_plr: boiler_max_plr,
+                                                                   sizing_factor: boiler_sizing_factor)
 
         # @todo Yixing. Adding temperature setpoint controller at boiler outlet causes simulation errors
         # boiler_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(self, hw_temp_sch)
@@ -319,7 +319,7 @@ class Standard
         # Add Constant pump, in plant loop, the number of chiller adjustment will assign pump to each chiller
         # pri_chw_pump = OpenStudio::Model::PumpConstantSpeed.new(model)
         pri_chw_pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-        pump_variable_speed_set_control_type(pri_chw_pump, control_type = 'Riding Curve')
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pri_chw_pump, control_type: 'Riding Curve')
         # This pump name is important for function add_ems_for_multiple_chiller_pumps_w_secondary_plant. If you update
         # it here, you must update the logic there to account for this
         pri_chw_pump.setName("#{chilled_water_loop.name} Primary Pump")
@@ -364,17 +364,13 @@ class Standard
     end
 
     # check for existence of condenser_water_loop if WaterCooled
-    if chiller_cooling_type == 'WaterCooled'
-      if condenser_water_loop.nil?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Requested chiller is WaterCooled but no condenser loop specified.')
-      end
+    if chiller_cooling_type == 'WaterCooled' && condenser_water_loop.nil?
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Requested chiller is WaterCooled but no condenser loop specified.')
     end
 
     # check for non-existence of condenser_water_loop if AirCooled
-    if chiller_cooling_type == 'AirCooled'
-      unless condenser_water_loop.nil?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Requested chiller is AirCooled but condenser loop specified.')
-      end
+    if chiller_cooling_type == 'AirCooled' && !condenser_water_loop.nil?
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Requested chiller is AirCooled but condenser loop specified.')
     end
 
     if cooling_fuel == 'DistrictCooling'
@@ -390,11 +386,11 @@ class Standard
       # 0.66 kw/ton for a 150 ton Water Cooled positive displacement chiller
       case chiller_cooling_type
       when 'AirCooled'
-        default_cop = kw_per_ton_to_cop(1.188)
+        default_cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(1.188)
       when 'WaterCooled'
-        default_cop = kw_per_ton_to_cop(0.66)
+        default_cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(0.66)
       else
-        default_cop = kw_per_ton_to_cop(0.66)
+        default_cop = OpenstudioStandards::HVAC.kw_per_ton_to_cop(0.66)
       end
 
       # make the correct type of chiller based these properties
@@ -680,11 +676,10 @@ class Standard
                   summer_oat_wbs_f << OpenStudio.convert(summer_oat_wb_c, 'C', 'F').get
                 else
                   if dd.wetBulbOrDewPointAtMaximumDryBulb.is_initialized
-                    summer_oat_wb_c = dd.wetBulbOrDewPointAtMaximumDryBulb
+                    summer_oat_wb_c = dd.wetBulbOrDewPointAtMaximumDryBulb.get
                     summer_oat_wbs_f << OpenStudio.convert(summer_oat_wb_c, 'C', 'F').get
                   end
                 end
-
               end
             end
           end
@@ -925,18 +920,18 @@ class Standard
       heat_pump_water_loop.addSupplyBranchForComponent(heating_equipment)
       heating_equipment_stpt_manager.setName("#{heat_pump_water_loop.name} District Heating Scheduled Dual Setpoint")
     when 'AirSourceHeatPump', 'ASHP'
-      heating_equipment = create_central_air_source_heat_pump(model, heat_pump_water_loop)
+      heating_equipment = OpenstudioStandards::HVAC.create_central_air_source_heat_pump(model, heat_pump_water_loop)
       heating_equipment_stpt_manager.setName("#{heat_pump_water_loop.name} ASHP Scheduled Dual Setpoint")
     when 'Electricity', 'Gas', 'NaturalGas', 'Propane', 'PropaneGas', 'FuelOilNo1', 'FuelOilNo2'
-      heating_equipment = create_boiler_hot_water(model,
-                                                  hot_water_loop: heat_pump_water_loop,
-                                                  name: "#{heat_pump_water_loop.name} Supplemental Boiler",
-                                                  fuel_type: heating_fuel,
-                                                  flow_mode: 'ConstantFlow',
-                                                  lvg_temp_dsgn_f: 86.0, # 30.0 degrees Celsius
-                                                  min_plr: 0.0,
-                                                  max_plr: 1.2,
-                                                  opt_plr: 1.0)
+      heating_equipment = OpenstudioStandards::HVAC.create_boiler_hot_water(model,
+                                                                            hot_water_loop: heat_pump_water_loop,
+                                                                            name: "#{heat_pump_water_loop.name} Supplemental Boiler",
+                                                                            fuel_type: heating_fuel,
+                                                                            flow_mode: 'ConstantFlow',
+                                                                            lvg_temp_dsgn_f: 86.0, # 30.0 degrees Celsius
+                                                                            min_plr: 0.0,
+                                                                            max_plr: 1.2,
+                                                                            opt_plr: 1.0)
       heating_equipment_stpt_manager.setName("#{heat_pump_water_loop.name} Boiler Scheduled Dual Setpoint")
     else
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', "Boiler fuel type #{heating_fuel} is not valid, no heating equipment will be added.")
@@ -1032,22 +1027,25 @@ class Standard
     loop_stpt_manager.setName("#{ground_hx_loop.name} Supply Outlet Setpoint")
     loop_stpt_manager.addToNode(ground_hx_loop.supplyOutletNode)
 
+    # edit name to be EMS friendly
+    ground_hx_ems_name = OpenstudioStandards::HVAC.ems_friendly_name(ground_hx.name)
+
     # sensor to read supply inlet temperature
     inlet_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model,
                                                                             'System Node Temperature')
-    inlet_temp_sensor.setName("#{ground_hx.name.to_s.gsub(/[ +-.]/, '_')} Inlet Temp Sensor")
+    inlet_temp_sensor.setName("#{ground_hx_ems_name} Inlet Temp Sensor")
     inlet_temp_sensor.setKeyName(ground_hx_loop.supplyInletNode.handle.to_s)
 
     # actuator to set supply outlet temperature
     outlet_temp_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hx_temp_sch,
                                                                                  'Schedule:Constant',
                                                                                  'Schedule Value')
-    outlet_temp_actuator.setName("#{ground_hx.name} Outlet Temp Actuator")
+    outlet_temp_actuator.setName("#{ground_hx_ems_name} Outlet Temp Actuator")
 
     # program to control outlet temperature
     # adjusts delta-t based on calculation of slope and intercept from control temperatures
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{ground_hx.name.to_s.gsub(/[ +-.]/, '_')} Temperature Control")
+    program.setName("#{ground_hx_ems_name} Temperature Control")
     program_body = <<-EMS
       SET Tin = #{inlet_temp_sensor.handle}
       SET Tout = #{slope_c_per_c.round(2)} * Tin + #{intercept_c.round(1)}
@@ -1057,7 +1055,7 @@ class Standard
 
     # program calling manager
     pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    pcm.setName("#{program.name.to_s.gsub(/[ +-.]/, '_')} Calling Manager")
+    pcm.setName("#{program.name} Calling Manager")
     pcm.setCallingPoint('InsideHVACSystemIterationLoop')
     pcm.addProgram(program)
 
@@ -1208,8 +1206,8 @@ class Standard
       chilled_water_loop.addAvailabilityManager(chilled_water_loop_lockout_manager)
     else
       # create availability managers based on zone heating and cooling demand
-      hot_water_loop_name = ems_friendly_name(hot_water_loop.name)
-      chilled_water_loop_name = ems_friendly_name(chilled_water_loop.name)
+      hot_water_loop_name = OpenstudioStandards::HVAC.ems_friendly_name(hot_water_loop.name)
+      chilled_water_loop_name = OpenstudioStandards::HVAC.ems_friendly_name(chilled_water_loop.name)
 
       # create hot water plant availability schedule managers and create an EMS acuator
       sch_hot_water_availability = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -1370,10 +1368,9 @@ class Standard
     sizing_system.setCentralHeatingDesignSupplyAirTemperature(htg_dsgn_sup_air_temp_c)
 
     # create supply fan
-    supply_fan = create_fan_by_name(model,
-                                    'Constant_DOAS_Fan',
-                                    fan_name: 'DOAS Supply Fan',
-                                    end_use_subcategory: 'DOAS Fans')
+    supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model, 'Constant_DOAS_Fan',
+                                                              fan_name: 'DOAS Supply Fan',
+                                                              end_use_subcategory: 'DOAS Fans')
     supply_fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     supply_fan.setMaximumFlowRate(OpenStudio.convert(fan_maximum_flow_rate, 'cfm', 'm^3/s').get) unless fan_maximum_flow_rate.nil?
     supply_fan.addToNode(air_loop.supplyInletNode)
@@ -1381,32 +1378,32 @@ class Standard
     # create heating coil
     if hot_water_loop.nil?
       # electric backup heating coil
-      create_coil_heating_electric(model,
-                                   air_loop_node: air_loop.supplyInletNode,
-                                   name: "#{air_loop.name} Backup Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                             air_loop_node: air_loop.supplyInletNode,
+                                                             name: "#{air_loop.name} Backup Htg Coil")
       # heat pump coil
-      create_coil_heating_dx_single_speed(model,
-                                          air_loop_node: air_loop.supplyInletNode,
-                                          name: "#{air_loop.name} Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                    air_loop_node: air_loop.supplyInletNode,
+                                                                    name: "#{air_loop.name} Htg Coil")
     else
-      create_coil_heating_water(model,
-                                hot_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Htg Coil",
-                                controller_convergence_tolerance: 0.0001)
+      OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                          hot_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Htg Coil",
+                                                          controller_convergence_tolerance: 0.0001)
     end
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil",
-                                       type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil",
+                                                                 type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # minimum outdoor air schedule
@@ -1462,23 +1459,21 @@ class Standard
       oa_system = air_loop.airLoopHVACOutdoorAirSystem.get
 
       # create the ERV and set its properties
-      erv = OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent.new(model)
-      erv.addToNode(oa_system.outboardOANode.get)
-      erv.setHeatExchangerType('Rotary')
       # @todo come up with scheme for estimating power of ERV motor wheel which might require knowing airflow.
       # erv.setNominalElectricPower(value_new)
-      erv.setEconomizerLockout(true)
-      erv.setSupplyAirOutletTemperatureControl(false)
-
-      erv.setSensibleEffectivenessat100HeatingAirFlow(0.76)
-      erv.setSensibleEffectivenessat75HeatingAirFlow(0.81)
-      erv.setLatentEffectivenessat100HeatingAirFlow(0.68)
-      erv.setLatentEffectivenessat75HeatingAirFlow(0.73)
-
-      erv.setSensibleEffectivenessat100CoolingAirFlow(0.76)
-      erv.setSensibleEffectivenessat75CoolingAirFlow(0.81)
-      erv.setLatentEffectivenessat100CoolingAirFlow(0.68)
-      erv.setLatentEffectivenessat75CoolingAirFlow(0.73)
+      erv = OpenstudioStandards::HVAC.create_heat_exchanger_air_to_air_sensible_and_latent(model,
+                                                                                           name: "#{zone.name} ERV HX",
+                                                                                           type: "Rotary",
+                                                                                           economizer_lockout: true,
+                                                                                           sensible_heating_100_eff: 0.76,
+                                                                                           sensible_heating_75_eff: 0.81,
+                                                                                           latent_heating_100_eff: 0.68,
+                                                                                           latent_heating_75_eff: 0.73,
+                                                                                           sensible_cooling_100_eff: 0.76,
+                                                                                           sensible_cooling_75_eff: 0.81,
+                                                                                           latent_cooling_100_eff: 0.68,
+                                                                                           latent_cooling_75_eff: 0.73)
+      erv.addToNode(oa_system.outboardOANode.get)
 
       # increase fan static pressure to account for ERV
       erv_pressure_rise = OpenStudio.convert(1.0, 'inH_{2}O', 'Pa').get
@@ -1602,15 +1597,15 @@ class Standard
     sizing_system.setCentralHeatingDesignSupplyAirTemperature(htg_dsgn_sup_air_temp_c)
 
     if doas_type == 'DOASCV'
-      supply_fan = create_fan_by_name(model,
-                                      'Constant_DOAS_Fan',
-                                      fan_name: 'DOAS Supply Fan',
-                                      end_use_subcategory: 'DOAS Fans')
+      supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                'Constant_DOAS_Fan',
+                                                                fan_name: 'DOAS Supply Fan',
+                                                                end_use_subcategory: 'DOAS Fans')
     else # 'DOASVAV'
-      supply_fan = create_fan_by_name(model,
-                                      'Variable_DOAS_Fan',
-                                      fan_name: 'DOAS Supply Fan',
-                                      end_use_subcategory: 'DOAS Fans')
+      supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                'Variable_DOAS_Fan',
+                                                                fan_name: 'DOAS Supply Fan',
+                                                                end_use_subcategory: 'DOAS Fans')
     end
     supply_fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     supply_fan.setMaximumFlowRate(OpenStudio.convert(fan_maximum_flow_rate, 'cfm', 'm^3/s').get) unless fan_maximum_flow_rate.nil?
@@ -1619,19 +1614,19 @@ class Standard
     # create heating coil
     if hot_water_loop.nil?
       # electric backup heating coil
-      create_coil_heating_electric(model,
-                                   air_loop_node: air_loop.supplyInletNode,
-                                   name: "#{air_loop.name} Backup Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                             air_loop_node: air_loop.supplyInletNode,
+                                                             name: "#{air_loop.name} Backup Htg Coil")
       # heat pump coil
-      create_coil_heating_dx_single_speed(model,
-                                          air_loop_node: air_loop.supplyInletNode,
-                                          name: "#{air_loop.name} Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                    air_loop_node: air_loop.supplyInletNode,
+                                                                    name: "#{air_loop.name} Htg Coil")
     else
-      create_coil_heating_water(model,
-                                hot_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Htg Coil",
-                                controller_convergence_tolerance: 0.0001)
+      OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                          hot_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Htg Coil",
+                                                          controller_convergence_tolerance: 0.0001)
     end
 
     # could add a humidity controller here set to limit supply air to a 16.6C/62F dewpoint
@@ -1648,15 +1643,15 @@ class Standard
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil",
-                                       type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil",
+                                                                 type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # minimum outdoor air schedule
@@ -1697,15 +1692,15 @@ class Standard
     # create an exhaust fan
     if include_exhaust_fan
       if doas_type == 'DOASCV'
-        exhaust_fan = create_fan_by_name(model,
-                                         'Constant_DOAS_Fan',
-                                         fan_name: 'DOAS Exhaust Fan',
-                                         end_use_subcategory: 'DOAS Fans')
+        exhaust_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                   'Constant_DOAS_Fan',
+                                                                   fan_name: 'DOAS Exhaust Fan',
+                                                                   end_use_subcategory: 'DOAS Fans')
       else # 'DOASVAV'
-        exhaust_fan = create_fan_by_name(model,
-                                         'Variable_DOAS_Fan',
-                                         fan_name: 'DOAS Exhaust Fan',
-                                         end_use_subcategory: 'DOAS Fans')
+        exhaust_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                   'Variable_DOAS_Fan',
+                                                                   fan_name: 'DOAS Exhaust Fan',
+                                                                   end_use_subcategory: 'DOAS Fans')
       end
       # set pressure rise 1.0 inH2O lower than supply fan, 1.0 inH2O minimum
       exhaust_fan_pressure_rise = supply_fan.pressureRise - OpenStudio.convert(1.0, 'inH_{2}O', 'Pa').get
@@ -1744,9 +1739,9 @@ class Standard
       elsif doas_type == 'DOASVAVReheat'
         # Reheat coil
         if hot_water_loop.nil?
-          rht_coil = create_coil_heating_electric(model, name: "#{zone.name} Electric Reheat Coil")
+          rht_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model, name: "#{zone.name} Electric Reheat Coil")
         else
-          rht_coil = create_coil_heating_water(model, hot_water_loop, name: "#{zone.name} Reheat Coil")
+          rht_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model, hot_water_loop, name: "#{zone.name} Reheat Coil")
         end
         # VAV reheat terminal
         air_terminal = OpenStudio::Model::AirTerminalSingleDuctVAVReheat.new(model, model.alwaysOnDiscreteSchedule, rht_coil)
@@ -1805,6 +1800,7 @@ class Standard
       sizing_zone.setDedicatedOutdoorAirSystemControlStrategy(doas_control_strategy)
       sizing_zone.setDedicatedOutdoorAirLowSetpointTemperatureforDesign(clg_dsgn_sup_air_temp_c)
       sizing_zone.setDedicatedOutdoorAirHighSetpointTemperatureforDesign(htg_dsgn_sup_air_temp_c)
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
     end
 
     return air_loop
@@ -1895,36 +1891,36 @@ class Standard
 
     # create fan
     # @type [OpenStudio::Model::FanVariableVolume] fan
-    fan = create_fan_by_name(model,
-                             'VAV_System_Fan',
-                             fan_name: "#{air_loop.name} Fan",
-                             fan_efficiency: fan_efficiency,
-                             pressure_rise: fan_pressure_rise,
-                             motor_efficiency: fan_motor_efficiency,
-                             end_use_subcategory: 'VAV System Fans')
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'VAV_System_Fan',
+                                                       fan_name: "#{air_loop.name} Fan",
+                                                       fan_efficiency: fan_efficiency,
+                                                       pressure_rise: fan_pressure_rise,
+                                                       motor_efficiency: fan_motor_efficiency,
+                                                       end_use_subcategory: 'VAV System Fans')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.addToNode(air_loop.supplyInletNode)
 
     # create heating coil
     if hot_water_loop.nil?
       if heating_type == 'Electricity'
-        htg_coil = create_coil_heating_electric(model,
-                                                air_loop_node: air_loop.supplyInletNode,
-                                                name: "#{air_loop.name} Main Electric Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          air_loop_node: air_loop.supplyInletNode,
+                                                                          name: "#{air_loop.name} Main Electric Htg Coil")
       else # default to NaturalGas
-        htg_coil = create_coil_heating_gas(model,
-                                           air_loop_node: air_loop.supplyInletNode,
-                                           name: "#{air_loop.name} Main Gas Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     air_loop_node: air_loop.supplyInletNode,
+                                                                     name: "#{air_loop.name} Main Gas Htg Coil")
       end
     else
-      htg_coil = create_coil_heating_water(model,
-                                           hot_water_loop,
-                                           air_loop_node: air_loop.supplyInletNode,
-                                           name: "#{air_loop.name} Main Htg Coil",
-                                           rated_inlet_water_temperature: hw_temp_c,
-                                           rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                           rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
-                                           rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                     hot_water_loop,
+                                                                     air_loop_node: air_loop.supplyInletNode,
+                                                                     name: "#{air_loop.name} Main Htg Coil",
+                                                                     rated_inlet_water_temperature: hw_temp_c,
+                                                                     rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                     rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
+                                                                     rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
     end
 
     # set the setpointmanager for the central/preheat coil if required
@@ -1932,15 +1928,15 @@ class Standard
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil",
-                                       type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil",
+                                                                 type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # outdoor air intake system
@@ -1990,19 +1986,19 @@ class Standard
       # create reheat coil
       case reheat_type
       when 'NaturalGas', 'Gas'
-        rht_coil = create_coil_heating_gas(model,
-                                           name: "#{zone.name} Gas Reheat Coil")
+        rht_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{zone.name} Gas Reheat Coil")
       when 'Electricity'
-        rht_coil = create_coil_heating_electric(model,
-                                                name: "#{zone.name} Electric Reheat Coil")
+        rht_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{zone.name} Electric Reheat Coil")
       when 'Water'
-        rht_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{zone.name} Reheat Coil",
-                                             rated_inlet_water_temperature: hw_temp_c,
-                                             rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                             rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
-                                             rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
+        rht_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{zone.name} Reheat Coil",
+                                                                       rated_inlet_water_temperature: hw_temp_c,
+                                                                       rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                       rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
+                                                                       rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       else
         # no reheat
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Model.Model', "No reheat coil for terminal in #{zone.name}")
@@ -2030,6 +2026,7 @@ class Standard
         sizing_zone = zone.sizingZone
         sizing_zone.setCoolingDesignAirFlowMethod('DesignDayWithLimit')
         sizing_zone.setHeatingDesignAirFlowMethod('DesignDay')
+        sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
         sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
         sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       else
@@ -2049,6 +2046,7 @@ class Standard
         # zone sizing
         sizing_zone = zone.sizingZone
         sizing_zone.setCoolingDesignAirFlowMethod('DesignDayWithLimit')
+        sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
         sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       end
 
@@ -2120,29 +2118,29 @@ class Standard
 
     # create fan
     # @type [OpenStudio::Model::FanVariableVolume] fan
-    fan = create_fan_by_name(model,
-                             'VAV_System_Fan',
-                             fan_name: "#{air_loop.name} Fan",
-                             fan_efficiency: fan_efficiency,
-                             pressure_rise: fan_pressure_rise,
-                             motor_efficiency: fan_motor_efficiency,
-                             end_use_subcategory: 'VAV System Fans')
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'VAV_System_Fan',
+                                                       fan_name: "#{air_loop.name} Fan",
+                                                       fan_efficiency: fan_efficiency,
+                                                       pressure_rise: fan_pressure_rise,
+                                                       motor_efficiency: fan_motor_efficiency,
+                                                       end_use_subcategory: 'VAV System Fans')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.addToNode(air_loop.supplyInletNode)
 
     # create heating coil
-    htg_coil = create_coil_heating_electric(model,
-                                            air_loop_node: air_loop.supplyInletNode,
-                                            name: "#{air_loop.name} Htg Coil")
+    htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                      air_loop_node: air_loop.supplyInletNode,
+                                                                      name: "#{air_loop.name} Htg Coil")
 
     # set the setpointmanager for the central/preheat coil if required
     model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
 
     # create cooling coil
-    create_coil_cooling_water(model,
-                              chilled_water_loop,
-                              air_loop_node: air_loop.supplyInletNode,
-                              name: "#{air_loop.name} Clg Coil")
+    OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                        chilled_water_loop,
+                                                        air_loop_node: air_loop.supplyInletNode,
+                                                        name: "#{air_loop.name} Clg Coil")
 
     # create outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -2167,14 +2165,14 @@ class Standard
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding VAV with PFP Boxes and Reheat system terminal for #{zone.name}.")
 
       # create reheat coil
-      rht_coil = create_coil_heating_electric(model,
-                                              name: "#{zone.name} Electric Reheat Coil")
+      rht_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                        name: "#{zone.name} Electric Reheat Coil")
 
       # create terminal fan
       # @type [OpenStudio::Model::FanConstantVolume] pfp_fan
-      pfp_fan = create_fan_by_name(model,
-                                   'PFP_Fan',
-                                   fan_name: "#{zone.name} PFP Term Fan")
+      pfp_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                             'PFP_Fan',
+                                                             fan_name: "#{zone.name} PFP Term Fan")
       pfp_fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       # create parallel fan powered terminal
@@ -2189,6 +2187,7 @@ class Standard
       sizing_zone = zone.sizingZone
       sizing_zone.setCoolingDesignAirFlowMethod('DesignDay')
       sizing_zone.setHeatingDesignAirFlowMethod('DesignDay')
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
     end
@@ -2272,31 +2271,31 @@ class Standard
     sa_stpt_manager.addToNode(air_loop.supplyOutletNode)
 
     # create fan
-    fan = create_fan_by_name(model,
-                             'VAV_default',
-                             fan_name: "#{air_loop.name} Fan")
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'VAV_default',
+                                                       fan_name: "#{air_loop.name} Fan")
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.addToNode(air_loop.supplyInletNode)
 
     # create heating coil
     if hot_water_loop.nil?
       if heating_type == 'Electricity'
-        htg_coil = create_coil_heating_electric(model,
-                                                air_loop_node: air_loop.supplyInletNode,
-                                                name: "#{air_loop.name} Main Electric Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          air_loop_node: air_loop.supplyInletNode,
+                                                                          name: "#{air_loop.name} Main Electric Htg Coil")
       else # default to NaturalGas
-        htg_coil = create_coil_heating_gas(model,
-                                           air_loop_node: air_loop.supplyInletNode,
-                                           name: "#{air_loop.name} Main Gas Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     air_loop_node: air_loop.supplyInletNode,
+                                                                     name: "#{air_loop.name} Main Gas Htg Coil")
       end
     else
-      htg_coil = create_coil_heating_water(model, hot_water_loop,
-                                           air_loop_node: air_loop.supplyInletNode,
-                                           name: "#{air_loop.name} Main Htg Coil",
-                                           rated_inlet_water_temperature: hw_temp_c,
-                                           rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                           rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
-                                           rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model, hot_water_loop,
+                                                                     air_loop_node: air_loop.supplyInletNode,
+                                                                     name: "#{air_loop.name} Main Htg Coil",
+                                                                     rated_inlet_water_temperature: hw_temp_c,
+                                                                     rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                     rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
+                                                                     rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
     end
 
     # set the setpointmanager for the central/preheat coil if required
@@ -2304,15 +2303,15 @@ class Standard
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil",
-                                       type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil",
+                                                                 type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # outdoor air intake system
@@ -2361,16 +2360,16 @@ class Standard
 
       # create reheat coil
       if electric_reheat || hot_water_loop.nil?
-        rht_coil = create_coil_heating_electric(model,
-                                                name: "#{zone.name} Electric Reheat Coil")
+        rht_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{zone.name} Electric Reheat Coil")
       else
-        rht_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{zone.name} Reheat Coil",
-                                             rated_inlet_water_temperature: hw_temp_c,
-                                             rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                             rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
-                                             rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
+        rht_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{zone.name} Reheat Coil",
+                                                                       rated_inlet_water_temperature: hw_temp_c,
+                                                                       rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                       rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
+                                                                       rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       end
 
       # create VAV terminal
@@ -2394,6 +2393,7 @@ class Standard
 
       # zone sizing
       sizing_zone = zone.sizingZone
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
     end
@@ -2461,34 +2461,34 @@ class Standard
 
     # create fan
     # @type [OpenStudio::Model::FanVariableVolume] fan
-    fan = create_fan_by_name(model,
-                             'VAV_System_Fan',
-                             fan_name: "#{air_loop.name} Fan",
-                             fan_efficiency: fan_efficiency,
-                             pressure_rise: fan_pressure_rise,
-                             motor_efficiency: fan_motor_efficiency,
-                             end_use_subcategory: 'VAV System Fans')
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'VAV_System_Fan',
+                                                       fan_name: "#{air_loop.name} Fan",
+                                                       fan_efficiency: fan_efficiency,
+                                                       pressure_rise: fan_pressure_rise,
+                                                       motor_efficiency: fan_motor_efficiency,
+                                                       end_use_subcategory: 'VAV System Fans')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.addToNode(air_loop.supplyInletNode)
 
     # create heating coil
-    htg_coil = create_coil_heating_electric(model,
-                                            air_loop_node: air_loop.supplyInletNode,
-                                            name: "#{air_loop.name} Main Htg Coil")
+    htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                      air_loop_node: air_loop.supplyInletNode,
+                                                                      name: "#{air_loop.name} Main Htg Coil")
 
     # set the setpointmanager for the central/preheat coil if required
     model_set_central_preheat_coil_spm(model, thermal_zones, htg_coil)
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil", type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil", type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # create outdoor air intake system
@@ -2515,14 +2515,14 @@ class Standard
       OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Model.Model', "Adding PVAV PFP Box to zone #{zone.name}")
 
       # create electric reheat coil
-      rht_coil = create_coil_heating_electric(model,
-                                              name: "#{zone.name} Electric Reheat Coil")
+      rht_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                        name: "#{zone.name} Electric Reheat Coil")
 
       # create terminal fan
       # @type [OpenStudio::Model::FanConstantVolume] pfp_fan
-      pfp_fan = create_fan_by_name(model,
-                                   'PFP_Fan',
-                                   fan_name: "#{zone.name} PFP Term Fan")
+      pfp_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                             'PFP_Fan',
+                                                             fan_name: "#{zone.name} PFP Term Fan")
       pfp_fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       # parallel fan powered terminal
@@ -2537,6 +2537,7 @@ class Standard
       sizing_zone = zone.sizingZone
       sizing_zone.setCoolingDesignAirFlowMethod('DesignDay')
       sizing_zone.setHeatingDesignAirFlowMethod('DesignDay')
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
     end
@@ -2617,37 +2618,37 @@ class Standard
     sa_stpt_manager.addToNode(air_loop.supplyOutletNode)
 
     # create fan
-    fan = create_fan_by_name(model,
-                             'Packaged_RTU_SZ_AC_CAV_Fan',
-                             fan_name: "#{air_loop.name} Fan",
-                             fan_efficiency: fan_efficiency,
-                             pressure_rise: fan_pressure_rise,
-                             motor_efficiency: fan_motor_efficiency,
-                             end_use_subcategory: 'CAV System Fans')
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'Packaged_RTU_SZ_AC_CAV_Fan',
+                                                       fan_name: "#{air_loop.name} Fan",
+                                                       fan_efficiency: fan_efficiency,
+                                                       pressure_rise: fan_pressure_rise,
+                                                       motor_efficiency: fan_motor_efficiency,
+                                                       end_use_subcategory: 'CAV System Fans')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.addToNode(air_loop.supplyInletNode)
 
     # create heating coil
-    create_coil_heating_water(model,
-                              hot_water_loop,
-                              air_loop_node: air_loop.supplyInletNode,
-                              name: "#{air_loop.name} Main Htg Coil",
-                              rated_inlet_water_temperature: hw_temp_c,
-                              rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                              rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
-                              rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
+    OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                        hot_water_loop,
+                                                        air_loop_node: air_loop.supplyInletNode,
+                                                        name: "#{air_loop.name} Main Htg Coil",
+                                                        rated_inlet_water_temperature: hw_temp_c,
+                                                        rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                        rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
+                                                        rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
 
     # create cooling coil
     if chilled_water_loop.nil?
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX Clg Coil",
-                                       type: 'OS default')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX Clg Coil",
+                                                                 type: 'OS default')
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Clg Coil")
     end
 
     # create outdoor air intake system
@@ -2673,13 +2674,13 @@ class Standard
       OpenStudio.logFree(OpenStudio::Debug, 'openstudio.Model.Model', "Adding CAV for #{zone.name}")
 
       # Reheat coil
-      rht_coil = create_coil_heating_water(model,
-                                           hot_water_loop,
-                                           name: "#{zone.name} Reheat Coil",
-                                           rated_inlet_water_temperature: hw_temp_c,
-                                           rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                           rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
-                                           rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
+      rht_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                     hot_water_loop,
+                                                                     name: "#{zone.name} Reheat Coil",
+                                                                     rated_inlet_water_temperature: hw_temp_c,
+                                                                     rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                     rated_inlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'],
+                                                                     rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       # VAV terminal
       terminal = OpenStudio::Model::AirTerminalSingleDuctVAVReheat.new(model, model.alwaysOnDiscreteSchedule, rht_coil)
       terminal.setName("#{zone.name} VAV Terminal")
@@ -2699,6 +2700,7 @@ class Standard
       sizing_zone = zone.sizingZone
       sizing_zone.setCoolingDesignAirFlowMethod('DesignDayWithLimit')
       sizing_zone.setHeatingDesignAirFlowMethod('DesignDay')
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
     end
@@ -2790,60 +2792,61 @@ class Standard
 
       # zone sizing
       sizing_zone = zone.sizingZone
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
 
       # create heating coil
       case heating_type
       when 'NaturalGas', 'Gas'
-        htg_coil = create_coil_heating_gas(model,
-                                           name: "#{air_loop.name} Gas Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{air_loop.name} Gas Htg Coil")
       when 'Water'
         if hot_water_loop.nil?
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No hot water plant loop supplied')
           return false
         end
-        htg_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{air_loop.name} Water Htg Coil",
-                                             rated_inlet_water_temperature: hw_temp_c,
-                                             rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                             rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
-                                             rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{air_loop.name} Water Htg Coil",
+                                                                       rated_inlet_water_temperature: hw_temp_c,
+                                                                       rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                                       rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
+                                                                       rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
       when 'Single Speed Heat Pump'
-        htg_coil = create_coil_heating_dx_single_speed(model,
-                                                       name: "#{zone.name} HP Htg Coil",
-                                                       type: 'PSZ-AC',
-                                                       cop: 3.3)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                                 name: "#{zone.name} HP Htg Coil",
+                                                                                 type: 'PSZ-AC',
+                                                                                 cop: 3.3)
       when 'Water To Air Heat Pump'
-        htg_coil = create_coil_heating_water_to_air_heat_pump_equation_fit(model,
-                                                                           hot_water_loop,
-                                                                           name: "#{air_loop.name} Water-to-Air HP Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water_to_air_heat_pump_equation_fit(model,
+                                                                                                     hot_water_loop,
+                                                                                                     name: "#{air_loop.name} Water-to-Air HP Htg Coil")
       when 'Electricity', 'Electric'
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{air_loop.name} Electric Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{air_loop.name} Electric Htg Coil")
       else
         # zero-capacity, always-off electric heating coil
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{air_loop.name} No Heat",
-                                                schedule: model.alwaysOffDiscreteSchedule,
-                                                nominal_capacity: 0.0)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{air_loop.name} No Heat",
+                                                                          schedule: model.alwaysOffDiscreteSchedule,
+                                                                          nominal_capacity: 0.0)
       end
 
       # create supplemental heating coil
       case supplemental_heating_type
       when 'Electricity', 'Electric'
-        supplemental_htg_coil = create_coil_heating_electric(model,
-                                                             name: "#{air_loop.name} Electric Backup Htg Coil")
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                       name: "#{air_loop.name} Electric Backup Htg Coil")
       when 'NaturalGas', 'Gas'
-        supplemental_htg_coil = create_coil_heating_gas(model,
-                                                        name: "#{air_loop.name} Gas Backup Htg Coil")
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                                  name: "#{air_loop.name} Gas Backup Htg Coil")
       else
         # Zero-capacity, always-off electric heating coil
-        supplemental_htg_coil = create_coil_heating_electric(model,
-                                                             name: "#{air_loop.name} No Heat",
-                                                             schedule: model.alwaysOffDiscreteSchedule,
-                                                             nominal_capacity: 0.0)
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                       name: "#{air_loop.name} No Heat",
+                                                                                       schedule: model.alwaysOffDiscreteSchedule,
+                                                                                       nominal_capacity: 0.0)
       end
 
       # create cooling coil
@@ -2853,20 +2856,20 @@ class Standard
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No chilled water plant loop supplied')
           return false
         end
-        clg_coil = create_coil_cooling_water(model,
-                                             chilled_water_loop,
-                                             name: "#{air_loop.name} Water Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                                       chilled_water_loop,
+                                                                       name: "#{air_loop.name} Water Clg Coil")
       when 'Two Speed DX AC'
-        clg_coil = create_coil_cooling_dx_two_speed(model,
-                                                    name: "#{air_loop.name} 2spd DX AC Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                              name: "#{air_loop.name} 2spd DX AC Clg Coil")
       when 'Single Speed DX AC'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} 1spd DX AC Clg Coil",
-                                                       type: 'PSZ-AC')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} 1spd DX AC Clg Coil",
+                                                                                 type: 'PSZ-AC')
       when 'Single Speed Heat Pump'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} 1spd DX HP Clg Coil",
-                                                       type: 'Heat Pump')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} 1spd DX HP Clg Coil",
+                                                                                 type: 'Heat Pump')
         # clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(10.0))
         # clg_coil.setRatedSensibleHeatRatio(0.69)
         # clg_coil.setBasinHeaterCapacity(10)
@@ -2876,9 +2879,9 @@ class Standard
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No chilled water plant loop supplied')
           return false
         end
-        clg_coil = create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
-                                                                           chilled_water_loop,
-                                                                           name: "#{air_loop.name} Water-to-Air HP Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
+                                                                                                     chilled_water_loop,
+                                                                                                     name: "#{air_loop.name} Water-to-Air HP Clg Coil")
       else
         clg_coil = nil
       end
@@ -2886,13 +2889,13 @@ class Standard
       # Use a Fan:OnOff in the unitary system object
       case fan_type
       when 'Cycling'
-        fan = create_fan_by_name(model,
-                                 'Packaged_RTU_SZ_AC_Cycling_Fan',
-                                 fan_name: "#{air_loop.name} Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'Packaged_RTU_SZ_AC_Cycling_Fan',
+                                                           fan_name: "#{air_loop.name} Fan")
       when 'ConstantVolume'
-        fan = create_fan_by_name(model,
-                                 'Packaged_RTU_SZ_AC_CAV_OnOff_Fan',
-                                 fan_name: "#{air_loop.name} Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'Packaged_RTU_SZ_AC_CAV_OnOff_Fan',
+                                                           fan_name: "#{air_loop.name} Fan")
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'Invalid fan_type')
         return false
@@ -3063,59 +3066,60 @@ class Standard
 
       # zone sizing
       sizing_zone = zone.sizingZone
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneCoolingDesignSupplyAirTemperature(dsgn_temps['zn_clg_dsgn_sup_air_temp_c'])
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
 
       # create fan
       # @type [OpenStudio::Model::FanVariableVolume] fan
-      fan = create_fan_by_name(model,
-                               fan_type,
-                               fan_name: "#{air_loop.name} Fan",
-                               end_use_subcategory: 'VAV System Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         fan_type,
+                                                         fan_name: "#{air_loop.name} Fan",
+                                                         end_use_subcategory: 'VAV System Fans')
       fan.setAvailabilitySchedule(hvac_op_sch)
 
       # create heating coil
       case heating_type
       when 'NaturalGas', 'Gas'
-        htg_coil = create_coil_heating_gas(model,
-                                           name: "#{air_loop.name} Gas Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{air_loop.name} Gas Htg Coil")
       when 'Electricity', 'Electric'
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{air_loop.name} Electric Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{air_loop.name} Electric Htg Coil")
       when 'Water'
-        htg_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{air_loop.name} Water Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{air_loop.name} Water Htg Coil")
       else
         # Zero-capacity, always-off electric heating coil
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{air_loop.name} No Heat",
-                                                schedule: model.alwaysOffDiscreteSchedule,
-                                                nominal_capacity: 0.0)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{air_loop.name} No Heat",
+                                                                          schedule: model.alwaysOffDiscreteSchedule,
+                                                                          nominal_capacity: 0.0)
       end
 
       # create supplemental heating coil
       case supplemental_heating_type
       when 'Electricity', 'Electric'
-        supplemental_htg_coil = create_coil_heating_electric(model,
-                                                             name: "#{air_loop.name} Electric Backup Htg Coil")
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                       name: "#{air_loop.name} Electric Backup Htg Coil")
       when 'NaturalGas', 'Gas'
-        supplemental_htg_coil = create_coil_heating_gas(model,
-                                                        name: "#{air_loop.name} Gas Backup Htg Coil")
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                                  name: "#{air_loop.name} Gas Backup Htg Coil")
       else
         # zero-capacity, always-off electric heating coil
-        supplemental_htg_coil = create_coil_heating_electric(model,
-                                                             name: "#{air_loop.name} No Backup Heat",
-                                                             schedule: model.alwaysOffDiscreteSchedule,
-                                                             nominal_capacity: 0.0)
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                       name: "#{air_loop.name} No Backup Heat",
+                                                                                       schedule: model.alwaysOffDiscreteSchedule,
+                                                                                       nominal_capacity: 0.0)
       end
 
       # create cooling coil
       case cooling_type
       when 'WaterCooled'
-        clg_coil = create_coil_cooling_water(model,
-                                             chilled_water_loop,
-                                             name: "#{air_loop.name} Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                                       chilled_water_loop,
+                                                                       name: "#{air_loop.name} Clg Coil")
       else # 'AirCooled'
         clg_coil = OpenStudio::Model::CoilCoolingDXVariableSpeed.new(model)
         clg_coil.setName("#{air_loop.name} Var spd DX AC Clg Coil")
@@ -3286,19 +3290,19 @@ class Standard
       # add the components to the air loop in order from closest to zone to furthest from zone
       if main_data_center
         # extra water heating coil
-        create_coil_heating_water(model,
-                                  hot_water_loop,
-                                  air_loop_node: air_loop.supplyInletNode,
-                                  name: "#{air_loop.name} Water Htg Coil",
-                                  rated_inlet_water_temperature: hw_temp_c,
-                                  rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
-                                  rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
-                                  rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
+        OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                            hot_water_loop,
+                                                            air_loop_node: air_loop.supplyInletNode,
+                                                            name: "#{air_loop.name} Water Htg Coil",
+                                                            rated_inlet_water_temperature: hw_temp_c,
+                                                            rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k),
+                                                            rated_inlet_air_temperature: dsgn_temps['prehtg_dsgn_sup_air_temp_c'],
+                                                            rated_outlet_air_temperature: dsgn_temps['htg_dsgn_sup_air_temp_c'])
 
         # extra electric heating coil
-        create_coil_heating_electric(model,
-                                     air_loop_node: air_loop.supplyInletNode,
-                                     name: "#{air_loop.name} Electric Htg Coil")
+        OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                               air_loop_node: air_loop.supplyInletNode,
+                                                               name: "#{air_loop.name} Electric Htg Coil")
 
         # humidity controllers
         humidifier = OpenStudio::Model::HumidifierSteamElectric.new(model)
@@ -3316,20 +3320,20 @@ class Standard
 
       # create fan
       # @type [OpenStudio::Model::FanConstantVolume]
-      fan = create_fan_by_name(model,
-                               'Packaged_RTU_SZ_AC_Cycling_Fan',
-                               fan_name: "#{air_loop.name} Fan")
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Packaged_RTU_SZ_AC_Cycling_Fan',
+                                                         fan_name: "#{air_loop.name} Fan")
       fan.setAvailabilitySchedule(hvac_op_sch)
 
       # create heating and cooling coils
-      htg_coil = create_coil_heating_water_to_air_heat_pump_equation_fit(model,
-                                                                         heat_pump_loop,
-                                                                         name: "#{air_loop.name} Water-to-Air HP Htg Coil")
-      clg_coil = create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
-                                                                         heat_pump_loop,
-                                                                         name: "#{air_loop.name} Water-to-Air HP Clg Coil")
-      supplemental_htg_coil = create_coil_heating_electric(model,
-                                                           name: "#{air_loop.name} Electric Backup Htg Coil")
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water_to_air_heat_pump_equation_fit(model,
+                                                                                                   heat_pump_loop,
+                                                                                                   name: "#{air_loop.name} Water-to-Air HP Htg Coil")
+      clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
+                                                                                                   heat_pump_loop,
+                                                                                                   name: "#{air_loop.name} Water-to-Air HP Clg Coil")
+      supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                     name: "#{air_loop.name} Electric Backup Htg Coil")
 
       # wrap fan and coils in a unitary system object
       unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
@@ -3452,19 +3456,19 @@ class Standard
       # Cycling: Unitary System
       # CyclingHeatPump: Unitary Heat Pump system
       if fan_type == 'VariableVolume'
-        fan = create_fan_by_name(model,
-                                 'CRAC_VAV_fan',
-                                 fan_name: "#{air_loop.name} Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'CRAC_VAV_fan',
+                                                           fan_name: "#{air_loop.name} Fan")
         fan.setAvailabilitySchedule(hvac_op_sch)
       elsif fan_type == 'ConstantVolume'
-        fan = create_fan_by_name(model,
-                                 'CRAC_CAV_fan',
-                                 fan_name: "#{air_loop.name} Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'CRAC_CAV_fan',
+                                                           fan_name: "#{air_loop.name} Fan")
         fan.setAvailabilitySchedule(hvac_op_sch)
       elsif fan_type == 'Cycling'
-        fan = create_fan_by_name(model,
-                                 'CRAC_Cycling_fan',
-                                 fan_name: "#{air_loop.name} Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'CRAC_Cycling_fan',
+                                                           fan_name: "#{air_loop.name} Fan")
         fan.setAvailabilitySchedule(hvac_op_sch)
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', "Fan type '#{fan_type}' not recognized, cannot add CRAC.")
@@ -3474,12 +3478,12 @@ class Standard
       # create cooling coil
       case cooling_type
       when 'Two Speed DX AC'
-        clg_coil = create_coil_cooling_dx_two_speed(model,
-                                                    name: "#{air_loop.name} 2spd DX AC Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                              name: "#{air_loop.name} 2spd DX AC Clg Coil")
       when 'Single Speed DX AC'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} 1spd DX AC Clg Coil",
-                                                       type: 'PSZ-AC')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} 1spd DX AC Clg Coil",
+                                                                                 type: 'PSZ-AC')
       else
         clg_coil = nil
       end
@@ -3666,9 +3670,9 @@ class Standard
     setpoint_mgr_cooling.addToNode(air_loop.supplyOutletNode)
 
     # create fan
-    fan = create_fan_by_name(model,
-                             'VAV_System_Fan',
-                             fan_name: "#{air_loop.name} Fan")
+    fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                       'VAV_System_Fan',
+                                                       fan_name: "#{air_loop.name} Fan")
     fan.setAvailabilitySchedule(hvac_op_sch)
     fan.addToNode(air_loop.supplyInletNode)
 
@@ -3684,11 +3688,11 @@ class Standard
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No chilled water plant loop supplied for CRAH system')
       return false
     else
-      create_coil_cooling_water(model,
-                                chilled_water_loop,
-                                air_loop_node: air_loop.supplyInletNode,
-                                name: "#{air_loop.name} Water Clg Coil",
-                                schedule: hvac_op_sch)
+      OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                          chilled_water_loop,
+                                                          air_loop_node: air_loop.supplyInletNode,
+                                                          name: "#{air_loop.name} Water Clg Coil",
+                                                          schedule: hvac_op_sch)
     end
 
     # outdoor air intake system
@@ -3810,16 +3814,16 @@ class Standard
     # create fan
     fan = nil
     if fan_type == 'ConstantVolume'
-      fan = create_fan_by_name(model,
-                               'Split_AC_CAV_Fan',
-                               fan_name: "#{air_loop.name} Fan",
-                               end_use_subcategory: 'CAV System Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Split_AC_CAV_Fan',
+                                                         fan_name: "#{air_loop.name} Fan",
+                                                         end_use_subcategory: 'CAV System Fans')
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     elsif fan_type == 'Cycling'
-      fan = create_fan_by_name(model,
-                               'Split_AC_Cycling_Fan',
-                               fan_name: "#{air_loop.name} Fan",
-                               end_use_subcategory: 'CAV System Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Split_AC_Cycling_Fan',
+                                                         fan_name: "#{air_loop.name} Fan",
+                                                         end_use_subcategory: 'CAV System Fans')
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     else
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', "fan_type #{fan_type} invalid for split AC system.")
@@ -3828,20 +3832,20 @@ class Standard
 
     # create supplemental heating coil
     if supplemental_heating_type == 'Electric'
-      create_coil_heating_electric(model,
-                                   air_loop_node: air_loop.supplyInletNode,
-                                   name: "#{air_loop.name} Electric Backup Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                             air_loop_node: air_loop.supplyInletNode,
+                                                             name: "#{air_loop.name} Electric Backup Htg Coil")
     elsif supplemental_heating_type == 'Gas'
-      create_coil_heating_gas(model,
-                              air_loop_node: air_loop.supplyInletNode,
-                              name: "#{air_loop.name} Gas Backup Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                        air_loop_node: air_loop.supplyInletNode,
+                                                        name: "#{air_loop.name} Gas Backup Htg Coil")
     end
 
     # create heating coil
     if heating_type == 'Gas'
-      htg_coil = create_coil_heating_gas(model,
-                                         air_loop_node: air_loop.supplyInletNode,
-                                         name: "#{air_loop.name} Gas Htg Coil")
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                   air_loop_node: air_loop.supplyInletNode,
+                                                                   name: "#{air_loop.name} Gas Htg Coil")
       htg_part_load_fraction_correlation = OpenStudio::Model::CurveCubic.new(model)
       htg_part_load_fraction_correlation.setCoefficient1Constant(0.8)
       htg_part_load_fraction_correlation.setCoefficient2x(0.2)
@@ -3851,24 +3855,24 @@ class Standard
       htg_part_load_fraction_correlation.setMaximumValueofx(1.0)
       htg_coil.setPartLoadFractionCorrelationCurve(htg_part_load_fraction_correlation)
     elsif heating_type == 'Single Speed Heat Pump'
-      create_coil_heating_dx_single_speed(model,
-                                          air_loop_node: air_loop.supplyInletNode,
-                                          name: "#{air_loop.name} HP Htg Coil")
+      OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                    air_loop_node: air_loop.supplyInletNode,
+                                                                    name: "#{air_loop.name} HP Htg Coil")
     end
 
     # create cooling coil
     if cooling_type == 'Two Speed DX AC'
-      create_coil_cooling_dx_two_speed(model,
-                                       air_loop_node: air_loop.supplyInletNode,
-                                       name: "#{air_loop.name} 2spd DX AC Clg Coil")
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                 air_loop_node: air_loop.supplyInletNode,
+                                                                 name: "#{air_loop.name} 2spd DX AC Clg Coil")
     elsif cooling_type == 'Single Speed DX AC'
-      create_coil_cooling_dx_single_speed(model,
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
                                           air_loop_node: air_loop.supplyInletNode,
                                           name: "#{air_loop.name} 1spd DX AC Clg Coil", type: 'Split AC')
     elsif cooling_type == 'Single Speed Heat Pump'
-      create_coil_cooling_dx_single_speed(model,
-                                          air_loop_node: air_loop.supplyInletNode,
-                                          name: "#{air_loop.name} 1spd DX HP Clg Coil", type: 'Heat Pump')
+      OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                    air_loop_node: air_loop.supplyInletNode,
+                                                                    name: "#{air_loop.name} 1spd DX HP Clg Coil", type: 'Heat Pump')
     end
 
     # create outdoor air controller
@@ -3948,9 +3952,9 @@ class Standard
       # create heating coil
       case heating_type
       when 'Single Speed DX'
-        htg_coil = create_coil_heating_dx_single_speed(model,
-                                                       name: "#{air_loop.name} Heating Coil",
-                                                       type: 'Residential Minisplit HP')
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} Heating Coil",
+                                                                                 type: 'Residential Minisplit HP')
         htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(OpenStudio.convert(-30.0, 'F', 'C').get)
         htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(OpenStudio.convert(40.0, 'F', 'C').get)
         htg_coil.setCrankcaseHeaterCapacity(0)
@@ -3963,31 +3967,31 @@ class Standard
       end
 
       # create backup heating coil
-      supplemental_htg_coil = create_coil_heating_electric(model,
-                                                           name: "#{air_loop.name} Electric Backup Htg Coil")
+      supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                     name: "#{air_loop.name} Electric Backup Htg Coil")
 
       # create cooling coil
       case cooling_type
       when 'Two Speed DX AC'
-        clg_coil = create_coil_cooling_dx_two_speed(model,
-                                                    name: "#{air_loop.name} 2spd DX AC Clg Coil",
-                                                    type: 'Residential Minisplit HP')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                              name: "#{air_loop.name} 2spd DX AC Clg Coil",
+                                                                              type: 'Residential Minisplit HP')
       when 'Single Speed DX AC'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} 1spd DX AC Clg Coil", type: 'Split AC')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} 1spd DX AC Clg Coil", type: 'Split AC')
       when 'Single Speed Heat Pump'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} 1spd DX HP Clg Coil", type: 'Heat Pump')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} 1spd DX HP Clg Coil", type: 'Heat Pump')
       else
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.Model.Model', "No cooling coil type selected for minisplit HP for #{zone.name}.")
         clg_coil = nil
       end
 
       # create fan
-      fan = create_fan_by_name(model,
-                               'Minisplit_HP_Fan',
-                               fan_name: "#{air_loop.name} Fan",
-                               end_use_subcategory: 'Minisplit HP Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Minisplit_HP_Fan',
+                                                         fan_name: "#{air_loop.name} Fan",
+                                                         end_use_subcategory: 'Minisplit HP Fans')
       fan.setAvailabilitySchedule(hvac_op_sch)
 
       # create unitary system (holds the coils and fan)
@@ -4065,13 +4069,13 @@ class Standard
 
       # add fan
       if fan_type == 'ConstantVolume'
-        fan = create_fan_by_name(model,
-                                 'PTAC_CAV_Fan',
-                                 fan_name: "#{zone.name} PTAC Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'PTAC_CAV_Fan',
+                                                           fan_name: "#{zone.name} PTAC Fan")
       elsif fan_type == 'Cycling'
-        fan = create_fan_by_name(model,
-                                 'PTAC_Cycling_Fan',
-                                 fan_name: "#{zone.name} PTAC Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'PTAC_Cycling_Fan',
+                                                           fan_name: "#{zone.name} PTAC Fan")
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "ptac_fan_type of #{fan_type} is not recognized.")
       end
@@ -4080,38 +4084,38 @@ class Standard
       # add heating coil
       case heating_type
       when 'NaturalGas', 'Gas'
-        htg_coil = create_coil_heating_gas(model,
-                                           name: "#{zone.name} PTAC Gas Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{zone.name} PTAC Gas Htg Coil")
       when 'Electricity', 'Electric'
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{zone.name} PTAC Electric Htg Coil")
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{zone.name} PTAC Electric Htg Coil")
       when nil
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{zone.name} PTAC No Heat",
-                                                schedule: model.alwaysOffDiscreteSchedule,
-                                                nominal_capacity: 0)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{zone.name} PTAC No Heat",
+                                                                          schedule: model.alwaysOffDiscreteSchedule,
+                                                                          nominal_capacity: 0)
       when 'Water'
         if hot_water_loop.nil?
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', 'No hot water plant loop supplied')
           return false
         end
-        htg_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{hot_water_loop.name} Water Htg Coil",
-                                             rated_inlet_water_temperature: hw_temp_c,
-                                             rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k))
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{hot_water_loop.name} Water Htg Coil",
+                                                                       rated_inlet_water_temperature: hw_temp_c,
+                                                                       rated_outlet_water_temperature: (hw_temp_c - hw_delta_t_k))
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "ptac_heating_type of #{heating_type} is not recognized.")
       end
 
       # add cooling coil
       if cooling_type == 'Two Speed DX AC'
-        clg_coil = create_coil_cooling_dx_two_speed(model,
-                                                    name: "#{zone.name} PTAC 2spd DX AC Clg Coil")
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_two_speed(model,
+                                                                              name: "#{zone.name} PTAC 2spd DX AC Clg Coil")
       elsif cooling_type == 'Single Speed DX AC'
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{zone.name} PTAC 1spd DX AC Clg Coil",
-                                                       type: 'PTAC')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{zone.name} PTAC 1spd DX AC Clg Coil",
+                                                                                 type: 'PTAC')
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "ptac_cooling_type of #{cooling_type} is not recognized.")
       end
@@ -4177,13 +4181,13 @@ class Standard
 
       # add fan
       if fan_type == 'ConstantVolume'
-        fan = create_fan_by_name(model,
-                                 'PTAC_CAV_Fan',
-                                 fan_name: "#{zone.name} PTHP Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'PTAC_CAV_Fan',
+                                                           fan_name: "#{zone.name} PTHP Fan")
       elsif fan_type == 'Cycling'
-        fan = create_fan_by_name(model,
-                                 'PTAC_Cycling_Fan',
-                                 fan_name: "#{zone.name} PTHP Fan")
+        fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                           'PTAC_Cycling_Fan',
+                                                           fan_name: "#{zone.name} PTHP Fan")
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "PTHP fan_type of #{fan_type} is not recognized.")
         return false
@@ -4191,15 +4195,15 @@ class Standard
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       # add heating coil
-      htg_coil = create_coil_heating_dx_single_speed(model,
-                                                     name: "#{zone.name} PTHP Htg Coil")
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                               name: "#{zone.name} PTHP Htg Coil")
       # add cooling coil
-      clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                     name: "#{zone.name} PTHP Clg Coil",
-                                                     type: 'Heat Pump')
+      clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                               name: "#{zone.name} PTHP Clg Coil",
+                                                                               type: 'Heat Pump')
       # supplemental heating coil
-      supplemental_htg_coil = create_coil_heating_electric(model,
-                                                           name: "#{zone.name} PTHP Supplemental Htg Coil")
+      supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                     name: "#{zone.name} PTHP Supplemental Htg Coil")
       # wrap coils in a PTHP system
       pthp_system = OpenStudio::Model::ZoneHVACPackagedTerminalHeatPump.new(model,
                                                                             model.alwaysOnDiscreteSchedule,
@@ -4278,24 +4282,25 @@ class Standard
 
       # zone sizing
       sizing_zone = zone.sizingZone
+      sizing_zone.setHeatingMaximumAirFlowFraction(1.0)
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
 
       # add fan
-      fan = create_fan_by_name(model,
-                               'Unit_Heater_Fan',
-                               fan_name: "#{zone.name} UnitHeater Fan",
-                               pressure_rise: fan_pressure_rise)
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Unit_Heater_Fan',
+                                                         fan_name: "#{zone.name} UnitHeater Fan",
+                                                         pressure_rise: fan_pressure_rise)
       fan.setAvailabilitySchedule(hvac_op_sch)
 
       # add heating coil
       if heating_type == 'NaturalGas' || heating_type == 'Gas'
-        htg_coil = create_coil_heating_gas(model,
-                                           name: "#{zone.name} UnitHeater Gas Htg Coil",
-                                           schedule: hvac_op_sch)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{zone.name} UnitHeater Gas Htg Coil",
+                                                                     schedule: hvac_op_sch)
       elsif heating_type == 'Electricity' || heating_type == 'Electric'
-        htg_coil = create_coil_heating_electric(model,
-                                                name: "#{zone.name} UnitHeater Electric Htg Coil",
-                                                schedule: hvac_op_sch)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                          name: "#{zone.name} UnitHeater Electric Htg Coil",
+                                                                          schedule: hvac_op_sch)
       elsif heating_type.include?('DistrictHeating') && !hot_water_loop.nil?
         # control temperature for hot water loop
         if rated_inlet_water_temperature.nil?
@@ -4318,13 +4323,13 @@ class Standard
         else
           rated_outlet_air_temperature_c = OpenStudio.convert(rated_outlet_air_temperature, 'F', 'C').get
         end
-        htg_coil = create_coil_heating_water(model,
-                                             hot_water_loop,
-                                             name: "#{zone.name} UnitHeater Water Htg Coil",
-                                             rated_inlet_water_temperature: rated_inlet_water_temperature_c,
-                                             rated_outlet_water_temperature: rated_outlet_water_temperature_c,
-                                             rated_inlet_air_temperature: rated_inlet_air_temperature_c,
-                                             rated_outlet_air_temperature: rated_outlet_air_temperature_c)
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                       hot_water_loop,
+                                                                       name: "#{zone.name} UnitHeater Water Htg Coil",
+                                                                       rated_inlet_water_temperature: rated_inlet_water_temperature_c,
+                                                                       rated_outlet_water_temperature: rated_outlet_water_temperature_c,
+                                                                       rated_inlet_air_temperature: rated_inlet_air_temperature_c,
+                                                                       rated_outlet_air_temperature: rated_outlet_air_temperature_c)
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'No heating type was found when adding unit heater; no unit heater will be created.')
         return false
@@ -4463,20 +4468,20 @@ class Standard
       # Create a sensor to read the zone load
       zn_load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model,
                                                                            'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
-      zn_load_sensor.setName("#{zone_name_clean.to_s.gsub(/[ +-.]/, '_')} Clg Load Sensor")
+      zn_load_sensor.setName("#{OpenstudioStandards::HVAC.ems_friendly_name(zone_name_clean)} Clg Load Sensor")
       zn_load_sensor.setKeyName(zone.handle.to_s)
 
       # Create an actuator to set the airloop availability
       air_loop_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_avail_sch,
                                                                                       'Schedule:Constant',
                                                                                       'Schedule Value')
-      air_loop_avail_actuator.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Actuator")
+      air_loop_avail_actuator.setName("#{OpenstudioStandards::HVAC.ems_friendly_name(air_loop.name)} Availability Actuator")
 
       # Create a program to turn on Evap Cooler if
       # there is a cooling load in the target zone.
       # Load < 0.0 is a cooling load.
       avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      avail_program.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Control")
+      avail_program.setName("#{OpenstudioStandards::HVAC.ems_friendly_name(air_loop.name)} Availability Control")
       avail_program_body = <<-EMS
         IF #{zn_load_sensor.handle} < 0.0
           SET #{air_loop_avail_actuator.handle} = 1
@@ -4489,22 +4494,28 @@ class Standard
       programs << avail_program
 
       # Direct Evap Cooler
-      # @todo better assumptions for evap cooler performance and fan pressure rise
+      # @todo better assumptions for fan pressure rise
       evap = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
       evap.setName("#{zone.name} Evap Media")
+      # assume 90% design effectiveness from https://basc.pnnl.gov/resource-guides/evaporative-cooling-systems#edit-group-description
+      evap.setCoolerDesignEffectiveness(0.90)
       evap.autosizePrimaryAirDesignFlowRate
+      evap.autosizeRecirculatingWaterPumpPowerConsumption
+      # use suggested E+ default values of 90.0 W-s/m^3 for pump sizing factor and 3.0 for blowdown concentration
+      evap.setWaterPumpPowerSizingFactor(90.0)
+      evap.setBlowdownConcentrationRatio(3.0)
       evap.addToNode(air_loop.supplyInletNode)
 
       # Fan (cycling), must be inside unitary system to cycle on airloop
-      fan = create_fan_by_name(model,
-                               'Evap_Cooler_Supply_Fan',
-                               fan_name: "#{zone.name} Evap Cooler Supply Fan")
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Evap_Cooler_Supply_Fan',
+                                                         fan_name: "#{zone.name} Evap Cooler Supply Fan")
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       # Dummy zero-capacity cooling coil
-      clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                     name: 'Dummy Always Off DX Coil',
-                                                     schedule: model.alwaysOffDiscreteSchedule)
+      clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                               name: 'Dummy Always Off DX Coil',
+                                                                               schedule: model.alwaysOffDiscreteSchedule)
       unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       unitary_system.setName("#{zone.name} Evap Cooler Cycling Fan")
       unitary_system.setSupplyFan(fan)
@@ -4612,9 +4623,9 @@ class Standard
 
     # create vrf outdoor unit
     master_zone = thermal_zones[0]
-    vrf_outdoor_unit = create_air_conditioner_variable_refrigerant_flow(model,
-                                                                        name: "#{thermal_zones.size} Zone VRF System",
-                                                                        master_zone: master_zone)
+    vrf_outdoor_unit = OpenstudioStandards::HVAC.create_air_conditioner_variable_refrigerant_flow(model,
+                                                                                                  name: "#{thermal_zones.size} Zone VRF System",
+                                                                                                  master_zone: master_zone)
 
     # default design temperatures used across all air loops
     dsgn_temps = standard_design_sizing_temperatures
@@ -4687,38 +4698,38 @@ class Standard
       sizing_zone.setZoneHeatingDesignSupplyAirTemperature(dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
 
       if chilled_water_loop
-        fcu_clg_coil = create_coil_cooling_water(model,
-                                                 chilled_water_loop,
-                                                 name: "#{zone.name} FCU Cooling Coil")
+        fcu_clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water(model,
+                                                                           chilled_water_loop,
+                                                                           name: "#{zone.name} FCU Cooling Coil")
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Fan coil units require a chilled water loop, but none was provided.')
         return false
       end
 
       if hot_water_loop
-        fcu_htg_coil = create_coil_heating_water(model,
-                                                 hot_water_loop,
-                                                 name: "#{zone.name} FCU Heating Coil",
-                                                 rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
+        fcu_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water(model,
+                                                                           hot_water_loop,
+                                                                           name: "#{zone.name} FCU Heating Coil",
+                                                                           rated_outlet_air_temperature: dsgn_temps['zn_htg_dsgn_sup_air_temp_c'])
       else
         # Zero-capacity, always-off electric heating coil
-        fcu_htg_coil = create_coil_heating_electric(model,
-                                                    name: "#{zone.name} No Heat",
-                                                    schedule: model.alwaysOffDiscreteSchedule,
-                                                    nominal_capacity: 0.0)
+        fcu_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                              name: "#{zone.name} No Heat",
+                                                                              schedule: model.alwaysOffDiscreteSchedule,
+                                                                              nominal_capacity: 0.0)
       end
 
       case capacity_control_method
       when 'VariableFanVariableFlow', 'VariableFanConstantFlow'
-        fcu_fan = create_fan_by_name(model,
-                                     'Fan_Coil_VarSpeed_Fan',
-                                     fan_name: "#{zone.name} Fan Coil Variable Fan",
-                                     end_use_subcategory: 'FCU Fans')
+        fcu_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                               'Fan_Coil_VarSpeed_Fan',
+                                                               fan_name: "#{zone.name} Fan Coil Variable Fan",
+                                                               end_use_subcategory: 'FCU Fans')
       else
-        fcu_fan = create_fan_by_name(model,
-                                     'Fan_Coil_Fan',
-                                     fan_name: "#{zone.name} Fan Coil fan",
-                                     end_use_subcategory: 'FCU Fans')
+        fcu_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                               'Fan_Coil_Fan',
+                                                               fan_name: "#{zone.name} Fan Coil fan",
+                                                               end_use_subcategory: 'FCU Fans')
       end
       fcu_fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       fcu_fan.autosizeMaximumFlowRate
@@ -5242,40 +5253,40 @@ class Standard
       radiant_loops << radiant_loop
 
       # rename nodes before adding EMS code
-      rename_plant_loop_nodes(model)
+      OpenstudioStandards::HVAC.rename_plant_loop_nodes(model)
 
       # set radiant loop controls
       case control_strategy.downcase
       when 'proportional_control'
         # slab setpoint varies based on previous day zone conditions
-        model_add_radiant_proportional_controls(model, zone, radiant_loop,
-                                                radiant_temperature_control_type: radiant_temperature_control_type,
-                                                use_zone_occupancy_for_control: use_zone_occupancy_for_control,
-                                                occupied_percentage_threshold: occupied_percentage_threshold,
-                                                model_occ_hr_start: model_occ_hr_start,
-                                                model_occ_hr_end: model_occ_hr_end,
-                                                proportional_gain: proportional_gain,
-                                                switch_over_time: switch_over_time)
+        OpenstudioStandards::HVAC.model_add_radiant_proportional_controls(model, zone, radiant_loop,
+                                                                          radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                          use_zone_occupancy_for_control: use_zone_occupancy_for_control,
+                                                                          occupied_percentage_threshold: occupied_percentage_threshold,
+                                                                          model_occ_hr_start: model_occ_hr_start,
+                                                                          model_occ_hr_end: model_occ_hr_end,
+                                                                          proportional_gain: proportional_gain,
+                                                                          switch_over_time: switch_over_time)
       when 'oa_based_control'
         # slab setpoint varies based on outdoor weather
-        model_add_radiant_basic_controls(model, zone, radiant_loop,
-                                         radiant_temperature_control_type: radiant_temperature_control_type,
-                                         slab_setpoint_oa_control: true,
-                                         switch_over_time: switch_over_time,
-                                         slab_sp_at_oat_low: slab_sp_at_oat_low,
-                                         slab_oat_low: slab_oat_low,
-                                         slab_sp_at_oat_high: slab_sp_at_oat_high,
-                                         slab_oat_high: slab_oat_high)
+        OpenstudioStandards::HVAC.model_add_radiant_basic_controls(model, zone, radiant_loop,
+                                                                   radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                   slab_setpoint_oa_control: true,
+                                                                   switch_over_time: switch_over_time,
+                                                                   slab_sp_at_oat_low: slab_sp_at_oat_low,
+                                                                   slab_oat_low: slab_oat_low,
+                                                                   slab_sp_at_oat_high: slab_sp_at_oat_high,
+                                                                   slab_oat_high: slab_oat_high)
       when 'constant_control'
         # constant slab setpoint control
-        model_add_radiant_basic_controls(model, zone, radiant_loop,
-                                         radiant_temperature_control_type: radiant_temperature_control_type,
-                                         slab_setpoint_oa_control: false,
-                                         switch_over_time: switch_over_time,
-                                         slab_sp_at_oat_low: slab_sp_at_oat_low,
-                                         slab_oat_low: slab_oat_low,
-                                         slab_sp_at_oat_high: slab_sp_at_oat_high,
-                                         slab_oat_high: slab_oat_high)
+        OpenstudioStandards::HVAC.model_add_radiant_basic_controls(model, zone, radiant_loop,
+                                                                   radiant_temperature_control_type: radiant_temperature_control_type,
+                                                                   slab_setpoint_oa_control: false,
+                                                                   switch_over_time: switch_over_time,
+                                                                   slab_sp_at_oat_low: slab_sp_at_oat_low,
+                                                                   slab_oat_low: slab_oat_low,
+                                                                   slab_sp_at_oat_high: slab_sp_at_oat_high,
+                                                                   slab_oat_high: slab_oat_high)
       end
     end
     return radiant_loops
@@ -5300,26 +5311,26 @@ class Standard
     thermal_zones.each do |zone|
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding window AC for #{zone.name}.")
 
-      clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                     name: "#{zone.name} Window AC Cooling Coil",
-                                                     type: 'Window AC',
-                                                     cop: cop)
+      clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                               name: "#{zone.name} Window AC Cooling Coil",
+                                                                               type: 'Window AC',
+                                                                               cop: cop)
       clg_coil.setRatedSensibleHeatRatio(shr)
       clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(773.3))
       clg_coil.setEvaporativeCondenserEffectiveness(OpenStudio::OptionalDouble.new(0.9))
       clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(10))
       clg_coil.setBasinHeaterSetpointTemperature(OpenStudio::OptionalDouble.new(2))
 
-      fan = create_fan_by_name(model,
-                               'Window_AC_Supply_Fan',
-                               fan_name: "#{zone.name} Window AC Supply Fan",
-                               end_use_subcategory: 'Window AC Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Window_AC_Supply_Fan',
+                                                         fan_name: "#{zone.name} Window AC Supply Fan",
+                                                         end_use_subcategory: 'Window AC Fans')
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
-      htg_coil = create_coil_heating_electric(model,
-                                              name: "#{zone.name} Window AC Always Off Htg Coil",
-                                              schedule: model.alwaysOffDiscreteSchedule,
-                                              nominal_capacity: 0)
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                        name: "#{zone.name} Window AC Always Off Htg Coil",
+                                                                        schedule: model.alwaysOffDiscreteSchedule,
+                                                                        nominal_capacity: 0)
       ptac = OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner.new(model,
                                                                            model.alwaysOnDiscreteSchedule,
                                                                            fan,
@@ -5394,19 +5405,19 @@ class Standard
       # create heating coil
       htg_coil = nil
       if heating
-        htg_coil = create_coil_heating_gas(model,
-                                           name: "#{air_loop.name} Heating Coil",
-                                           efficiency: afue_to_thermal_eff(afue))
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_gas(model,
+                                                                     name: "#{air_loop.name} Heating Coil",
+                                                                     efficiency: OpenstudioStandards::HVAC.afue_to_thermal_eff(afue))
       end
 
       # create cooling coil
       clg_coil = nil
       if cooling
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} Cooling Coil",
-                                                       type: 'Residential Central AC')
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} Cooling Coil",
+                                                                                 type: 'Residential Central AC')
         clg_coil.setRatedSensibleHeatRatio(shr)
-        clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(eer_to_cop_no_fan(eer)))
+        clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(OpenstudioStandards::HVAC.eer_to_cop_no_fan(eer)))
         clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(ac_w_per_cfm / OpenStudio.convert(1.0, 'cfm', 'm^3/s').get))
         clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(OpenStudio::OptionalDouble.new(1.5))
@@ -5418,10 +5429,10 @@ class Standard
       end
 
       # create fan
-      fan = create_fan_by_name(model,
-                               'Residential_HVAC_Fan',
-                               fan_name: "#{air_loop.name} Supply Fan",
-                               end_use_subcategory: 'Residential HVAC Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Residential_HVAC_Fan',
+                                                         fan_name: "#{air_loop.name} Supply Fan",
+                                                         end_use_subcategory: 'Residential HVAC Fans')
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       if ventilation
@@ -5517,10 +5528,10 @@ class Standard
       htg_coil = nil
       supplemental_htg_coil = nil
       if heating
-        htg_coil = create_coil_heating_dx_single_speed(model,
-                                                       name: "#{air_loop.name} heating coil",
-                                                       type: 'Residential Central Air Source HP',
-                                                       cop: hspf_to_cop_no_fan(hspf))
+        htg_coil = OpenstudioStandards::HVAC.create_coil_heating_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} heating coil",
+                                                                                 type: 'Residential Central Air Source HP',
+                                                                                 cop: OpenstudioStandards::HVAC.hspf_to_cop_no_fan(hspf))
         if model.version < OpenStudio::VersionString.new('3.5.0')
           htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(ac_w_per_cfm / OpenStudio.convert(1.0, 'cfm', 'm^3/s').get)
         else
@@ -5537,17 +5548,17 @@ class Standard
         # Supplemental Heating Coil
 
         # create supplemental heating coil
-        supplemental_htg_coil = create_coil_heating_electric(model,
-                                                             name: "#{air_loop.name} Supplemental Htg Coil")
+        supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                       name: "#{air_loop.name} Supplemental Htg Coil")
       end
 
       # create cooling coil
       clg_coil = nil
       if cooling
-        clg_coil = create_coil_cooling_dx_single_speed(model,
-                                                       name: "#{air_loop.name} Cooling Coil",
-                                                       type: 'Residential Central ASHP',
-                                                       cop: cop)
+        clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_dx_single_speed(model,
+                                                                                 name: "#{air_loop.name} Cooling Coil",
+                                                                                 type: 'Residential Central ASHP',
+                                                                                 cop: cop)
         clg_coil.setRatedSensibleHeatRatio(shr)
         clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(ac_w_per_cfm / OpenStudio.convert(1.0, 'cfm', 'm^3/s').get))
         clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
@@ -5560,10 +5571,10 @@ class Standard
       end
 
       # create fan
-      fan = create_fan_by_name(model,
-                               'Residential_HVAC_Fan',
-                               fan_name: "#{air_loop.name} Supply Fan",
-                               end_use_subcategory: 'Residential HVAC Fans')
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'Residential_HVAC_Fan',
+                                                         fan_name: "#{air_loop.name} Supply Fan",
+                                                         end_use_subcategory: 'Residential HVAC Fans')
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       # create outdoor air intake
@@ -5625,19 +5636,19 @@ class Standard
 
     water_to_air_hp_systems = []
     thermal_zones.each do |zone|
-      supplemental_htg_coil = create_coil_heating_electric(model,
-                                                           name: "#{zone.name} Supplemental Htg Coil")
-      htg_coil = create_coil_heating_water_to_air_heat_pump_equation_fit(model,
-                                                                         condenser_loop,
-                                                                         name: "#{zone.name} Water-to-Air HP Htg Coil")
-      clg_coil = create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
-                                                                         condenser_loop,
-                                                                         name: "#{zone.name} Water-to-Air HP Clg Coil")
+      supplemental_htg_coil = OpenstudioStandards::HVAC.create_coil_heating_electric(model,
+                                                                                     name: "#{zone.name} Supplemental Htg Coil")
+      htg_coil = OpenstudioStandards::HVAC.create_coil_heating_water_to_air_heat_pump_equation_fit(model,
+                                                                                                   condenser_loop,
+                                                                                                   name: "#{zone.name} Water-to-Air HP Htg Coil")
+      clg_coil = OpenstudioStandards::HVAC.create_coil_cooling_water_to_air_heat_pump_equation_fit(model,
+                                                                                                   condenser_loop,
+                                                                                                   name: "#{zone.name} Water-to-Air HP Clg Coil")
 
       # add fan
-      fan = create_fan_by_name(model,
-                               'WSHP_Fan',
-                               fan_name: "#{zone.name} WSHP Fan")
+      fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                         'WSHP_Fan',
+                                                         fan_name: "#{zone.name} WSHP Fan")
       fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
 
       water_to_air_hp_system = OpenStudio::Model::ZoneHVACWaterToAirHeatPump.new(model,
@@ -5674,14 +5685,14 @@ class Standard
 
       # Determine the OA requirement for this zone
       min_oa_flow_m3_per_s_per_m2 = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate_per_area(zone)
-      supply_fan = create_fan_by_name(model,
-                                      'ERV_Supply_Fan',
-                                      fan_name: "#{zone.name} ERV Supply Fan")
+      supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                'ERV_Supply_Fan',
+                                                                fan_name: "#{zone.name} ERV Supply Fan")
       impeller_eff = fan_baseline_impeller_efficiency(supply_fan)
       fan_change_impeller_efficiency(supply_fan, impeller_eff)
-      exhaust_fan = create_fan_by_name(model,
-                                       'ERV_Supply_Fan',
-                                       fan_name: "#{zone.name} ERV Exhaust Fan")
+      exhaust_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                 'ERV_Supply_Fan',
+                                                                 fan_name: "#{zone.name} ERV Exhaust Fan")
       fan_change_impeller_efficiency(exhaust_fan, impeller_eff)
 
       erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
@@ -5691,19 +5702,19 @@ class Standard
       # erv_controller.setTimeofDayEconomizerFlowControlSchedule(self.alwaysOnDiscreteSchedule)
       # erv_controller.setHighHumidityControlFlag(false)
 
-      heat_exchanger = OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent.new(model)
-      heat_exchanger.setName("#{zone.name} ERV HX")
-      heat_exchanger.setHeatExchangerType('Plate')
-      heat_exchanger.setEconomizerLockout(false)
-      heat_exchanger.setSupplyAirOutletTemperatureControl(false)
-      heat_exchanger.setSensibleEffectivenessat100HeatingAirFlow(0.76)
-      heat_exchanger.setSensibleEffectivenessat75HeatingAirFlow(0.81)
-      heat_exchanger.setLatentEffectivenessat100HeatingAirFlow(0.68)
-      heat_exchanger.setLatentEffectivenessat75HeatingAirFlow(0.73)
-      heat_exchanger.setSensibleEffectivenessat100CoolingAirFlow(0.76)
-      heat_exchanger.setSensibleEffectivenessat75CoolingAirFlow(0.81)
-      heat_exchanger.setLatentEffectivenessat100CoolingAirFlow(0.68)
-      heat_exchanger.setLatentEffectivenessat75CoolingAirFlow(0.73)
+      heat_exchanger = OpenstudioStandards::HVAC.create_heat_exchanger_air_to_air_sensible_and_latent(model,
+                                                                                                      name: "#{zone.name} ERV HX",
+                                                                                                      type: "Plate",
+                                                                                                      economizer_lockout: false,
+                                                                                                      supply_air_outlet_temperature_control: false,
+                                                                                                      sensible_heating_100_eff: 0.76,
+                                                                                                      sensible_heating_75_eff: 0.81,
+                                                                                                      latent_heating_100_eff: 0.68,
+                                                                                                      latent_heating_75_eff: 0.73,
+                                                                                                      sensible_cooling_100_eff: 0.76,
+                                                                                                      sensible_cooling_75_eff: 0.81,
+                                                                                                      latent_cooling_100_eff: 0.68,
+                                                                                                      latent_cooling_75_eff: 0.73)
 
       zone_hvac = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator.new(model, heat_exchanger, supply_fan, exhaust_fan)
       zone_hvac.setName("#{zone.name} ERV")
@@ -5923,43 +5934,58 @@ class Standard
   # Add a residential ERV: standalone ERV that operates to provide OA,
   # used in conjuction with a system that having mechanical cooling and a heating coil
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param thermal_zone [OpenStudio::Model::ThermalZone] OpenStudio ThermalZone object
-  # @return [OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator] Standalone ERV
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to enable ideal air loads
+  # @return [Array<OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator>] an array of zone ERVs
   def model_add_residential_erv(model,
-                                thermal_zone,
+                                thermal_zones,
                                 min_oa_flow_m3_per_s_per_m2 = nil)
-
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding standalone ERV for #{thermal_zone.name}.")
-
     # Determine ERR and design basis when energy recovery is required
-    #
     # enthalpy_recovery_ratio = nil will trigger an ERV with no effectiveness that only provides OA
     enthalpy_recovery_ratio = nil
+
+    # Process climate zone:
+    # Moisture regime is not needed for climate zone 7 and 8
     climate_zone = OpenstudioStandards::Weather.model_get_climate_zone(model)
+    climate_zone_code = climate_zone.split('-')[-1]
+    climate_zone_code = 7 if ['7A', '7B'].include? climate_zone_code
+    climate_zone_code = 8 if ['8A', '8B'].include? climate_zone_code
+
     case template
-      when '90.1-2019'
+      when '90.1-2019', '90.1-2016'
         search_criteria = {
           'template' => template,
-          'climate_zone' => climate_zone,
+          'climate_zone' => climate_zone_code,
           'under_8000_hours' => false,
           'nontransient_dwelling' => true
         }
+        metric = 'enthalpy_recovery_ratio'
       else
         search_criteria = {
           'template' => template,
-          'climate_zone' => climate_zone,
+          'climate_zone' => climate_zone_code,
           'under_8000_hours' => false
         }
+        metric = 'energy_recovery_effectiveness'
     end
 
-    erv_enthalpy_recovery_ratio = model_find_object(standards_data['energy_recovery'], search_criteria)
+    # Pick the most stringent of the heating or cooling Enthalpy Recovery Ratio (ERR)
+    # or Energy Recovery Effectiveness (ERE); ERR and ERE are virtually the same metrics
+    erv_enthalpy_recovery_ratio = nil
+    erv_enthalpy_recovery_ratios = model_find_objects(standards_data['energy_recovery'], search_criteria)
+    erv_enthalpy_recovery_ratios.each do |erv_data|
+      if erv_enthalpy_recovery_ratio.nil?
+        erv_enthalpy_recovery_ratio = erv_data
+      end
+      if !erv_data[metric].nil? && (erv_enthalpy_recovery_ratio[metric] <= erv_data[metric])
+        erv_enthalpy_recovery_ratio = erv_data
+      end
+    end
 
-    # Extract ERR from data lookup
+    # Extract ERR/ERE from data lookup
     if !erv_enthalpy_recovery_ratio.nil?
-      if erv_enthalpy_recovery_ratio['enthalpy_recovery_ratio'].nil? & erv_enthalpy_recovery_ratio['enthalpy_recovery_ratio_design_conditions'].nil?
-        # If not included in the data, an enthalpy
-        # recovery ratio (ERR) of 50% is used
+      if erv_enthalpy_recovery_ratio[metric].nil? & erv_enthalpy_recovery_ratio['design_conditions'].nil?
+        # If not included in the data, an ERR of 50% is used
         enthalpy_recovery_ratio = 0.5
         case climate_zone
           when 'ASHRAE 169-2006-6B',
@@ -5977,118 +6003,130 @@ class Standard
             design_conditions = 'cooling'
         end
       else
-        design_conditions = erv_enthalpy_recovery_ratio['enthalpy_recovery_ratio_design_conditions'].downcase
-        enthalpy_recovery_ratio = erv_enthalpy_recovery_ratio['enthalpy_recovery_ratio']
+        design_conditions = erv_enthalpy_recovery_ratio['design_conditions'].downcase
+        enthalpy_recovery_ratio = erv_enthalpy_recovery_ratio[metric]
       end
     end
 
-    # # Fan power with energy recovery = 0.934 W/cfm
-    supply_fan = create_fan_by_name(model,
-                                    'ERV_Supply_Fan',
-                                    fan_name: "#{thermal_zone.name} ERV Supply Fan")
-    exhaust_fan = create_fan_by_name(model,
-                                     'ERV_Supply_Fan',
-                                     fan_name: "#{thermal_zone.name} ERV Exhaust Fan")
-    supply_fan.setMotorEfficiency(0.48)
-    exhaust_fan.setMotorEfficiency(0.48)
-    supply_fan.setFanTotalEfficiency(0.303158)
-    exhaust_fan.setFanTotalEfficiency(0.303158)
-    supply_fan.setPressureRise(270.64755)
-    exhaust_fan.setPressureRise(270.64755)
+    zone_ervs = []
+    thermal_zones.each do |thermal_zone|
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding standalone ERV for #{thermal_zone.name}.")
 
+      # Fan power with energy recovery = 0.934 W/cfm
+      supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                'ERV_Supply_Fan',
+                                                                fan_name: "#{thermal_zone.name} ERV Supply Fan")
+      exhaust_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                 'ERV_Supply_Fan',
+                                                                 fan_name: "#{thermal_zone.name} ERV Exhaust Fan")
+      supply_fan.setMotorEfficiency(0.48)
+      exhaust_fan.setMotorEfficiency(0.48)
+      supply_fan.setFanTotalEfficiency(0.303158)
+      exhaust_fan.setFanTotalEfficiency(0.303158)
+      supply_fan.setPressureRise(270.64755)
+      exhaust_fan.setPressureRise(270.64755)
 
-    # Create ERV Controller
-    erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
-    erv_controller.setName("#{thermal_zone.name} ERV Controller")
-    erv_controller.setControlHighIndoorHumidityBasedonOutdoorHumidityRatio(false)
+      # Create heat exchanger
+      heat_exchanger = OpenstudioStandards::HVAC.create_heat_exchanger_air_to_air_sensible_and_latent(model,
+                                                                                                      name: "#{thermal_zone.name} ERV HX",
+                                                                                                      type: 'Rotary',
+                                                                                                      economizer_lockout: false,
+                                                                                                      supply_air_outlet_temperature_control: false,
+                                                                                                      frost_control_type: 'ExhaustOnly')
+      heat_exchanger.setThresholdTemperature(-23.3)
+      heat_exchanger.setInitialDefrostTimeFraction(0.167)
+      heat_exchanger.setRateofDefrostTimeFractionIncrease(1.44)
+      heat_exchanger.setAvailabilitySchedule(model_add_schedule(model, 'Always On - No Design Day'))
+      heat_exchanger_air_to_air_sensible_and_latent_apply_prototype_efficiency_enthalpy_recovery_ratio(heat_exchanger, enthalpy_recovery_ratio, design_conditions, climate_zone)
 
-    # Create heat exchanger
-    heat_exchanger = OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent.new(model)
-    heat_exchanger.setName("#{thermal_zone.name} ERV HX")
-    heat_exchanger.setSupplyAirOutletTemperatureControl(false)
-    heat_exchanger.setHeatExchangerType('Rotary')
-    heat_exchanger.setEconomizerLockout(false)
-    heat_exchanger.setFrostControlType('ExhaustOnly')
-    heat_exchanger.setThresholdTemperature(-23.3)
-    heat_exchanger.setInitialDefrostTimeFraction(0.167)
-    heat_exchanger.setRateofDefrostTimeFractionIncrease(1.44)
-    heat_exchanger.setAvailabilitySchedule(model_add_schedule(model, 'Always On - No Design Day'))
-    heat_exchanger_air_to_air_sensible_and_latent_apply_prototype_efficiency_enthalpy_recovery_ratio(heat_exchanger, enthalpy_recovery_ratio, design_conditions, climate_zone)
+      # Create ERV Controller
+      erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
+      erv_controller.setName("#{thermal_zone.name} ERV Controller")
+      erv_controller.setControlHighIndoorHumidityBasedonOutdoorHumidityRatio(false)
 
-    erv = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator.new(model, heat_exchanger, supply_fan, exhaust_fan)
-    erv.setName("#{thermal_zone.name} ERV")
+      # Create ERV
+      erv = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator.new(model, heat_exchanger, supply_fan, exhaust_fan)
+      erv.setName("#{thermal_zone.name} ERV")
+      erv.setController(erv_controller)
+      erv.addToThermalZone(thermal_zone)
 
-    erv.setController(erv_controller)
-    erv.addToThermalZone(thermal_zone)
+      # Set OA requirements; Assumes a default of 55 cfm
+      if min_oa_flow_m3_per_s_per_m2.nil?
+        erv.setSupplyAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
+        erv.setExhaustAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
+      else
+        erv.setVentilationRateperUnitFloorArea(min_oa_flow_m3_per_s_per_m2)
+      end
+      erv.setVentilationRateperOccupant(0.0)
 
-    # Set OA requirements; Assumes a default of 55 cfm
-    if min_oa_flow_m3_per_s_per_m2.nil?
-      erv.setSupplyAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
-      erv.setExhaustAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
-    else
-      erv.setVentilationRateperUnitFloorArea(min_oa_flow_m3_per_s_per_m2)
+      # Ensure the ERV takes priority, so ventilation load is included when treated by other zonal systems
+      # From EnergyPlus I/O reference:
+      # "For situations where one or more equipment types has limited capacity or limited control capability, order the
+      #  sequence so that the most controllable piece of equipment runs last. For example, with a dedicated outdoor air
+      #  system (DOAS), the air terminal for the DOAS should be assigned Heating Sequence = 1 and Cooling Sequence = 1.
+      #  Any other equipment should be assigned sequence 2 or higher so that it will see the net load after the DOAS air
+      #  is added to the zone."
+      thermal_zone.setCoolingPriority(erv.to_ModelObject.get, 1)
+      thermal_zone.setHeatingPriority(erv.to_ModelObject.get, 1)
+
+      zone_ervs << erv
     end
-    erv.setVentilationRateperOccupant(0.0)
 
-    # Ensure the ERV takes priority, so ventilation load is included when treated by other zonal systems
-    # From EnergyPlus I/O reference:
-    # "For situations where one or more equipment types has limited capacity or limited control capability, order the
-    #  sequence so that the most controllable piece of equipment runs last. For example, with a dedicated outdoor air
-    #  system (DOAS), the air terminal for the DOAS should be assigned Heating Sequence = 1 and Cooling Sequence = 1.
-    #  Any other equipment should be assigned sequence 2 or higher so that it will see the net load after the DOAS air
-    #  is added to the zone."
-    thermal_zone.setCoolingPriority(erv.to_ModelObject.get, 1)
-    thermal_zone.setHeatingPriority(erv.to_ModelObject.get, 1)
-
-    return erv
+    return zone_ervs
   end
 
   # Add a residential ventilation: standalone unit ventilation and zone exhaust that operates to provide OA,
   # used in conjuction with a system that having mechanical cooling and a heating coil
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param thermal_zone [OpenStudio::Model::ThermalZone] OpenStudio ThermalZone object
-  # @return [OpenStudio::Model::ZoneHVACUnitVentilator] Standalone Unit Ventilator
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of zones to enable ideal air loads
+  # @return [Array<OpenStudio::Model::ZoneHVACUnitVentilator>] an array of zone Unit Ventilators
   def model_add_residential_ventilator(model,
-                                       thermal_zone,
+                                       thermal_zones,
                                        min_oa_flow_m3_per_s_per_m2 = nil)
+    unit_ventilators = []
+    thermal_zones.each do |thermal_zone|
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding standalone unit ventilator for #{thermal_zone.name}.")
 
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding standalone unit ventilator for #{thermal_zone.name}.")
+      # Fan power with no energy recovery = 0.806 W/cfm
+      supply_fan = OpenstudioStandards::HVAC.create_typical_fan(model,
+                                                                'ERV_Supply_Fan',
+                                                                fan_name: "#{thermal_zone.name} Ventilator Supply Fan")
+      supply_fan.setMotorEfficiency(0.48)
+      supply_fan.setFanTotalEfficiency(0.303158)
+      supply_fan.setPressureRise(233.6875)
 
-    # Fan power with no energy recovery = 0.806 W/cfm
-    supply_fan = create_fan_by_name(model,
-                                    'ERV_Supply_Fan',
-                                    fan_name: "#{thermal_zone.name} Ventilator Supply Fan")
-    supply_fan.setMotorEfficiency(0.48)
-    supply_fan.setFanTotalEfficiency(0.303158)
-    supply_fan.setPressureRise(233.6875)
+      unit_ventilator = OpenStudio::Model::ZoneHVACUnitVentilator.new(model, supply_fan)
+      unit_ventilator.setName("#{thermal_zone.name} Unit Ventilator")
+      unit_ventilator.addToThermalZone(thermal_zone)
+      fan_zone_exhaust = OpenstudioStandards::HVAC.create_fan_zone_exhaust(model,
+                                                                           fan_name: "#{thermal_zone.name} Exhaust Fan",
+                                                                           fan_efficiency: 0.303158,
+                                                                           pressure_rise: 233.6875)
 
-    unit_ventilator = OpenStudio::Model::ZoneHVACUnitVentilator.new(model, supply_fan)
-    unit_ventilator.setName("#{thermal_zone.name} Unit Ventilator")
-    unit_ventilator.addToThermalZone(thermal_zone)
-    fan_zone_exhaust = create_fan_zone_exhaust(model,
-                                               fan_name: "#{thermal_zone.name} Exhaust Fan",
-                                               fan_efficiency: 0.303158,
-                                               pressure_rise: 233.6875)
+      # Set OA requirements; Assumes a default of 55 cfm
+      if min_oa_flow_m3_per_s_per_m2.nil?
+        unit_ventilator.setMaximumSupplyAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
+        fan_zone_exhaust.setMaximumFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
+      else
+        unit_ventilator.setMaximumSupplyAirFlowRate(min_oa_flow_m3_per_s_per_m2)
+        fan_zone_exhaust.setMaximumFlowRate(min_oa_flow_m3_per_s_per_m2)
+      end
 
-    # Set OA requirements; Assumes a default of 55 cfm
-    if min_oa_flow_m3_per_s_per_m2.nil?
-      unit_ventilator.setMaximumSupplyAirFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
-      fan_zone_exhaust.setMaximumFlowRate(OpenStudio.convert(55.0, 'cfm', 'm^3/s').get)
-    else
-      unit_ventilator.setMaximumSupplyAirFlowRate(min_oa_flow_m3_per_s_per_m2)
-      fan_zone_exhaust.setMaximumFlowRate(min_oa_flow_m3_per_s_per_m2)
+      # Ensure the unit ventilator takes priority, so ventilation load is included when treated by other zonal systems
+      # From EnergyPlus I/O reference:
+      # "For situations where one or more equipment types has limited capacity or limited control capability, order the
+      #  sequence so that the most controllable piece of equipment runs last. For example, with a dedicated outdoor air
+      #  system (DOAS), the air terminal for the DOAS should be assigned Heating Sequence = 1 and Cooling Sequence = 1.
+      #  Any other equipment should be assigned sequence 2 or higher so that it will see the net load after the DOAS air
+      #  is added to the zone."
+      thermal_zone.setCoolingPriority(unit_ventilator.to_ModelObject.get, 1)
+      thermal_zone.setHeatingPriority(unit_ventilator.to_ModelObject.get, 1)
+
+      unit_ventilators << unit_ventilator
     end
 
-    # Ensure the unit ventilator takes priority, so ventilation load is included when treated by other zonal systems
-    # From EnergyPlus I/O reference:
-    # "For situations where one or more equipment types has limited capacity or limited control capability, order the
-    #  sequence so that the most controllable piece of equipment runs last. For example, with a dedicated outdoor air
-    #  system (DOAS), the air terminal for the DOAS should be assigned Heating Sequence = 1 and Cooling Sequence = 1.
-    #  Any other equipment should be assigned sequence 2 or higher so that it will see the net load after the DOAS air
-    #  is added to the zone."
-    thermal_zone.setCoolingPriority(unit_ventilator.to_ModelObject.get, 1)
-    thermal_zone.setHeatingPriority(unit_ventilator.to_ModelObject.get, 1)
+    return unit_ventilators
   end
 
   # Adds an exhaust fan to each zone.
@@ -6125,7 +6163,7 @@ class Standard
       # input the flow rate as a number (assign directly) or from an array (assign each flow rate to each zone)
       if flow_rate.is_a? Numeric
         fan.setMaximumFlowRate(flow_rate)
-      elsif flow_rate.class.to_s == 'Array'
+      elsif flow_rate.instance_of?(::Array)
         index = thermal_zones.index(zone)
         flow_rate_zone = flow_rate[index]
         fan.setMaximumFlowRate(flow_rate_zone)
@@ -6253,6 +6291,7 @@ class Standard
         if chilled_water_loop_cooling_type == 'AirCooled'
           chilled_water_loop = model_add_chw_loop(model,
                                                   chw_pumping_type: 'const_pri',
+                                                  chiller_cooling_type: 'AirCooled',
                                                   cooling_fuel: cool_fuel)
         else
           fan_type = model_cw_loop_cooling_tower_fan_type(model)
@@ -6334,7 +6373,7 @@ class Standard
         model_add_zone_heat_cool_request_count_program(model, thermal_zones)
       end
 
-      plant_water_loop_name = ems_friendly_name(plant_water_loop.name)
+      plant_water_loop_name = OpenstudioStandards::HVAC.ems_friendly_name(plant_water_loop.name)
 
       if plant_water_loop.componentType.valueName == 'Heating'
         swt_upper_limit = sp_at_oat_low.nil? ? OpenStudio.convert(120, 'F', 'C').get : OpenStudio.convert(sp_at_oat_low, 'F', 'C').get
@@ -6510,7 +6549,7 @@ class Standard
       exisiting_ems_sensors_names = exisiting_ems_sensors.collect { |sensor| "#{sensor.name.get}-#{sensor.outputVariableOrMeterName}" }
 
       # Create zone air temperature 'sensor' for the zone.
-      zone_name = ems_friendly_name(zone.name)
+      zone_name = OpenstudioStandards::HVAC.ems_friendly_name(zone.name)
       zone_air_sensor_name = "#{zone_name}_ctrl_temperature"
 
       unless exisiting_ems_sensors_names.include?("#{zone_air_sensor_name}-Zone Air Temperature")
@@ -7402,6 +7441,12 @@ class Standard
     when 'ERVs'
       model_add_zone_erv(model, zones)
 
+    when 'Residential ERVs'
+      model_add_residential_erv(model, zones)
+
+    when 'Residential Ventilators'
+      model_add_residential_ventilator(model, zones)
+
     when 'Evaporative Cooler'
       model_add_evap_cooler(model, zones)
 
@@ -7477,7 +7522,7 @@ class Standard
     end
 
     # rename air loop and plant loop nodes for readability
-    rename_air_loop_nodes(model)
-    rename_plant_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_air_loop_nodes(model)
+    OpenstudioStandards::HVAC.rename_plant_loop_nodes(model)
   end
 end

@@ -210,7 +210,7 @@ class TestSchedulesParametric < Minitest::Test
     std = Standard.build('ComStock 90.1-2010')
 
     sch = std.model_add_schedule(model, 'Outpatient Bldg Light')
-    
+
     day_sch = model.getScheduleDayByName('Outpatient Bldg Light Sat Day').get
 
     puts day_sch
@@ -253,7 +253,7 @@ class TestSchedulesParametric < Minitest::Test
 
     puts day_sch
 
-    day_sch.additionalProperties.setFeature('param_day_profile', 
+    day_sch.additionalProperties.setFeature('param_day_profile',
                                             'hoo_end + 0.5 ~ 0.05113 | '\
                                             'hoo_end + 1.5 ~ 0.036094 | '\
                                             'hoo_end + 2.5 ~ 0.031636 | '\
@@ -395,8 +395,7 @@ class TestSchedulesParametric < Minitest::Test
                                                                           modify_wkdy_op_hrs: modify_schedules,
                                                                           modify_wknd_op_hrs: modify_schedules,
                                                                           add_hvac: false,
-                                                                          add_elevators: false
-                                                                          )
+                                                                          add_elevators: false)
 
     Dir.chdir(orig_dir)
   end
@@ -431,7 +430,7 @@ class TestSchedulesParametric < Minitest::Test
 
       # osm_path = "#{run_dir}/#{type}_nomod_hoo.osm"
       # assert(@model.save(osm_path, true))
-      
+
       rule_days = []
       op_sch.scheduleRules.each do |rule|
         if rule.applySaturday
@@ -490,7 +489,7 @@ class TestSchedulesParametric < Minitest::Test
         clg_sch = tstat.coolingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
         htg_sch = tstat.heatingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
         tstat_schedules << clg_sch unless tstat_schedules.include?(clg_sch)
-        tstat_schedules << htg_sch unless tstat_schedules.include?(clg_sch)
+        tstat_schedules << htg_sch unless tstat_schedules.include?(htg_sch)
       end
 
       tstat_schedules.each do |sch_rule|
@@ -526,7 +525,7 @@ class TestSchedulesParametric < Minitest::Test
         opt_sch = opt_sch.get.to_ScheduleRuleset.get
         schedules_to_check << opt_sch
       end
-      
+
       schedules_to_check.each do |opt_sch|
         day_schedules = [opt_sch.defaultDaySchedule]
         opt_sch.scheduleRules.each{|r| day_schedules << r.daySchedule}

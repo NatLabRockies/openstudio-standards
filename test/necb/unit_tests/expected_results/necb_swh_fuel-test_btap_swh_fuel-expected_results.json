@@ -1,0 +1,145 @@
+{
+  "VarType": "vintage",
+  "BTAP1980TO2010": {
+    "VarType": "swh_fuel_type",
+    "NECB_Default": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "BTAP1980TO2010",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "NECB_Default",
+        "swh_tanks": [
+          {
+            "name": "49gal NaturalGas Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 184,
+            "tankVolume_gal": 48.7,
+            "heaterFuelType": "NaturalGas",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    },
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "BTAP1980TO2010",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "Electricity",
+        "swh_tanks": [
+          {
+            "name": "49gal Electricity Water Heater - 33kBtu/hr 1 Therm Eff",
+            "tankVolume_L": 184,
+            "tankVolume_gal": 48.7,
+            "heaterFuelType": "Electricity",
+            "Efficiency": 1.0
+          }
+        ]
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "BTAP1980TO2010",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "NaturalGas",
+        "swh_tanks": [
+          {
+            "name": "49gal NaturalGas Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 184,
+            "tankVolume_gal": 48.7,
+            "heaterFuelType": "NaturalGas",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "BTAP1980TO2010",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "FuelOilNo2",
+        "swh_tanks": [
+          {
+            "name": "49gal FuelOilNo2 Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 184,
+            "tankVolume_gal": 48.7,
+            "heaterFuelType": "FuelOilNo2",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    }
+  },
+  "NECB2020": {
+    "VarType": "swh_fuel_type",
+    "NECB_Default": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "NECB2020",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "NECB_Default",
+        "swh_tanks": [
+          {
+            "name": "48gal NaturalGas Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 182,
+            "tankVolume_gal": 48.2,
+            "heaterFuelType": "NaturalGas",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    },
+    "Electricity": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "NECB2020",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "Electricity",
+        "swh_tanks": [
+          {
+            "name": "48gal Electricity Water Heater - 33kBtu/hr 1 Therm Eff",
+            "tankVolume_L": 182,
+            "tankVolume_gal": 48.2,
+            "heaterFuelType": "Electricity",
+            "Efficiency": 1.0
+          }
+        ]
+      }
+    },
+    "NaturalGas": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "NECB2020",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "NaturalGas",
+        "swh_tanks": [
+          {
+            "name": "48gal NaturalGas Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 182,
+            "tankVolume_gal": 48.2,
+            "heaterFuelType": "NaturalGas",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    },
+    "FuelOilNo2": {
+      "VarType": "TestCase",
+      "case-1": {
+        "template": "NECB2020",
+        "default_fuel_type": "NaturalGas",
+        "test_SWH_fuel": "FuelOilNo2",
+        "swh_tanks": [
+          {
+            "name": "48gal FuelOilNo2 Water Heater - 33kBtu/hr 0.82 Therm Eff",
+            "tankVolume_L": 182,
+            "tankVolume_gal": 48.2,
+            "heaterFuelType": "FuelOilNo2",
+            "Efficiency": 0.82
+          }
+        ]
+      }
+    }
+  }
+}

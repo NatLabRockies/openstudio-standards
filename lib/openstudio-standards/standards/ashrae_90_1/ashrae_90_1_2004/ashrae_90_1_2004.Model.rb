@@ -14,7 +14,7 @@ class ASHRAE9012004 < ASHRAE901
     if intended_surface_type == 'ExteriorWindow' || intended_surface_type == 'GlassDoor'
       wwr = OpenstudioStandards::Geometry.model_get_exterior_window_to_wall_ratio(model)
       if wwr <= 0.1
-        wwr_range['minimum_percent_of_surface'] = 1.0
+        wwr_range['minimum_percent_of_surface'] = 0.0
         wwr_range['maximum_percent_of_surface'] = 10.0
       elsif wwr <= 0.2
         wwr_range['minimum_percent_of_surface'] = 10.001
@@ -27,7 +27,7 @@ class ASHRAE9012004 < ASHRAE901
         wwr_range['maximum_percent_of_surface'] = 40
       else
         wwr_range['minimum_percent_of_surface'] = 40.001
-        wwr_range['maximum_percent_of_surface'] = 100.0
+        wwr_range['maximum_percent_of_surface'] = 50.0
       end
     end
     return wwr_range

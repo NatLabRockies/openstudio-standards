@@ -45,6 +45,8 @@ class NECB_HVAC_System_3_Test < Minitest::Test
     puts "***************************************#{name}*******************************************************\n"
     model = standard.load_building_type_from_library(building_type: 'SmallOffice')
     standard.apply_weather_data(model: model, epw_file: weather_file)
+    standard.assign_building_activity(model: model)
+    standard.assign_building_structure(model: model, activity: @activity)
     standard.apply_loads(model: model)
     standard.apply_envelope(model: model)
     standard.apply_fdwr_srr_daylighting(model: model)
@@ -52,7 +54,7 @@ class NECB_HVAC_System_3_Test < Minitest::Test
     hw_loop = nil
     if (baseboard_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype,model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(
         model: model,

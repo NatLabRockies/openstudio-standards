@@ -315,7 +315,7 @@ module OpenstudioStandards
 
           opt_space = water_use_equipment.space
           if opt_space.is_initialized
-            space = space.get
+            space = opt_space.get
             hours_of_operation = OpenstudioStandards::Space.space_hours_of_operation(space)
             OpenstudioStandards::Schedules.schedule_ruleset_get_parametric_inputs(schedule, water_use_equipment, parametric_inputs, hours_of_operation, gather_data_only: gather_data_only, hoo_var_method: hoo_var_method)
           else
@@ -708,6 +708,7 @@ module OpenstudioStandards
         # flags to control variable settings for tstats
         start_set = false
         end_set = false
+        tstat_start_val = nil
         par_val_time_hash.sort.each do |time, value_array|
           # add in value variables
           # not currently using range, only using min max for constant schedules or schedules with just two values
@@ -835,8 +836,13 @@ module OpenstudioStandards
               if min_key == 'start' && !start_set
                 time = 'hoo_start + 0'
                 start_set = true
+                tstat_start_val = value_array_var.dup
               else
                 time = 'hoo_end + 0'
+                # use the reversed values from hoo_start to produce a step function without ramp interpolation.
+                # reversing a 2-element [setback, occupied] pair gives [occupied, setback] — the correct mirror
+                # transition at hoo_end. for single-element (ramp) entries, reverse is a no-op.
+                value_array_var = tstat_start_val.reverse unless tstat_start_val.nil?
               end
             end
           end
@@ -1056,7 +1062,7 @@ module OpenstudioStandards
             remainder = days_to_fill - value[:days_used]
             day_for_rule = days_to_fill - remainder
             if remainder.size < days_to_fill.size
-              autogen_rules[profile_index] = { days_to_fill: day_for_rule, hoo_start: hoo_start, hoo_end: hoo_end}
+              autogen_rules[profile_index] = { days_to_fill: day_for_rule, hoo_start: hoo_start, hoo_end: hoo_end }
             end
             days_to_fill = remainder
           end

@@ -24,7 +24,7 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 # Hopefully this makes is easier to debug the HVAC stuff!
 
 
-class NECB_HVAC_System_6_Test_E_E_HW_S_AFORBI_IV < Minitest::Test
+class NECB_HVAC_System_6_Test < Minitest::Test
 
   def test_necb_hvac_system_6_electricity_electric_hot_water__scroll_af_or_bi_inletvanes()
 
@@ -54,7 +54,7 @@ class NECB_HVAC_System_6_Test_E_E_HW_S_AFORBI_IV < Minitest::Test
     hw_loop = nil
     if (baseboard_type == "Hot Water") || (heating_coil_type == "Hot Water")
       hw_loop = OpenStudio::Model::PlantLoop.new(model)
-      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, model.alwaysOnDiscreteSchedule)
+      standard.setup_hw_loop_with_components(model, hw_loop, boiler_fueltype, boiler_fueltype, model.alwaysOnDiscreteSchedule)
     end
     standard.add_sys6_multi_zone_built_up_system_with_baseboard_heating(
         model: model,

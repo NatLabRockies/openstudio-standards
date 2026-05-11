@@ -365,7 +365,7 @@ module OpenstudioStandards
       else
         num_timesteps = model.getTimestep.numberOfTimestepsPerHour
         day_timeseries = schedule_day.timeSeries.values.to_a
-        schedule_values = day_timeseries.each_slice(num_timesteps).map { |slice| slice.sum / slice.size.to_f }
+        schedule_values = day_timeseries.each_slice(num_timesteps).map { |slice| (slice.sum / slice.size.to_f).round(10) }
       end
 
       unless schedule_values.size == 24

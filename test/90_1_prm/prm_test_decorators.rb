@@ -1,5 +1,5 @@
 class AppendixGPRMTests < Minitest::Test
-  
+
   # Add exhaust fan object to each lab zone in model
   # @param model
   def add_exhaust_fan_per_lab_zone(model)
@@ -120,9 +120,9 @@ class AppendixGPRMTests < Minitest::Test
   # Add piping insulation to service heating water systems
   def add_piping_insulation(model, arguments)
     std = Standard.build('90.1-PRM-2019')
-    model.getPlantLoops.each do |plantloop|
-      if std.plant_loop_swh_loop?(plantloop)
-        std.model_add_piping_losses_to_swh_system(model, plantloop, true)
+    model.getPlantLoops.each do |plant_loop|
+      if std.plant_loop_swh_loop?(plant_loop)
+        OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_piping_losses(model, plant_loop)
       end
     end
 

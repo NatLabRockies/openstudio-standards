@@ -1,0 +1,28 @@
+[
+  {
+    "template": "NECB2011",
+    "epw_file": "CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw",
+    "building_type": "FullServiceRestaurant",
+    "primary_heating_fuel": "NaturalGas",
+    "dcv_type": "Occupancy_based_DCV",
+    "outdoor_co2_schedule_name": "outdoor_co2_schedule",
+    "outdoor_co2_schedule_for_alldays_ppm": "400.0",
+    "attic - co2_availability_schedule": "indoor_co2_availability_schedule",
+    "attic - co2_setpoint_schedule": "indoor_co2_setpoint_schedule",
+    "attic - co2_setpoint_schedule_ppm": "1000.0",
+    "Dining - co2_availability_schedule": "indoor_co2_availability_schedule",
+    "Dining - co2_setpoint_schedule": "indoor_co2_setpoint_schedule",
+    "Dining - co2_setpoint_schedule_ppm": "1000.0",
+    "Kitchen - co2_availability_schedule": "indoor_co2_availability_schedule",
+    "Kitchen - co2_setpoint_schedule": "indoor_co2_setpoint_schedule",
+    "Kitchen - co2_setpoint_schedule_ppm": "1000.0",
+    "Air Loop HVAC Outdoor Air System 2 - outdoor_air_controller": "Controller Outdoor Air 2",
+    "Controller Outdoor Air 2 - mechanical_ventilation_controller": "Controller Mechanical Ventilation 2",
+    "Controller Mechanical Ventilation 2 - dcv_status": "true",
+    "Controller Mechanical Ventilation 2 - outdoor_air_method": "ZoneSum",
+    "Air Loop HVAC Outdoor Air System 1 - outdoor_air_controller": "Controller Outdoor Air 1",
+    "Controller Outdoor Air 1 - mechanical_ventilation_controller": "Controller Mechanical Ventilation 1",
+    "Controller Mechanical Ventilation 1 - dcv_status": "true",
+    "Controller Mechanical Ventilation 1 - outdoor_air_method": "ZoneSum"
+  }
+]

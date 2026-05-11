@@ -181,11 +181,12 @@ Standard.class_eval do
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object
   # @param sizing_run_dir [String] file path location for the sizing run, defaults to 'SR' in the current directory
+  # @param sizing_run_simulation [Boolean] whether to run the simulation for the sizing periods, defaults to true
   # @return [Boolean] returns true if successful, false if not
-  def model_run_sizing_run(model, sizing_run_dir = "#{Dir.pwd}/SR")
+  def model_run_sizing_run(model, sizing_run_dir = "#{Dir.pwd}/SR", sizing_run_simulation = true)
     # Change the simulation to only run the sizing days
     sim_control = model.getSimulationControl
-    sim_control.setRunSimulationforSizingPeriods(true)
+    sim_control.setRunSimulationforSizingPeriods(sizing_run_simulation)
     sim_control.setRunSimulationforWeatherFileRunPeriods(false)
     if model.version >= OpenStudio::VersionString.new('3.0.0')
       sim_control.setDoHVACSizingSimulationforSizingPeriods(true)
@@ -194,7 +195,12 @@ Standard.class_eval do
     if model.version >= OpenStudio::VersionString.new('3.8.0')
       sim_control.setDoZoneSizingCalculation(true)
       sim_control.setDoSystemSizingCalculation(true)
-      sim_control.setDoPlantSizingCalculation(true)
+      # Do plant sizing only if there are Sizing:Plant objects in the model, or else E+ version 25.2+ will error out
+      if model.getSizingPlants.size > 0
+        sim_control.setDoPlantSizingCalculation(true)
+      else
+        sim_control.setDoPlantSizingCalculation(false)
+      end
     end
 
     # check that all zones have surfaces.
