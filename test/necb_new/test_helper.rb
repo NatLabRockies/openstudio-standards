@@ -45,6 +45,7 @@ end
 
 # Load standard test helpers
 require_relative '../helpers/minitest_helper'
+require_relative '../helpers/necb_helper'
 
 # Load NECB-specific helpers
 require_relative 'fixtures/necb_fixture_manager'

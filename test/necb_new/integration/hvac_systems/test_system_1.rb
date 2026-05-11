@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 # Test suite for NECB System 1: PTAC + Electric Baseboard
 #

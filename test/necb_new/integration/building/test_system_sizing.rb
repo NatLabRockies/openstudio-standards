@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 # Integration Tests for NECB Systems with Sizing
 # These tests create and size HVAC systems to verify end-to-end functionality
@@ -14,7 +14,7 @@ class TestSystemSizingIntegration < Minitest::Test
     standard = Standard.build(template)
 
     # Load the standard NECB test resource model (same approach as existing NECB tests)
-    resource_path = File.join(File.dirname(__FILE__), '../../necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    resource_path = File.join(File.dirname(__FILE__), '..', '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
     translator = OpenStudio::OSVersion::VersionTranslator.new
     model = translator.loadModel(resource_path).get
 

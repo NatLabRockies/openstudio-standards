@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../../test_helper'
 require_relative '../fixtures/fixture_loader'
 
 # Integration Tests for NECB Systems 4, 5, and 6

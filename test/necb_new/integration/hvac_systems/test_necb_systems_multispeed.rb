@@ -35,7 +35,7 @@
 #
 # Execution time: ~6-8 seconds
 
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 class TestNECBSystemsMultiSpeed < Minitest::Test
 

@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 class TestNECBSystem6Complete < Minitest::Test
   # Complete tests for NECB System 6 (VAV with reheat)
