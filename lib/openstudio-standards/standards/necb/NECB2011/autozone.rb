@@ -101,6 +101,13 @@ class NECB2011
                     shw_scale:,
                     baseline_system_zones_map_option:)
     raise('validation of model failed.') unless validate_initial_model(model)
+
+    # Initialize fuel_type_set if not already set
+    if self.fuel_type_set.nil?
+      self.fuel_type_set = SystemFuels.new()
+      self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: 'NaturalGas')
+    end
+
     # Store fuel type information in case hvac_system_primary requires a reset
     init_fuel_type = get_fuel_type_information()
     # Check to see if model is using another vintage of spacetypes. If so overwrite the @standards for the object with the
@@ -722,7 +729,9 @@ class NECB2011
   def percentage_difference(value_1, value_2)
     return 0.0 if value_1 == value_2
 
-    return ((value_1 - value_2).abs / ((value_1 + value_2) / 2) * 100)
+    # Coerce to float so integer arithmetic does not silently truncate the
+    # quotient (e.g. (100 - 110).abs / ((100 + 110) / 2) == 0 in pure ints).
+    return ((value_1 - value_2).abs.to_f / ((value_1 + value_2) / 2.0) * 100)
   end
 
   # Set wildcard spactype schedule to NECB letter index.
