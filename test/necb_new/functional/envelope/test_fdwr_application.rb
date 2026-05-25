@@ -23,7 +23,7 @@ require_relative '../../test_helper'
 class TestFDWRApplication < Minitest::Test
 
   # Fixture path
-  SIMPLE_BOX_PATH = File.absolute_path(File.join(__dir__, '../fixtures/geometry/simple_box.osm'))
+  SIMPLE_BOX_PATH = File.absolute_path(File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
 
   # Helper method to add thermal zone with heating thermostat to make spaces conditioned
   # Also adds default construction set to avoid errors

@@ -123,7 +123,7 @@ class TestSchedules < Minitest::Test
   def test_schedule_assignment_to_space_type
     # Test that schedules are properly assigned to space type loads
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
 
     # Get or create a space type
     space_type = model.getSpaceTypes.first
@@ -173,7 +173,7 @@ class TestSchedules < Minitest::Test
   def test_hvac_schedule_assignment
     # Test HVAC availability schedules
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
 
     # Create air loop
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -218,7 +218,7 @@ class TestSchedules < Minitest::Test
   def test_thermostat_schedule_assignment
     # Test thermostat schedule assignment to thermal zones
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
 
     # Create thermal zone if none exists
     zone = model.getThermalZones.first

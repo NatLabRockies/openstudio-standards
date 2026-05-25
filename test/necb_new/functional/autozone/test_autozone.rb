@@ -20,7 +20,7 @@ class TestAutozone < Minitest::Test
   def test_multi_zone_rectangle_has_five_zones
     # The multi_zone_rectangle fixture should have 5 spaces:
     # 4 perimeter zones (N/S/E/W) + 1 core zone per floor
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
 
     spaces = model.getSpaces
     assert_operator spaces.size, :>=, 5, "Should have at least 5 spaces (4 perimeter + 1 core)"
@@ -36,7 +36,7 @@ class TestAutozone < Minitest::Test
 
   def test_multi_zone_rectangle_perimeter_naming
     # Verify perimeter zones are named with cardinal directions
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
 
     spaces = model.getSpaces
     space_names = spaces.map { |s| s.name.get }
@@ -50,7 +50,7 @@ class TestAutozone < Minitest::Test
   def test_multi_zone_rectangle_perimeter_depth
     # Verify perimeter zones are approximately 4.57m deep
     # The fixture is created with perimeter_zone_depth = 4.57
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
 
     # Get the West perimeter space (easiest to check depth)
     west_space = model.getSpaces.find { |s| s.name.get.include?('West Perimeter') }
@@ -68,7 +68,7 @@ class TestAutozone < Minitest::Test
 
   def test_multi_zone_rectangle_has_exterior_walls
     # Perimeter zones should have exterior walls
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
 
     perimeter_spaces = model.getSpaces.select { |s| s.name.get.include?('Perimeter') }
 
@@ -85,7 +85,7 @@ class TestAutozone < Minitest::Test
 
   def test_multi_zone_rectangle_core_no_exterior_walls
     # Core zone should NOT have exterior walls (all interior)
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
 
     core_space = model.getSpaces.find { |s| s.name.get.include?('Core') }
     refute_nil core_space, "Should find Core space"
@@ -307,7 +307,7 @@ class TestAutozone < Minitest::Test
 
   def test_5zone_fixture_has_spaces
     # Load the 5ZoneNoHVAC fixture and verify it has the expected structure
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../../necb/unit_tests/resources/5ZoneNoHVAC.osm'))
 
     spaces = model.getSpaces
     assert_operator spaces.size, :>, 0, "5ZoneNoHVAC should have spaces"
@@ -315,7 +315,7 @@ class TestAutozone < Minitest::Test
 
   def test_5zone_fixture_space_count
     # Verify 5ZoneNoHVAC has expected number of spaces
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../../necb/unit_tests/resources/5ZoneNoHVAC.osm'))
 
     spaces = model.getSpaces
     # This fixture typically has 5 spaces (name suggests it)
@@ -325,7 +325,7 @@ class TestAutozone < Minitest::Test
   def test_5zone_fixture_thermal_zones_can_be_created
     # Test that we can create thermal zones for the 5ZoneNoHVAC fixture
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../../necb/unit_tests/resources/5ZoneNoHVAC.osm'))
 
     # Get initial space and zone count
     spaces = model.getSpaces

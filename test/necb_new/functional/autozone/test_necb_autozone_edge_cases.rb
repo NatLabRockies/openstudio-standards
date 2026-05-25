@@ -277,10 +277,127 @@ class TestNECBAutozoneEdgeCases < Minitest::Test
   end
 
   ##############################################################################
+  # PURE MATH AND CLASSIFICATION HELPERS
+  # These methods do not require sized models — fast unit tests
+  ##############################################################################
+
+  def test_percentage_difference_returns_zero_when_equal
+    standard = Standard.build('NECB2011')
+    assert_equal 0.0, standard.percentage_difference(10.0, 10.0)
+    assert_equal 0.0, standard.percentage_difference(0.0, 0.0)
+  end
+
+  def test_percentage_difference_simple_case
+    standard = Standard.build('NECB2011')
+    assert_in_delta 18.1818, standard.percentage_difference(10.0, 12.0), 0.01
+  end
+
+  def test_percentage_difference_is_symmetric
+    standard = Standard.build('NECB2011')
+    a = standard.percentage_difference(5.0, 8.0)
+    b = standard.percentage_difference(8.0, 5.0)
+    assert_in_delta a, b, 0.0001
+  end
+
+  def test_is_an_necb_wet_space_detects_washroom
+    standard = Standard.build('NECB2011')
+    space = build_space_with_type(space_type: 'Washroom - occupant')
+    assert standard.is_an_necb_wet_space?(space)
+  end
+
+  def test_is_an_necb_wet_space_detects_locker_room
+    standard = Standard.build('NECB2011')
+    space = build_space_with_type(space_type: 'Locker room')
+    assert standard.is_an_necb_wet_space?(space)
+  end
+
+  def test_is_an_necb_wet_space_rejects_office
+    standard = Standard.build('NECB2011')
+    space = build_space_with_type(space_type: 'Office - open plan')
+    refute standard.is_an_necb_wet_space?(space)
+  end
+
+  def test_is_an_necb_storage_space_detects_storage_types
+    standard = Standard.build('NECB2011')
+    space = build_space_with_type(space_type: 'Storage area')
+    assert standard.is_an_necb_storage_space?(space)
+  end
+
+  def test_is_an_necb_storage_space_rejects_non_storage
+    standard = Standard.build('NECB2011')
+    space = build_space_with_type(space_type: 'Office - open plan')
+    refute standard.is_an_necb_storage_space?(space)
+  end
+
+  ##############################################################################
+  # SPACE / ZONE SIMILARITY (geometry-driven, no sizing required)
+  ##############################################################################
+
+  def test_space_surface_report_returns_array
+    standard = Standard.build('NECB2011')
+    model = create_simple_model(width: 30, length: 30, num_floors: 1)
+    space = model.getSpaces.first
+    report = standard.space_surface_report(space)
+    assert report.is_a?(Array)
+  end
+
+  def test_space_surface_report_entries_have_expected_keys
+    standard = Standard.build('NECB2011')
+    model = create_simple_model(width: 30, length: 30, num_floors: 1)
+    space = model.getSpaces.detect { |s| s.surfaces.any? { |srf| srf.outsideBoundaryCondition == 'Outdoors' } } || model.getSpaces.first
+    report = standard.space_surface_report(space)
+    return if report.empty?
+    entry = report.first
+    [:surface_type, :azimuth, :tilt, :boundary_condition,
+     :surface_area, :surface_area_to_floor_ratio,
+     :glazed_subsurface_area_to_floor_ratio,
+     :opaque_subsurface_area_to_floor_ratio].each do |key|
+      assert entry.key?(key), "surface_report entry should include #{key}"
+    end
+  end
+
+  def test_are_space_loads_similar_returns_true_for_identical_space
+    standard = Standard.build('NECB2011')
+    model = create_simple_model(width: 30, length: 30, num_floors: 1)
+    space = model.getSpaces.first
+    assert standard.are_space_loads_similar?(space_1: space, space_2: space)
+  end
+
+  def test_are_space_loads_similar_returns_false_when_space_type_missing
+    standard = Standard.build('NECB2011')
+    model = create_simple_model(width: 30, length: 30, num_floors: 1)
+    space_a = model.getSpaces.first
+    space_b = OpenStudio::Model::Space.new(model)
+    refute standard.are_space_loads_similar?(space_1: space_a, space_2: space_b)
+  end
+
+  def test_are_zone_loads_similar_returns_false_when_zone_sizes_differ
+    standard = Standard.build('NECB2011')
+    model = create_simple_model(width: 30, length: 30, num_floors: 1)
+    zone_a = OpenStudio::Model::ThermalZone.new(model)
+    zone_b = OpenStudio::Model::ThermalZone.new(model)
+    spaces = model.getSpaces
+    spaces[0].setThermalZone(zone_a)
+    spaces[1].setThermalZone(zone_b) if spaces[1]
+    spaces[2].setThermalZone(zone_a) if spaces[2]
+    refute standard.are_zone_loads_similar?(zone_1: zone_a, zone_2: zone_b)
+  end
+
+  ##############################################################################
   # HELPER METHODS
   ##############################################################################
 
   private
+
+  def build_space_with_type(space_type:, building_type: 'Space Function')
+    model = OpenStudio::Model::Model.new
+    st = OpenStudio::Model::SpaceType.new(model)
+    st.setStandardsBuildingType(building_type)
+    st.setStandardsSpaceType(space_type)
+    space = OpenStudio::Model::Space.new(model)
+    space.setSpaceType(st)
+    space
+  end
 
   def create_simple_model(width:, length:, num_floors:, floor_height: 4.0)
     # Load the standard NECB test resource model with proper geometry

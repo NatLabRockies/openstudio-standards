@@ -133,7 +133,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_enforcement_with_standard_limit
     # Test applying standard NECB SRR limit to a model with skylights
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -156,7 +156,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_enforcement_with_custom_low_limit
     # Test with very restrictive SRR limit (2%)
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -179,7 +179,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_enforcement_with_high_limit
     # Test with generous SRR limit (10%) - should leave skylights mostly unchanged
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -210,7 +210,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_remove_all_skylights
     # Test removing all skylights (SRR limit < 0.001)
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -271,7 +271,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_with_existing_skylight_within_limit
     # Test that when existing SRR is already below limit, skylights are resized to target
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -305,7 +305,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_invalid_limit_too_high
     # Test that SRR > 1.0 returns false (invalid)
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set
     setup_construction_set(model)
@@ -337,7 +337,7 @@ class TestSRRApplication < Minitest::Test
   def test_necb2017_srr_enforcement
     # Test NECB2017 SRR enforcement
     standard = Standard.build('NECB2017')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -356,7 +356,7 @@ class TestSRRApplication < Minitest::Test
   def test_necb2020_srr_enforcement
     # Test NECB2020 SRR enforcement
     standard = Standard.build('NECB2020')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
@@ -379,7 +379,7 @@ class TestSRRApplication < Minitest::Test
   def test_srr_preserves_roof_geometry
     # Verify that applying SRR doesn't modify the roof surface itself
     standard = Standard.build('NECB2011')
-    model = BTAP::FileIO.load_osm('/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm')
+    model = BTAP::FileIO.load_osm(File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'))
 
     # Setup required construction set and make spaces conditioned
     setup_construction_set(model)
