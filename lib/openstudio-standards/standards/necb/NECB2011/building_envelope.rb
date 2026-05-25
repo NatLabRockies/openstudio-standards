@@ -1187,8 +1187,27 @@ class NECB2011
   #           like exterior walls). The method returns a building 'gross roof area' (see attr_reader :osut), which
   #           excludes the area of attic roof overhangs.
   def apply_max_srr_nrcan(model:, srr_lim:, srr_opt: '')
+    # Check if default construction set exists
+    unless model.getBuilding.defaultConstructionSet.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No default construction set defined. Cannot apply SRR.')
+      return false
+    end
+
     construct_set = model.getBuilding.defaultConstructionSet.get
-    skylight_construct_set = construct_set.defaultExteriorSubSurfaceConstructions.get.skylightConstruction.get
+
+    # Check if skylight construction exists
+    unless construct_set.defaultExteriorSubSurfaceConstructions.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No default exterior subsurface constructions defined. Cannot apply SRR.')
+      return false
+    end
+
+    ext_subsurface = construct_set.defaultExteriorSubSurfaceConstructions.get
+    unless ext_subsurface.skylightConstruction.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No skylight construction defined. Cannot apply SRR.')
+      return false
+    end
+
+    skylight_construct_set = ext_subsurface.skylightConstruction.get
 
     unless srr_opt.to_s.downcase == 'osut' # OPTION A
       # First determine which roof surfaces are adjacent to heated spaces (both plenum and non-plenum).

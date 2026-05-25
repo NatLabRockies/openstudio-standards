@@ -1,6 +1,6 @@
 
 OS:Version,
-  {f8c8044c-dd61-4a79-9df7-fa6ac65ebc68}, !- Handle
+  {7b77b22c-62e4-4fc5-8ce2-efbe9a30a5f1}, !- Handle
   3.9.0;                                  !- Version Identifier
 
 OS:Schedule:Constant,
@@ -8554,7 +8554,7 @@ OS:SimulationControl,
   {aca73dab-769c-41e3-a3a7-b8ebff3c2bd0}, ! Handle
   Yes,                                    ! Do Zone Sizing Calculation
   Yes,                                    ! Do System Sizing Calculation
-  Yes,                                    ! Do Plant Sizing Calculation
+  No,                                     ! Do Plant Sizing Calculation
   Yes,                                    ! Run Simulation for Sizing Periods
   No,                                     ! Run Simulation for Weather File Run Periods
   0.040000000000000001,                   ! Loads Convergence Tolerance Value
@@ -8657,7 +8657,7 @@ OS:SpaceInfiltration:DesignFlowRate,
 
 OS:SpaceType,
   {401bf17a-54a5-4a79-aeda-b6bb2a338d25}, !- Handle
-  ASHRAE 189.1-2009 ClimateZone 1-3 SmallOffice, !- Name
+  Space Function Office - open plan 6,    !- Name
   ,                                       !- Default Construction Set Name
   {20ec2d4f-1420-4417-8a8e-4b28fb2dc11c}, !- Default Schedule Set Name
   {70f42ee1-1ec5-40bb-880d-d70c64efe69d}, !- Group Rendering Name
@@ -8668,7 +8668,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {af22a35a-6d16-4bfa-b2c7-ad0170e81cf8}, !- Handle
-  ASHRAE 189.1-2009 ClimateZone 4-8 SmallOffice, !- Name
+  Space Function Office - open plan 5,    !- Name
   ,                                       !- Default Construction Set Name
   {20ec2d4f-1420-4417-8a8e-4b28fb2dc11c}, !- Default Schedule Set Name
   {4015c427-52d4-44ac-aef6-ccd07d845783}, !- Group Rendering Name
@@ -8679,7 +8679,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {c2d10f69-0e74-41d1-bdab-f2bbd1f6d8a1}, !- Handle
-  ASHRAE 90.1-2004 SmallOffice,           !- Name
+  Space Function Office - open plan 2,    !- Name
   ,                                       !- Default Construction Set Name
   {20ec2d4f-1420-4417-8a8e-4b28fb2dc11c}, !- Default Schedule Set Name
   {c235f3c0-f3b3-4a02-8c32-0e3e9aa9f707}, !- Group Rendering Name
@@ -8690,7 +8690,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {05ba3eb4-a9e5-4807-94e9-fd6d7d749f3e}, !- Handle
-  CBECS 1980-2004 SmallOffice,            !- Name
+  Space Function Office - open plan 1,    !- Name
   ,                                       !- Default Construction Set Name
   {20ec2d4f-1420-4417-8a8e-4b28fb2dc11c}, !- Default Schedule Set Name
   {05c1fb0c-d44f-4b8c-ac49-fafc96b56616}, !- Group Rendering Name
@@ -8701,7 +8701,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {213f1f80-1468-4d4c-b914-ede8f8294f7e}, !- Handle
-  CBECS Before-1980 SmallOffice,          !- Name
+  Space Function Office - open plan,      !- Name
   ,                                       !- Default Construction Set Name
   {20ec2d4f-1420-4417-8a8e-4b28fb2dc11c}, !- Default Schedule Set Name
   {45c68753-8209-46ab-be7c-4b95b12c604f}, !- Group Rendering Name
@@ -8712,7 +8712,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {e57f7dc2-d843-4ce8-9877-8fbcbd9c24f8}, !- Handle
-  Empty Space Type,                       !- Name
+  Space Function Office - open plan 4,    !- Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   {3230a485-0e4a-4dd1-81af-0c6945032a27}, !- Group Rendering Name
@@ -8723,7 +8723,7 @@ OS:SpaceType,
 
 OS:SpaceType,
   {291ec2f7-8ae1-43e9-bb8c-7e1d7d9fe1d9}, !- Handle
-  Attic,                                  !- Name
+  Space Function Office - open plan 3,    !- Name
   ,                                       !- Default Construction Set Name
   {0573c707-777e-4c73-ad4e-c6f7a5289f10}, !- Default Schedule Set Name
   {acce0ec6-cf3b-4ab1-a68c-d2481bf53df6}, !- Group Rendering Name
@@ -8731,6 +8731,36 @@ OS:SpaceType,
   ,                                       !- Standards Template
   Space Function,                         !- Standards Building Type
   Office - open plan;                     !- Standards Space Type
+
+OS:ThermostatSetpoint:DualSetpoint,
+  {280db209-ac4e-466a-bad2-fab852936c84}, ! Handle
+  Thermal Zone 1 Thermostat,              ! Name
+  {7ac82242-7555-49bc-8d94-163cc4fe9960}, ! Heating Setpoint Temperature Schedule Name
+  {fe7c0370-fe3c-43f4-913d-f1fdbd0358b4}; ! Cooling Setpoint Temperature Schedule Name
+
+OS:ThermostatSetpoint:DualSetpoint,
+  {3f006386-b64d-4ca4-bd7d-fc63cd016619}, ! Handle
+  Thermal Zone 2 Thermostat,              ! Name
+  {7ac82242-7555-49bc-8d94-163cc4fe9960}, ! Heating Setpoint Temperature Schedule Name
+  {fe7c0370-fe3c-43f4-913d-f1fdbd0358b4}; ! Cooling Setpoint Temperature Schedule Name
+
+OS:ThermostatSetpoint:DualSetpoint,
+  {ea93d619-8faa-4475-b71b-46894822d5d8}, ! Handle
+  Thermal Zone 3 Thermostat,              ! Name
+  {7ac82242-7555-49bc-8d94-163cc4fe9960}, ! Heating Setpoint Temperature Schedule Name
+  {fe7c0370-fe3c-43f4-913d-f1fdbd0358b4}; ! Cooling Setpoint Temperature Schedule Name
+
+OS:ThermostatSetpoint:DualSetpoint,
+  {cef81f2d-b59d-47b4-947a-81b683d12b80}, ! Handle
+  Thermal Zone 4 Thermostat,              ! Name
+  {7ac82242-7555-49bc-8d94-163cc4fe9960}, ! Heating Setpoint Temperature Schedule Name
+  {fe7c0370-fe3c-43f4-913d-f1fdbd0358b4}; ! Cooling Setpoint Temperature Schedule Name
+
+OS:ThermostatSetpoint:DualSetpoint,
+  {aee82399-b0f7-47f0-9e42-da6fd68c8b80}, ! Handle
+  Thermal Zone 5 Thermostat,              ! Name
+  {7ac82242-7555-49bc-8d94-163cc4fe9960}, ! Heating Setpoint Temperature Schedule Name
+  {fe7c0370-fe3c-43f4-913d-f1fdbd0358b4}; ! Cooling Setpoint Temperature Schedule Name
 
 OS:ThermostatSetpoint:DualSetpoint,
   {5e792549-1e27-45eb-9fd5-0aacb071cbbe}, ! Handle
@@ -10683,18 +10713,18 @@ OS:ThermalZone,
   {9d0178aa-f728-40ae-95d6-3ef974ee366b}, !- Zone Air Inlet Port List
   {5da2681e-8743-44da-97b9-136b4591c7e2}, !- Zone Air Exhaust Port List
   {5f2990a3-5e80-4215-8966-62e49bc830e6}, !- Zone Air Node Name
-  {965d130d-e309-4c37-99a1-25a53d41fe82}, !- Zone Return Air Port List
+  {b87a5cdb-c1ed-4a33-a000-146589b4b22b}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                       !- Illuminance Map Name
   {efd42927-9aaf-4bf8-aef6-734678b7461d}, !- Group Rendering Name
-  {7f48d246-df66-4322-bd94-3d61fd367d7e}, !- Thermostat Name
+  {280db209-ac4e-466a-bad2-fab852936c84}, !- Thermostat Name
   Yes;                                    !- Use Ideal Air Loads
 
 OS:PortList,
-  {965d130d-e309-4c37-99a1-25a53d41fe82}, !- Handle
+  {b87a5cdb-c1ed-4a33-a000-146589b4b22b}, !- Handle
   {1a18f482-9322-4b26-909b-3771a680984f}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -10786,18 +10816,18 @@ OS:ThermalZone,
   {24e0f9c9-b6af-4042-a1e6-d73c56ffc71a}, !- Zone Air Inlet Port List
   {18f5b9aa-359f-4975-8fca-a49e691589bc}, !- Zone Air Exhaust Port List
   {eba1a781-fb3a-4be0-bfb4-1efe2b1654cd}, !- Zone Air Node Name
-  {f0be9cd8-be4e-4119-9149-5d18fa307caf}, !- Zone Return Air Port List
+  {aab07faa-fac6-405d-90a8-236dac63f74a}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                       !- Illuminance Map Name
   {fa0547d6-35f3-49a8-bcfa-e7f8168092ab}, !- Group Rendering Name
-  {57293390-8003-44d9-b411-5584888056ed}, !- Thermostat Name
+  {3f006386-b64d-4ca4-bd7d-fc63cd016619}, !- Thermostat Name
   Yes;                                    !- Use Ideal Air Loads
 
 OS:PortList,
-  {f0be9cd8-be4e-4119-9149-5d18fa307caf}, !- Handle
+  {aab07faa-fac6-405d-90a8-236dac63f74a}, !- Handle
   {786b3063-5ade-40ed-95e0-cc9adbe324c5}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -10889,18 +10919,18 @@ OS:ThermalZone,
   {d61bd3a0-6c9d-4172-a748-5571cc2b1806}, !- Zone Air Inlet Port List
   {eef34145-3b9a-40d6-913d-fb359563df94}, !- Zone Air Exhaust Port List
   {35fde64d-999f-4d04-b03c-cd0276504b1a}, !- Zone Air Node Name
-  {b5350891-98ec-4fdf-a6c9-a5429cad4715}, !- Zone Return Air Port List
+  {408848f6-6ea9-4d97-a9ef-f64d24182ca1}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                       !- Illuminance Map Name
   {e426dc20-bd4c-410a-9b87-bf502eea1e70}, !- Group Rendering Name
-  {d7f6e2a6-244e-49ec-9360-099b0ae848b9}, !- Thermostat Name
+  {ea93d619-8faa-4475-b71b-46894822d5d8}, !- Thermostat Name
   Yes;                                    !- Use Ideal Air Loads
 
 OS:PortList,
-  {b5350891-98ec-4fdf-a6c9-a5429cad4715}, !- Handle
+  {408848f6-6ea9-4d97-a9ef-f64d24182ca1}, !- Handle
   {bf347082-b158-40c7-afea-384a770aa02a}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -10992,18 +11022,18 @@ OS:ThermalZone,
   {93ac757a-f20e-4c2a-8596-8b58893c8c33}, !- Zone Air Inlet Port List
   {8223c7cd-b6e9-444b-8176-bbbdaf3bd775}, !- Zone Air Exhaust Port List
   {ea52c8d6-7cf9-4f4d-8490-ade394152a03}, !- Zone Air Node Name
-  {d8e0149a-9dc4-491d-8fd5-418fff4e2461}, !- Zone Return Air Port List
+  {f4d75771-8874-43dc-867b-c9f62362a49b}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                       !- Illuminance Map Name
   {2957754d-f420-4eec-9763-7b6839ab4d30}, !- Group Rendering Name
-  {fb755d16-b2fb-49f9-91b9-9bd68e3b263d}, !- Thermostat Name
+  {cef81f2d-b59d-47b4-947a-81b683d12b80}, !- Thermostat Name
   Yes;                                    !- Use Ideal Air Loads
 
 OS:PortList,
-  {d8e0149a-9dc4-491d-8fd5-418fff4e2461}, !- Handle
+  {f4d75771-8874-43dc-867b-c9f62362a49b}, !- Handle
   {520c6106-2486-4b24-9fb0-9efdc71eeeff}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -11095,18 +11125,18 @@ OS:ThermalZone,
   {d19bd555-dd63-43ae-b394-d3354e97c502}, !- Zone Air Inlet Port List
   {2bfd7c1d-a833-4520-9d16-8238d8b132f7}, !- Zone Air Exhaust Port List
   {692e5aaa-4a04-41fd-8ae3-df3b60d9e421}, !- Zone Air Node Name
-  {1d1ed698-56e6-48f7-bdfa-39d3e40d566c}, !- Zone Return Air Port List
+  {47310d30-519c-4e08-a048-601a531fd157}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                       !- Illuminance Map Name
   {197b01d0-753c-405d-87a3-acab2e8aee56}, !- Group Rendering Name
-  {6d7cab73-82cd-4360-bb69-ad4aea823b7a}, !- Thermostat Name
+  {aee82399-b0f7-47f0-9e42-da6fd68c8b80}, !- Thermostat Name
   Yes;                                    !- Use Ideal Air Loads
 
 OS:PortList,
-  {1d1ed698-56e6-48f7-bdfa-39d3e40d566c}, !- Handle
+  {47310d30-519c-4e08-a048-601a531fd157}, !- Handle
   {07abe0b2-8661-4381-90d4-685f5047d22f}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -11194,8 +11224,8 @@ OS:Building,
   {af22a35a-6d16-4bfa-b2c7-ad0170e81cf8}, !- Space Type Name
   {925fd388-6014-4483-bdc7-1a24eab0db75}, !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
-  2,                                      !- Standards Number of Stories
-  2,                                      !- Standards Number of Above Ground Stories
+  1,                                      !- Standards Number of Stories
+  1,                                      !- Standards Number of Above Ground Stories
   ,                                       !- Standards Template
   ;                                       !- Standards Building Type
 
@@ -11204,7 +11234,7 @@ OS:ClimateZones,
   ASHRAE,                                 !- Climate Zone Institution Name 1
   ANSI/ASHRAE Standard 169,               !- Climate Zone Document Name 1
   2006,                                   !- Climate Zone Document Year 1
-  8;                                      !- Climate Zone Value 1
+  5A;                                     !- Climate Zone Value 1
 
 OS:LifeCycleCost:Parameters,
   {fcfce190-f6fd-45d5-b787-23199397dd3a}, !- Handle
@@ -11225,11 +11255,11 @@ OS:LifeCycleCost:Parameters,
 
 OS:Site,
   {d0de4424-3945-41f1-8984-51fcf8f48718}, !- Handle
-  Yellowknife AP_NT_CAN,                  !- Name
-  62.46,                                  !- Latitude {deg}
-  -114.44,                                !- Longitude {deg}
-  -7,                                     !- Time Zone {hr}
-  205.7,                                  !- Elevation {m}
+  Toronto Intl AP_ON_CAN,                 !- Name
+  43.68,                                  !- Latitude {deg}
+  -79.63,                                 !- Longitude {deg}
+  -5,                                     !- Time Zone {hr}
+  173.4,                                  !- Elevation {m}
   ;                                       !- Terrain
 
 OS:StandardsInformation:Construction,
@@ -13321,29 +13351,29 @@ OS:StandardsInformation:Construction,
   {fed678a4-65fc-42d6-8a3d-5298af0c87cc}; !- Construction Name
 
 OS:WeatherFile,
-  {4e1c00af-a67b-4692-b7b5-c17683b0b289}, !- Handle
-  Yellowknife AP,                         !- City
-  NT,                                     !- State Province Region
+  {6dee6ffa-702d-48dc-afa2-7a3cd039929a}, !- Handle
+  Toronto Intl AP,                        !- City
+  ON,                                     !- State Province Region
   CAN,                                    !- Country
   CWEC2020,                               !- Data Source
-  719360,                                 !- WMO Number
-  62.46,                                  !- Latitude {deg}
-  -114.44,                                !- Longitude {deg}
-  -7,                                     !- Time Zone {hr}
-  205.7,                                  !- Elevation {m}
-  /workspaces/openstudio-standards/data/weather/CAN_NT_Yellowknife.AP.719360_CWEC2020.epw, !- Url
-  9F35EA84,                               !- Checksum
+  716240,                                 !- WMO Number
+  43.68,                                  !- Latitude {deg}
+  -79.63,                                 !- Longitude {deg}
+  -5,                                     !- Time Zone {hr}
+  173.4,                                  !- Elevation {m}
+  /workspaces/openstudio-standards/data/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw, !- Url
+  02FA758F,                               !- Checksum
   ,                                       !- Start Date Actual Year
   Sunday;                                 !- Start Day of Week
 
 OS:SizingPeriod:DesignDay,
-  {741354af-7183-41be-9701-1d441c096364}, !- Handle
-  Yellowknife AP Ann Clg .4% Condns DB=>MWB, !- Name
-  25.6,                                   !- Maximum Dry-Bulb Temperature {C}
-  8,                                      !- Daily Dry-Bulb Temperature Range {deltaC}
-  98878,                                  !- Barometric Pressure {Pa}
-  4.1,                                    !- Wind Speed {m/s}
-  160,                                    !- Wind Direction {deg}
+  {35302ebe-49be-4858-bd02-09ab6c43ca5c}, !- Handle
+  Toronto Intl AP Ann Clg .4% Condns DB=>MWB, !- Name
+  31.5,                                   !- Maximum Dry-Bulb Temperature {C}
+  9.5,                                    !- Daily Dry-Bulb Temperature Range {deltaC}
+  99259,                                  !- Barometric Pressure {Pa}
+  6,                                      !- Wind Speed {m/s}
+  270,                                    !- Wind Direction {deg}
   ,                                       !- Sky Clearness
   No,                                     !- Rain Indicator
   No,                                     !- Snow Indicator
@@ -13353,7 +13383,7 @@ OS:SizingPeriod:DesignDay,
   No,                                     !- Daylight Saving Time Indicator
   Wetbulb,                                !- Humidity Condition Type
   ,                                       !- Humidity Condition Day Schedule Name
-  16.1,                                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+  22.4,                                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
   ,                                       !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
   ,                                       !- Enthalpy at Maximum Dry-Bulb {J/kg}
   DefaultMultipliers,                     !- Dry-Bulb Temperature Range Modifier Type
@@ -13361,17 +13391,17 @@ OS:SizingPeriod:DesignDay,
   ASHRAETau,                              !- Solar Model Indicator
   ,                                       !- Beam Solar Day Schedule Name
   ,                                       !- Diffuse Solar Day Schedule Name
-  0.369,                                  !- ASHRAE Clear Sky Optical Depth for Beam Irradiance {dimensionless}
-  2.418;                                  !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance {dimensionless}
+  0.426,                                  !- ASHRAE Clear Sky Optical Depth for Beam Irradiance {dimensionless}
+  2.27;                                   !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance {dimensionless}
 
 OS:SizingPeriod:DesignDay,
-  {f4c7ad9d-4c62-4bc2-b75c-6d878bb737c3}, !- Handle
-  Yellowknife AP Ann Clg .4% Condns WB=>MDB, !- Name
-  22.9,                                   !- Maximum Dry-Bulb Temperature {C}
-  8,                                      !- Daily Dry-Bulb Temperature Range {deltaC}
-  98878,                                  !- Barometric Pressure {Pa}
-  4.1,                                    !- Wind Speed {m/s}
-  160,                                    !- Wind Direction {deg}
+  {c7d28c66-2c24-48ee-b3ef-4d38ea6f2e0c}, !- Handle
+  Toronto Intl AP Ann Clg .4% Condns WB=>MDB, !- Name
+  29.2,                                   !- Maximum Dry-Bulb Temperature {C}
+  9.5,                                    !- Daily Dry-Bulb Temperature Range {deltaC}
+  99259,                                  !- Barometric Pressure {Pa}
+  6,                                      !- Wind Speed {m/s}
+  270,                                    !- Wind Direction {deg}
   ,                                       !- Sky Clearness
   No,                                     !- Rain Indicator
   No,                                     !- Snow Indicator
@@ -13381,7 +13411,7 @@ OS:SizingPeriod:DesignDay,
   No,                                     !- Daylight Saving Time Indicator
   Wetbulb,                                !- Humidity Condition Type
   ,                                       !- Humidity Condition Day Schedule Name
-  17.2,                                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+  23.8,                                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
   ,                                       !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
   ,                                       !- Enthalpy at Maximum Dry-Bulb {J/kg}
   DefaultMultipliers,                     !- Dry-Bulb Temperature Range Modifier Type
@@ -13389,17 +13419,17 @@ OS:SizingPeriod:DesignDay,
   ASHRAETau,                              !- Solar Model Indicator
   ,                                       !- Beam Solar Day Schedule Name
   ,                                       !- Diffuse Solar Day Schedule Name
-  0.369,                                  !- ASHRAE Clear Sky Optical Depth for Beam Irradiance {dimensionless}
-  2.418;                                  !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance {dimensionless}
+  0.426,                                  !- ASHRAE Clear Sky Optical Depth for Beam Irradiance {dimensionless}
+  2.27;                                   !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance {dimensionless}
 
 OS:SizingPeriod:DesignDay,
-  {9bd74e73-28c9-432c-b9cd-e10f3094cb16}, !- Handle
-  Yellowknife AP Ann Htg 99.6% Condns DB, !- Name
-  -40,                                    !- Maximum Dry-Bulb Temperature {C}
+  {fb30bb73-c711-4109-8262-b4c801752003}, !- Handle
+  Toronto Intl AP Ann Htg 99.6% Condns DB, !- Name
+  -18.5,                                  !- Maximum Dry-Bulb Temperature {C}
   0,                                      !- Daily Dry-Bulb Temperature Range {deltaC}
-  98878,                                  !- Barometric Pressure {Pa}
-  1.8,                                    !- Wind Speed {m/s}
-  310,                                    !- Wind Direction {deg}
+  99259,                                  !- Barometric Pressure {Pa}
+  5.3,                                    !- Wind Speed {m/s}
+  0,                                      !- Wind Direction {deg}
   0,                                      !- Sky Clearness
   No,                                     !- Rain Indicator
   No,                                     !- Snow Indicator
@@ -13409,7 +13439,7 @@ OS:SizingPeriod:DesignDay,
   No,                                     !- Daylight Saving Time Indicator
   Wetbulb,                                !- Humidity Condition Type
   ,                                       !- Humidity Condition Day Schedule Name
-  -40,                                    !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+  -18.5,                                  !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
   ,                                       !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
   ,                                       !- Enthalpy at Maximum Dry-Bulb {J/kg}
   DefaultMultipliers,                     !- Dry-Bulb Temperature Range Modifier Type
@@ -13417,424 +13447,54 @@ OS:SizingPeriod:DesignDay,
   ASHRAEClearSky;                         !- Solar Model Indicator
 
 OS:Site:WaterMainsTemperature,
-  {859d4c44-5601-4576-a5e2-1742b74ad3fc}, !- Handle
+  {0c4839a1-89a4-4e97-bd1a-ced5711ae2e6}, !- Handle
   Correlation,                            !- Calculation Method
   ,                                       !- Temperature Schedule Name
-  -3.65833333333333,                      !- Annual Average Outdoor Air Temperature {C}
-  41.5;                                   !- Maximum Difference In Monthly Average Outdoor Air Temperatures {deltaC}
+  9.06666666666667,                       !- Annual Average Outdoor Air Temperature {C}
+  25.2;                                   !- Maximum Difference In Monthly Average Outdoor Air Temperatures {deltaC}
 
 OS:Site:GroundTemperature:Shallow,
-  {00dec305-04df-43f1-aacc-26cf40650256}, !- Handle
-  -14.3,                                  !- January Surface Ground Temperature {C}
-  -20.7,                                  !- February Surface Ground Temperature {C}
-  -22.4,                                  !- March Surface Ground Temperature {C}
-  -20.9,                                  !- April Surface Ground Temperature {C}
-  -12.3,                                  !- May Surface Ground Temperature {C}
-  -2.6,                                   !- June Surface Ground Temperature {C}
-  6.6,                                    !- July Surface Ground Temperature {C}
-  13.2,                                   !- August Surface Ground Temperature {C}
-  15.1,                                   !- September Surface Ground Temperature {C}
-  12,                                     !- October Surface Ground Temperature {C}
-  4.5,                                    !- November Surface Ground Temperature {C}
-  -4.9;                                   !- December Surface Ground Temperature {C}
+  {5864c8d9-cb9d-41d5-bac5-2b2466b01a8e}, !- Handle
+  -2.3,                                   !- January Surface Ground Temperature {C}
+  -0.2,                                   !- February Surface Ground Temperature {C}
+  4,                                      !- March Surface Ground Temperature {C}
+  8,                                      !- April Surface Ground Temperature {C}
+  15.4,                                   !- May Surface Ground Temperature {C}
+  19.4,                                   !- June Surface Ground Temperature {C}
+  20.5,                                   !- July Surface Ground Temperature {C}
+  18.5,                                   !- August Surface Ground Temperature {C}
+  13.9,                                   !- September Surface Ground Temperature {C}
+  8.1,                                    !- October Surface Ground Temperature {C}
+  2.5,                                    !- November Surface Ground Temperature {C}
+  -1.3;                                   !- December Surface Ground Temperature {C}
 
 OS:Site:GroundTemperature:Deep,
-  {2e682c21-6909-4ce3-a477-5d0fe5fb295e}, !- Handle
-  -4.7,                                   !- January Deep Ground Temperature {C}
-  -9.4,                                   !- February Deep Ground Temperature {C}
-  -12.3,                                  !- March Deep Ground Temperature {C}
-  -13.2,                                  !- April Deep Ground Temperature {C}
-  -11.5,                                  !- May Deep Ground Temperature {C}
-  -7.6,                                   !- June Deep Ground Temperature {C}
-  -2.8,                                   !- July Deep Ground Temperature {C}
-  1.9,                                    !- August Deep Ground Temperature {C}
-  5.1,                                    !- September Deep Ground Temperature {C}
-  5.8,                                    !- October Deep Ground Temperature {C}
-  4,                                      !- November Deep Ground Temperature {C}
-  0.2;                                    !- December Deep Ground Temperature {C}
+  {2a7f8b73-238f-4a38-9d57-bbd05b9f827e}, !- Handle
+  3.7,                                    !- January Deep Ground Temperature {C}
+  3.3,                                    !- February Deep Ground Temperature {C}
+  4.4,                                    !- March Deep Ground Temperature {C}
+  5.9,                                    !- April Deep Ground Temperature {C}
+  9.7,                                    !- May Deep Ground Temperature {C}
+  12.5,                                   !- June Deep Ground Temperature {C}
+  14.4,                                   !- July Deep Ground Temperature {C}
+  14.8,                                   !- August Deep Ground Temperature {C}
+  13.7,                                   !- September Deep Ground Temperature {C}
+  11.3,                                   !- October Deep Ground Temperature {C}
+  8.3,                                    !- November Deep Ground Temperature {C}
+  5.6;                                    !- December Deep Ground Temperature {C}
 
 OS:Site:GroundTemperature:FCfactorMethod,
-  {3d197cf4-aa04-46dc-a5a7-49c1d3f9633e}, !- Handle
-  0.1,                                    !- January Ground Temperature {C}
-  -14.7,                                  !- February Ground Temperature {C}
-  -20.9,                                  !- March Ground Temperature {C}
-  -23.8,                                  !- April Ground Temperature {C}
-  -22.4,                                  !- May Ground Temperature {C}
-  -18.3,                                  !- June Ground Temperature {C}
-  -6.9,                                   !- July Ground Temperature {C}
-  7.1,                                    !- August Ground Temperature {C}
-  14.9,                                   !- September Ground Temperature {C}
-  17.7,                                   !- October Ground Temperature {C}
-  15.3,                                   !- November Ground Temperature {C}
-  8;                                      !- December Ground Temperature {C}
-
-OS:Schedule:Ruleset,
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Handle
-  Heating Setpoint Schedule,              !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  {b32f92d9-c28e-4840-bd42-bab9cf988bf4}; !- Default Day Schedule Name
-
-OS:Schedule:Day,
-  {b32f92d9-c28e-4840-bd42-bab9cf988bf4}, !- Handle
-  Schedule Day 1,                         !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  ,                                       !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  21;                                     !- Value Until Time 1
-
-OS:Schedule:Ruleset,
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}, !- Handle
-  Cooling Setpoint Schedule,              !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  {4e71e413-7f36-4a44-b337-259cbd19d091}; !- Default Day Schedule Name
-
-OS:Schedule:Day,
-  {4e71e413-7f36-4a44-b337-259cbd19d091}, !- Handle
-  Schedule Day 2,                         !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  ,                                       !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  24;                                     !- Value Until Time 1
-
-OS:ThermostatSetpoint:DualSetpoint,
-  {6d7cab73-82cd-4360-bb69-ad4aea823b7a}, !- Handle
-  Thermostat Setpoint Dual Setpoint 1,    !- Name
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Heating Setpoint Temperature Schedule Name
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}; !- Cooling Setpoint Temperature Schedule Name
-
-OS:ThermostatSetpoint:DualSetpoint,
-  {fb755d16-b2fb-49f9-91b9-9bd68e3b263d}, !- Handle
-  Thermostat Setpoint Dual Setpoint 2,    !- Name
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Heating Setpoint Temperature Schedule Name
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}; !- Cooling Setpoint Temperature Schedule Name
-
-OS:ThermostatSetpoint:DualSetpoint,
-  {d7f6e2a6-244e-49ec-9360-099b0ae848b9}, !- Handle
-  Thermostat Setpoint Dual Setpoint 3,    !- Name
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Heating Setpoint Temperature Schedule Name
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}; !- Cooling Setpoint Temperature Schedule Name
-
-OS:ThermostatSetpoint:DualSetpoint,
-  {57293390-8003-44d9-b411-5584888056ed}, !- Handle
-  Thermostat Setpoint Dual Setpoint 4,    !- Name
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Heating Setpoint Temperature Schedule Name
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}; !- Cooling Setpoint Temperature Schedule Name
-
-OS:ThermostatSetpoint:DualSetpoint,
-  {7f48d246-df66-4322-bd94-3d61fd367d7e}, !- Handle
-  Thermostat Setpoint Dual Setpoint 5,    !- Name
-  {8abf1296-1596-452d-a84f-1c38ac14c3e3}, !- Heating Setpoint Temperature Schedule Name
-  {946fab05-f968-44b3-bf4a-7e2eefa2b998}; !- Cooling Setpoint Temperature Schedule Name
-
-OS:PlantLoop,
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Handle
-  Hot Water Loop,                         !- Name
-  Water,                                  !- Fluid Type
-  0,                                      !- Glycol Concentration
-  ,                                       !- User Defined Fluid Type
-  ,                                       !- Plant Equipment Operation Heating Load
-  ,                                       !- Plant Equipment Operation Cooling Load
-  ,                                       !- Primary Plant Equipment Operation Scheme
-  {fcd0f479-45b7-4172-9d7e-b3f5a8c58f08}, !- Loop Temperature Setpoint Node Name
-  82,                                     !- Maximum Loop Temperature {C}
-  60,                                     !- Minimum Loop Temperature {C}
-  ,                                       !- Maximum Loop Flow Rate {m3/s}
-  ,                                       !- Minimum Loop Flow Rate {m3/s}
-  Autocalculate,                          !- Plant Loop Volume {m3}
-  {536fa3f7-055a-456e-94a4-55c42351baf9}, !- Plant Side Inlet Node Name
-  {92332353-7acf-4233-9dbe-a2fa07cfd261}, !- Plant Side Outlet Node Name
-  ,                                       !- Plant Side Branch List Name
-  {1b96549f-3e16-4fc0-b694-6284e09ee55b}, !- Demand Side Inlet Node Name
-  {80258f53-9922-4183-b410-246d530897e5}, !- Demand Side Outlet Node Name
-  ,                                       !- Demand Side Branch List Name
-  ,                                       !- Demand Side Connector List Name
-  Optimal,                                !- Load Distribution Scheme
-  {ae86100e-8119-42e9-972a-684c9f72b77f}, !- Availability Manager List Name
-  ,                                       !- Plant Loop Demand Calculation Scheme
-  ,                                       !- Common Pipe Simulation
-  ,                                       !- Pressure Simulation Type
-  ,                                       !- Plant Equipment Operation Heating Load Schedule
-  ,                                       !- Plant Equipment Operation Cooling Load Schedule
-  ,                                       !- Primary Plant Equipment Operation Scheme Schedule
-  ,                                       !- Component Setpoint Operation Scheme Schedule
-  {328ec6d8-c186-4e44-8206-d463c55720da}, !- Demand Mixer Name
-  {3025fcee-de10-446c-88f3-c31895ed5eb9}, !- Demand Splitter Name
-  {5432c185-d378-4af8-ad86-1cf72d178a4e}, !- Supply Mixer Name
-  {3f8f5e9f-de27-4a70-85f2-01054ff6f191}; !- Supply Splitter Name
-
-OS:Node,
-  {3de6d622-2682-488f-a231-a9d5d8b0bd8b}, !- Handle
-  Node 6,                                 !- Name
-  {536fa3f7-055a-456e-94a4-55c42351baf9}, !- Inlet Port
-  {98a7f995-5753-4a8a-b5ce-31cd6d81edc1}; !- Outlet Port
-
-OS:Node,
-  {fcd0f479-45b7-4172-9d7e-b3f5a8c58f08}, !- Handle
-  Node 7,                                 !- Name
-  {bd98f88c-1dc1-4df8-9bcd-560579a71ad3}, !- Inlet Port
-  {92332353-7acf-4233-9dbe-a2fa07cfd261}; !- Outlet Port
-
-OS:Node,
-  {073a7dcc-a450-45a0-8708-5a79a2ab1f1a}, !- Handle
-  Node 8,                                 !- Name
-  {2e7920d6-61cc-4f5e-b609-dcb3b8481770}, !- Inlet Port
-  {183f04df-4cd2-4a58-ac3a-995d20e499d8}; !- Outlet Port
-
-OS:Connector:Mixer,
-  {5432c185-d378-4af8-ad86-1cf72d178a4e}, !- Handle
-  Connector Mixer 1,                      !- Name
-  {bd98f88c-1dc1-4df8-9bcd-560579a71ad3}, !- Outlet Branch Name
-  {a28c734c-b0ea-4ace-bafe-9693db1c06c8}; !- Inlet Branch Name 1
-
-OS:Connector:Splitter,
-  {3f8f5e9f-de27-4a70-85f2-01054ff6f191}, !- Handle
-  Connector Splitter 1,                   !- Name
-  {d11bf62d-9e14-4645-8789-e3e5cdc2cb77}, !- Inlet Branch Name
-  {2e7920d6-61cc-4f5e-b609-dcb3b8481770}; !- Outlet Branch Name 1
-
-OS:Connection,
-  {536fa3f7-055a-456e-94a4-55c42351baf9}, !- Handle
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Source Object
-  14,                                     !- Outlet Port
-  {3de6d622-2682-488f-a231-a9d5d8b0bd8b}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {2e7920d6-61cc-4f5e-b609-dcb3b8481770}, !- Handle
-  {3f8f5e9f-de27-4a70-85f2-01054ff6f191}, !- Source Object
-  3,                                      !- Outlet Port
-  {073a7dcc-a450-45a0-8708-5a79a2ab1f1a}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {bd98f88c-1dc1-4df8-9bcd-560579a71ad3}, !- Handle
-  {5432c185-d378-4af8-ad86-1cf72d178a4e}, !- Source Object
-  2,                                      !- Outlet Port
-  {fcd0f479-45b7-4172-9d7e-b3f5a8c58f08}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {92332353-7acf-4233-9dbe-a2fa07cfd261}, !- Handle
-  {fcd0f479-45b7-4172-9d7e-b3f5a8c58f08}, !- Source Object
-  3,                                      !- Outlet Port
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Target Object
-  15;                                     !- Inlet Port
-
-OS:Node,
-  {31f3de04-32f7-4b83-a9a9-955610b70158}, !- Handle
-  Node 9,                                 !- Name
-  {1b96549f-3e16-4fc0-b694-6284e09ee55b}, !- Inlet Port
-  {898119bc-daff-4af3-ab4d-cc27e50f8f3c}; !- Outlet Port
-
-OS:Node,
-  {7092b9b1-af6d-4e84-a6e3-b64a26df6ef6}, !- Handle
-  Node 10,                                !- Name
-  {146a8ebb-ace2-4e4a-a580-6a65120c7994}, !- Inlet Port
-  {80258f53-9922-4183-b410-246d530897e5}; !- Outlet Port
-
-OS:Node,
-  {00773102-6907-4992-a400-fb742f0af821}, !- Handle
-  Node 11,                                !- Name
-  {c2509fa0-e9d3-4ef7-af5e-7eca3e8e6731}, !- Inlet Port
-  {4cfbeb25-b4c0-4647-8bd1-1336fd8d878f}; !- Outlet Port
-
-OS:Connector:Mixer,
-  {328ec6d8-c186-4e44-8206-d463c55720da}, !- Handle
-  Connector Mixer 2,                      !- Name
-  {146a8ebb-ace2-4e4a-a580-6a65120c7994}, !- Outlet Branch Name
-  {4cfbeb25-b4c0-4647-8bd1-1336fd8d878f}; !- Inlet Branch Name 1
-
-OS:Connector:Splitter,
-  {3025fcee-de10-446c-88f3-c31895ed5eb9}, !- Handle
-  Connector Splitter 2,                   !- Name
-  {898119bc-daff-4af3-ab4d-cc27e50f8f3c}, !- Inlet Branch Name
-  {c2509fa0-e9d3-4ef7-af5e-7eca3e8e6731}; !- Outlet Branch Name 1
-
-OS:Connection,
-  {1b96549f-3e16-4fc0-b694-6284e09ee55b}, !- Handle
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Source Object
-  17,                                     !- Outlet Port
-  {31f3de04-32f7-4b83-a9a9-955610b70158}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {898119bc-daff-4af3-ab4d-cc27e50f8f3c}, !- Handle
-  {31f3de04-32f7-4b83-a9a9-955610b70158}, !- Source Object
-  3,                                      !- Outlet Port
-  {3025fcee-de10-446c-88f3-c31895ed5eb9}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {c2509fa0-e9d3-4ef7-af5e-7eca3e8e6731}, !- Handle
-  {3025fcee-de10-446c-88f3-c31895ed5eb9}, !- Source Object
-  3,                                      !- Outlet Port
-  {00773102-6907-4992-a400-fb742f0af821}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {4cfbeb25-b4c0-4647-8bd1-1336fd8d878f}, !- Handle
-  {00773102-6907-4992-a400-fb742f0af821}, !- Source Object
-  3,                                      !- Outlet Port
-  {328ec6d8-c186-4e44-8206-d463c55720da}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:Connection,
-  {146a8ebb-ace2-4e4a-a580-6a65120c7994}, !- Handle
-  {328ec6d8-c186-4e44-8206-d463c55720da}, !- Source Object
-  2,                                      !- Outlet Port
-  {7092b9b1-af6d-4e84-a6e3-b64a26df6ef6}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {80258f53-9922-4183-b410-246d530897e5}, !- Handle
-  {7092b9b1-af6d-4e84-a6e3-b64a26df6ef6}, !- Source Object
-  3,                                      !- Outlet Port
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Target Object
-  18;                                     !- Inlet Port
-
-OS:Sizing:Plant,
-  {0fdfe27e-8b5b-4965-a83c-339b1aaf3ae7}, !- Handle
-  {88659760-b2ab-43a1-89a2-7db68f84b35b}, !- Plant or Condenser Loop Name
-  Heating,                                !- Loop Type
-  82,                                     !- Design Loop Exit Temperature {C}
-  11,                                     !- Loop Design Temperature Difference {deltaC}
-  NonCoincident,                          !- Sizing Option
-  1,                                      !- Zone Timesteps in Averaging Window
-  None;                                   !- Coincident Sizing Factor Mode
-
-OS:AvailabilityManagerAssignmentList,
-  {ae86100e-8119-42e9-972a-684c9f72b77f}, !- Handle
-  Plant Loop 1 AvailabilityManagerAssignmentList; !- Name
-
-OS:Pump:VariableSpeed,
-  {d0c99227-ecab-41f0-bf93-32c6df5077cc}, !- Handle
-  Pump Variable Speed 1,                  !- Name
-  {98a7f995-5753-4a8a-b5ce-31cd6d81edc1}, !- Inlet Node Name
-  {b6118a13-1e51-4bd7-8516-212707bd2f38}, !- Outlet Node Name
-  ,                                       !- Rated Flow Rate {m3/s}
-  ,                                       !- Rated Pump Head {Pa}
-  ,                                       !- Rated Power Consumption {W}
-  ,                                       !- Motor Efficiency
-  ,                                       !- Fraction of Motor Inefficiencies to Fluid Stream
-  ,                                       !- Coefficient 1 of the Part Load Performance Curve
-  ,                                       !- Coefficient 2 of the Part Load Performance Curve
-  ,                                       !- Coefficient 3 of the Part Load Performance Curve
-  ,                                       !- Coefficient 4 of the Part Load Performance Curve
-  ,                                       !- Minimum Flow Rate {m3/s}
-  Intermittent,                           !- Pump Control Type
-  ,                                       !- Pump Flow Rate Schedule Name
-  ,                                       !- Pump Curve Name
-  ,                                       !- Impeller Diameter {m}
-  ,                                       !- VFD Control Type
-  ,                                       !- Pump RPM Schedule Name
-  ,                                       !- Minimum Pressure Schedule {Pa}
-  ,                                       !- Maximum Pressure Schedule {Pa}
-  ,                                       !- Minimum RPM Schedule {rev/min}
-  ,                                       !- Maximum RPM Schedule {rev/min}
-  ,                                       !- Zone Name
-  0.5,                                    !- Skin Loss Radiative Fraction
-  PowerPerFlowPerPressure,                !- Design Power Sizing Method
-  348701.1,                               !- Design Electric Power per Unit Flow Rate {W/(m3/s)}
-  1.282051282,                            !- Design Shaft Power per Unit Flow Rate per Unit Head {W-s/m3-Pa}
-  0,                                      !- Design Minimum Flow Rate Fraction
-  General;                                !- End-Use Subcategory
-
-OS:Node,
-  {01ef7304-5187-4de5-875d-1567428dd93d}, !- Handle
-  Node 12,                                !- Name
-  {b6118a13-1e51-4bd7-8516-212707bd2f38}, !- Inlet Port
-  {d11bf62d-9e14-4645-8789-e3e5cdc2cb77}; !- Outlet Port
-
-OS:Connection,
-  {98a7f995-5753-4a8a-b5ce-31cd6d81edc1}, !- Handle
-  {3de6d622-2682-488f-a231-a9d5d8b0bd8b}, !- Source Object
-  3,                                      !- Outlet Port
-  {d0c99227-ecab-41f0-bf93-32c6df5077cc}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {b6118a13-1e51-4bd7-8516-212707bd2f38}, !- Handle
-  {d0c99227-ecab-41f0-bf93-32c6df5077cc}, !- Source Object
-  3,                                      !- Outlet Port
-  {01ef7304-5187-4de5-875d-1567428dd93d}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {d11bf62d-9e14-4645-8789-e3e5cdc2cb77}, !- Handle
-  {01ef7304-5187-4de5-875d-1567428dd93d}, !- Source Object
-  3,                                      !- Outlet Port
-  {3f8f5e9f-de27-4a70-85f2-01054ff6f191}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Boiler:HotWater,
-  {f5d73695-f9ed-41e2-9081-d9d25080945e}, !- Handle
-  Boiler Hot Water 1,                     !- Name
-  NaturalGas,                             !- Fuel Type
-  ,                                       !- Nominal Capacity {W}
-  ,                                       !- Nominal Thermal Efficiency
-  ,                                       !- Efficiency Curve Temperature Evaluation Variable
-  ,                                       !- Normalized Boiler Efficiency Curve Name
-  ,                                       !- Design Water Flow Rate {m3/s}
-  ,                                       !- Minimum Part Load Ratio
-  ,                                       !- Maximum Part Load Ratio
-  ,                                       !- Optimum Part Load Ratio
-  {183f04df-4cd2-4a58-ac3a-995d20e499d8}, !- Boiler Water Inlet Node Name
-  {c46c5758-cb42-45a0-94aa-96c48ce7cd29}, !- Boiler Water Outlet Node Name
-  99,                                     !- Water Outlet Upper Temperature Limit {C}
-  ConstantFlow,                           !- Boiler Flow Mode
-  0,                                      !- On Cycle Parasitic Electric Load {W}
-  0,                                      !- Off Cycle Parasitic Fuel Load {W}
-  1,                                      !- Sizing Factor
-  General;                                !- End-Use Subcategory
-
-OS:Node,
-  {9859ed86-177b-4cd6-ba2f-bac683f700ea}, !- Handle
-  Node 13,                                !- Name
-  {c46c5758-cb42-45a0-94aa-96c48ce7cd29}, !- Inlet Port
-  {a28c734c-b0ea-4ace-bafe-9693db1c06c8}; !- Outlet Port
-
-OS:Connection,
-  {183f04df-4cd2-4a58-ac3a-995d20e499d8}, !- Handle
-  {073a7dcc-a450-45a0-8708-5a79a2ab1f1a}, !- Source Object
-  3,                                      !- Outlet Port
-  {f5d73695-f9ed-41e2-9081-d9d25080945e}, !- Target Object
-  11;                                     !- Inlet Port
-
-OS:Connection,
-  {c46c5758-cb42-45a0-94aa-96c48ce7cd29}, !- Handle
-  {f5d73695-f9ed-41e2-9081-d9d25080945e}, !- Source Object
-  12,                                     !- Outlet Port
-  {9859ed86-177b-4cd6-ba2f-bac683f700ea}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {a28c734c-b0ea-4ace-bafe-9693db1c06c8}, !- Handle
-  {9859ed86-177b-4cd6-ba2f-bac683f700ea}, !- Source Object
-  3,                                      !- Outlet Port
-  {5432c185-d378-4af8-ad86-1cf72d178a4e}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:Schedule:Ruleset,
-  {7a33d685-52f6-493e-ae8b-d582c51357a0}, !- Handle
-  Schedule Ruleset 1,                     !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  {2da4015b-bf51-4d4b-b19d-466d4fd163de}; !- Default Day Schedule Name
-
-OS:Schedule:Day,
-  {2da4015b-bf51-4d4b-b19d-466d4fd163de}, !- Handle
-  Schedule Day 3,                         !- Name
-  {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  ,                                       !- Interpolate to Timestep
-  24,                                     !- Hour 1
-  0,                                      !- Minute 1
-  82;                                     !- Value Until Time 1
-
-OS:SetpointManager:Scheduled,
-  {e27bd428-72e4-4183-bd03-33759c10e68f}, !- Handle
-  Setpoint Manager Scheduled 1,           !- Name
-  Temperature,                            !- Control Variable
-  {7a33d685-52f6-493e-ae8b-d582c51357a0}, !- Schedule Name
-  {fcd0f479-45b7-4172-9d7e-b3f5a8c58f08}; !- Setpoint Node or NodeList Name
+  {b17dcb1a-35e0-4d60-a3f3-79feca37f1e1}, !- Handle
+  10.8,                                   !- January Ground Temperature {C}
+  4,                                      !- February Ground Temperature {C}
+  -2.5,                                   !- March Ground Temperature {C}
+  -2.7,                                   !- April Ground Temperature {C}
+  -3.6,                                   !- May Ground Temperature {C}
+  0.4,                                    !- June Ground Temperature {C}
+  7.7,                                    !- July Ground Temperature {C}
+  14.6,                                   !- August Ground Temperature {C}
+  19.4,                                   !- September Ground Temperature {C}
+  21.6,                                   !- October Ground Temperature {C}
+  20.9,                                   !- November Ground Temperature {C}
+  18.2;                                   !- December Ground Temperature {C}
 

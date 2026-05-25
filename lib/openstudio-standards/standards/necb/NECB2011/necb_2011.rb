@@ -846,7 +846,12 @@ class NECB2011 < Standard
 
     bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
     bldg_structure   = bldg_structure.to_s.downcase.to_sym
-    bldg_structures  = @structure.data[:structure].keys
+
+    if construction_opt == 'structure' && @structure && @structure.data
+      bldg_structures  = @structure.data[:structure].keys
+    else
+      bldg_structures = []
+    end
 
     if bldg_structures.include?(bldg_structure)
       argh            = {}
