@@ -157,11 +157,12 @@ class TestNECBSystems1And4 < Minitest::Test
       multispeed: false
     )
 
-    # Should return air loop when MAU is created
-    assert air_loop, "Should return air loop when MAU is present"
-    assert air_loop.is_a?(OpenStudio::Model::AirLoopHVAC), "Should return AirLoopHVAC object"
+    # Note: add_sys1_unitary_ac_baseboard_heating returns the air system
+    # *name* (a String) via assign_base_sys_name -> detect_air_system_type,
+    # not the air loop object. Verify the loop was created in the model.
+    assert air_loop, "Should produce a system identifier when MAU is present"
 
-    # Verify MAU air loop exists
+    # Verify MAU air loop exists in the model
     air_loops = model.getAirLoopHVACs
     assert air_loops.length > 0, "Should create MAU air loop"
 
@@ -251,16 +252,17 @@ class TestNECBSystems1And4 < Minitest::Test
       hw_loop: hw_loop
     )
 
-    # Should return air loop
-    assert air_loop, "System 4 creation should return air loop"
-    assert air_loop.is_a?(OpenStudio::Model::AirLoopHVAC), "Should return AirLoopHVAC object"
+    # Note: add_sys4_* returns the air system *name* (String) via
+    # assign_base_sys_name -> detect_air_system_type, not the air loop.
+    assert air_loop, "System 4 creation should return a system identifier"
 
-    # Verify air loop was created
+    # Verify air loop was created in the model
     air_loops = model.getAirLoopHVACs
     assert air_loops.length > 0, "Should create PSZ air loop"
 
-    # Verify air loop name includes system identifier
-    assert_match(/sys.*4/i, air_loop.name.to_s, "Air loop name should identify System 4")
+    # Verify air loop name identifies System 4
+    sys4_loop = air_loops.find { |al| al.name.to_s =~ /sys.*4/i }
+    assert sys4_loop, "An air loop should be named to identify System 4"
   end
 
   def test_system_4_gas_heating_components
@@ -459,7 +461,7 @@ class TestNECBSystems1And4 < Minitest::Test
     )
 
     # Run sizing
-    run_dir = File.join(Dir.pwd, 'output', 'hvac_systems_1_4_tests')
+    run_dir = File.join(Dir.pwd, 'output', "hvac_systems_1_4_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system1_sizing')
 
@@ -493,7 +495,7 @@ class TestNECBSystems1And4 < Minitest::Test
     )
 
     # Run sizing
-    run_dir = File.join(Dir.pwd, 'output', 'hvac_systems_1_4_tests')
+    run_dir = File.join(Dir.pwd, 'output', "hvac_systems_1_4_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system4_sizing')
 

@@ -45,7 +45,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_apply_constructions_hdd_3000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',  # HDD ~2800
       standard
     )
@@ -68,7 +68,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_apply_constructions_hdd_4000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
       standard
     )
@@ -87,7 +87,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_apply_constructions_hdd_5000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',  # Toronto HDD ~3800
       standard
     )
@@ -106,7 +106,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_apply_constructions_hdd_6000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_NT_Yellowknife.AP.719360_CWEC2020.epw',  # Yellowknife is HDD 6000+
       standard
     )
@@ -126,7 +126,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_roof_constructions_hdd_3000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',  # HDD ~2800
       standard
     )
@@ -149,7 +149,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_roof_constructions_hdd_6000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_NT_Yellowknife.AP.719360_CWEC2020.epw',  # HDD ~8200
       standard
     )
@@ -172,7 +172,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_floor_constructions_ground
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',  # HDD ~5120
       standard
     )
@@ -199,7 +199,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_window_constructions_hdd_3000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'),
       'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',  # HDD ~2800
       standard
     )
@@ -223,7 +223,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_skylight_constructions_hdd_4000
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box_with_skylight.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box_with_skylight.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',  # HDD ~5120
       standard
     )
@@ -251,7 +251,7 @@ class TestConstructions < Minitest::Test
   def test_necb2015_apply_constructions_hdd_4000
     standard = Standard.build('NECB2015')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
       standard
     )
@@ -270,7 +270,7 @@ class TestConstructions < Minitest::Test
   def test_necb2020_apply_constructions_hdd_4000
     standard = Standard.build('NECB2020')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
       standard
     )
@@ -293,7 +293,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_construction_names_reasonable
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/simple_box.osm',
+      File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
       standard
     )
@@ -318,7 +318,7 @@ class TestConstructions < Minitest::Test
   def test_necb2011_multi_zone_constructions
     standard = Standard.build('NECB2011')
     model = setup_model_for_constructions(
-      '/workspaces/openstudio-standards/test/necb_new/fixtures/geometry/multi_zone_rectangle.osm',
+      File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'),
       'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
       standard
     )

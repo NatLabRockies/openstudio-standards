@@ -58,7 +58,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's try_sizing_run method (handles Sizing:Zone creation)
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     # Use try_sizing_run which is the NECB standard way to run sizing
@@ -97,7 +97,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_1_hw')
@@ -137,7 +137,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's standard method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_3_sizing')
@@ -176,7 +176,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's standard method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_4_gas_sizing')
@@ -209,7 +209,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's standard method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_4_electric_sizing')
@@ -243,7 +243,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_4_hw')
@@ -296,7 +296,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's standard method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_5_sizing')
@@ -336,7 +336,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's standard method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_6_electric_sizing')
@@ -377,7 +377,7 @@ class TestSystemSizingIntegration < Minitest::Test
     )
 
     # Run sizing using NECB's method
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_6_hw')
@@ -426,7 +426,7 @@ class TestSystemSizingIntegration < Minitest::Test
       hw_loop: nil
     )
 
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_1_vancouver')
@@ -454,7 +454,7 @@ class TestSystemSizingIntegration < Minitest::Test
       hw_loop: nil
     )
 
-    run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+    run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
 
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system_1_yellowknife')
@@ -485,7 +485,7 @@ class TestSystemSizingIntegration < Minitest::Test
         hw_loop: nil
       )
 
-      run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+      run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
       FileUtils.mkdir_p(run_dir)
 
       standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: "system_1_#{vintage.downcase}")
@@ -514,7 +514,7 @@ class TestSystemSizingIntegration < Minitest::Test
         hw_loop: nil
       )
 
-      run_dir = File.join(Dir.pwd, 'output', 'integration_tests')
+      run_dir = File.join(Dir.pwd, 'output', "integration_tests_#{Process.pid}")
       FileUtils.mkdir_p(run_dir)
 
       standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: "system_6_#{vintage.downcase}")

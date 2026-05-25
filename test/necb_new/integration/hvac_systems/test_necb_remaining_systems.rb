@@ -64,7 +64,7 @@ class TestNECBRemainingHVACSystems < Minitest::Test
     )
 
     # Run sizing
-    run_dir = File.join(Dir.pwd, 'output', 'remaining_hvac_tests')
+    run_dir = File.join(Dir.pwd, 'output', "remaining_hvac_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system2_sizing')
 
@@ -264,7 +264,7 @@ class TestNECBRemainingHVACSystems < Minitest::Test
     )
 
     # Run sizing
-    run_dir = File.join(Dir.pwd, 'output', 'remaining_hvac_tests')
+    run_dir = File.join(Dir.pwd, 'output', "remaining_hvac_tests_#{Process.pid}")
     FileUtils.mkdir_p(run_dir)
     standard.try_sizing_run(model: model, sizing_run_dir: run_dir, sizing_run_subdir: 'system8_sizing')
 

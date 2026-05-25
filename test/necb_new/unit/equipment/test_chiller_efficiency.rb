@@ -376,7 +376,7 @@ class TestChillerEfficiency < Minitest::Test
 
     # NECB2020 loads its own chiller data which overrides NECB2011 data
     # The data file exists at: lib/openstudio-standards/standards/necb/NECB2020/data/chillers.json
-    assert File.exist?('/workspaces/openstudio-standards/lib/openstudio-standards/standards/necb/NECB2020/data/chillers.json'),
+    assert File.exist?(File.join(__dir__, '../../../../lib/openstudio-standards/standards/necb/NECB2020/data/chillers.json')),
       "NECB2020 should have its own chillers.json data file"
   end
 

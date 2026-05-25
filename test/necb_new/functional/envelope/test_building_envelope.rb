@@ -1,4 +1,4 @@
-require_relative '../../helpers/minitest_helper'
+require_relative '../../test_helper'
 
 # Building Envelope Tests for NECB - Phase 7
 # Tests envelope calculations, FDWR, SRR, U-values, and construction application
@@ -9,7 +9,7 @@ class TestBuildingEnvelope < Minitest::Test
     standard = Standard.build(template)
 
     # Load the standard NECB test resource model (proven approach)
-    resource_path = File.join(File.dirname(__FILE__), '../../necb/unit_tests/resources/5ZoneNoHVAC.osm')
+    resource_path = File.join(File.dirname(__FILE__), '../../../necb/unit_tests/resources/5ZoneNoHVAC.osm')
     translator = OpenStudio::OSVersion::VersionTranslator.new
     model = translator.loadModel(resource_path).get
 
