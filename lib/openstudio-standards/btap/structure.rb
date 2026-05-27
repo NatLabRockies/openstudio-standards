@@ -527,12 +527,12 @@ module BTAP
       # may be more on the high side for many prototype models, fixed appliances
       # (e.g. fixtures, counters, doors and windows) are considered included.
       # Adjust for larger spaces, based on building category.
-      case @@data[:category]
-      when "commerce"   then partition_m2 = floor_m2 / 2
-      when "industry"   then partition_m2 = floor_m2 / 4
-      when "recreation" then partition_m2 = floor_m2 / 3
-      else                   partition_m2 = floor_m2
-      end
+      partition_m2 = case @@data[:category]
+                     when "commerce"   then floor_m2 / 2
+                     when "industry"   then floor_m2 / 4
+                     when "recreation" then floor_m2 / 3
+                     else                   floor_m2
+                     end
 
       # For wood-framed partitions, representative material volumes (per m2):
       #  - 16% wood-framing: 0.0224 m3/m2 x 540 kg/m3 =  12.1 kg/m2 (35.7%)
@@ -548,12 +548,11 @@ module BTAP
       #
       # For CMU partitions, representative material volumes (per m2):
       #  - 10" medium weight CMU                      = 250.0 kg/m2 (approx.)
-
-      case @framing
-      when :cmu  then partition_kgm2 = 250.0 * partition_m2 / floor_m2
-      when :wood then partition_kgm2 =  33.9 * partition_m2 / floor_m2
-      else            partition_kgm2 =  27.2 * partition_m2 / floor_m2
-      end
+      partition_kgm2 = case @framing
+                       when :cmu  then 250.0 * partition_m2 / floor_m2
+                       when :wood then  33.9 * partition_m2 / floor_m2
+                       else             27.2 * partition_m2 / floor_m2
+                       end
 
       # Structural dead load - not explicitly modelled - include columns,
       # bracing, connectors, etc. For BTAP purposes, some basic assumptions are
@@ -584,14 +583,14 @@ module BTAP
         column_m += height * space.floorArea * 15 / 1000
       end
 
-      case @structure
-      when :steel then column_kgm2 = 190 * column_m / floor_m2
-      when :metal then column_kgm2 = 190 * column_m / floor_m2
-      when :cmu   then column_kgm2 = 150 * column_m / floor_m2
-      when :wood  then column_kgm2 =  48 * column_m / floor_m2
-      when :clt   then column_kgm2 =  96 * column_m / floor_m2
-      else             column_kgm2 = 304 * column_m / floor_m2
-      end
+      column_kgm2 = case @structure
+                    when :steel then 190 * column_m / floor_m2
+                    when :metal then 190 * column_m / floor_m2
+                    when :cmu   then 150 * column_m / floor_m2
+                    when :wood  then  48 * column_m / floor_m2
+                    when :clt   then  96 * column_m / floor_m2
+                    else             304 * column_m / floor_m2
+                    end
 
       @deadload = partition_kgm2 + column_kgm2
 
@@ -675,13 +674,13 @@ module BTAP
       @co2 = {structure: 0}
 
       # Add columns.
-      case @structure
-      when :steel then cl_co2 =  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
-      when :metal then cl_co2 =  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
-      when :wood  then cl_co2 = 55.000 * (column_m *  48) / 540 # 55 kgCO2-e/m3
-      when :clt   then cl_co2 = 55.000 * (column_m *  96) / 540 # 55 kgCO2-e/m3
-      else             cl_co2 =  0.268 * (column_m *  96) # 0.268 kgCO2-e/kg
-      end
+      cl_co2 = case @structure
+               when :steel then  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
+               when :metal then  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
+               when :wood  then 55.000 * (column_m *  48) / 540 # 55 kgCO2-e/m3
+               when :clt   then 55.000 * (column_m *  96) / 540 # 55 kgCO2-e/m3
+               else              0.268 * (column_m *  96) # 0.268 kgCO2-e/kg
+               end
 
       @co2[:structure] += cl_co2
 
