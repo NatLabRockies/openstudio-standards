@@ -1,5 +1,5 @@
 # **************************************************************************** /
-# *  Copyright (c) 2008-2025, Natural Resources Canada
+# *  Copyright (c) 2008-2026, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -32,7 +32,7 @@ module BTAP
     # As detailed a bit further on, this determination is either via user input:
     #   - e.g. "clt" (mass timber) post/beam STRUCTURE, for a school.
     #
-    # Or auto-assigned based on the prevalence of model space type assignments:
+    # ... or auto-assigned based on the prevalence of model space types:
     #   - e.g. 75% of spaces are commercial in nature (see activity.rb),
     #     therefore the building STRUCTURE defaults to "steel" post/beam.
     #
@@ -45,7 +45,7 @@ module BTAP
     #
     # Ensuring consistency between building STRUCTURE, envelope selection,
     # internal mass definitions, etc. is key to harmonizing predicted energy
-    # use, peak demand assessments, GHG emissions, vs thermal resilience and
+    # use, peak demand assessments, GHG emissions, thermal resilience and
     # embodied energy/GHG tallies.
     #
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
@@ -72,7 +72,7 @@ module BTAP
     #   NOTES:
     #
     #    **  Neither "metal" nor "clt" options can be considered as fully
-    #        supported by BTAP, e.g.:
+    #        supported by BTAP at this stage, e.g.:
     #          - no range of admissible envelope Uo factors
     #          - no associated PSI-factors (thermal bridging)
     #          - no costing data
@@ -104,8 +104,8 @@ module BTAP
     #
     # Note that there's a (growing?) need to contrast "metal" buildings against
     # the default "steel" post/beam option. Like a "wood" framed STRUCTURE or a
-    # load-bearing "cmu" wall, a "metal" building's envelope structure and skin
-    # are indistinguishable, i.e. no mixing/matching of STRUCTURE vs envelope.
+    # load-bearing "cmu" wall, a "metal" building's structure and envelope are
+    # indistinguishable, i.e. no mixing/matching of STRUCTURE vs envelope.
     #
     # There are of course several other (smaller scale) structural options,
     # often load-bearing envelopes like adobe/hemp/straw bale construction. Most
@@ -113,8 +113,8 @@ module BTAP
     # shortlisting them for commercial building stock assessments. One could
     # state the same when it comes to the current (marginal) use of "clt". Yet
     # as the latter is rapidly becoming a robust low-carbon alternative to
-    # "steel" and "concrete" options, its inclusion is justified. Additional
-    # options may nonetheless be added in the future.
+    # "steel" and "concrete" options, its inclusion seems justified. Additional
+    # options may be added in the future.
     @@data = {structure: {}, cladding: {}, finish: {}, category: {}}
 
     # Each STRUCTURE inherits a default FRAMING option. Together with the
@@ -133,11 +133,11 @@ module BTAP
 
     # An example. STRUCTURE == "wood" + default FRAMING == "wood", e.g. housing:
     #   - typical engineered wood joists + FINISH
-    #   - similar engineered wood rafters + FINISH (if flat or cathedral roof)
+    #   - similar engineered wood rafters + FINISH (when flat or cathedral roof)
     #   - anchored engineered wood joist balconies
     #
     # FRAMING may also determine above-grade exterior wall composition (e.g.
-    # wool-insulated wood-framed exterior walls, if FRAMING == "wood"). This
+    # wool-insulated wood-framed exterior walls, when FRAMING == "wood"). This
     # may instead be determined by CLADDING selection in several cases.
     #
     # Exterior CLADDING and interior FINISH options are both limited to 4
@@ -150,7 +150,7 @@ module BTAP
     # rare, even in pre-code buildings. An example would be a load-bearing,
     # "cmu" wall with 2 coats of paint in a semi-heated industrial facility. The
     # "none" FINISH option is slightly more common, e.g. exposed ceilings, bare
-    # "clt" walls, and again bare "cmu" walls (or with 2 coats of paint).
+    # "clt" walls, and again bare "cmu" walls.
     @@data[:cladding] = [:none, :light, :medium, :heavy]
     @@data[:finish  ] = [:none, :light, :medium, :heavy]
 
@@ -161,8 +161,8 @@ module BTAP
     #   - load-bearing basement walls
     #   - basement columns, shear walls, etc. (internal mass)
     #
-    # Hopefully, users may also assign STRUCTURE, FRAMING, CLADDING & FINISH
-    # options per OpenStudio's building-to-space hierarchy, e.g. - @todo:
+    # BTAP users can also explicitely assign STRUCTURE, FRAMING, CLADDING &
+    # FINISH options per OpenStudio's building-to-space hierarchy, e.g.:
     #
     #   Example A: Composite STRUCTURE:
     #     - "concrete" post/beam STRUCTURE for first 4 building stories
@@ -251,20 +251,26 @@ module BTAP
   class BTAP::Structure
     extend StructureData
 
-    # @return [String] building type CATEGORY (e.g. "public")
+    # @return [String] default building type CATEGORY (e.g. "public")
     attr_reader :category
 
-    # @return [Symbol] building STRUCTURE selection (e.g. :steel)
+    # @return [Symbol] default building STRUCTURE selection (e.g. :steel)
     attr_reader :structure
 
-    # @return [Symbol] building framing (e.g. :steel)
+    # @return [Symbol] default building framing (e.g. :steel)
     attr_reader :framing
 
-    # @return [Symbol] building cladding (e.g. :medium)
+    # @return [Symbol] default building cladding (e.g. :medium)
     attr_reader :cladding
 
-    # @return [Symbol] building finish (e.g. :light)
+    # @return [Symbol] default building finish (e.g. :light)
     attr_reader :finish
+
+    # @ return [Boolean] whether customization is requested (e.g. STRUCTURE)
+    attr_reader :customized
+
+    # @return [Hash] customized STRUCTURE, FRAMING, CLADDING & FINISH per space
+    attr_reader :spaces
 
     # @return [Float] estimated dead load, in kg/m2 of floor area
     attr_reader :deadload
@@ -300,8 +306,9 @@ module BTAP
         return
       end
 
-      cat = activity.category
+      cat   = activity.category
       lload = activity.liveload
+      tags  = ["btap_structure", "btap_framing", "btap_cladding", "btap_finish"]
 
       if cat.respond_to?(:to_sym)
         cat = cat.to_s.downcase
@@ -328,12 +335,14 @@ module BTAP
       end
 
       # Cap internal mass density to 1000 kg/m3, and thickness to 6".
-      rho   = 1000.0
-      th    = 0.150
-      bldg  = model.getBuilding
+      rho  = 1000.0
+      th   = 0.150
+      bldg = model.getBuilding
 
-      @category  = cat
-      @structure = data[:category][cat][:small]
+      @customized = false
+      @category   = cat
+      @structure  = data[:category][cat][:small]
+      @spaces     = {}
 
       # Switch to :large structure, instead of default :small.
       if data[:category][cat].key?(:stories)
@@ -378,10 +387,107 @@ module BTAP
       @finish = :none  if @framing == :cmu
       @finish = :heavy if @category == "robust"
 
+      # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
+      # Customizing (default) building STRUCTURE option? Maintain or reset as
+      # an OpenStudio AdditionalProperty.
+      tag = "btap_structure"
+
+      if bldg.additionalProperties.hasFeature(tag)
+        prp = bldg.additionalProperties.getFeatureAsString(tag)
+
+        if prp.empty?
+          bldg.additionalProperties.setFeature(tag, @structure.to_s)
+        else
+          prp = prp.get.downcase.to_sym
+
+          if @@data[:structure].keys.include?(prp)
+            @customized = true
+            @structure  = prp
+
+            # Reset :clt and :metal structure selections for now - @todo
+            @structure = :steel    if @structure == :metal
+            @structure = :concrete if @structure == :clt
+          else
+            bldg.additionalProperties.setFeature(tag, @structure.to_s)
+          end
+        end
+      else
+        bldg.additionalProperties.setFeature(tag, @structure.to_s)
+      end
+
+      # Repeat for custom building FRAMING.
+      tag = "btap_framing"
+
+      if bldg.additionalProperties.hasFeature(tag)
+        prp = bldg.additionalProperties.getFeatureAsString(tag)
+
+        if prp.empty?
+          bldg.additionalProperties.setFeature(tag, @framing.to_s)
+        else
+          prp = prp.get.downcase.to_sym
+
+          if @@data[:structure][@structure][:framing] == prp ||
+             @@data[:structure][@structure][:frames].include?(prp)
+            @customized = true
+            @framing    = prp
+          else
+            bldg.additionalProperties.setFeature(tag, @framing.to_s)
+          end
+        end
+      else
+        bldg.additionalProperties.setFeature(tag, @framing.to_s)
+      end
+
+      # Repeat for custom building cladding & finish. Must be compatible.
+      [:cladding, :finish].each do |item|
+        tag = "btap_" + item.to_s
+
+        if bldg.additionalProperties.hasFeature(tag)
+          prp = bldg.additionalProperties.getFeatureAsString(tag)
+
+          if prp.empty?
+            bldg.additionalProperties.setFeature(tag, item.to_s)
+          else
+            prp = prp.get.downcase.to_sym
+
+            if @@data[item].include?(opt)
+              if item == :cladding
+                @cladding   = prp
+                @customized = true
+              else
+                @finish     = prp
+                @customized = true
+              end
+            else
+              bldg.additionalProperties.setFeature(tag, item.to_s)
+            end
+          end
+        else
+          bldg.additionalProperties.setFeature(tag, item.to_s)
+        end
+      end
+
+      # Customized story/space STRUCTURE attributes, overriding default/custom
+      # building-wide attributes.
+      tags.each do |tag|
+        model.getSpaces.each do |space|
+          id  = space.nameString
+          prp = self.property(space, tag)
+          next if prp.nil?
+
+          @spaces[id] = {} unless spaces.key?(id)
+          @spaces[id][:structure] = prp if tag.include?("structure")
+          @spaces[id][:framing  ] = prp if tag.include?("framing")
+          @spaces[id][:cladding ] = prp if tag.include?("cladding")
+          @spaces[id][:finish   ] = prp if tag.include?("finish")
+        end
+      end
+
+      # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
       # 'Dead load' refers to the self-weight of structural elements of a
       # building, as well as non-structural fixtures that are permanently
       # attached to the building. They are considered 'dead' as they typically
-      # do not move around during the life of the building. If/once a building
+      # do not move around during the life of the building. Once a building
       # is resold, its new owners recover dead load as 'real estate assets'.
       # Dead load typically falls under design scopes of architects/engineers.
       # Although there are obvious design constraints to consider (e.g. fire
@@ -601,6 +707,143 @@ module BTAP
       bldg.additionalProperties.setFeature(tag, @co2[:structure])
 
       true
+    end
+
+    ##
+    # Returns an (inherited) AdditionalProperty, applicable to a given space.
+    # Four admissible STRUCTURE AdditionalProperty keys: "btap_structure",
+    # "btap_framing", "btap_cladding", "btap_finish". If an AdditionalProperty
+    # key is correctly identified yet its value invalid (per BTAP::Structure
+    # rules), its value is reset to building defaults.
+    #
+    # @param space [OpenStudio::Model::Space] a space
+    # @param tag [String] AdditionalProperty key, e.g. "btap_structure"
+    #
+    # @return [Symbol] AdditionalProperty value (nil if invalid inputs)
+    def property(space = nil, tag = "")
+      mth = "BTAP::Structure::#{__callee__}"
+      lgs = @feedback[:logs]
+      prp = nil
+
+      unless space.is_a?(OpenStudio::Model::Space)
+        lgs << "Invalid or empty OpenStudio space (#{mth})"
+        return prp
+      end
+
+      unless tag.respond_to?(:to_sym)
+        lgs << "Invalid AddtionalProperty (#{mth})"
+        return prp
+      end
+
+      tag  = tag.to_s.downcase
+      tags = ["btap_structure", "btap_framing", "btap_cladding", "btap_finish"]
+
+      unless tags.include?(tag)
+        lgs << "Unrecognized STRUCTURE AddtionalProperty '#{tag}' (#{mth})"
+        return prp
+      end
+
+      # Check if the AdditionalProperty is assigned to the space itself.
+      if space.additionalProperties.hasFeature(tag)
+        prp = space.additionalProperties.getFeatureAsString(tag)
+
+        if prp.empty?
+          lgs << "Unknown space AddtionalProperty (#{mth})"
+          prp = nil
+        else
+          prp = prp.get.downcase.to_sym
+        end
+      end
+
+      # Check if the AdditionalProperty is instead assigned to the spacetype.
+      unless prp
+        type = space.spaceType
+
+        unless type.empty?
+          type = type.get
+
+          if type.additionalProperties.hasFeature(tag)
+            prp = type.additionalProperties.getFeatureAsString(tag)
+
+            if prp.empty?
+              lgs << "Unknown spacetype AddtionalProperty (#{mth})"
+              prp = nil
+            else
+              prp = prp.get.downcase.to_sym
+            end
+          end
+        end
+      end
+
+      # Check if the AdditionalProperty is instead assigned to building story.
+      unless prp
+        story = space.buildingStory
+
+        unless story.empty?
+          story = story.get
+
+          if story.additionalProperties.hasFeature(tag)
+            prp = story.additionalProperties.getFeatureAsString(tag)
+
+            if prp.empty?
+              lgs << "Unknown story AddtionalProperty (#{mth})"
+              prp = nil
+            else
+              prp = prp.get.downcase.to_sym
+            end
+          end
+        end
+      end
+
+      if prp
+        if tag == "btap_structure"
+          if @@data[:structure].keys.include?(prp)
+            @customized = true
+
+            # Reset :clt and :metal structure selections for now - @todo
+            prp = :steel    if prp == :metal
+            prp = :concrete if prp == :clt
+          else
+            prp = @structure
+            space.additionalProperties.setFeature(tag, prp.to_s)
+          end
+        elsif tag == "btap_framing"
+          structure = self.property(space, "btap_structure")
+          structure = @structure if structure.nil?
+
+          if @@data[:structure].keys.include?(structure)
+            if @@data[:structure][structure][:framing] == prp ||
+               @@data[:structure][structure][:frames].include?(prp)
+              @customized = true
+            else
+              prp = @framing
+              space.additionalProperties.setFeature(tag, prp.to_s)
+            end
+          else
+            prp = @framing
+            bldg.additionalProperties.setFeature(tag, prp.to_s)
+          end
+        elsif tag == "btap_cladding"
+          if @@data[:cladding].include?(prp)
+            @customized = true
+          else
+            prp = @cladding
+            space.additionalProperties.setFeature(tag, prp.to_s)
+          end
+        elsif tag == "btap_finish"
+          if @@data[:finish].include?(prp)
+            @customized = true
+          else
+            prp = @finish
+            space.additionalProperties.setFeature(tag, prp.to_s)
+          end
+        else
+          lgs << "Unknown AddtionalProperty (#{mth})"
+          prp = nil
+        end
+      end
+
+      prp
     end
   end
 end

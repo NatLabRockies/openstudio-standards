@@ -698,7 +698,7 @@ module BTAP
             comply[stypes] = false
           end
 
-          @model[:constructions].each do |lc, v|
+          @model[:constructions].values.each do |v|
             next unless v[:stypes] == stypes
 
             v[:uo] = uo
@@ -727,7 +727,22 @@ module BTAP
         args.delete(ut)
 
         # Reset uprated Uo factor for each 'deratable' construction.
-        @model[:constructions].each do |lc, v|
+        @model[:constructions].each do |ide, v|
+          lc = model.getConstructionByName(ide)
+
+          if lc.empty?
+            lgs << "Mismatched construction: #{ide} (#{mth})?"
+            return false
+          end
+
+          lc = lc.get.to_LayeredConstruction
+
+          if lc.empty?
+            lgs << "Mismatched layered construction: #{ide} (#{mth})?"
+            return false
+          end
+
+          lc = lc.get
           next unless v[:stypes] == stypes
 
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
@@ -876,20 +891,16 @@ module BTAP
         return false
       end
 
-      # TBD surface objects hold certain attributes (keys) to signal if they're
-      # deratable. Concentrating only on those. Relying on reported strings
-      # (e.g. surface identifier) or integers (e.g. a layer :index) seems fine.
-      # Yet referecing TBD-cloned OpenStudio objects (e.g. key :construction)
-      # is a no-no (e.g. seg faults).
+      # Process only surfaces deemed 'deratable' by TBD.
       res[:surfaces].each do |id, surface|
         next unless surface.key?(:type)      # :wall, :ceiling or :floor
-        next unless surface.key?(:filmRSI)   # sum of air film resistances
+        next unless surface.key?(:filmRSI)   # surface air film resistances
+        next unless surface.key?(:net)       # surface net area
         next unless surface.key?(:index)     # deratable layer index
         next unless surface.key?(:r)         # deratable layer RSi
         next unless surface.key?(:deratable) # true or false
-
         next unless surface[:deratable]
-        next unless surface[:index    ]
+        next unless surface[:index]
 
         stypes = case surface[:type]
                  when :wall    then :walls
@@ -899,6 +910,9 @@ module BTAP
                  end
 
         next if stypes.empty?
+
+        fR = surface[:filmRSI]
+        m2 = surface[:net]
 
         # Track surface type.
         @model[:stypes] << stypes unless @model[:stypes].include?(stypes)
@@ -935,17 +949,20 @@ module BTAP
         end
 
         lc = lc.get
+        ide = lc.nameString
 
-        unless @model[:constructions].key?(lc)
-          @model[:constructions][lc]             = {}
-          @model[:constructions][lc][:index    ] = surface[:index]   # material
-          @model[:constructions][lc][:r        ] = surface[:r]       # material
-          @model[:constructions][lc][:filmRSI  ] = surface[:filmRSI] # assembly
-          @model[:constructions][lc][:uo       ] = nil               # assembly
-          @model[:constructions][lc][:compliant] = nil               # assembly
-          @model[:constructions][lc][:stypes   ] = []
-          @model[:constructions][lc][:surfaces ] = []
-          @model[:constructions][lc][:spaces   ] = []
+        unless @model[:constructions].key?(ide)
+          @model[:constructions][ide]             = {}
+          @model[:constructions][ide][:index    ] = surface[:index] # material
+          @model[:constructions][ide][:r        ] = surface[:r]     # material
+          @model[:constructions][ide][:uo       ] = nil             # assembly
+          @model[:constructions][ide][:compliant] = nil             # assembly
+          @model[:constructions][ide][:m2       ] = 0               # cumulative
+          @model[:constructions][ide][:fA       ] = 0               # cumulative
+          @model[:constructions][ide][:filmRSI  ] = 0               # weighted
+          @model[:constructions][ide][:stypes   ] = []
+          @model[:constructions][ide][:surfaces ] = []
+          @model[:constructions][ide][:spaces   ] = []
 
           # Generate TBD input hashes for both :good & :bad PSI factor sets.
           # This depends solely on assigned wall constructions (e.g. steel- vs
@@ -955,35 +972,55 @@ module BTAP
           # - there should be a single assigned layered construction for all
           # walls in a BTAP-altered OpenStudio model.
           if stypes == :walls
-            @model[:constructions][lc][:lp_bad ] = self.inputs(strc, :lp, :bad )
-            @model[:constructions][lc][:lp_good] = self.inputs(strc, :lp, :good)
-            @model[:constructions][lc][:hp_bad ] = self.inputs(strc, :hp, :bad )
-            @model[:constructions][lc][:hp_good] = self.inputs(strc, :hp, :good)
+            @model[:constructions][ide][:lp_bad ] = self.inputs(strc, :lp, :bad )
+            @model[:constructions][ide][:lp_good] = self.inputs(strc, :lp, :good)
+            @model[:constructions][ide][:hp_bad ] = self.inputs(strc, :hp, :bad )
+            @model[:constructions][ide][:hp_good] = self.inputs(strc, :hp, :good)
           end
         end
 
-        # Select lowest applicable air film resistances (given surface slope).
-        film = [@model[:constructions][lc][:filmRSI], surface[:filmRSI]].min
-
-        @model[:constructions][lc][:filmRSI ] = film
-        @model[:constructions][lc][:stypes  ] << stypes           # 1x
-        @model[:constructions][lc][:surfaces] << id               # many
-        @model[:constructions][lc][:spaces  ] << space.nameString # less
+        @model[:constructions][ide][:m2      ] += m2
+        @model[:constructions][ide][:fA      ] += m2 / fR
+        @model[:constructions][ide][:stypes  ] << stypes
+        @model[:constructions][ide][:surfaces] << id
+        @model[:constructions][ide][:spaces  ] << space.nameString
       end
+
+      # Area-weighted surface air film resistances.
+      @model[:constructions].values.each { |v| v[:filmRSI] = v[:m2] / v[:fA] }
 
       # Loop through all tracked deratable constructions. Ensure a single
       # surface type per construction. Ensure at least one wall construction.
       @model[:constructions].values.each { |v| v[:stypes].uniq! }
       nb = 0
 
-      @model[:constructions].each do |lc, v|
+      @model[:constructions].each do |ide, v|
         if v[:stypes].size != 1
+
+          # @todo : Revise if multiple surface types per construction.
+          # Clone construction as needed to ensure surface type uniqueness.
           lgs << "Multiple surface types per construction (#{mth})?"
           return false
         else
           v[:stypes] = v[:stypes].first
 
-          # Assign construction for each deratable surface.
+          lc = model.getConstructionByName(ide)
+
+          if lc.empty?
+            lgs << "Mismatched construction: #{ide} (#{mth})?"
+            return false
+          end
+
+          lc = lc.get.to_LayeredConstruction
+
+          if lc.empty?
+            lgs << "Mismatched layered construction: #{ide} (#{mth})?"
+            return false
+          end
+
+          lc = lc.get
+
+          # Hard-set construction to each deratable surface.
           v[:surfaces].each do |id|
             surface = model.getSurfaceByName(id)
             next if surface.empty?
@@ -1091,7 +1128,7 @@ module BTAP
         lgs << lg
 
         # Report then on required Uo factor per construction (compliant or not).
-        @model[:constructions].each do |lc, v|
+        @model[:constructions].each do |ide, v|
           next unless v.key?(:stypes)
           next unless v.key?(:uo)
           next unless v.key?(:compliant)
@@ -1101,7 +1138,7 @@ module BTAP
 
           uo  = format("%.3f", v[:uo])
           lg  = v[:compliant] ? "   Compliant " : "   Non-compliant "
-          lg += "#{lc.nameString} Uo #{uo} (W/K.m2)"
+          lg += "#{ide} Uo #{uo} (W/K.m2)"
           lgs << lg
         end
       end

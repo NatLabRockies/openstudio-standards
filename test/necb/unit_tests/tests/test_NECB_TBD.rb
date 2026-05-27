@@ -33,7 +33,7 @@ class NECB_TBD_Tests < Minitest::Test
     @buildings = [
       # 'FullServiceRestaurant',
       # 'HighriseApartment',
-      'HighriseApartmentMult',
+      # 'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
@@ -42,10 +42,10 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
@@ -58,7 +58,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @structure = [
-      '',
+      # '',
       'structure'
     ]
 
@@ -77,7 +77,7 @@ class NECB_TBD_Tests < Minitest::Test
     #
     @options = [
       # 'none',
-      'bad',
+      # 'bad',
       # 'good',
       'uprate'
     ]

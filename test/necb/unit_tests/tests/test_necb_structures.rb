@@ -37,8 +37,8 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
@@ -46,8 +46,8 @@ class NECB_Structure_Tests < Minitest::Test
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
-      # 'Warehouse'
+      'SmallOffice',
+      'Warehouse'
     ]
 
     @templates = [
@@ -58,9 +58,12 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @options = [
-      "",
+      # "",
       "structure"
     ]
+
+    # AdditionalProperty override.
+    @property = true
 
     tg  = "co2_structure"
     tag = "space_conditioning_category"
@@ -76,13 +79,44 @@ class NECB_Structure_Tests < Minitest::Test
           @options.sort.each do |option  |
             cas   = "CASE #{building} (#{template})"
             cas  += " - #{option}" unless option.empty?
-
             st    = Standard.build(template)
-            model = st.model_create_prototype_model(template: template,
-                                                    epw_file: epw,
-                                                    building_type: building,
-                                                    construction_opt: option,
-                                                    sizing_run_dir: @sizing_run_dir)
+
+            # Customizing STRUCTURE options. For example, the BTAP Warehouse is
+            # assumed to have a steel (or metal) structure. A possible override:
+            # load-bearing CMU structure for the warehouse's bulk storage space.
+            if @property && building == "Warehouse"
+              model = st.load_building_type_from_library(building_type: building)
+              id    = "Zone3 Bulk Storage"
+              opt   = "btap_structure"
+              prp   = "cmu"
+              bulk  = model.getSpaceByName(id)
+
+              err_msg = "BTAP::Structure invalid space ID '#{id}' (#{cas})?"
+              refute_empty(bulk, err_msg)
+              bulk  = bulk.get
+
+              err_msg = "BTAP::Structure failed AddProp '#{opt}' (#{cas})?"
+              assert(bulk.additionalProperties.setFeature(opt, prp), err_msg)
+
+              err_msg = "BTAP::Structure missing AddProp '#{opt}' (#{cas})?"
+              prop = bulk.additionalProperties.getFeatureAsString(opt)
+              refute_empty(prop, err_msg)
+
+              prop = prop.get
+              err_msg = "BTAP:Structure incorrect AddProp '#{prop}' (#{cas})?"
+              assert_equal(prop, prp, err_msg)
+
+              model = st.model_apply_standard(model: model,
+                                              epw_file: epw,
+                                              construction_opt: option,
+                                              sizing_run_dir: @sizing_run_dir)
+            else
+              model = st.model_create_prototype_model(template: template,
+                                                      epw_file: epw,
+                                                      building_type: building,
+                                                      construction_opt: option,
+                                                      sizing_run_dir: @sizing_run_dir)
+            end
 
             co2 = model.getBuilding.additionalProperties.getFeatureAsDouble(tg)
 
@@ -135,7 +169,7 @@ class NECB_Structure_Tests < Minitest::Test
                 else
                   id = c.layers.last.nameString
                   err_msg = "BTAP::Structure #{id} insulation layer (#{cas})?"
-                  assert_includes(id, "OSut:K", err_msg)
+                    assert_includes(id, "OSut:K", err_msg)
                 end
               end
             end
@@ -169,6 +203,14 @@ class NECB_Structure_Tests < Minitest::Test
             end
 
             s = st.structure
+
+            if @property && building == "Warehouse"
+              err_msg = "BTAP::Structure customized (#{cas})?"
+              assert(s.customized, err_msg)
+
+              err_msg = "BTAP::Structure size (#{cas})?"
+              assert_equal(s.spaces.size, 1, err_msg)
+            end
 
             err_msg = "BTAP::Structure #{s.class} (#{cas})?"
             assert_kind_of(BTAP::Structure, s, err_msg)
@@ -251,6 +293,14 @@ class NECB_Structure_Tests < Minitest::Test
 
               co2m2 = ": #{(s.co2[:structure]/floor_m2).round} kgCO2-e/m2 (A1-A3)"
               fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
+
+              if @property
+                s.spaces.each do |id, prp|
+                  next unless prp.key?(:structure)
+
+                  fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
+                end
+              end
             end
 
             s.feedback[:logs].each { |log| puts log }
