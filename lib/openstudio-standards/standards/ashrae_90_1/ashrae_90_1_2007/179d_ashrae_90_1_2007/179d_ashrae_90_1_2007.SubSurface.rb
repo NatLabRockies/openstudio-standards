@@ -42,6 +42,19 @@ SELECT Value FROM TabularDataWithStrings
     return val_.get
   end
 
+  # Try `Glass <metric>` first, fall back to `Assembly <metric>`.
+  # Under standards 0.8.2 + OS 3.10, the EnvelopeSummary table populates one or
+  # the other depending on whether the EnergyPlus simulation classified the
+  # construction as having a frame/divider; pre-checking
+  # `windowPropertyFrameAndDivider` on the OS SubSurface is unreliable because
+  # the baseline measure may swap constructions without touching the SubSurface
+  # frame/divider attachment.
+  def get_exterior_fenestration_value_with_fallback(sub_surface, metric)
+    get_exterior_fenestration_value(sub_surface, "Glass #{metric}")
+  rescue RuntimeError
+    get_exterior_fenestration_value(sub_surface, "Assembly #{metric}")
+  end
+
   def sub_surface_get_window_property(sub_surface)
     sql_file = sub_surface.model.sqlFile
     if !sql_file.is_initialized
@@ -59,18 +72,8 @@ SELECT Value FROM TabularDataWithStrings
 
     sub_surface_name = sub_surface.name.to_s
 
-    # OpenStudio SDK has only methods for querying the assembly values
-    # (SubSurface::assemblySHGC / assemblyUFactor)
-    # When you do not have a frame, these are empty (0.0) though!
-    # Since we reimplement the get_exterior_fenestration_value, might as well
-    # use it for everything for clarity and consistency
-    if sub_surface.windowPropertyFrameAndDivider.is_initialized
-      window_shgc = get_exterior_fenestration_value(sub_surface, 'Assembly SHGC')
-      window_u_value = get_exterior_fenestration_value(sub_surface, 'Assembly U-Factor')
-    else
-      window_shgc = get_exterior_fenestration_value(sub_surface, 'Glass SHGC')
-      window_u_value = get_exterior_fenestration_value(sub_surface, 'Glass U-Factor')
-    end
+    window_shgc = get_exterior_fenestration_value_with_fallback(sub_surface, 'SHGC')
+    window_u_value = get_exterior_fenestration_value_with_fallback(sub_surface, 'U-Factor')
 
     # get opening area, including the frame (width is added to the sub_surface vertices)
     window_area = get_exterior_fenestration_value(sub_surface, 'Area of Multiplied Openings')
