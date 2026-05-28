@@ -253,7 +253,7 @@ class ACM179dASHRAE9012007
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
         air_loop_hvac.thermalZones.sort.each do |zone|
           unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
-            thermal_zone_convert_oa_req_to_per_area(zone)
+            OpenstudioStandards::ThermalZone.thermal_zone_convert_outdoor_air_to_per_area(zone)
           end
         end
       end
