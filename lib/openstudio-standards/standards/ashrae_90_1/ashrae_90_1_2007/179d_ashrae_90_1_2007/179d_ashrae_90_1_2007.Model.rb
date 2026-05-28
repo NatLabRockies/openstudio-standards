@@ -1701,4 +1701,46 @@ class ACM179dASHRAE9012007
     return true
   end
 
+  # 179D ACM mandates that Kitchen, Restroom, and Cafeteria zone exhaust fans
+  # operate on the building's HVAC operation schedule (per IRS Notice 2006-52
+  # §3.03 / CA 2005 ACM Tables N2-2..N2-9), not the always-on default that
+  # OpenstudioStandards::HVAC.create_exhaust_fan applies in standards 0.8.x.
+  # Call super for the stock fan creation (sized from typical_exhaust.csv,
+  # transfer-air zone mixing if applicable), then replace availability and
+  # flow-fraction schedules on those three space types with the ACM schedule.
+  #
+  # Replaces the v0.4-era thermal_zone_add_exhaust override (dead under 0.8
+  # because exhaust creation moved to a module function that doesn't dispatch
+  # through Standard inheritance).
+  ACM_EXHAUST_SPACE_TYPES = ['Kitchen', 'Restroom', 'Cafeteria'].freeze
+
+  def model_add_exhaust(model, makeup_source: 'None', remove_existing_exhaust_fans: true)
+    zone_exhaust_fans = super
+    return zone_exhaust_fans if zone_exhaust_fans.empty?
+
+    data = model_get_standards_data(model, throw_if_not_found: true)
+    acm_fan_sch_name = data['hvac_operation_schedule']
+    return zone_exhaust_fans if acm_fan_sch_name.nil?
+
+    acm_fan_sch = model_add_schedule(model, acm_fan_sch_name)
+    return zone_exhaust_fans if acm_fan_sch.nil?
+
+    zone_exhaust_fans.each do |fan|
+      next unless fan.thermalZone.is_initialized
+
+      zone = fan.thermalZone.get
+      next unless zone.spaces.any? { |s|
+        s.spaceType.is_initialized && s.spaceType.get.standardsSpaceType.is_initialized &&
+          ACM_EXHAUST_SPACE_TYPES.include?(s.spaceType.get.standardsSpaceType.get)
+      }
+
+      fan.setAvailabilitySchedule(acm_fan_sch)
+      fan.setFlowFractionSchedule(acm_fan_sch)
+      OpenStudio.logFree(OpenStudio::Info, '179d.standards.Model',
+                         "Set ACM exhaust schedule '#{acm_fan_sch_name}' on '#{fan.name}' (179D override of v0.8 alwaysOn default)")
+    end
+
+    zone_exhaust_fans
+  end
+
 end
