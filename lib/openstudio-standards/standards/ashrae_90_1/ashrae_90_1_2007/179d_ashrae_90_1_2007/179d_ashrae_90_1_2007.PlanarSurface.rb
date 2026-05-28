@@ -89,9 +89,16 @@ class ACM179dASHRAE9012007
       stds_type = standards_info.fenestrationFrameType
       if stds_type.is_initialized
         stds_type = stds_type.get
-        if !wwr_building_type.nil?
-          stds_type = 'Any Vertical Glazing'
-        end
+        # NOTE: 179D 90.1-2007 deliberately does NOT rewrite stds_type to
+        # 'Any Vertical Glazing' even when wwr_building_type is non-nil.
+        # The 90.1-2007 construction_properties data does not have an
+        # 'Any Vertical Glazing' standards_construction_type, so doing
+        # the substitution would force the lookup to fall through to the
+        # generic third-pass search and pick the FIRST matching row
+        # ('Nonmetal framing (all)' U=0.4) regardless of the surface's
+        # actual frame type, masking the 'Metal framing (all other)'
+        # U=0.55 we set. (90.1-2016+ added 'Any Vertical Glazing' so
+        # the upstream behavior is correct for those templates.)
         case stds_type
         when 'Metal Framing', 'Metal Framing with Thermal Break'
           if template == '90.1-2013'
@@ -112,12 +119,21 @@ class ACM179dASHRAE9012007
           return previous_construction_map
         end
       else
-        if wwr_building_type.nil?
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.PlanarSurface', "Could not determine the standards fenestration frame type for #{planar_surface.name} from #{construction.name}.  This surface will not have the standard applied.")
-          return previous_construction_map
-        else
-          stds_type = 'Any Vertical Glazing'
-        end
+        # No FrameType set on this window's construction. Under 90.1-2007
+        # we cannot pick a frame-type-specific entry; default to
+        # 'Nonmetal framing (all)'. This matches the upstream pre-Phase-3
+        # behavior: when wwr_building_type is non-nil (it is, 'All others'),
+        # the upstream substituted stds_type to 'Any Vertical Glazing',
+        # which doesn't exist in 90.1-2007 data, so the third-pass generic
+        # search returned the FIRST matching row -- 'Nonmetal framing
+        # (all)' alphabetically. Keep that exact behavior here so we don't
+        # shift workflow EUIs from the pre-Phase-3 baseline.
+        # (Earlier versions of this override defaulted to 'Metal framing
+        # (all other)' which produced higher U-values than the upstream
+        # fall-through and regressed Integration - MediumOffice gas EUI
+        # by +9.2%.)
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.PlanarSurface', "Could not determine the standards fenestration frame type for #{planar_surface.name} from #{construction.name}; defaulting to 'Nonmetal framing (all)' for 179D 90.1-2007.")
+        stds_type = 'Nonmetal framing (all)'
       end
     when 'Skylight'
       # Skylights
