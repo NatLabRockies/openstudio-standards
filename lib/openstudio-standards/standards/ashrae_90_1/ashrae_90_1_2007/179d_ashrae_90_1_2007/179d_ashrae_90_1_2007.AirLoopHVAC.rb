@@ -184,7 +184,7 @@ class ACM179dASHRAE9012007
     supply_fan_on_loop = air_loop_hvac.supplyComponents.any? { |c| c.iddObjectType.valueName.include?('Fan') }
     if !supply_fan_on_loop && air_loop_hvac.airLoopHVACOutdoorAirSystem.is_initialized
       controller_oa = air_loop_hvac.airLoopHVACOutdoorAirSystem.get.getControllerOutdoorAir
-      unless controller_oa.economizerControlType == 'NoEconomizer'
+      unless controller_oa.getEconomizerControlType == 'NoEconomizer'
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC',
                            "For #{air_loop_hvac.name}: No supply fan found on air loop supply path " \
                            '(fan may be inside a UnitarySystem). Disabling economizer to avoid ' \
