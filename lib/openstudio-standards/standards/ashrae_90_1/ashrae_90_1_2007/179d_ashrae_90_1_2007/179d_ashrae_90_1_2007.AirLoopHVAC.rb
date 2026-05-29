@@ -23,12 +23,12 @@ class ACM179dASHRAE9012007
       return false
     end
     # oa_flow_m3_per_s can be false if the sizing run failed or sql not avail
-    if oa_flow_m3_per_s != false
-      puts "oa_flow_m3_per_s: #{oa_flow_m3_per_s}"
-      oa_flow_cfm = OpenStudio.convert(oa_flow_m3_per_s, 'm^3/s', 'cfm').get
-    else
+    if oa_flow_m3_per_s == false
       OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}, DCV not applicable because oa_flow_m3_per_s is FALSE.")
       return false
+    else
+      puts "oa_flow_m3_per_s: #{oa_flow_m3_per_s}"
+      oa_flow_cfm = OpenStudio.convert(oa_flow_m3_per_s, 'm^3/s', 'cfm').get
     end
     any_zones_req_dcv = false
     air_loop_hvac.thermalZones.sort.each do |zone|
@@ -90,14 +90,13 @@ class ACM179dASHRAE9012007
   # @return [Boolean] flag of whether thermal zone in baseline is required to have DCV
   def baseline_thermal_zone_demand_control_ventilation_required?(thermal_zone)
     # zone needs dcv if user model has dcv and baseline does not meet apxg exception
-    if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV')
-      # meaning it was served by an airloop in the user model, does not mean much here, conditional as a safeguard
-      # in case it was not served by an airloop in the user model
-      if !thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get && # does not meet apxg exception (need to have dcv if user model has it
-         thermal_zone.additionalProperties.getFeatureAsBoolean('zone DCV implemented in user model').get
-        return true
-      end
+    # meaning it was served by an airloop in the user model, does not mean much here, conditional as a safeguard
+    # in case it was not served by an airloop in the user model
+    if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV') && (!thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get && # does not meet apxg exception (need to have dcv if user model has it
+             thermal_zone.additionalProperties.getFeatureAsBoolean('zone DCV implemented in user model').get)
+      return true
     end
+
     return false
   end
 
@@ -108,6 +107,7 @@ class ACM179dASHRAE9012007
   def get_airloop_hvac_design_oa_from_sql(air_loop_hvac)
     return false unless air_loop_hvac.airLoopHVACOutdoorAirSystem.is_initialized
     return false unless air_loop_hvac.model.sqlFile.is_initialized
+
     cooling_oa = air_loop_hvac.model.sqlFile.get.execAndReturnFirstDouble(
       "SELECT Value FROM TabularDataWithStrings WHERE ReportName='Standard62.1Summary' AND ReportForString='Entire Facility' AND TableName = 'System Ventilation Requirements for Cooling' AND ColumnName LIKE 'Outdoor Air Intake Flow%Vot' AND RowName='#{air_loop_hvac.name.to_s.upcase}'"
     )
@@ -140,6 +140,7 @@ class ACM179dASHRAE9012007
 
     return true
   end
+
   # Set default fan curve to be VSD with static pressure reset
   # NOTE: 179D overrides it because we want the use the proper fan coefs,
   # and not the ones from 'Multi Zone VAV with VSD and SP Setpoint Reset'
@@ -162,7 +163,7 @@ class ACM179dASHRAE9012007
     # Apply this before ERV because it modifies annual hours of operation which can impact ERV requirements
     if air_loop_hvac_unoccupied_fan_shutoff_required?(air_loop_hvac)
       occ_threshold = air_loop_hvac_unoccupied_threshold
-      air_loop_hvac_enable_unoccupied_fan_shutoff(air_loop_hvac, min_occ_pct = occ_threshold)
+      air_loop_hvac_enable_unoccupied_fan_shutoff(air_loop_hvac, occ_threshold)
     else
       air_loop_hvac.setAvailabilitySchedule(air_loop_hvac.model.alwaysOnDiscreteSchedule)
     end
@@ -175,6 +176,22 @@ class ACM179dASHRAE9012007
     # Economizers
     air_loop_hvac_apply_economizer_limits(air_loop_hvac, climate_zone)
     air_loop_hvac_apply_economizer_integration(air_loop_hvac, climate_zone)
+
+    # If the air loop has no direct supply fan (e.g., fan is inside an AirLoopHVACUnitarySystem),
+    # disable any economizer that was just applied. Without a standalone supply fan on the air
+    # loop supply path, EnergyPlus will produce a fatal sizing error when an economizer is present
+    # because it cannot apply DX fan/economizer control logic.
+    supply_fan_on_loop = air_loop_hvac.supplyComponents.any? { |c| c.iddObjectType.valueName.include?('Fan') }
+    if !supply_fan_on_loop && air_loop_hvac.airLoopHVACOutdoorAirSystem.is_initialized
+      controller_oa = air_loop_hvac.airLoopHVACOutdoorAirSystem.get.getControllerOutdoorAir
+      unless controller_oa.economizerControlType == 'NoEconomizer'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC',
+                           "For #{air_loop_hvac.name}: No supply fan found on air loop supply path " \
+                           '(fan may be inside a UnitarySystem). Disabling economizer to avoid ' \
+                           'invalid EnergyPlus sizing configuration.')
+        controller_oa.setEconomizerControlType('NoEconomizer')
+      end
+    end
 
     # Multizone VAV Systems
     if air_loop_hvac_multizone_vav_system?(air_loop_hvac)
@@ -241,20 +258,18 @@ class ACM179dASHRAE9012007
 
     # DCV
     # only apply DCV in baseline
-    if baseline_179d
-      if air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
-        air_loop_hvac_enable_demand_control_ventilation(air_loop_hvac, climate_zone)
-        # For systems that require DCV,
-        # all individual zones that require DCV preserve
-        # both per-area and per-person OA requirements.
-        # Other zones have OA requirements converted
-        # to per-area values only so DCV performance is only
-        # based on the subset of zones that required DCV.
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
-        air_loop_hvac.thermalZones.sort.each do |zone|
-          unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
-            OpenstudioStandards::ThermalZone.thermal_zone_convert_outdoor_air_to_per_area(zone)
-          end
+    if baseline_179d && air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
+      air_loop_hvac_enable_demand_control_ventilation(air_loop_hvac, climate_zone)
+      # For systems that require DCV,
+      # all individual zones that require DCV preserve
+      # both per-area and per-person OA requirements.
+      # Other zones have OA requirements converted
+      # to per-area values only so DCV performance is only
+      # based on the subset of zones that required DCV.
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
+      air_loop_hvac.thermalZones.sort.each do |zone|
+        unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
+          OpenstudioStandards::ThermalZone.thermal_zone_convert_outdoor_air_to_per_area(zone)
         end
       end
     end
@@ -313,5 +328,4 @@ class ACM179dASHRAE9012007
       end
     end
   end
-
 end
