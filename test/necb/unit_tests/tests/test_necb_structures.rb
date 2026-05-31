@@ -205,9 +205,6 @@ class NECB_Structure_Tests < Minitest::Test
             s = st.structure
 
             if @property && building == "Warehouse"
-              err_msg = "BTAP::Structure customized (#{cas})?"
-              assert(s.customized, err_msg)
-
               err_msg = "BTAP::Structure size (#{cas})?"
               assert_equal(s.spaces.size, 1, err_msg)
             end

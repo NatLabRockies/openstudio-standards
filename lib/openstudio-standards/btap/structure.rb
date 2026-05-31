@@ -266,9 +266,6 @@ module BTAP
     # @return [Symbol] default building finish (e.g. :light)
     attr_reader :finish
 
-    # @ return [Boolean] whether customization is requested (e.g. STRUCTURE)
-    attr_reader :customized
-
     # @return [Hash] customized STRUCTURE, FRAMING, CLADDING & FINISH per space
     attr_reader :spaces
 
@@ -278,7 +275,7 @@ module BTAP
     # @return [Float] estimated non-occupant live load, in kg/m2 of floor area
     attr_reader :liveload
 
-    # @return [Hash] calculated embodied carbon (CO2-e kg)
+    # @return [Hash] calculated embodied carbon (CO2-e kg) of STRUCTURE
     attr_reader :co2
 
     # @return [Hash] logged messages
@@ -339,7 +336,6 @@ module BTAP
       th   = 0.150
       bldg = model.getBuilding
 
-      @customized = false
       @category   = cat
       @structure  = data[:category][cat][:small]
       @spaces     = {}
@@ -401,8 +397,7 @@ module BTAP
           prp = prp.get.downcase.to_sym
 
           if @@data[:structure].keys.include?(prp)
-            @customized = true
-            @structure  = prp
+            @structure = prp
 
             # Reset :clt and :metal structure selections for now - @todo
             @structure = :steel    if @structure == :metal
@@ -428,8 +423,7 @@ module BTAP
 
           if @@data[:structure][@structure][:framing] == prp ||
              @@data[:structure][@structure][:frames].include?(prp)
-            @customized = true
-            @framing    = prp
+            @framing = prp
           else
             bldg.additionalProperties.setFeature(tag, @framing.to_s)
           end
@@ -452,11 +446,9 @@ module BTAP
 
             if @@data[item].include?(opt)
               if item == :cladding
-                @cladding   = prp
-                @customized = true
+                @cladding = prp
               else
-                @finish     = prp
-                @customized = true
+                @finish = prp
               end
             else
               bldg.additionalProperties.setFeature(tag, item.to_s)
@@ -467,19 +459,48 @@ module BTAP
         end
       end
 
-      # Customized story/space STRUCTURE attributes, overriding default/custom
-      # building-wide attributes.
+      # Isolate occupied spaces & floors, as well as exposed surfaces.
+      cspaces   = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
+      floor_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
+      ofloor_m2 = TBD.facets(cspaces, "outdoors", "floor").map(&:grossArea).sum
+      ifloor_m2 = TBD.facets(cspaces, "surface", "floor").map(&:grossArea).sum
+      roof_m2   = TBD.facets(cspaces, "outdoors", "roofceiling").map(&:grossArea).sum
+      wall_m2   = TBD.facets(cspaces, "outdoors", "walls").map(&:grossArea).sum
+      iwall_m2  = TBD.facets(cspaces, "surface", "wall").map(&:grossArea).sum
+
+      # Customized story/spacetype/space STRUCTURE attributes, overriding
+      # default/custom building-wide attributes? Skip if same as building.
       tags.each do |tag|
-        model.getSpaces.each do |space|
+        cspaces.each do |space|
           id  = space.nameString
           prp = self.property(space, tag)
           next if prp.nil?
+          next if tag.include?("structure") && prp == @structure
+          next if tag.include?("framing")   && prp == @framing
+          next if tag.include?("cladding")  && prp == @cladding
+          next if tag.include?("finish")    && prp == @finish
 
-          @spaces[id] = {} unless spaces.key?(id)
-          @spaces[id][:structure] = prp if tag.include?("structure")
-          @spaces[id][:framing  ] = prp if tag.include?("framing")
-          @spaces[id][:cladding ] = prp if tag.include?("cladding")
-          @spaces[id][:finish   ] = prp if tag.include?("finish")
+          if @spaces.key?(id)
+            @spaces[id][:structure] = prp if tag.include?("structure")
+            @spaces[id][:framing  ] = prp if tag.include?("framing")
+            @spaces[id][:cladding ] = prp if tag.include?("cladding")
+            @spaces[id][:finish   ] = prp if tag.include?("finish")
+          else
+            @spaces[id]             = {}
+            @spaces[id][:floor_m2 ] = TBD.facets(space, "all", "floor").map(&:grossArea).sum
+            @spaces[id][:ofloor_m2] = TBD.facets(space, "outdoors", "floor").map(&:grossArea).sum
+            @spaces[id][:ifloor_m2] = TBD.facets(space, "surface", "floor").map(&:grossArea).sum
+            @spaces[id][:roof_m2  ] = TBD.facets(space, "outdoors", "roofceiling").map(&:grossArea).sum
+            @spaces[id][:wall_m2  ] = TBD.facets(space, "outdoors", "walls").map(&:grossArea).sum
+            @spaces[id][:iwall_m2 ] = TBD.facets(space, "surface", "wall").map(&:grossArea).sum
+
+            floor_m2  -= @spaces[id][:floor_m2]
+            ofloor_m2 -= @spaces[id][:ofloor_m2]
+            ifloor_m2 -= @spaces[id][:ifloor_m2]
+            roof_m2   -= @spaces[id][:roof_m2]
+            wall_m2   -= @spaces[id][:wall_m2]
+            iwall_m2  -= @spaces[id][:iwall_m2]
+          end
         end
       end
 
@@ -506,16 +527,7 @@ module BTAP
       # a mass floor area density estimate (kg/m2) of non-modelled structural
       # and non-structural items like fixed furniture, partitions, columns,
       # beams, shear walls and bracing.
-
-      # First, isolate occupied spaces & floors, as well as exposed surfaces.
-      cspaces   = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
-      floor_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
-      ofloor_m2 = TBD.facets(cspaces, "outdoors", "floor").map(&:grossArea).sum
-      ifloor_m2 = TBD.facets(cspaces, "surface", "floor").map(&:grossArea).sum
-      roof_m2   = TBD.facets(cspaces, "outdoors", "roofceiling").map(&:grossArea).sum
-      wall_m2   = TBD.facets(cspaces, "outdoors", "walls").map(&:grossArea).sum
-      iwall_m2  = TBD.facets(cspaces, "surface", "wall").map(&:grossArea).sum
-
+      #
       # In OpenStudio, partitions are usually limited to interzone walls between
       # zones to save on simulation times. Partitions typically absent from a
       # model include walls surrounding lobbies, stairwells, WCs and technical
@@ -730,7 +742,7 @@ module BTAP
       end
 
       unless tag.respond_to?(:to_sym)
-        lgs << "Invalid AddtionalProperty (#{mth})"
+        lgs << "Invalid STRUCTURE AddtionalProperty tag (#{mth})"
         return prp
       end
 
@@ -747,7 +759,7 @@ module BTAP
         prp = space.additionalProperties.getFeatureAsString(tag)
 
         if prp.empty?
-          lgs << "Unknown space AddtionalProperty (#{mth})"
+          lgs << "Unknown space AddtionalProperty '#{tag}' (#{mth})"
           prp = nil
         else
           prp = prp.get.downcase.to_sym
@@ -765,7 +777,7 @@ module BTAP
             prp = type.additionalProperties.getFeatureAsString(tag)
 
             if prp.empty?
-              lgs << "Unknown spacetype AddtionalProperty (#{mth})"
+              lgs << "Unknown spacetype AddtionalProperty '#{tag}' (#{mth})"
               prp = nil
             else
               prp = prp.get.downcase.to_sym
@@ -785,7 +797,7 @@ module BTAP
             prp = story.additionalProperties.getFeatureAsString(tag)
 
             if prp.empty?
-              lgs << "Unknown story AddtionalProperty (#{mth})"
+              lgs << "Unknown story AddtionalProperty '#{tag}' (#{mth})"
               prp = nil
             else
               prp = prp.get.downcase.to_sym
@@ -794,27 +806,24 @@ module BTAP
         end
       end
 
+      # Validate, based on STRUCTURE rules - attempt to fix if invalid.
       if prp
-        if tag == "btap_structure"
+        case tag
+        when "btap_structure"
           if @@data[:structure].keys.include?(prp)
-            @customized = true
-
-            # Reset :clt and :metal structure selections for now - @todo
-            prp = :steel    if prp == :metal
-            prp = :concrete if prp == :clt
+            prp = :steel    if prp == :metal # temporary - @todo
+            prp = :concrete if prp == :clt   # temporary - @todo
           else
             prp = @structure
             space.additionalProperties.setFeature(tag, prp.to_s)
           end
-        elsif tag == "btap_framing"
+        when "btap_framing"
           structure = self.property(space, "btap_structure")
-          structure = @structure if structure.nil?
+          structure = @structure unless structure
 
           if @@data[:structure].keys.include?(structure)
-            if @@data[:structure][structure][:framing] == prp ||
-               @@data[:structure][structure][:frames].include?(prp)
-              @customized = true
-            else
+            unless @@data[:structure][structure][:framing] == prp ||
+                   @@data[:structure][structure][:frames].include?(prp)
               prp = @framing
               space.additionalProperties.setFeature(tag, prp.to_s)
             end
@@ -822,22 +831,18 @@ module BTAP
             prp = @framing
             bldg.additionalProperties.setFeature(tag, prp.to_s)
           end
-        elsif tag == "btap_cladding"
-          if @@data[:cladding].include?(prp)
-            @customized = true
-          else
+        when "btap_cladding"
+          unless @@data[:cladding].include?(prp)
             prp = @cladding
             space.additionalProperties.setFeature(tag, prp.to_s)
           end
-        elsif tag == "btap_finish"
-          if @@data[:finish].include?(prp)
-            @customized = true
-          else
+        when "btap_finish"
+          unless @@data[:finish].include?(prp)
             prp = @finish
             space.additionalProperties.setFeature(tag, prp.to_s)
           end
         else
-          lgs << "Unknown AddtionalProperty (#{mth})"
+          lgs << "Unknown AddtionalProperty '#{tag}' (#{mth})"
           prp = nil
         end
       end
