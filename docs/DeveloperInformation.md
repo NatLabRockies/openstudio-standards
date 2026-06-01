@@ -50,6 +50,7 @@ This project uses [Rake](http://rake.rubyforge.org/) to run tasks from the termi
 - `bundle exec rake clobber`                  # Remove any generated files
 - `bundle exec rake data:update`              # Generate JSONs from OpenStudio_Standards spreadsheets locally downloaded to data/standards
 - `bundle exec rake data:export:jsons`        # Export JSONs from OpenStudio_Standards to data library
+- `bundle exec rake data:update:179d`         # Generate 179D JSONs from OpenStudio_Standards spreadsheets
 - `bundle exec rake data:update:costing`      # Update RS-Means Database
 - `bundle exec rake doc`                      # Generate the documentation
 - `bundle exec rake doc:show`                 # Generate the documentation and show in a web browser
@@ -78,6 +79,7 @@ As you add to/modify the code, please follow the code architecture. See the {fil
 1. 90.1 standards data is available in [this database](https://github.com/pnnl/building-energy-standards-data). All 90.1 changes happen on that database. Data for other standards or templates lives in the .json files in openstudio-standards.
 2. If you have data, modify the .json files and run commands to update the database, as appropriate. Historically, openstudio-standards data used a series of google spreadsheets, and is still used for non-90.1-standards. See [OpenStudio_Standards Google Spreadsheet](https://drive.google.com/drive/folders/1x7yEU4jnKw-gskLBih8IopStwl0KAMEi?usp=sharing). Contact <mailto:matthew.dahlhausen@nrel.gov> for access.
 3. You may edit the spreadsheet or modify a copy of the data, then download the spreadsheet to the `data/standards` directory, and run `bundle exec rake data:update:manual` to update the JSONs.
+4. For 179D JSONs, download `OpenStudio_Standards-ashrae_90_1(space_types).xlsx` (from the `179d_external` folder in Google Drive) into `data/standards`, then run `bundle exec rake data:update:179d`. This task filters schedule rows tagged with ACM/179D and moves generated JSONs to `lib/openstudio-standards/standards/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007`.
 
 ### Test the code
 Tests prove that your code works as expected, but more importantly they help make sure that changes don't break other code. If your code doesn't have tests and someone else makes changes that break it, it's your own fault.
