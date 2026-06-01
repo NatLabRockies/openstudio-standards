@@ -519,27 +519,28 @@ module BTAP
       #   - between foam vs fibrous insulation options
       #
       # Most dead load is modelled explicitly in OpenStudio, like envelope and
-      # interzone sub/surfaces. Rough estimates of embodied carbon (in CO2-e
-      # kg/m2) can be reasonably associated to selected construction assemblies
-      # (based on m2), such as the embodied carbon of chosen insulation
-      # materials or framing options. Other dead load, like lighting and HVAC,
-      # are not modelled explicitly. Here, the 'deadload' attribute represents
-      # a mass floor area density estimate (kg/m2) of non-modelled structural
-      # and non-structural items like fixed furniture, partitions, columns,
-      # beams, shear walls and bracing.
+      # interzone surfaces. Rough estimates of embodied carbon (in CO2-e kg/m2)
+      # can be reasonably associated to selected construction assemblies (based
+      # on m2), such as the embodied carbon of chosen insulation materials or
+      # framing options. Other dead load, like lighting and HVAC, are not
+      # modelled explicitly. Here, the 'deadload' attribute represents a mass
+      # floor area density estimate (kg/m2) of non-modelled structural and
+      # non-structural items like fixed furniture, columns, beams, shear walls
+      # and bracing, as well as 'partitions'.
       #
-      # In OpenStudio, partitions are usually limited to interzone walls between
-      # zones to save on simulation times. Partitions typically absent from a
-      # model include walls surrounding lobbies, stairwells, WCs and technical
-      # rooms, as well as separations between similar rooms (e.g. multiple,
-      # side-by-side enclosed offices, a row of hotel rooms). Comparing BTAP
-      # prototype models and samples of building plans for similar facilities
-      # suggests matching modelled partition m2 with floor m2 as a suitable
-      # basis to determine the mass of non-modelled partitions. As this estimate
-      # may be more on the high side for many prototype models, fixed appliances
-      # (e.g. fixtures, counters, doors and windows) are considered included.
-      # Adjust for larger spaces, based on building category.
-      partition_m2 = case @@data[:category]
+      # Note that OpenStudio supports an InteriorPartitionSurface class, used
+      # mainly for daylighting. Although similar, 'partition' (within the scope
+      # of BTAP::Structure) more generally refers to any non-modelled wall, e.g.
+      # those surrounding lobbies, stairwells, WCs and technical rooms, as well
+      # as separations between similar rooms (e.g. multiple, side-by-side
+      # enclosed offices, a row of hotel rooms). Comparing BTAP prototype models
+      # and samples of building plans for similar facilities suggests matching
+      # modelled partition m2 with floor m2 as a suitable basis to estimate the
+      # mass of non-modelled partitions. As this estimate may be more on the
+      # high side for many prototype models, fixed appliances (e.g. fixtures,
+      # counters, doors and windows) are considered included. Adjusting for
+      # larger spaces, based on building category.
+      partition_m2 = case @category
                      when "commerce"   then floor_m2 / 2
                      when "industry"   then floor_m2 / 4
                      when "recreation" then floor_m2 / 3
@@ -565,6 +566,7 @@ module BTAP
                        when :wood then  33.9 * partition_m2 / floor_m2
                        else             27.2 * partition_m2 / floor_m2
                        end
+
 
       # Structural dead load - not explicitly modelled - include columns,
       # bracing, connectors, etc. For BTAP purposes, some basic assumptions are

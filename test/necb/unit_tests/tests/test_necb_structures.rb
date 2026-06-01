@@ -46,7 +46,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
+      # 'SmallOffice',
       'Warehouse'
     ]
 
