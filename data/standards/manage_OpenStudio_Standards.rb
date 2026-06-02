@@ -686,7 +686,7 @@ def write_standards_hash_to_json(standards_data, spreadsheet_title, standards_di
             raise "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
           end
           File.open(json_path, 'w:UTF-8') do |file|
-            file << JSON.pretty_generate(sorted_objs)
+            file << JSON.pretty_generate(sorted_objs) << "\n"
           end
           puts "--successfully generated #{json_path}"
           jsons_written += 1
@@ -714,7 +714,7 @@ def write_standards_hash_to_json(standards_data, spreadsheet_title, standards_di
           raise  "--ERROR the JSON path is #{json_path.size - 256} characters longer than the Window 256 character limit, cannot write to #{json_path}"
         end
         File.open(json_path, 'w:UTF-8') do |file|
-          file << JSON.pretty_generate(sorted_objs)
+          file << JSON.pretty_generate(sorted_objs) << "\n"
         end
         puts "--successfully generated #{json_path}"
         jsons_written += 1
@@ -740,7 +740,7 @@ def write_standards_hash_to_json(standards_data, spreadsheet_title, standards_di
           return false
         end
         File.open(json_path, 'w:UTF-8') do |file|
-          file << JSON.pretty_generate(sorted_objs)
+          file << JSON.pretty_generate(sorted_objs) << "\n"
         end
         puts "--successfully generated #{json_path}"
         jsons_written += 1
