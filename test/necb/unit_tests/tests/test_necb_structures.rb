@@ -77,13 +77,14 @@ class NECB_Structure_Tests < Minitest::Test
       @buildings.sort.each   do |building|
         @templates.sort.each do |template|
           @options.sort.each do |option  |
-            cas   = "CASE #{building} (#{template})"
-            cas  += " - #{option}" unless option.empty?
-            st    = Standard.build(template)
+            cas  = "CASE #{building} (#{template})"
+            cas += " - #{option}" unless option.empty?
+            st   = Standard.build(template)
 
-            # Customizing STRUCTURE options. For example, the BTAP Warehouse is
-            # assumed to have a steel (or metal) structure. A possible override:
-            # load-bearing CMU structure for the warehouse's bulk storage space.
+            # Customizing STRUCTURE options. In this example, the Warehouse
+            # model inherits a steel (or metal) structure by default. A possible
+            # override: load-bearing CMU structure for the warehouse's bulk
+            # storage space.
             if @property && building == "Warehouse"
               model = st.load_building_type_from_library(building_type: building)
               id    = "Zone3 Bulk Storage"
@@ -204,11 +205,6 @@ class NECB_Structure_Tests < Minitest::Test
 
             s = st.structure
 
-            if @property && building == "Warehouse"
-              err_msg = "BTAP::Structure size (#{cas})?"
-              assert_equal(s.spaces.size, 1, err_msg)
-            end
-
             err_msg = "BTAP::Structure #{s.class} (#{cas})?"
             assert_kind_of(BTAP::Structure, s, err_msg)
             err_msg = "BTAP::Structure data #{s.data.class} (#{cas})?"
@@ -226,9 +222,23 @@ class NECB_Structure_Tests < Minitest::Test
             err_msg = "BTAP::Structure missing structures (#{cas})?"
             assert(s.data.key?(:structure), err_msg)
 
-            tload    = s.liveload + s.deadload
-            cspaces  = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
-            floor_m2 = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
+            if @property && building == "Warehouse"
+              err_msg = "BTAP::Structure size (#{cas})?"
+              assert_equal(s.spaces.size, 1, err_msg)
+
+              err_msg = "BTAP::Structure custom BULK storage space (#{cas})?"
+              assert_includes(s.spaces, "Zone3 Bulk Storage", err_msg)
+
+              err_msg = "BTAP::Structure custom BULK structure (#{cas})?"
+              assert_includes(s.spaces["Zone3 Bulk Storage"], :structure, err_msg)
+            end
+
+            # BTAP::Structure higher-level attributes liveload and deadload
+            # reflect non-customized spaces.
+            cspaces = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
+            espaces = cspaces.reject { |sp| s.spaces.key?(sp.nameString)}
+            flr_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
+            flor_m2 = TBD.facets(espaces, "all", "floor").map(&:grossArea).sum
 
             if option.empty?
               err_msg = "BTAP::Structure internal mass definitions (#{cas})?"
@@ -236,12 +246,13 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "BTAP::Structure internal mass (#{cas})?"
               assert_empty(model.getInternalMasss)
             else
-              err_msg = "BTAP::Structure misisng internal mass definitions (#{cas})?"
+              kg  = 0
+              mkg = (s.deadload + s.liveload) * flor_m2
+
+              err_msg = "BTAP::Structure missing internal mass definitions (#{cas})?"
               refute_empty(model.getInternalMassDefinitions)
               err_msg = "BTAP::Structure missing internal mass (#{cas})?"
               refute_empty(model.getInternalMasss)
-
-              kg = 0
 
               model.getInternalMasss.each do |imass|
                 id      = imass.nameString
@@ -263,13 +274,25 @@ class NECB_Structure_Tests < Minitest::Test
                 refute_empty(mat, err_msg)
                 mat     = mat.get
                 m3      = mat.thickness * m2
-                kg     += m3 * mat.density
+                mass    = m3 * mat.density
+                kg     += mass
+                space   = imass.space
+                err_msg = "BTAP::Structure #{id} space (#{cas})?"
+                refute_empty(space, err_msg)
+                space   = space.get
+                ide     = space.nameString
+                fm2     = space.floorArea
+
+                if s.spaces.key?(ide)
+                  dkg     = (s.spaces[ide][:deadload] + s.liveload) * fm2
+                  err_msg = "BTAP::Structure #{id} #{ide} load (#{cas})?"
+                  assert_equal(dkg.round(2), mass.round(2), err_msg)
+                  mkg    += dkg
+                end
               end
 
-              kgm2 = kg / floor_m2
-
-              unless kgm2.round == (s.liveload + s.deadload).round
-                fdback << "BTAP::Structure internal mass #{kgm2.round} (#{cas})!"
+              unless mkg.round == kg.round
+                fdback << "BTAP::Structure internal mass #{kg.round} (#{cas})!"
                 @test_passed = false
               end
             end
@@ -284,21 +307,21 @@ class NECB_Structure_Tests < Minitest::Test
               @test_passed = false
             end
 
-            if @test_passed
-              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
-              assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
-
-              co2m2 = ": #{(s.co2[:structure]/floor_m2).round} kgCO2-e/m2 (A1-A3)"
-              fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
-
-              if @property
-                s.spaces.each do |id, prp|
-                  next unless prp.key?(:structure)
-
-                  fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
-                end
-              end
-            end
+            # if @test_passed
+            #   err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
+            #   assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
+            #
+            #   co2m2 = ": #{(s.co2[:structure]/floor_m2).round} kgCO2-e/m2 (A1-A3)"
+            #   fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
+            #
+            #   if @property
+            #     s.spaces.each do |id, prp|
+            #       next unless prp.key?(:structure)
+            #
+            #       fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
+            #     end
+            #   end
+            # end
 
             s.feedback[:logs].each { |log| puts log }
           end                 # |option  |

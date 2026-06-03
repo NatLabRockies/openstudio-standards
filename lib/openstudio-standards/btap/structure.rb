@@ -115,7 +115,13 @@ module BTAP
     # as the latter is rapidly becoming a robust low-carbon alternative to
     # "steel" and "concrete" options, its inclusion seems justified. Additional
     # options may be added in the future.
-    @@data = {structure: {}, cladding: {}, finish: {}, category: {}}
+    @@data = {structure: {}, cladding: {}, finish: {}, category: {}, tags: []}
+
+    # Admissible AdditionalProperty keys for customization.
+    @@data[:tags] << "btap_structure"
+    @@data[:tags] << "btap_framing"
+    @@data[:tags] << "btap_cladding"
+    @@data[:tags] << "btap_finish"
 
     # Each STRUCTURE inherits a default FRAMING option. Together with the
     # STRUCTURE selection, FRAMING determines inter alia:
@@ -269,13 +275,13 @@ module BTAP
     # @return [Hash] customized STRUCTURE, FRAMING, CLADDING & FINISH per space
     attr_reader :spaces
 
-    # @return [Float] estimated dead load, in kg/m2 of floor area
+    # @return [Float] default building dead load, in floor kg/m2
     attr_reader :deadload
 
-    # @return [Float] estimated non-occupant live load, in kg/m2 of floor area
+    # @return [Float] default building non-occupant live load, in floor kg/m2
     attr_reader :liveload
 
-    # @return [Hash] calculated embodied carbon (CO2-e kg) of STRUCTURE
+    # @return [Hash] default building STRUCTURE embodied carbon (CO2-e kg)
     attr_reader :co2
 
     # @return [Hash] logged messages
@@ -305,7 +311,6 @@ module BTAP
 
       cat   = activity.category
       lload = activity.liveload
-      tags  = ["btap_structure", "btap_framing", "btap_cladding", "btap_finish"]
 
       if cat.respond_to?(:to_sym)
         cat = cat.to_s.downcase
@@ -331,14 +336,10 @@ module BTAP
         return
       end
 
-      # Cap internal mass density to 1000 kg/m3, and thickness to 6".
-      rho  = 1000.0
-      th   = 0.150
-      bldg = model.getBuilding
-
-      @category   = cat
-      @structure  = data[:category][cat][:small]
-      @spaces     = {}
+      bldg       = model.getBuilding
+      @category  = cat
+      @structure = data[:category][cat][:small]
+      @spaces    = {}
 
       # Switch to :large structure, instead of default :small.
       if data[:category][cat].key?(:stories)
@@ -459,50 +460,55 @@ module BTAP
         end
       end
 
-      # Isolate occupied spaces & floors, as well as exposed surfaces.
-      cspaces   = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
+      # Ignore UNCONDITIONED spaces for now - @todo?
+      cspaces = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
+
+      # Customized story/spacetype/space STRUCTURE attributes, overriding
+      # default/custom building-wide attributes? Skip if same as building.
+      data[:tags].each do |tag|
+        cspaces.each do |space|
+          id  = space.nameString
+          m2  = space.floorArea
+          prp = self.property(space, tag)
+          next if prp.nil?
+          next if tag == "btap_structure" && prp == @structure
+          next if tag == "btap_framing"   && prp == @framing
+          next if tag == "btap_cladding"  && prp == @cladding
+          next if tag == "btap_finish"    && prp == @finish
+          next unless m2 > 0
+
+          unless @spaces.key?(id)
+            @spaces[id]             = {}
+            @spaces[id][:floor_m2 ] = m2
+            @spaces[id][:ofloor_m2] = TBD.facets(space, "outdoors", "floor").map(&:grossArea).sum
+            @spaces[id][:ifloor_m2] = TBD.facets(space, "surface", "floor").map(&:grossArea).sum
+            @spaces[id][:roof_m2  ] = TBD.facets(space, "outdoors", "roofceiling").map(&:grossArea).sum
+            @spaces[id][:wall_m2  ] = TBD.facets(space, "outdoors", "walls").map(&:grossArea).sum
+            @spaces[id][:iwall_m2 ] = TBD.facets(space, "surface", "wall").map(&:grossArea).sum
+          end
+
+          @spaces[id][:structure] = prp if tag == "btap_structure"
+          @spaces[id][:framing  ] = prp if tag == "btap_framing"
+          @spaces[id][:cladding ] = prp if tag == "btap_cladding"
+          @spaces[id][:finish   ] = prp if tag == "btap_finish"
+        end
+      end
+
+      # Prune customized spaces from common collection.
+      @spaces.keys.each do |id|
+        space = model.getSpaceByName(id)
+        next if space.empty?
+
+        space = space.get
+        cspaces.delete(space)
+      end
+
       floor_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
       ofloor_m2 = TBD.facets(cspaces, "outdoors", "floor").map(&:grossArea).sum
       ifloor_m2 = TBD.facets(cspaces, "surface", "floor").map(&:grossArea).sum
       roof_m2   = TBD.facets(cspaces, "outdoors", "roofceiling").map(&:grossArea).sum
       wall_m2   = TBD.facets(cspaces, "outdoors", "walls").map(&:grossArea).sum
       iwall_m2  = TBD.facets(cspaces, "surface", "wall").map(&:grossArea).sum
-
-      # Customized story/spacetype/space STRUCTURE attributes, overriding
-      # default/custom building-wide attributes? Skip if same as building.
-      tags.each do |tag|
-        cspaces.each do |space|
-          id  = space.nameString
-          prp = self.property(space, tag)
-          next if prp.nil?
-          next if tag.include?("structure") && prp == @structure
-          next if tag.include?("framing")   && prp == @framing
-          next if tag.include?("cladding")  && prp == @cladding
-          next if tag.include?("finish")    && prp == @finish
-
-          if @spaces.key?(id)
-            @spaces[id][:structure] = prp if tag.include?("structure")
-            @spaces[id][:framing  ] = prp if tag.include?("framing")
-            @spaces[id][:cladding ] = prp if tag.include?("cladding")
-            @spaces[id][:finish   ] = prp if tag.include?("finish")
-          else
-            @spaces[id]             = {}
-            @spaces[id][:floor_m2 ] = TBD.facets(space, "all", "floor").map(&:grossArea).sum
-            @spaces[id][:ofloor_m2] = TBD.facets(space, "outdoors", "floor").map(&:grossArea).sum
-            @spaces[id][:ifloor_m2] = TBD.facets(space, "surface", "floor").map(&:grossArea).sum
-            @spaces[id][:roof_m2  ] = TBD.facets(space, "outdoors", "roofceiling").map(&:grossArea).sum
-            @spaces[id][:wall_m2  ] = TBD.facets(space, "outdoors", "walls").map(&:grossArea).sum
-            @spaces[id][:iwall_m2 ] = TBD.facets(space, "surface", "wall").map(&:grossArea).sum
-
-            floor_m2  -= @spaces[id][:floor_m2]
-            ofloor_m2 -= @spaces[id][:ofloor_m2]
-            ifloor_m2 -= @spaces[id][:ifloor_m2]
-            roof_m2   -= @spaces[id][:roof_m2]
-            wall_m2   -= @spaces[id][:wall_m2]
-            iwall_m2  -= @spaces[id][:iwall_m2]
-          end
-        end
-      end
 
       # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
       # 'Dead load' refers to the self-weight of structural elements of a
@@ -561,12 +567,36 @@ module BTAP
       #
       # For CMU partitions, representative material volumes (per m2):
       #  - 10" medium weight CMU                      = 250.0 kg/m2 (approx.)
-      partition_kgm2 = case @framing
-                       when :cmu  then 250.0 * partition_m2 / floor_m2
-                       when :wood then  33.9 * partition_m2 / floor_m2
-                       else             27.2 * partition_m2 / floor_m2
-                       end
+      partition_rho = case @framing
+                      when :cmu  then 250.0
+                      when :wood then  33.9
+                      else             27.2
+                      end
 
+      partition_kgm2 = 0
+      partition_kgm2 = partition_rho * partition_m2 / floor_m2 if floor_m2 > 0
+
+      # Repeat for customized spaces.
+      @spaces.each do |id, sp|
+        sp_partition_m2 = case @category
+                          when "commerce"   then sp[:floor_m2] / 2
+                          when "industry"   then sp[:floor_m2] / 4
+                          when "recreation" then sp[:floor_m2] / 3
+                          else                   sp[:floor_m2]
+                          end
+
+        if sp.key?(:framing)
+          p_rho = case sp[:framing]
+                  when :cmu  then 250.0
+                  when :wood then  33.9
+                  else             27.2
+                  end
+        else
+          p_rho = partition_rho
+        end
+
+        sp[:partition_kgm2] = p_rho * sp_partition_m2 / sp[:floor_m2]
+      end
 
       # Structural dead load - not explicitly modelled - include columns,
       # bracing, connectors, etc. For BTAP purposes, some basic assumptions are
@@ -589,24 +619,56 @@ module BTAP
       #     - if structure :wood
       #       - 1/2 :clt                              =  48 kg/m
 
-      # Fetch approx. total column height (m).
-      column_m = 0
+      # Fetch approx. total column height (m) and linear density.
+      column_m   = 0
+      column_rho = case @structure
+                   when :steel then 190
+                   when :metal then 190
+                   when :cmu   then 150
+                   when :wood  then  48
+                   when :clt   then  96
+                   else             304
+                   end
 
-      model.getSpaces.each do |space|
-        height    = BTAP::Geometry::Spaces.space_height(space)
-        column_m += height * space.floorArea * 15 / 1000
+      cspaces.each do |space|
+        m2 = space.floorArea
+        id = space.nameString
+        next if @spaces.key?(id)
+
+        column_m += BTAP::Geometry::Spaces.space_height(space) * m2 * 15 / 1000
       end
 
-      column_kgm2 = case @structure
-                    when :steel then 190 * column_m / floor_m2
-                    when :metal then 190 * column_m / floor_m2
-                    when :cmu   then 150 * column_m / floor_m2
-                    when :wood  then  48 * column_m / floor_m2
-                    when :clt   then  96 * column_m / floor_m2
-                    else             304 * column_m / floor_m2
-                    end
+      column_kgm2 = 0
+      column_kgm2 = column_rho * column_m / floor_m2 if floor_m2 > 0
+      @deadload   = partition_kgm2 + column_kgm2
 
-      @deadload = partition_kgm2 + column_kgm2
+      # Repeat for customized spaces.
+      @spaces.each do |id, sp|
+        space = model.getSpaceByName(id)
+        next if space.empty?
+
+        space  = space.get
+        height = BTAP::Geometry::Spaces.space_height(space)
+        col_m  = height * sp[:floor_m2] * 15 / 1000
+
+        if sp.key?(:structure)
+          c_rho = case sp[:structure]
+                  when :steel then 190
+                  when :metal then 190
+                  when :cmu   then 150
+                  when :wood  then  48
+                  when :clt   then  96
+                  else             304
+                  end
+        else
+          c_rho = column_rho
+        end
+
+        col_kgm2 = c_rho * col_m / sp[:floor_m2]
+
+        sp[:column_kgm2] = col_kgm2
+        sp[:deadload   ] = sp[:partition_kgm2] + col_kgm2
+      end
 
       # The 'liveload' attribute represents the mass area density (kg/m2) of
       # dynamic, yet uniform floor live load from non-permanent items like
@@ -637,17 +699,29 @@ module BTAP
       # types, including bigbox retail and warehousing. Grain of salt.
       @liveload = lload
 
+      # Cap internal mass density to 1000 kg/m3, and thickness to 6".
+      rho = 1000.0
+      th  = 0.150
+
       # Add internal mass objects, 1x instance per occupied space.
-      cspaces.each do |space|
+      model.getSpaces.each do |space|
+        id = space.nameString
+        next unless space.partofTotalFloorArea
         break unless massive
 
-        matID = "#{space.nameString} : Mass Material"
-        conID = "#{space.nameString} : Mass Construction"
-        defID = "#{space.nameString} : Mass Definition"
-        mssID = "#{space.nameString} : Mass"
+        matID = "#{id} : Mass Material"
+        conID = "#{id} : Mass Construction"
+        defID = "#{id} : Mass Definition"
+        mssID = "#{id} : Mass"
 
         # Calculate total mass of internal mass (kg), then thickness.
-        kg = space.floorArea * (@liveload + @deadload)
+        if @spaces.key?(id)
+          load_kgm2 = @liveload + @spaces[id][:deadload]
+        else
+          load_kgm2 = @liveload + @deadload
+        end
+
+        kg = space.floorArea * load_kgm2
         m2 = kg / rho / th
 
         mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
@@ -749,9 +823,8 @@ module BTAP
       end
 
       tag  = tag.to_s.downcase
-      tags = ["btap_structure", "btap_framing", "btap_cladding", "btap_finish"]
 
-      unless tags.include?(tag)
+      unless data[:tags].include?(tag)
         lgs << "Unrecognized STRUCTURE AddtionalProperty '#{tag}' (#{mth})"
         return prp
       end
