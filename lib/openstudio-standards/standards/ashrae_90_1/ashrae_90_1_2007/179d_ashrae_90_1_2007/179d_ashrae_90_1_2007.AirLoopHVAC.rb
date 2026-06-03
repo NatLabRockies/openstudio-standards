@@ -239,22 +239,16 @@ class ACM179dASHRAE9012007
       ## end
     end
 
-    # DCV
-    # only apply DCV in baseline
-    if baseline_179d
-      if air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
-        air_loop_hvac_enable_demand_control_ventilation(air_loop_hvac, climate_zone)
-        # For systems that require DCV,
-        # all individual zones that require DCV preserve
-        # both per-area and per-person OA requirements.
-        # Other zones have OA requirements converted
-        # to per-area values only so DCV performance is only
-        # based on the subset of zones that required DCV.
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
-        air_loop_hvac.thermalZones.sort.each do |zone|
-          unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
-            OpenstudioStandards::ThermalZone.thermal_zone_convert_outdoor_air_to_per_area(zone)
-          end
+    # DCV per ASHRAE 90.1-2007 §6.4.3.9 mandatory provision.
+    # Appendix G G3.1.2.5 requires DCV be modeled identically in baseline and
+    # proposed (exception: voluntary DCV in proposed beyond mandate). So apply
+    # in both tracks, not just baseline.
+    if air_loop_hvac_demand_control_ventilation_required?(air_loop_hvac, climate_zone)
+      air_loop_hvac_enable_demand_control_ventilation(air_loop_hvac, climate_zone)
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Converting ventilation requirements to per-area for all zones served that do not require DCV.")
+      air_loop_hvac.thermalZones.sort.each do |zone|
+        unless thermal_zone_demand_control_ventilation_required?(zone, climate_zone)
+          OpenstudioStandards::ThermalZone.thermal_zone_convert_outdoor_air_to_per_area(zone)
         end
       end
     end
@@ -312,6 +306,59 @@ class ACM179dASHRAE9012007
         air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces)
       end
     end
+  end
+
+  # Set the VAV damper control to single maximum or dual maximum control depending on the standard.
+  # NOTE: 179D override — intentionally does NOT call setMaximumFlowFractionDuringReheat(0.5)
+  # on HW reheat terminals. Capping reheat flow fraction to 0.5 prevents the terminal from
+  # delivering enough airflow to offset the kitchen/restroom exhaust makeup load and causes
+  # reheat coil UA autosize to fail with "Bad starting values".
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @return [Boolean] returns true if successful, false if not
+  def air_loop_hvac_apply_vav_damper_action(air_loop_hvac)
+    damper_action = air_loop_hvac_vav_damper_action(air_loop_hvac)
+
+    # Interpret this as an EnergyPlus input
+    damper_action_eplus = nil
+    if damper_action == 'Single Maximum'
+      damper_action_eplus = 'Normal'
+    elsif damper_action == 'Dual Maximum'
+      # EnergyPlus 8.7 changed the meaning of 'Reverse'.
+      # For versions of OpenStudio using E+ 8.6 or lower
+      damper_action_eplus = if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.0.5')
+                              'Reverse'
+                            # For versions of OpenStudio using E+ 8.7 or higher
+                            else
+                              'ReverseWithLimits'
+                            end
+    end
+
+    # Set the control for any VAV reheat terminals on this airloop.
+    control_type_set = false
+    air_loop_hvac.demandComponents.each do |equip|
+      if equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
+        term = equip.to_AirTerminalSingleDuctVAVReheat.get
+        # Dual maximum only applies to terminals with HW reheat coils
+        if damper_action == 'Dual Maximum'
+          if term.reheatCoil.to_CoilHeatingWater.is_initialized
+            term.setDamperHeatingAction(damper_action_eplus)
+            control_type_set = true
+            # NOTE 179D Override: commenting this out
+            # term.setMaximumFlowFractionDuringReheat(0.5)
+          end
+        else
+          term.setDamperHeatingAction(damper_action_eplus)
+          control_type_set = true
+        end
+      end
+    end
+
+    if control_type_set
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: VAV damper action was set to #{damper_action} control.")
+    end
+
+    return true
   end
 
 end

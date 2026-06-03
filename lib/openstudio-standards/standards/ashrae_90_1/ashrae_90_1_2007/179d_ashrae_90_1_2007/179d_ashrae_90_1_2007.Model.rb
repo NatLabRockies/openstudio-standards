@@ -1738,6 +1738,41 @@ class ACM179dASHRAE9012007
       fan.setFlowFractionSchedule(acm_fan_sch)
       OpenStudio.logFree(OpenStudio::Info, '179d.standards.Model',
                          "Set ACM exhaust schedule '#{acm_fan_sch_name}' on '#{fan.name}' (179D override of v0.8 alwaysOn default)")
+
+      # Balance kitchen/restroom/cafeteria exhaust with explicit makeup OA.
+      # For these zones the exhaust hood pulls a fixed-flow amount that VAV
+      # supply at low cooling/heating demand cannot match. Without explicit
+      # makeup-air modeling EnergyPlus emits "Load due to induced outdoor air
+      # is neglected" and silently drops the heat load — zone goes under-setpoint.
+      # Fix:
+      #   1. Add SpaceInfiltrationDesignFlowRate = exhaust max, scheduled to the
+      #      exhaust availability schedule, so EP accounts for the makeup OA load.
+      #   2. Set BalancedExhaustFractionSchedule = always-on so EP treats the
+      #      exhaust as balanced (no neglected induced OA term) and uses the
+      #      infiltration as the canonical makeup path.
+      # For VAV:Reheat terminals also set cooling minimum = exhaust max so the
+      # supply system can deliver the extra mass flow during cooking peak.
+      # Do NOT cap max airflow or heating sizing — let autosize converge.
+      next unless fan.maximumFlowRate.is_initialized
+
+      maximum_flow_rate_si = fan.maximumFlowRate.get
+      space = zone.spaces.first
+
+      air_terminal = zone.airLoopHVACTerminal
+      if air_terminal.is_initialized && air_terminal.get.to_AirTerminalSingleDuctVAVReheat.is_initialized
+        sz = zone.sizingZone
+        sz.setCoolingDesignAirFlowMethod('DesignDayWithLimit')
+        sz.setCoolingMinimumAirFlow(maximum_flow_rate_si)
+      end
+
+      makeup_infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+      makeup_infiltration.setName("#{fan.name} Makeup infil")
+      makeup_infiltration.setDesignFlowRate(maximum_flow_rate_si)
+      makeup_infiltration.setSpace(space)
+      makeup_infiltration.setSchedule(acm_fan_sch)
+      fan.setBalancedExhaustFractionSchedule(model.alwaysOnDiscreteSchedule)
+      OpenStudio.logFree(OpenStudio::Info, '179d.standards.Model',
+                         "Added makeup infiltration '#{makeup_infiltration.name}' (#{maximum_flow_rate_si.round(4)} m\u00b3/s) and balanced-exhaust flag on '#{fan.name}'.")
     end
 
     zone_exhaust_fans
