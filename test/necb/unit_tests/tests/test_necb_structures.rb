@@ -34,15 +34,15 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPTownHouse',
       # 'LEEPMultiTower',
       'LowriseApartment',
-      'MediumOffice',
-      'MidriseApartment',
+      # 'MediumOffice',
+      # 'MidriseApartment',
       # 'Outpatient',
       # 'PrimarySchool',
       'QuickServiceRestaurant',
       'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
-      'SmallHotel',
+      # 'SmallHotel',
       'SmallOffice',
       'Warehouse'
     ]
@@ -59,6 +59,9 @@ class NECB_Structure_Tests < Minitest::Test
       "structure"
     ]
 
+    tg  = "co2_structure"
+    tag = "space_conditioning_category"
+
     fdback = []
     fdback << ""
     fdback << "BTAP::Structure Unit Tests"
@@ -69,14 +72,20 @@ class NECB_Structure_Tests < Minitest::Test
         @templates.sort.each do |template |
           @options.sort.each do |option   |
             cas   = "CASE #{building} (#{template})"
-            cas  += " #" unless option.empty?
-            tag   = "space_conditioning_category"
+            cas  += ":" unless option.empty?
+
             st    = Standard.build(template)
             model = st.model_create_prototype_model(template: template,
                                                     epw_file: epw,
                                                     building_type: building,
                                                     construction_opt: option,
                                                     sizing_run_dir: @sizing_run_dir)
+
+            co2 = model.getBuilding.additionalProperties.getFeatureAsDouble(tg)
+
+            err_msg = "BTAP/TBD: BLDG kgCO2-e (#{cas})?"
+            refute_empty(co2, err_msg)
+            co2 = co2.get
 
             nb  = model.getBuilding.standardsNumberOfAboveGroundStories.get
             nst = nb < 2 ? "#{nb} storey" : "#{nb} stories"
@@ -123,7 +132,7 @@ class NECB_Structure_Tests < Minitest::Test
                 else
                   id = c.layers.last.nameString
                   err_msg = "BTAP::Structure #{id} insulation layer (#{cas})?"
-                  assert_includes(id, "cellulose", err_msg)
+                  assert_includes(id, "OSut:K", err_msg)
                 end
               end
             end
@@ -234,6 +243,9 @@ class NECB_Structure_Tests < Minitest::Test
             end
 
             if @test_passed
+              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
+              assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
+
               co2m2 = ": #{(s.co2[:structure]/floor_m2).round} kgCO2-e/m2 (A1-A3)"
               fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
             end

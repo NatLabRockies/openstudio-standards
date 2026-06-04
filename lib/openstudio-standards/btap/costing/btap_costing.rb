@@ -1,48 +1,17 @@
 require 'json'
-require_relative 'costing_database_wrapper'
-
-class SimpleLinearRegression
-  #https://gist.github.com/rweald/3516193#file-full-slr-class-snippet-rb
-  def initialize(xs, ys)
-    @xs, @ys = xs, ys
-    if @xs.length != @ys.length
-      raise "Unbalanced data. xs need to be same length as ys"
-    end
-  end
-
-  def y_intercept
-    return mean(@ys) - (slope * mean(@xs))
-  end
-
-  def slope
-    x_mean = mean(@xs)
-    y_mean = mean(@ys)
-
-    numerator = (0...@xs.length).reduce(0) do |sum, i|
-      sum + ((@xs[i] - x_mean) * (@ys[i] - y_mean))
-    end
-
-    denominator = @xs.reduce(0) do |sum, x|
-      sum + ((x - x_mean) ** 2)
-    end
-
-    return (numerator / denominator)
-  end
-
-  def mean(values)
-    total = values.reduce(0) { |sum, x| x + sum }
-    return Float(total) / Float(values.length)
-  end
-end
-
+require_relative 'btap_database'
 
 class BTAPCosting
-  # May be initialized with custom databases:
-  #   costs_csv:   Path to custom costing
-  #   factors_csv: Path to custom localization factors
+
+  # Class to initialize BTAP Costing.
+  # @param costs_csv   [String] Path to custom costing.
+  # @param factors_csv [String] Path to custom localization factors.
+  # @param attributes  [BTAP::Atributes] Methods and helpers for model
+  #                                      attributes, mostly envelopes and
+  #                                      constructions.
   def initialize(costs_csv: nil, factors_csv: nil, attributes:)
     @cp               = CommonPaths.instance
-    @costing_database = CostingDatabase.instance
+    @costing_database = BTAPDatabase.instance
     @attributes       = attributes
 
     # If the path for custom costing is defined, use custom costing.
@@ -60,30 +29,6 @@ class BTAPCosting
     @costing_database.validate_database
   end
 
-  def generate_construction_cost_database_for_all_cities()
-    result = Array.new
-    @costing_database['raw']['locations'].each do |location|
-      province_state = location["province_state"]
-      city = location['city']
-      result.concat(generate_construction_cost_database_for_city(city, province_state))
-    end
-    return result
-  end
-
-  def generate_construction_cost_database_for_city(city, province_state)
-    @costing_database['constructions_costs'] = Array.new
-    puts "Costing for: #{province_state},#{city}"
-    @costing_database["raw"]['constructions_opaque'].each do |construction|
-      cost_construction(construction, {"province_state" => province_state, "city" => city}, 'opaque')
-    end
-    @costing_database["raw"]['constructions_glazing'].each do |construction|
-      cost_construction(construction, {"province_state" => province_state, "city" => city}, 'glazing')
-    end
-    puts "#{@costing_database['constructions_costs'].size} Costed Constructions for #{province_state},#{city}."
-    return @costing_database['constructions_costs']
-  end
-
-
   def cost_audit_all(model:,
                      prototype_creator:,
                      envelope_costing: true,
@@ -95,6 +40,7 @@ class BTAPCosting
                      ventilation_costing: true,
                      zone_system_costing: true,
                      renewables_costing: true,
+                     thermal_bridging_costing: @attributes.use_tbd,
                      template_type: nil
   )
     # Create a Hash to collect costing data.
@@ -134,7 +80,8 @@ class BTAPCosting
     # Find the mechanical room
     mech_room, cond_spaces = prototype_creator.find_mech_room(model)
 
-    envCost = envelope_costing ? self.cost_audit_envelope(model, prototype_creator) : 0.0
+    envCost = envelope_costing ? self.cost_audit_envelope(prototype_creator) : 0.0
+    thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(prototype_creator) : 0.0
     lgtCost = lighting_costing ? self.cost_audit_lighting(model, prototype_creator) : 0.0
     boilerCost = boilers_costing ? self.boiler_costing(model, prototype_creator) : 0.0
     chillerCost = chillers_costing ? self.chiller_costing(model, prototype_creator) : 0.0
@@ -143,7 +90,6 @@ class BTAPCosting
     ventCost = ventilation_costing ? self.ventilation_costing(model, prototype_creator,template_type, mech_room, cond_spaces) : 0.0
     zonalSystemCost = zone_system_costing ? self.zonalsys_costing(model, prototype_creator, mech_room, cond_spaces) : 0.0
     pvGroundCost = renewables_costing ? self.cost_audit_pv_ground(model, prototype_creator) : 0.0
-    thermalBridgingCost = 0.0
 
     @costing_report["totals"] = {
       'envelope' => envCost.round(0),
@@ -160,69 +106,18 @@ class BTAPCosting
     return @costing_report, @cost_items
   end
 
-  def get_regional_cost_factors(provinceState, city, material)
+  def get_regional_cost_factors(province_state, city, material)
     @costing_database['localization_factors'].select { |code|
-      code['province_state'] == provinceState && code['city'] == city }.each do |code|
+      code['province_state'] == province_state && code['city'] == city }.each do |code|
       prefix_id = material['id'][0..1]
       prefix_stored = code['code_prefix']
       if prefix_id == prefix_stored
         return code['material'], code['installation'], code['total']
       end
-
     end
-    error = [material, "Could not find regional adjustment factor for material used in #{city}, #{provinceState}."]
+    error = [material, "Could not find regional adjustment factor for material used in #{city}, #{province_state}."]
     @costing_database['db_errors'] << error unless @costing_database['db_errors'].include?(error)
     return 100.0, 100.0, 100.0
-  end
-
-  # Interpolate array of hashes that contain 2 values (key=rsi, data=cost)
-  def interpolate(x_y_array:, x2:, exterpolate_percentage_range: 30.0)
-    ratio_range = exterpolate_percentage_range / 100.0
-    array = x_y_array.uniq.sort { |a, b| a[0] <=> b[0] }
-    #if there is only one...return what you got.
-    if array.size == 1
-      return array.first[1].to_f
-    end
-    # Check if value x2 is within range of array for interpolation
-    # Extrapolate when x2 is out-of-range by +/- 10% of end values.
-    if array.empty? || x2 < ((1.0 - ratio_range) * array.first[0].to_f) || x2 > ((1.0 + ratio_range) * array.last[0].to_f)
-      return nil
-    elsif x2 < array.first[0].to_f
-      # Extrapolate down using first and second cost value to this out-of-range input
-      x_array = [array[0][0].to_f, array[1][0].to_f]
-      y_array = [array[0][1].to_f, array[1][1].to_f]
-      linear_model = SimpleLinearRegression.new(x_array, y_array)
-      y2 = linear_model.y_intercept + linear_model.slope * x2
-      return y2
-    elsif x2 > array.last[0].to_f
-      # Extrapolate up using second to last and last cost value to this out-of-range input
-      x_array = [array[-2][0].to_f, array[-1][0].to_f]
-      y_array = [array[-2][1].to_f, array[-1][1].to_f]
-      linear_model = SimpleLinearRegression.new(x_array, y_array)
-      y2 = linear_model.y_intercept + linear_model.slope * x2
-      return y2
-    else
-      array.each_index do |counter|
-
-        # skip last value.
-        next if array[counter] == array.last
-
-        x0 = array[counter][0]
-        y0 = array[counter][1]
-        x1 = array[counter + 1][0]
-        y1 = array[counter + 1][1]
-
-        # skip to next if x2 is not between x0 and x1
-        next if x2 < x0 || x2 > x1
-
-        # Do interpolation
-        y2 = y0 # just in-case x0, x1 and x2 are identical!
-        if (x1 - x0) > 0.0
-          y2 = y0.to_f + ((y1 - y0).to_f * (x2 - x0).to_f / (x1 - x0).to_f)
-        end
-        return y2
-      end
-    end
   end
 
   # Enter in [latitude, longitude] for each loc and this method will return the distance.
@@ -465,5 +360,4 @@ class BTAPCosting
     }
     return costRetHash
   end
-
 end

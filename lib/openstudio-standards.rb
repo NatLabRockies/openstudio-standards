@@ -146,6 +146,7 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/btap/carbon/btap_carbon'
   require_relative 'openstudio-standards/btap/costing/ventilation_costing'
   require_relative 'openstudio-standards/btap/costing/envelope_costing'
+  require_relative 'openstudio-standards/btap/costing/thermal_bridging_costing'
   require_relative 'openstudio-standards/btap/costing/lighting_costing'
   require_relative 'openstudio-standards/btap/costing/heating_cooling_costing'
   require_relative 'openstudio-standards/btap/costing/shw_costing'
