@@ -307,21 +307,21 @@ class NECB_Structure_Tests < Minitest::Test
               @test_passed = false
             end
 
-            # if @test_passed
-            #   err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
-            #   assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
-            #
-            #   co2m2 = ": #{(s.co2[:structure]/floor_m2).round} kgCO2-e/m2 (A1-A3)"
-            #   fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
-            #
-            #   if @property
-            #     s.spaces.each do |id, prp|
-            #       next unless prp.key?(:structure)
-            #
-            #       fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
-            #     end
-            #   end
-            # end
+            if @test_passed
+              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
+              assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
+
+              co2m2 = ": #{(s.co2[:structure]/flr_m2).round} kgCO2-e/m2 (A1-A3)"
+              fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
+
+              if @property
+                s.spaces.each do |id, prp|
+                  next unless prp.key?(:structure)
+
+                  fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
+                end
+              end
+            end
 
             s.feedback[:logs].each { |log| puts log }
           end                 # |option  |

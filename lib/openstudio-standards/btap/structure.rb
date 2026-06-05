@@ -553,19 +553,19 @@ module BTAP
                      else                   floor_m2
                      end
 
-      # For wood-framed partitions, representative material volumes (per m2):
+      # For wood-framed partitions, representative material mass (per m2):
       #  - 16% wood-framing: 0.0224 m3/m2 x 540 kg/m3 =  12.1 kg/m2 (35.7%)
       #  - 84% insulation  : 0.1176 m3/m2 x  19 kg/m3 =   2.2 kg/m2 ( 6.5%)
       #  - drywall (2x)    : 0.0250 m3/m2 x 785 kg/m3 =  19.6 kg/m2 (57.8%)
       #                                               =  33.9 kg/m2
       #
-      # For steel-framed partitions, representative material volumes (per m2):
+      # For steel-framed partitions, representative material mass (per m2):
       #  - 1% steel-framing:   1.25 x 2.5 x 1.5 kg/m  =   4.7 kg/m2 (17.3%)
       #  - 99% insulation  : 0.1504 m3/m2 x  19 kg/m3 =   2.9 kg/m2 (10.7%)
       #  - drywall (2x)    : 0.0250 m3/m2 x 785 kg/m3 =  19.6 kg/m2 (72.0%)
       #                                               =  27.2 kg/m2
       #
-      # For CMU partitions, representative material volumes (per m2):
+      # For CMU partitions, representative material mass (per m2):
       #  - 10" medium weight CMU                      = 250.0 kg/m2 (approx.)
       partition_rho = case @framing
                       when :cmu  then 250.0
@@ -573,17 +573,18 @@ module BTAP
                       else             27.2
                       end
 
+      # Partition kg / floor area.
       partition_kgm2 = 0
       partition_kgm2 = partition_rho * partition_m2 / floor_m2 if floor_m2 > 0
 
       # Repeat for customized spaces.
       @spaces.each do |id, sp|
-        sp_partition_m2 = case @category
-                          when "commerce"   then sp[:floor_m2] / 2
-                          when "industry"   then sp[:floor_m2] / 4
-                          when "recreation" then sp[:floor_m2] / 3
-                          else                   sp[:floor_m2]
-                          end
+        sp[:partition_m2] = case @category
+                            when "commerce"   then sp[:floor_m2] / 2
+                            when "industry"   then sp[:floor_m2] / 4
+                            when "recreation" then sp[:floor_m2] / 3
+                            else                   sp[:floor_m2]
+                            end
 
         if sp.key?(:framing)
           p_rho = case sp[:framing]
@@ -595,7 +596,7 @@ module BTAP
           p_rho = partition_rho
         end
 
-        sp[:partition_kgm2] = p_rho * sp_partition_m2 / sp[:floor_m2]
+        sp[:partition_kgm2] = p_rho * sp[:partition_m2] / sp[:floor_m2]
       end
 
       # Structural dead load - not explicitly modelled - include columns,
@@ -604,8 +605,8 @@ module BTAP
       #   - 9m x 9m spans
       #   - approx. 15 columns / 1000 m2 of floor area
       #   - approx. 14" x 14" columns (0.126 m2)
-      #     - if structure :steel or :metal (HP14x102):
-      #       - 152 kg/m (x 125% for bracing, etc.)   = 190 kg/m
+      #     - if structure :steel or :metal (W10x49)
+      #       - 73 kg/m (x 125% for bracing, etc.)    =  91 kg/m
       #     - if structure :concrete
       #       - concrete: 2240 kg/m3 x 0.126 m2 x 97% = 274 kg/m
       #       - rebar:    7850 kg/m3 x 0.126 m2 x  3% =  30 kg/m
@@ -622,8 +623,8 @@ module BTAP
       # Fetch approx. total column height (m) and linear density.
       column_m   = 0
       column_rho = case @structure
-                   when :steel then 190
-                   when :metal then 190
+                   when :steel then  91
+                   when :metal then  91
                    when :cmu   then 150
                    when :wood  then  48
                    when :clt   then  96
@@ -653,8 +654,8 @@ module BTAP
 
         if sp.key?(:structure)
           c_rho = case sp[:structure]
-                  when :steel then 190
-                  when :metal then 190
+                  when :steel then  91
+                  when :metal then  91
                   when :cmu   then 150
                   when :wood  then  48
                   when :clt   then  96
@@ -754,40 +755,68 @@ module BTAP
 
       # Embodied CO2-e kg (A1-A3?) of a model's structure includes:
       #   - non-modelled above grade items (e.g. columns)
-      #   - non-modelled partitions
+      #   - non-modelled 'partitions'
       #
       # Below-grade structures (rebar + poured concrete) are ignored - no
-      # alternative options are considered for the moment, e.g. lower carbon
-      # concrete mixes.
+      # alternative BTAP options, e.g. lower carbon concrete mixes.
       @co2 = {structure: 0}
 
       # Add columns.
-      cl_co2 = case @structure
-               when :steel then  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
-               when :metal then  0.854 * (column_m * 190) # 0.854 kgCO2-e/kg
-               when :wood  then 55.000 * (column_m *  48) / 540 # 55 kgCO2-e/m3
-               when :clt   then 55.000 * (column_m *  96) / 540 # 55 kgCO2-e/m3
-               else              0.268 * (column_m *  96) # 0.268 kgCO2-e/kg
-               end
+      column_kgco2kg = case @structure
+                       when :steel then  0.854         #  0.854 kgCO2-e/kg
+                       when :metal then  0.854         #  0.854 kgCO2-e/kg
+                       when :wood  then 55.000 / 540.0 # 55.000 kgCO2-e/m3
+                       when :clt   then 55.000 / 540.0 # 55.000 kgCO2-e/m3
+                       else              0.268         #  0.268 kgCO2-e/kg
+                       end
 
-      @co2[:structure] += cl_co2
+      @co2[:structure] += column_kgco2kg * column_m * column_rho
+      puts
+      puts "BLDG COLUMNS: #{((column_kgco2kg * column_m * column_rho)/floor_m2).round} kgCO2/m2"
 
-      # Add interior partitions.
-      m2 = partition_m2
+      # Add interior partitions, based on framing options only. Other partition
+      # components are ignored for now (e.g. drywall, acoustic insulation).
+      partition_kgco2m2 = case @framing
+                          when :wood then  55.000 * 12.1 / 540.0
+                          when :cmu  then 200.000 * 0.250
+                          else              0.854 * 4.7
+                          end
 
-      case @framing
-      when :wood then
-        partition_co2kg = 55.0 / 540.0 # 55 kgCO2-e/m3 / density
-      when :cmu  then # 250mm medium weight CMU, 200 kgCO2-e/m3
-        partition_m3    = 0.250 * m2 # nominal m3
-        partition_kg    = 250.0 * m2 # volume-weighted concrete/air/grout
-        partition_kgm3  = pt_kg / partition_m3
-        partition_co2kg = 200.0 / partition_kgm3 # 200 kgCO2-e/m3 / density
-      else # :steel, 1% lightweight steel-framing + drywall
-        partition_co2kg = 2.440
+      @co2[:structure] += partition_kgco2m2 * partition_m2
+
+      puts "BLDG PARTITIONS: #{((partition_kgco2m2 * partition_m2)/floor_m2).round} kgCO2/m2"
+
+      # Repeat for customized spaces.
+      @spaces.each do |id, sp|
+        if sp.key?(:structure)
+          c_kgco2kg = case sp[:structure]
+                      when :steel then  0.854         #  0.854 kgCO2-e/kg
+                      when :metal then  0.854         #  0.854 kgCO2-e/kg
+                      when :wood  then 55.000 / 540.0 # 55.000 kgCO2-e/m3
+                      when :clt   then 55.000 / 540.0 # 55.000 kgCO2-e/m3
+                      else              0.268         #  0.268 kgCO2-e/kg
+                      end
+        else
+          c_kgco2kg = column_kgco2kg
+        end
+
+        if sp.key?(:framing)
+          p_kgco2m2 = case sp[:framing]
+                      when :wood then  55.000 * 12.1 / 540.0
+                      when :cmu  then 200.000 * 0.250
+                      else              0.854 * 4.7
+                      end
+        else
+          p_kgco2m2 = partition_kgco2m2
+        end
+
+        @co2[:structure] += c_kgco2kg * sp[:column_kgm2] * sp[:floor_m2]
+        @co2[:structure] += p_kgco2m2 * sp[:partition_m2]
+
+        puts "#{id} COLUMNS: #{((c_kgco2kg * sp[:column_kgm2])).round} kgCO2/m2"
+        puts "#{id} PARTITIONS: #{(p_kgco2m2 * sp[:partition_m2] / sp[:floor_m2]).round} kgCO2/m2"
+        puts
       end
-
-      @co2[:structure] += partition_kgm2 * m2 * partition_co2kg
 
       # Set an AdditionalProperty for tallied CO2-e [kg] (A1-A3):
       tag = "co2_structure"
