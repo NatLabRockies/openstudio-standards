@@ -485,6 +485,7 @@ module BTAP
             @spaces[id][:roof_m2  ] = TBD.facets(space, "outdoors", "roofceiling").map(&:grossArea).sum
             @spaces[id][:wall_m2  ] = TBD.facets(space, "outdoors", "walls").map(&:grossArea).sum
             @spaces[id][:iwall_m2 ] = TBD.facets(space, "surface", "wall").map(&:grossArea).sum
+            @spaces[id][:co2      ] = {columns: 0, partitions: 0}
           end
 
           @spaces[id][:structure] = prp if tag == "btap_structure"
@@ -503,6 +504,12 @@ module BTAP
         cspaces.delete(space)
       end
 
+      # Scenario A - no space customization (default BTAP scenario):
+      #   - take-off areas below (m2) reflect all CONDITIONED spaces
+      #
+      # Scenario B - one or more spaces are customized, e.g. :framing
+      #   - take-off areas below (m2) reflect non-customized spaces only
+      #   - look up @spaces to retrieve custom space-specific take-offs.
       floor_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
       ofloor_m2 = TBD.facets(cspaces, "outdoors", "floor").map(&:grossArea).sum
       ifloor_m2 = TBD.facets(cspaces, "surface", "floor").map(&:grossArea).sum
@@ -525,16 +532,16 @@ module BTAP
       #   - between foam vs fibrous insulation options
       #
       # Most dead load is modelled explicitly in OpenStudio, like envelope and
-      # interzone surfaces. Rough estimates of embodied carbon (in CO2-e kg/m2)
-      # can be reasonably associated to selected construction assemblies (based
-      # on m2), such as the embodied carbon of chosen insulation materials or
-      # framing options. Other dead load, like lighting and HVAC, are not
+      # interzone surfaces. Rough estimates of embodied carbon (in CO2-e kg of
+      # surface m2) can be reasonably associated to selected construction
+      # assemblies, such as the embodied carbon of chosen insulation materials
+      # or framing options. Other dead load, like lighting and HVAC, are not
       # modelled explicitly. Here, the 'deadload' attribute represents a mass
       # floor area density estimate (kg/m2) of non-modelled structural and
       # non-structural items like fixed furniture, columns, beams, shear walls
       # and bracing, as well as 'partitions'.
       #
-      # Note that OpenStudio supports an InteriorPartitionSurface class, used
+      # Note that OpenStudio supports an InteriorPartitionSurface class, useful
       # mainly for daylighting. Although similar, 'partition' (within the scope
       # of BTAP::Structure) more generally refers to any non-modelled wall, e.g.
       # those surrounding lobbies, stairwells, WCs and technical rooms, as well
@@ -668,7 +675,7 @@ module BTAP
         col_kgm2 = c_rho * col_m / sp[:floor_m2]
 
         sp[:column_kgm2] = col_kgm2
-        sp[:deadload   ] = sp[:partition_kgm2] + col_kgm2
+        sp[:deadload   ] = sp[:partition_kgm2] + sp[:column_kgm2]
       end
 
       # The 'liveload' attribute represents the mass area density (kg/m2) of
@@ -753,13 +760,18 @@ module BTAP
         mass.setSpace(space)
       end
 
-      # Embodied CO2-e kg (A1-A3?) of a model's structure includes:
-      #   - non-modelled above grade items (e.g. columns)
-      #   - non-modelled 'partitions'
+      # Embodied CO2-e kg (A1-A3?) of a model's structure is broken down into:
+      #   - non-modelled above grade items COLUMNS
+      #   - non-modelled PARTITIONS
       #
-      # Below-grade structures (rebar + poured concrete) are ignored - no
-      # alternative BTAP options, e.g. lower carbon concrete mixes.
-      @co2 = {structure: 0}
+      # COLUMN and PARTITION CO2-e kg estimates are limited to non-customized
+      # spaces (look for equivalent entries in customized @spaces). Yet
+      # all COLUMN and PARTITION estimates (for both custom and non-custom
+      # spaces) are ultimately tallied in the STRUCTURE CO2-e kg entry.
+      #
+      # Note that below-grade structures (rebar + poured concrete) are ignored,
+      # as there are no alternative BTAP options (e.g. low carbon concrete mix).
+      @co2 = {}
 
       # Add columns.
       column_kgco2kg = case @structure
@@ -770,9 +782,7 @@ module BTAP
                        else              0.268         #  0.268 kgCO2-e/kg
                        end
 
-      @co2[:structure] += column_kgco2kg * column_m * column_rho
-      puts
-      puts "BLDG COLUMNS: #{((column_kgco2kg * column_m * column_rho)/floor_m2).round} kgCO2/m2"
+      @co2[:columns] = column_kgco2kg * column_m * column_rho
 
       # Add interior partitions, based on framing options only. Other partition
       # components are ignored for now (e.g. drywall, acoustic insulation).
@@ -782,9 +792,8 @@ module BTAP
                           else              0.854 * 4.7
                           end
 
-      @co2[:structure] += partition_kgco2m2 * partition_m2
-
-      puts "BLDG PARTITIONS: #{((partition_kgco2m2 * partition_m2)/floor_m2).round} kgCO2/m2"
+      @co2[:partitions] = partition_kgco2m2 * partition_m2
+      @co2[:structure ] = @co2[:columns] + @co2[:partitions]
 
       # Repeat for customized spaces.
       @spaces.each do |id, sp|
@@ -810,12 +819,10 @@ module BTAP
           p_kgco2m2 = partition_kgco2m2
         end
 
-        @co2[:structure] += c_kgco2kg * sp[:column_kgm2] * sp[:floor_m2]
-        @co2[:structure] += p_kgco2m2 * sp[:partition_m2]
+        sp[:co2][:columns   ] = c_kgco2kg * sp[:column_kgm2] * sp[:floor_m2]
+        sp[:co2][:partitions] = p_kgco2m2 * sp[:partition_m2]
 
-        puts "#{id} COLUMNS: #{((c_kgco2kg * sp[:column_kgm2])).round} kgCO2/m2"
-        puts "#{id} PARTITIONS: #{(p_kgco2m2 * sp[:partition_m2] / sp[:floor_m2]).round} kgCO2/m2"
-        puts
+        @co2[:structure] += sp[:co2][:columns] + sp[:co2][:partitions]
       end
 
       # Set an AdditionalProperty for tallied CO2-e [kg] (A1-A3):

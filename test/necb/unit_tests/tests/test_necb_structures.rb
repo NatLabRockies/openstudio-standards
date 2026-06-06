@@ -36,7 +36,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPTownHouse',
       # 'LowriseApartment',
       # 'MediumOffice',
-      # 'MidriseApartment',
+      'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
@@ -46,7 +46,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
+      'SmallOffice',
       'Warehouse'
     ]
 
@@ -308,17 +308,34 @@ class NECB_Structure_Tests < Minitest::Test
             end
 
             if @test_passed
-              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas})?"
-              assert_equal(s.co2[:structure].round(2), co2.round(2), err_msg)
+              co2_structure = s.co2[:columns] + s.co2[:partitions]
 
-              co2m2 = ": #{(s.co2[:structure]/flr_m2).round} kgCO2-e/m2 (A1-A3)"
+              if @property
+                s.spaces.values.each do |prp|
+                  co2_structure += prp[:co2][:columns] + prp[:co2][:partitions]
+                end
+              end
+
+              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas}) 1?"
+              assert_equal(co2_structure.round, co2.round, err_msg)
+              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas}) 2?"
+              assert_equal(co2_structure.round, s.co2[:structure].round, err_msg)
+
+              # Reset for non-customized spaces only.
+              co2_structure = s.co2[:columns] + s.co2[:partitions]
+
+              co2m2 = ": #{(co2_structure/flor_m2).round} kgCO2-e/m2 (A1-A3)"
               fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
 
               if @property
                 s.spaces.each do |id, prp|
                   next unless prp.key?(:structure)
+                  next unless prp.key?(:floor_m2)
 
-                  fdback << "... #{id} : custom STRUCTURE #{prp[:structure]}"
+                  sp_co2 = prp[:co2][:columns] + prp[:co2][:partitions]
+                  state  = "... #{id} : custom STRUCTURE #{prp[:structure]}"
+                  state += " #{(sp_co2/prp[:floor_m2]).round} kgCO2-e/m2 (A1-A3)"
+                  fdback << state
                 end
               end
             end
