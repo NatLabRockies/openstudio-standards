@@ -9,15 +9,10 @@ module OpenstudioStandards
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param name [String] Name of the refrigeration walkin
     # @param template [String] Technology or standards level, either 'old', 'new', or 'advanced'
-    # @param walkin_type [String] The walkin type. See refrigerated_walkins data for valid options under walkin_type.
+    # @param walkin_type [String] The walkin type. See refrigeration_walkins data for valid options under walkin_type.
     # @param defrost_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object with boolean values for the defrost schedule
     # @param defrost_start_hour [Double] Start hour between 0 and 24 for. Used if defrost_schedule not specified.
     # @param dripdown_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object with boolean values for the dripdown schedule
-    # @param restocking_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the restocking schedule.
-    #   If nil, will use the schedule from the refrigerated_walkins data. If that is not available, it will default to a constant 21 W schedule.
-    # @param door_opening_schedule [OpenStudio::Model::Schedule] OpenStudio Schedule object for the stocking door opening schedule. If nil, will use the schedule from the refrigerated_walkins data. If that is not available, it will default to 0.0625 fraction open between 6:00 and 22:00.
-    # @param door_protection_type [String] Stocking door opening protection type. Options are 'None', 'AirCurtain', or 'StripCurtain'. If nil, it will use the value from the refrigerated_walkins data.
-    #   If nil, uses the value from lookup properties.
     # @param thermal_zone [OpenStudio::Model::ThermalZone] Thermal zone with the walkin. If nil, will look up from the model.
     # @return [OpenStudio::Model::RefrigerationWalkIn] the refrigeration walkin
     def self.create_walkin(model,
@@ -27,9 +22,6 @@ module OpenstudioStandards
                            defrost_schedule: nil,
                            defrost_start_hour: 0,
                            dripdown_schedule: nil,
-                           restocking_schedule: nil,
-                           door_opening_schedule: nil,
-                           door_protection_type: nil,
                            thermal_zone: nil)
       # get thermal zone if not provided
       if thermal_zone.nil?
@@ -89,9 +81,7 @@ module OpenstudioStandards
       # replace with glass height property when added
       ref_walkin.setZoneBoundaryHeightofGlassReachInDoorsFacingZone(walkins_properties[:height_of_stocking_doors_facing_zone])
       ref_walkin.setZoneBoundaryStockingDoorUValueFacingZone(walkins_properties[:stocking_door_u])
-      # Use door_protection_type argument if provided, otherwise use value from lookup properties
-      protection_type = door_protection_type.nil? ? walkins_properties[:stocking_door_opening_protection] : door_protection_type
-      ref_walkin.zoneBoundaries.each { |zb| zb.setStockingDoorOpeningProtectionTypeFacingZone(protection_type) }
+      ref_walkin.zoneBoundaries.each { |zb| zb.setStockingDoorOpeningProtectionTypeFacingZone(walkins_properties[:stocking_door_opening_protection]) }
       ref_walkin.setZoneBoundaryThermalZone(thermal_zone)
 
       # only add defrost schedules if not OffCycle
@@ -147,39 +137,9 @@ module OpenstudioStandards
         ref_walkin.setDefrostDripDownSchedule(dripdown_schedule)
       end
 
-      # restocking schedule
-      # default calculated from 100 kg * 5 deg C * 3.65 kJ/kg*C / 24 hours = ~21 W
-      std = Standard.build('90.1-2013')
-      if !restocking_schedule.nil?
-        unless restocking_schedule.to_Schedule.is_initialized
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Refrigeration', "Input for restocking_schedule #{restocking_schedule} is not a valid OpenStudio::Model::Schedule object")
-          return nil
-        end
-      elsif !walkins_properties[:restocking_schedule].nil?
-        restocking_schedule = std.model_add_schedule(model, walkins_properties[:restocking_schedule])
-      else
-        restocking_schedule = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model, 21, name: "#{ref_walkin.name} Restocking")
-      end
-      ref_walkin.setRestockingSchedule(restocking_schedule)
-
-      # door opening schedule
-      if !door_opening_schedule.nil?
-        unless door_opening_schedule.to_Schedule.is_initialized
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Refrigeration', "Input for door_opening_schedule #{door_opening_schedule} is not a valid OpenStudio::Model::Schedule object")
-          return nil
-        end
-      elsif !walkins_properties[:stocking_door_schedule].nil?
-        door_opening_schedule = std.model_add_schedule(model, walkins_properties[:stocking_door_schedule])
-      else
-        door_opening_options = {
-          'name' => 'Walk-In Door Opening Schedule',
-          'winter_time_value_pairs' => { 6.0 => 0.0, 22.0 => 0.0625, 24.0 => 0.0 },
-          'summer_time_value_pairs' => { 6.0 => 0.0, 22.0 => 0.0625, 24.0 => 0.0 },
-          'default_time_value_pairs' => { 6.0 => 0.0, 22.0 => 0.0625, 24.0 => 0.0 }
-        }
-        door_opening_schedule = OpenstudioStandards::Schedules.create_simple_schedule(model, door_opening_options)
-      end
-      ref_walkin.setZoneBoundaryStockingDoorOpeningScheduleFacingZone(door_opening_schedule)
+      # stocking schedule
+      # ref_walkin.setRestockingSchedule(model.alwaysOffDiscreteSchedule)
+      ref_walkin.setZoneBoundaryStockingDoorOpeningScheduleFacingZone(model.alwaysOffDiscreteSchedule)
 
       insulated_floor_area_ft2 = OpenStudio.convert(walkins_properties[:insulated_floor_area], 'm^2', 'ft^2').get
       rated_cooling_capacity_btu_per_hr = OpenStudio.convert(walkins_properties[:rated_capacity], 'W', 'Btu/hr').get

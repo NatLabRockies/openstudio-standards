@@ -64,11 +64,9 @@ class Standard
     cop = nil
 
     # If PTHP, use equations if coefficients are specified
-    # Check both new format (equipment_type == 'PTHP') and old format (e.g. DOE Ref Pre-1980 / 1980-2004)
-    # where there is no 'equipment_type' key and PTHP is identified via subcategory instead.
     pthp_eer_coeff_1 = ac_props['pthp_eer_coefficient_1']
     pthp_eer_coeff_2 = ac_props['pthp_eer_coefficient_2']
-    if (equipment_type == 'PTHP' || sub_category == 'PTHP') && !pthp_eer_coeff_1.nil? && !pthp_eer_coeff_2.nil?
+    if equipment_type == 'PTHP' && !pthp_eer_coeff_1.nil? && !pthp_eer_coeff_2.nil?
       # TABLE 6.8.1D
       # EER = pthp_eer_coeff_1 - (pthp_eer_coeff_2 * Cap / 1000)
       # Note c: Cap means the rated cooling capacity of the product in Btu/h.

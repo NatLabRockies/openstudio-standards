@@ -76,9 +76,6 @@ module OpenstudioStandards
       canopy_entry_area = 0.0
       canopy_emergency_area = 0.0
       ground_story_ext_wall_area = 0.0
-      building_perimeter_ft = 0.0
-      largest_building_type = nil
-      largest_building_type_area = 0.0
 
       # temporary std for model_effective_num_stories method
       std = Standard.build('90.1-2013')
@@ -158,23 +155,7 @@ module OpenstudioStandards
         # determine effective number of stories to find first above grade story exterior wall area
         ground_story = effective_num_stories[:story_hash].keys[effective_num_stories[:below_grade]]
         ground_story_ext_wall_area_m2 = effective_num_stories[:story_hash][ground_story][:ext_wall_area]
-        this_story_ext_wall_area_ft2 = OpenStudio.convert(ground_story_ext_wall_area_m2, 'm^2', 'ft^2').get
-        ground_story_ext_wall_area += this_story_ext_wall_area_ft2
-
-        # compute perimeter from exterior wall area divided by floor-to-floor height
-        story_height_m = if ground_story.nominalFloortoFloorHeight.is_initialized
-                           ground_story.nominalFloortoFloorHeight.get
-                         else
-                           4.0 # default 4m (~13 ft) for commercial buildings
-                         end
-        story_height_ft = OpenStudio.convert(story_height_m, 'm', 'ft').get
-        building_perimeter_ft += this_story_ext_wall_area_ft2 / story_height_ft
-
-        # track dominant building type by floor area
-        if hash[:floor_area] > largest_building_type_area
-          largest_building_type = building_type
-          largest_building_type_area = hash[:floor_area]
-        end
+        ground_story_ext_wall_area += OpenStudio.convert(ground_story_ext_wall_area_m2, 'm^2', 'ft^2').get
       end
 
       # no source for width of different entry types
@@ -194,9 +175,7 @@ module OpenstudioStandards
       area_length_count_hash[:drive_through_windows] = drive_through_windows
       area_length_count_hash[:canopy_entry_area] = canopy_entry_area
       area_length_count_hash[:canopy_emergency_area] = canopy_emergency_area
-      area_length_count_hash[:building_facades_area] = ground_story_ext_wall_area
-      area_length_count_hash[:building_perimeter] = building_perimeter_ft
-      area_length_count_hash[:largest_building_type] = largest_building_type
+      area_length_count_hash[:building_facades] = ground_story_ext_wall_area
 
       return area_length_count_hash
     end

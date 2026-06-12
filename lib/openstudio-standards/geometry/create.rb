@@ -256,9 +256,7 @@ module OpenstudioStandards
           (space_type_hash[:floor_area] < valid_bar_area_min_m2) && (space_type_hash[:floor_area] > tol_value) ? (test_b = true) : (test_b = false)
 
           # identify very small slices and re-arrange spaces to different stories to avoid this
-          # only apply test_a when there is more than one space type on this story; if there is only one,
-          # shifting it out would leave space_types_local_count empty and crash create_sliced_bar_simple_polygons
-          if test_a && space_types_local_count.size > 1
+          if test_a
 
             # get first/smallest space type to move to another story
             first_space = space_types_local_count.first
@@ -350,8 +348,6 @@ module OpenstudioStandards
 
       # sort array by floor area but shift largest object to front
       space_types = space_types.sort_by { |k, v| v[:floor_area] }
-      # guard against empty space_types (e.g. when all space types were slivers removed by caller)
-      return hash_of_point_vectors if space_types.empty?
       space_types.insert(0, space_types.delete_at(space_types.size - 1)) # .to_h
 
       # min and max bar end values
@@ -366,11 +362,11 @@ module OpenstudioStandards
         start_perimeter_width_deduction = 0.0
         end_perimeter_width_deduction = 0.0
         if space_type == space_types.first[0]
-          if ([length, width].max * space_type_hash[:floor_area] / total_floor_area) > (max_bar_end_multiplier * perimeter_zone_depth)
+          if [length, width].max * space_type_hash[:floor_area] / total_floor_area > max_bar_end_multiplier * perimeter_zone_depth
             start_perimeter_width_deduction = perimeter_zone_depth
           end
           # see if last space type is too small for perimeter. If it is then save some of this space type
-          if ([length, width].max * space_types.last[1][:floor_area] / total_floor_area )< (perimeter_zone_depth * min_bar_end_multiplier)
+          if [length, width].max * space_types.last[1][:floor_area] / total_floor_area < perimeter_zone_depth * min_bar_end_multiplier
             re_apply_largest_space_type_at_end = true
           end
         end

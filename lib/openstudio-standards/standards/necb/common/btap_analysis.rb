@@ -2,10 +2,10 @@ require 'openstudio'
 
 module BTAP
   # BTAP Analysis
-  # 
+  #
   # Class to instantiate post-analysis mechanisms like costing or carbon
-  # calculation. Can be done during a simulation or without one given an OSM file and its SQL
-  # file, along with a few other parameters.
+  # calculation. Can be done during a simulation or without one given an OSM file
+  # and its SQL file, along with a few other parameters.
   #
   # Abstract class, only instantiate BTAPNoSimAnalysis or BTAPDatapointAnalysis.
   class Analysis
@@ -114,15 +114,6 @@ module BTAP
       @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
       @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
     end
-
-    # disable openstudio-version; for debugging only
-    # cost_result["openstudio-version"] = OpenstudioStandards::VERSION
-    File.open(File.join(@output_folder, 'cost_results.json'), 'w') do |f|
-      f.write(JSON.pretty_generate(cost_result, allow_nan: true))
-    end
-    puts "Wrote cost_results.json in #{@output_folder} "
-
-    return cost_result
   end
 
   # BTAP Datapoint Analysis
@@ -173,10 +164,12 @@ module BTAP
       end
     end
 
-    File.open(File.join(@output_folder, 'carbon_results.json'), 'w') do |f|
-      f.write(JSON.pretty_generate(carbon_result, allow_nan: true))
+    # @param path [String]
+    def write_cache(path)
+      File.open(path, "w") do |file|
+        file.write(JSON.pretty_generate(@data))
+      end
     end
-    puts "Wrote carbon_results.json in #{@output_folder} "
 
     # @param path [String]
     def self.load_cache(path)

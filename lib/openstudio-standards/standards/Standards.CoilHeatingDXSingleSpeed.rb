@@ -65,9 +65,7 @@ class Standard
 
     cop = nil
     # If PTHP, use equations
-    # Check both new format (equipment_type == 'PTHP') and old format (e.g. DOE Ref Pre-1980 / 1980-2004)
-    # where there is no 'equipment_type' key and PTHP is identified via subcategory instead.
-    if (equipment_type == 'PTHP' || sub_category == 'PTHP') && !hp_props['pthp_cop_coefficient_1'].nil? && !hp_props['pthp_cop_coefficient_2'].nil?
+    if equipment_type == 'PTHP' && !hp_props['pthp_cop_coefficient_1'].nil? && !hp_props['pthp_cop_coefficient_2'].nil?
       pthp_cop_coeff_1 = hp_props['pthp_cop_coefficient_1']
       pthp_cop_coeff_2 = hp_props['pthp_cop_coefficient_2']
       # TABLE 6.8.1D

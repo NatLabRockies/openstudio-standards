@@ -489,7 +489,7 @@ class TestSchedulesParametric < Minitest::Test
         clg_sch = tstat.coolingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
         htg_sch = tstat.heatingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
         tstat_schedules << clg_sch unless tstat_schedules.include?(clg_sch)
-        tstat_schedules << htg_sch unless tstat_schedules.include?(htg_sch)
+        tstat_schedules << htg_sch unless tstat_schedules.include?(clg_sch)
       end
 
       tstat_schedules.each do |sch_rule|

@@ -70,24 +70,6 @@ class BTAPCarbon
 
       @carbon_database["frame"] << item
     end
-
-    carbon_frame = CSV.read(@cp.carbon_frame_path)
-    @carbon_database["frame"] = Array.new
-
-    1.upto carbon_frame.length - 1 do |i|
-      row   = carbon_frame[i]
-      index = row.each
-      item  = Hash.new
-
-      item["materials_glazing_id"]    = index.next
-      item["description"]             = index.next
-      item["per m2"]                  = index.next.to_f
-      item["Embodied Carbon (A1-A5)"] = index.next.to_f
-      item["Embodied Carbon (A-C)"]   = index.next.to_f
-      item["Environmental Product Declaration (EPD)"] = index.next
-
-      @carbon_database["frame"] << item
-    end
   end
 
   def audit_embodied_carbon
@@ -143,6 +125,7 @@ class BTAPCarbon
         end
       end
     end
+
     # Get the total emissions from all the surface types.
     @attributes.surface_types.each do |surface_type|
       total_emissions += @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]
