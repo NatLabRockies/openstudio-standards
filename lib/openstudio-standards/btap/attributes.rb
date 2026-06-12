@@ -124,6 +124,10 @@ module BTAP
         "ExteriorRoof"                    => "roof",
         "ExteriorFloor"                   => "floor",
         "InterzonalRoof"                  => "roof",
+
+        # TODO: Although we don't have specific constructions on interzonal
+        # skylight walls, using external wall constructions is better than
+        # ignoring them.
         "InterzonalSkylightWalls"         => "wall",
         "ExteriorFixedWindow"             => "window",
         "ExteriorOperableWindow"          => "window",
@@ -191,12 +195,6 @@ module BTAP
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
     def compile_surface_construction(surface, surface_type)
-
-      # TODO: Currently we don't have the right assemblies to properly cost
-      # skylight well walls, so don't cost them for now. Wall constructions
-      # aren't suitable.
-      return if surface_type == "InterzonalSkylightWalls"
-
       construction_sheet = @surface_types_to_construction_sheet[surface_type]
       construction_name  = @surface_types_to_assembly_names[surface_type]
       is_opaque          = !(@glazing_surface_types.include?(construction_sheet))
