@@ -560,14 +560,18 @@ class NECB2011
   end
 
   ##
-  # Adds default construction sets, based on building 'category' & 'structure'
-  # selections. This is an alternative method to 'model_apply_construction'
-  # & 'apply_standard_construction_properties' methods.
+  # Adds default construction sets, applied to one or more spaces. Parameters
+  # are based on prior 'category' & 'structure' selections. An alternative to
+  # 'model_apply_construction' & 'apply_standard_construction_properties'.
   #
   # @author denis@rd2.ca
   #
-  # @param model [OpenStudio::Model::Model] a model
-  # @param necb_hdd [Boolean] whether to rely on BTAP to set HDD (vs stat file)
+  # @param spaces [Array<OpenStudio::Model::Space>] space(s)
+  # @param bldg [Boolean] true if assigned to building (not individual spaces)
+  # @param hdd [Boolean] whether to rely on BTAP in setting HDD (vs stat file)
+  # @param category [String] spacetype CATEGORY, e.g. "public"
+  # @param structure [Symbol] STRUCTURE selection, e.g. :steel
+  # @param framing [Symbol] selected framing, e.g. (light gauge) :steel
   # @param a [Hash] optional U & SHGC overrides
   # @option a [Hash] eWallU exposed wall Uo (or Ut)
   # @option a [Hash] eFloorU exposed floor Uo (or Ut)
@@ -583,14 +587,23 @@ class NECB2011
   # @option a [Hash] skySHGC skylight SHGC
   #
   # @return [Boolean] whether default constructions were successfully added.
-  def add_construction_sets(model, necb_hdd, a)
-    return false unless model.is_a?(OpenStudio::Model::Model)
+  def add_construction_sets(spaces = [], bldg, hdd, category, structure, framing, a)
+    bldg = true unless [true, false].include?(bldg)
+    hdd  = true unless [true, false].include?(hdd)
+    btp  = BTAP::Resources::Envelope::Constructions # alias
+    tag  = "space_conditioning_category"
+
+    # Accept a single 'OpenStudio::Model::Space' (vs an array of spaces).
+    if spaces.respond_to?(:spaceType) || spaces.respond_to?(:to_a)
+      spaces = spaces.respond_to?(:to_a) ? spaces.to_a : [spaces]
+      return false if spaces.empty?
+    else
+      return false
+    end
+
     return false unless a.is_a?(Hash)
 
-    btp = BTAP::Resources::Envelope::Constructions # alias
-    necb_hdd = true unless [true, false].include?(necb_hdd)
-
-    # Validate argh options (limited to either U or SHGC)
+    # Validate argh options (limited to either U or SHGC).
     a.each do |k, v|
       return false unless v.is_a?(Numeric)
       return false unless v.round(3) > 0
@@ -602,12 +615,11 @@ class NECB2011
       end
     end
 
-    tag  = "space_conditioning_category"
-    bldg = model.getBuilding
-    hdd  = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
+    model = spaces.first.model
+    hdd   = get_necb_hdd18(model: model, necb_hdd: hdd)
 
     # Reset constructions.
-    model.getPlanarSurfaces.sort.each(&:resetConstruction)
+    spaces.each { |space| space.surfaces.sort.each(&:resetConstruction) }
 
     # Fetch NECB-required U-factors (or provided as arguments).
     eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", "outdoors", hdd)
@@ -637,13 +649,6 @@ class NECB2011
     doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
     fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
     skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
-
-    # Fetch corresponding BTAP structure parameters.
-    category  = @structure.category
-    structure = @structure.structure
-    framing   = @structure.framing
-    cladding  = @structure.cladding
-    finish    = @structure.finish
 
     # Uninsulated slab-on-grade, except if HDD > 6999 (Uo = 0.379 W/m2.K).
     # If HDD < 7000, slab-on-grade insulation is instead only required along
@@ -775,45 +780,48 @@ class NECB2011
     shading        = TBD.genConstruction(model, specs)
 
     # Building-wide, default constructions.
-    intBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    solBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    extBLDG = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    subBLDG = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
-    intBLDG.setName("BTAP interior constructions BLDG")
-    solBLDG.setName("BTAP ground constructions BLDG")
-    extBLDG.setName("BTAP exterior constructions BLDG")
-    subBLDG.setName("BTAP subsurface constructions BLDG")
-    intBLDG.setWallConstruction(iWall)
-    intBLDG.setFloorConstruction(iFloor)
-    intBLDG.setRoofCeilingConstruction(iRoof)
-    solBLDG.setWallConstruction(gWall)
-    solBLDG.setFloorConstruction(gFloor)
-    solBLDG.setRoofCeilingConstruction(gRoof)
-    extBLDG.setWallConstruction(eWall)
-    extBLDG.setFloorConstruction(eFloor)
-    extBLDG.setRoofCeilingConstruction(eRoof)
-    subBLDG.setFixedWindowConstruction(fen)
-    subBLDG.setOperableWindowConstruction(fen)
-    subBLDG.setGlassDoorConstruction(fen)
-    subBLDG.setSkylightConstruction(sky)
-    subBLDG.setTubularDaylightDomeConstruction(sky)
-    subBLDG.setTubularDaylightDiffuserConstruction(sky)
-    subBLDG.setDoorConstruction(door)
-    subBLDG.setOverheadDoorConstruction(door)
+    intSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    solSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    subSPACE = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
+    intSPACE.setName("BTAP interior constructions")
+    solSPACE.setName("BTAP ground constructions")
+    extSPACE.setName("BTAP exterior constructions")
+    subSPACE.setName("BTAP subsurface constructions")
+    intSPACE.setName("BTAP interior constructions BLDG")   if bldg
+    solSPACE.setName("BTAP ground constructions BLDG")     if bldg
+    extSPACE.setName("BTAP exterior constructions BLDG")   if bldg
+    subSPACE.setName("BTAP subsurface constructions BLDG") if bldg
+    intSPACE.setWallConstruction(iWall)
+    intSPACE.setFloorConstruction(iFloor)
+    intSPACE.setRoofCeilingConstruction(iRoof)
+    solSPACE.setWallConstruction(gWall)
+    solSPACE.setFloorConstruction(gFloor)
+    solSPACE.setRoofCeilingConstruction(gRoof)
+    extSPACE.setWallConstruction(eWall)
+    extSPACE.setFloorConstruction(eFloor)
+    extSPACE.setRoofCeilingConstruction(eRoof)
+    subSPACE.setFixedWindowConstruction(fen)
+    subSPACE.setOperableWindowConstruction(fen)
+    subSPACE.setGlassDoorConstruction(fen)
+    subSPACE.setSkylightConstruction(sky)
+    subSPACE.setTubularDaylightDomeConstruction(sky)
+    subSPACE.setTubularDaylightDiffuserConstruction(sky)
+    subSPACE.setDoorConstruction(door)
+    subSPACE.setOverheadDoorConstruction(door)
 
-    setBLDG = OpenStudio::Model::DefaultConstructionSet.new(model)
-    setBLDG.setName("BTAP construction set BLDG")
-    setBLDG.setDefaultInteriorSurfaceConstructions(intBLDG)
-    setBLDG.setDefaultGroundContactSurfaceConstructions(solBLDG)
-    setBLDG.setDefaultExteriorSurfaceConstructions(extBLDG)
-    setBLDG.setDefaultExteriorSubSurfaceConstructions(subBLDG)
-    setBLDG.setInteriorPartitionConstruction(iWall)
-    setBLDG.setSpaceShadingConstruction(shading)
-    setBLDG.setBuildingShadingConstruction(shading)
-    setBLDG.setSiteShadingConstruction(shading)
-    setBLDG.setAdiabaticSurfaceConstruction(iWall)
-
-    bldg.setDefaultConstructionSet(setBLDG)
+    setSPACE = OpenStudio::Model::DefaultConstructionSet.new(model)
+    setSPACE.setName("BTAP construction set")
+    setSPACE.setName("BTAP construction set BLDG") if bldg
+    setSPACE.setDefaultInteriorSurfaceConstructions(intSPACE)
+    setSPACE.setDefaultGroundContactSurfaceConstructions(solSPACE)
+    setSPACE.setDefaultExteriorSurfaceConstructions(extSPACE)
+    setSPACE.setDefaultExteriorSubSurfaceConstructions(subSPACE)
+    setSPACE.setInteriorPartitionConstruction(iWall)
+    setSPACE.setSpaceShadingConstruction(shading)
+    setSPACE.setBuildingShadingConstruction(shading)
+    setSPACE.setSiteShadingConstruction(shading)
+    setSPACE.setAdiabaticSurfaceConstruction(iWall)
 
     # Unconditioned, unoccupied spaces (e.g. attics) inherit their own
     # default construction set. Indirectly-conditioned, unoccupied spaces
@@ -821,7 +829,7 @@ class NECB2011
     attics  = []
     plenums = []
 
-    model.getSpaces.each do |space|
+    spaces.each do |space|
       prop = space.additionalProperties.getFeatureAsString(tag)
       next if prop.empty?
       next if space.partofTotalFloorArea
@@ -829,6 +837,17 @@ class NECB2011
       prop = prop.get.downcase
       attics  << space if prop == "unconditioned"
       plenums << space if prop == "nonresconditioned"
+    end
+
+    if bldg
+      model.getBuilding.setDefaultConstructionSet(setSPACE)
+    else
+      spaces.each do |space|
+        next if attics.include?(space)
+        next if plenums.include?(space)
+
+        space.setDefaultConstructionSet(setSPACE)
+      end
     end
 
     # None of the outdoor-facing surfaces of attics are required to be
@@ -958,10 +977,6 @@ class NECB2011
     #   - check if insulated when required
     #   - ensure uninsulated assemblies unless required
     #   - hard assign constructions if either case
-    #
-    # Future upgrades could include adding story- or space-specific default
-    # construction sets (e.g. CMU walls of a school gym in an otherwise
-    # steel-framed school). @todo
 
     true
   end

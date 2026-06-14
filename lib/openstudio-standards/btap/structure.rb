@@ -433,7 +433,10 @@ module BTAP
         bldg.additionalProperties.setFeature(tag, @framing.to_s)
       end
 
-      # Repeat for custom building cladding & finish. Must be compatible.
+      # Repeat for custom building cladding & finish. Must be compatible. Custom
+      # cladding and finish options are caught and kept in memory, yet
+      # currently unused - the BTAP construction database isn't yet rich enough
+      # to support custom finish or cladding options.
       [:cladding, :finish].each do |item|
         tag = "btap_" + item.to_s
 
@@ -488,6 +491,9 @@ module BTAP
             @spaces[id][:co2      ] = {columns: 0, partitions: 0}
           end
 
+          # Custom cladding and finish options are caught and kept in memory,
+          # yet currently unused - the BTAP construction database isn't yet rich
+          # enough to support custom finish or cladding options.
           @spaces[id][:structure] = prp if tag == "btap_structure"
           @spaces[id][:framing  ] = prp if tag == "btap_framing"
           @spaces[id][:cladding ] = prp if tag == "btap_cladding"

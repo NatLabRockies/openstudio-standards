@@ -561,6 +561,7 @@ class NECB2011 < Standard
                    construction_opt: construction_opt,
                    bldg_category: @activity.category,
                    bldg_structure: @structure.structure,
+                   bldg_framing: @structure.framing,
                    ext_wall_cond: ext_wall_cond,
                    ext_floor_cond: ext_floor_cond,
                    ext_roof_cond: ext_roof_cond,
@@ -846,6 +847,7 @@ class NECB2011 < Standard
                      construction_opt: '',
                      bldg_category: '',
                      bldg_structure: '',
+                     bldg_framing: '',
                      ext_wall_cond: nil,
                      ext_floor_cond: nil,
                      ext_roof_cond: nil,
@@ -872,8 +874,10 @@ class NECB2011 < Standard
 
     construction_opt = '' unless construction_opt.respond_to?(:to_sym)
     bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
+    bldg_framing     = '' unless bldg_framing.respond_to?(:to_sym)
     construction_opt = construction_opt.to_s.downcase
     bldg_structure   = bldg_structure.to_s.downcase.to_sym
+    bldg_framing     = bldg_framing.to_s.downcase.to_sym
     bldg_structures  = @structure.data[:structure].keys
 
     if construction_opt == 'structure' && bldg_structures.include?(bldg_structure)
@@ -892,7 +896,13 @@ class NECB2011 < Standard
       argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
 
       assign_contruction_to_adiabatic_surfaces(model)
-      ok = add_construction_sets(model, necb_hdd, argh)
+      ok = add_construction_sets(model.getSpaces,
+                                 true,
+                                 necb_hdd,
+                                 bldg_category,
+                                 bldg_structure,
+                                 bldg_framing,
+                                 argh)
 
       raise('NECB2011: Failed to assign default construction sets') unless ok
     else
