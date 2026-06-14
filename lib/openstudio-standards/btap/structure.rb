@@ -463,7 +463,7 @@ module BTAP
         end
       end
 
-      # Ignore UNCONDITIONED spaces for now - @todo?
+      # Ignore UNOCCUPIED spaces for now - @todo?
       cspaces = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
 
       # Customized story/spacetype/space STRUCTURE attributes, overriding
