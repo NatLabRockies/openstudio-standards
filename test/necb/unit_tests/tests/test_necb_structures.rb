@@ -33,7 +33,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
-      # 'LEEPTownHouse', # activity == "townhall" ??
+      # 'LEEPTownHouse',
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
@@ -224,10 +224,6 @@ class NECB_Structure_Tests < Minitest::Test
 
             # Default construction sets?
             csets = model.getDefaultConstructionSets
-
-            csets.each do |cset|
-              puts cset
-            end
 
             if @addprop && building == "Warehouse"
               err_msg = "BTAP::Structure # Default Construction Sets (#{cas})?"
