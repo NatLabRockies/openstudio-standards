@@ -35,14 +35,14 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
-      # 'RetailStandalone',
+      'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
@@ -64,6 +64,11 @@ class NECB_Structure_Tests < Minitest::Test
 
     # AdditionalProperty override.
     @addprop = true
+    # CASE Warehouse (NECB2020) - structure : industry (steel, 1 storey): 10 kgCO2-e/m2 (A1-A3)
+    #                        ... Zone3 Bulk Storage : custom STRUCTURE cmu 6 kgCO2-e/m2 (A1-A3)
+
+    # @addprop = false
+    # CASE Warehouse (NECB2020) - structure : industry (steel, 1 storey): 11 kgCO2-e/m2 (A1-A3)
 
     tg  = "co2_structure"
     tag = "space_conditioning_category"
@@ -92,19 +97,19 @@ class NECB_Structure_Tests < Minitest::Test
               prp   = "cmu"
               bulk  = model.getSpaceByName(id)
 
-              err_msg = "BTAP::Structure invalid space ID '#{id}' (#{cas})?"
+              err_msg = "Invalid space ID '#{id}' (#{cas})?"
               refute_empty(bulk, err_msg)
               bulk  = bulk.get
 
-              err_msg = "BTAP::Structure failed AddProp '#{opt}' (#{cas})?"
+              err_msg = "Failed AddProp '#{opt}' (#{cas})?"
               assert(bulk.additionalProperties.setFeature(opt, prp), err_msg)
 
-              err_msg = "BTAP::Structure missing AddProp '#{opt}' (#{cas})?"
+              err_msg = "Missing AddProp '#{opt}' (#{cas})?"
               prop = bulk.additionalProperties.getFeatureAsString(opt)
               refute_empty(prop, err_msg)
 
               prop = prop.get
-              err_msg = "BTAP:Structure incorrect AddProp '#{prop}' (#{cas})?"
+              err_msg = "Incorrect AddProp '#{prop}' (#{cas})?"
               assert_equal(prop, prp, err_msg)
 
               model = st.model_apply_standard(model: model,
@@ -121,7 +126,7 @@ class NECB_Structure_Tests < Minitest::Test
 
             co2 = model.getBuilding.additionalProperties.getFeatureAsDouble(tg)
 
-            err_msg = "BTAP/TBD: BLDG kgCO2-e (#{cas})?"
+            err_msg = "BLDG kgCO2-e (#{cas})?"
             refute_empty(co2, err_msg)
             co2 = co2.get
 
@@ -146,12 +151,12 @@ class NECB_Structure_Tests < Minitest::Test
 
               id  = attic.nameString
               set = attic.defaultConstructionSet
-              err_msg = "BTAP::Structure #{id} default construction set (#{cas})?"
+              err_msg = "#{id} default construction set (#{cas})?"
               refute_empty(set, err_msg)
 
               set = set.get
               id  = set.nameString
-              err_msg = "BTAP::Structure default construction set #{id} (#{cas})?"
+              err_msg = "Default construction set #{id} (#{cas})?"
               assert_includes(id, "ATTIC", err_msg)
 
               attic.surfaces.each do |surface|
@@ -161,7 +166,7 @@ class NECB_Structure_Tests < Minitest::Test
                 next unless surface.surfaceType.downcase == "floor"
 
                 if id.include?("soffit")
-                  err_msg = "BTAP::Structure #{id} insulated (#{cas})?"
+                  err_msg = "#{id} insulated (#{cas})?"
 
                   # Soffit 'floor' not insulated.
                   c.layers.each do |layer|
@@ -169,7 +174,7 @@ class NECB_Structure_Tests < Minitest::Test
                   end
                 else
                   id = c.layers.last.nameString
-                  err_msg = "BTAP::Structure #{id} insulation layer (#{cas})?"
+                  err_msg = "#{id} insulation layer (#{cas})?"
                     assert_includes(id, "OSut:K", err_msg)
                 end
               end
@@ -180,12 +185,12 @@ class NECB_Structure_Tests < Minitest::Test
 
               id  = plenum.nameString
               set = plenum.defaultConstructionSet
-              err_msg = "BTAP::Structure #{id} default construction set (#{cas})?"
+              err_msg = "#{id} default construction set (#{cas})?"
               refute_empty(set, err_msg)
 
               set = set.get
               id  = set.nameString
-              err_msg = "BTAP::Structure default construction set #{id} (#{cas})?"
+              err_msg = "Default construction set #{id} (#{cas})?"
               assert_includes(id, "PLENUM", err_msg)
 
               plenum.surfaces.each do |surface|
@@ -194,66 +199,73 @@ class NECB_Structure_Tests < Minitest::Test
                 id = surface.nameString
                 c  = surface.construction.get.to_LayeredConstruction.get
                 n  = c.layers.size
-                err_msg = "BTAP::Structure #{id} ##{n} layers (#{cas})?"
+                err_msg = "#{id} ##{n} layers (#{cas})?"
                 assert_equal(n, 1, err_msg)
 
                 id = c.layers.first.nameString
-                err_msg = "BTAP::Structure #{id} tile (#{cas})?"
+                err_msg = "#{id} tile (#{cas})?"
                 assert_includes(id, "material", err_msg)
               end
             end
 
             s = st.structure
 
-            err_msg = "BTAP::Structure #{s.class} (#{cas})?"
+            err_msg = "#{s.class} (#{cas})?"
             assert_kind_of(BTAP::Structure, s, err_msg)
-            err_msg = "BTAP::Structure data #{s.data.class} (#{cas})?"
+            err_msg = "Data #{s.data.class} (#{cas})?"
             assert_kind_of(Hash, s.data, err_msg)
-            err_msg = "BTAP::Structure category #{s.category.class} (#{cas})?"
+            err_msg = "Category #{s.category.class} (#{cas})?"
             assert_kind_of(String, s.category, err_msg)
-            err_msg = "BTAP::Structure structure #{s.structure.class} (#{cas})?"
+            err_msg = "Structure #{s.structure.class} (#{cas})?"
             assert_kind_of(Symbol, s.structure, err_msg)
-            err_msg = "BTAP::Structure liveload #{s.liveload.class} (#{cas})?"
+            err_msg = "Liveload #{s.liveload.class} (#{cas})?"
             assert_kind_of(Float, s.liveload, err_msg)
-            err_msg = "BTAP::Structure deadload #{s.deadload.class} (#{cas})?"
+            err_msg = "Deadload #{s.deadload.class} (#{cas})?"
             assert_kind_of(Float, s.deadload, err_msg)
-            err_msg = "BTAP::Structure missing categories (#{cas})?"
+            err_msg = "Missing categories (#{cas})?"
             assert(s.data.key?(:category), err_msg)
-            err_msg = "BTAP::Structure missing structures (#{cas})?"
+            err_msg = "Missing structures (#{cas})?"
             assert(s.data.key?(:structure), err_msg)
 
             # Default construction sets?
             csets = model.getDefaultConstructionSets
 
             if @addprop && building == "Warehouse"
-              err_msg = "BTAP::Structure # Default Construction Sets (#{cas})?"
+              err_msg = "# Default Construction Sets (#{cas})?"
               assert_equal(csets.size, 2, err_msg)
-
-              err_msg = "BTAP::Structure # custom spaces (#{cas})?"
+              err_msg = "# custom spaces (#{cas})?"
               assert_equal(s.spaces.size, 1, err_msg)
-
-              err_msg = "BTAP::Structure custom BULK storage space (#{cas})?"
+              err_msg = "Custom BULK storage space (#{cas})?"
               assert_includes(s.spaces, "Zone3 Bulk Storage", err_msg)
-
-              err_msg = "BTAP::Structure custom BULK structure (#{cas})?"
+              err_msg = "Custom BULK structure (#{cas})?"
               assert_includes(s.spaces["Zone3 Bulk Storage"], :structure, err_msg)
-
               bulkset = bulk.defaultConstructionSet
-              err_msg = "BTAP::Structure BULK Default Construction Set (#{cas})?"
+              err_msg = "BULK Default Construction Set (#{cas})?"
               refute_empty(bulkset, err_msg)
-
               bulkset = bulkset.get
-              # puts; puts "#{bulkset}"; puts
-
+              err_msg = "BULK empty ground constructions (#{cas})?"
+              assert_empty(bulkset.defaultGroundContactSurfaceConstructions, err_msg)
+              err_msg = "BULK empty exterior subsurface constructions (#{cas})?"
+              assert_empty(bulkset.defaultExteriorSubSurfaceConstructions, err_msg)
+              err_msg = "BULK empty interior subsurface constructions (#{cas})?"
+              assert_empty(bulkset.defaultInteriorSubSurfaceConstructions, err_msg)
+              err_msg = "BULK empty space shading construction (#{cas})?"
+              assert_empty(bulkset.spaceShadingConstruction, err_msg)
+              err_msg = "BULK empty site shading construction (#{cas})?"
+              assert_empty(bulkset.siteShadingConstruction, err_msg)
+              err_msg = "BULK empty building shading construction (#{cas})?"
+              assert_empty(bulkset.buildingShadingConstruction, err_msg)
+              err_msg = "BULK empty adiabatic surface construction (#{cas})?"
+              assert_empty(bulkset.adiabaticSurfaceConstruction, err_msg)
             else
               nb  = 1
               nb += 1 unless plenums.empty?
               nb += 1 unless attics.empty?
 
-              err_msg = "BTAP::Structure # Default Construction Sets (#{cas})?"
+              err_msg = "# Default Construction Sets (#{cas})?"
               assert_equal(csets.size, nb, err_msg)
 
-              err_msg = "BTAP::Structure # custom spaces (#{cas})?"
+              err_msg = "# custom spaces (#{cas})?"
               assert_equal(s.spaces.size, 0, err_msg)
             end
 
@@ -265,43 +277,43 @@ class NECB_Structure_Tests < Minitest::Test
             flor_m2 = TBD.facets(espaces, "all", "floor").map(&:grossArea).sum
 
             if option.empty?
-              err_msg = "BTAP::Structure internal mass definitions (#{cas})?"
+              err_msg = "Internal mass definitions (#{cas})?"
               assert_empty(model.getInternalMassDefinitions)
-              err_msg = "BTAP::Structure internal mass (#{cas})?"
+              err_msg = "Internal mass (#{cas})?"
               assert_empty(model.getInternalMasss)
             else
               kg  = 0
               mkg = (s.deadload + s.liveload) * flor_m2
 
-              err_msg = "BTAP::Structure missing internal mass definitions (#{cas})?"
+              err_msg = "Missing internal mass definitions (#{cas})?"
               refute_empty(model.getInternalMassDefinitions)
-              err_msg = "BTAP::Structure missing internal mass (#{cas})?"
+              err_msg = "Missing internal mass (#{cas})?"
               refute_empty(model.getInternalMasss)
 
               model.getInternalMasss.each do |imass|
                 id      = imass.nameString
                 m2      = imass.surfaceArea
-                err_msg = "BTAP::Structure #{id} (#{cas})?"
+                err_msg = "#{id} (#{cas})?"
                 refute_empty(m2, err_msg)
                 m2      = m2.get
                 c       = imass.internalMassDefinition.construction
-                err_msg = "BTAP::Structure #{id} construction (#{cas})?"
+                err_msg = "#{id} construction (#{cas})?"
                 refute_empty(c, err_msg)
                 c       = c.get.to_LayeredConstruction
-                err_msg = "BTAP::Structure #{id} layered construction (#{cas})?"
+                err_msg = "#{id} layered construction (#{cas})?"
                 refute_empty(c, err_msg)
                 layers  = c.get.layers
-                err_msg = "BTAP::Structure #{id} construction layers (#{cas})?"
+                err_msg = "#{id} construction layers (#{cas})?"
                 assert_equal(layers.size, 1, err_msg)
                 mat     = layers.first.to_StandardOpaqueMaterial
-                err_msg = "BTAP::Structure #{id} material (#{cas})?"
+                err_msg = "#{id} material (#{cas})?"
                 refute_empty(mat, err_msg)
                 mat     = mat.get
                 m3      = mat.thickness * m2
                 mass    = m3 * mat.density
                 kg     += mass
                 space   = imass.space
-                err_msg = "BTAP::Structure #{id} space (#{cas})?"
+                err_msg = "#{id} space (#{cas})?"
                 refute_empty(space, err_msg)
                 space   = space.get
                 ide     = space.nameString
@@ -309,25 +321,25 @@ class NECB_Structure_Tests < Minitest::Test
 
                 if s.spaces.key?(ide)
                   dkg     = (s.spaces[ide][:deadload] + s.liveload) * fm2
-                  err_msg = "BTAP::Structure #{id} #{ide} load (#{cas})?"
+                  err_msg = "#{id} #{ide} load (#{cas})?"
                   assert_equal(dkg.round(2), mass.round(2), err_msg)
                   mkg    += dkg
                 end
               end
 
               unless mkg.round == kg.round
-                fdback << "BTAP::Structure internal mass #{kg.round} (#{cas})!"
+                fdback << "Internal mass #{kg.round} (#{cas})!"
                 @test_passed = false
               end
             end
 
             unless s.data[:category].include?(s.category)
-              fdback << "BTAP::Structure invalid category #{s.category} (#{cas})!"
+              fdback << "Invalid category #{s.category} (#{cas})!"
               @test_passed = false
             end
 
             unless s.data[:structure].include?(s.structure)
-              fdback << "BTAP::Structure invalid structure #{s.structure} (#{cas})!"
+              fdback << "Invalid structure #{s.structure} (#{cas})!"
               @test_passed = false
             end
 
@@ -340,9 +352,9 @@ class NECB_Structure_Tests < Minitest::Test
                 end
               end
 
-              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas}) 1?"
+              err_msg = "BUILDING kgCO2-e (#{cas}) 1?"
               assert_equal(co2_structure.round, co2.round, err_msg)
-              err_msg = "BTAP::Structure BUILDING kgCO2-e (#{cas}) 2?"
+              err_msg = "BUILDING kgCO2-e (#{cas}) 2?"
               assert_equal(co2_structure.round, s.co2[:structure].round, err_msg)
 
               # Reset for non-customized spaces only.
