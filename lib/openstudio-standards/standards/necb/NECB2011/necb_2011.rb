@@ -245,7 +245,6 @@ class NECB2011 < Standard
   # This method is a wrapper to create the 16 archetypes easily. # 55 args
   def model_create_prototype_model(template:,
                                    building_type:,
-                                   construction_opt: '',
                                    epw_file:,
                                    custom_weather_folder: nil,
                                    debug: false,
@@ -317,7 +316,6 @@ class NECB2011 < Standard
                                    oerd_utility_pricing: nil)
     model = load_building_type_from_library(building_type: building_type)
     return model_apply_standard(model: model,
-                                construction_opt: construction_opt,
                                 tbd_option: tbd_option,
                                 tbd_interpolate: tbd_interpolate,
                                 epw_file: epw_file,
@@ -402,7 +400,6 @@ class NECB2011 < Standard
   # Created this method so that additional methods can be addded for bulding the prototype model in later
   # code versions without modifying the build_protoype_model method or copying it wholesale for a few changes.
   def model_apply_standard(model:,
-                           construction_opt: '',
                            tbd_option: 'none',
                            tbd_interpolate: true,
                            epw_file:,
@@ -484,17 +481,27 @@ class NECB2011 < Standard
     self.fuel_type_set = SystemFuels.new()
     self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: primary_heating_fuel)
     clean_and_scale_model(model: model, rotation_degrees: rotation_degrees, scale_x: scale_x, scale_y: scale_y, scale_z: scale_z)
-    fdwr_set = convert_arg_to_f(variable: fdwr_set, default: -1)
-    srr_set = convert_arg_to_f(variable: srr_set, default: -1)
-    srr_opt = convert_arg_to_string(variable: srr_opt, default: '')
-    construction_opt = convert_arg_to_string(variable: construction_opt, default: '')
-    massive = construction_opt == 'structure'
-    tbd_option = convert_arg_to_string(variable: tbd_option, default: 'none')
-    tbd_interpolate = convert_arg_to_bool(variable: tbd_interpolate, default: true)
-    necb_hdd = convert_arg_to_bool(variable: necb_hdd, default: true)
-    boiler_fuel = convert_arg_to_string(variable: boiler_fuel, default: nil)
-    boiler_cap_ratio = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
-    swh_fuel = convert_arg_to_string(variable: swh_fuel, default: nil)
+
+    ext_floor_cond           = convert_arg_to_f(variable: ext_floor_cond, default: nil)
+    ext_roof_cond            = convert_arg_to_f(variable: ext_roof_cond, default: nil)
+    ext_wall_cond            = convert_arg_to_f(variable: ext_wall_cond, default: nil)
+    ground_floor_cond        = convert_arg_to_f(variable: ground_floor_cond, default: nil)
+    ground_roof_cond         = convert_arg_to_f(variable: ground_roof_cond, default: nil)
+    ground_wall_cond         = convert_arg_to_f(variable: ground_wall_cond, default: nil)
+    door_construction_cond   = convert_arg_to_f(variable: door_construction_cond, default: nil)
+    fixed_window_cond        = convert_arg_to_f(variable: fixed_window_cond, default: nil)
+    fixed_wind_solar_trans   = convert_arg_to_f(variable: fixed_wind_solar_trans, default: nil)
+    skylight_solar_trans     = convert_arg_to_f(variable: skylight_solar_trans, default: nil)
+    glass_door_solar_trans   = convert_arg_to_f(variable: glass_door_solar_trans, default: nil)
+    fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
+    srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
+    srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
+    tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
+    tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
+    necb_hdd                 = convert_arg_to_bool(variable: necb_hdd, default: true)
+    boiler_fuel              = convert_arg_to_string(variable: boiler_fuel, default: nil)
+    boiler_cap_ratio         = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
+    swh_fuel                 = convert_arg_to_string(variable: swh_fuel, default: nil)
     airloop_fancoils_heating = convert_arg_to_bool(variable: airloop_fancoils_heating, default: false)
 
     # Check if custom systems are assigned to dwelling units, washrooms, corridors, and storage rooms.  If they are, set
@@ -519,7 +526,7 @@ class NECB2011 < Standard
     output_meters = check_output_meters(output_meters: output_meters) if oerd_utility_pricing
 
     assign_building_activity(model: model)
-    assign_building_structure(model: model, activity: @activity, massive: massive)
+    assign_building_structure(model: model, activity: @activity)
     apply_loads(model: model,
                 lights_type: lights_type,
                 lights_scale: lights_scale,
@@ -527,7 +534,6 @@ class NECB2011 < Standard
                 electrical_loads_scale: electrical_loads_scale,
                 oa_scale: oa_scale)
     apply_envelope(model: model,
-                   construction_opt: construction_opt,
                    bldg_category: @activity.category,
                    bldg_structure: @structure.structure,
                    ext_wall_cond: ext_wall_cond,
@@ -563,7 +569,7 @@ class NECB2011 < Standard
                       sizing_run_dir: sizing_run_dir,
                       lights_type: lights_type,
                       lights_scale: lights_scale)
-    apply_kiva_foundation(model, massive)
+    apply_kiva_foundation(model)
     apply_systems_and_efficiencies(model: model,
                                    sizing_run_dir: sizing_run_dir,
                                    hvac_system_primary: hvac_system_primary,
@@ -812,7 +818,6 @@ class NECB2011 < Standard
   end
 
   def apply_envelope(model:,
-                     construction_opt: '',
                      bldg_category: '',
                      bldg_structure: '',
                      ext_wall_cond: nil,
@@ -839,13 +844,11 @@ class NECB2011 < Standard
     model.getInsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
     model.getOutsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
 
-    construction_opt = '' unless construction_opt.respond_to?(:to_sym)
     bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
-    construction_opt = construction_opt.to_s.downcase
     bldg_structure   = bldg_structure.to_s.downcase.to_sym
     bldg_structures  = @structure.data[:structure].keys
 
-    if construction_opt == 'structure' && bldg_structures.include?(bldg_structure)
+    if bldg_structures.include?(bldg_structure)
       argh            = {}
       argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
       argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
@@ -888,11 +891,8 @@ class NECB2011 < Standard
   end
 
   # Apply Kiva foundation model to floors/walls with ground boundary condition.
-  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
-  # 'massive' edit: denis@rd2.ca
-  #
-  # @param massive [Boolean] whether opaque materials are standard (not massless)
-  def apply_kiva_foundation(model, massive = false)
+  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca), denis@rd2.ca
+  def apply_kiva_foundation(model)
     # define a Kiva model for the whole bldg that's used for the first floor in contact with ground in each zone
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
@@ -920,20 +920,11 @@ class NECB2011 < Standard
             kiva_model.setWallDepthBelowSlab(0.0)
             zone_kiva_models << kiva_model
           end
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones.
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones. Skip check if 'massive'.
-          if massive
-            c = gfloor.construction.get.to_LayeredConstruction.get
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-            gfloor.setConstruction(c)
-          else
-            replace_massless_material_with_std_material(model,gfloor)
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-          end
+          # Kiva model only works with standard materials.
+          c = gfloor.construction.get.to_LayeredConstruction.get
+          gfloor.setOutsideBoundaryCondition('Foundation')
+          gfloor.setAdjacentFoundation(zone_kiva_models.last)
+          gfloor.setConstruction(c)
 
           # Set the exposed perimeter for space floors in contact with the ground.
           floor_exp_per = 0.0
@@ -947,16 +938,10 @@ class NECB2011 < Standard
           # contact with the space floor in contact with ground 'gfloor'
           space_ground_walls.each do |gwall|
             if surfaces_are_in_contact?(gfloor,gwall)
-              if massive
-                c = gwall.construction.get.to_LayeredConstruction.get
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-                gwall.setConstruction(c)
-              else
-                replace_massless_material_with_std_material(model,gwall)
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-              end
+              c = gwall.construction.get.to_LayeredConstruction.get
+              gwall.setOutsideBoundaryCondition('Foundation')
+              gwall.setAdjacentFoundation(zone_kiva_models.last)
+              gwall.setConstruction(c)
             end
           end
         end
@@ -1161,11 +1146,10 @@ class NECB2011 < Standard
   #
   # @param model [OpenStudio::Model::Model] a model
   # @param activity [BTAP::Activity] a BTAP building ACTIVITY object
-  # @param massive [Boolean] whether requesting internal mass generation
   #
   # @return [BTAP::Structure] a BTAP building STRUCTURE (see logs if failed)
-  def assign_building_structure(model: nil, activity: nil, massive: true)
-    @structure = BTAP::Structure.new(model, activity, massive)
+  def assign_building_structure(model: nil, activity: nil)
+    @structure = BTAP::Structure.new(model, activity)
   end
 
   ##
