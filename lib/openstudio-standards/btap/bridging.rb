@@ -18,6 +18,7 @@
 # **************************************************************************** /
 
 require 'tbd'
+require 'json'
 
 module BTAP
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
@@ -405,73 +406,6 @@ module BTAP
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
 
     ##
-    # Retrieves BTAP-costed assembly.
-    #
-    # @param structure [BTAP::Structure] BTAP Structure object
-    # @param stype [:walls, :floors or :roofs] surface type
-    # @param perform [:hp or :lp] high- or low-performance variant
-    #
-    # @return [String] BTAP assembly identifier for costing
-    def costed_assembly(structure = nil, stype = :walls, perform = :lp)
-      stype   = :walls unless [:roofs, :floors].include?(stype)
-      perform = :lp    unless perform == :hp
-      return STEL1 unless structure.is_a?(BTAP::Structure)
-
-      # Select BTAP-costed assembly, matching:
-      #   - BTAP::Structure generated construction parameters
-      #   - requested high (HP) vs low-performance (LP) PSI-factor level
-      #
-      # Ideally, chosen PSI factor sets and matching OpenStudio constructions
-      # shouldn't strictly be based on selected BTAP assemblies (e.g.
-      # wood-framed vs steel-framed, cladding choice), but also on selected
-      # building 'structure', e.g.:
-      #
-      #   - "wood-framed" MURB
-      #   - "steel post/beam" office building
-      #   - "reinforced concrete post/beam" public library
-      #   - "metal(-building)" warehouse
-      #   - "mass-timber (CLT)" university pavilion
-      #
-      # Major thermal bridges often consist of anchors or supports that transmit
-      # structural loads (and by the same token, 'heat') to a building's main
-      # structure. Examples include balconies, parapets and shelf angles.
-      # Highly conductive building structures (e.g. steel, aluminium) exacerbate
-      # thermal bridging effects - so building structural selection matters.
-      #
-      # The BTAP::Structure module generates such attributes, yet BTAP's costed
-      # thermal bridging database doesn't yet distinguish between building
-      # structures - @todo. For the moment, BTAP PSI set selection is strictly
-      # based on BTAP::Structure's :framing, :cladding and :finish attributes,
-      # which must be set prior to initiating BTAP's TBD's thermal bridging
-      # solution:
-
-      # Light gauge steel framing by default. Override if wood, cmu or precast.
-      case stype
-      when :roofs  then return ROOF
-      when :floors then return FLOOR
-      else
-        case structure.framing
-        when :wood
-          c1 = WOOD5
-          c2 = WOOD7
-        when :cmu
-          c1 = MASS2
-          c2 = MASSB
-        else
-          if structure.cladding == :heavy && structure.finish == :heavy
-            c1 = MASS4
-            c2 = MASS8
-          else
-            c1 = STEL1
-            c2 = STEL2
-          end
-        end
-      end
-
-      perform == :lp ? c1 : c2
-    end
-
-    ##
     # Retrieves nearest assembly Uo factor.
     #
     # @param assembly [String] BTAP assembly identifier
@@ -540,6 +474,54 @@ module BTAP
     def self.extended(base)
       base.send(:include, self)
     end
+
+    # Retrieve the material quantities for TBD edge tallies.
+    # @param edge_tallies [Hash] Wall references mapped to costs.
+    # @return [Hash] IDs mapped to their quantities in feet.
+    def self.get_material_quantities_for_edges(edge_tallies)
+      cp                  = CommonPaths.instance
+      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+      material_quantities = {}
+
+      edge_tallies.each do |edge_type, value|
+        value.each do |wall_reference_and_quality, quantity|
+
+          # "transition" or "ceiling" edges aren't considered.
+          if edge_type == "transition" || edge_type == "ceiling"
+            next
+
+          # "jamb", "sill", and "head" may all be grouped under fenestration
+          # when referencing the thermal bridging CSV. Same for "skylightjamb",
+          # "skylightsill", and "skylighthead".
+          elsif edge_type.match?(/^(skylight)?(jamb|sill|head)$/)
+            edge_type = "fenestration"
+          end
+
+          result = csv.find do |row|
+            row["edge_type"]      == edge_type &&
+            row["wall_reference"] == wall_reference_and_quality
+          end
+
+          if result.nil?
+            raise("Entry with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
+                  " could not be found in the thermal bridging database.")
+            next
+          end
+
+          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
+          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
+          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
+            if material_quantities[id].nil?
+              material_quantities[id] = 0.0
+            end
+
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
+          end
+        end
+      end
+
+      return material_quantities
+    end
   end
 
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
@@ -577,6 +559,7 @@ module BTAP
     def initialize(model = nil, argh = {})
       btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
+      tag       = "uprated_Uo"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
@@ -619,7 +602,7 @@ module BTAP
 
       return false if args[:io_path].nil?
 
-      args[:option ] = ""
+      args[:option] = ""
 
       loop do
         if initial
@@ -658,9 +641,6 @@ module BTAP
         mdl.addObjects(model.toIdfFile.objects)
         TBD.clean!
 
-        # fil = File.join("/Users/rd2/Desktop/test.osm")
-        # mdl.save(fil, true)
-
         res = TBD.process(mdl, args)
 
         # Halt all processes if fatal errors raised by TBD (e.g. badly formatted
@@ -687,7 +667,7 @@ module BTAP
           # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
-          assembly = self.costed_assembly(argh[:structure], stypes, perform)
+          assembly = BTAP::Constructions.costed_assembly(argh[:structure], stypes, perform)
 
           uo = target ? self.costed_uo(assembly, target) : nil
 
@@ -732,6 +712,17 @@ module BTAP
           next unless v[:stypes] == stypes
 
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
+
+          # Maintain initial uprated Uo as AdditionalProperty.
+          v[:surfaces].each do |id|
+            surface = model.getSurfaceByName(id)
+            next if surface.empty?
+
+            surface = surface.get
+            next unless surface.additionalProperties.getFeatureAsDouble(tag).empty?
+
+            surface.additionalProperties.setFeature(tag, v[:uo])
+          end
         end
       end
 
@@ -1013,7 +1004,7 @@ module BTAP
       # wall selection. Adapt once BTAP::Structure supports STRUCTURE
       # assignements per OpenStudio's building-to-space hierarchy, e.g. "cmu"
       # gymnasium walls in an otherwise "steel"post/frame school. @todo
-      assembly = self.costed_assembly(structure, :walls, perform)
+      assembly = BTAP::Constructions.costed_assembly(structure, :walls, perform)
       building_psi = self.set(assembly, quality)
 
       psis[ building_psi[:id] ] = building_psi
@@ -1121,65 +1112,13 @@ module BTAP
           lgs << "# '#{type}' (#{e.size}x):"
 
           e.each do |psi, length|
-            l = format("%.2f", length)
-            lgs << "... PSI set '#{psi}' : #{l} m"
+            lgs << "... PSI set '#{psi}' : #{format("%.2f", length)} m"
           end
         end
       end
 
       true
     end
-
-    # def get_material_quantities()
-    #   material_quantities = {}
-    #   csv = CSV.read("#{File.dirname(__FILE__)}/../../../data/inventory/thermal_bridging.csv", headers: true)
-    #   tally_edges = @tally[:edges].transform_keys(&:to_s)
-    #
-    #   tally_edges.each do |edge_type_full, value|
-    #     edge_type = edge_type_full.delete_suffix('convex')
-    #     edge_type = 'fenestration' if ['head', 'jamb', 'sill'].include?(edge_type)
-    #
-    #     value.each do |wall_ref_and_quality, quantity|
-    #       /(.*)\s(.*)/ =~ wall_ref_and_quality
-    #       wall_reference = $1
-    #       quality = $2
-    #
-    #       if wall_reference =='BTAP-ExteriorWall-SteelFramed-1'
-    #         wall_reference = 'BTAP-ExteriorWall-SteelFramed-2'
-    #       end
-    #
-    #       next if edge_type == 'transition'
-    #
-    #       result = csv.find { |row| row['edge_type'] == edge_type &&
-    #         row['quality'] == quality &&
-    #         row['wall_reference'] == wall_reference
-    #       }
-    #
-    #       if result.nil?
-    #         puts ("#{edge_type}-#{wall_reference}-#{quality}")
-    #         puts "not found in tb database"
-    #         next
-    #       end
-    #
-    #       # Split
-    #       material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
-    #       id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
-    #
-    #       material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
-    #         material_quantities[id] = 0.0 if material_quantities[id].nil?
-    #         material_quantities[id] = material_quantities[id] + scale.to_f * quantity.to_f
-    #       end
-    #     end
-    #   end
-    #
-    #   material_opaque_id_quantities = []
-    #
-    #   material_quantities.each do |id,quantity|
-    #     material_opaque_id_quantities << { 'materials_opaque_id' => id, 'quantity' => quantity, 'domain'=> 'thermal_bridging' }
-    #   end
-    #
-    #   return material_opaque_id_quantities
-    # end
   end
 end
 

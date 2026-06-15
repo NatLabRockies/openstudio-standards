@@ -162,6 +162,7 @@ class BTAPDatapoint
                                        fixed_wind_solar_trans: @options[:fixed_wind_solar_trans],
                                        skylight_solar_trans: @options[:skylight_solar_trans],
                                        fdwr_set: @options[:fdwr_set],
+                                       srr_opt: @options[:srr_opt],
                                        srr_set: @options[:srr_set],
                                        rotation_degrees: @options[:rotation_degrees],
                                        scale_x: @options[:scale_x],
@@ -186,6 +187,7 @@ class BTAPDatapoint
                                        airloop_economizer_type: @options[:airloop_economizer_type],
                                        shw_scale: @options[:shw_scale],
                                        baseline_system_zones_map_option: @options[:baseline_system_zones_map_option],
+                                       tbd_interpolate: @options[:tbd_interpolate],
                                        tbd_option: @options[:tbd_option],
                                        necb_hdd: @options[:necb_hdd],
                                        boiler_fuel: @options[:boiler_fuel],
@@ -224,12 +226,12 @@ class BTAPDatapoint
         # Attach the sql file from the run to the sizing model
         model.setSqlFile(sql)
 
+        post_analysis = nil
         if @options[:enable_costing] or @options[:enable_carbon]
           @cp = CommonPaths.instance
-          post_analysis = BTAPDatapointAnalysis.new(
+          post_analysis = BTAP::DatapointAnalysis.new(
             model: model,
             output_folder: @dp_temp_folder,
-            template: @options[:template],
             standard: @standard,
             qaqc: @qaqc)
         end
@@ -260,12 +262,20 @@ class BTAPDatapoint
                                   oerd_utility_pricing: @oerd_utility_pricing,
                                   utility_pricing_year: @utility_pricing_year).btap_data
 
-        # Write Files
-        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') { |f| f.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true)) }
-        puts "Wrote File btap_data.json in #{Dir.pwd} "
+        # Write files
+        File.open(File.join(@dp_temp_folder, 'btap_data.json'), 'w') do |file|
+          file.write(JSON.pretty_generate(@btap_data.sort.to_h, allow_nan: true))
+          puts "Wrote File btap_data.json in #{Dir.pwd} "
+        end
 
-        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') { |f| f.write(JSON.pretty_generate(@qaqc, allow_nan: true)) }
-        puts "Wrote File qaqc.json in #{Dir.pwd} "
+        File.open(File.join(@dp_temp_folder, 'qaqc.json'), 'w') do |file|
+          file.write(JSON.pretty_generate(@qaqc, allow_nan: true))
+          puts "Wrote File qaqc.json in #{Dir.pwd} "
+        end
+
+        # Write cache files to be able to re-run this analysis without an annual
+        # simulation.
+        post_analysis.write_cache(File.join(@dp_temp_folder, 'btap_cache.json')) if post_analysis
 
         #output hourly data
         self.output_hourly_data(model,@dp_temp_folder, @options[:datapoint_id])
@@ -308,7 +318,7 @@ class BTAPDatapoint
 
     # Initializes the qaqc data structure.
     # Scoped inside of the class so that it can be used in the intialization of
-    # this class as well as in BTAPAnalysis.
+    # this class as well as in BTAP::Analysis.
     def build_qaqc(model, standard, datapoint_id, analysis_id)
       qaqc = standard.init_qaqc(model)
       command = "SELECT Value

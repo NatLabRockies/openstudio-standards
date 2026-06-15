@@ -355,10 +355,9 @@ class BTAPResults_Test < Minitest::Test
       #create osm file to use mimic PAT/OS server called final
       model.save(model_out_path, true)
       helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
-      post_analysis = BTAPDatapointAnalysis.new(
+      post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
-        template: template,
         standard: standard,
         qaqc: nil)
     else

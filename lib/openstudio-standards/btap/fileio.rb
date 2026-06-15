@@ -31,8 +31,8 @@ module BTAP
   #Test Constructions Module
     if __FILE__ == $0
       require 'test/unit'
-      class FileIOTests < Test::Unit::TestCase 
- 
+      class FileIOTests < Test::Unit::TestCase
+
         def setup
         end
 
@@ -262,10 +262,6 @@ module BTAP
       # add new file to empty model
       model.addObjects( new_model.toIdfFile.objects )
       BTAP::runner_register("Info",  "Model name is now #{model.building.get.name}.", runner)
-
-
-
-
     end
 
     # This method will save the model to an osm file.
@@ -1192,83 +1188,85 @@ module BTAP
       return new_model
     end
 
-
-    def self.clean_osm_file( file_path: , 
-                        output_path:  )
-
-      def self.read_osm_file(file_path)
-        data = []
-        current_hash = {}
-      
-        File.foreach(file_path) do |line|
-          line.strip!
-          next if line.empty?
-      
-          if line.start_with?('OS:')
-            current_hash = { type: line.split(/[;,]/).first }
-            data << current_hash
-          elsif line.include?('!-')
-            key, value = line.split('!-').map(&:strip)
-            current_hash[value] = key.chomp(',;').strip
-          else
-            current_hash[:id] ||= line.chomp(',;').strip
-          end
-        end
-      
-        data
-      end
-      
-      def self.remove_special_characters(hash)
-        hash.keys.each do |key|
-            new_key = key.to_s.sub(/[;,]$/, '')
-          hash[new_key] = hash.delete(key)
-        end
-      
+    def self.set_all_epw_paths(osm_data)
+      osm_data.each do |hash|
         hash.each do |key, value|
-          next unless value.is_a?(String)
-        
-          hash[key] = value.gsub(/[;,]$/, '')
+          #Check if value is in a epw file path format like this "USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw"
+          if value.match?(/.*\.epw/)
+            # Get name of file without path from value
+            hash[key] = File.basename(value)
+          end
         end
       end
-      
-      def self.rename_handles(osm_data)
+    end
 
-        hash = Digest::SHA1.hexdigest("fixed_seed")
-        handle_map = {}
-        new_handle_index = 0
-        object_type_index = 0
-        last_object_type = nil
-      
-        osm_data.each do |hash|
-          if hash['Handle']
-            #puts hash
-            #puts "#{hash['type']} == #{last_object_type}"
-            if hash['type'] != last_object_type
-              last_object_type = hash['type']
-              object_type_index += 1
-              new_handle_index = 1
-            else
-              new_handle_index += 1
-            end
-
-            # create a formatted string that is 12 charecters created with new_handle_index, but padded with 0s on the left.
-            formatted_index = new_handle_index.to_s.rjust(12, '0')
-            formatted_index_object_type = object_type_index.to_s.rjust(4, '0')
-            new_handle = "{00000000-0000-0000-#{formatted_index_object_type}-#{formatted_index}}"
-            handle_map[hash['Handle']] = new_handle
-            hash['Handle'] = new_handle
+    def self.set_all_data_time(osm_data)
+      osm_data.each do |hash|
+        hash.each do |key, value|
+          #Check if value is in a date-time format like this "2024-10-17 01:19:35 UTC"
+          if value.match?(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/)
+            hash[key] = "2024-01-01 01:00:00 UTC"
           end
         end
-      
+      end
+    end
+
+    def self.save_osm_file(osm_data, output_path)
+      File.open(output_path, 'w') do |file|
         osm_data.each do |hash|
+          file.puts "#{hash["type"]},"
           hash.each do |key, value|
-            if handle_map.key?(value)
-              hash[key] = handle_map[value]
+            next if key == "type"
+            is_last_key = (hash.keys - [:type]).last == key
+            if key == :id
+              file.puts "  #{value},"
+            else
+              file.puts "  #{value}#{is_last_key ? ';' : ','}".ljust(42) + " !- #{key}"
             end
           end
+          file.puts
         end
-        
-       # Go through all hashes in osm_data and if the "Name" field value fits this pattern {9386c18d-e70a-447e-8b69-9a0a39fd8f06} replace it with an incremented value.
+      end
+    end
+
+    def self.rename_handles(osm_data)
+
+      hash = Digest::SHA1.hexdigest("fixed_seed")
+      handle_map = {}
+      new_handle_index = 0
+      object_type_index = 0
+      last_object_type = nil
+
+      osm_data.each do |hash|
+        if hash['Handle']
+          #puts hash
+          #puts "#{hash['type']} == #{last_object_type}"
+          if hash['type'] != last_object_type
+            last_object_type = hash['type']
+            object_type_index += 1
+            new_handle_index = 1
+          else
+            new_handle_index += 1
+          end
+
+          # create a formatted string that is 12 charecters created with new_handle_index, but padded with 0s on the left.
+          formatted_index = new_handle_index.to_s.rjust(12, '0')
+          formatted_index_object_type = object_type_index.to_s.rjust(4, '0')
+          new_handle = "{00000000-0000-0000-#{formatted_index_object_type}-#{formatted_index}}"
+          handle_map[hash['Handle']] = new_handle
+          hash['Handle'] = new_handle
+        end
+      end
+
+      osm_data.each do |hash|
+        hash.each do |key, value|
+          if handle_map.key?(value)
+            hash[key] = handle_map[value]
+          end
+        end
+      end
+
+      # Go through all hashes in osm_data and if the "Name" field value fits this pattern {9386c18d-e70a-447e-8b69-9a0a39fd8f06} replace it with an incremented value.
       name_map = {}
       new_name_index = 0
       osm_data.each do |hash|
@@ -1288,55 +1286,43 @@ module BTAP
           end
         end
       end
+    end
 
-
+    def self.remove_special_characters(hash)
+      hash.keys.each do |key|
+        new_key = key.to_s.sub(/[;,]$/, '')
+        hash[new_key] = hash.delete(key)
       end
-      
 
+      hash.each do |key, value|
+        next unless value.is_a?(String)
+        hash[key] = value.gsub(/[;,]$/, '')
+      end
+    end
 
-
-      def self.save_osm_file(osm_data, output_path)
-        File.open(output_path, 'w') do |file|
-          osm_data.each do |hash|
-            file.puts "#{hash["type"]},"
-            hash.each do |key, value|
-              next if key == "type"
-              is_last_key = (hash.keys - [:type]).last == key
-              if key == :id
-                file.puts "  #{value},"
-              else
-                file.puts "  #{value}#{is_last_key ? ';' : ','}".ljust(42) + " !- #{key}"
-              end
-            end
-            file.puts
-          end
+    def self.read_osm_file(file_path)
+      data = []
+      current_hash = {}
+      File.foreach(file_path) do |line|
+        line.strip!
+        next if line.empty?
+         if line.start_with?('OS:')
+          current_hash = { type: line.split(/[;,]/).first }
+          data << current_hash
+        elsif line.include?('!-')
+          key, value = line.split('!-').map(&:strip)
+          current_hash[value] = key.chomp(',;').strip
+        elsif line.include?('! ') # for lines that have '! ' but not '!-'
+          key, value = line.split('! ').map(&:strip)
+          current_hash[value] = key.chomp(',;').strip
+        else
+          current_hash[:id] ||= line.chomp(',;').strip
         end
       end
+      data
+    end
 
-      def self.set_all_data_time(osm_data)
-        osm_data.each do |hash|
-          hash.each do |key, value|
-            #Check if value is in a date-time format like this "2024-10-17 01:19:35 UTC"
-            if value.match?(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/)
-              hash[key] = "2024-01-01 01:00:00 UTC"
-            end
-          end
-        end
-      end
-
-      def self.set_all_epw_paths(osm_data)
-        osm_data.each do |hash|
-          hash.each do |key, value|
-            #Check if value is in a epw file path format like this "USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw"
-            if value.match?(/.*\.epw/)
-              # Get name of file without path from value
-              hash[key] = File.basename(value)
-            end
-          end
-        end
-      end
-
-              
+    def self.clean_osm_file( file_path: ,output_path:  )
       osm_data = read_osm_file(file_path)
       osm_data.sort_by! { |hash| [hash[:type], hash['Name'] || ''] }
 

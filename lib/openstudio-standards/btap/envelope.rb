@@ -64,6 +64,17 @@ module BTAP
 
       #This module contains methods dealing with the creation and modification of constructions.
       module Constructions #Resources::Envelope::Constructions
+
+        # TODO: These are temporary values for uMIN and uMAX that reflect the
+        # current maximum and minimum assemblies for the construction database
+        # from `nrcan_476`.
+        @uMIN = 0.08
+        @uMAX = 2.69
+        class << self
+          attr_reader :uMIN
+          attr_reader :uMAX
+        end
+
         #Test Constructions Module
         if __FILE__ == $0
           require 'test/unit'

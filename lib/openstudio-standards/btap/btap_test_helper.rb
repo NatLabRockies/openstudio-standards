@@ -8,7 +8,7 @@ class BTAPResultsHelper < Minitest::Test
   puts "BTAP Results caching enabled." if @@cached
 
   def initialize(test_path:, model_name:, run_dir:)
-    @test_path             = File.expand_path(test_path) 
+    @test_path             = File.expand_path(test_path)
     @test_filename         = File.basename(test_path, '.rb')
     @model_name            = model_name
     @run_dir               = File.expand_path(run_dir)
@@ -33,7 +33,7 @@ class BTAPResultsHelper < Minitest::Test
 
   def get_analysis(output_folder:, template:)
     return BTAPNoSimAnalysis.new(
-      model_path:    @model_cached_path, 
+      model_path:    @model_cached_path,
       sql_file_path: @sql_cached_path,
       output_folder: output_folder,
       template:      template,
@@ -50,11 +50,11 @@ class BTAPResultsHelper < Minitest::Test
     regression_files_folder  = "#{File.dirname(@test_path)}/regression_files"
     expected_result_filename = "#{regression_files_folder}/#{@model_name}_expected_result.cost.json"
     test_result_filename     = "#{regression_files_folder}/#{@model_name}_test_result.cost.json"
-    expected_result_json     = JSON.parse(File.read(expected_result_filename))
     test_result_json         = JSON.parse(File.read(cost_result_json_path))
 
     FileUtils.rm(test_result_filename) if File.exist?(test_result_filename)
     if File.exist?(expected_result_filename)
+      expected_result_json = JSON.parse(File.read(expected_result_filename))
       unless expected_result_json == test_result_json
         FileUtils.cp(cost_result_json_path, test_result_filename)
         test_instance.assert(false, "Regression test for #{@model_name} produces differences. Examine expected and test result differences in test/btap_costing/tests/regression_files/")
@@ -73,7 +73,7 @@ class BTAPResultsHelper < Minitest::Test
       cost_list_output = BTAPCosting.new().cost_list_items(btap_items: cost_list)
       cost_result      = JSON.parse(File.read(cost_result_json_path))
       cost_sum         = cost_result['totals']
-      
+
       # Compare the results and let the user know if there are differences.  Do not fail test if there are.
       puts("")
       puts("Comparing BTAP_Costing results and itemized costing list cost results:")
