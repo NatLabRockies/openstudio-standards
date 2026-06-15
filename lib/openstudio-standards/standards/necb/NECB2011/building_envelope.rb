@@ -580,7 +580,7 @@ class NECB2011
   # @option a [Hash] gFloorU ground floor Uo (or Ut)
   # @option a [Hash] gRoofU ground roof Uo (or Ut)
   # @option a [Hash] doorU opaque door U
-  # @option a [Hash] fenU fenestration U (e.g. fixe, operable, glass door)
+  # @option a [Hash] fenU fenestration U (e.g. fixed, operable, glass door)
   # @option a [Hash] skyU skylight U
   # @option a [Hash] doorSHGC opaque door SHGC
   # @option a [Hash] fenSHGC fenestration SHGC
@@ -661,41 +661,45 @@ class NECB2011
     # The solution is temporarily OK, yet a more nuanced treatment is required
     # for full-height basement cases. This would likely require a space-by-space
     # treatment, based on Z-axis grade-vs-floor height difference - @todo.
-    specs          = {}
-    specs[:type  ] = :slab
-    specs[:uo    ] = nil
-    specs[:uo    ] = gFloorU   if hdd > 6999
-    specs[:frame ] = :none unless hdd > 6999
-    specs[:finish] = :none     if category == "robust"
-    specs[:finish] = :none     if category == "industry"
-    gFloor         = TBD.genConstruction(model, specs)
-    insulation     = TBD.insulatingLayer(gFloor)
+    #
+    # Ground-facing constructions are restricted to a building's default
+    # construction set - not customized spaces'.
+    if bldg
+      specs          = {}
+      specs[:type  ] = :slab
+      specs[:uo    ] = nil
+      specs[:uo    ] = gFloorU   if hdd > 6999
+      specs[:frame ] = :none unless hdd > 6999
+      specs[:finish] = :none     if category == "robust"
+      specs[:finish] = :none     if category == "industry"
+      gFloor         = TBD.genConstruction(model, specs)
 
-    # Ensure insulating layer uniqueness for each insulated construction.
-    lyr = TBD.insulatingLayer(gFloor)
-    TBD.assignUniqueMaterial(gFloor, lyr[:index]) if lyr[:index]
+      # Ensure insulating layer uniqueness for each insulated construction.
+      lyr = TBD.insulatingLayer(gFloor)
+      TBD.assignUniqueMaterial(gFloor, lyr[:index]) if lyr[:index]
 
-    # Insulated basement wall. A more nuanced treatment is necessary for
-    # multiple basement stories - no insulation required below 2.4m from grade.
-    specs          = {}
-    specs[:type  ] = :basement
-    specs[:uo    ] = gWallU
-    gWall          = TBD.genConstruction(model, specs)
+      # Insulated basement wall. A more nuanced treatment is necessary for
+      # multiple basement stories - no insulation required below 2.4m from grade.
+      specs          = {}
+      specs[:type  ] = :basement
+      specs[:uo    ] = gWallU
+      gWall          = TBD.genConstruction(model, specs)
 
-    lyr = TBD.insulatingLayer(gWall)
-    TBD.assignUniqueMaterial(gWall, lyr[:index]) if lyr[:index]
+      lyr = TBD.insulatingLayer(gWall)
+      TBD.assignUniqueMaterial(gWall, lyr[:index]) if lyr[:index]
 
-    # Insulated basement roof. Again, a more nuanced approach is necessary if
-    # the basement roof is below 1.2m from grade (e.g. a tunnel).
-    specs          = {}
-    specs[:type  ] = :roof
-    specs[:uo    ] = gRoofU
-    specs[:frame ] = :medium
-    specs[:finish] = :heavy
-    gRoof          = TBD.genConstruction(model, specs)
+      # Insulated basement roof. Again, a more nuanced approach is necessary if
+      # the basement roof is below 1.2m from grade (e.g. a tunnel).
+      specs          = {}
+      specs[:type  ] = :roof
+      specs[:uo    ] = gRoofU
+      specs[:frame ] = :medium
+      specs[:finish] = :heavy
+      gRoof          = TBD.genConstruction(model, specs)
 
-    lyr = TBD.insulatingLayer(gRoof)
-    TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
+      lyr = TBD.insulatingLayer(gRoof)
+      TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
+    end
 
     # Outdoor-facing wall.
     specs          = {}
@@ -739,28 +743,33 @@ class NECB2011
     TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
 
     # Outdoor-facing, opaque door.
-    specs          = {}
-    specs[:type  ] = :door
-    specs[:uo    ] = doorU
-    door           = TBD.genConstruction(model, specs)
+    if bldg
+      specs        = {}
+      specs[:type] = :door
+      specs[:uo  ] = doorU
+      door         = TBD.genConstruction(model, specs)
 
-    # Outdoor-facing, vertical fenestration.
-    specs          = {}
-    specs[:type  ] = :window
-    specs[:uo    ] = fenU
-    specs[:shgc  ] = fenSHGC
-    fen            = TBD.genConstruction(model, specs)
+      # Outdoor-facing, vertical fenestration.
+      specs        = {}
+      specs[:type] = :window
+      specs[:uo  ] = fenU
+      specs[:shgc] = fenSHGC
+      fen          = TBD.genConstruction(model, specs)
 
-    # Outdoor-facing, horizontal skylight.
-    specs          = {}
-    specs[:type  ] = :skylight
-    specs[:uo    ] = skyU
-    specs[:shgc  ] = skySHGC
-    sky            = TBD.genConstruction(model, specs)
+      # Outdoor-facing, horizontal skylight.
+      specs        = {}
+      specs[:type] = :skylight
+      specs[:uo  ] = skyU
+      specs[:shgc] = skySHGC
+      sky          = TBD.genConstruction(model, specs)
+    end
 
     # Interzone/partition wall.
     specs          = {}
     specs[:type  ] = :partition
+    specs[:clad  ] = :none   if framing == :cmu
+    specs[:finish] = :none   if framing == :cmu
+    specs[:frame ] = :medium if framing == :cmu
     iWall          = TBD.genConstruction(model, specs)
 
     # Interzone roof/ceiling & floor.
@@ -776,52 +785,55 @@ class NECB2011
     iFloor         = TBD.genConstruction(model, specs)
 
     # Shading material.
-    specs          = {type: :shading}
-    shading        = TBD.genConstruction(model, specs)
+    if bldg
+      specs   = {type: :shading}
+      shading = TBD.genConstruction(model, specs)
+    end
 
-    # Building-wide, default constructions.
     intSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    solSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
     extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    subSPACE = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
     intSPACE.setName("BTAP interior constructions")
-    solSPACE.setName("BTAP ground constructions")
     extSPACE.setName("BTAP exterior constructions")
-    subSPACE.setName("BTAP subsurface constructions")
-    intSPACE.setName("BTAP interior constructions BLDG")   if bldg
-    solSPACE.setName("BTAP ground constructions BLDG")     if bldg
-    extSPACE.setName("BTAP exterior constructions BLDG")   if bldg
-    subSPACE.setName("BTAP subsurface constructions BLDG") if bldg
     intSPACE.setWallConstruction(iWall)
     intSPACE.setFloorConstruction(iFloor)
     intSPACE.setRoofCeilingConstruction(iRoof)
-    solSPACE.setWallConstruction(gWall)
-    solSPACE.setFloorConstruction(gFloor)
-    solSPACE.setRoofCeilingConstruction(gRoof)
     extSPACE.setWallConstruction(eWall)
     extSPACE.setFloorConstruction(eFloor)
     extSPACE.setRoofCeilingConstruction(eRoof)
-    subSPACE.setFixedWindowConstruction(fen)
-    subSPACE.setOperableWindowConstruction(fen)
-    subSPACE.setGlassDoorConstruction(fen)
-    subSPACE.setSkylightConstruction(sky)
-    subSPACE.setTubularDaylightDomeConstruction(sky)
-    subSPACE.setTubularDaylightDiffuserConstruction(sky)
-    subSPACE.setDoorConstruction(door)
-    subSPACE.setOverheadDoorConstruction(door)
 
     setSPACE = OpenStudio::Model::DefaultConstructionSet.new(model)
     setSPACE.setName("BTAP construction set")
-    setSPACE.setName("BTAP construction set BLDG") if bldg
     setSPACE.setDefaultInteriorSurfaceConstructions(intSPACE)
-    setSPACE.setDefaultGroundContactSurfaceConstructions(solSPACE)
     setSPACE.setDefaultExteriorSurfaceConstructions(extSPACE)
-    setSPACE.setDefaultExteriorSubSurfaceConstructions(subSPACE)
     setSPACE.setInteriorPartitionConstruction(iWall)
-    setSPACE.setSpaceShadingConstruction(shading)
-    setSPACE.setBuildingShadingConstruction(shading)
-    setSPACE.setSiteShadingConstruction(shading)
-    setSPACE.setAdiabaticSurfaceConstruction(iWall)
+
+    if bldg
+      solSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      subSPACE = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
+      solSPACE.setName("BTAP ground constructions BLDG")
+      subSPACE.setName("BTAP subsurface constructions BLDG")
+      intSPACE.setName("BTAP interior constructions BLDG")
+      extSPACE.setName("BTAP exterior constructions BLDG")
+      solSPACE.setWallConstruction(gWall)
+      solSPACE.setFloorConstruction(gFloor)
+      solSPACE.setRoofCeilingConstruction(gRoof)
+      subSPACE.setFixedWindowConstruction(fen)
+      subSPACE.setOperableWindowConstruction(fen)
+      subSPACE.setGlassDoorConstruction(fen)
+      subSPACE.setSkylightConstruction(sky)
+      subSPACE.setTubularDaylightDomeConstruction(sky)
+      subSPACE.setTubularDaylightDiffuserConstruction(sky)
+      subSPACE.setDoorConstruction(door)
+      subSPACE.setOverheadDoorConstruction(door)
+
+      setSPACE.setName("BTAP construction set BLDG")
+      setSPACE.setDefaultGroundContactSurfaceConstructions(solSPACE)
+      setSPACE.setSpaceShadingConstruction(shading)
+      setSPACE.setBuildingShadingConstruction(shading)
+      setSPACE.setSiteShadingConstruction(shading)
+      setSPACE.setDefaultExteriorSubSurfaceConstructions(subSPACE)
+      setSPACE.setAdiabaticSurfaceConstruction(iWall)
+    end
 
     # Unconditioned, unoccupied spaces (e.g. attics) inherit their own
     # default construction set. Indirectly-conditioned, unoccupied spaces
@@ -833,6 +845,7 @@ class NECB2011
       prop = space.additionalProperties.getFeatureAsString(tag)
       next if prop.empty?
       next if space.partofTotalFloorArea
+      next unless bldg
 
       prop = prop.get.downcase
       attics  << space if prop == "unconditioned"

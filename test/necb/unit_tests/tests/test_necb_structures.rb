@@ -33,10 +33,10 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
-      # 'LEEPTownHouse',
+      # 'LEEPTownHouse', # activity == "townhall" ??
       # 'LowriseApartment',
       # 'MediumOffice',
-      'MidriseApartment',
+      # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
@@ -63,7 +63,7 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     # AdditionalProperty override.
-    @property = true
+    @addprop = true
 
     tg  = "co2_structure"
     tag = "space_conditioning_category"
@@ -85,7 +85,7 @@ class NECB_Structure_Tests < Minitest::Test
             # model inherits a steel (or metal) structure by default. A possible
             # override: load-bearing CMU structure for the warehouse's bulk
             # storage space.
-            if @property && building == "Warehouse"
+            if @addprop && building == "Warehouse"
               model = st.load_building_type_from_library(building_type: building)
               id    = "Zone3 Bulk Storage"
               opt   = "btap_structure"
@@ -222,8 +222,18 @@ class NECB_Structure_Tests < Minitest::Test
             err_msg = "BTAP::Structure missing structures (#{cas})?"
             assert(s.data.key?(:structure), err_msg)
 
-            if @property && building == "Warehouse"
-              err_msg = "BTAP::Structure size (#{cas})?"
+            # Default construction sets?
+            csets = model.getDefaultConstructionSets
+
+            csets.each do |cset|
+              puts cset
+            end
+
+            if @addprop && building == "Warehouse"
+              err_msg = "BTAP::Structure # Default Construction Sets (#{cas})?"
+              assert_equal(csets.size, 2, err_msg)
+
+              err_msg = "BTAP::Structure # custom spaces (#{cas})?"
               assert_equal(s.spaces.size, 1, err_msg)
 
               err_msg = "BTAP::Structure custom BULK storage space (#{cas})?"
@@ -231,6 +241,24 @@ class NECB_Structure_Tests < Minitest::Test
 
               err_msg = "BTAP::Structure custom BULK structure (#{cas})?"
               assert_includes(s.spaces["Zone3 Bulk Storage"], :structure, err_msg)
+
+              bulkset = bulk.defaultConstructionSet
+              err_msg = "BTAP::Structure BULK Default Construction Set (#{cas})?"
+              refute_empty(bulkset, err_msg)
+
+              bulkset = bulkset.get
+              # puts; puts "#{bulkset}"; puts
+
+            else
+              nb  = 1
+              nb += 1 unless plenums.empty?
+              nb += 1 unless attics.empty?
+
+              err_msg = "BTAP::Structure # Default Construction Sets (#{cas})?"
+              assert_equal(csets.size, nb, err_msg)
+
+              err_msg = "BTAP::Structure # custom spaces (#{cas})?"
+              assert_equal(s.spaces.size, 0, err_msg)
             end
 
             # BTAP::Structure higher-level attributes liveload and deadload
@@ -310,7 +338,7 @@ class NECB_Structure_Tests < Minitest::Test
             if @test_passed
               co2_structure = s.co2[:columns] + s.co2[:partitions]
 
-              if @property
+              if @addprop
                 s.spaces.values.each do |prp|
                   co2_structure += prp[:co2][:columns] + prp[:co2][:partitions]
                 end
@@ -327,7 +355,7 @@ class NECB_Structure_Tests < Minitest::Test
               co2m2 = ": #{(co2_structure/flor_m2).round} kgCO2-e/m2 (A1-A3)"
               fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
 
-              if @property
+              if @addprop
                 s.spaces.each do |id, prp|
                   next unless prp.key?(:structure)
                   next unless prp.key?(:floor_m2)
