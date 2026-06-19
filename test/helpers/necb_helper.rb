@@ -6,7 +6,7 @@ require 'json'
 require 'parallel'
 #require 'hashdiff'
 
-# Add significant digits capability to float amd integer class to tidy up reporting.
+# Add significant digits capability to float and integer class to tidy up reporting.
 class Float
   def signif(digits=4)
     return 0 if self.zero?
@@ -48,7 +48,7 @@ module NecbHelper
 
   # Hold an array of the instantiated standards (to save recreating them all the time).
   @@standards = []
-  
+
   # Default to true for PERFORM_STANDARDS in testing.
   PERFORM_STANDARDS = true
 
@@ -219,7 +219,6 @@ module NecbHelper
     return test_results
   end
 
-
   # Method to recover existing template (or create on if it has not been instantiated).
   def get_standard(template)
     standard = nil
@@ -231,6 +230,68 @@ module NecbHelper
     end
     logger.debug "Using template: #{standard.class}"
     return standard
+  end
+
+  def create_baseline_necb_model(
+    template: 'NECB2011',
+    epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
+    primary_heating_fuel: 'Electricity',
+    num_stories: 1,
+    add_thermostat: true,
+    add_baseboard_heating: false)
+
+    standard      = Standard.build(template)
+    resource_path = File.join(__dir__, '../necb/models/5ZoneNoHVAC.osm')
+    translator    = OpenStudio::OSVersion::VersionTranslator.new
+    model         = translator.loadModel(resource_path).get
+
+    OpenstudioStandards::Weather.model_set_building_location(
+      model,
+      weather_file_path: OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file))
+
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
+    end
+
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(num_stories)
+    building.setStandardsNumberOfAboveGroundStories(num_stories)
+
+    if add_thermostat
+      htg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      htg_sch.setName('Heating Setpoint Schedule')
+      htg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 21.0)
+
+      clg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      clg_sch.setName('Cooling Setpoint Schedule')
+      clg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 24.0)
+
+      model.getThermalZones.each do |zone|
+        thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
+        thermostat.setHeatingSetpointTemperatureSchedule(htg_sch)
+        thermostat.setCoolingSetpointTemperatureSchedule(clg_sch)
+        zone.setThermostatSetpointDualSetpoint(thermostat)
+      end
+    end
+
+    if add_baseboard_heating
+      standard.add_sys1_unitary_ac_baseboard_heating(
+        model: model,
+        zones: model.getThermalZones.sort,
+        mau_type: true,
+        mau_heating_coil_type: 'Electric',
+        baseboard_type: 'Electric',
+        hw_loop: nil
+      )
+    end
+
+    standard.fuel_type_set = SystemFuels.new()
+    standard.fuel_type_set.set_defaults(
+      standards_data: standard.instance_variable_get(:@standards_data),
+      primary_heating_fuel: primary_heating_fuel)
+
+    return [model, standard]
   end
 
   # Load a sized model from fixture cache.
