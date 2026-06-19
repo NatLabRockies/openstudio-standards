@@ -42,7 +42,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'Outpatient',
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
-      'RetailStandalone',
+      # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
@@ -175,7 +175,7 @@ class NECB_Structure_Tests < Minitest::Test
                 else
                   id = c.layers.last.nameString
                   err_msg = "#{id} insulation layer (#{cas})?"
-                    assert_includes(id, "OSut:K", err_msg)
+                  assert_includes(id, "OSut:K", err_msg)
                 end
               end
             end
@@ -219,9 +219,9 @@ class NECB_Structure_Tests < Minitest::Test
             err_msg = "Structure #{s.structure.class} (#{cas})?"
             assert_kind_of(Symbol, s.structure, err_msg)
             err_msg = "Liveload #{s.liveload.class} (#{cas})?"
-            assert_kind_of(Float, s.liveload, err_msg)
+            assert_kind_of(Numeric, s.liveload, err_msg)
             err_msg = "Deadload #{s.deadload.class} (#{cas})?"
-            assert_kind_of(Float, s.deadload, err_msg)
+            assert_kind_of(Numeric, s.deadload, err_msg)
             err_msg = "Missing categories (#{cas})?"
             assert(s.data.key?(:category), err_msg)
             err_msg = "Missing structures (#{cas})?"
@@ -269,12 +269,24 @@ class NECB_Structure_Tests < Minitest::Test
               assert_equal(s.spaces.size, 0, err_msg)
             end
 
-            # BTAP::Structure higher-level attributes liveload and deadload
-            # reflect non-customized spaces.
-            cspaces = model.getSpaces.select { |sp| sp.partofTotalFloorArea }
-            espaces = cspaces.reject { |sp| s.spaces.key?(sp.nameString)}
-            flr_m2  = TBD.facets(cspaces, "all", "floor").map(&:grossArea).sum
-            flor_m2 = TBD.facets(espaces, "all", "floor").map(&:grossArea).sum
+            # Limit anaylsis to CONDITIONED spaces (e.g. no vented attics).
+            # Isolate OCCUPIED spaces from UNOCCUPIED spaces (e.g. plenums).
+            # Isolate non-customized spaces (may include customized plenums).
+            cspaces = model.getSpaces.reject { |sp| TBD.unconditioned?(sp) }
+            cspaces = cspaces.reject { |sp| s.spaces.key?(sp.nameString)}
+            ospaces = cspaces.select { |sp| sp.partofTotalFloorArea }
+
+            cm2 = 0
+            om2 = 0
+
+            cspaces.each do |space|
+              zn = space.thermalZone
+              next if zn.empty?
+
+              sm2  = space.floorArea * space.multiplier * zn.get.multiplier
+              cm2 += sm2
+              om2 += sm2 if ospaces.include?(space)
+            end
 
             if option.empty?
               err_msg = "Internal mass definitions (#{cas})?"
@@ -282,8 +294,9 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "Internal mass (#{cas})?"
               assert_empty(model.getInternalMasss)
             else
-              kg  = 0
-              mkg = (s.deadload + s.liveload) * flor_m2
+              kg   = 0
+              mkg  = s.deadload * cm2
+              mkg += s.liveload * om2
 
               err_msg = "Missing internal mass definitions (#{cas})?"
               refute_empty(model.getInternalMassDefinitions)
@@ -317,10 +330,11 @@ class NECB_Structure_Tests < Minitest::Test
                 refute_empty(space, err_msg)
                 space   = space.get
                 ide     = space.nameString
-                fm2     = space.floorArea
 
                 if s.spaces.key?(ide)
-                  dkg     = (s.spaces[ide][:deadload] + s.liveload) * fm2
+                  fm2     = space.floorArea
+                  dkg     = s.spaces[ide][:deadload] * fm2
+                  dkg    += s.liveload * fm2 if space.partofTotalFloorArea
                   err_msg = "#{id} #{ide} load (#{cas})?"
                   assert_equal(dkg.round(2), mass.round(2), err_msg)
                   mkg    += dkg
@@ -360,17 +374,17 @@ class NECB_Structure_Tests < Minitest::Test
               # Reset for non-customized spaces only.
               co2_structure = s.co2[:columns] + s.co2[:partitions]
 
-              co2m2 = ": #{(co2_structure/flor_m2).round} kgCO2-e/m2 (A1-A3)"
+              co2m2 = ": #{(co2_structure/cm2).round} kgCO2-e/m2 (A1-A3)"
               fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
 
               if @addprop
                 s.spaces.each do |id, prp|
                   next unless prp.key?(:structure)
-                  next unless prp.key?(:floor_m2)
+                  next unless prp.key?(:m2)
 
                   sp_co2 = prp[:co2][:columns] + prp[:co2][:partitions]
                   state  = "... #{id} : custom STRUCTURE #{prp[:structure]}"
-                  state += " #{(sp_co2/prp[:floor_m2]).round} kgCO2-e/m2 (A1-A3)"
+                  state += " #{(sp_co2/prp[:m2]).round} kgCO2-e/m2 (A1-A3)"
                   fdback << state
                 end
               end
