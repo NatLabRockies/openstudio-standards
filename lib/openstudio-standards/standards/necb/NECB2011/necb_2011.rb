@@ -917,22 +917,27 @@ class NECB2011 < Standard
             space = model.getSpaceByName(id)
             next if space.empty?
 
+            match = false
             space = space.get
             next if space == espace
 
             custom.each do |csp|
               stx = csp[:structure]
               frx = csp[:framing]
+              break if match
 
               if sp[:structure] == stx && sp[:framing] == frx
-                sp[:spaces] << space
-              else
-                spx            << {}
-                spx[:spaces   ] = [space]
-                spx[:structure] = sp[:structure]
-                spx[:framing  ] = sp[:framing]
-                custom         << spx
+                csp[:spaces] << space
+                match = true
               end
+            end
+
+            unless match
+              spx             = {}
+              spx[:spaces   ] = [space]
+              spx[:structure] = sp[:structure]
+              spx[:framing  ] = sp[:framing]
+              custom         << spx
             end
           end
 

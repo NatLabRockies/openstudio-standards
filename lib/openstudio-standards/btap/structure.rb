@@ -466,6 +466,11 @@ module BTAP
       # Track CONDITIONED spaces, e.g. plenums - ignore vented attics.
       cspaces = model.getSpaces.reject { |space| TBD.unconditioned?(space) }
 
+      if cspaces.empty?
+        lgs << "Only UNCONDITIONED spaces (#{mth})?"
+        return
+      end
+
       # Customized story/spacetype/space STRUCTURE attributes, overriding
       # default/custom building-wide attributes? Skip if same as building.
       data[:tags].each do |tag|
@@ -502,11 +507,65 @@ module BTAP
       end
 
       # Prune customized spaces from common collection.
-      @spaces.keys.each do |id|
-        space = model.getSpaceByName(id)
-        next if space.empty?
+      @spaces.keys.each { |id| cspaces.delete(model.getSpaceByName(id).get) }
 
-        cspaces.delete(space.get)
+      # Only customized spaces? Base building STRUCTURE on most common one.
+      if cspaces.empty?
+        custom = []
+        id     = @spaces.keys.first
+        sp     = @spaces.values.first
+        espace = model.getSpaceByName(id).get
+
+        first             = {}
+        first[:spaces   ] = [espace]
+        first[:structure] = sp[:structure]
+        first[:framing  ] = sp[:framing]
+        first[:m2       ] = sp[:m2]
+        custom           << first
+
+        @spaces.each do |id, sp|
+          space = model.getSpaceByName(id).get
+          match = false
+          next if space == espace
+
+          custom.each do |csp|
+            stx = csp[:structure]
+            frx = csp[:framing]
+            break if match
+
+            if sp[:structure] == stx && sp[:framing] == frx
+              csp[:spaces] << space
+              csp[:m2    ] += sp[:m2]
+              match = true
+            end
+          end
+
+          unless match
+            spx             = {}
+            spx[:spaces   ] = [space]
+            spx[:structure] = sp[:structure]
+            spx[:framing  ] = sp[:framing]
+            spx[:m2       ] = sp[:m2]
+            custom         << spx
+          end
+        end
+
+        if custom.empty?
+          lgs << "Unknown UNCONDITIONED spaces (#{mth})?"
+          return
+        end
+
+        csp        = custom.sort_by(&:m2).reverse.first
+        cspaces    = csp[:spaces]
+        @structure = csp[:structure]
+        @framing   = csp[:framing]
+
+        cspaces.each { |space| @spaces.remove(space.nameString) }
+      end
+
+      if cspaces.empty?
+        lgs << "Invalid # CONDITIONED spaces (#{mth})?"
+        return
       end
 
       # Isolate OCCUPIED spaces.
