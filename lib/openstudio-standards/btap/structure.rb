@@ -185,12 +185,12 @@ module BTAP
     # With the exception of "metal" buildings, users may optionally interchange
     # some paired STRUCTURE vs FRAMING options (among available :frames above).
     # Unusual in some cases, yet not completely unheard of.
-    @@data[:structure][:steel   ][:frames] = [:wood        ]
-    @@data[:structure][:metal   ][:frames] = [             ]
-    @@data[:structure][:concrete][:frames] = [:wood, :cmu  ]
-    @@data[:structure][:cmu     ][:frames] = [:wood, :steel]
-    @@data[:structure][:wood    ][:frames] = [:steel       ]
-    @@data[:structure][:clt     ][:frames] = [:clt, :steel ]
+    @@data[:structure][:steel   ][:frames] = [:steel, :wood        ]
+    @@data[:structure][:metal   ][:frames] = [:metal               ]
+    @@data[:structure][:concrete][:frames] = [:steel, :wood, :cmu  ]
+    @@data[:structure][:cmu     ][:frames] = [:cmu,   :wood, :steel]
+    @@data[:structure][:wood    ][:frames] = [:wood,  :steel       ]
+    @@data[:structure][:clt     ][:frames] = [:wood,  :clt, :steel ]
 
     # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
     # To simplify data management, building TYPES (e.g. those listed in Table
@@ -384,82 +384,53 @@ module BTAP
       @finish = :none  if @framing  == :cmu
       @finish = :heavy if @category == "robust"
 
-      # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
-      # Customizing (default) building STRUCTURE option? Maintain or reset as
-      # an OpenStudio AdditionalProperty.
-      tag = "btap_structure"
-
-      if bldg.additionalProperties.hasFeature(tag)
-        prp = bldg.additionalProperties.getFeatureAsString(tag)
-
-        if prp.empty?
-          bldg.additionalProperties.setFeature(tag, @structure.to_s)
-        else
-          prp = prp.get.downcase.to_sym
-
-          if @@data[:structure].keys.include?(prp)
-            @structure = prp
-
-            # Reset :clt and :metal structure selections for now - @todo
-            @structure = :steel    if @structure == :metal
-            @structure = :concrete if @structure == :clt
-          else
-            bldg.additionalProperties.setFeature(tag, @structure.to_s)
-          end
-        end
-      else
-        bldg.additionalProperties.setFeature(tag, @structure.to_s)
-      end
-
-      # Repeat for custom building FRAMING.
-      tag = "btap_framing"
-
-      if bldg.additionalProperties.hasFeature(tag)
-        prp = bldg.additionalProperties.getFeatureAsString(tag)
-
-        if prp.empty?
-          bldg.additionalProperties.setFeature(tag, @framing.to_s)
-        else
-          prp = prp.get.downcase.to_sym
-
-          if @@data[:structure][@structure][:framing] == prp ||
-             @@data[:structure][@structure][:frames].include?(prp)
-            @framing = prp
-          else
-            bldg.additionalProperties.setFeature(tag, @framing.to_s)
-          end
-        end
-      else
-        bldg.additionalProperties.setFeature(tag, @framing.to_s)
-      end
-
-      # Repeat for custom building cladding & finish. Must be compatible. Custom
-      # cladding and finish options are caught and kept in memory, yet
-      # currently unused - the BTAP construction database isn't yet rich enough
-      # to support custom finish or cladding options.
-      [:cladding, :finish].each do |item|
+      # Validate customization requests. Custom cladding and finish options are
+      # caught and kept in memory, yet currently unused - the BTAP construction
+      # database isn't yet rich enough for custom finish or cladding options.
+      [:structure, :framing, :cladding, :finish].each do |item|
         tag = "btap_" + item.to_s
+        opt = case item
+              when :framing  then @framing
+              when :cladding then @cladding
+              when :finish   then @finish
+              else                @structure
+              end
 
         if bldg.additionalProperties.hasFeature(tag)
           prp = bldg.additionalProperties.getFeatureAsString(tag)
 
           if prp.empty?
-            bldg.additionalProperties.setFeature(tag, item.to_s)
+            bldg.additionalProperties.setFeature(tag, opt.to_s)
           else
             prp = prp.get.downcase.to_sym
 
-            if @@data[item].include?(opt)
-              if item == :cladding
-                @cladding = prp
+            case item
+            when :structure
+              if @@data[:structure].key?(prp)
+                @structure = prp
+
+                # Reset :clt and :metal structure selections for now - @todo
+                @structure = :steel    if @structure == :metal
+                @structure = :concrete if @structure == :clt
               else
-                @finish = prp
+                bldg.additionalProperties.setFeature(tag, @structure.to_s)
               end
+            when :framing
+              if @@data[:structure][@structure][:frames].include?(prp)
+                @framing = prp
+              else
+                bldg.additionalProperties.setFeature(tag, @framing.to_s)
+              end
+            when :cladding
+              @cladding = prp if @@data[:cladding].include?(opt)
+            when :finish
+              @finish = prp if @@data[:finish].include?(opt)
             else
-              bldg.additionalProperties.setFeature(tag, item.to_s)
+              bldg.additionalProperties.setFeature(tag, opt.to_s)
             end
           end
         else
-          bldg.additionalProperties.setFeature(tag, item.to_s)
+          bldg.additionalProperties.setFeature(tag, opt.to_s)
         end
       end
 
@@ -499,6 +470,10 @@ module BTAP
           # Custom cladding and finish options are caught and kept in memory,
           # yet currently unused - the BTAP construction database isn't yet rich
           # enough to support custom finish or cladding options.
+          @spaces[id][:structure] = @structure
+          @spaces[id][:framing  ] = @framing
+          @spaces[id][:cladding ] = @cladding
+          @spaces[id][:finish   ] = @finish
           @spaces[id][:structure] = prp if tag == "btap_structure"
           @spaces[id][:framing  ] = prp if tag == "btap_framing"
           @spaces[id][:cladding ] = prp if tag == "btap_cladding"
@@ -555,12 +530,13 @@ module BTAP
           return
         end
 
-        csp        = custom.sort_by(&:m2).reverse.first
+        csp = custom.sort_by { |sp| sp[:m2] }.reverse.first
+
         cspaces    = csp[:spaces]
         @structure = csp[:structure]
         @framing   = csp[:framing]
 
-        cspaces.each { |space| @spaces.remove(space.nameString) }
+        cspaces.each { |space| @spaces.delete(space.nameString) }
       end
 
       if cspaces.empty?

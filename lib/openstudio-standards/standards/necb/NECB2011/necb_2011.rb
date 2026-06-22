@@ -896,8 +896,8 @@ class NECB2011 < Standard
         raise('NECB: Failed to assign default BUILDING construction sets')
       end
 
-      # Then add default construction sets to customized spaces. Group spaces
-      # along customized STRUCTURE and/or customized FRAMING.
+      # Add default construction sets to customized spaces. Group spaces along
+      # customized STRUCTURE and/or customized FRAMING.
       unless @structure.spaces.empty?
         custom = []
         id     = @structure.spaces.keys.first

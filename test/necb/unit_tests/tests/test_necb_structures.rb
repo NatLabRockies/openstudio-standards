@@ -64,11 +64,6 @@ class NECB_Structure_Tests < Minitest::Test
 
     # AdditionalProperty override.
     @addprop = true
-    # CASE Warehouse (NECB2020) - structure : industry (steel, 1 storey): 10 kgCO2-e/m2 (A1-A3)
-    #                        ... Zone3 Bulk Storage : custom STRUCTURE cmu 6 kgCO2-e/m2 (A1-A3)
-
-    # @addprop = false
-    # CASE Warehouse (NECB2020) - structure : industry (steel, 1 storey): 11 kgCO2-e/m2 (A1-A3)
 
     tg  = "co2_structure"
     tag = "space_conditioning_category"
@@ -86,31 +81,62 @@ class NECB_Structure_Tests < Minitest::Test
             cas += " - #{option}" unless option.empty?
             st   = Standard.build(template)
 
-            # Customizing STRUCTURE options. In this example, the Warehouse
-            # model inherits a steel (or metal) structure by default. A possible
-            # override: load-bearing CMU structure for the warehouse's bulk
-            # storage space.
+            # Customizing STRUCTURE options. In this Warehouse example, the
+            # building would inherit a steel (or metal) structure by default.
+            # This is overridden here as all 3 spaces are customized:
+            #   - the office has a user-assigned wood structure
+            #   - the fine storage space has a user-assigned wood-framing only
+            #   - the bulk storage area has a user-assigned CMU structure
             if @addprop && building == "Warehouse"
-              model = st.load_building_type_from_library(building_type: building)
-              id    = "Zone3 Bulk Storage"
-              opt   = "btap_structure"
-              prp   = "cmu"
-              bulk  = model.getSpaceByName(id)
+              id1  = "Zone1 Office"
+              id2  = "Zone2 Fine Storage"
+              id3  = "Zone3 Bulk Storage"
+              opt1 = "btap_structure"
+              opt2 = "btap_framing"
+              prp1 = "wood"
+              prp2 = "cmu"
 
-              err_msg = "Invalid space ID '#{id}' (#{cas})?"
-              refute_empty(bulk, err_msg)
-              bulk  = bulk.get
+              model  = st.load_building_type_from_library(building_type: building)
+              office = model.getSpaceByName(id1)
+              fine   = model.getSpaceByName(id2)
+              bulk   = model.getSpaceByName(id3)
+              err_msg1 = "Invalid space ID '#{id1}' (#{cas})?"
+              err_msg2 = "Invalid space ID '#{id2}' (#{cas})?"
+              err_msg3 = "Invalid space ID '#{id3}' (#{cas})?"
+              refute_empty(office, err_msg1)
+              refute_empty(  fine, err_msg2)
+              refute_empty(  bulk, err_msg3)
+              office = office.get
+              fine   = fine.get
+              bulk   = bulk.get
 
-              err_msg = "Failed AddProp '#{opt}' (#{cas})?"
-              assert(bulk.additionalProperties.setFeature(opt, prp), err_msg)
+              # Assign custom STRUCTURE or FRAMING properties.
+              err_msg1 = "Failed AddProp '#{opt1}' #{id1} (#{cas})?"
+              err_msg2 = "Failed AddProp '#{opt2}' #{id2} (#{cas})?"
+              err_msg3 = "Failed AddProp '#{opt1}' #{id3} (#{cas})?"
+              assert(office.additionalProperties.setFeature(opt1, prp1), err_msg1)
+              assert(  fine.additionalProperties.setFeature(opt2, prp1), err_msg2)
+              assert(  bulk.additionalProperties.setFeature(opt1, prp2), err_msg3)
+              err_msg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
+              err_msg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
+              err_msg3 = "Missing AddProp '#{opt1}' #{id3} (#{cas})?"
 
-              err_msg = "Missing AddProp '#{opt}' (#{cas})?"
-              prop = bulk.additionalProperties.getFeatureAsString(opt)
-              refute_empty(prop, err_msg)
-
-              prop = prop.get
-              err_msg = "Incorrect AddProp '#{prop}' (#{cas})?"
-              assert_equal(prop, prp, err_msg)
+              # Validate.
+              prop1 = office.additionalProperties.getFeatureAsString(opt1)
+              prop2 =   fine.additionalProperties.getFeatureAsString(opt2)
+              prop3 =   bulk.additionalProperties.getFeatureAsString(opt1)
+              refute_empty(prop1, err_msg1)
+              refute_empty(prop2, err_msg2)
+              refute_empty(prop3, err_msg3)
+              prop1 = prop1.get
+              prop2 = prop2.get
+              prop3 = prop3.get
+              err_msg1 = "Incorrect AddProp '#{prop1}' #{id1} (#{cas})?"
+              err_msg2 = "Incorrect AddProp '#{prop2}' #{id2} (#{cas})?"
+              err_msg3 = "Incorrect AddProp '#{prop3}' #{id3} (#{cas})?"
+              assert_equal(prop1, prp1, err_msg1)
+              assert_equal(prop2, prp1, err_msg2)
+              assert_equal(prop3, prp2, err_msg3)
 
               model = st.model_apply_standard(model: model,
                                               epw_file: epw,
@@ -232,31 +258,59 @@ class NECB_Structure_Tests < Minitest::Test
 
             if @addprop && building == "Warehouse"
               err_msg = "# Default Construction Sets (#{cas})?"
-              assert_equal(csets.size, 2, err_msg)
+              assert_equal(csets.size, 3, err_msg)
               err_msg = "# custom spaces (#{cas})?"
-              assert_equal(s.spaces.size, 1, err_msg)
-              err_msg = "Custom BULK storage space (#{cas})?"
-              assert_includes(s.spaces, "Zone3 Bulk Storage", err_msg)
-              err_msg = "Custom BULK structure (#{cas})?"
-              assert_includes(s.spaces["Zone3 Bulk Storage"], :structure, err_msg)
-              bulkset = bulk.defaultConstructionSet
-              err_msg = "BULK Default Construction Set (#{cas})?"
-              refute_empty(bulkset, err_msg)
-              bulkset = bulkset.get
-              err_msg = "BULK empty ground constructions (#{cas})?"
-              assert_empty(bulkset.defaultGroundContactSurfaceConstructions, err_msg)
-              err_msg = "BULK empty exterior subsurface constructions (#{cas})?"
-              assert_empty(bulkset.defaultExteriorSubSurfaceConstructions, err_msg)
-              err_msg = "BULK empty interior subsurface constructions (#{cas})?"
-              assert_empty(bulkset.defaultInteriorSubSurfaceConstructions, err_msg)
-              err_msg = "BULK empty space shading construction (#{cas})?"
-              assert_empty(bulkset.spaceShadingConstruction, err_msg)
-              err_msg = "BULK empty site shading construction (#{cas})?"
-              assert_empty(bulkset.siteShadingConstruction, err_msg)
-              err_msg = "BULK empty building shading construction (#{cas})?"
-              assert_empty(bulkset.buildingShadingConstruction, err_msg)
-              err_msg = "BULK empty adiabatic surface construction (#{cas})?"
-              assert_empty(bulkset.adiabaticSurfaceConstruction, err_msg)
+              assert_equal(s.spaces.size, 2, err_msg)
+
+              # id1  = "Zone1 Office"
+              # id2  = "Zone2 Fine Storage"
+
+              err_msg = "Custom #{id1} (#{cas})?"
+              assert_includes(s.spaces, id1, err_msg)
+              err_msg = "Custom #{id2} (#{cas})?"
+              assert_includes(s.spaces, id2, err_msg)
+              err_msg = "Custom #{id3} (#{cas})?"
+              refute_includes(s.spaces, id3, err_msg)
+              err_msg = "Custom #{id1} structure (#{cas})?"
+              assert_includes(s.spaces[id1], :structure, err_msg)
+              err_msg = "Custom #{id2} structure (#{cas})?"
+              assert_includes(s.spaces[id2], :structure, err_msg)
+              offcset = office.defaultConstructionSet
+              fineset = fine.defaultConstructionSet
+              err_msg1 = "#{id1} Default Construction Set (#{cas})?"
+              err_msg2 = "#{id2} Default Construction Set (#{cas})?"
+              refute_empty(offcset, err_msg1)
+              refute_empty(fineset, err_msg2)
+              offcset = offcset.get
+              fineset = fineset.get
+              err_msg1 = "#{id1} empty ground constructions (#{cas})?"
+              err_msg2 = "#{id2} empty ground constructions (#{cas})?"
+              assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg1)
+              assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty exterior subsurface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty exterior subsurface constructions (#{cas})?"
+              assert_empty(offcset.defaultExteriorSubSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultExteriorSubSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty interior subsurface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty interior subsurface constructions (#{cas})?"
+              assert_empty(offcset.defaultInteriorSubSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultInteriorSubSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty space shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty space shading construction (#{cas})?"
+              assert_empty(offcset.spaceShadingConstruction, err_msg1)
+              assert_empty(fineset.spaceShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty site shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty site shading construction (#{cas})?"
+              assert_empty(offcset.siteShadingConstruction, err_msg1)
+              assert_empty(fineset.siteShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty building shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty building shading construction (#{cas})?"
+              assert_empty(offcset.buildingShadingConstruction, err_msg1)
+              assert_empty(fineset.buildingShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty adiabatic surface construction (#{cas})?"
+              err_msg2 = "#{id2} empty adiabatic surface construction (#{cas})?"
+              assert_empty(offcset.adiabaticSurfaceConstruction, err_msg1)
+              assert_empty(fineset.adiabaticSurfaceConstruction, err_msg2)
             else
               nb  = 1
               nb += 1 unless plenums.empty?

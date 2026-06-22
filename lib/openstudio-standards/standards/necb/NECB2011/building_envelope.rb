@@ -569,9 +569,9 @@ class NECB2011
   # @param spaces [Array<OpenStudio::Model::Space>] space(s)
   # @param bldg [Boolean] true if assigned to building (not individual spaces)
   # @param hdd [Boolean] whether to rely on BTAP in setting HDD (vs stat file)
-  # @param category [String] spacetype CATEGORY, e.g. "public"
-  # @param structure [Symbol] STRUCTURE selection, e.g. :steel
-  # @param framing [Symbol] selected framing, e.g. (light gauge) :steel
+  # @param ctg [String] spacetype CATEGORY, e.g. "public"
+  # @param stc [Symbol] STRUCTURE selection, e.g. :steel
+  # @param frm [Symbol] selected FRAMING, e.g. (light gauge) :steel
   # @param a [Hash] optional U & SHGC overrides
   # @option a [Hash] eWallU exposed wall Uo (or Ut)
   # @option a [Hash] eFloorU exposed floor Uo (or Ut)
@@ -587,7 +587,7 @@ class NECB2011
   # @option a [Hash] skySHGC skylight SHGC
   #
   # @return [Boolean] whether default constructions were successfully added.
-  def add_construction_sets(spaces = [], bldg, hdd, category, structure, framing, a)
+  def add_construction_sets(spaces = [], bldg, hdd, ctg, stc, frm, a)
     bldg = true unless [true, false].include?(bldg)
     hdd  = true unless [true, false].include?(hdd)
     btp  = BTAP::Resources::Envelope::Constructions # alias
@@ -640,14 +640,65 @@ class NECB2011
     #     0.21;                           !- Visible Transmittance
     #
     # 1. Identifier 'U=0.220' for an NFRC-rated U-factor of 2.2 W/m2.K ?
-    # 2. VT is almost always higher than SHGC - not the other way around. VT
-    #    should be set here based on a reasonable LSG ratio:
+    # 2. VT is almost always higher than SHGC - not the other way around.
+    #    VT should be set here based on a reasonable LSG ratio:
     #    - eta-publications.lbl.gov/sites/default/files/femp-spec-sel-low-e.pdf
     #
     # ... for the moment, sticking to SHGC 60%, yet keeping default VT.
     doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
     fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
     skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
+
+    # Outdoor-facing wall.
+    specs          = {}
+    specs[:type  ] = :wall
+    specs[:uo    ] = eWallU
+    specs[:frame ] = :medium
+    specs[:clad  ] = :heavy  if ctg == "robust"
+    specs[:finish] = :medium if ctg == "robust"
+    specs[:finish] = :medium if frm  == :cmu
+    eWall          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eWall)
+    TBD.assignUniqueMaterial(eWall, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing roof.
+    specs          = {}
+    specs[:type  ] = :roof
+    specs[:uo    ] = eRoofU
+    specs[:clad  ] = :medium if ctg == "housing" && stc == :concrete
+    specs[:clad  ] = :medium if ctg == "lodging" && stc == :concrete
+    specs[:frame ] = :medium
+    specs[:frame ] = :heavy  if frm  == :wood
+    specs[:finish] = :medium if ctg == "robust"
+    specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
+    specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
+    eRoof          = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eRoof)
+    TBD.assignUniqueMaterial(eRoof, lyr[:index]) if lyr[:index]
+
+    # Outdoor-facing floor.
+    specs          = {}
+    specs[:type  ] = :floor
+    specs[:uo    ] = eFloorU
+    specs[:finish] = :medium unless frm == :wood
+    specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
+    specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
+    eFloor         = TBD.genConstruction(model, specs)
+
+    lyr = TBD.insulatingLayer(eFloor)
+    TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
+
+    extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+    extSPACE.setName("BTAP exterior constructions")
+    extSPACE.setWallConstruction(eWall)
+    extSPACE.setFloorConstruction(eFloor)
+    extSPACE.setRoofCeilingConstruction(eRoof)
+
+    setSPACE = OpenStudio::Model::DefaultConstructionSet.new(model)
+    setSPACE.setName("BTAP construction set")
+    setSPACE.setDefaultExteriorSurfaceConstructions(extSPACE)
 
     # Uninsulated slab-on-grade, except if HDD > 6999 (Uo = 0.379 W/m2.K).
     # If HDD < 7000, slab-on-grade insulation is instead only required along
@@ -669,8 +720,8 @@ class NECB2011
       specs[:uo    ] = nil
       specs[:uo    ] = gFloorU   if hdd > 6999
       specs[:frame ] = :none unless hdd > 6999
-      specs[:finish] = :none     if category == "robust"
-      specs[:finish] = :none     if category == "industry"
+      specs[:finish] = :none     if ctg == "robust"
+      specs[:finish] = :none     if ctg == "industry"
       gFloor         = TBD.genConstruction(model, specs)
 
       # Ensure insulating layer uniqueness for each insulated construction.
@@ -698,51 +749,13 @@ class NECB2011
 
       lyr = TBD.insulatingLayer(gRoof)
       TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
-    end
 
-    # Outdoor-facing wall.
-    specs          = {}
-    specs[:type  ] = :wall
-    specs[:uo    ] = eWallU
-    specs[:frame ] = :medium
-    specs[:clad  ] = :heavy  if category == "robust"
-    specs[:finish] = :medium if category == "robust"
-    specs[:finish] = :medium if framing  == :cmu
-    eWall          = TBD.genConstruction(model, specs)
+      # Shading.
+      specs        = {}
+      specs[:type] = :shading
+      shading      = TBD.genConstruction(model, specs)
 
-    lyr = TBD.insulatingLayer(eWall)
-    TBD.assignUniqueMaterial(eWall, lyr[:index]) if lyr[:index]
-
-    # Outdoor-facing roof.
-    specs          = {}
-    specs[:type  ] = :roof
-    specs[:uo    ] = eRoofU
-    specs[:clad  ] = :medium if category == "housing" && structure == :concrete
-    specs[:clad  ] = :medium if category == "lodging" && structure == :concrete
-    specs[:frame ] = :medium
-    specs[:frame ] = :heavy  if framing  == :wood
-    specs[:finish] = :medium if category == "robust"
-    specs[:finish] = :heavy  if category == "housing" && structure == :concrete
-    specs[:finish] = :heavy  if category == "lodging" && structure == :concrete
-    eRoof          = TBD.genConstruction(model, specs)
-
-    lyr = TBD.insulatingLayer(eRoof)
-    TBD.assignUniqueMaterial(eRoof, lyr[:index]) if lyr[:index]
-
-    # Outdoor-facing floor.
-    specs          = {}
-    specs[:type  ] = :floor
-    specs[:uo    ] = eFloorU
-    specs[:finish] = :medium unless framing == :wood
-    specs[:finish] = :heavy  if category == "housing" && structure == :concrete
-    specs[:finish] = :heavy  if category == "lodging" && structure == :concrete
-    eFloor         = TBD.genConstruction(model, specs)
-
-    lyr = TBD.insulatingLayer(eFloor)
-    TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
-
-    # Outdoor-facing, opaque door.
-    if bldg
+      # Outdoor-facing doors.
       specs        = {}
       specs[:type] = :door
       specs[:uo  ] = doorU
@@ -761,61 +774,40 @@ class NECB2011
       specs[:uo  ] = skyU
       specs[:shgc] = skySHGC
       sky          = TBD.genConstruction(model, specs)
-    end
 
-    # Interzone/partition wall.
-    specs          = {}
-    specs[:type  ] = :partition
-    specs[:clad  ] = :none   if framing == :cmu
-    specs[:finish] = :none   if framing == :cmu
-    specs[:frame ] = :medium if framing == :cmu
-    iWall          = TBD.genConstruction(model, specs)
+      # Interzone/partition wall.
+      specs          = {}
+      specs[:type  ] = :partition
+      specs[:clad  ] = :none   if frm == :cmu
+      specs[:finish] = :none   if frm == :cmu
+      specs[:frame ] = :medium if frm == :cmu
+      iWall          = TBD.genConstruction(model, specs)
 
-    # Interzone roof/ceiling & floor.
-    specs          = {}
-    specs[:type  ] = :partition
-    specs[:frame ] = :medium unless framing == :wood
-    specs[:frame ] = :heavy  if category == "housing" && structure == :concrete
-    specs[:frame ] = :heavy  if category == "lodging" && structure == :concrete
-    specs[:frame ] = :heavy  if category == "robust"
-    specs[:clad  ] = :none   if category == "robust"
-    specs[:finish] = :none   if category == "robust"
-    iRoof          = TBD.genConstruction(model, specs)
-    iFloor         = TBD.genConstruction(model, specs)
+      # Interzone roof/ceiling & floor.
+      specs          = {}
+      specs[:type  ] = :partition
+      specs[:frame ] = :medium unless frm == :wood
+      specs[:frame ] = :heavy  if ctg == "housing" && stc == :concrete
+      specs[:frame ] = :heavy  if ctg == "lodging" && stc == :concrete
+      specs[:frame ] = :heavy  if ctg == "robust"
+      specs[:clad  ] = :none   if ctg == "robust"
+      specs[:finish] = :none   if ctg == "robust"
+      iRoof          = TBD.genConstruction(model, specs)
+      iFloor         = TBD.genConstruction(model, specs)
 
-    # Shading material.
-    if bldg
-      specs   = {type: :shading}
-      shading = TBD.genConstruction(model, specs)
-    end
-
-    intSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
-    intSPACE.setName("BTAP interior constructions")
-    extSPACE.setName("BTAP exterior constructions")
-    intSPACE.setWallConstruction(iWall)
-    intSPACE.setFloorConstruction(iFloor)
-    intSPACE.setRoofCeilingConstruction(iRoof)
-    extSPACE.setWallConstruction(eWall)
-    extSPACE.setFloorConstruction(eFloor)
-    extSPACE.setRoofCeilingConstruction(eRoof)
-
-    setSPACE = OpenStudio::Model::DefaultConstructionSet.new(model)
-    setSPACE.setName("BTAP construction set")
-    setSPACE.setDefaultInteriorSurfaceConstructions(intSPACE)
-    setSPACE.setDefaultExteriorSurfaceConstructions(extSPACE)
-    setSPACE.setInteriorPartitionConstruction(iWall)
-
-    if bldg
       solSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
+      intSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
       subSPACE = OpenStudio::Model::DefaultSubSurfaceConstructions.new(model)
       solSPACE.setName("BTAP ground constructions BLDG")
-      subSPACE.setName("BTAP subsurface constructions BLDG")
       intSPACE.setName("BTAP interior constructions BLDG")
+      subSPACE.setName("BTAP subsurface constructions BLDG")
       extSPACE.setName("BTAP exterior constructions BLDG")
       solSPACE.setWallConstruction(gWall)
       solSPACE.setFloorConstruction(gFloor)
       solSPACE.setRoofCeilingConstruction(gRoof)
+      intSPACE.setWallConstruction(iWall)
+      intSPACE.setFloorConstruction(iFloor)
+      intSPACE.setRoofCeilingConstruction(iRoof)
       subSPACE.setFixedWindowConstruction(fen)
       subSPACE.setOperableWindowConstruction(fen)
       subSPACE.setGlassDoorConstruction(fen)
@@ -831,7 +823,9 @@ class NECB2011
       setSPACE.setBuildingShadingConstruction(shading)
       setSPACE.setSiteShadingConstruction(shading)
       setSPACE.setDefaultExteriorSubSurfaceConstructions(subSPACE)
+      setSPACE.setDefaultInteriorSurfaceConstructions(intSPACE)
       setSPACE.setAdiabaticSurfaceConstruction(iWall)
+      setSPACE.setInteriorPartitionConstruction(iWall)
     end
 
     # Unconditioned, unoccupied spaces (e.g. attics) inherit their own
@@ -917,7 +911,7 @@ class NECB2011
       specs[:uo    ] = eFloorU
       specs[:frame ] = :heavy
       specs[:finish] = :none
-      specs[:finish] = :heavy if structure == :concrete
+      specs[:finish] = :heavy if stc == :concrete
       iAtticFloor    = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticFloor)
@@ -927,9 +921,9 @@ class NECB2011
       specs[:type  ] = :floor
       specs[:uo    ] = eRoofU
       specs[:frame ] = :light
-      specs[:frame ] = :heavy if framing == :wood
+      specs[:frame ] = :heavy if frm == :wood
       specs[:clad  ] = :none
-      specs[:clad  ] = :heavy if category == "robust"
+      specs[:clad  ] = :heavy if ctg == "robust"
       iAtticRoof     = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticRoof)
