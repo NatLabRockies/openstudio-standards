@@ -8,16 +8,19 @@ require_relative '../../test_helper'
 # - PTHP units in each zone
 # - DX heating and cooling coils
 class TestECMHS11ASHPPTHP < Minitest::Test
-  include NecbHelper
+  include(NecbHelper)
 
   def setup
-    @model, @standard = create_baseline_necb_model(add_baseboard_heating: true)
+    @model, @standard = create_baseline_necb_model(
+      primary_heating_fuel: 'Electricity',
+      add_thermostat: true,
+      add_baseboard_heating: true)
+
     @ecm_std = Standard.build('ECMS')
     @ecm_std.apply_system_ecm(
       model: @model,
       ecm_system_name: 'hs11_ashp_pthp',
-      template_standard: @standard
-    )
+      template_standard: @standard)
   end
 
   def test_hs11_system_creation

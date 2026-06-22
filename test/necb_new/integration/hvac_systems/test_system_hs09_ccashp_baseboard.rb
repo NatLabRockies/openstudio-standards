@@ -8,16 +8,19 @@ require_relative '../../test_helper'
 # - Electric or hot water baseboards for backup
 # - Air loops for heating/cooling
 class TestECMHS09CCASHP < Minitest::Test
-  include NecbHelper
+  include(NecbHelper)
 
   def setup
-    @model, @standard = create_baseline_necb_model(add_baseboard_heating: true)
+    @model, @standard = create_baseline_necb_model(
+      primary_heating_fuel: 'Electricity',
+      add_thermostat: true,
+      add_baseboard_heating: true)
+
     @ecm_std = Standard.build('ECMS')
     @ecm_std.apply_system_ecm(
       model: @model,
       ecm_system_name: 'hs09_ccashp_baseboard',
-      template_standard: @standard
-    )
+      template_standard: @standard)
   end
 
   def test_hs09_system_creation

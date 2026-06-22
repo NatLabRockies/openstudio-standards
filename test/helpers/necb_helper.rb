@@ -235,9 +235,9 @@ module NecbHelper
   def create_baseline_necb_model(
     template: 'NECB2011',
     epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
-    primary_heating_fuel: 'Electricity',
+    primary_heating_fuel: nil,
     num_stories: 1,
-    add_thermostat: true,
+    add_thermostat: false,
     add_baseboard_heating: false)
 
     standard      = Standard.build(template)
@@ -286,10 +286,12 @@ module NecbHelper
       )
     end
 
-    standard.fuel_type_set = SystemFuels.new()
-    standard.fuel_type_set.set_defaults(
-      standards_data: standard.instance_variable_get(:@standards_data),
-      primary_heating_fuel: primary_heating_fuel)
+    unless primary_heating_fuel.nil?
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(
+        standards_data: standard.instance_variable_get(:@standards_data),
+        primary_heating_fuel: primary_heating_fuel)
+    end
 
     return [model, standard]
   end
