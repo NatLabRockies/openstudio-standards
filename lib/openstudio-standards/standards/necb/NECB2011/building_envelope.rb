@@ -295,29 +295,29 @@ class NECB2011
   ##
   # Returns NECB-required U-factor, based on surface type, outside boundary
   # condition, heating-degree-days (18C) and NECB edition (template). The bulk
-  # of this should be a CSV file.
+  # of this should be a CSV, JSON or YAML file.
   #
   # @author denis@rd2.ca
   #
   # @param stype [#to_s] surface type, e.g. "roofceiling"
-  # @param condition [#to_s] outside boundary condition, e.g. "outdoors"
+  # @param bc [#to_s] outside boundary condition, e.g. "outdoors"
   # @param hdd [#to_f] heating-degree-days 18C
   #
   # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
-  def max_u_necb(stype = "roofceiling", condition = "outdoors", hdd = 8000)
+  def max_u_necb(stype = "roofceiling", bc = "outdoors", hdd = 8000)
     hdd = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
 
     # Admissible surface types.
     stypes = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
-    stype  = stype.respond_to?(:to_s) ? stype.to_s.downcase : "roofceiling"
+    stype  = stype.respond_to?(:to_sym) ? stype.to_s.downcase : "roofceiling"
     stype  = stypes.include?(stype) ? stype : "roofceiling"
 
     # Admissible outside boundary conditions.
-    conditions = ["outdoors", "ground"]
-    condition  = condition.respond_to?(:to_s) ? condition.to_s.downcase : "outdoors"
-    condition  = conditions.include?(condition) ? condition : "outdoors"
+    bcs = ["outdoors", "ground"]
+    bc  = bc.respond_to?(:to_sym) ? bc.to_s.downcase : "outdoors"
+    bc  = bcs.include?(bc) ? bc : "outdoors"
 
-    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020"]
+    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020", "NECB2025"]
 
     data = {}
 
@@ -325,14 +325,14 @@ class NECB2011
     templates.each do |tp|
       data[tp] = {}
 
-      conditions.each do |cd|
+      bcs.each do |cd|
         data[tp][cd] = {}
 
         stypes.each { |st| data[tp][cd][st] = {} }
       end
     end
 
-    # From NECB Part 3 tables. Moving away from BTAP formulas. Should be CSV.
+    # From NECB Part 3 tables. Moving away from BTAP formulas.
     data["NECB2011"]["outdoors"]["wall"       ][3000] = 0.315
     data["NECB2011"]["outdoors"]["wall"       ][4000] = 0.278
     data["NECB2011"]["outdoors"]["wall"       ][5000] = 0.247
@@ -554,7 +554,10 @@ class NECB2011
     data["NECB2020"]["ground"  ]["floor"      ][9999] = 0.379
 
     # Return required U-factor if provided HDD < stored HDD.
-    data[@template][condition][stype].each { |hdd18, u| return u if hdd < hdd18 }
+    tplate = @template
+    tplate = "NECB2020" if tplate == "NECB2025"
+
+    data[tplate][bc][stype].each { |hdd18, u| return u if hdd < hdd18 }
 
     0.110
   end

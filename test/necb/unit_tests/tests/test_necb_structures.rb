@@ -35,7 +35,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
@@ -43,10 +43,10 @@ class NECB_Structure_Tests < Minitest::Test
       # 'PrimarySchool',
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
+      'SmallOffice',
       'Warehouse'
     ]
 
@@ -258,13 +258,9 @@ class NECB_Structure_Tests < Minitest::Test
 
             if @addprop && building == "Warehouse"
               err_msg = "# Default Construction Sets (#{cas})?"
-              assert_equal(csets.size, 3, err_msg)
+              assert_equal(csets.size, 3, err_msg)    # 1x building + 2x spaces
               err_msg = "# custom spaces (#{cas})?"
-              assert_equal(s.spaces.size, 2, err_msg)
-
-              # id1  = "Zone1 Office"
-              # id2  = "Zone2 Fine Storage"
-
+              assert_equal(s.spaces.size, 2, err_msg) # 2x custom spaces
               err_msg = "Custom #{id1} (#{cas})?"
               assert_includes(s.spaces, id1, err_msg)
               err_msg = "Custom #{id2} (#{cas})?"
@@ -291,6 +287,10 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg2 = "#{id2} empty exterior subsurface constructions (#{cas})?"
               assert_empty(offcset.defaultExteriorSubSurfaceConstructions, err_msg1)
               assert_empty(fineset.defaultExteriorSubSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty interior surface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty interior surface constructions (#{cas})?"
+              assert_empty(offcset.defaultInteriorSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultInteriorSurfaceConstructions, err_msg2)
               err_msg1 = "#{id1} empty interior subsurface constructions (#{cas})?"
               err_msg2 = "#{id2} empty interior subsurface constructions (#{cas})?"
               assert_empty(offcset.defaultInteriorSubSurfaceConstructions, err_msg1)
@@ -337,7 +337,7 @@ class NECB_Structure_Tests < Minitest::Test
               zn = space.thermalZone
               next if zn.empty?
 
-              sm2  = space.floorArea * space.multiplier * zn.get.multiplier
+              sm2  = space.floorArea
               cm2 += sm2
               om2 += sm2 if ospaces.include?(space)
             end
@@ -396,7 +396,7 @@ class NECB_Structure_Tests < Minitest::Test
               end
 
               unless mkg.round == kg.round
-                fdback << "Internal mass #{kg.round} (#{cas})!"
+                fdback << "Internal mass #{kg.round} vs #{mkg.round} (#{cas})!"
                 @test_passed = false
               end
             end

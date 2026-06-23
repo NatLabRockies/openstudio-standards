@@ -449,9 +449,7 @@ module BTAP
           id = space.nameString
           zn = space.thermalZone
           next if zn.empty?
-
-          m2 = space.floorArea * space.multiplier * zn.get.multiplier
-          next unless m2 > 0
+          next unless space.floorArea > 0
 
           prp = self.property(space, tag)
           next if prp.nil?
@@ -462,7 +460,7 @@ module BTAP
 
           unless @spaces.key?(id)
             @spaces[id]       = {}
-            @spaces[id][:m2 ] = m2
+            @spaces[id][:m2 ] = space.floorArea
             @spaces[id][:h  ] = BTAP::Geometry::Spaces.space_height(space)
             @spaces[id][:co2] = {columns: 0, partitions: 0}
           end
@@ -490,17 +488,19 @@ module BTAP
         id     = @spaces.keys.first
         sp     = @spaces.values.first
         espace = model.getSpaceByName(id).get
+        ezone  = espace.thermalZone.get
 
         first             = {}
         first[:spaces   ] = [espace]
         first[:structure] = sp[:structure]
         first[:framing  ] = sp[:framing]
-        first[:m2       ] = sp[:m2]
+        first[:m2       ] = sp[:m2] * espace.multiplier * ezone.multiplier
         custom           << first
 
         @spaces.each do |id, sp|
-          space = model.getSpaceByName(id).get
           match = false
+          space = model.getSpaceByName(id).get
+          zone  = space.thermalZone.get
           next if space == espace
 
           custom.each do |csp|
@@ -510,7 +510,7 @@ module BTAP
 
             if sp[:structure] == stx && sp[:framing] == frx
               csp[:spaces] << space
-              csp[:m2    ] += sp[:m2]
+              csp[:m2    ] += sp[:m2] * space.multiplier * zone.multiplier
               match = true
             end
           end
@@ -520,7 +520,7 @@ module BTAP
             spx[:spaces   ] = [space]
             spx[:structure] = sp[:structure]
             spx[:framing  ] = sp[:framing]
-            spx[:m2       ] = sp[:m2]
+            spx[:m2       ] = sp[:m2] * space.multiplier * zone.multiplier
             custom         << spx
           end
         end
@@ -560,7 +560,7 @@ module BTAP
         zn = space.thermalZone
         next if zn.empty?
 
-        sm2  = space.floorArea * space.multiplier * zn.get.multiplier
+        sm2  = space.floorArea
         m2  += sm2
         om2 += sm2 if ospaces.include?(space)
       end
@@ -665,32 +665,34 @@ module BTAP
       #     - if structure :concrete
       #       - concrete: 2240 kg/m3 x 0.126 m2 x 97% = 274 kg/m
       #       - rebar:    7850 kg/m3 x 0.126 m2 x  3% =  30 kg/m
-      #                                               = 304 kg/m (+11%)
+      #                                               = 304 kg/m
+      #       - x 125% for shear walls, etc.          = 380 kg/m
       #     - if structure :cmu (mix of load bearing walls + smaller pours)
-      #       - 1/2 :concrete                         = 150 kg/m
+      #       - 1/2 :concrete                         = 190 kg/m
       #     - if structure :clt
       #       - wood:     540 kg/m3 x 0.126 m2 x 97%  =  66 kg/m
       #       - anchors: 7850 kg/m3 x 0.126 m2 x 3%   =  30 kg/m
-      #                                               =  96 kg/m (+45%)
+      #                                               =  96 kg/m
+      #       - x 125% for shear walls, etc.          = 120 kg/m
       #     - if structure :wood
-      #       - 1/2 :clt                              =  48 kg/m
+      #       - 1/2 :clt                              =  60 kg/m
 
       # Fetch approx. total column height (m) and linear density.
       column_m   = 0
       column_rho = case @structure
                    when :steel then  91
                    when :metal then  91
-                   when :cmu   then 150
-                   when :wood  then  48
-                   when :clt   then  96
-                   else             304
+                   when :cmu   then 190
+                   when :wood  then  60
+                   when :clt   then 120
+                   else             380
                    end
 
       cspaces.each do |space|
         zn = space.thermalZone
         next if zn.empty?
 
-        fm2 = space.floorArea * space.multiplier * zn.get.multiplier
+        fm2 = space.floorArea
         next unless fm2 > 0
 
         column_m += BTAP::Geometry::Spaces.space_height(space) * fm2 * 15 / 1000
@@ -708,10 +710,10 @@ module BTAP
           c_rho = case sp[:structure]
                   when :steel then  91
                   when :metal then  91
-                  when :cmu   then 150
-                  when :wood  then  48
-                  when :clt   then  96
-                  else             304
+                  when :cmu   then 190
+                  when :wood  then  60
+                  when :clt   then 120
+                  else             380
                   end
         else
           c_rho = column_rho
