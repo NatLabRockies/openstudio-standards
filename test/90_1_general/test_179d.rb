@@ -303,6 +303,15 @@ class ACM179dASHRAE9012007Test < Minitest::Test
     building = model.getBuilding
     building.setStandardsBuildingType('PrimarySchool')
 
+    vent_zone = OpenStudio::Model::ThermalZone.new(model)
+    vent_space = OpenStudio::Model::Space.new(model)
+    vent_space.setThermalZone(vent_zone)
+    ventilation = OpenStudio::Model::ZoneVentilationDesignFlowRate.new(model)
+    ventilation.setName('Warehouse Test Ventilation')
+    ventilation.setSchedule(model.alwaysOnDiscreteSchedule)
+    ventilation.setDesignFlowRate(0.01)
+    ventilation.addToThermalZone(vent_zone)
+
     _airloophvac = OpenStudio::Model::AirLoopHVAC.new(model)
 
     _baseboardconvectiveelectric = OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric.new(model)
@@ -412,6 +421,8 @@ class ACM179dASHRAE9012007Test < Minitest::Test
         end
       end
     end
+
+    assert_equal('SchoolPrimary_HVAC_Sch', ventilation.schedule.nameString)
   end
 
   def test_space_type_apply_internal_loads_also_sets_people_fraction_sensible

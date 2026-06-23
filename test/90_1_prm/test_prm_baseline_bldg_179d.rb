@@ -61,5 +61,27 @@ class ACM179dASHRAE9012007BaselineBuildingTest < Minitest::Test
       assert_in_delta(lighting_per_area_si, base_lpd_si, 0.001, "LPD failure for #{base_sp.nameString}")
     end
 
+    ventilation_zvs = base_model.getZoneVentilationDesignFlowRates.select { |zv| zv.nameString.end_with?(' Ventilation') }
+    cooling_exhaust_zvs = base_model.getZoneVentilationDesignFlowRates.select { |zv| zv.nameString.end_with?(' Cooling Exhaust') }
+    cooling_makeup_zvs = base_model.getZoneVentilationDesignFlowRates.select { |zv| zv.nameString.end_with?(' Cooling Makeup Air Intake') }
+
+    assert_operator(ventilation_zvs.size, :>, 0)
+    assert_operator(cooling_exhaust_zvs.size, :>, 0)
+    assert_operator(cooling_makeup_zvs.size, :>, 0)
+
+    ventilation_zvs.each do |zv|
+      refute_equal(base_model.alwaysOnDiscreteSchedule, zv.schedule, "#{zv.nameString} should run on ACM occupied schedule")
+    end
+
+    cooling_exhaust_zvs.each do |zv|
+      assert(zv.thermalZone.is_initialized)
+      assert(zv.thermalZone.get.spaces.all? { |space| space.exteriorArea <= 0.001 }, "#{zv.nameString} should be on interior zones only")
+    end
+
+    cooling_makeup_zvs.each do |zv|
+      assert(zv.thermalZone.is_initialized)
+      assert(zv.thermalZone.get.spaces.any? { |space| space.exteriorArea > 0.001 }, "#{zv.nameString} should be on exterior-connected zones only")
+    end
+
   end
 end

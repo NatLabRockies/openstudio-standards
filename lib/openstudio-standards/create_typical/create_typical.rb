@@ -816,6 +816,18 @@ module OpenstudioStandards
         # adjust infiltration schedules
         if add_infiltration
           OpenstudioStandards::Infiltration.model_set_nist_infiltration_schedules(model)
+
+          if template == '179D 90.1-2007' && primary_bldg_type == 'Warehouse'
+            heated_only_zones_with_zvs = model.getThermalZones.select do |zone|
+              next false unless zone.airLoopHVAC.empty?
+
+              zone.equipment.any? do |eq|
+                zv = eq.to_ZoneVentilationDesignFlowRate
+                zv.is_initialized && zv.get.nameString.end_with?(' Ventilation')
+              end
+            end
+            standard.model_add_ddy_only_infiltration_for_heated_only_zones(model, heated_only_zones_with_zvs)
+          end
         end
       end
 
