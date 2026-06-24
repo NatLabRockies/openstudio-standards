@@ -3,31 +3,30 @@ require_relative '../../../helpers/create_doe_prototype_helper'
 require 'tbd'
 require 'json'
 
-# This checks whether TBD is correctly deployed within BTAP.
+# Checks whether TBD is correctly deployed within BTAP.
 class NECB_TBD_Tests < Minitest::Test
   def test_necb_tbd()
+    outd = "output/test_necb_tbd"
+    eres = "../expected_results/necb_tbd_expected_results.json"
+    tres = "../expected_results/necb_tbd_test_results.json"
+    sizd = "sizing_folder"
 
-    # File paths.
-    @output_folder = File.join(__dir__, 'output/test_necb_tbd')
-    @expected_results_file = File.join(__dir__, '../expected_results/necb_tbd_expected_results.json')
-    @test_results_file = File.join(__dir__, '../expected_results/necb_tbd_test_results.json')
-    @sizing_run_dir = File.join(@output_folder, 'sizing_folder')
-    @test_results_array = [] # test results storage array
+    @output_folder         = File.join(__dir__, outd)
+    @expected_results_file = File.join(__dir__, eres)
+    @test_results_file     = File.join(__dir__, tres)
+    @sizing_run_dir        = File.join(@output_folder, sizd)
+    @test_results_array    = []
 
     # Intial test condition.
     @test_passed = true
-
-    # Hard setting climate & fuel.
-    @epw  = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
-    @fuel = 'Electricity'
-    @srr  = 'osut'
 
     # Range of test options.
     @templates = [
       # 'NECB2011',
       # 'NECB2015',
       # 'NECB2017',
-      'NECB2020'
+      'NECB2020',
+      # 'NECB2025'
     ]
 
     @buildings = [
@@ -42,7 +41,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
@@ -54,7 +53,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
-      # 'Warehouse'
+      'Warehouse'
     ]
 
     @structure = [
@@ -62,26 +61,23 @@ class NECB_TBD_Tests < Minitest::Test
       'structure'
     ]
 
-    # Optional PSI factor sets (e.g. optional for pre-NECB2017 templates). If
-    # :none, neither TBD 'uprating' nor 'derating' calculations (and subsequent
-    # modifications to generated OpenStudio models) are carried out. If instead
-    # set to :uprate, psi factor sets are determined iteratively, see:
+    # BTAP currently supports 4 options when enabling linear thermal bridging
+    # calculations (e.g. uprating, derating), via the TBD gem.
+    @options = [
+      # 'none', # ignore linear thermal bridging altogether
+      # 'bad',  # derating from poor thermal bridging details
+      # 'good', # derating from better thermal bridging details
+      'uprate'  # uprating (then derating) per NECB2017, NECB2020, NECB2025
+    ]
+
+    # PSI factor sets 'bad' or 'good' refer to costed BTAP details. If set
+    # to 'uprate', psi factor sets are determined iteratively, see:
     #
     #   lib/openstudio-standards/btap/bridging.rb
     #
-    # Otherwise, :bad vs :good PSI factor sets refer to costed BTAP details.
+    # AdditionalProperties tag derated surfaces with their initial,
+    # code-required Uo factors (whether derating or not).
     #
-    # @todo: For options 'bad' and 'good' (simple derating), deploy a similar
-    #        AdditionalProperty strategy (when uprating) to tag derated
-    #        surfaces with their initial, code-required Uo factors.
-    #
-    @options = [
-      # 'none',
-      # 'bad',
-      # 'good',
-      'uprate'
-    ]
-
     # BTAP holds discrete performance levels for each e.g. wall construction:
     # discrete U factors, from 0.314 down to 0.100 (or even 0.080 ... it
     # depends on the construction). When (successfully) uprating, TBD will
@@ -100,8 +96,12 @@ class NECB_TBD_Tests < Minitest::Test
       false
     ]
 
+    # AdditionalProperty override.
+    @addprop = true
+
     tag = "space_conditioning_category"
     tg  = "uprated_Uo"
+    epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
 
     fdback = []
     fdback << ""
@@ -121,15 +121,84 @@ class NECB_TBD_Tests < Minitest::Test
               fdback << ""
               fdback << cas
               st = Standard.build(template)
-              model = st.model_create_prototype_model(template:template,
-                                                      construction_opt: structure,
-                                                      epw_file: @epw,
-                                                      srr_opt: @srr,
-                                                      building_type: building,
-                                                      primary_heating_fuel: @fuel,
-                                                      tbd_option: option,
-                                                      tbd_interpolate: inter,
-                                                      sizing_run_dir: @sizing_run_dir)
+
+              # Customizing STRUCTURE options (similar to the unit test
+              # 'test_necb_structures'. STRUCTURE and/or FRAMING customization
+              # triggers customized thermal bridging PSI factor sets in BTAP. In
+              # this Warehouse example, the building would inherit a steel (or
+              # metal) structure by default. This is overridden here as all 3
+              # spaces are customized:
+              #   - the office has a user-assigned wood structure
+              #   - the fine storage space has user-assigned wood-framing
+              #   - the bulk storage area has a user-assigned CMU structure
+              if @addprop && building == "Warehouse"
+                id1  = "Zone1 Office"
+                id2  = "Zone2 Fine Storage"
+                id3  = "Zone3 Bulk Storage"
+                opt1 = "btap_structure"
+                opt2 = "btap_framing"
+                prp1 = "wood"
+                prp2 = "cmu"
+
+                model  = st.load_building_type_from_library(building_type: building)
+                office = model.getSpaceByName(id1)
+                fine   = model.getSpaceByName(id2)
+                bulk   = model.getSpaceByName(id3)
+                err_msg1 = "Invalid space ID '#{id1}' (#{cas})?"
+                err_msg2 = "Invalid space ID '#{id2}' (#{cas})?"
+                err_msg3 = "Invalid space ID '#{id3}' (#{cas})?"
+                refute_empty(office, err_msg1)
+                refute_empty(  fine, err_msg2)
+                refute_empty(  bulk, err_msg3)
+                office = office.get
+                fine   = fine.get
+                bulk   = bulk.get
+
+                # Assign custom STRUCTURE or FRAMING properties.
+                err_msg1 = "Failed AddProp '#{opt1}' #{id1} (#{cas})?"
+                err_msg2 = "Failed AddProp '#{opt2}' #{id2} (#{cas})?"
+                err_msg3 = "Failed AddProp '#{opt1}' #{id3} (#{cas})?"
+                assert(office.additionalProperties.setFeature(opt1, prp1), err_msg1)
+                assert(  fine.additionalProperties.setFeature(opt2, prp1), err_msg2)
+                assert(  bulk.additionalProperties.setFeature(opt1, prp2), err_msg3)
+                err_msg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
+                err_msg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
+                err_msg3 = "Missing AddProp '#{opt1}' #{id3} (#{cas})?"
+
+                # Validate.
+                prop1 = office.additionalProperties.getFeatureAsString(opt1)
+                prop2 =   fine.additionalProperties.getFeatureAsString(opt2)
+                prop3 =   bulk.additionalProperties.getFeatureAsString(opt1)
+                refute_empty(prop1, err_msg1)
+                refute_empty(prop2, err_msg2)
+                refute_empty(prop3, err_msg3)
+                prop1 = prop1.get
+                prop2 = prop2.get
+                prop3 = prop3.get
+                err_msg1 = "Incorrect AddProp '#{prop1}' #{id1} (#{cas})?"
+                err_msg2 = "Incorrect AddProp '#{prop2}' #{id2} (#{cas})?"
+                err_msg3 = "Incorrect AddProp '#{prop3}' #{id3} (#{cas})?"
+                assert_equal(prop1, prp1, err_msg1)
+                assert_equal(prop2, prp1, err_msg2)
+                assert_equal(prop3, prp2, err_msg3)
+
+                model = st.model_apply_standard(model: model,
+                                                epw_file: epw,
+                                                srr_opt: "osut",
+                                                construction_opt: structure,
+                                                tbd_option: option,
+                                                tbd_interpolate: inter,
+                                                sizing_run_dir: @sizing_run_dir)
+              else
+                model = st.model_create_prototype_model(template: template,
+                                                        epw_file: epw,
+                                                        building_type: building,
+                                                        srr_opt: "osut",
+                                                        construction_opt: structure,
+                                                        tbd_option: option,
+                                                        tbd_interpolate: inter,
+                                                        sizing_run_dir: @sizing_run_dir)
+              end
 
               if option == 'none'
                 err_msg = "BTAP/TBD: Initialized ('#{cas}')?"
@@ -147,8 +216,9 @@ class NECB_TBD_Tests < Minitest::Test
                   # then all surfaces inherit 'defaulted' constructions, either:
                   #   - building-wide default construction set
                   #   - space-specific default construction sets, e.g.
-                  #       - attics
-                  #       - plenums
+                  #     - attics
+                  #     - plenums
+                  #     - customized spaces
                   err_msg  = "BTAP/TBD: #{id} defaulted construction (#{cas})?"
                   assert(surface.isConstructionDefaulted, err_msg)
 
@@ -172,6 +242,7 @@ class NECB_TBD_Tests < Minitest::Test
                   # holding uninsulated, mass walls in 19th-century buildings,
                   # or non-compliant curtainwall spandrels.
                   next unless structure == "structure"
+                  next if @addprop && building == "Warehouse"
 
                   space   = surface.space
                   err_msg = "BTAP/TBD: #{id} space (#{cas})?"
