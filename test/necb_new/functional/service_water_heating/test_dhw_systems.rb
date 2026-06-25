@@ -16,8 +16,8 @@ class TestDhwSystems < Minitest::Test
 
     # Test gas water heater efficiency for small units (<= 75,000 Btu/hr)
     # Should use residential efficiency equation with fixed 82% efficiency
-    standard = Standard.build('NECB2011')
     model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2011')
 
     # Create small gas water heater
     water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
@@ -39,8 +39,8 @@ class TestDhwSystems < Minitest::Test
 
     # Test gas water heater efficiency for large units (> 75,000 Btu/hr)
     # Should use commercial efficiency equation with 80% minimum efficiency
-    standard = Standard.build('NECB2011')
     model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2011')
 
     # Create large gas water heater
     water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
@@ -59,10 +59,11 @@ class TestDhwSystems < Minitest::Test
   end
 
   def test_necb2020_gas_water_heater_small_uef_based
+
     # Test NECB 2020 gas water heater with UEF-based efficiency
     # NECB 2020 uses Uniform Energy Factor methodology
-    standard = Standard.build('NECB2020')
     model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2020')
 
     # Small gas water heater (<=22kW, 76-208L volume)
     water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
@@ -80,10 +81,11 @@ class TestDhwSystems < Minitest::Test
   end
 
   def test_necb2020_gas_water_heater_large_capacity
+
     # Test NECB 2020 large gas water heater efficiency
     # Large units use different efficiency calculation
-    standard = Standard.build('NECB2020')
     model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2020')
 
     # Large gas water heater
     water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)

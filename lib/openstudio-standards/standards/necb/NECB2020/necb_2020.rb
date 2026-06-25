@@ -187,11 +187,11 @@ class NECB2020 < NECB2017
   #   end
   #
   def model_create_necb_2020_performance_compliance(proposed_model:,
-                                                     epw_file:,
-                                                     sizing_run_dir: Dir.pwd,
-                                                     output_dir: Dir.pwd,
-                                                     run_simulations: false,
-                                                     html_report: true)
+                                                    epw_file:,
+                                                    sizing_run_dir: Dir.pwd,
+                                                    output_dir: Dir.pwd,
+                                                    run_simulations: false,
+                                                    html_report: true)
 
     # Load required modules
     require_relative 'performance_compliance/compliance_logger'

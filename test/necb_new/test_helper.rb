@@ -4,7 +4,7 @@
 # Provides SimpleCov coverage tracking for new tests
 
 # Configure SimpleCov for new test suite (unless disabled for parallel execution)
-unless ENV['DISABLE_SIMPLECOV'] == 'true'
+if ENV['ENABLE_SIMPLECOV'] == 'true'
   require 'simplecov'
   # Distinct command_name per process so parallel test subprocesses do not
   # overwrite each other's entry in .resultset.json. ResultMerger reads every
@@ -46,15 +46,10 @@ unless ENV['DISABLE_SIMPLECOV'] == 'true'
     SimpleCov.formatter = SimpleCov::Formatter::Codecov
   else
     SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
-    puts "📊 Coverage report will be generated at: test/necb_new/coverage/index.html"
+    puts "Coverage report will be generated at: test/necb_new/coverage/index.html"
   end
 end
 
-# Load standard test helpers
 require_relative '../helpers/minitest_helper'
 require_relative '../helpers/necb_helper'
-
-# Load NECB-specific helpers
-require_relative 'fixtures/necb_fixture_manager'
-
-puts "✅ NECB New Test Suite loaded with coverage tracking"
+require_relative '../helpers/necb_fixture_manager'

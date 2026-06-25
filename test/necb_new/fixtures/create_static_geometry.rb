@@ -21,7 +21,7 @@ def save_geometry(model, filename, description)
   path = File.join(GEOMETRY_DIR, filename)
   model.save(path, true)
   size_kb = (File.size(path) / 1024.0).round(1)
-  puts "✓ Created: #{filename} (#{size_kb} KB) - #{description}"
+  puts "Created: #{filename} (#{size_kb} KB) - #{description}"
 end
 
 #==============================================================================

@@ -18,10 +18,10 @@ class SizedModelFixtureManager
   RESOURCE_MODEL_PATH = File.join(__dir__, '..', '..', 'necb', 'unit_tests', 'resources', '5ZoneNoHVAC.osm')
 
   EPW_FILES = {
-    'toronto'    => 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
-    'vancouver'  => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',
-    'montreal'   => 'CAN_QC_Montreal.Intl.AP.716270_CWEC2020.epw',
-    'calgary'    => 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw',
+    'toronto'     => 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
+    'vancouver'   => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',
+    'montreal'    => 'CAN_QC_Montreal.Intl.AP.716270_CWEC2020.epw',
+    'calgary'     => 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw',
     'yellowknife' => 'CAN_NT_Yellowknife.AP.719360_CWEC2020.epw'
   }.freeze
 
@@ -43,12 +43,12 @@ class SizedModelFixtureManager
       if manifest[cache_key]
         cached = lookup_cached_fixture(manifest[cache_key])
         if cached
-          puts "✓ Using cached sized fixture: #{template}/#{system_type}/#{climate} [#{cache_key[0..7]}]"
+          puts "Using cached sized fixture: #{template}/#{system_type}/#{climate} [#{cache_key[0..7]}]"
           return cached.merge(config: config)
         end
       end
 
-      puts "⚙ Creating sized fixture: #{template}/#{system_type}/#{climate}"
+      puts "Creating sized fixture: #{template}/#{system_type}/#{climate}"
       fixture = build_sized_model(template: template, system_type: system_type,
                                   climate: climate, cache_key: cache_key)
 

@@ -195,15 +195,15 @@ def generate_fixture(config, index, total)
     elapsed = Time.now - start_time
 
     if model
-      puts "  ✓ Success (#{elapsed.round(1)}s)"
+      puts "  Success (#{elapsed.round(1)}s)"
       return { success: true, config: config, time: elapsed }
     else
-      puts "  ✗ Failed to generate model"
+      puts "  Failed to generate model"
       return { success: false, config: config, error: "Model creation returned nil" }
     end
 
   rescue StandardError => e
-    puts "  ✗ Error: #{e.message}"
+    puts "  Error: #{e.message}"
     return { success: false, config: config, error: e.message }
   end
 end

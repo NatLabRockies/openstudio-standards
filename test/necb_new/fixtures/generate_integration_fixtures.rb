@@ -82,15 +82,15 @@ fixtures = [
 
 # Climate zone to weather file mapping
 WEATHER_FILES = {
-  'Toronto' => 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
-  'Vancouver' => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',
-  'Edmonton' => 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
+  'Toronto'     => 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
+  'Vancouver'   => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2020.epw',
+  'Edmonton'    => 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw',
   'Yellowknife' => 'CAN_NT_Yellowknife.AP.719360_CWEC2020.epw'
 }
 
 # Building geometry configurations
 BUILDING_CONFIGS = {
-  'SmallOffice' => { length: 20.0, width: 15.0, floors: 1, height: 3.0 },
+  'SmallOffice'  => { length: 20.0, width: 15.0, floors: 1, height: 3.0 },
   'MediumOffice' => { length: 40.0, width: 30.0, floors: 2, height: 3.8 }
 }
 
@@ -218,7 +218,7 @@ def generate_fixture(config, idx, total, force)
   # Skip if exists and not forcing
   if File.exist?(fixture_path) && !force
     size_mb = (File.size(fixture_path) / 1024.0 / 1024.0).round(2)
-    puts "[#{idx}/#{total}] ⊙ Skipping #{config[:name]} (already exists, #{size_mb} MB)"
+    puts "[#{idx}/#{total}] Skipping #{config[:name]} (already exists, #{size_mb} MB)"
     return { name: config[:name], status: :skipped, size_mb: size_mb }
   end
 
@@ -252,17 +252,17 @@ def generate_fixture(config, idx, total, force)
       # Save sized model
       model.save(fixture_path, true)
       size_mb = (File.size(fixture_path) / 1024.0 / 1024.0).round(2)
-      puts "[#{idx}/#{total}] ✓ Completed #{config[:name]} (#{size_mb} MB)"
+      puts "[#{idx}/#{total}] Completed #{config[:name]} (#{size_mb} MB)"
       { name: config[:name], status: :success, size_mb: size_mb }
     else
-      puts "[#{idx}/#{total}] ✗ Sizing failed: #{config[:name]}"
+      puts "[#{idx}/#{total}] Sizing failed: #{config[:name]}"
       { name: config[:name], status: :failed, error: 'Sizing failed' }
     end
 
   rescue => e
-    puts "[#{idx}/#{total}] ✗ Error in #{config[:name]}: #{e.message}"
+    puts "[#{idx}/#{total}] Error in #{config[:name]}: #{e.message}"
     puts "    #{e.backtrace.first}" if ENV['DEBUG']
-    { name: config[:name], status: :error, error: e.message }
+    { name: config[:name], status: :error, error: e.full_message }
   end
 end
 
@@ -326,10 +326,10 @@ error_count = results.count { |r| r[:status] == :error }
 skipped_count = results.count { |r| r[:status] == :skipped }
 
 puts "Results:"
-puts "  ✓ Success: #{success_count}"
-puts "  ⊙ Skipped: #{skipped_count}" if skipped_count > 0
-puts "  ✗ Failed:  #{failed_count}" if failed_count > 0
-puts "  ✗ Errors:  #{error_count}" if error_count > 0
+puts "  Success: #{success_count}"
+puts "  Skipped: #{skipped_count}" if skipped_count > 0
+puts "  Failed:  #{failed_count}" if failed_count > 0
+puts "  Errors:  #{error_count}" if error_count > 0
 puts ""
 
 if failed_count > 0 || error_count > 0
