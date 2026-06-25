@@ -232,7 +232,17 @@ module NecbHelper
     return standard
   end
 
+  # Baseline model creation method for unit tests not running full simulations.
+  #
+  # @param osm_file              [String]
+  # @param template              [String]
+  # @param epw_file              [String]
+  # @param primary_heating_fuel  [String]
+  # @param num_stories           [Integer]
+  # @param add_thermostat        [Boolean]
+  # @param add_baseboard_heating [Boolean]
   def create_baseline_necb_model(
+    osm_file: File.join(__dir__, '../necb/models/5ZoneNoHVAC.osm'),
     template: 'NECB2011',
     epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
     primary_heating_fuel: nil,
@@ -240,10 +250,9 @@ module NecbHelper
     add_thermostat: false,
     add_baseboard_heating: false)
 
-    standard      = Standard.build(template)
-    resource_path = File.join(__dir__, '../necb/models/5ZoneNoHVAC.osm')
-    translator    = OpenStudio::OSVersion::VersionTranslator.new
-    model         = translator.loadModel(resource_path).get
+    standard   = Standard.build(template)
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model      = translator.loadModel(osm_file).get
 
     OpenstudioStandards::Weather.model_set_building_location(
       model,
