@@ -1,4 +1,4 @@
-require_relative '../../test_helper'
+require_relative '../coverage_helper'
 
 # Test space type assignment and load densities for NECB standards.
 # Phase 2 of new NECB test suite.
@@ -20,7 +20,7 @@ class TestSpaceTypeAssignment < Minitest::Test
   def test_lpd
     # Test that office space type has lighting power density assigned
     model, standard = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
+      osm_file: File.join(__dir__, '../fixtures/geometry/simple_box.osm'))
 
     # Create an office space type
     space_type = OpenStudio::Model::SpaceType.new(model)
@@ -48,7 +48,7 @@ class TestSpaceTypeAssignment < Minitest::Test
   # Test that warehouse space type has lower LPD than office
   def test_warehouse_lpd_lower_than_office
     model, standard = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
+      osm_file: File.join(__dir__, '../fixtures/geometry/simple_box.osm'))
 
     # Create office space type
     office_st = OpenStudio::Model::SpaceType.new(model)
@@ -87,9 +87,9 @@ class TestSpaceTypeAssignment < Minitest::Test
   # Test that NECB2020 has different LPD than NECB2011 for office space
   def test_necb2020_lpd_differs_from_necb2011
     model_2011, standard_2011 = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
+      osm_file: File.join(__dir__, '../fixtures/geometry/simple_box.osm'))
     model_2020, standard_2020 = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/simple_box.osm'),
+      osm_file: File.join(__dir__, '../fixtures/geometry/simple_box.osm'),
       template: 'NECB2020')
 
     # Create office space types for both vintages
@@ -126,7 +126,7 @@ class TestSpaceTypeAssignment < Minitest::Test
 
   def test_space_type_occupancy_density
     model, standard = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/simple_box.osm'))
+      osm_file: File.join(__dir__, '../fixtures/geometry/simple_box.osm'))
 
     # Create office space type
     space_type = OpenStudio::Model::SpaceType.new(model)
@@ -152,7 +152,7 @@ class TestSpaceTypeAssignment < Minitest::Test
 
   def test_multiple_space_types_in_multi_zone_model
     model, standard = create_baseline_necb_model(
-      osm_file: File.join(__dir__, '../../fixtures/geometry/multi_zone_rectangle.osm'))
+      osm_file: File.join(__dir__, '../fixtures/geometry/multi_zone_rectangle.osm'))
 
     # Create different space types
     office_st = OpenStudio::Model::SpaceType.new(model)

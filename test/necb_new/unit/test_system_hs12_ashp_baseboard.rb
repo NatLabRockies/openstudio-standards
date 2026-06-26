@@ -1,4 +1,4 @@
-require_relative '../../test_helper'
+require_relative '../coverage_helper'
 
 # ECM HS12: Standard ASHP + Baseboards
 # Standard zones (4-5)
