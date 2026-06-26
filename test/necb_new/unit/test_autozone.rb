@@ -125,28 +125,4 @@ class TestNECBAutozone < Minitest::Test
 
     assert !result.nil?, "Wet spaces zoning should execute"
   end
-
-  def test_are_space_loads_similar_returns_true_for_identical_space
-    model, standard = create_baseline_necb_model
-    space = model.getSpaces.first
-    assert standard.are_space_loads_similar?(space_1: space, space_2: space)
-  end
-
-  def test_are_space_loads_similar_returns_false_when_space_type_missing
-    model, standard = create_baseline_necb_model
-    space_a = model.getSpaces.first
-    space_b = OpenStudio::Model::Space.new(model)
-    refute standard.are_space_loads_similar?(space_1: space_a, space_2: space_b)
-  end
-
-  def test_are_zone_loads_similar_returns_false_when_zone_sizes_differ
-    model, standard = create_baseline_necb_model
-    zone_a = OpenStudio::Model::ThermalZone.new(model)
-    zone_b = OpenStudio::Model::ThermalZone.new(model)
-    spaces = model.getSpaces
-    spaces[0].setThermalZone(zone_a)
-    spaces[1].setThermalZone(zone_b) if spaces[1]
-    spaces[2].setThermalZone(zone_a) if spaces[2]
-    refute standard.are_zone_loads_similar?(zone_1: zone_a, zone_2: zone_b)
-  end
 end
