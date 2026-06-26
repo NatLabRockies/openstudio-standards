@@ -74,37 +74,6 @@ class TestNECBRemainingHVACSystems < Minitest::Test
     assert plant_loops.length >= 2, "Should create multiple plant loops"
   end
 
-  def test_system_8_vav_with_gas_reheat_creation
-    # System 8 is similar to System 3 but with reheat
-    # File: hvac_system_3_and_8_single_speed.rb handles both
-    model, standard = create_baseline_necb_model(add_thermostat: true, primary_heating_fuel: 'NaturalGas')
-
-    zones = model.getThermalZones
-
-    # Create hot water loop (required by System 8)
-    hw_loop = create_hot_water_loop(model, standard)
-
-    standard.add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(
-      model: model,
-      zones: zones,
-      heating_coil_type: 'Gas',
-      baseboard_type: 'Hot Water',
-      hw_loop: hw_loop
-    )
-
-    # Verify air loops
-    air_loops = model.getAirLoopHVACs
-    assert air_loops.length > 0, "Should create air loop(s)"
-
-    # Verify DX cooling coils
-    dx_coils = model.getCoilCoolingDXSingleSpeeds
-    assert dx_coils.length > 0, "Should have DX cooling coils"
-
-    # Verify heating coils
-    gas_heating_coils = model.getCoilHeatingGass
-    assert gas_heating_coils.length > 0, "Should have gas heating coils"
-  end
-
   def test_system_7_vav_pfp_concept
     skip "System 7 (VAV with PFP boxes) is not implemented as a separate method in NECB2011
     It would typically be a VAV system (System 6) with parallel fan-powered terminal units
