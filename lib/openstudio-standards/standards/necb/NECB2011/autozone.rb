@@ -528,6 +528,121 @@ class NECB2011
     return wild_zone_array
   end
 
+  # This method will determine if the loads on a zone are similar. (Exposure, space type, space loads, and schedules, etc)
+  def are_zone_loads_similar?(zone_1:, zone_2:)
+    # make sure they have the same number of spaces.
+    truthes = []
+    return false if zone_1.spaces.size != zone_2.spaces.size
+
+    zone_1.spaces.each do |space_1|
+      zone_2.spaces.each do |space_2|
+        if are_space_loads_similar?(space_1: space_1, space_2: space_2)
+          truthes << true
+        end
+      end
+    end
+    # truthes sizes should be the same as the # of spaces if all spaces are similar.
+    return truthes.size == zone_1.spaces.size
+  end
+
+  # This method will determine if the loads on a space are similar. (Exposure, space type, space loads, and schedules, etc)
+  def are_space_loads_similar?(space_1:,
+                               space_2:,
+                               surface_percent_difference_tolerance: 0.01,
+                               angular_percent_difference_tolerance: 0.001,
+                               heating_load_percent_difference_tolerance: 15.0)
+    # Do they have the same space type?
+    return false unless space_1.multiplier == space_2.multiplier
+    # Ensure that they both have defined spacetypes
+    return false if space_1.spaceType.empty?
+    return false if space_2.spaceType.empty?
+    # ensure that they have the same spacetype.
+    return false unless space_1.spaceType.get == space_2.spaceType.get
+
+    # Perform surface comparision. If ranges are within percent_difference_tolerance.. they can be considered the same.
+    space_1_floor_area = space_1.floorArea
+    space_2_floor_area = space_2.floorArea
+    space_1_surface_report = space_surface_report(space_1)
+    space_2_surface_report = space_surface_report(space_2)
+    # Spaces should have the same number of surface orientations.
+    return false unless space_1_surface_report.size == space_2_surface_report.size
+    # spaces should have similar loads
+    return false unless percentage_difference(stored_space_heating_load(space_1), stored_space_heating_load(space_2)) <= heating_load_percent_difference_tolerance
+
+    # Each surface should match
+    space_1_surface_report.each do |space_1_surface|
+      surface_match = space_2_surface_report.detect do |space_2_surface|
+        space_1_surface[:surface_type] == space_2_surface[:surface_type] &&
+          space_1_surface[:boundary_condition] == space_2_surface[:boundary_condition] &&
+          percentage_difference(space_1_surface[:tilt], space_2_surface[:tilt]) <= angular_percent_difference_tolerance &&
+          percentage_difference(space_1_surface[:azimuth], space_2_surface[:azimuth]) <= angular_percent_difference_tolerance &&
+          percentage_difference(space_1_surface[:surface_area_to_floor_ratio],
+                                space_2_surface[:surface_area_to_floor_ratio]) <= surface_percent_difference_tolerance &&
+          percentage_difference(space_1_surface[:glazed_subsurface_area_to_floor_ratio],
+                                space_2_surface[:glazed_subsurface_area_to_floor_ratio]) <= surface_percent_difference_tolerance &&
+          percentage_difference(space_1_surface[:opaque_subsurface_area_to_floor_ratio],
+                                space_2_surface[:opaque_subsurface_area_to_floor_ratio]) <= surface_percent_difference_tolerance
+      end
+      return false if surface_match.nil?
+    end
+    return true
+  end
+
+  # This method gathers the surface information for the space to determine if spaces are the same.
+  def space_surface_report(space)
+    surface_report = []
+    space_floor_area = space.floorArea
+    ['Outdoors', 'Ground'].each do |bc|
+      surfaces = BTAP::Geometry::Surfaces.filter_by_boundary_condition(space.surfaces, [bc]).each do |surface|
+        # sum wall area and subsurface area by direction. This is the old way so excluding top and bottom surfaces.
+        # new way
+        glazings = BTAP::Geometry::Surfaces.filter_subsurfaces_by_types(surface.subSurfaces, ['FixedWindow',
+                                                                                              'OperableWindow',
+                                                                                              'GlassDoor',
+                                                                                              'Skylight',
+                                                                                              'TubularDaylightDiffuser',
+                                                                                              'TubularDaylightDome'])
+        doors = BTAP::Geometry::Surfaces.filter_subsurfaces_by_types(surface.subSurfaces, ['Door',
+                                                                                           'OverheadDoor'])
+        azimuth = (surface.azimuth() * 180.0 / Math::PI)
+        tilt = (surface.tilt() * 180.0 / Math::PI)
+        surface_data = surface_report.detect do |curr_surface_data|
+          curr_surface_data[:surface_type] == surface.surfaceType &&
+            curr_surface_data[:azimuth] == azimuth &&
+            curr_surface_data[:tilt] == tilt &&
+            curr_surface_data[:boundary_condition] == bc
+        end
+
+        if surface_data.nil?
+          surface_data = {
+            surface_type: surface.surfaceType,
+            azimuth: azimuth,
+            tilt: tilt,
+            boundary_condition: bc,
+            surface_area: 0,
+            surface_area_to_floor_ratio: 0,
+            glazed_subsurface_area: 0,
+            glazed_subsurface_area_to_floor_ratio: 0,
+            opaque_subsurface_area: 0,
+            opaque_subsurface_area_to_floor_ratio: 0
+          }
+          surface_report << surface_data
+        end
+        surface_data[:surface_area] += surface.grossArea.to_i
+        surface_data[:surface_area_to_floor_ratio] += surface.grossArea / space.floorArea
+
+        surface_data[:glazed_subsurface_area] += glazings.map { |subsurface| subsurface.grossArea * subsurface.multiplier }.inject(0) { |sum, x| sum + x }.to_i
+        surface_data[:glazed_subsurface_area_to_floor_ratio] += glazings.map { |subsurface| subsurface.grossArea * subsurface.multiplier }.inject(0) { |sum, x| sum + x } / space.floorArea
+
+        surface_data[:surface_area] += doors.map { |subsurface| subsurface.grossArea * subsurface.multiplier }.inject(0) { |sum, x| sum + x }.to_i
+        surface_data[:surface_area_to_floor_ratio] += doors.map { |subsurface| subsurface.grossArea * subsurface.multiplier }.inject(0) { |sum, x| sum + x } / space.floorArea
+      end
+    end
+    surface_report.sort! { |a, b| [a[:surface_type], a[:azimuth], a[:tilt], a[:boundary_condition]] <=> [b[:surface_type], b[:azimuth], b[:tilt], b[:boundary_condition]] }
+
+    return surface_report
+  end
+
   # Check to see if this is a wildcard space that the NECB does not have a specified schedule or system for.
   def is_an_necb_wildcard_space?(space)
     # Avoid including washrooms and locker rooms as both wildcard and wet spaces
