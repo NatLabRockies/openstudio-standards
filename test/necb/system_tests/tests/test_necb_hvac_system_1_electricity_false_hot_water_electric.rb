@@ -34,7 +34,7 @@ class NECB_HVAC_System_1_Test < Minitest::Test
 
   def test_necb_hvac_system_1_electricity_false_hot_water_electric()
     weather_file = 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw'
-    template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
+    template_osm_file = "#{__dir__}/../../models/5ZoneNoHVAC.osm"
     system_name = 'system_1'
     vintage = 'NECB2011'
     boiler_fueltype = ' Electricity'
