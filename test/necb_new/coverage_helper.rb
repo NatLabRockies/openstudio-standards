@@ -6,6 +6,10 @@
 # with the same name in the parralel tests gem. Coverage will not work until
 # then, but one can temporarily rename the class without pushing to remote as
 # a workaround.
+#
+# Also, the content of this file should be implemented across one of the other
+# more encompassing test helpers, and should not be not confined solely to the
+# `necb_new/` suite.
 
 # Test Helper for NECB New Test Suite
 # Provides SimpleCov coverage tracking for new tests
