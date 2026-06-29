@@ -1,20 +1,28 @@
 #!/usr/bin/env ruby
 
+# TODO: NLR's parallel test helper class
+# `test/helpers/parallel_tests.rb`:ParallelTests needs to be renamed to not
+# conflict with `simplecov`'s assumptions since it overrwrites the class
+# with the same name in the parralel tests gem. Coverage will not work until
+# then, but one can temporarily rename the class without pushing to remote as
+# a workaround.
+
 # Test Helper for NECB New Test Suite
 # Provides SimpleCov coverage tracking for new tests
 
 # Configure SimpleCov for new test suite (unless disabled for parallel execution)
 if ENV['ENABLE_SIMPLECOV'] == 'true'
   require 'simplecov'
+
   # Distinct command_name per process so parallel test subprocesses do not
   # overwrite each other's entry in .resultset.json. ResultMerger reads every
   # named entry and combines them when generating the final report.
-  test_label = ENV['SIMPLECOV_COMMAND_NAME'] ||
-               ($0 ? File.basename($0, '.rb') : "necb_new")
+  test_label   = ENV['SIMPLECOV_COMMAND_NAME'] || ($0 ? File.basename($0, '.rb') : "necb_new")
+  coverage_dir = 'test/necb_new/coverage'
   SimpleCov.command_name "#{test_label}-#{Process.pid}"
   SimpleCov.start do
     # Coverage output directory
-    coverage_dir 'test/necb_new/coverage'
+    coverage_dir coverage_dir
 
     # Track only NECB implementation code in /lib/openstudio-standards/standards/necb/
     add_group 'NECB2011', 'lib/openstudio-standards/standards/necb/NECB2011'
@@ -41,15 +49,9 @@ if ENV['ENABLE_SIMPLECOV'] == 'true'
   end
 
   # Use HTML formatter locally, Codecov in CI
-  if ENV['CI'] == 'true'
-    require 'codecov'
-    SimpleCov.formatter = SimpleCov::Formatter::Codecov
-  else
-    SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
-    puts "Coverage report will be generated at: test/necb_new/coverage/index.html"
-  end
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+  puts "Coverage report will be generated at: #{coverage_dir}/index.html"
 end
 
 require_relative '../helpers/minitest_helper'
 require_relative '../helpers/necb_helper'
-require_relative '../helpers/necb_fixture_manager'
