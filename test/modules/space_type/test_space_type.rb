@@ -63,7 +63,7 @@ class TestSpaceTypeModule < Minitest::Test
       when 'Classroom'
         assert_equal('classroom_lecture_training_lighting', value)
       when 'ComputerRoom'
-        assert_equal('classroom_lecture_training_lighting', value)
+        assert_equal('computer_room_lighting', value)
       when 'Library'
         assert_equal('library_lighting', value) # library_reading_area_lighting?
       end
