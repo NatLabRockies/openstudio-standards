@@ -6,7 +6,7 @@ require 'json'
 require 'parallel'
 #require 'hashdiff'
 
-# Add significant digits capability to float amd integer class to tidy up reporting.
+# Add significant digits capability to float and integer class to tidy up reporting.
 class Float
   def signif(digits=4)
     return 0 if self.zero?
@@ -48,7 +48,7 @@ module NecbHelper
 
   # Hold an array of the instantiated standards (to save recreating them all the time).
   @@standards = []
-  
+
   # Default to true for PERFORM_STANDARDS in testing.
   PERFORM_STANDARDS = true
 
@@ -219,7 +219,6 @@ module NecbHelper
     return test_results
   end
 
-
   # Method to recover existing template (or create on if it has not been instantiated).
   def get_standard(template)
     standard = nil
@@ -231,6 +230,134 @@ module NecbHelper
     end
     logger.debug "Using template: #{standard.class}"
     return standard
+  end
+
+  # Baseline model creation method for unit tests not running full simulations.
+  #
+  # @param osm_file              [String]
+  # @param template              [String]
+  # @param epw_file              [String]
+  # @param primary_heating_fuel  [String]
+  # @param num_stories           [Integer]
+  # @param add_thermostat        [Boolean]
+  # @param add_baseboard_heating [Boolean]
+  def create_baseline_necb_model(
+    osm_file: File.join(__dir__, '../necb/models/5ZoneNoHVAC.osm'),
+    template: 'NECB2011',
+    epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
+    primary_heating_fuel: nil,
+    num_stories: 1,
+    add_thermostat: false,
+    add_baseboard_heating: false)
+
+    standard   = Standard.build(template)
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model      = translator.loadModel(osm_file).get
+
+    OpenstudioStandards::Weather.model_set_building_location(
+      model,
+      weather_file_path: OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file))
+
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
+    end
+
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(num_stories)
+    building.setStandardsNumberOfAboveGroundStories(num_stories)
+
+    if add_thermostat
+      htg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      htg_sch.setName('Heating Setpoint Schedule')
+      htg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 21.0)
+
+      clg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      clg_sch.setName('Cooling Setpoint Schedule')
+      clg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 24.0)
+
+      model.getThermalZones.each do |zone|
+        thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
+        thermostat.setHeatingSetpointTemperatureSchedule(htg_sch)
+        thermostat.setCoolingSetpointTemperatureSchedule(clg_sch)
+        zone.setThermostatSetpointDualSetpoint(thermostat)
+      end
+    end
+
+    if add_baseboard_heating
+      standard.add_sys1_unitary_ac_baseboard_heating(
+        model: model,
+        zones: model.getThermalZones.sort,
+        mau_type: true,
+        mau_heating_coil_type: 'Electric',
+        baseboard_type: 'Electric',
+        hw_loop: nil
+      )
+    end
+
+    unless primary_heating_fuel.nil?
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(
+        standards_data: standard.instance_variable_get(:@standards_data),
+        primary_heating_fuel: primary_heating_fuel)
+    end
+
+    return [model, standard]
+  end
+
+  # Load a sized model from fixture cache.
+  # If fixture doesn't exist, returns nil.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @return [OpenStudio::Model::Model, nil] The sized model, or nil if not cached
+  def get_sized_model_from_fixture(template:, building_type:, epw_file:, system_type: nil)
+    require_relative './necb_fixture_manager'
+
+    # Check if fixture exists
+    config = {
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      openstudio_version: OpenStudio.openStudioVersion,
+      fixture_version: NecbFixtureManager::FIXTURE_VERSION
+    }
+
+    fixture_path = NecbFixtureManager.fixture_path(config)
+
+    if File.exist?(fixture_path)
+      logger.debug "Loading sized model from fixture: #{File.basename(fixture_path)}"
+      NecbFixtureManager.send(:load_fixture, fixture_path)
+    else
+      logger.debug "No fixture found for: #{template} #{building_type} #{system_type}"
+      nil
+    end
+  end
+
+  # Get or create a sized model using fixture cache.
+  # First tries to load from cache, if not found creates and caches the sized model.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @param customize_block [Proc, nil] Optional block to customize model before sizing
+  # @return [OpenStudio::Model::Model, nil] The sized model
+  def get_or_create_sized_model_with_cache(template:, building_type:, epw_file:, system_type: nil, &customize_block)
+    require_relative './necb_fixture_manager'
+
+    logger.debug "Requesting sized model: #{template} #{building_type} #{system_type}"
+
+    NecbFixtureManager.get_or_create_sized_model(
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      &customize_block
+    )
   end
 
   # Standard method to run sizing for NECB testing. Parameters:

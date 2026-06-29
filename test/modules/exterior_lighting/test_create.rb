@@ -4,6 +4,7 @@ class TestExteriorLightingCreate < Minitest::Test
   def setup
     @create = OpenstudioStandards::CreateTypical
     @ext = OpenstudioStandards::ExteriorLighting
+    FileUtils.mkdir_p "#{__dir__}/output"
   end
 
   def test_model_create_exterior_lights
@@ -31,6 +32,8 @@ class TestExteriorLightingCreate < Minitest::Test
     assert_in_delta(1.0, lights.multiplier, 0.001)
     ext_lights_def = lights.exteriorLightsDefinition
     assert_in_delta(1000.0, ext_lights_def.designLevel, 0.001)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_model_create_exterior_lights.osm"), true)
   end
 
   def test_create_typical_exterior_lighting
@@ -39,6 +42,9 @@ class TestExteriorLightingCreate < Minitest::Test
     path = OpenStudio::Path.new("#{__dir__}/../../doe_prototype/models/example_model_multipliers.osm")
     model = translator.loadModel(path)
     model = model.get
+
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
 
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
@@ -56,6 +62,8 @@ class TestExteriorLightingCreate < Minitest::Test
     assert(parking_lighting.multiplier == 93150.0)
     base_lighting = exterior_lights.select { |e| e.name.get == 'Base Site Allowance 750 W' }[0]
     assert(base_lighting.exteriorLightsDefinition.designLevel == 750.0)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting.osm"), true)
   end
 
   def test_create_typical_exterior_lighting_default
@@ -65,6 +73,9 @@ class TestExteriorLightingCreate < Minitest::Test
     model = translator.loadModel(path)
     model = model.get
 
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
                                                             lighting_generation: 'default',
@@ -73,7 +84,7 @@ class TestExteriorLightingCreate < Minitest::Test
     # check results
     assert(exterior_lights.size == 5)
     assert(!exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }.empty?)
-    assert(!exterior_lights.select { |e| e.name.get == 'Building Facades 0.15 W/ft^2' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Building Facades 0.84 W/ft' }.empty?)
     assert(!exterior_lights.select { |e| e.name.get == 'Main Entries 30.0 W/ft' }.empty?)
     assert(!exterior_lights.select { |e| e.name.get == 'Other Doors 20.0 W/ft' }.empty?)
     parking_lighting = exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }[0]
@@ -81,6 +92,8 @@ class TestExteriorLightingCreate < Minitest::Test
     assert(parking_lighting.multiplier == 93150.0)
     base_lighting = exterior_lights.select { |e| e.name.get == 'Base Site Allowance 750.0 W' }[0]
     assert(base_lighting.exteriorLightsDefinition.designLevel == 750.0)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_default.osm"), true)
   end
 
   def test_create_typical_exterior_lighting_small_hotel
@@ -89,6 +102,9 @@ class TestExteriorLightingCreate < Minitest::Test
     path = OpenStudio::Path.new("#{__dir__}/../../doe_prototype/models/SmallHotel_5B_2004.osm")
     model = translator.loadModel(path)
     model = model.get
+
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
 
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
@@ -111,6 +127,8 @@ class TestExteriorLightingCreate < Minitest::Test
     entry_canopies_lighting = exterior_lights.select { |e| e.name.get == 'Entry Canopies 1.25 W/ft^2' }[0]
     assert_in_delta(720.0, entry_canopies_lighting.multiplier, 1.0)
     assert(entry_canopies_lighting.exteriorLightsDefinition.designLevel == 1.25)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_small_hotel.osm"), true)
   end
 
   def test_create_typical_exterior_lighting_hospital
@@ -120,10 +138,13 @@ class TestExteriorLightingCreate < Minitest::Test
     model = translator.loadModel(path)
     model = model.get
 
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
-                                                                  standard: Standard.build('DOE Ref Pre-1980'),
-                                                                  lighting_zone: 4)
+                                                            standard: Standard.build('DOE Ref Pre-1980'),
+                                                            lighting_zone: 4)
 
     # check results
     assert(exterior_lights.size == 5)
@@ -137,6 +158,8 @@ class TestExteriorLightingCreate < Minitest::Test
     emergency_canopies_lighting = exterior_lights.select { |e| e.name.get == 'Emergency Canopies 4.0 W/ft^2' }[0]
     assert_in_delta(720.0, emergency_canopies_lighting.multiplier, 1.0)
     assert(emergency_canopies_lighting.exteriorLightsDefinition.designLevel == 4.0)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_hospital.osm"), true)
   end
 
   def test_create_typical_exterior_lighting_secondary
@@ -146,10 +169,40 @@ class TestExteriorLightingCreate < Minitest::Test
     model = translator.loadModel(path)
     model = model.get
 
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
-                                                                  standard: Standard.build('DOE Ref 1980-2004'),
-                                                                  lighting_zone: 2)
+                                                            lighting_generation: 'default',
+                                                            lighting_zone: 3)
+
+    # check results
+    assert(exterior_lights.size == 4)
+    assert(!exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Building Facades 0.74 W/ft' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Main Entries 30.0 W/ft' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Other Doors 20.0 W/ft' }.empty?)
+    parking_lighting = exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }[0]
+    assert_in_delta(0.041, parking_lighting.exteriorLightsDefinition.designLevel, 0.001)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_secondary.osm"), true)
+  end
+
+  def test_create_typical_exterior_lighting_secondary_standard
+    # Load the test model
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    path = OpenStudio::Path.new("#{__dir__}/../../doe_prototype/models/SecondarySchool_6A_1980-2004.osm")
+    model = translator.loadModel(path)
+    model = model.get
+
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
+    # add lights
+    exterior_lights = @ext.create_typical_exterior_lighting(model,
+                                                            standard: Standard.build('DOE Ref 1980-2004'),
+                                                            lighting_zone: 2)
 
     # check results
     assert(exterior_lights.size == 4)
@@ -159,6 +212,8 @@ class TestExteriorLightingCreate < Minitest::Test
     assert(!exterior_lights.select { |e| e.name.get == 'Other Doors 25.0 W/ft' }.empty?)
     parking_lighting = exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.18 W/ft^2' }[0]
     assert(parking_lighting.exteriorLightsDefinition.designLevel == 0.18)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_secondary_standard.osm"), true)
   end
 
   def test_create_typical_exterior_lighting_quick_service
@@ -168,15 +223,18 @@ class TestExteriorLightingCreate < Minitest::Test
     model = translator.loadModel(path)
     model = model.get
 
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
     # add lights
     exterior_lights = @ext.create_typical_exterior_lighting(model,
                                                             standard: Standard.build('90.1-2010'),
                                                             lighting_zone: 1)
 
     # check results
-    assert(exterior_lights.size == 5)
+    assert(exterior_lights.size == 4)
     assert(!exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }.empty?)
-    # assert(!exterior_lights.select { |e| e.name.get == 'Building Facades 0.0 W/ft^2' }.empty?)
+    assert(exterior_lights.select { |e| e.name.get == 'Building Facades 0.0 W/ft^2' }.empty?)
     assert(!exterior_lights.select { |e| e.name.get == 'Main Entries 20 W/ft' }.empty?)
     assert(!exterior_lights.select { |e| e.name.get == 'Other Doors 20 W/ft' }.empty?)
     assert(!exterior_lights.select { |e| e.name.get == 'Drive Through Windows 400 W/ft^2' }.empty?)
@@ -184,5 +242,36 @@ class TestExteriorLightingCreate < Minitest::Test
     assert(parking_lighting.exteriorLightsDefinition.designLevel == 0.04)
     drive_lighting = exterior_lights.select { |e| e.name.get == 'Drive Through Windows 400 W/ft^2' }[0]
     assert_in_delta(1.0, drive_lighting.multiplier, 0.001) # 2501 ft^2 / drive through per 2501
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_quick_service.osm"), true)
+  end
+
+
+  def test_create_typical_exterior_lighting_warehouse
+    # Load the test model
+    template = '90.1-2013'
+    climate_zone = 'ASHRAE 169-2013-4A'
+    std = Standard.build(template)
+    model = std.safe_load_model("#{__dir__}/../../../data/geometry/ASHRAE90120102013Warehouse.osm")
+    OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+
+    # remove existing exterior lights to avoid interference with test
+    model.getExteriorLightss.each(&:remove)
+
+    # add lights
+    exterior_lights = @ext.create_typical_exterior_lighting(model,
+                                                            lighting_generation: 'default',
+                                                            lighting_zone: 3)
+
+    # check results
+    assert(exterior_lights.size == 4)
+    assert(!exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Building Facades 0.97 W/ft' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Main Entries 30.0 W/ft' }.empty?)
+    assert(!exterior_lights.select { |e| e.name.get == 'Other Doors 20.0 W/ft' }.empty?)
+    parking_lighting = exterior_lights.select { |e| e.name.get == 'Parking Areas and Drives 0.04 W/ft^2' }[0]
+    assert_in_delta(0.041, parking_lighting.exteriorLightsDefinition.designLevel, 0.001)
+
+    model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_warehouse.osm"), true)
   end
 end

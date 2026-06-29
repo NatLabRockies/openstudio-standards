@@ -140,4 +140,222 @@ class NECB2020 < NECB2017
     infiltration.setSpace(space)
     return true
   end
+
+  # Generate NECB 2020 Performance Path compliance models (proposed and reference)
+  #
+  # This method implements the NECB 2020 Section 8.4 Performance Path by:
+  # 1. Documenting the proposed building characteristics per Section 8.4.3
+  # 2. Generating a reference building with prescriptive requirements per Section 8.4.4
+  # 3. Optionally running simulations and validating compliance per Section 8.4.1
+  # 4. Generating detailed HTML compliance reports with before/after logging
+  #
+  # @param proposed_model [OpenStudio::Model::Model] The proposed building model (input, not modified)
+  # @param epw_file [String] Path to EPW weather file
+  # @param sizing_run_dir [String] Directory for sizing runs (default: current directory)
+  # @param output_dir [String] Directory for output files (default: current directory)
+  # @param run_simulations [Boolean] Whether to run EnergyPlus simulations (default: false)
+  # @param html_report [Boolean] Whether to generate HTML report (default: true)
+  # @return [Hash] Results hash containing:
+  #   - :proposed_model - The input proposed building model (unmodified)
+  #   - :reference_model - Generated reference building model
+  #   - :compliance_log - Structured compliance logger with all changes
+  #   - :proposed_model_path - Path to saved proposed model copy
+  #   - :reference_model_path - Path to saved reference model
+  #   - :html_report_path - Path to HTML compliance report (if html_report: true)
+  #   - :compliance_result - Compliance validation results (if run_simulations: true)
+  #   - :building_energy_target - Building energy target from reference (if run_simulations: true)
+  #   - :climate_zone - Climate zone for the location
+  #   - :hdd18 - Heating degree days (base 18°C)
+  #
+  # @example Basic usage without simulations
+  #   standard = Standard.build('NECB2020')
+  #   result = standard.model_create_necb_2020_performance_compliance(
+  #     proposed_model: model,
+  #     epw_file: 'path/to/weather.epw'
+  #   )
+  #   puts "Reference model: #{result[:reference_model_path]}"
+  #   puts "HTML report: #{result[:html_report_path]}"
+  #
+  # @example With simulations and compliance validation
+  #   result = standard.model_create_necb_2020_performance_compliance(
+  #     proposed_model: model,
+  #     epw_file: 'path/to/weather.epw',
+  #     run_simulations: true
+  #   )
+  #   if result[:compliance_result][:compliant]
+  #     puts "Building is compliant!"
+  #   end
+  #
+  def model_create_necb_2020_performance_compliance(proposed_model:,
+                                                    epw_file:,
+                                                    sizing_run_dir: Dir.pwd,
+                                                    output_dir: Dir.pwd,
+                                                    run_simulations: false,
+                                                    html_report: true)
+
+    # Load required modules
+    require_relative 'performance_compliance/compliance_logger'
+    require_relative 'performance_compliance/proposed_builder'
+    require_relative 'performance_compliance/reference_builder'
+    require_relative 'performance_compliance/reference_hvac_selector'
+    require_relative 'performance_compliance/compliance_validator'
+    require_relative 'performance_compliance/compliance_report'
+
+    # Initialize logger
+    logger = OpenstudioStandards::NECB2020::ComplianceLogger.new
+
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       'Starting NECB 2020 Performance Path compliance generation')
+
+    # Get climate information
+    hdd18 = get_necb_hdd18(model: proposed_model)
+    climate_zone = get_climate_zone_name(hdd18)
+
+    logger.log_article(
+      article: '8.4.1.1',
+      action: 'Initialized NECB 2020 Performance Path compliance',
+      details: {
+        climate_zone: climate_zone,
+        hdd18: hdd18.round(0),
+        epw_file: File.basename(epw_file)
+      }
+    )
+
+    # Step 1: Document proposed building per Section 8.4.3
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       'Documenting proposed building characteristics (Section 8.4.3)')
+
+    proposed_builder = OpenstudioStandards::NECB2020::ProposedBuilder.new(proposed_model, logger)
+    proposed_characteristics = proposed_builder.document_all_characteristics
+
+    # Step 2: Generate reference building per Section 8.4.4
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       'Generating reference building (Section 8.4.4)')
+
+    reference_builder = OpenstudioStandards::NECB2020::ReferenceBuilder.new(
+      self, proposed_model, logger, epw_file
+    )
+    reference_model = reference_builder.generate_reference_building(sizing_run_dir: sizing_run_dir)
+
+    # Step 3: Save models
+    proposed_model_path = File.join(output_dir, 'proposed_building.osm')
+    reference_model_path = File.join(output_dir, 'reference_building.osm')
+
+    BTAP::FileIO.save_osm(proposed_model, proposed_model_path)
+    BTAP::FileIO.save_osm(reference_model, reference_model_path)
+
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       "Saved proposed model to: #{proposed_model_path}")
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       "Saved reference model to: #{reference_model_path}")
+
+    # Prepare results
+    results = {
+      proposed_model: proposed_model,
+      reference_model: reference_model,
+      compliance_log: logger,
+      proposed_model_path: proposed_model_path,
+      reference_model_path: reference_model_path,
+      climate_zone: climate_zone,
+      hdd18: hdd18,
+      epw_file: epw_file
+    }
+
+    # Step 4: Optional - Run simulations and validate compliance
+    if run_simulations
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                         'Running simulations and validating compliance (Section 8.4.1)')
+
+      # Run proposed building simulation
+      proposed_sql_path = run_simulation_and_get_sql(
+        proposed_model,
+        epw_file,
+        File.join(output_dir, 'proposed_sim')
+      )
+
+      # Run reference building simulation
+      reference_sql_path = run_simulation_and_get_sql(
+        reference_model,
+        epw_file,
+        File.join(output_dir, 'reference_sim')
+      )
+
+      if proposed_sql_path && reference_sql_path
+        # Load SQL files
+        proposed_sql = OpenStudio::SqlFile.new(proposed_sql_path)
+        reference_sql = OpenStudio::SqlFile.new(reference_sql_path)
+
+        # Validate compliance
+        validator = OpenstudioStandards::NECB2020::ComplianceValidator.new(logger)
+        compliance_result = validator.validate_compliance(proposed_sql, reference_sql)
+
+        results[:compliance_result] = compliance_result
+        results[:building_energy_target] = compliance_result[:annual_energy][:building_energy_target_gj]
+
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                           "Compliance: #{compliance_result[:compliant] ? 'PASS' : 'FAIL'}")
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.NECB2020',
+                           'Simulations failed - compliance validation not performed')
+      end
+    end
+
+    # Step 5: Generate HTML report
+    if html_report
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                         'Generating HTML compliance report')
+
+      report_data = {
+        climate_zone: climate_zone,
+        hdd18: hdd18,
+        epw_file: epw_file,
+        compliance_result: results[:compliance_result]
+      }
+
+      report_generator = OpenstudioStandards::NECB2020::ComplianceReportGenerator.new(logger, report_data)
+      report_path = File.join(output_dir, 'necb_2020_performance_compliance_report.html')
+      report_generator.save_report(report_path)
+
+      results[:html_report_path] = report_path
+
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                         "Saved HTML report to: #{report_path}")
+    end
+
+    # Final summary
+    summary = logger.get_summary
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.NECB2020',
+                       "Compliance generation complete. Total entries: #{summary[:total_entries]}, " \
+                       "Passed: #{summary[:passed]}, Failed: #{summary[:failed]}")
+
+    results
+  end
+
+  private
+
+  # Run EnergyPlus simulation and return SQL file path
+  #
+  # @param model [OpenStudio::Model::Model] Model to simulate
+  # @param epw_file [String] Weather file path
+  # @param run_dir [String] Directory for simulation files
+  # @return [String, nil] Path to SQL file, or nil if simulation failed
+  def run_simulation_and_get_sql(model, epw_file, run_dir)
+    # Create run directory
+    FileUtils.mkdir_p(run_dir)
+
+    # Save model
+    osm_path = File.join(run_dir, 'in.osm')
+    BTAP::FileIO.save_osm(model, osm_path)
+
+    # Run simulation
+    sql_path = model_run_simulation_and_log_errors(model, run_dir)
+
+    return sql_path if sql_path
+
+    nil
+  rescue StandardError => e
+    OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.NECB2020',
+                       "Simulation failed: #{e.message}")
+    nil
+  end
 end

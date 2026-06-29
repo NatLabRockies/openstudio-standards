@@ -31,7 +31,7 @@ class NECB_HVAC_System_2_Test < Minitest::Test
   #Sizing Convergence Errors when mua_cooling_types = DX
   def test_necb_hvac_system_2_fuel_oil2_rotary_screw_hydronic_fpfc()
     weather_file = 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw'
-    template_osm_file = "#{__dir__}/../resources/5ZoneNoHVAC.osm"
+    template_osm_file = "#{__dir__}/../../models/5ZoneNoHVAC.osm"
     system_name = 'system_2'
     vintage = 'NECB2011'
     boiler_fueltype = 'FuelOilNo2'
