@@ -1,8 +1,7 @@
 require 'openstudio'
 require 'json'
 require 'csv'
-require_relative 'create'
-require_relative 'add_schedule_parametric'
+require_relative '../../lib/openstudio-standards'
 
 def load_schedule_data(path)
   file_content = File.read(path)
@@ -159,4 +158,5 @@ def convert_all_schedules
   model.save('test_compare_all.osm', true)
 end
 
-convert_all_schedules
+# dev/data-generation script: only run when invoked directly, never on require
+convert_all_schedules if __FILE__ == $PROGRAM_NAME

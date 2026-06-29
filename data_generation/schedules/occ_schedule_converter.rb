@@ -5,8 +5,7 @@
 require 'openstudio'
 require 'json'
 require 'csv'
-require_relative 'create'
-require_relative 'add_schedule_parametric'
+require_relative '../../lib/openstudio-standards'
 
 def evaluate_trends(values)
   # step through each time value pair and determine if the trend from one point to the next is increasing, decreasing, or constant and by how much
@@ -267,4 +266,5 @@ def convert_all_schedules(create_osm: false)
   model.save('occ_sch_parametric.osm', true)
 end
 
-convert_all_schedules(create_osm: true)
+# dev/data-generation script: only run when invoked directly, never on require
+convert_all_schedules(create_osm: true) if __FILE__ == $PROGRAM_NAME
