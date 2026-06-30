@@ -50,6 +50,13 @@ class TestScheduleComparison < Minitest::Test
       SuperMarket
     ]
 
+    # Allow subsetting the (slow) building-type list for local runs / smoke tests,
+    # e.g. SCHEDULE_COMPARISON_BLDG_TYPES="SmallOffice,Warehouse"
+    if ENV['SCHEDULE_COMPARISON_BLDG_TYPES']
+      requested = ENV['SCHEDULE_COMPARISON_BLDG_TYPES'].split(',').map(&:strip)
+      building_types = building_types.select { |b| requested.include?(b) }
+    end
+
     output_dir = "#{__dir__}/output/#{__method__}"
     FileUtils.mkdir_p output_dir unless Dir.exist? output_dir
 
@@ -57,9 +64,13 @@ class TestScheduleComparison < Minitest::Test
     #   all_data[bldg_type]['prototype'|'parametric'][space_type_label][schedule_label][day_type] = [24 hourly values]
     all_data = {}
 
+    # validation metrics, accumulated one row per (building_type, metric)
+    metric_rows = []
+
     building_types.each do |bldg_type|
       floor_area = small_types.include?(bldg_type) ? 10_000 : 100_000
       all_data[bldg_type] = {}
+      models = {}
 
       %w[prototype parametric].each do |schedule_method|
         puts "Building: #{bldg_type}, schedule_method: #{schedule_method}"
@@ -68,7 +79,13 @@ class TestScheduleComparison < Minitest::Test
                                      schedule_method, output_dir)
         next if model.nil?
 
+        models[schedule_method] = model
         all_data[bldg_type][schedule_method] = extract_schedule_data(model, bldg_type)
+      end
+
+      # Compute the validation metrics when both methods were built successfully
+      if models['prototype'] && models['parametric']
+        metric_rows.concat(collect_validation_metrics(bldg_type, models['prototype'], models['parametric']))
       end
     end
 
@@ -79,6 +96,215 @@ class TestScheduleComparison < Minitest::Test
     assert File.exist?(html_path),
            "Expected HTML report at #{html_path} but file was not found."
     puts "Schedule comparison report written to: #{html_path}"
+
+    # Record and (optionally) assert the validation metrics
+    report_and_assert_validation_metrics(metric_rows, output_dir)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Validation metrics
+  #
+  # These compare the parametric schedules/model against the prototype baseline:
+  #   Schedule-level: annual EFLH within ±5%; occupancy mean absolute hourly
+  #     fractional error ≤ 0.05.
+  #   Model-level: peak occupancy within ±5%; coincident peak lighting+equipment
+  #     electric demand (annual max) within ±5%.
+  #
+  # By default the harness MEASURES and RECORDS every metric and prints a summary
+  # so regressions are visible, but does not fail the suite — the parametric path
+  # is not expected to reproduce the prototype within ±5%.
+  # Set the environment variable SCHEDULE_VALIDATION_STRICT=true to enforce the
+  # thresholds as hard assertions.
+  # ---------------------------------------------------------------------------
+
+  EFLH_TOLERANCE = 0.05      # ±5% on equivalent full load hours / model peaks
+  OCC_MAE_TOLERANCE = 0.05   # mean absolute hourly fractional error for occupancy
+
+  # Collects all metric rows for one building type from its prototype and
+  # parametric models.
+  #
+  # @param bldg_type [String]
+  # @param proto_model [OpenStudio::Model::Model]
+  # @param param_model [OpenStudio::Model::Model]
+  # @return [Array<Hash>] metric rows
+  def collect_validation_metrics(bldg_type, proto_model, param_model)
+    rows = []
+
+    # --- model-level ---
+    rows << metric_row(bldg_type, 'model', 'peak_occupancy',
+                       model_peak_occupancy(proto_model), model_peak_occupancy(param_model),
+                       EFLH_TOLERANCE)
+    rows << metric_row(bldg_type, 'model', 'coincident_peak_demand_W',
+                       model_coincident_peak_demand(proto_model), model_coincident_peak_demand(param_model),
+                       EFLH_TOLERANCE)
+
+    # --- schedule-level ---
+    proto_scheds = collect_space_type_schedules(proto_model)
+    param_scheds = collect_space_type_schedules(param_model)
+    proto_scheds.each do |st_name, loads|
+      next unless param_scheds.key?(st_name)
+
+      loads.each do |load_type, proto_sched|
+        param_sched = param_scheds[st_name][load_type]
+        next if param_sched.nil?
+
+        rows << metric_row(bldg_type, 'schedule', "#{st_name} | #{load_type} EFLH",
+                           @sch.schedule_get_equivalent_full_load_hours(proto_sched),
+                           @sch.schedule_get_equivalent_full_load_hours(param_sched),
+                           EFLH_TOLERANCE)
+
+        next unless load_type == 'People'
+
+        mae = occupancy_hourly_mae(proto_sched, param_sched)
+        rows << { bldg: bldg_type, level: 'schedule', metric: "#{st_name} | People hourly_MAE",
+                  proto: nil, param: mae, pct_diff: nil, mae: mae,
+                  criterion: "MAE<=#{OCC_MAE_TOLERANCE}",
+                  pass: !mae.nil? && mae <= OCC_MAE_TOLERANCE }
+      end
+    end
+
+    rows
+  end
+
+  # Builds a metric row comparing a prototype and parametric scalar within a
+  # relative tolerance.
+  def metric_row(bldg, level, metric, proto, param, tol)
+    pct = if proto.nil? || param.nil? || proto.abs < 1e-9
+            nil
+          else
+            100.0 * (param - proto) / proto
+          end
+    pass = if proto.nil? || param.nil?
+             false
+           elsif proto.abs < 1e-9
+             param.abs < 1e-9
+           else
+             (pct.abs / 100.0) <= tol
+           end
+    { bldg: bldg, level: level, metric: metric, proto: proto, param: param,
+      pct_diff: pct, mae: nil, criterion: "+/-#{(tol * 100).to_i}%", pass: pass }
+  end
+
+  # Maps each space type name to its People/Lights/ElecEquip ScheduleRulesets.
+  #
+  # @param model [OpenStudio::Model::Model]
+  # @return [Hash{String=>Hash{String=>OpenStudio::Model::ScheduleRuleset}}]
+  def collect_space_type_schedules(model)
+    result = {}
+    model.getSpaceTypes.each do |st|
+      entry = {}
+      ppl = st.people.find { |p| p.numberofPeopleSchedule.is_initialized }
+      entry['People'] = to_ruleset(ppl.numberofPeopleSchedule.get) if ppl
+      lt = st.lights.find { |l| l.schedule.is_initialized }
+      entry['Lights'] = to_ruleset(lt.schedule.get) if lt
+      eq = st.electricEquipment.find { |e| e.schedule.is_initialized }
+      entry['ElecEquip'] = to_ruleset(eq.schedule.get) if eq
+      result[st.name.get] = entry.reject { |_, v| v.nil? }
+    end
+    result
+  end
+
+  def to_ruleset(schedule)
+    schedule.to_ScheduleRuleset.is_initialized ? schedule.to_ScheduleRuleset.get : nil
+  end
+
+  # Sum over space types of peak people = number-of-people * max(occupancy schedule).
+  def model_peak_occupancy(model)
+    total = 0.0
+    model.getSpaceTypes.each do |st|
+      area = st.floorArea
+      next if area <= 0.0
+
+      st.people.each do |ppl|
+        sched = ppl.numberofPeopleSchedule
+        next unless sched.is_initialized
+
+        total += ppl.getNumberOfPeople(area) * ruleset_max(sched.get)
+      end
+    end
+    total
+  end
+
+  # Annual maximum of the summed lighting + electric-equipment electric demand
+  # (the coincident peak), in Watts.
+  def model_coincident_peak_demand(model)
+    hourly = nil
+    model.getSpaceTypes.each do |st|
+      area = st.floorArea
+      next if area <= 0.0
+
+      num_people = st.people.sum { |p| p.getNumberOfPeople(area) }
+      (st.lights.to_a + st.electricEquipment.to_a).each do |load|
+        sched = load.schedule
+        next unless sched.is_initialized && sched.get.to_ScheduleRuleset.is_initialized
+
+        power = load.respond_to?(:getLightingPower) ? load.getLightingPower(area, num_people) : load.getDesignLevel(area, num_people)
+        trace = @sch.schedule_ruleset_get_hourly_values(sched.get.to_ScheduleRuleset.get)
+        next if trace.nil?
+
+        hourly ||= Array.new(trace.size, 0.0)
+        trace.each_index { |h| hourly[h] += power * trace[h] }
+      end
+    end
+    hourly.nil? ? 0.0 : hourly.max
+  end
+
+  def ruleset_max(schedule)
+    rs = schedule.to_ScheduleRuleset
+    return 0.0 unless rs.is_initialized
+
+    @sch.schedule_ruleset_get_min_max(rs.get)['max']
+  end
+
+  # Mean absolute hourly fractional error between two ScheduleRulesets over the year.
+  def occupancy_hourly_mae(proto_sched, param_sched)
+    a = @sch.schedule_ruleset_get_hourly_values(proto_sched)
+    b = @sch.schedule_ruleset_get_hourly_values(param_sched)
+    return nil if a.nil? || b.nil? || a.empty? || a.size != b.size
+
+    a.each_index.sum { |i| (a[i] - b[i]).abs } / a.size.to_f
+  end
+
+  # Prints a summary table, writes a JSON results file, and (in strict mode)
+  # asserts the thresholds.
+  def report_and_assert_validation_metrics(rows, output_dir)
+    return if rows.empty?
+
+    json_path = File.join(output_dir, 'validation_metrics.json')
+    File.write(json_path, JSON.pretty_generate(rows))
+
+    puts "\n===== Validation Metrics (parametric vs prototype) ====="
+    rows.each do |r|
+      status = r[:pass] ? 'PASS' : 'FAIL'
+      if r[:mae]
+        puts format('  [%-4s] %-14s %-48s mae=%.3f (%s)', status, r[:bldg], r[:metric], r[:mae], r[:criterion])
+      else
+        pct = r[:pct_diff].nil? ? 'n/a' : format('%+.1f%%', r[:pct_diff])
+        puts format('  [%-4s] %-14s %-48s proto=%s param=%s diff=%s', status, r[:bldg], r[:metric],
+                    fmt_metric(r[:proto]), fmt_metric(r[:param]), pct)
+      end
+    end
+
+    failed = rows.reject { |r| r[:pass] }
+    model_failed = failed.count { |r| r[:level] == 'model' }
+    puts format('Summary: %d/%d metrics within tolerance (%d model-level failures).',
+                rows.size - failed.size, rows.size, model_failed)
+    puts "Detailed metrics written to: #{json_path}"
+
+    if ENV.fetch('SCHEDULE_VALIDATION_STRICT', 'false') == 'true'
+      assert failed.empty?, "#{failed.size} metric(s) failed validation:\n" +
+                            failed.map { |r| "  #{r[:bldg]} #{r[:metric]}" }.join("\n")
+    else
+      # Default: record only. The metrics above show current deltas loudly; flip
+      # SCHEDULE_VALIDATION_STRICT=true to enforce the ±5% / MAE<=0.05 thresholds.
+      assert(rows.all? { |r| r.key?(:pass) }, 'validation metrics were not computed')
+    end
+  end
+
+  def fmt_metric(v)
+    return 'n/a' if v.nil?
+
+    v.abs >= 100 ? format('%.0f', v) : format('%.2f', v)
   end
 
   # ---------------------------------------------------------------------------

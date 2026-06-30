@@ -75,6 +75,8 @@ end
 #   [23,0.1]
 # ]
 
+# dev/POC script: only run the demonstration when invoked directly, never on require
+if __FILE__ == $PROGRAM_NAME
 time_value_pairs = [
   [0, 0.05],
   [1, 0],
@@ -87,7 +89,7 @@ time_value_pairs = [
   [23, 0.2]
 ]
 
-# compare to schedule produced from full set of 24 time-value pairs 
+# compare to schedule produced from full set of 24 time-value pairs
 orig_tvps = [
   [0.0, 0.05],
 	[1.0, 0.0],
@@ -120,3 +122,4 @@ require 'ascii_charts'
 puts AsciiCharts::Cartesian.new(tvs).draw
 # tvs.each{|tv| puts "#{tv[0]} - #{tv[1]}"}
 puts AsciiCharts::Cartesian.new(orig_tvps).draw
+end
