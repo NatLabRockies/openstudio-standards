@@ -31,6 +31,14 @@ export function expandSlope(scheduleData, params) {
   })
 }
 
+export function evaluateControlPoints(scheduleData, params) {
+  return request('/evaluate_control_points', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ schedule_data: scheduleData, params })
+  })
+}
+
 export function derive(body) {
   return request('/derive', {
     method: 'POST',

@@ -25,7 +25,7 @@ const initialState = {
   rawData: {
     spaceTypes: [],
     scheduleSets: [],
-    occupancySchedules: [],
+    parametricSchedules: [],
     lightingParams: [],
     elecEquipParams: [],
     gasEquipParams: [],

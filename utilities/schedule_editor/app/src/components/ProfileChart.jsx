@@ -10,6 +10,7 @@ const CATEGORY_COLORS = {
   ElectricEquipment:'#2ecc71',
   GasEquipment:     '#e67e22',
   HotWater:         '#3498db',
+  Diurnal:          '#9b59b6',
 }
 
 function formatHour(h) {
@@ -20,11 +21,12 @@ function formatHour(h) {
 // Standard data uses step-after semantics: its value is held until the next defined point.
 // When parametric data has finer time resolution, we fill standard forward so it renders
 // as a continuous step-after line rather than invisible nubs at integer-hour positions.
-function buildChartData(standardData, expandedData) {
-  // Collect all unique h values across both datasets
+function buildChartData(standardData, expandedData, gateData) {
+  // Collect all unique h values across all datasets
   const allHSet = new Set()
   if (standardData) standardData.forEach(({ h }) => allHSet.add(h))
   if (expandedData) expandedData.forEach(({ h }) => allHSet.add(h))
+  if (gateData) gateData.forEach(({ h }) => allHSet.add(h))
   const allH = Array.from(allHSet).sort((a, b) => a - b)
 
   // Build step-after lookup: for any h, find the last standard value at or before h
@@ -54,12 +56,18 @@ function buildChartData(standardData, expandedData) {
     })
   }
 
+  if (gateData) {
+    gateData.forEach(({ h, v }) => {
+      map[h].gate = v
+    })
+  }
+
   return allH.map(h => map[h])
 }
 
-export default function ProfileChart({ scheduleName, category, standardData, expandedData, hasError, errorMessage, isLoading, stTime, etTime }) {
+export default function ProfileChart({ scheduleName, category, standardData, expandedData, gateData, hasError, errorMessage, isLoading, stTime, etTime, onEditControlPoints, spillNote }) {
   const color = CATEGORY_COLORS[category] || '#999'
-  const data = buildChartData(standardData, expandedData)
+  const data = buildChartData(standardData, expandedData, gateData)
 
   const xTicks = Array.from({ length: 13 }, (_, i) => i * 2)
 
@@ -70,9 +78,25 @@ export default function ProfileChart({ scheduleName, category, standardData, exp
       borderRadius: 6, padding: 8, background: '#fafafa'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <strong style={{ fontSize: 12, color: '#444' }}>{scheduleName} — {category}</strong>
-        {isLoading && <span style={{ fontSize: 11, color: '#999' }}>Updating…</span>}
-        {hasError && <span style={{ fontSize: 11, color: '#e74c3c' }}>⚠ {errorMessage}</span>}
+        <strong style={{ fontSize: 12, color: '#444' }}>
+          {scheduleName} — {category}
+          {spillNote && (
+            <span style={{ fontSize: 9, color: '#fff', background: '#8e44ad', borderRadius: 3, padding: '0 5px', marginLeft: 6, fontWeight: 400 }}
+              title="This profile's control points extend past midnight; the library emits a cross-day boundary rule.">
+              {spillNote}
+            </span>
+          )}
+        </strong>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {isLoading && <span style={{ fontSize: 11, color: '#999' }}>Updating…</span>}
+          {hasError && <span style={{ fontSize: 11, color: '#e74c3c' }}>⚠ {errorMessage}</span>}
+          {onEditControlPoints && (
+            <button onClick={onEditControlPoints}
+              style={{ fontSize: 10, padding: '2px 8px', border: '1px solid #2980b9', background: '#fff', color: '#2980b9', borderRadius: 3, cursor: 'pointer' }}>
+              ✎ Edit points
+            </button>
+          )}
+        </span>
       </div>
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
@@ -96,6 +120,18 @@ export default function ProfileChart({ scheduleName, category, standardData, exp
               strokeWidth={1.5}
               dot={false}
               type="stepAfter"
+              isAnimationActive={false}
+            />
+          )}
+          {gateData && (
+            <Line
+              dataKey="gate"
+              name="Diurnal gate"
+              stroke="#9b59b6"
+              strokeWidth={1.5}
+              strokeDasharray="5 3"
+              dot={false}
+              type="linear"
               isAnimationActive={false}
             />
           )}

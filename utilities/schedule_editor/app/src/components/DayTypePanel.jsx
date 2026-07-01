@@ -4,13 +4,19 @@ import {
   SET_ACTIVE_DAY_TYPE,
   SET_EXPANDED_PROFILE, SET_EXPANDED_PROFILE_ERROR
 } from '../context.jsx'
-import { derive } from '../api.js'
+import { derive, expandParametric } from '../api.js'
 import { getUniqueDayTypes } from '../utils/dayAssignment.js'
 import { createExpandDebounced } from '../utils/expandDebounced.js'
+import { resolveKind } from '../utils/scheduleLookup.js'
+import { controlPointParams, offsetsForActiveSet } from '../utils/expandParams.js'
+import { evalControlPoint } from '../utils/controlPointCodec.js'
+import { diurnalDeriveBody } from '../utils/diurnal.js'
+import { getLoadParamArray } from '../utils/workingCopy.js'
 import AddProfileDialog from './AddProfileDialog.jsx'
 import ProfileChart from './ProfileChart.jsx'
+import ControlPointEditor from './ControlPointEditor.jsx'
 
-const CATEGORY_ORDER = ['Occupancy', 'Lighting', 'ElectricEquipment', 'GasEquipment', 'HotWater']
+const CATEGORY_ORDER = ['Occupancy', 'Lighting', 'ElectricEquipment', 'GasEquipment', 'HotWater', 'Diurnal']
 
 function paramsArrayForCategory(category, rawData, workingCopies) {
   if (category === 'Lighting') return workingCopies.lighting_params || rawData.lightingParams || []
@@ -34,6 +40,14 @@ function categoryFor(scheduleName, rawData, workingCopies) {
   if ((workingCopies.elec_equip_params || rawData.elecEquipParams || []).some(p => p.name === scheduleName)) return 'ElectricEquipment'
   if ((workingCopies.gas_equip_params || rawData.gasEquipParams || []).some(p => p.name === scheduleName)) return 'GasEquipment'
   if ((workingCopies.hot_water_params || rawData.hotWaterParams || []).some(p => p.name === scheduleName)) return 'HotWater'
+  // Fallback: a parametric record selected directly (e.g. from the Schedules tab) —
+  // honor its own category so direct/diurnal schedules render with the right color.
+  const paramRec = (workingCopies.parametric_schedules || rawData.parametricSchedules || []).find(p => p.name === scheduleName)
+  if (paramRec) {
+    if (paramRec.category === 'Lighting') return 'Lighting'
+    if (paramRec.category === 'Equipment') return 'ElectricEquipment'
+    if (paramRec.category === 'Diurnal') return 'Diurnal'
+  }
   return 'Occupancy'
 }
 
@@ -41,6 +55,9 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
   const state = useAppState()
   const dispatch = useAppDispatch()
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [editingCp, setEditingCp] = useState(null) // { name, dayType, category } | null
+  const [gateCurves, setGateCurves] = useState({}) // loadName -> [{ h, v }] diurnal gate
+  const gateCacheRef = useRef({})
 
   // Create a stable debounced expand function
   const expandRef = useRef(null)
@@ -50,7 +67,7 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
   const scheduleExpand = expandRef.current
   const lastDerivedRef = useRef({})
 
-  const allOccRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+  const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
 
   const schedObjects = useMemo(() =>
     occupancyScheduleName
@@ -68,60 +85,46 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
 
   // Build schedule info for all selected schedules
   const scheduleInfos = useMemo(() => {
-    const infos = state.selectedScheduleNames.map(name => ({
-      name,
-      category: categoryFor(name, state.rawData, state.workingCopies),
-    }))
+    const paramRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
+    const infos = state.selectedScheduleNames.map(name => {
+      const category = categoryFor(name, state.rawData, state.workingCopies)
+      return { name, category, kind: resolveKind(name, category, paramRecords) }
+    })
     infos.sort((a, b) =>
       CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
     )
     return infos
   }, [state.selectedScheduleNames, state.rawData, state.workingCopies])
 
-  // Trigger expand for occupancy schedules when activeTab or selection changes
+  // Trigger expand for control-point schedules (occupancy + direct loads)
   useEffect(() => {
-    const occRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
-    for (const { name, category } of scheduleInfos) {
-      if (category !== 'Occupancy') continue
+    const occRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
+    const offsets = offsetsForActiveSet(state)
+    for (const { name, kind } of scheduleInfos) {
+      if (kind !== 'occupancy' && kind !== 'direct') continue
       const schedObj = occRecords.find(o => o.name === name && o.day_types === activeTab)
                     || occRecords.find(o => o.name === name && o.day_types === 'Default')
       if (!schedObj) continue
-      const profileKey = `${name}|${activeTab}`
-      const profileParams = state.editorParams.byProfile[profileKey]
-      const params = {
-        base: profileParams?.base ?? schedObj.base_std,
-        peak: profileParams?.peak ?? schedObj.peak_std,
-        st:   profileParams?.st   ?? schedObj.st_std,
-        et:   profileParams?.et   ?? schedObj.et_std,
-        timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
-      }
+      const params = controlPointParams(state, schedObj, activeTab, { offsets: kind === 'direct' ? offsets : null })
       scheduleExpand(name, activeTab, schedObj, params)
     }
-  }, [activeTab, scheduleInfos, state.editorParams])
+  }, [activeTab, scheduleInfos, state.editorParams, state.workingCopies])
 
   // Auto-derive non-occupancy schedules when occupancy profile expands or params change
   useEffect(() => {
     if (!occupancyScheduleName) return
-    const allOcc = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+    const allOcc = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
     const occSchedObj = allOcc.find(o => o.name === occupancyScheduleName && o.day_types === activeTab)
                      || allOcc.find(o => o.name === occupancyScheduleName && o.day_types === 'Default')
     if (!occSchedObj) return
 
-    const occProfileKey = `${occupancyScheduleName}|${activeTab}`
-    const occEditorParams = state.editorParams.byProfile[occProfileKey]
-    const occExpandParams = {
-      base: occEditorParams?.base ?? occSchedObj.base_std,
-      peak: occEditorParams?.peak ?? occSchedObj.peak_std,
-      st:   occEditorParams?.st   ?? occSchedObj.st_std,
-      et:   occEditorParams?.et   ?? occSchedObj.et_std,
-      timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
-    }
+    const occExpandParams = controlPointParams(state, occSchedObj, activeTab)
     const occExpandKey = `${occupancyScheduleName}|${activeTab}|${JSON.stringify(occExpandParams)}`
     const initial_values = state.expandedProfiles[occExpandKey]
     if (!initial_values) return
 
-    for (const { name, category } of scheduleInfos) {
-      if (category === 'Occupancy') continue
+    for (const { name, category, kind } of scheduleInfos) {
+      if (kind !== 'derived') continue
       const paramsArr = paramsArrayForCategory(category, state.rawData, state.workingCopies)
       const rawObj = paramsArr.find(p => p.name === name)
       if (!rawObj) continue
@@ -139,6 +142,8 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
         initial_values,
         timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
         schedule_name: name,
+        base_peak_mode: rawObj.base_peak_mode || 'absolute',
+        ...diurnalDeriveBody(state, category, name),
       }
       // Only re-derive if occupancy profile or derived params changed
       const cacheKey = `${occExpandKey}||${JSON.stringify(body)}`
@@ -154,6 +159,37 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
         })
     }
   }, [state.expandedProfiles, activeTab, scheduleInfos, state.editorParams])
+
+  // Compute the diurnal gate curve for any derived load that has a diurnal profile,
+  // so it can be drawn as a faint overlay alongside the gated load.
+  useEffect(() => {
+    const tph = state.editorParams.timestepsPerHour || 4
+    const params = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
+    for (const { name, category, kind } of scheduleInfos) {
+      if (kind !== 'derived') continue
+      const rec = getLoadParamArray(state, category).find(p => p.name === name)
+      if (!rec || !rec.diurnal_profile) {
+        if (gateCacheRef.current[name]) { gateCacheRef.current[name] = null; setGateCurves(g => ({ ...g, [name]: null })) }
+        continue
+      }
+      const dRec = params.find(o => o.name === rec.diurnal_profile && o.day_types === 'Default')
+      if (!dRec) continue
+      const mode = rec.diurnal_mode || 'off_when_asleep'
+      const weight = rec.diurnal_weight ?? 1.0
+      const cacheKey = `${rec.diurnal_profile}|${mode}|${weight}|${tph}|${JSON.stringify(dRec.control_points)}`
+      if (gateCacheRef.current[name] === cacheKey) continue
+      gateCacheRef.current[name] = cacheKey
+      const dParams = { base: dRec.base_std, peak: dRec.peak_std, st: dRec.st_std, et: dRec.et_std, timesteps_per_hour: tph }
+      expandParametric(dRec, dParams).then(r => {
+        const curve = (r.time_value_pairs || []).map(([h, d]) => {
+          let g = mode === 'on_when_asleep' ? weight * d : 1 - weight * d
+          g = Math.max(0, Math.min(1, g))
+          return { h, v: g }
+        })
+        setGateCurves(g => ({ ...g, [name]: curve }))
+      }).catch(() => {})
+    }
+  }, [scheduleInfos, activeTab, state.editorParams, state.workingCopies])
 
   const tabStyle = (active) => ({
     padding: '5px 12px', cursor: 'pointer', border: 'none', fontSize: 12, borderRadius: '4px 4px 0 0',
@@ -174,7 +210,7 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
       </div>
 
       <div style={{ flex: 1, padding: '12px', overflow: 'auto' }}>
-        {scheduleInfos.map(({ name, category }) => {
+        {scheduleInfos.map(({ name, category, kind }) => {
           const ashraeRefName = state.standardReferenceOverrides[name]
           const ashraeObjs = state.rawData.ashraeSchedules.filter(s => {
             const cat = (s.category === 'Electric Equipment') ? 'ElectricEquipment' : s.category
@@ -184,42 +220,33 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
                          || ashraeObjs.find(s => s.day_types === 'Default')
           const standardData = ashraeObj?.values?.map((v, i) => ({ h: i, v })) || null
 
-          const occRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+          const occRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
           const schedObj = occRecords.find(o => o.name === name && o.day_types === activeTab)
                         || occRecords.find(o => o.name === name && o.day_types === 'Default')
 
           let expandedData = null
           // Resolve occupancy schedule object and its current st/et for reference lines
           const occScheduleName = occupancyScheduleName
-          const allOccRecs = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+          const allOccRecs = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
           const occSchedObjForChart = occScheduleName
             ? (allOccRecs.find(o => o.name === occScheduleName && o.day_types === activeTab)
               || allOccRecs.find(o => o.name === occScheduleName && o.day_types === 'Default'))
             : null
-          const occProfileKeyForChart = occScheduleName ? `${occScheduleName}|${activeTab}` : null
-          const occEditorParamsForChart = occProfileKeyForChart ? state.editorParams.byProfile[occProfileKeyForChart] : null
-          const stTime = occSchedObjForChart
-            ? (occEditorParamsForChart?.st ?? occSchedObjForChart.st_std ?? null)
+          const occParamsForChart = occSchedObjForChart
+            ? controlPointParams(state, occSchedObjForChart, activeTab)
             : null
-          const etTime = occSchedObjForChart
-            ? (occEditorParamsForChart?.et ?? occSchedObjForChart.et_std ?? null)
-            : null
+          const stTime = occParamsForChart ? occParamsForChart.st : null
+          const etTime = occParamsForChart ? occParamsForChart.et : null
 
-          if (category === 'Occupancy' && schedObj) {
-            const profileKey = `${name}|${activeTab}`
-            const profileParams = state.editorParams.byProfile[profileKey]
-            const params = {
-              base: profileParams?.base ?? schedObj.base_std,
-              peak: profileParams?.peak ?? schedObj.peak_std,
-              st:   profileParams?.st   ?? schedObj.st_std,
-              et:   profileParams?.et   ?? schedObj.et_std,
-              timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
-            }
+          if ((kind === 'occupancy' || kind === 'direct') && schedObj) {
+            const params = controlPointParams(state, schedObj, activeTab, {
+              offsets: kind === 'direct' ? offsetsForActiveSet(state) : null,
+            })
             const paramsHash = JSON.stringify(params)
             const expandKey = `${name}|${activeTab}|${paramsHash}`
             const pairs = state.expandedProfiles[expandKey]
             expandedData = pairs?.map(([h, v]) => ({ h, v })) || null
-          } else if (category !== 'Occupancy') {
+          } else {
             const derivedKey = `${name}|${activeTab}`
             const pairs = state.expandedProfiles[derivedKey]
             expandedData = pairs?.map(([h, v]) => ({ h, v })) || null
@@ -228,6 +255,16 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
           const profileKey = `${name}|${activeTab}`
           const errorState = state.expandedProfileErrors[profileKey]
 
+          const editable = kind === 'occupancy' || kind === 'direct'
+          // Spillover: control-point profile whose anchors extend past midnight (or
+          // before hour 0) spills into the adjacent day (library emits a boundary rule).
+          let spillNote = null
+          if (editable && schedObj?.control_points) {
+            const times = schedObj.control_points.map(cp => evalControlPoint(cp, schedObj, state.editorParams.timestepsPerHour || 4)[0])
+            const maxT = Math.max(...times), minT = Math.min(...times)
+            if (maxT > 24) spillNote = '→ next day'
+            else if (minT < 0) spillNote = 'prev day ←'
+          }
           return (
             <ProfileChart
               key={name}
@@ -240,6 +277,9 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
               isLoading={!expandedData && !errorState}
               stTime={stTime}
               etTime={etTime}
+              onEditControlPoints={editable ? () => setEditingCp({ name, dayType: activeTab, category }) : null}
+              spillNote={spillNote}
+              gateData={kind === 'derived' ? (gateCurves[name] || null) : null}
             />
           )
         })}
@@ -247,6 +287,15 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
 
       {showAddDialog && (
         <AddProfileDialog occupancyScheduleName={occupancyScheduleName} onClose={() => setShowAddDialog(false)} />
+      )}
+
+      {editingCp && (
+        <ControlPointEditor
+          scheduleName={editingCp.name}
+          dayType={editingCp.dayType}
+          category={editingCp.category}
+          onClose={() => setEditingCp(null)}
+        />
       )}
     </div>
   )

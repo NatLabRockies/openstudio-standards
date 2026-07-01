@@ -12,9 +12,9 @@ require 'rack/cors'
 
 REPO_ROOT = File.expand_path('../../', __dir__)
 
-SPACE_TYPES_PATH         = File.join(REPO_ROOT, 'lib/openstudio-standards/space_type/data/level_1_space_types.json')
-OCCUPANCY_SCHEDULES_PATH = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_parametric_occupancy_schedules.json')
-SCHEDULE_SET_PATH        = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_parametric_schedule_set.json')
+SPACE_TYPES_PATH          = File.join(REPO_ROOT, 'lib/openstudio-standards/space_type/data/level_1_space_types.json')
+PARAMETRIC_SCHEDULES_PATH = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_parametric_schedules.json')
+SCHEDULE_SET_PATH         = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_parametric_schedule_set.json')
 LIGHTING_PARAMS_PATH     = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_lighting_parameters.json')
 ELEC_EQUIP_PARAMS_PATH   = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_electric_equipment_parameters.json')
 GAS_EQUIP_PARAMS_PATH    = File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/data/default_gas_equipment_parameters.json')
@@ -40,9 +40,9 @@ before do
 end
 
 get '/api/data' do
-  space_types         = JSON.parse(File.read(SPACE_TYPES_PATH))
-  occupancy_schedules = JSON.parse(File.read(OCCUPANCY_SCHEDULES_PATH))
-  schedule_sets       = JSON.parse(File.read(SCHEDULE_SET_PATH))
+  space_types          = JSON.parse(File.read(SPACE_TYPES_PATH))
+  parametric_schedules = JSON.parse(File.read(PARAMETRIC_SCHEDULES_PATH))
+  schedule_sets        = JSON.parse(File.read(SCHEDULE_SET_PATH))
   lighting_params     = JSON.parse(File.read(LIGHTING_PARAMS_PATH))
   elec_equip_params   = JSON.parse(File.read(ELEC_EQUIP_PARAMS_PATH))
   gas_equip_params    = JSON.parse(File.read(GAS_EQUIP_PARAMS_PATH))
@@ -58,9 +58,9 @@ get '/api/data' do
   deer_schedules = deer_raw.is_a?(Hash) ? (deer_raw['schedules'] || []) : deer_raw
 
   {
-    space_types:         space_types,
-    occupancy_schedules: occupancy_schedules,
-    schedule_sets:       schedule_sets,
+    space_types:          space_types,
+    parametric_schedules: parametric_schedules,
+    schedule_sets:        schedule_sets,
     lighting_params:     lighting_params,
     elec_equip_params:   elec_equip_params,
     gas_equip_params:    gas_equip_params,
@@ -113,8 +113,8 @@ ASHRAE_TEMPLATES = {
 }.freeze
 
 SAVE_TARGETS = {
-  'occupancy_schedules' => OCCUPANCY_SCHEDULES_PATH,
-  'schedule_sets'       => SCHEDULE_SET_PATH,
+  'parametric_schedules' => PARAMETRIC_SCHEDULES_PATH,
+  'schedule_sets'        => SCHEDULE_SET_PATH,
   'lighting_params'     => LIGHTING_PARAMS_PATH,
   'elec_equip_params'   => ELEC_EQUIP_PARAMS_PATH,
   'gas_equip_params'    => GAS_EQUIP_PARAMS_PATH,
@@ -147,21 +147,118 @@ post '/api/expand_slope' do
   { time_value_pairs: pairs }.to_json
 end
 
+# Returns the RAW, un-smoothed control-point anchors so the editor can place
+# draggable markers exactly on the schedule's control points. Mirrors the
+# /api/expand_parametric request shape but calls evaluate_schedule_control_points
+# (no wrap, no smoothing). Used by the control-point editor in standard-coordinate mode.
+post '/api/evaluate_control_points' do
+  body = JSON.parse(request.body.read, symbolize_names: true)
+  sch  = body[:schedule_data]
+  p    = body[:params] || {}
+  tph  = (p[:timesteps_per_hour] || sch[:timesteps_per_hour] || 1).to_i
+  base = (p[:base]  || sch[:base_std]).to_f
+  peak = (p[:peak]  || sch[:peak_std]).to_f
+  st   = (p[:st]    || sch[:st_std]).to_f
+  et   = (p[:et]    || sch[:et_std]).to_f
+  anchors = OpenstudioStandards::Schedules.evaluate_schedule_control_points(sch, base, peak, st, et, tph)
+  { anchors: anchors }.to_json
+end
+
+# Apply a diurnal gate to occupancy presence pairs before derivation, mirroring
+# OpenstudioStandards::Schedules.build_diurnal_gate without the OpenStudio SDK objects:
+# expand the Diurnal profile's control points, then scale each presence value by
+# gate = on_when_asleep ? (weight * d) : (1 - weight * d), clamped to [0, 1].
+def apply_diurnal_gate(initial_values, diurnal_sd, diurnal_mode, diurnal_weight, tph)
+  return initial_values if diurnal_sd.nil?
+
+  dpairs = OpenstudioStandards::Schedules.expand_schedule_control_points(
+    diurnal_sd,
+    diurnal_sd[:base_std].to_f, diurnal_sd[:peak_std].to_f,
+    diurnal_sd[:st_std].to_f, diurnal_sd[:et_std].to_f, tph
+  )
+  on_when_asleep = diurnal_mode.to_s == 'on_when_asleep'
+  weight = diurnal_weight.nil? ? 1.0 : diurnal_weight.to_f
+
+  initial_values.map do |t, v|
+    d = OpenstudioStandards::Schedules.profile_value_at(dpairs, t)
+    g = on_when_asleep ? (weight * d) : (1.0 - (weight * d))
+    g = g.clamp(0.0, 1.0)
+    [t, v * g]
+  end
+end
+
 post '/api/derive' do
   body = JSON.parse(request.body.read, symbolize_names: true)
+  tph  = (body[:timesteps_per_hour] || 1).to_i
+
+  # Occupancy base/peak for absolute-mode normalization is taken from the UNGATED
+  # presence (matching the library, which uses the occupancy schedule's own base/peak),
+  # so the diurnal gate does not shift the normalization range.
+  occ_vals = (body[:initial_values] || []).map { |p| p[1] }
+  occupancy_base = occ_vals.empty? ? nil : occ_vals.min
+  occupancy_peak = occ_vals.empty? ? nil : occ_vals.max
+
+  initial_values = apply_diurnal_gate(
+    body[:initial_values], body[:diurnal_schedule_data],
+    body[:diurnal_mode], body[:diurnal_weight], tph
+  )
   pairs = OpenstudioStandards::Schedules.derive_values(
     body[:derivation_type],
     body[:base].to_f,
     body[:peak].to_f,
     body[:response].to_f,
-    body[:initial_values],
-    start_slope:       body[:start_slope],
-    end_slope:         body[:end_slope],
-    start_time:        body[:start_time],
-    end_time:          body[:end_time],
-    timesteps_per_hour: (body[:timesteps_per_hour] || 1).to_i
+    initial_values,
+    start_slope:        body[:start_slope],
+    end_slope:          body[:end_slope],
+    start_time:         body[:start_time],
+    end_time:           body[:end_time],
+    timesteps_per_hour: tph,
+    base_peak_mode:     body[:base_peak_mode] || 'absolute',
+    occupancy_base:     occupancy_base,
+    occupancy_peak:     occupancy_peak
   )
   { time_value_pairs: pairs }.to_json
+end
+
+# Custom pretty-printer matching the committed default_parametric_schedules.json /
+# *_parameters.json style: 2-space indent, one space after the colon, but arrays of
+# scalars (the control-point [time, value] pairs) render inline. This keeps a no-op
+# save byte-stable (no spurious whitespace diffs), preserving the standalone-expansion
+# invariant at the file level.
+def scalar_for_json?(v)
+  v.is_a?(String) || v.is_a?(Numeric) || v == true || v == false || v.nil?
+end
+
+def format_parametric_json(obj, indent = 0)
+  sp  = '  ' * indent
+  sp1 = '  ' * (indent + 1)
+  case obj
+  when Hash
+    return '{}' if obj.empty?
+    inner = obj.map { |k, v| "#{sp1}#{k.to_s.to_json}: #{format_parametric_json(v, indent + 1)}" }.join(",\n")
+    "{\n#{inner}\n#{sp}}"
+  when Array
+    return '[]' if obj.empty?
+    if obj.all? { |e| scalar_for_json?(e) }
+      '[' + obj.map(&:to_json).join(', ') + ']'
+    else
+      inner = obj.map { |e| "#{sp1}#{format_parametric_json(e, indent + 1)}" }.join(",\n")
+      "[\n#{inner}\n#{sp}]"
+    end
+  else
+    obj.to_json
+  end
+end
+
+# Serialize each target in the exact committed style so unchanged records stay byte-identical.
+def serialize_save(target, data)
+  if target == 'schedule_sets'
+    # 4-space indent, two spaces after the colon, trailing newline
+    JSON.pretty_generate(data, indent: '    ', space: '  ') + "\n"
+  else
+    # parametric_schedules + *_params: inline control-point pairs, no trailing newline
+    format_parametric_json(data)
+  end
 end
 
 post '/api/save' do
@@ -173,7 +270,7 @@ post '/api/save' do
   end
   path    = SAVE_TARGETS[target]
   tmp     = "#{path}.tmp"
-  File.write(tmp, JSON.pretty_generate(body['data']))
+  File.write(tmp, serialize_save(target, body['data']))
   File.rename(tmp, path)
   { saved: true }.to_json
 end

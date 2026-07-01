@@ -6,8 +6,15 @@ import StandardReferenceSelector from './StandardReferenceSelector.jsx'
 import ProfileMetaControls from './ProfileMetaControls.jsx'
 import ScheduleControls from './ScheduleControls.jsx'
 import DerivedControls from './DerivedControls.jsx'
+import ExpansionControls from './ExpansionControls.jsx'
+import BuildingHoursControls from './BuildingHoursControls.jsx'
+import ScheduleSetOffsets from './ScheduleSetOffsets.jsx'
+import { resolveKind } from '../utils/scheduleLookup.js'
+import { controlPointParams } from '../utils/expandParams.js'
+import { diurnalDeriveBody } from '../utils/diurnal.js'
+import { getLoadParamArray } from '../utils/workingCopy.js'
 
-const CATEGORY_ORDER = ['Occupancy','Lighting','ElectricEquipment','GasEquipment','HotWater']
+const CATEGORY_ORDER = ['Occupancy','Lighting','ElectricEquipment','GasEquipment','HotWater','Diurnal']
 
 function categoryFor(scheduleName, rawData, workingCopies) {
   const scheduleSets = workingCopies.schedule_sets || rawData.scheduleSets
@@ -21,6 +28,12 @@ function categoryFor(scheduleName, rawData, workingCopies) {
   if ((workingCopies.lighting_params || rawData.lightingParams || []).some(p => p.name === scheduleName)) return 'Lighting'
   if ((workingCopies.elec_equip_params || rawData.elecEquipParams || []).some(p => p.name === scheduleName)) return 'ElectricEquipment'
   if ((workingCopies.gas_equip_params || rawData.gasEquipParams || []).some(p => p.name === scheduleName)) return 'GasEquipment'
+  const paramRec = (workingCopies.parametric_schedules || rawData.parametricSchedules || []).find(p => p.name === scheduleName)
+  if (paramRec) {
+    if (paramRec.category === 'Lighting') return 'Lighting'
+    if (paramRec.category === 'Equipment') return 'ElectricEquipment'
+    if (paramRec.category === 'Diurnal') return 'Diurnal'
+  }
   return 'Occupancy'
 }
 
@@ -28,8 +41,12 @@ export default function RightPane() {
   const state = useAppState()
   const dispatch = useAppDispatch()
 
+  const paramRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
   const scheduleInfos = state.selectedScheduleNames
-    .map(name => ({ name, category: categoryFor(name, state.rawData, state.workingCopies) }))
+    .map(name => {
+      const category = categoryFor(name, state.rawData, state.workingCopies)
+      return { name, category, kind: resolveKind(name, category, paramRecords) }
+    })
     .sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category))
 
   const occupancyInfo = scheduleInfos.find(s => s.category === 'Occupancy')
@@ -45,21 +62,13 @@ export default function RightPane() {
     if (!occupancyName) return
 
     // Compute occupancy params to look up the expand key (same logic as DayTypePanel)
-    const allOccRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+    const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
     const dayType = state.activeDayType
     const schedObj = allOccRecords.find(o => o.name === occupancyName && o.day_types === dayType)
                   || allOccRecords.find(o => o.name === occupancyName && o.day_types === 'Default')
     if (!schedObj) return
 
-    const occProfileKey = `${occupancyName}|${dayType}`
-    const occProfileParams = state.editorParams.byProfile[occProfileKey]
-    const occParams = {
-      base: occProfileParams?.base ?? schedObj.base_std,
-      peak: occProfileParams?.peak ?? schedObj.peak_std,
-      st:   occProfileParams?.st   ?? schedObj.st_std,
-      et:   occProfileParams?.et   ?? schedObj.et_std,
-      timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
-    }
+    const occParams = controlPointParams(state, schedObj, dayType)
     const expandKey = `${occupancyName}|${dayType}|${JSON.stringify(occParams)}`
     const initial_values = state.expandedProfiles[expandKey]
 
@@ -76,6 +85,8 @@ export default function RightPane() {
       initial_values,
       timesteps_per_hour: state.editorParams.timestepsPerHour || 4,
       schedule_name: name,
+      base_peak_mode: getLoadParamArray(state, category).find(p => p.name === name)?.base_peak_mode || 'absolute',
+      ...diurnalDeriveBody(state, category, name),
     }).then(result => {
       const derivedProfileKey = `${name}|${dayType}`
       dispatch({ type: SET_EXPANDED_PROFILE, payload: { key: derivedProfileKey, pairs: result.time_value_pairs, profileKey: derivedProfileKey } })
@@ -101,6 +112,8 @@ export default function RightPane() {
   return (
     <div style={{ padding: 12, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
       <GlobalControls onParamsChanged={handleParamsChanged} />
+      <BuildingHoursControls onChanged={handleParamsChanged} />
+      <ScheduleSetOffsets onChanged={handleParamsChanged} />
 
       {occupancyInfo && (
         <ProfileMetaControls
@@ -111,12 +124,16 @@ export default function RightPane() {
 
       <StandardReferenceSelector scheduleInfos={scheduleInfos} />
 
-      {scheduleInfos.map(({ name, category }) => (
+      {scheduleInfos.map(({ name, category, kind }) => (
         <div key={name}>
-          {category === 'Occupancy'
-            ? <ScheduleControls scheduleName={name} onParamsChanged={handleParamsChanged} />
-            : <DerivedControls scheduleName={name} category={category} onParamsChanged={handleParamsChanged} onDerivedParamsChanged={(newParams) => handleDerivedParamsChanged(name, category, newParams)} />
-          }
+          {kind === 'occupancy' || kind === 'direct' ? (
+            <>
+              <ScheduleControls scheduleName={name} category={category} onParamsChanged={handleParamsChanged} />
+              <ExpansionControls scheduleName={name} onChanged={handleParamsChanged} />
+            </>
+          ) : (
+            <DerivedControls scheduleName={name} category={category} onParamsChanged={handleParamsChanged} onDerivedParamsChanged={(newParams) => handleDerivedParamsChanged(name, category, newParams)} />
+          )}
         </div>
       ))}
     </div>

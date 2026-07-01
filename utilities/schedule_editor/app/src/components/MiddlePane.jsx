@@ -27,12 +27,12 @@ export default function MiddlePane() {
   // Recompute day assignments when selection changes
   useEffect(() => {
     if (!occupancyScheduleName) return
-    const allOccRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+    const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
     const schedObjects = allOccRecords.filter(o => o.name === occupancyScheduleName)
     if (schedObjects.length === 0) return
     const assignments = assignDayTypes(schedObjects, state.calendarYear)
     dispatch({ type: SET_DAY_ASSIGNMENTS, payload: { [occupancyScheduleName]: assignments } })
-  }, [occupancyScheduleName, state.workingCopies.occupancy_schedules, state.calendarYear])
+  }, [occupancyScheduleName, state.workingCopies.parametric_schedules, state.calendarYear])
 
   const assignments = occupancyScheduleName
     ? (state.dayAssignments[occupancyScheduleName] || {})

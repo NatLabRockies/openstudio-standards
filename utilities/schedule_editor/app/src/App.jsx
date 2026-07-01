@@ -24,7 +24,7 @@ function DataLoader({ children }) {
           payload: {
             spaceTypes: data.space_types || [],
             scheduleSets: data.schedule_sets || [],
-            occupancySchedules: data.occupancy_schedules || [],
+            parametricSchedules: data.parametric_schedules || [],
             lightingParams: data.lighting_params || [],
             elecEquipParams: data.elec_equip_params || [],
             gasEquipParams: data.gas_equip_params || [],

@@ -17,7 +17,7 @@ export default function AddProfileDialog({ occupancyScheduleName, onClose }) {
   const tokenError = dayType.trim() && !isValidToken
     ? `Invalid token. Valid: ${VALID_TOKENS.join(', ')}` : null
 
-  const allRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+  const allRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
   const alreadyExists = allRecords.some(
     o => o.name === occupancyScheduleName && o.day_types === dayType.trim()
   )
@@ -37,7 +37,7 @@ export default function AddProfileDialog({ occupancyScheduleName, onClose }) {
       end_date: endDate || null,
     }
     const updated = [...allRecords, newObj]
-    dispatch({ type: SET_WORKING_COPY, payload: { target: 'occupancy_schedules', data: updated } })
+    dispatch({ type: SET_WORKING_COPY, payload: { target: 'parametric_schedules', data: updated } })
     dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: tok })
     onClose()
   }

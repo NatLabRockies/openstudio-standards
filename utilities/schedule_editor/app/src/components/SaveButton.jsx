@@ -3,7 +3,7 @@ import { useAppState, useAppDispatch, SET_RAW_DATA, SET_WORKING_COPY } from '../
 import { save, fetchData } from '../api.js'
 
 const RAW_KEY = {
-  occupancy_schedules: 'occupancySchedules',
+  parametric_schedules: 'parametricSchedules',
   schedule_sets: 'scheduleSets',
   lighting_params: 'lightingParams',
   elec_equip_params: 'elecEquipParams',
@@ -51,7 +51,7 @@ export default function SaveButton({ onSuccess }) {
         payload: {
           spaceTypes: freshData.space_types || [],
           scheduleSets: freshData.schedule_sets || [],
-          occupancySchedules: freshData.occupancy_schedules || [],
+          parametricSchedules: freshData.parametric_schedules || [],
           lightingParams: freshData.lighting_params || [],
           elecEquipParams: freshData.elec_equip_params || [],
           gasEquipParams: freshData.gas_equip_params || [],

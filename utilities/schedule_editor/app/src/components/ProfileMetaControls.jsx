@@ -15,7 +15,7 @@ export default function ProfileMetaControls({ scheduleName, onDatesChanged }) {
   const metaEdit = state.profileMetaEdits[metaKey] || {}
 
   // Get current values from working copy or raw data
-  const allRecords = state.workingCopies.occupancy_schedules || state.rawData.occupancySchedules
+  const allRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
   const record = allRecords.find(o => o.name === scheduleName && o.day_types === activeDayType)
 
   const currentDayType = metaEdit.dayType ?? record?.day_types ?? activeDayType
@@ -34,7 +34,7 @@ export default function ProfileMetaControls({ scheduleName, onDatesChanged }) {
         ? { ...o, day_types: newDayType, start_date: newStart || null, end_date: newEnd || null }
         : o
     )
-    dispatch({ type: SET_WORKING_COPY, payload: { target: 'occupancy_schedules', data: updated } })
+    dispatch({ type: SET_WORKING_COPY, payload: { target: 'parametric_schedules', data: updated } })
   }
 
   function handleDayTypeChange(e) {

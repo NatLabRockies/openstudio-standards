@@ -1,5 +1,13 @@
-import { expandParametric } from '../api.js'
+import { expandParametric, expandSlope } from '../api.js'
 import { SET_EXPANDED_PROFILE, SET_EXPANDED_PROFILE_ERROR } from '../context.jsx'
+
+// Pick the expander the way the Ruby does: explicit `expansion` field wins, else
+// infer slope only when both slopes are present.
+function expanderFor(scheduleData) {
+  const expansion = scheduleData.expansion
+    || (scheduleData.start_slope != null && scheduleData.end_slope != null ? 'slope' : 'control_points')
+  return expansion === 'slope' ? expandSlope : expandParametric
+}
 
 export function createExpandDebounced(dispatch, delayMs = 150) {
   let timer = null
@@ -15,7 +23,7 @@ export function createExpandDebounced(dispatch, delayMs = 150) {
       for (const { scheduleName: sn, dayType: dt, scheduleData: sd, params: p } of toProcess) {
         const profileKey = `${sn}|${dt}`
         try {
-          const result = await expandParametric(sd, p)
+          const result = await expanderFor(sd)(sd, p)
           const paramsHash = JSON.stringify(p)
           dispatch({
             type: SET_EXPANDED_PROFILE,

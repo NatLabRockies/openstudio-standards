@@ -23,7 +23,7 @@ function scheduleSetKey(scheduleType) {
 }
 
 function workingCopyTarget(scheduleType) {
-  if (scheduleType === 'Occupancy') return 'occupancy_schedules'
+  if (scheduleType === 'Occupancy') return 'parametric_schedules'
   if (scheduleType === 'Lighting') return 'lighting_params'
   if (scheduleType === 'Electric Equipment') return 'elec_equip_params'
   if (scheduleType === 'Gas Equipment') return 'gas_equip_params'
@@ -31,7 +31,7 @@ function workingCopyTarget(scheduleType) {
 }
 
 function rawDataKey(scheduleType) {
-  if (scheduleType === 'Occupancy') return 'occupancySchedules'
+  if (scheduleType === 'Occupancy') return 'parametricSchedules'
   if (scheduleType === 'Lighting') return 'lightingParams'
   if (scheduleType === 'Electric Equipment') return 'elecEquipParams'
   if (scheduleType === 'Gas Equipment') return 'gasEquipParams'
@@ -48,7 +48,7 @@ export default function NewScheduleDialog({ mode, prefill, onClose }) {
 
   const allNames = useMemo(() => {
     const sets = [
-      ...state.rawData.occupancySchedules,
+      ...state.rawData.parametricSchedules,
       ...state.rawData.lightingParams,
       ...state.rawData.elecEquipParams,
       ...state.rawData.gasEquipParams,
