@@ -14,7 +14,7 @@ class TestSchedulesDataIntegrity < Minitest::Test
   # day-type tokens the schedule builder understands (create_complex_schedule + design days)
   DAY_TYPES = %w[Default Wkdy Wknd Mon Tue Wed Thu Fri Sat Sun SmrDsn WntrDsn Hol].freeze
   EXPANSIONS = %w[control_points slope].freeze
-  ADJUSTMENT_MODES = %w[stretch static truncate].freeze
+  ADJUSTMENT_MODES = %w[stretch truncate].freeze
   DERIVATION_TYPES = %w[linear exponential exponential-inverse up_down].freeze
   DIURNAL_MODES = %w[off_when_asleep on_when_asleep].freeze
 

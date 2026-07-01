@@ -1,9 +1,9 @@
 require_relative '../../helpers/minitest_helper'
 
-# Tests for static/truncate occupancy mode: time-of-day-anchored profiles clip
+# Tests for truncate occupancy mode: time-of-day-anchored profiles clip
 # to the [st, et] window instead of stretching, so a restaurant open only for lunch and
 # dinner shows two peaks at their correct wall-clock times rather than three compressed.
-class TestScheduleStaticMode < Minitest::Test
+class TestScheduleTruncateMode < Minitest::Test
   def setup
     @sch = OpenstudioStandards::Schedules
   end
@@ -54,14 +54,14 @@ class TestScheduleStaticMode < Minitest::Test
     range.max_by { |h| vals[h] }
   end
 
-  def test_static_standalone_keeps_all_three_humps
-    vals = default_hourly(restaurant_profile('static'), {})
-    assert_equal 3, count_peaks(vals), 'standalone static profile should show three meal humps'
+  def test_truncate_standalone_keeps_all_three_humps
+    vals = default_hourly(restaurant_profile('truncate'), {})
+    assert_equal 3, count_peaks(vals), 'standalone truncate profile should show three meal humps'
   end
 
-  def test_static_lunch_and_dinner_window_drops_breakfast
+  def test_truncate_lunch_and_dinner_window_drops_breakfast
     # open only for lunch + dinner (12:00-22:00) -> breakfast hump (9:00) is clipped out
-    vals = default_hourly(restaurant_profile('static'), { st: 12.0, et: 22.0 })
+    vals = default_hourly(restaurant_profile('truncate'), { st: 12.0, et: 22.0 })
     assert_equal 2, count_peaks(vals), 'lunch+dinner window should show exactly two humps'
 
     # the retained humps stay at their correct wall-clock times (≈13 and ≈19)
@@ -75,12 +75,12 @@ class TestScheduleStaticMode < Minitest::Test
   def test_stretch_mode_compresses_into_window
     # the same profile in stretch mode keeps all three humps but compresses them into
     # the shorter window, so the dinner peak is pulled much earlier than 19:00
-    static_vals = default_hourly(restaurant_profile('static'), { st: 12.0, et: 22.0 })
+    truncate_vals = default_hourly(restaurant_profile('truncate'), { st: 12.0, et: 22.0 })
     stretch_vals = default_hourly(restaurant_profile('stretch'), { st: 12.0, et: 22.0 })
 
     assert_equal 3, count_peaks(stretch_vals), 'stretch mode compresses all three humps into the window'
-    assert_operator count_peaks(static_vals), :<, count_peaks(stretch_vals),
-                    'static mode should drop the out-of-window hump that stretch keeps'
+    assert_operator count_peaks(truncate_vals), :<, count_peaks(stretch_vals),
+                    'truncate mode should drop the out-of-window hump that stretch keeps'
   end
 
   def test_default_mode_is_stretch

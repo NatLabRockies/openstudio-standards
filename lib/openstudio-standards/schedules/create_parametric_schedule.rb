@@ -223,7 +223,7 @@ module OpenstudioStandards
     end
 
     # Clip control-point anchors to an absolute [start_time, end_time] window for
-    # static/truncate mode: anchors outside the window are dropped, the window edges are
+    # truncate mode: anchors outside the window are dropped, the window edges are
     # forced to base, and smootherstep then ramps in/out. Multi-hump profiles thus lose
     # whole humps that fall outside the window instead of compressing.
     #
@@ -251,8 +251,8 @@ module OpenstudioStandards
     # @return [Array] array of time value pairs
     def self.expand_schedule_control_points(schedule_data, base, peak, start_time, end_time, timesteps_per_hour)
       mode = (schedule_data[:adjustment_mode] || 'stretch').to_s
-      if %w[static truncate].include?(mode)
-        # Static/truncate: anchor humps to their absolute standard wall-clock positions
+      if mode == 'truncate'
+        # Truncate: anchor humps to their absolute standard wall-clock positions
         # (evaluate at st_std/et_std so offsets are unscaled), then clip to the building
         # [start_time, end_time] window, forcing outside-window to base.
         anchors = OpenstudioStandards::Schedules.evaluate_schedule_control_points(schedule_data, base, peak, schedule_data[:st_std], schedule_data[:et_std], timesteps_per_hour)
@@ -286,10 +286,10 @@ module OpenstudioStandards
     def self.schedule_control_points_spillover(schedule_data, base, peak, start_time, end_time, timesteps_per_hour)
       result = { next_day: [], prev_day: [] }
 
-      # static/truncate profiles are clipped to the [start_time, end_time] window, so
+      # truncate profiles are clipped to the [start_time, end_time] window, so
       # they do not spill past it into an adjacent day.
       mode = (schedule_data[:adjustment_mode] || 'stretch').to_s
-      return result if %w[static truncate].include?(mode)
+      return result if mode == 'truncate'
 
       anchors = OpenstudioStandards::Schedules.evaluate_schedule_control_points(schedule_data, base, peak, start_time, end_time, timesteps_per_hour)
       return result unless anchors[-1][0] > 24 || anchors[0][0] < 0
@@ -704,8 +704,15 @@ module OpenstudioStandards
     # @param end_time [Float, nil] optional explicit end time used by 'up_down'
     # @param timesteps_per_hour [Integer] timestep resolution used by 'up_down'
     # @param schedule_name [String, nil] optional schedule name for logging used by 'up_down'
+    # @param base_peak_mode [String] 'absolute' (default) rescales the presence source by the
+    #   occupancy base/peak so `base`/`peak` are absolute output endpoints; 'relative' uses the
+    #   raw presence value (legacy behavior). Does not affect 'up_down' (already absolute).
+    # @param occupancy_base [Float, nil] occupancy floor used to normalize presence in absolute
+    #   mode; inferred from initial_values.min when nil
+    # @param occupancy_peak [Float, nil] occupancy peak used to normalize presence in absolute
+    #   mode; inferred from initial_values.max when nil
     # @return [Array] array of derived time value pairs
-    def self.derive_values(derivation_type, base, peak, response, initial_values, start_slope: nil, end_slope: nil, start_time: nil, end_time: nil, timesteps_per_hour: 1, schedule_name: nil)
+    def self.derive_values(derivation_type, base, peak, response, initial_values, start_slope: nil, end_slope: nil, start_time: nil, end_time: nil, timesteps_per_hour: 1, schedule_name: nil, base_peak_mode: 'absolute', occupancy_base: nil, occupancy_peak: nil)
       # Guard against inverted inputs (base > peak), which would otherwise produce a negative
       # derivation range. Rather than swapping the two, this collapses them onto a single value:
       # when base is the dominant (> 0.5) input, peak is raised to base; when peak is the small
@@ -715,22 +722,48 @@ module OpenstudioStandards
       peak = base if (base > peak) && (base > 0.5)
       base = peak if (peak < base) && (peak < 0.5)
 
+      # Presence normalization. The occupancy presence value fed to the derivation ranges over
+      # the occupancy schedule's own base/peak (e.g. 0.25..1.0), not 0..1. In 'absolute' mode
+      # (the default) the presence is rescaled from [occupancy_base, occupancy_peak] to [0, 1]
+      # so `base`/`peak` are the absolute output endpoints: presence at the occupancy floor maps
+      # to `base` and presence at the occupancy peak maps to `peak`. In 'relative' mode (legacy)
+      # the raw presence value is used, so the derived base/peak come out relative to the
+      # occupancy schedule's base/peak. The occupancy range is taken from occupancy_base/
+      # occupancy_peak when supplied, otherwise inferred from the initial_values min/max.
+      absolute = base_peak_mode.to_s != 'relative'
+      occ_lo = occupancy_base
+      occ_hi = occupancy_peak
+      if absolute && !initial_values.empty?
+        vals = initial_values.map { |p| p[1] }
+        occ_lo = vals.min if occ_lo.nil?
+        occ_hi = vals.max if occ_hi.nil?
+      end
+      occ_range = (occ_lo.nil? || occ_hi.nil?) ? nil : (occ_hi.to_f - occ_lo.to_f)
+      presence = lambda do |v|
+        return v unless absolute
+        # flat occupancy (or unknown range): fall back to the raw value so design days and
+        # constant profiles behave as before.
+        return v.to_f.clamp(0.0, 1.0) if occ_range.nil? || occ_range.abs < 1e-9
+
+        ((v.to_f - occ_lo) / occ_range).clamp(0.0, 1.0)
+      end
+
       # derive time-value pairs
       derived_pairs = []
       case derivation_type
       when 'linear'
         initial_values.each do |initial_pair|
-          derived_value = base + ((peak - base) * (initial_pair[1] * response))
+          derived_value = base + ((peak - base) * (presence.call(initial_pair[1]) * response))
           derived_pairs << [initial_pair[0], derived_value]
         end
       when 'exponential'
         initial_values.each do |initial_pair|
-          derived_value = base + ((peak - base) * (initial_pair[1]**response.to_f))
+          derived_value = base + ((peak - base) * (presence.call(initial_pair[1])**response.to_f))
           derived_pairs << [initial_pair[0], derived_value]
         end
       when 'exponential-inverse'
         initial_values.each do |initial_pair|
-          derived_value = base + ((peak - base) * (initial_pair[1]**(1 / response.to_f)))
+          derived_value = base + ((peak - base) * (presence.call(initial_pair[1])**(1 / response.to_f)))
           derived_pairs << [initial_pair[0], derived_value]
         end
       when 'up_down'
@@ -819,6 +852,9 @@ module OpenstudioStandards
     #   - :base [Float] required
     #   - :peak [Float] required
     #   - :response [Float] required for non up_down derivation types
+    #   - :base_peak_mode [String] optional 'absolute' (default) or 'relative'. In 'absolute'
+    #     mode base/peak are absolute output endpoints (the presence is rescaled by the
+    #     occupancy schedule's base/peak); 'relative' is the legacy behavior.
     #   - :start_slope [Float] required for up_down
     #   - :end_slope [Float] required for up_down
     #   - :st [Float] optional explicit start time for up_down
@@ -853,6 +889,16 @@ module OpenstudioStandards
       summer_design_day_peak = params[:summer_design_day_peak].nil? ? peak : params[:summer_design_day_peak]
       summer_design_day_response = params[:summer_design_day_response].nil? ? response : params[:summer_design_day_response]
 
+      # base/peak interpretation: 'absolute' (default) rescales the occupancy presence by the
+      # occupancy schedule's own base/peak so the derived base/peak are absolute output values;
+      # 'relative' keeps the legacy behavior. The occupancy range is the occupancy schedule's
+      # realized default-day min/max (its base/peak), applied uniformly to the default, rule,
+      # and design-day derivations so a single occupancy peak maps to the load peak everywhere.
+      base_peak_mode = params[:base_peak_mode].nil? ? 'absolute' : params[:base_peak_mode]
+      occ_default_values = occupancy_schedule.defaultDaySchedule.values
+      occupancy_base = occ_default_values.empty? ? nil : occ_default_values.min
+      occupancy_peak = occ_default_values.empty? ? nil : occ_default_values.max
+
       # create a new schedule ruleset
       derived_schedule = OpenStudio::Model::ScheduleRuleset.new(model)
       derived_schedule.setName(params[:name])
@@ -866,7 +912,8 @@ module OpenstudioStandards
         derivation_type, base, peak, response, occ_time_values,
         start_slope: start_slope, end_slope: end_slope,
         start_time: derivation_start_time, end_time: derivation_end_time,
-        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name],
+        base_peak_mode: base_peak_mode, occupancy_base: occupancy_base, occupancy_peak: occupancy_peak
       )
       default_day = derived_schedule.defaultDaySchedule
       default_day.setName("#{params[:name]} Default Day")
@@ -880,7 +927,8 @@ module OpenstudioStandards
         derivation_type, summer_design_day_base, summer_design_day_peak, summer_design_day_response, occ_time_values,
         start_slope: start_slope, end_slope: end_slope,
         start_time: derivation_start_time, end_time: derivation_end_time,
-        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name],
+        base_peak_mode: base_peak_mode, occupancy_base: occupancy_base, occupancy_peak: occupancy_peak
       )
       summer_day = OpenStudio::Model::ScheduleDay.new(model)
       summer_day.setName("#{params[:name]} Summer Design Day")
@@ -895,7 +943,8 @@ module OpenstudioStandards
         derivation_type, winter_design_day_base, winter_design_day_peak, winter_design_day_response, occ_time_values,
         start_slope: start_slope, end_slope: end_slope,
         start_time: derivation_start_time, end_time: derivation_end_time,
-        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+        timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name],
+        base_peak_mode: base_peak_mode, occupancy_base: occupancy_base, occupancy_peak: occupancy_peak
       )
       winter_day = OpenStudio::Model::ScheduleDay.new(model)
       winter_day.setName("#{params[:name]} Winter Design Day")
@@ -915,7 +964,8 @@ module OpenstudioStandards
           derivation_type, base, peak, response, occ_time_values,
           start_slope: start_slope, end_slope: end_slope,
           start_time: derivation_start_time, end_time: derivation_end_time,
-          timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name]
+          timesteps_per_hour: timesteps_per_hour, schedule_name: params[:name],
+          base_peak_mode: base_peak_mode, occupancy_base: occupancy_base, occupancy_peak: occupancy_peak
         )
 
         # Make the Rule
