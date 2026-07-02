@@ -16,16 +16,24 @@ class BTAPDatapoint
     # Set local temporary cache folders. These are created new for each
     # datapoint. Location of the datapoint input folder. Could be local, cloud,
     # or VM host.
-    @dp_temp_folder = File.join(__dir__, 'temp_folder_' + SecureRandom.uuid)
+    datapoint_folder = File.join(__dir__, 'datapoint/')
+    @dp_temp_folder  = File.join(datapoint_folder, SecureRandom.uuid + '_' + Process.pid.to_s)
 
     # Determine whether the analysis was run on AWS S3.
     @s3 = input_folder.start_with?('s3:')
 
-    # Make sure temp folders are always clean.
-    FileUtils.rm_rf(@dp_temp_folder)
+    # Clean up stale temp folders whose PID isn't running.
+    Dir.glob("#{datapoint_folder}/*").each do |dir|
+      begin
+        Process.kill(0, dir.rpartition('_').last.to_i)
+      rescue Errno::ESRCH, Errno::EPERM
+        FileUtils.rm_rf(dir)
+      end
+    end
     FileUtils.mkdir_p(@dp_temp_folder)
 
-    # Check if input where input is from.
+    # For S3 inputs, download to the temp folder so files are accessible
+    # locally. For local inputs, read directly from the input folder.
     if @s3
       match = input_folder.match(%r{s3://(.*?)/(.*)})
       @s3_bucket = match[1]
@@ -36,11 +44,11 @@ class BTAPDatapoint
            "s3_output_folder_object: #{@s3_output_folder_object}")
 
       s3_copy(source_folder: input_folder, target_folder: @dp_temp_folder)
+      run_options_path = File.join(@dp_temp_folder, 'run_options.yml')
     else
       raise("Input folder does not exist: #{input_folder}") unless Dir.exist?(input_folder)
-      FileUtils.cp_r(File.join(input_folder, '.'), @dp_temp_folder)
+      run_options_path = File.join(input_folder, 'run_options.yml')
     end
-    run_options_path = File.join(@dp_temp_folder, 'run_options.yml')
     raise("Could not read input from #{run_options_path}") unless File.file?(run_options_path)
 
     @options = YAML.load_file(run_options_path)
@@ -72,7 +80,7 @@ class BTAPDatapoint
       # points. You can add a custom file as it will search the libary first.
       model = @standard.load_building_type_from_library(building_type: @options[:building_type])
       if false == model
-        osm_model_path = File.absolute_path(File.join(@dp_temp_folder, @options[:building_type] + '.osm'))
+        osm_model_path = File.absolute_path(File.join(@s3 ? @dp_temp_folder : input_folder, @options[:building_type] + '.osm'))
         raise("File #{osm_model_path} not found") unless File.exist?(osm_model_path)
 
         model = BTAP::FileIO.load_osm(osm_model_path)
@@ -262,9 +270,10 @@ class BTAPDatapoint
         self.output_timestep_data(model,@dp_temp_folder, @options[:datapoint_id])
       end
     rescue StandardError => error
-      puts "Error occured: #{error}"
+      @error = error
+      puts "Error occured: #{@error}"
       File.open(File.join(@dp_temp_folder, 'error.txt'), 'w') do |f|
-        f.write(error.message + "\n" + error.backtrace.join("\n"))
+        f.write(@error.message + "\n" + @error.backtrace.join("\n"))
       end
       @failed = true
     ensure
@@ -289,7 +298,7 @@ class BTAPDatapoint
       # Do not fail container if running on AWS, handle error on AWS instead to
       # avoid isuses with large analyses.
       unless @failed == false || @s3
-        raise(error)
+        raise(@error)
       end
     end
   end
