@@ -22,6 +22,7 @@ HOT_WATER_PARAMS_PATH    = File.join(REPO_ROOT, 'lib/openstudio-standards/schedu
 ASHRAE_SCHEDULES_PATH    = File.join(REPO_ROOT, 'lib/openstudio-standards/standards/ashrae_90_1/data/ashrae_90_1.schedules.json')
 CBES_SCHEDULES_PATH      = File.join(REPO_ROOT, 'lib/openstudio-standards/standards/cbes/data/cbes.schedules.json')
 DEER_SCHEDULES_PATH      = File.join(REPO_ROOT, 'lib/openstudio-standards/standards/deer/data/deer.schedules.json')
+ASHRAE_SPACE_TYPE_MAP_PATH = File.join(__dir__, 'ashrae_space_type_map.json')
 
 require_relative File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/create_parametric_schedule.rb')
 
@@ -57,6 +58,8 @@ get '/api/data' do
   deer_raw       = JSON.parse(File.read(DEER_SCHEDULES_PATH))
   deer_schedules = deer_raw.is_a?(Hash) ? (deer_raw['schedules'] || []) : deer_raw
 
+  ashrae_space_type_map = File.exist?(ASHRAE_SPACE_TYPE_MAP_PATH) ? JSON.parse(File.read(ASHRAE_SPACE_TYPE_MAP_PATH)) : {}
+
   {
     space_types:          space_types,
     parametric_schedules: parametric_schedules,
@@ -67,7 +70,8 @@ get '/api/data' do
     hot_water_params:    hot_water_params,
     ashrae_schedules:    ashrae_schedules,
     cbes_schedules:      cbes_schedules,
-    deer_schedules:      deer_schedules
+    deer_schedules:      deer_schedules,
+    ashrae_space_type_map: ashrae_space_type_map
   }.to_json
 end
 
@@ -94,7 +98,8 @@ get '/api/spc_typ/:template' do
         occupancy_schedule:       e['occupancy_schedule'],
         lighting_schedule:        e['lighting_schedule'],
         electric_equipment_schedule: e['electric_equipment_schedule'],
-        gas_equipment_schedule:   e['gas_equipment_schedule']
+        gas_equipment_schedule:   e['gas_equipment_schedule'],
+        service_water_heating_schedule: e['service_water_heating_schedule']
       }
     end
 

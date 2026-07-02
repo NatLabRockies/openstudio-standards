@@ -213,7 +213,9 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
         {scheduleInfos.map(({ name, category, kind }) => {
           const ashraeRefName = state.standardReferenceOverrides[name]
           const ashraeObjs = state.rawData.ashraeSchedules.filter(s => {
-            const cat = (s.category === 'Electric Equipment') ? 'ElectricEquipment' : s.category
+            const cat = s.category === 'Electric Equipment' ? 'ElectricEquipment'
+              : s.category === 'Service Water Heating' ? 'HotWater'
+              : s.category
             return ashraeRefName ? s.name === ashraeRefName : cat === category
           })
           const ashraeObj = ashraeObjs.find(s => s.day_types === activeTab)

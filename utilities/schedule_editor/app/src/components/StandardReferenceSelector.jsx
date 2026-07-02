@@ -17,6 +17,7 @@ const CATEGORY_SCHEDULE_FIELD = {
   Lighting:          'lighting_schedule',
   ElectricEquipment: 'electric_equipment_schedule',
   GasEquipment:      'gas_equipment_schedule',
+  HotWater:          'service_water_heating_schedule',
 }
 
 // StandardReferenceSelector is rendered once (not per schedule).
@@ -29,6 +30,7 @@ export default function StandardReferenceSelector({ scheduleInfos }) {
   const [spaceTypes, setSpaceTypes] = useState([])
   const [loadError, setLoadError] = useState(null)
   const [filter, setFilter] = useState('')
+  const [showAll, setShowAll] = useState(false)
 
   // Load space types whenever template changes
   useEffect(() => {
@@ -39,10 +41,20 @@ export default function StandardReferenceSelector({ scheduleInfos }) {
       .catch(err => setLoadError(err.message))
   }, [template])
 
+  // Keys the mapping considers equivalent to the selected level-1 space type for this template.
+  const mappedKeys = useMemo(() => {
+    const entries = state.rawData.ashraeSpaceTypeMap?.[state.selectedSpaceType] || []
+    return new Set(entries.filter(e => e.template === template).map(e => e.key))
+  }, [state.rawData.ashraeSpaceTypeMap, state.selectedSpaceType, template])
+
+  // Pre-filter to the mapped equivalents (unless "show all"); the text filter still applies.
+  const prefiltering = !showAll && mappedKeys.size > 0
   const filteredSpaceTypes = useMemo(() => {
     const q = filter.toLowerCase()
-    return spaceTypes.filter(st => st.key.toLowerCase().includes(q))
-  }, [spaceTypes, filter])
+    return spaceTypes
+      .filter(st => !prefiltering || mappedKeys.has(st.key))
+      .filter(st => st.key.toLowerCase().includes(q))
+  }, [spaceTypes, filter, prefiltering, mappedKeys])
 
   // When space type changes, dispatch the 4 schedule overrides
   function applySpaceType(key) {
@@ -83,7 +95,20 @@ export default function StandardReferenceSelector({ scheduleInfos }) {
       </div>
 
       <div style={{ marginBottom: 4 }}>
-        <label style={labelStyle}>Space type</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <label style={labelStyle}>Space type</label>
+          {mappedKeys.size > 0 && (
+            <label style={{ fontSize: 10, color: '#666', display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
+              <input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)} style={{ margin: 0 }} />
+              Show all
+            </label>
+          )}
+        </div>
+        {prefiltering && (
+          <div style={{ fontSize: 10, color: '#2980b9', marginBottom: 3 }}>
+            Showing {mappedKeys.size} equivalent{mappedKeys.size !== 1 ? 's' : ''} for “{state.selectedSpaceType}”
+          </div>
+        )}
         <input
           placeholder="Filter space types…"
           value={filter}

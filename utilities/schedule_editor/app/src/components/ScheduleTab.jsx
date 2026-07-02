@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { useAppState, useAppDispatch, SET_SELECTED_SCHEDULE_NAMES } from '../context.jsx'
 
-// The merged default_parametric_schedules.json holds multiple categories. Default
-// to Occupancy (the original behavior) but let the user browse direct-load and
-// diurnal schedules too.
-const CATEGORIES = ['Occupancy', 'Lighting', 'Equipment', 'Diurnal', 'All']
+// The merged default_parametric_schedules.json holds Occupancy/Lighting/Equipment/Diurnal
+// records; hot water schedules live in default_hot_water_equipment_parameters.json. Default
+// to Occupancy (the original behavior) but let the user browse the other categories too.
+const CATEGORIES = ['Occupancy', 'Lighting', 'Equipment', 'Hot Water', 'Diurnal', 'All']
 
 export default function ScheduleTab() {
   const state = useAppState()
@@ -13,12 +13,13 @@ export default function ScheduleTab() {
 
   const names = useMemo(() => {
     const seen = new Set()
-    return state.rawData.parametricSchedules
-      .filter(s => filterCat === 'All' || (s.category || 'Occupancy') === filterCat)
-      .map(s => s.name)
-      .filter(n => { if (seen.has(n)) return false; seen.add(n); return true })
-      .sort()
-  }, [state.rawData.parametricSchedules, filterCat])
+    const dedupSort = (arr) => arr.filter(n => { if (seen.has(n)) return false; seen.add(n); return true }).sort()
+    const parametric = state.rawData.parametricSchedules || []
+    const hotWater = state.rawData.hotWaterParams || []
+    if (filterCat === 'Hot Water') return dedupSort(hotWater.map(s => s.name))
+    if (filterCat === 'All') return dedupSort([...parametric.map(s => s.name), ...hotWater.map(s => s.name)])
+    return dedupSort(parametric.filter(s => (s.category || 'Occupancy') === filterCat).map(s => s.name))
+  }, [state.rawData.parametricSchedules, state.rawData.hotWaterParams, filterCat])
 
   function select(name) {
     dispatch({ type: SET_SELECTED_SCHEDULE_NAMES, payload: [name] })

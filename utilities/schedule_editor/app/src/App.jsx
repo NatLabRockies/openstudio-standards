@@ -32,6 +32,7 @@ function DataLoader({ children }) {
             ashraeSchedules: data.ashrae_schedules || [],
             cbesSchedules: data.cbes_schedules || [],
             deerSchedules: data.deer_schedules || [],
+            ashraeSpaceTypeMap: data.ashrae_space_type_map || {},
           }
         })
       })

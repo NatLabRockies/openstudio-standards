@@ -33,6 +33,7 @@ const initialState = {
     ashraeSchedules: [],
     cbesSchedules: [],
     deerSchedules: [],
+    ashraeSpaceTypeMap: {},
   },
 
   selectedSpaceType: null,
