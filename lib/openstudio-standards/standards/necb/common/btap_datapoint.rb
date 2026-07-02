@@ -338,7 +338,6 @@ class BTAPDatapoint
   end
 
   def s3_copy_file_to_s3(bucket_name:, source_file:, target_file:, n: 0)
-    require 'aws-sdk-core'
     require 'aws-sdk-s3'
     Aws.use_bundled_cert!
     s3_client = Aws::S3::Client.new(region: 'ca-central-1')
