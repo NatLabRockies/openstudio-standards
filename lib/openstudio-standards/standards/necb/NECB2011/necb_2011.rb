@@ -870,34 +870,33 @@ class NECB2011 < Standard
     construction_opt = construction_opt.to_s.downcase
 
     if construction_opt == 'structure'
-      argh            = {}
-      argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
-      argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
-      argh[:eRoofU  ] = ext_roof_cond          if ext_roof_cond
-      argh[:gWallU  ] = ground_wall_cond       if ground_wall_cond
-      argh[:gFloorU ] = ground_floor_cond      if ground_floor_cond
-      argh[:gRoofU  ] = ground_roof_cond       if ground_roof_cond
-      argh[:doorU   ] = door_construction_cond if door_construction_cond
-      argh[:fenU    ] = fixed_window_cond      if fixed_window_cond
-      argh[:skyU    ] = skylight_solar_trans   if skylight_solar_trans
-      argh[:doorSHGC] = glass_door_solar_trans if glass_door_solar_trans
-      argh[:fenSHGC ] = fixed_wind_solar_trans if fixed_wind_solar_trans
-      argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
+      argh             = {}
+      argh[:eWallU   ] = ext_wall_cond          if ext_wall_cond
+      argh[:eFloorU  ] = ext_floor_cond         if ext_floor_cond
+      argh[:eRoofU   ] = ext_roof_cond          if ext_roof_cond
+      argh[:gWallU   ] = ground_wall_cond       if ground_wall_cond
+      argh[:gFloorU  ] = ground_floor_cond      if ground_floor_cond
+      argh[:gRoofU   ] = ground_roof_cond       if ground_roof_cond
+      argh[:doorU    ] = door_construction_cond if door_construction_cond
+      argh[:fenU     ] = fixed_window_cond      if fixed_window_cond
+      argh[:skyU     ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:fenSHGC  ] = fixed_wind_solar_trans if fixed_wind_solar_trans
+      argh[:skySHGC  ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:category ] = @activity.category
+      argh[:structure] = @structure.structure
+      argh[:framing  ] = @structure.framing
+      argh[:cladding ] = @structure.cladding
+      argh[:finish   ] = @structure.finish
 
       assign_contruction_to_adiabatic_surfaces(model)
 
-      spaces = model.getSpaces
-      ct     = @activity.category
-      st     = @structure.structure
-      fr     = @structure.framing
-
       # Add default BUILDING construction sets.
-      unless add_construction_sets(spaces, true, necb_hdd, ct, st, fr, argh)
+      unless add_construction_sets(model.getSpaces, true, necb_hdd, argh)
         raise('NECB: Failed to assign default BUILDING construction sets')
       end
 
       # Add default construction sets to customized spaces. Group spaces along
-      # customized STRUCTURE and/or customized FRAMING.
+      # customized STRUCTURE, FRAMING, CLADDING and/or FINISH.
       unless @structure.spaces.empty?
         custom = []
         id     = @structure.spaces.keys.first
@@ -911,6 +910,8 @@ class NECB2011 < Standard
           first[:spaces   ] = [espace]
           first[:structure] = sp[:structure]
           first[:framing  ] = sp[:framing]
+          first[:cladding ] = sp[:cladding]
+          first[:finish   ] = sp[:finish]
           custom           << first
 
           @structure.spaces.each do |id, sp|
@@ -922,13 +923,15 @@ class NECB2011 < Standard
             next if space == espace
 
             custom.each do |csp|
-              stx = csp[:structure]
-              frx = csp[:framing]
               break if match
 
-              if sp[:structure] == stx && sp[:framing] == frx
-                csp[:spaces] << space
-                match = true
+              if sp[:structure] == csp[:structure] &&
+                 sp[:framing  ] == csp[:framing  ] &&
+                 sp[:cladding ] == csp[:cladding ] &&
+                 sp[:finish   ] == csp[:finish   ]
+
+                 csp[:spaces] << space
+                 match = true
               end
             end
 
@@ -937,16 +940,19 @@ class NECB2011 < Standard
               spx[:spaces   ] = [space]
               spx[:structure] = sp[:structure]
               spx[:framing  ] = sp[:framing]
+              spx[:cladding ] = sp[:cladding]
+              spx[:finish   ] = sp[:finish]
               custom         << spx
             end
           end
 
           custom.each do |csp|
-            spx = csp[:spaces]
-            stx = csp[:structure]
-            frx = csp[:framing]
+            argh[:structure] = csp[:structure]
+            argh[:framing  ] = csp[:framing]
+            argh[:cladding ] = csp[:cladding]
+            argh[:finish   ] = csp[:finish]
 
-            unless add_construction_sets(spx, false, necb_hdd, ct, stx, frx, argh)
+            unless add_construction_sets(csp[:spaces], false, necb_hdd, argh)
               raise('NECB: Failed to assign (custom) SPACE construction sets')
             end
           end
@@ -1258,7 +1264,7 @@ class NECB2011 < Standard
 
   ##
   # (Optionally) uprates - then derates - envelope surface constructions due to
-  # MAJOR thermal bridges (e.g. roof parapets, corners, fenestration
+  # linear thermal bridges (e.g. roof parapets, corners, fenestration
   # perimeters). See lib/openstudio-standards/btap/bridging.rb, which relies on
   # the Thermal Bridging & Derating (TBD) gem.
   #

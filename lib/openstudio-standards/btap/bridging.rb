@@ -1,5 +1,5 @@
 # **************************************************************************** /
-# *  Copyright (c) 2008-2025, Natural Resources Canada
+# *  Copyright (c) 2008-2026, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -30,8 +30,7 @@ module BTAP
     # @author: Denis Bourgeois
 
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
-    # BTAP/TBD data initially extracted from the BTAP costing spreadsheet:
-    #
+    # BTAP/TBD data below is based on BTAP costing data:
     #   - range of clear-field Uo factors
     #   - range of PSI factors (i.e. MAJOR thermal bridging), e.g. corners
     #
@@ -39,20 +38,12 @@ module BTAP
     #      - Building Envelope Thermal Bridging Guide (BETBG)
     #      - ASHRAE RP-1365, ISO-12011, etc.
     #
-    # This module has been subsequently adapted following the adoption of new
-    # BTAP structure/envelope data model/classes.
+    # This module also rests on structure/envelope data model/classes.
 
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
-    # BTAP costing data (both original BTAP envelope entries and EVOKE add-ons)
-    # hold sub-variants based on cladding/veneer, e.g.:
-    #
-    #   - "BTAP-ExteriorWall-WoodFramed-5" ... brick veneer
-    #   - "BTAP-ExteriorWall-WoodFramed-1" ... wood siding
-    #
-    # Not all of these sub-variants are currently used within BTAP, e.g.
-    # "BTAP-ExteriorWall-WoodFramed-1" is unused. BTAP/TBD data is limited
-    # to the following wall assemblies (paired LP & HP variants), which
-    # eventually should be located in a shared file (e.g. CSV, JSON).
+    # BTAP/TBD data is limited to the following wall assemblies (as paired LP
+    # & HP variants), which eventually should be located in a shared file
+    # (e.g. CSV, JSON, YAML).
     #
     #   -----   Low Performance (LP) assemblies
     #   ID    : layers
@@ -71,7 +62,7 @@ module BTAP
     #   MASS8 : precast  | xps     | wool | frame | gypsum ... switch from MASS4
     #
     # Paired LPs & HPs vall variants are critical for 'uprating' cases, e.g.
-    # NECB2017/2020. See below, and end of this document for additional NOTES.
+    # NECB2017/2020/2025. See below, and additional NoteS at the very end.
 
     MASS2      = "BTAP-ExteriorWall-Mass-2"              # LP wall
     MASS2_BAD  = "BTAP-ExteriorWall-Mass-2 bad"          # LP "bad" PSI factors
@@ -122,37 +113,36 @@ module BTAP
     #   - "bad" or "good": (BTAP-costed) PSI factor sets, i.e. derating only
     #   - "uprate": iteratively determine initial Uo ... prior to derating
     #
-    # For vintages < NECB2017, the default BTAP policy is to switch off TBD,
-    # i.e. 'none' (see the NOTE on this topic at the end of this document). To
-    # instead assess prescriptive Ut compliance for vintages NECB2017 and
-    # NECB2020, the BTAP/TBD must be set to "uprate" so it can iteratively reset
-    # combined Uo & PSI factors towards finding the least expensive, yet
-    # compliant, combination. Why? Improved Uo assembly variants are necessarily
-    # required, given:
+    # For NECB editions prior to NECB2017, the current BTAP policy is to switch
+    # off TBD, i.e. 'none' (see the Note on this topic at the end of this
+    # document). To instead assess prescriptive Ut compliance for NECB editions
+    # 2017 through 2025, BTAP/TBD must be set to "uprate" so it can iteratively
+    # reset combined Uo & PSI factors towards finding the least expensive, yet
+    # compliant, Ut combination. Why? Improved Uo assembly variants are
+    # necessarily required, given:
     #
     #   Ut = Uo + ( ∑psi x L )/A + ( ∑khi x n )/A   (ref: rd2.github.io/tbd)
     #
     # If one ignores linear ("( ∑psi x L )/A") and point ("( ∑khi x n )/A")
-    # conductances, Ut simply equates to Uo. Yet for ANY added linear or
-    # point conductance, Uo factors must necessarily be lower than required
-    # NECB2017 or NECB2020 Ut factors. EVOKE's 2022 contribution extends
-    # initial (pre-2022) BTAP wall assembly variants, offering much
-    # lower Uo factors (in some cases slightly below 0.1 W/m2.K or ~R70).
-    # These BTAP upgrades provide more options for attaining required Ut
-    # factors. For some variants, this simply implies a thicker insulation
-    # layer. For others, it involves more radical assembly changes, such
-    # as switching over to the latest commercially-available HP
-    # thermally-broken cladding clips. While some solutions are simple
-    # (free) detailing changes, most improvements increase construction
-    # costs. Despite adding new HP assemblies, it is unlikely that TBD
-    # will find NECB2017 or NECB2020 compliant combinations (prescriptive
-    # path) for EVERY OpenStudio model. Read here as to "why?":
+    # conductances, Ut simply equates to Uo. Yet for ANY added linear or point
+    # conductance, Uo factors must necessarily be lower than required NECB2017+
+    # Ut factor requirements. BTAP HP wall assembly variants indeed offer much
+    # lower Uo factors (than required Ut), down to 0.1 W/m2.K or ~R70. These
+    # BTAP upgrades certainly provide more options for attaining required Ut
+    # factors. In practice, this simply implies a thicker insulation layer. For
+    # others, it involves more radical assembly changes, such as switching over
+    # to the latest commercially-available HP thermally-broken cladding clips.
+    # While some solutions are simple (free) detailing changes, most
+    # improvements increase construction costs. Despite adding new BTAP HP
+    # assemblies, it is unlikely that TBD will find NECB2017+ compliant
+    # combinations (prescriptive path) for EVERY OpenStudio model.
+    # Read here as to "why?":
     #
     #   github.com/rd2/tbd/blob/f34ec6a017fcc0f6022f2a46e056b46b9d036b3b/
     #   spec/tbd_tests_spec.rb#L9219
     #
     # For these reasons, BTAP's use of TBD rests on an ITERATIVE uprating
-    # solution for NECB2017 and NECB2020:
+    # solution for NECB2017+:
     #
     #   1. TBD attempts to achieve NECB-required area-weighted Ut factors
     #      for above-grade walls (then for roofs and exposed floors),
@@ -165,8 +155,8 @@ module BTAP
     #      (HP) thermal bridging detailing for that same assembly, and
     #      repeats the exercise.
     #
-    #   3. A subsequent failed attempt triggers a switch over to EVOKE's
-    #      HP (improved Uo) assemblies. For instance:
+    #   3. A subsequent failed attempt triggers a switch over to improved HP Uo
+    #      assemblies. For instance:
     #        - "BTAP-ExteriorWall-WoodFramed-5" ... switches over to:
     #        - "BTAP-ExteriorWall-WoodFramed-7"
     #
@@ -222,7 +212,7 @@ module BTAP
 
     # Thermal bridge types :balcony, :party and :joint are NOT expected to
     # be processed soon within BTAP. They are neither costed out, nor are carbon
-    # intensities (kg CO2eq/linear meter) associated to them. At some point, it
+    # intensities (kgCO2-eq/linear meter) associated to them. At some point, it
     # may be wise to do so (notably cantilevered balconies in MURBs) - @todo.
     # Default, generic BETBG PSI factors are nonetheless provided here:
     #   - for "bad" BTAP cases : generic BETBG set "bad"
@@ -406,20 +396,37 @@ module BTAP
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
 
     ##
-    # Retrieves BTAP-costed assembly.
+    # Retrieves BTAP-costed assembly. Defaults to STEL1 if invalid input.
     #
-    # @param structure [BTAP::Structure] BTAP Structure object
-    # @param stype [:walls, :floors or :roofs] surface type
-    # @param perform [:hp or :lp] high- or low-performance variant
+    # @param [Hash] argh structure-linked options
+    # @option argh [Symbol] :stype (:walls, :floors or :roofs)
+    # @option argh [Symbol] :perform (:lp or :hp) wall variant
+    # @option argh [Symbol] :framing (:steel, :wood, :cmu)
+    # @option argh [Symbol] :cladding (:heavy)
+    # @option argh [Symbol] :finish (:heavy)
     #
     # @return [String] BTAP assembly identifier for costing
-    def costed_assembly(structure = nil, stype = :walls, perform = :lp)
+    def costed_assembly(argh = {})
+      return STEL1 unless argh.respond_to?(:keys)
+      return STEL1 unless argh.key?(:stype)
+      return STEL1 unless argh.key?(:perform)
+
+      # Key inputs.
+      stype   = argh[:stype]
       stype   = :walls unless [:roofs, :floors].include?(stype)
       perform = :lp    unless perform == :hp
-      return STEL1 unless structure.is_a?(BTAP::Structure)
+
+      # Optionals.
+      framing  = argh.key?(:framing)  ? argh[:framing ] : :light
+      cladding = argh.key?(:cladding) ? argh[:cladding] : :light
+      finish   = argh.key?(:finish)   ? argh[:finish  ] : :light
+
+      framing  = :steel unless [:wood, :cmu].include?(framing)
+      cladding = :light unless cladding == :heavy
+      finish   = :light unless finish   == :heavy
 
       # Select BTAP-costed assembly, matching:
-      #   - BTAP::Structure generated construction parameters
+      #   - BTAP::Structure generated construction parameters (e.g. framing)
       #   - requested high (HP) vs low-performance (LP) PSI-factor level
       #
       # Ideally, chosen PSI factor sets and matching OpenStudio constructions
@@ -436,22 +443,19 @@ module BTAP
       # Major thermal bridges often consist of anchors or supports that transmit
       # structural loads (and by the same token, 'heat') to a building's main
       # structure. Examples include balconies, parapets and shelf angles.
-      # Highly conductive building structures (e.g. steel, aluminium) exacerbate
-      # thermal bridging effects - so building structural selection matters.
+      # Highly conductive building structural materials (e.g. steel, concrete)
+      # exacerbate thermal bridging - building structural choices should matter.
       #
       # The BTAP::Structure module generates such attributes, yet BTAP's costed
       # thermal bridging database doesn't yet distinguish between building
       # structures - @todo. For the moment, BTAP PSI set selection is strictly
       # based on BTAP::Structure's :framing, :cladding and :finish attributes,
-      # which must be set prior to initiating BTAP's TBD's thermal bridging
-      # solution:
-
-      # Light gauge steel framing by default. Override if wood, cmu or precast.
+      # which are usually set prior to initiating BTAP's TBD solution.
       case stype
       when :roofs  then return ROOF
       when :floors then return FLOOR
       else
-        case structure.framing
+        case framing
         when :wood
           c1 = WOOD5
           c2 = WOOD7
@@ -459,7 +463,7 @@ module BTAP
           c1 = MASS2
           c2 = MASSB
         else
-          if structure.cladding == :heavy && structure.finish == :heavy
+          if cladding == :heavy && finish == :heavy
             c1 = MASS4
             c2 = MASS8
           else
@@ -569,14 +573,14 @@ module BTAP
     #
     # @param model [OpenStudio::Model::Model] a model
     # @param [Hash] argh BTAP/TBD argument hash
-    # @option argh [BTAP::Structure] structure a BTAP STRUCTURE object
-    # @option argh [Hash] walls exterior wall parameters e.g. :uo, :ut
-    # @option argh [Hash] floors exposed floor parameters e.g. :uo, :ut
-    # @option argh [Hash] roofs exterior roof parameters e.g. :uo, :ut
-    # @option argh [:good, :bad] quality derating option (if not uprating)
-    # @option argh [Boolean] interpolate if TBD interpolates among Uo (uprate)
+    # @option argh [BTAP::Structure] :structure a BTAP STRUCTURE instance
+    # @option argh [Hash] :walls exterior wall parameters (:uo, :ut)
+    # @option argh [Hash] :floors exposed floor parameters (:uo, :ut)
+    # @option argh [Hash] :roofs exterior roof parameters (:uo, :ut)
+    # @option argh [:good, :bad] :quality of thermal bridging (derating only)
+    # @option argh [Boolean] :interpolate between costed Uo (uprate only)
     def initialize(model = nil, argh = {})
-      btp       = BTAP::Resources::Envelope::Constructions # alias
+      # btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
       tag       = "uprated_Uo"
       @model    = {}
@@ -786,12 +790,12 @@ module BTAP
     #
     # @param model [OpenStudio::Model::Model] a model
     # @param [Hash] argh BTAP/TBD argument hash
-    # @option argh [BTAP::Structure] structure a BTAP STRUCTURE object
-    # @option argh [Hash] walls exterior wall parameters e.g. :uo, :ut
-    # @option argh [Hash] floors exposed floor parameters e.g. :uo, :ut
-    # @option argh [Hash] roofs exterior roof parameters e.g. :uo, :ut
-    # @option argh [Symbol] quality derating option (if not uprating)
-    # @option argh [Boolean] interpolate if TBD should pick between Uo values
+    # @option argh [BTAP::Structure] :structure a BTAP STRUCTURE instance
+    # @option argh [Hash] :walls exterior wall parameters (:uo, :ut)
+    # @option argh [Hash] :floors exposed floor parameters (:uo, :ut)
+    # @option argh [Hash] :roofs exterior roof parameters (:uo, :ut)
+    # @option argh [:good, :bad] :quality of thermal bridging (derating only)
+    # @option argh [Boolean] :interpolate between costed Uo (uprate only)
     #
     # @return [Boolean] true if valid (check @feedback logs if false)
     def populate(model = nil, argh = {})
@@ -819,12 +823,6 @@ module BTAP
         lgs << "Missing STRUCTURE key (#{mth})"
         return false
       end
-
-      # Building-wide envelope (e.g. assemblies, U-factors, PSI-factors) options
-      # depend on building structure-dependent features such as framing,
-      # cladding, etc. This will need to adapt to upcoming story/space
-      # construction/PSI customization - @todo.
-      strc = argh[:structure]
 
       argh[:interpolate] = false unless argh.key?(:interpolate)
       argh[:interpolate] = false unless [true, false].include?(argh[:interpolate])
@@ -858,12 +856,13 @@ module BTAP
       end
 
       # Run TBD on a cloned OpenStudio model (dry run).
+      stc = argh[:structure]
       mdl = OpenStudio::Model::Model.new
       mdl.addObjects(model.toIdfFile.objects)
       TBD.clean!
       res = TBD.process(mdl, args)
 
-      # TBD validation of OpenStudio model.
+      # TBD validation of the OpenStudio model.
       if TBD.fatal? || TBD.error?
         lgs << "TBD-identified FATAL error(s):"     if TBD.fatal?
         lgs << "TBD-identified non-FATAL error(s):" if TBD.error?
@@ -872,26 +871,47 @@ module BTAP
         return false if TBD.fatal?
       end
 
-      # Fetch number of stories in OpenStudio model.
-      stories = model.getBuilding.standardsNumberOfAboveGroundStories
-      stories = stories.get                  unless stories.empty?
-      stories = model.getBuildingStorys.size unless stories.is_a?(Integer)
-
-      # Story/space construction/PSI customization is yet to be implemented.
-      # Keeping placeholders for now - @todo.
-      @model[:stories] = stories.clamp(1, 999)
-      @model[:spaces ] = {}
-
-      # Initialize deratable opaque, layered constructions & surface types.
-      @model[:constructions] = {}
-      @model[:stypes       ] = []
-
       if res[:surfaces].nil?
         lgs << "No deratable surfaces in model (#{mth})"
         return false
       end
 
-      # Process only surfaces deemed 'deratable' by TBD.
+      # Within BTAP, a building must reference a default construction set.
+      if model.getBuilding.defaultConstructionSet.empty?
+        lgs << "No BUILDING default construction set (#{mth})"
+        return false
+      else
+        bset = model.getBuilding.defaultConstructionSet.get
+      end
+
+      # Fetch number of stories.
+      stories = model.getBuilding.standardsNumberOfAboveGroundStories
+      stories = stories.get                  unless stories.empty?
+      stories = model.getBuildingStorys.size unless stories.is_a?(Integer)
+
+      @model[:stories] = stories.clamp(1, 999)
+
+      # Initialize deratable constructions, spaces & surface types.
+      @model[:constructions] = {}
+      @model[:spaces       ] = {}
+      @model[:stypes       ] = []
+
+      # Generate TBD input hashes for both :good & :bad PSI factor sets. This
+      # depends solely on assigned wall constructions (e.g. steel- vs wood-
+      # framed) - not roof or floor constructions. By default, a single PSI
+      # factor set is assigned for the building. If users request customized,
+      # space-specific structural/envelope, matching PSI-factor sets are added.
+      #   - 1x set as the building-wide default
+      #   - ?x set(s) for user-customized spaces
+      #   - see NECB2011/building_envelope.rb's "add_construction_sets"
+      @model[:psi]           = {}
+      @model[:psi][:lp_bad ] = self.inputs(stc, :lp, :bad)
+      @model[:psi][:lp_good] = self.inputs(stc, :lp, :good)
+      @model[:psi][:hp_bad ] = self.inputs(stc, :hp, :bad)
+      @model[:psi][:hp_good] = self.inputs(stc, :hp, :good)
+
+      # Only process surfaces deemed 'deratable' by TBD. Match PSI factor sets
+      # with generated BTAP default construction sets:
       res[:surfaces].each do |id, surface|
         next unless surface.key?(:type)      # :wall, :ceiling or :floor
         next unless surface.key?(:filmRSI)   # surface air film resistances
@@ -909,10 +929,9 @@ module BTAP
                  else ""
                  end
 
-        next if stypes.empty?
-
         fR = surface[:filmRSI]
         m2 = surface[:net]
+        next if stypes.empty?
 
         # Track surface type.
         @model[:stypes] << stypes unless @model[:stypes].include?(stypes)
@@ -925,8 +944,16 @@ module BTAP
           return false
         end
 
-        srf = srf.get
+        srf   = srf.get
         space = srf.space
+
+        # Fetch default construction set.
+        if srf.isConstructionDefaulted
+          set = TBD.defaultConstructionSet(srf)
+          set = bset unless set
+        else
+          set = bset
+        end
 
         if space.empty?
           lgs << "Missing space: #{id} (#{mth})?"
@@ -934,7 +961,8 @@ module BTAP
         end
 
         space = space.get
-        lc = srf.construction
+        spID  = space.nameString
+        lc    = srf.construction
 
         if lc.empty?
           lgs << "Mismatched construction: #{id} (#{mth})?"
@@ -948,7 +976,7 @@ module BTAP
           return false
         end
 
-        lc = lc.get
+        lc  = lc.get
         ide = lc.nameString
 
         unless @model[:constructions].key?(ide)
@@ -957,6 +985,7 @@ module BTAP
           @model[:constructions][ide][:r        ] = surface[:r]     # material
           @model[:constructions][ide][:uo       ] = nil             # assembly
           @model[:constructions][ide][:compliant] = nil             # assembly
+          @model[:constructions][ide][:set      ] = set             # assembly
           @model[:constructions][ide][:m2       ] = 0               # cumulative
           @model[:constructions][ide][:fA       ] = 0               # cumulative
           @model[:constructions][ide][:filmRSI  ] = 0               # weighted
@@ -964,19 +993,7 @@ module BTAP
           @model[:constructions][ide][:surfaces ] = []
           @model[:constructions][ide][:spaces   ] = []
 
-          # Generate TBD input hashes for both :good & :bad PSI factor sets.
-          # This depends solely on assigned wall constructions (e.g. steel- vs
-          # wood-framed) - not roof or floor constructions. Until space- and
-          # storey-specific structure/construction customization is enabled in
-          # BTAP, this is set for the entire building. In other words - for now
-          # - there should be a single assigned layered construction for all
-          # walls in a BTAP-altered OpenStudio model.
-          if stypes == :walls
-            @model[:constructions][ide][:lp_bad ] = self.inputs(strc, :lp, :bad )
-            @model[:constructions][ide][:lp_good] = self.inputs(strc, :lp, :good)
-            @model[:constructions][ide][:hp_bad ] = self.inputs(strc, :hp, :bad )
-            @model[:constructions][ide][:hp_good] = self.inputs(strc, :hp, :good)
-          end
+          # Map ... @todo.
         end
 
         @model[:constructions][ide][:m2      ] += m2
@@ -1003,7 +1020,6 @@ module BTAP
           return false
         else
           v[:stypes] = v[:stypes].first
-
           lc = model.getConstructionByName(ide)
 
           if lc.empty?
@@ -1045,33 +1061,60 @@ module BTAP
     ##
     # Generate TBD input hash.
     #
-    # @param structure [BTAP::Structure] a BTAP STRUCTURE object
-    # @param perform [Symbol] :lp or :hp wall variant
-    # @param quality [Symbol] :bad or :good PSI-factor
+    # @param structure [BTAP::Structure] BTAP::Structure object
+    # @option perform [Symbol] performance variant (:lp or :hp)
+    # @option quality [Symbol] PSI-factor set selection (:bad or :good)
     #
-    # @return [Hash] TBD inputs
+    # @return [Hash] TBD inputs (empty if invalid input)
     def inputs(structure = nil, perform = :hp, quality = :good)
       input   = {}
       psis    = {} # construction-specific PSI sets
-      perform = :hp   unless [:lp, :hp].include?(perform)
+      spaces  = {} # custom space-specific PSI references
+      perform = :hp   unless [:lp, :hp   ].include?(perform)
       quality = :good unless [:bad, :good].include?(quality)
+      return input    unless structure.is_a?(BTAP::Structure)
 
-      # A single PSI set for the entire building, based strictly on exterior
-      # wall selection. Adapt once BTAP::Structure supports STRUCTURE
-      # assignements per OpenStudio's building-to-space hierarchy, e.g. "cmu"
-      # gymnasium walls in an otherwise "steel"post/frame school. @todo
-      assembly = self.costed_assembly(structure, :walls, perform)
-      building_psi = self.set(assembly, quality)
+      argh            = {}
+      argh[:stype   ] = :walls
+      argh[:perform ] = perform
+      argh[:framing ] = structure.framing
+      argh[:cladding] = structure.cladding
+      argh[:finish  ] = structure.finish
 
-      psis[ building_psi[:id] ] = building_psi
+      assembly = self.costed_assembly(argh)
+      bldg_psi = self.set(assembly, quality)
+
+      # A single PSI-factor set for the building.
+      psis[bldg_psi[:id]] = bldg_psi
+
+      # Add PSI-factor sets for customized spaces, e.g.
+      #   - "cmu" gymnasium walls in an otherwise "steel" post/frame school
+      structure.spaces.each do |id, csp|
+        argh[:framing ] = csp[:framing]
+        argh[:cladding] = csp[:cladding]
+        argh[:finish  ] = csp[:finish]
+
+        cassembly = self.costed_assembly(argh)
+        next if cassembly == assembly
+
+        space_psi = self.set(cassembly, quality)
+        next if psis.key?(space_psi[:id])
+
+        # Append customized PSI-factor set.
+        psis[space_psi[:id]] = space_psi
+
+        # Add reference to customized space PSI-factor set.
+        spaces[id] = { id: id, psi: space_psi[:id] }
+      end
 
       # TBD JSON schema added as a reminder. No schema validation in BTAP.
       schema = "https://github.com/rd2/tbd/blob/master/tbd.schema.json"
 
       input[:schema     ] = schema
-      input[:description] = "TBD input for BTAP" # append run # ?
-      input[:psis       ] = psis.values          # maybe more than 1 in future
-      input[:building   ] = { psi: building_psi[:id] }
+      input[:description] = "TBD input for BTAP"
+      input[:psis       ] = psis.values
+      input[:spaces     ] = spaces.values
+      input[:building   ] = { psi: bldg_psi[:id] }
 
       input
     end
@@ -1249,7 +1292,7 @@ module BTAP
 end
 
 # ----- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----- #
-# NOTE: BTAP supports Uo variants for each of the aforementioned wall
+# Note: BTAP supports Uo variants for each of the aforementioned wall
 #       constructions, e.g. meeting NECB2011 and NECB2015 prescriptive "Uo"
 #       requirements for each NECB climate zone. By definition, these Uo
 #       variants ignore the effects of MAJOR thermal bridging, such as
@@ -1264,7 +1307,7 @@ end
 #       goal remains a fair assessment of the (relative) contribution of more
 #       recent NECB requirements (e.g. 2020).
 
-# NOTE: The BTAP costing spreadsheet holds entries for curtain wall (CW)
+# Note: The BTAP costing spreadsheet holds entries for curtain wall (CW)
 #       spandrel inserts above/below fenestration for certain spacetypes, see:
 #
 #         test/necb/unit_tests/resources/btap_spandrels.png
@@ -1312,7 +1355,7 @@ end
 #       combinations of Uo+PSI factors if ever HP CW spandrels were integrated
 #       within BTAP.
 
-# NOTE: Some of the aforementioned constructions have exterior brick veneer.
+# Note: Some of the aforementioned constructions have exterior brick veneer.
 #       For 2-story OpenStudio models with punch windows (i.e. not strip
 #       windows), one would NOT expect a continuous steel shelf angle along the
 #       intermediate floor slab edge (typically a MAJOR thermal bridge). One
@@ -1334,7 +1377,7 @@ end
 #       general solution would be required for 3rd-party OpenStudio models
 #       (without strip windows as a basic fenestration layout).
 #
-# NOTE: BTAP costing: In addition to the listed items for parapets as MAJOR
+# Note: BTAP costing: In addition to the listed items for parapets as MAJOR
 #       thermal bridges (eventually generating an overall $ per linear meter),
 #       BTAP costing requires extending the areas (m2) of OpenStudio wall
 #       surfaces (along parapet edges) by 3'-6" (1.1 m) x parapet lengths, to

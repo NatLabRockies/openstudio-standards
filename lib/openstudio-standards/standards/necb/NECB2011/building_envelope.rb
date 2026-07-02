@@ -305,7 +305,8 @@ class NECB2011
   #
   # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
   def max_u_necb(stype = "roofceiling", bc = "outdoors", hdd = 8000)
-    hdd = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
+    data = {}
+    hdd  = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
 
     # Admissible surface types.
     stypes = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
@@ -318,8 +319,6 @@ class NECB2011
     bc  = bcs.include?(bc) ? bc : "outdoors"
 
     templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020", "NECB2025"]
-
-    data = {}
 
     # Initialize data.
     templates.each do |tp|
@@ -563,38 +562,41 @@ class NECB2011
   end
 
   ##
-  # Adds default construction sets, applied to one or more spaces. Parameters
-  # are based on prior 'category' & 'structure' selections. An alternative to
-  # 'model_apply_construction' & 'apply_standard_construction_properties'.
+  # Adds default construction sets, applied to a model's building object, or to
+  # one or more spaces. Parameters are based on previously-set 'category' &
+  # 'structure' parameters. An alternative to 'model_apply_construction' &
+  # 'apply_standard_construction_properties'.
   #
   # @author denis@rd2.ca
   #
-  # @param spaces [Array<OpenStudio::Model::Space>] space(s)
-  # @param bldg [Boolean] true if assigned to building (not individual spaces)
-  # @param hdd [Boolean] whether to rely on BTAP in setting HDD (vs stat file)
-  # @param ctg [String] spacetype CATEGORY, e.g. "public"
-  # @param stc [Symbol] STRUCTURE selection, e.g. :steel
-  # @param frm [Symbol] selected FRAMING, e.g. (light gauge) :steel
-  # @param a [Hash] optional U & SHGC overrides
-  # @option a [Hash] eWallU exposed wall Uo (or Ut)
-  # @option a [Hash] eFloorU exposed floor Uo (or Ut)
-  # @option a [Hash] eRoofU exposed roof Uo (or Ut)
-  # @option a [Hash] gWallU ground wall Uo (or Ut)
-  # @option a [Hash] gFloorU ground floor Uo (or Ut)
-  # @option a [Hash] gRoofU ground roof Uo (or Ut)
-  # @option a [Hash] doorU opaque door U
-  # @option a [Hash] fenU fenestration U (e.g. fixed, operable, glass door)
-  # @option a [Hash] skyU skylight U
-  # @option a [Hash] doorSHGC opaque door SHGC
-  # @option a [Hash] fenSHGC fenestration SHGC
-  # @option a [Hash] skySHGC skylight SHGC
+  # @param [Array<OpenStudio::Model::Space>] spaces
+  # @param [Boolean] bldg true if assigned to building (not individual spaces)
+  # @param [Boolean] hdd whether to rely on BTAP in setting HDD (vs stat file)
+  # @param [Hash] a optional parameters, e.g. U-factors
+  # @option a [String] :category ("public")
+  # @option a [Symbol] :structure (:concrete)
+  # @option a [Symbol] :framing (:steel)
+  # @option a [Symbol] :cladding (:heavy)
+  # @option a [Symbol] :finish (:light)
+  # @option a [Numeric] :eWallU exposed wall Uo (or Ut)
+  # @option a [Numeric] :eFloorU exposed floor Uo (or Ut)
+  # @option a [Numeric] :eRoofU exposed roof Uo (or Ut)
+  # @option a [Numeric] :gWallU ground wall Uo (or Ut)
+  # @option a [Numeric] :gFloorU ground floor Uo (or Ut)
+  # @option a [Numeric] :gRoofU ground roof Uo (or Ut)
+  # @option a [Numeric] :doorU opaque door U
+  # @option a [Numeric] :fenU fenestration U e.g. fixed/operable, glass door
+  # @option a [Numeric] :skyU skylight U
+  # @option a [Numeric] :fenSHGC fenestration solar heat gain coefficient
+  # @option a [Numeric] :skySHGC skylight solar heat gain coefficient
   #
   # @return [Boolean] whether default constructions were successfully added.
-  def add_construction_sets(spaces = [], bldg, hdd, ctg, stc, frm, a)
+  def add_construction_sets(spaces = [], bldg, hdd, a)
     bldg = true unless [true, false].include?(bldg)
     hdd  = true unless [true, false].include?(hdd)
-    btp  = BTAP::Resources::Envelope::Constructions # alias
     tag  = "space_conditioning_category"
+    out  = "outdoors"
+    gnd  = "ground"
 
     # Accept a single 'OpenStudio::Model::Space' (vs an array of spaces).
     if spaces.respond_to?(:spaceType) || spaces.respond_to?(:to_a)
@@ -604,17 +606,20 @@ class NECB2011
       return false
     end
 
-    return false unless a.is_a?(Hash)
+    return false unless argh.is_a?(Hash)
 
-    # Validate argh options (limited to either U or SHGC).
+    # Rudimentary parameter validation.
     a.each do |k, v|
-      return false unless v.is_a?(Numeric)
-      return false unless v.round(3) > 0
+      if v.is_a?(Numeric)
+        return false unless v.round(3) > 0
 
-      if k.to_s[-1].downcase == "u"
-        return false unless v.between?(btp::uMIN, btp::uMAX)
+        if k.to_s[-1].downcase == "u"
+          return false unless v.between?(TBD::UMIN, TBD::UMAX)
+        else
+          return false unless v.between?(0.05, 0.95)
+        end
       else
-        return false unless v.between?(0.05, 0.95)
+        return false unless k.respond_to?(:to_sym)
       end
     end
 
@@ -624,17 +629,28 @@ class NECB2011
     # Reset constructions.
     spaces.each { |space| space.surfaces.sort.each(&:resetConstruction) }
 
-    # Fetch NECB-required U-factors (or provided as arguments).
-    eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", "outdoors", hdd)
-    eRoofU  = a[:eRoofU ] ? a[:eRoofU ] : max_u_necb("roofceiling", "outdoors", hdd)
-    eFloorU = a[:eFloorU] ? a[:eFloorU] : max_u_necb("floor", "outdoors", hdd)
-    gWallU  = a[:gWallU ] ? a[:gWallU ] : max_u_necb("wall", "ground", hdd)
-    gFloorU = a[:gFloorU] ? a[:gFloorU] : max_u_necb("floor", "ground", hdd)
-    gRoofU  = a[:gRoofU ] ? a[:gRoofU ] : max_u_necb("roofceiling", "ground", hdd)
-    doorU   = a[:doorU  ] ? a[:doorU  ] : max_u_necb("door", "outdoors", hdd)
-    fenU    = a[:fenU   ] ? a[:fenU   ] : max_u_necb("window", "outdoors", hdd)
-    skyU    = a[:skyU   ] ? a[:skyU   ] : max_u_necb("skylight", "outdoors", hdd)
+    # Filling in the blanks: STRUCTURE-based parameters.
+    ctg = a[:category ] ? a[:category ] : "commercial"
+    stc = a[:structure] ? a[:structure] : :steel
+    frm = a[:framing  ] ? a[:framing  ] : :steel
+    cld = a[:cladding ] ? a[:cladding ] : :light
+    fsh = a[:finish   ] ? a[:finish   ] : :light
 
+    # Filling in the blanks: U-factors.
+    eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", out, hdd)
+    eRoofU  = a[:eRoofU ] ? a[:eRoofU ] : max_u_necb("roofceiling", out, hdd)
+    eFloorU = a[:eFloorU] ? a[:eFloorU] : max_u_necb("floor", out, hdd)
+    gWallU  = a[:gWallU ] ? a[:gWallU ] : max_u_necb("wall", gnd, hdd)
+    gFloorU = a[:gFloorU] ? a[:gFloorU] : max_u_necb("floor", gnd, hdd)
+    gRoofU  = a[:gRoofU ] ? a[:gRoofU ] : max_u_necb("roofceiling", gnd, hdd)
+    doorU   = a[:doorU  ] ? a[:doorU  ] : max_u_necb("door", out, hdd)
+    fenU    = a[:fenU   ] ? a[:fenU   ] : max_u_necb("window", out, hdd)
+    skyU    = a[:skyU   ] ? a[:skyU   ] : max_u_necb("skylight", out, hdd)
+
+    # Filling in the blanks: solar heat gain coefficients.
+    fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
+    skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
+    #
     # FYI: Excerpt of the 'SimpleGlazing' material, generated by BTAP:
     #
     #   SimpleGlazing:U=0.220 SHGC=0.600, !- Name
@@ -648,9 +664,6 @@ class NECB2011
     #    - eta-publications.lbl.gov/sites/default/files/femp-spec-sel-low-e.pdf
     #
     # ... for the moment, sticking to SHGC 60%, yet keeping default VT.
-    doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
-    fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
-    skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
 
     # Outdoor-facing wall.
     specs          = {}
@@ -659,7 +672,7 @@ class NECB2011
     specs[:frame ] = :medium
     specs[:clad  ] = :heavy  if ctg == "robust"
     specs[:finish] = :medium if ctg == "robust"
-    specs[:finish] = :medium if frm  == :cmu
+    specs[:finish] = :medium if frm == :cmu
     eWall          = TBD.genConstruction(model, specs)
 
     lyr = TBD.insulatingLayer(eWall)
@@ -672,7 +685,7 @@ class NECB2011
     specs[:clad  ] = :medium if ctg == "housing" && stc == :concrete
     specs[:clad  ] = :medium if ctg == "lodging" && stc == :concrete
     specs[:frame ] = :medium
-    specs[:frame ] = :heavy  if frm  == :wood
+    specs[:frame ] = :heavy  if frm == :wood
     specs[:finish] = :medium if ctg == "robust"
     specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
     specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
@@ -686,8 +699,8 @@ class NECB2011
     specs[:type  ] = :floor
     specs[:uo    ] = eFloorU
     specs[:finish] = :medium unless frm == :wood
-    specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
-    specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
+    specs[:finish] = :heavy      if ctg == "housing" && stc == :concrete
+    specs[:finish] = :heavy      if ctg == "lodging" && stc == :concrete
     eFloor         = TBD.genConstruction(model, specs)
 
     lyr = TBD.insulatingLayer(eFloor)
@@ -764,12 +777,16 @@ class NECB2011
       specs[:uo  ] = doorU
       door         = TBD.genConstruction(model, specs)
 
-      # Outdoor-facing, vertical fenestration.
+      # Outdoor-facing, vertical fenestration (including glass doors).
       specs        = {}
       specs[:type] = :window
       specs[:uo  ] = fenU
       specs[:shgc] = fenSHGC
       fen          = TBD.genConstruction(model, specs)
+
+      fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
+      skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
+      doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
 
       # Outdoor-facing, horizontal skylight.
       specs        = {}
@@ -790,11 +807,11 @@ class NECB2011
       specs          = {}
       specs[:type  ] = :partition
       specs[:frame ] = :medium unless frm == :wood
-      specs[:frame ] = :heavy  if ctg == "housing" && stc == :concrete
-      specs[:frame ] = :heavy  if ctg == "lodging" && stc == :concrete
-      specs[:frame ] = :heavy  if ctg == "robust"
-      specs[:clad  ] = :none   if ctg == "robust"
-      specs[:finish] = :none   if ctg == "robust"
+      specs[:frame ] = :heavy      if ctg == "housing" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "lodging" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "robust"
+      specs[:clad  ] = :none       if ctg == "robust"
+      specs[:finish] = :none       if ctg == "robust"
       iRoof          = TBD.genConstruction(model, specs)
       iFloor         = TBD.genConstruction(model, specs)
 
