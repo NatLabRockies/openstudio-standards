@@ -582,7 +582,7 @@ module BTAP
     def initialize(model = nil, argh = {})
       # btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
-      tag       = "uprated_Uo"
+      tag       = "btap_Uo"
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
@@ -619,9 +619,10 @@ module BTAP
       end
 
       # Building-wide PSI set.
-      @model[:constructions].values.each do |v|
-        args[:io_path] = v[combo] if v.key?(combo)
-      end
+      args[:io_path] = @model[:psi][combo]
+      # @model[:constructions].values.each do |v|
+      #   args[:io_path] = v[combo] if v.key?(combo)
+      # end
 
       return false if args[:io_path].nil?
 
@@ -636,18 +637,22 @@ module BTAP
             quality = :good
             combo   = "#{perform.to_s}_#{quality.to_s}".to_sym
 
-            @model[:constructions].values.each do |v|
-              args[:io_path] = v[combo] if v.key?(combo)
-            end
+            args[:io_path] = @model[:psi][combo]
+
+            # @model[:constructions].values.each do |v|
+            #   args[:io_path] = v[combo] if v.key?(combo)
+            # end
           elsif perform == :lp
             # Switch 'perform' from :lp to :hp - reset quality to :bad.
             perform = :hp
             quality = :bad
             combo   = "#{perform.to_s}_#{quality.to_s}".to_sym
 
-            @model[:constructions].values.each do |v|
-              args[:io_path] = v[combo] if v.key?(combo)
-            end
+            args[:io_path] = @model[:psi][combo]
+
+            # @model[:constructions].values.each do |v|
+            #   args[:io_path] = v[combo] if v.key?(combo)
+            # end
           end
 
           # Delete previously-generated TBD args Uo key/value pairs.
@@ -684,6 +689,9 @@ module BTAP
         # variants with corresponding Uo factors. If TBD-uprated Uo factors are
         # lower than any of these admissible BTAP Uo factors, then no
         # commercially available solution can been identified.
+
+        # @todo : REVISE BELOW !!!
+
         @model[:stypes].each do |stypes|
           next unless comply.key?(stypes) # true only if uprating
 
@@ -910,8 +918,8 @@ module BTAP
       @model[:psi][:hp_bad ] = self.inputs(stc, :hp, :bad)
       @model[:psi][:hp_good] = self.inputs(stc, :hp, :good)
 
-      # Only process surfaces deemed 'deratable' by TBD. Match PSI factor sets
-      # with generated BTAP default construction sets:
+      # Process surfaces deemed 'deratable' by TBD. Match PSI factor sets with
+      # generated BTAP default construction sets.
       res[:surfaces].each do |id, surface|
         next unless surface.key?(:type)      # :wall, :ceiling or :floor
         next unless surface.key?(:filmRSI)   # surface air film resistances
@@ -933,7 +941,7 @@ module BTAP
         m2 = surface[:net]
         next if stypes.empty?
 
-        # Track surface type.
+        # Track surface types.
         @model[:stypes] << stypes unless @model[:stypes].include?(stypes)
 
         # Track TBD-targeted constructions for uprating/derating.
@@ -976,6 +984,7 @@ module BTAP
           return false
         end
 
+        nb  = 0 # number of deratable walls in the model
         lc  = lc.get
         ide = lc.nameString
 
@@ -985,6 +994,7 @@ module BTAP
           @model[:constructions][ide][:r        ] = surface[:r]     # material
           @model[:constructions][ide][:uo       ] = nil             # assembly
           @model[:constructions][ide][:compliant] = nil             # assembly
+          @model[:constructions][ide][:psi      ] = {}              # assembly
           @model[:constructions][ide][:set      ] = set             # assembly
           @model[:constructions][ide][:m2       ] = 0               # cumulative
           @model[:constructions][ide][:fA       ] = 0               # cumulative
@@ -992,8 +1002,6 @@ module BTAP
           @model[:constructions][ide][:stypes   ] = []
           @model[:constructions][ide][:surfaces ] = []
           @model[:constructions][ide][:spaces   ] = []
-
-          # Map ... @todo.
         end
 
         @model[:constructions][ide][:m2      ] += m2
@@ -1009,11 +1017,9 @@ module BTAP
       # Loop through all tracked deratable constructions. Ensure a single
       # surface type per construction. Ensure at least one wall construction.
       @model[:constructions].values.each { |v| v[:stypes].uniq! }
-      nb = 0
 
       @model[:constructions].each do |ide, v|
         if v[:stypes].size != 1
-
           # @todo : Revise if multiple surface types per construction.
           # Clone construction as needed to ensure surface type uniqueness.
           lgs << "Multiple surface types per construction (#{mth})?"
