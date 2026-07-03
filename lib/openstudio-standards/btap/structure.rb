@@ -412,12 +412,20 @@ module BTAP
                 # Reset :clt and :metal structure selections for now - @todo
                 @structure = :steel    if @structure == :metal
                 @structure = :concrete if @structure == :clt
+
+                # Conditionally reset framing, cladding and/or finish.
+                @framing  = data[:structure][@structure][:framing]
+                @cladding = :medium if @structure == :cmu
+                @finish   = :none   if @framing   == :cmu
               else
                 bldg.additionalProperties.setFeature(tag, @structure.to_s)
               end
             when :framing
               if data[:structure][@structure][:frames].include?(prp)
                 @framing = prp
+
+                # Conditionally reset finish.
+                @finish = :none if @framing == :cmu
               else
                 bldg.additionalProperties.setFeature(tag, @framing.to_s)
               end
@@ -472,16 +480,34 @@ module BTAP
             @spaces[id][:m2 ] = space.floorArea
             @spaces[id][:h  ] = BTAP::Geometry::Spaces.space_height(space)
             @spaces[id][:co2] = {columns: 0, partitions: 0}
+
+            # Initialized with building attributes by default.
+            @spaces[id][:structure] = @structure
+            @spaces[id][:framing  ] = @framing
+            @spaces[id][:cladding ] = @cladding
+            @spaces[id][:finish   ] = @finish
           end
 
-          @spaces[id][:structure] = @structure
-          @spaces[id][:framing  ] = @framing
-          @spaces[id][:cladding ] = @cladding
-          @spaces[id][:finish   ] = @finish
-          @spaces[id][:structure] = prp if tag == "btap_structure"
-          @spaces[id][:framing  ] = prp if tag == "btap_framing"
-          @spaces[id][:cladding ] = prp if tag == "btap_cladding"
-          @spaces[id][:finish   ] = prp if tag == "btap_finish"
+          # Reset if compatible.
+          case tag
+          when "btap_structure"
+            @spaces[id][:structure] = prp
+
+            # Conditionally reset framing, cladding and/or finish.
+            @spaces[id][:framing ] = data[:structure][prp][:framing]
+            @spaces[id][:cladding] = :medium if @spaces[id][:structure] == :cmu
+            @spaces[id][:finish  ] = :none   if @spaces[id][:framing  ] == :cmu
+          when "btap_framing"
+            @spaces[id][:framing] = prp
+
+            # Conditionally reset finish.
+            @spaces[id][:finish] = :none if @spaces[id][:framing] == :cmu
+          when "btap_cladding"
+            @spaces[id][:cladding] = prp
+          when "btap_finish"
+            @spaces[id][:finish] = prp
+          else
+          end
         end
       end
 
@@ -908,7 +934,7 @@ module BTAP
         return prp
       end
 
-      tag  = tag.to_s.downcase
+      tag = tag.to_s.downcase
 
       unless data[:tags].include?(tag)
         lgs << "Unrecognized STRUCTURE AddtionalProperty '#{tag}' (#{mth})"
@@ -984,11 +1010,11 @@ module BTAP
 
           if data[:structure].key?(structure)
             unless data[:structure][structure][:frames].include?(prp)
-              prp = framing
+              prp = data[:structure][structure][:framing]
               space.additionalProperties.setFeature(tag, prp.to_s)
             end
           else
-            prp = @framing
+            prp = data[:structure][@structure][:framing]
             bldg.additionalProperties.setFeature(tag, prp.to_s)
           end
         when "btap_cladding"

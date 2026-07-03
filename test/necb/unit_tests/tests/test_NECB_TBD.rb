@@ -161,11 +161,11 @@ class NECB_TBD_Tests < Minitest::Test
                 assert(office.additionalProperties.setFeature(opt1, prp1), err_msg1)
                 assert(  fine.additionalProperties.setFeature(opt2, prp1), err_msg2)
                 assert(  bulk.additionalProperties.setFeature(opt1, prp2), err_msg3)
+                
+                # Validate.
                 err_msg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
                 err_msg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
                 err_msg3 = "Missing AddProp '#{opt1}' #{id3} (#{cas})?"
-
-                # Validate.
                 prop1 = office.additionalProperties.getFeatureAsString(opt1)
                 prop2 =   fine.additionalProperties.getFeatureAsString(opt2)
                 prop3 =   bulk.additionalProperties.getFeatureAsString(opt1)

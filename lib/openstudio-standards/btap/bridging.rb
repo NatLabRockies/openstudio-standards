@@ -822,6 +822,14 @@ module BTAP
         return false
       end
 
+      puts
+      puts argh[:structure].structure
+      puts argh[:structure].framing
+      puts argh[:structure].cladding
+      puts argh[:structure].finish
+      
+      puts
+
       argh[:interpolate] = false unless argh.key?(:interpolate)
       argh[:interpolate] = false unless [true, false].include?(argh[:interpolate])
 
