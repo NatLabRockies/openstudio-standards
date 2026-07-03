@@ -100,7 +100,7 @@ class NECB_TBD_Tests < Minitest::Test
     @addprop = true
 
     tag = "space_conditioning_category"
-    tg  = "uprated_Uo"
+    tg  = "btap_Uo"
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
 
     fdback = []
@@ -369,9 +369,7 @@ class NECB_TBD_Tests < Minitest::Test
                   prop = surface.additionalProperties.getFeatureAsDouble(tg)
                   err_msg = "BTAP/TBD: #{id} uprated Uo (#{cas})?"
 
-                  unless option == 'uprate'
-                    assert_empty(prop, err_msg)
-                  else
+                  if option == 'uprate'
                     refute_empty(prop, err_msg)
 
                     # Initial, uprated Uo, e.g. (FullServiceRestaurant):
@@ -382,6 +380,8 @@ class NECB_TBD_Tests < Minitest::Test
 
                     err_msg = "BTAP/TBD: #{id} Uo vs U (#{cas})?"
                     assert(uo < 1/TBD.rsi(lc, film))
+                  else
+                    assert_empty(prop, err_msg)
                   end
                 end
 

@@ -413,6 +413,7 @@ module BTAP
 
       # Key inputs.
       stype   = argh[:stype]
+      perform = argh[:perform]
       stype   = :walls unless [:roofs, :floors].include?(stype)
       perform = :lp    unless perform == :hp
 
@@ -619,41 +620,26 @@ module BTAP
       end
 
       # Building-wide PSI set.
+      args[:option ] = ""
       args[:io_path] = @model[:psi][combo]
-      # @model[:constructions].values.each do |v|
-      #   args[:io_path] = v[combo] if v.key?(combo)
-      # end
-
       return false if args[:io_path].nil?
-
-      args[:option] = ""
 
       loop do
         if initial
           initial = false
         else
           # Subsequent uprating runs. Upgrade technologies. Reset TBD args.
+          # Switch 'perform' from :lp to :hp - reset quality to :bad.
           if quality == :bad
             quality = :good
             combo   = "#{perform.to_s}_#{quality.to_s}".to_sym
-
-            args[:io_path] = @model[:psi][combo]
-
-            # @model[:constructions].values.each do |v|
-            #   args[:io_path] = v[combo] if v.key?(combo)
-            # end
           elsif perform == :lp
-            # Switch 'perform' from :lp to :hp - reset quality to :bad.
             perform = :hp
             quality = :bad
             combo   = "#{perform.to_s}_#{quality.to_s}".to_sym
-
-            args[:io_path] = @model[:psi][combo]
-
-            # @model[:constructions].values.each do |v|
-            #   args[:io_path] = v[combo] if v.key?(combo)
-            # end
           end
+
+          args[:io_path] = @model[:psi][combo]
 
           # Delete previously-generated TBD args Uo key/value pairs.
           @model[:stypes].each do |stypes|
@@ -689,16 +675,20 @@ module BTAP
         # variants with corresponding Uo factors. If TBD-uprated Uo factors are
         # lower than any of these admissible BTAP Uo factors, then no
         # commercially available solution can been identified.
-
-        # @todo : REVISE BELOW !!!
-
         @model[:stypes].each do |stypes|
           next unless comply.key?(stypes) # true only if uprating
 
           # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
+          opt            = {}
+          opt[:stype   ] = stypes
+          opt[:perform ] = perform
+          opt[:framing ] = argh[:structure].framing
+          opt[:cladding] = argh[:structure].cladding
+          opt[:finish  ] = argh[:structure].finish
+
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
-          assembly = self.costed_assembly(argh[:structure], stypes, perform)
+          assembly = self.costed_assembly(opt)
 
           uo = target ? self.costed_uo(assembly, target) : nil
 
@@ -984,7 +974,6 @@ module BTAP
           return false
         end
 
-        nb  = 0 # number of deratable walls in the model
         lc  = lc.get
         ide = lc.nameString
 
@@ -995,6 +984,7 @@ module BTAP
           @model[:constructions][ide][:uo       ] = nil             # assembly
           @model[:constructions][ide][:compliant] = nil             # assembly
           @model[:constructions][ide][:psi      ] = {}              # assembly
+          @model[:constructions][ide][:btapID   ] = ""              # assembly
           @model[:constructions][ide][:set      ] = set             # assembly
           @model[:constructions][ide][:m2       ] = 0               # cumulative
           @model[:constructions][ide][:fA       ] = 0               # cumulative
@@ -1010,6 +1000,8 @@ module BTAP
         @model[:constructions][ide][:surfaces] << id
         @model[:constructions][ide][:spaces  ] << space.nameString
       end
+
+      nb  = 0 # number of deratable walls in the model
 
       # Area-weighted surface air film resistances.
       @model[:constructions].values.each { |v| v[:filmRSI] = v[:m2] / v[:fA] }

@@ -606,7 +606,7 @@ class NECB2011
       return false
     end
 
-    return false unless argh.is_a?(Hash)
+    return false unless a.is_a?(Hash)
 
     # Rudimentary parameter validation.
     a.each do |k, v|
