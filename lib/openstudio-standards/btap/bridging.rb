@@ -822,14 +822,6 @@ module BTAP
         return false
       end
 
-      puts
-      puts argh[:structure].structure
-      puts argh[:structure].framing
-      puts argh[:structure].cladding
-      puts argh[:structure].finish
-      
-      puts
-
       argh[:interpolate] = false unless argh.key?(:interpolate)
       argh[:interpolate] = false unless [true, false].include?(argh[:interpolate])
 
@@ -1009,7 +1001,7 @@ module BTAP
         @model[:constructions][ide][:spaces  ] << space.nameString
       end
 
-      nb  = 0 # number of deratable walls in the model
+      nb = 0 # number of deratable walls in the model
 
       # Area-weighted surface air film resistances.
       @model[:constructions].values.each { |v| v[:filmRSI] = v[:m2] / v[:fA] }
@@ -1311,20 +1303,17 @@ end
 #       construction. Currently, BTAP does not assess the impact of MAJOR
 #       thermal bridging for vintages < NECB2017. But ideally it SHOULD, if the
 #       goal remains a fair assessment of the (relative) contribution of more
-#       recent NECB requirements (e.g. 2020).
+#       recent NECB requirements (e.g. 2025).
 
-# Note: The BTAP costing spreadsheet holds entries for curtain wall (CW)
-#       spandrel inserts above/below fenestration for certain spacetypes, see:
-#
-#         test/necb/unit_tests/resources/btap_spandrels.png
-#
-#       This is yet to be implemented. This note is an "aide-mémoire" for future
+# Note: The original BTAP costing database holds entries for curtain wall (CW)
+#       spandrel inserts above/below fenestration for certain spacetypes. This
+#       is yet to be implemented. This note is an "aide-mémoire" for future
 #       consideration. The BETBG does not hold any CW glazed spandrels achieving
-#       U factors ANYWHERE near NECB requirements, regardless of NECB vintage or
-#       NECB climate zone. Same for the Guide to Low Thermal Energy Demand for
-#       Large Buildings. The original intention was to rely on BTAP variants
-#       "Metal-2" and "Metal-3" as HP CW spandrels ACTUALLY achieving NECB
-#       prescriptive targets, which could only be possible in practice at
+#       U-factors ANYWHERE near NECB requirements, regardless of NECB vintage or
+#       NECB climate zone. Same for the 'Guide to Low Thermal Energy Demand for
+#       Large Buildings'. It seems the original intent was to rely on BTAP
+#       variants "Metal-2" and "Metal-3" as HP CW spandrels ACTUALLY achieving
+#       NECB prescriptive targets, which could only be possible in practice at
 #       great cost and effort (e.g. a 2nd insulated wall behind the spandrel).
 #
 #       If TBD's uprating calculations (e.g. NECB 2017) were in theory no longer
@@ -1344,22 +1333,17 @@ end
 #
 #         - Automated OSM façade-splitting feature
 #           - insert spandrels above/below windows
-#             > ~200 lines of Ruby code
 #           - simple cases only e.g., vertical, no overlaps, h > 200mm
-#             > split above/below plenum walls as well
-#             > potentially another 200 lines to catch invalid input
+#             - split above/below plenum walls as well
 #
 #        - Further develop PSI sets to cover CWs (see below)
 #          - e.g. PSI factors for CW vision "jamb" transitions
 #          - e.g. PSI factors for CW spandrel "jamb" transitions
 #
 #       These added features would simplify the process tremendously. Yet
-#       without admissible CW spandrel U factors down to 0.130 or 0.100 W/m2.K,
-#       TBD's uprating features would necessarily push OTHER wall constructions
-#       to compensate - noticeably for climate zone 7 (or colder). This would
-#       make it MUCH MORE difficult to identify NECB2017 or NECB2020 compliant
-#       combinations of Uo+PSI factors if ever HP CW spandrels were integrated
-#       within BTAP.
+#       without admissible CW spandrel U-factors down to 0.130 or 0.100 W/m2.K,
+#       this would make it pretty much impossible to identify NECB2017 through
+#       NECB2025 compliant combinations of Uo+PSI factors.
 
 # Note: Some of the aforementioned constructions have exterior brick veneer.
 #       For 2-story OpenStudio models with punch windows (i.e. not strip
@@ -1382,10 +1366,3 @@ end
 #       costing ($/m2), yet should be limited to doors (@todo). A more flexible,
 #       general solution would be required for 3rd-party OpenStudio models
 #       (without strip windows as a basic fenestration layout).
-#
-# Note: BTAP costing: In addition to the listed items for parapets as MAJOR
-#       thermal bridges (eventually generating an overall $ per linear meter),
-#       BTAP costing requires extending the areas (m2) of OpenStudio wall
-#       surfaces (along parapet edges) by 3'-6" (1.1 m) x parapet lengths, to
-#       account for the extra cost of completely wrapping the parapet in
-#       insulation for "good" (HP) details. See final TBD tally - @todo.

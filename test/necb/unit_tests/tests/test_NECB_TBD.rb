@@ -47,7 +47,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
@@ -92,8 +92,8 @@ class NECB_TBD_Tests < Minitest::Test
     # the solution becomes more categorical, with the inconvenience of being
     # more expensive (i.e. 0.100 $$$ > 0.124 $$).
     @interpolate = [
-      # true,
-      false
+      true,
+      # false
     ]
 
     # AdditionalProperty override.
@@ -161,7 +161,7 @@ class NECB_TBD_Tests < Minitest::Test
                 assert(office.additionalProperties.setFeature(opt1, prp1), err_msg1)
                 assert(  fine.additionalProperties.setFeature(opt2, prp1), err_msg2)
                 assert(  bulk.additionalProperties.setFeature(opt1, prp2), err_msg3)
-                
+
                 # Validate.
                 err_msg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
                 err_msg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
