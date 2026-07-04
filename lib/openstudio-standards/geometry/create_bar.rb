@@ -107,6 +107,313 @@ module OpenstudioStandards
       return hash[building_type]
     end
 
+    # Keyword tables for classifying a space type as perimeter or core based on its name.
+    # Case-insensitive regexes. Core wins on a tie (support functions dominate mixed names
+    # like "corridor lobby"). Used by {space_type_position_heuristic}.
+    SPACE_TYPE_POSITION_KEYWORDS = {
+      core: [
+        /corridor/i, /restroom/i, /toilet/i, /bathroom/i, /stair/i, /\belev/i,
+        /storage/i, /stock/i, /mech/i, /elec/i, /janitor/i, /util/i, /laundry/i,
+        /locker/i, /data ?center/i, /server/i, /\bit ?closet/i, /copy/i, /print/i,
+        /vault/i, /refrig/i, /walk-?in/i, /cooler/i, /freezer/i, /soil work/i,
+        /sterile/i, /pharmacy/i, /lab support/i
+      ],
+      perimeter: [
+        /office/i, /classroom/i, /lecture/i, /patroom/i, /patient/i, /guest ?room/i,
+        /exam/i, /dining/i, /retail/i, /sales/i, /lobby/i, /entry/i, /apartment/i,
+        /living/i, /ward/i, /daycare/i, /library/i, /reading/i
+      ]
+    }.freeze
+
+    # classify a space type as 'perimeter', 'core', or 'any' based on its name, with an
+    # optional size bias for names that match no keyword
+    #
+    # @param space_type_name [String] the space type name (typically the standards space type)
+    # @param ratio_of_building [Double] optional fraction of the building this space type
+    #   represents; when given, an unmatched name biases to 'core' below size_threshold and
+    #   'perimeter' at or above it
+    # @param size_threshold [Double] the ratio cutoff for the size bias, defaults to 0.05
+    # @return [Array(String, String)] the position ('core'|'perimeter'|'any') and the source
+    #   of the decision ('keyword'|'size'|'default')
+    def self.space_type_position_heuristic(space_type_name, ratio_of_building: nil, size_threshold: 0.05)
+      name = space_type_name.to_s
+      if SPACE_TYPE_POSITION_KEYWORDS[:core].any? { |re| name =~ re }
+        return ['core', 'keyword']
+      elsif SPACE_TYPE_POSITION_KEYWORDS[:perimeter].any? { |re| name =~ re }
+        return ['perimeter', 'keyword']
+      end
+
+      unless ratio_of_building.nil?
+        return ratio_of_building < size_threshold ? ['core', 'size'] : ['perimeter', 'size']
+      end
+
+      return ['any', 'default']
+    end
+
+    # resolve the perimeter/core position of every entry in a space_types_hash, applying
+    # precedence: explicit per-entry :position > harvested :circ flag > name/size heuristic.
+    # Mutates each entry, setting :position (never left 'any') and :position_source.
+    #
+    # @param space_types_hash [Hash] hash keyed by SpaceType with per-type data hashes;
+    #   entries may carry :position, :circ, and :ratio_of_bldg_total
+    # @param args [Hash] user arguments; reads :position_size_threshold (defaults to 0.05)
+    # @return [Hash] the same space_types_hash with :position and :position_source populated
+    def self.resolve_space_type_positions(space_types_hash, args)
+      size_threshold = args.fetch(:position_size_threshold, 0.05)
+      space_types_hash.each do |space_type, hash|
+        # prefer the standards space type name, fall back to the object name
+        name = space_type.to_s
+        if space_type.respond_to?(:standardsSpaceType) && space_type.standardsSpaceType.is_initialized
+          name = space_type.standardsSpaceType.get
+        elsif space_type.respond_to?(:name)
+          name = space_type.name.to_s
+        end
+
+        explicit_position = hash[:position].nil? ? nil : hash[:position].to_s
+        if !explicit_position.nil? && explicit_position != 'any'
+          position = explicit_position
+          source = 'explicit'
+        elsif explicit_position == 'any'
+          # explicit 'any' means no preference (overrides the circ flag and keywords):
+          # the size rule decides, and the spill step may freely move it between bands
+          ratio = hash[:ratio_of_bldg_total]
+          if ratio.nil?
+            position = 'perimeter'
+            source = 'default'
+          else
+            position = ratio < size_threshold ? 'core' : 'perimeter'
+            source = 'size'
+          end
+        elsif hash[:circ] == true
+          position = 'core'
+          source = 'circ'
+        else
+          position, source = OpenstudioStandards::Geometry.space_type_position_heuristic(name, ratio_of_building: hash[:ratio_of_bldg_total], size_threshold: size_threshold)
+        end
+
+        # the allocator expects a strict two-way partition, so resolve 'any' to perimeter
+        position = 'perimeter' if position == 'any'
+
+        if hash[:orientation] && position != 'perimeter'
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{name} has an :orientation preference but is positioned as #{position}; orientation only applies to perimeter space types.")
+        end
+
+        hash[:position] = position
+        hash[:position_source] = source
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "#{name} positioned as #{position} (source: #{source})")
+      end
+
+      return space_types_hash
+    end
+
+    # Keyword table for space types that should be given their own thermal zone in heuristic
+    # zoning (loads or setpoints categorically different from generic core support spaces).
+    SPACE_TYPE_ZONE_ALONE_KEYWORDS = [
+      /mech/i, /elec/i, /data ?center/i, /server/i, /\bit ?(closet|room)/i,
+      /refrig/i, /walk-?in/i, /cooler/i, /freezer/i, /kitchen/i, /\blab(oratory)?\b/i
+    ].freeze
+
+    # whether a space type should be zoned on its own under heuristic zoning
+    #
+    # @param space_type_name [String] the space type name (typically the standards space type)
+    # @return [Boolean] true if the space type should get its own thermal zone
+    def self.space_type_zone_alone_heuristic(space_type_name)
+      name = space_type_name.to_s
+      SPACE_TYPE_ZONE_ALONE_KEYWORDS.any? { |re| name =~ re }
+    end
+
+    # build a thermal zone group resolver for the requested zoning method. The resolver is a
+    # callable taking (space_type, band, facade) and returning a zone-group label String, or
+    # nil to leave the space in its own thermal zone.
+    #
+    # @param args [Hash] user arguments; reads :zoning_method, :zone_groups, :zone_group_default
+    # @return [Proc, nil, false] a resolver callable; nil for the 'Individual Spaces' method
+    #   (no grouping); false when the zoning inputs are invalid
+    def self.resolve_zone_groups(args)
+      method = args.fetch(:zoning_method, 'Individual Spaces')
+      default = args.fetch(:zone_group_default, 'heuristic').to_s
+      groups_input = args[:zone_groups]
+
+      valid_methods = ['Individual Spaces', 'Perimeter Orientation and Core', 'Space Type Groups']
+      unless valid_methods.include?(method)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "Invalid :zoning_method '#{method}', expected one of #{valid_methods.join(', ')}.")
+        return false
+      end
+      unless %w[heuristic individual].include?(default)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "Invalid :zone_group_default '#{default}', expected 'heuristic' or 'individual'.")
+        return false
+      end
+      if !groups_input.nil? && method != 'Space Type Groups'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', ':zone_groups is ignored unless :zoning_method is "Space Type Groups".')
+      end
+
+      return nil if method == 'Individual Spaces'
+
+      parsed_groups = []
+      if method == 'Space Type Groups'
+        input = groups_input
+        if input.is_a?(String)
+          begin
+            input = JSON.parse(input, symbolize_names: true)
+          rescue JSON::ParserError => e
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "Could not parse :zone_groups JSON string: #{e.message}")
+            return false
+          end
+        end
+        unless input.is_a?(Array) && !input.empty?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ':zone_groups must be a non-empty array of hashes when :zoning_method is "Space Type Groups".')
+          return false
+        end
+        input.each_with_index do |raw, i|
+          unless raw.is_a?(Hash)
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":zone_groups entry #{i} is not a hash.")
+            return false
+          end
+          group = raw.transform_keys(&:to_sym)
+          if group[:name].to_s.empty?
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":zone_groups entry #{i} must include a :name.")
+            return false
+          end
+          unless group[:space_types].is_a?(Array) && !group[:space_types].empty?
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":zone_groups entry #{i} (#{group[:name]}) must include a non-empty :space_types array.")
+            return false
+          end
+          zone_per = (group[:zone_per] || 'group').to_s
+          unless %w[group space facade space_type].include?(zone_per)
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":zone_groups entry #{i} (#{group[:name]}) has an invalid :zone_per '#{zone_per}', expected group, space, facade, or space_type.")
+            return false
+          end
+          unless group[:position].nil? || %w[core perimeter].include?(group[:position].to_s)
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":zone_groups entry #{i} (#{group[:name]}) has an invalid :position '#{group[:position]}', expected core or perimeter.")
+            return false
+          end
+          matchers = group[:space_types].map do |key|
+            parts = key.to_s.split('|').map { |part| part.strip.downcase }
+            parts.size >= 2 ? { bldg: parts[0], spc: parts[1] } : { spc: parts[0] }
+          end
+          parsed_groups << { name: group[:name].to_s, matchers: matchers, zone_per: zone_per, position: group[:position]&.to_s }
+        end
+      end
+
+      std_bldg = lambda do |st|
+        st.respond_to?(:standardsBuildingType) && st.standardsBuildingType.is_initialized ? st.standardsBuildingType.get.to_s.downcase : nil
+      end
+      std_spc = lambda do |st|
+        if st.respond_to?(:standardsSpaceType) && st.standardsSpaceType.is_initialized
+          st.standardsSpaceType.get.to_s.downcase
+        elsif st.respond_to?(:name)
+          st.name.to_s.downcase
+        else
+          st.to_s.downcase
+        end
+      end
+      spc_display = lambda do |st|
+        if st.respond_to?(:standardsSpaceType) && st.standardsSpaceType.is_initialized
+          st.standardsSpaceType.get.to_s
+        elsif st.respond_to?(:name)
+          st.name.to_s
+        else
+          st.to_s
+        end
+      end
+      heuristic_label = lambda do |st, band, facade|
+        if !st.nil? && OpenstudioStandards::Geometry.space_type_zone_alone_heuristic(spc_display.call(st))
+          nil
+        elsif band == :core
+          'core'
+        else
+          "perimeter #{facade}"
+        end
+      end
+
+      warned_multi = {}
+      warned_facade = {}
+
+      resolver = lambda do |st, band, facade|
+        return heuristic_label.call(st, band, facade) if method == 'Perimeter Orientation and Core'
+
+        matches = parsed_groups.select do |group|
+          next false unless group[:position].nil? || group[:position] == band.to_s
+
+          group[:matchers].any? do |matcher|
+            if matcher[:bldg]
+              matcher[:bldg] == std_bldg.call(st) && matcher[:spc] == std_spc.call(st)
+            else
+              matcher[:spc] == std_spc.call(st)
+            end
+          end
+        end
+
+        if matches.empty?
+          return default == 'heuristic' ? heuristic_label.call(st, band, facade) : nil
+        end
+
+        group = matches.first
+        if matches.size > 1 && !st.nil? && !warned_multi[st]
+          warned_multi[st] = true
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{spc_display.call(st)} matched multiple zone groups; using the first (#{group[:name]}).")
+        end
+
+        case group[:zone_per]
+        when 'group'
+          group[:name]
+        when 'space'
+          nil
+        when 'facade'
+          if band == :core
+            if !st.nil? && !warned_facade[st]
+              warned_facade[st] = true
+              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "Zone group #{group[:name]} requested facade zoning for a core space type #{spc_display.call(st)}; grouping into one zone instead.")
+            end
+            group[:name]
+          else
+            "#{group[:name]} #{facade}"
+          end
+        when 'space_type'
+          "#{group[:name]} #{spc_display.call(st)}"
+        end
+      end
+
+      return resolver
+    end
+
+    # log a warning for grouped thermal zones that combine space types with different
+    # standards heating/cooling setpoint schedules. Guarded so it never fails the build.
+    #
+    # @param zones [Array<OpenStudio::Model::ThermalZone>] thermal zones to check
+    # @param template [String] standards template used for the setpoint lookup
+    # @return [void]
+    def self.perimeter_core_warn_mixed_setpoints(zones, template)
+      return if template.nil?
+
+      begin
+        std = Standard.build(template)
+      rescue StandardError
+        return
+      end
+
+      zones.sort.each do |zone|
+        next unless zone.additionalProperties.getFeatureAsString('zone_group').is_initialized
+
+        space_types = zone.spaces.map { |space| space.spaceType.is_initialized ? space.spaceType.get : nil }.compact.uniq
+        next if space_types.size <= 1
+
+        setpoints = space_types.map do |space_type|
+          data = begin
+            std.space_type_get_standards_data(space_type)
+          rescue StandardError
+            nil
+          end
+          data.nil? ? nil : [data['heating_setpoint_schedule'], data['cooling_setpoint_schedule']]
+        end.compact
+        next if setpoints.size <= 1
+
+        if setpoints.uniq.size > 1
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "Thermal zone #{zone.name} groups space types with different standards setpoint schedules; put a type in its own zone group if separate control is required.")
+        end
+      end
+    end
+
     # sort building stories
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
@@ -554,7 +861,7 @@ module OpenstudioStandards
             length = bar_hash[:length]
             width = bar_hash[:width]
           end
-          footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(bar_hash[:space_types], length, width, bar_hash[:center_of_footprint])
+          footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(bar_hash[:space_types], length, width, bar_hash[:center_of_footprint], zone_resolver: bar_hash[:zone_resolver])
         end
 
       elsif bar_hash[:bar_division_method] == 'Multiple Space Types - Individual Stories Sliced'
@@ -567,7 +874,26 @@ module OpenstudioStandards
           end
         end
 
-        footprints = OpenstudioStandards::Geometry.create_sliced_bar_multi_polygons(bar_hash[:space_types], bar_hash[:length], bar_hash[:width], bar_hash[:center_of_footprint], story_hash)
+        footprints = OpenstudioStandards::Geometry.create_sliced_bar_multi_polygons(bar_hash[:space_types], bar_hash[:length], bar_hash[:width], bar_hash[:center_of_footprint], story_hash, zone_resolver: bar_hash[:zone_resolver])
+
+      elsif bar_hash[:bar_division_method] == 'Multiple Space Types - Perimeter and Core Sliced'
+
+        # update story_hash for partial_story_above
+        story_hash.each_with_index do |(k, v), i|
+          # adjust size of bar if top story is not a full story
+          if i + 1 == story_hash.size
+            story_hash[k][:partial_story_multiplier] = (1.0 - bar_hash[:num_stories_above_grade].ceil + bar_hash[:num_stories_above_grade])
+          end
+        end
+
+        # default depths guard external callers that build bar_hash directly
+        pc_args = {
+          perimeter_zone_depth: bar_hash[:perimeter_zone_depth] || OpenStudio.convert(15.0, 'ft', 'm').get,
+          perimeter_depth_min: bar_hash[:perimeter_depth_min] || OpenStudio.convert(8.0, 'ft', 'm').get,
+          perimeter_depth_max: bar_hash[:perimeter_depth_max] || OpenStudio.convert(25.0, 'ft', 'm').get,
+          zone_resolver: bar_hash[:zone_resolver]
+        }
+        footprints = OpenstudioStandards::Geometry.create_perimeter_core_bar_polygons(bar_hash[:space_types], bar_hash[:length], bar_hash[:width], bar_hash[:center_of_footprint], story_hash, pc_args)
 
       else
         footprints = []
@@ -583,7 +909,7 @@ module OpenstudioStandards
             width = bar_hash[:width]
           end
           # perimeter defaults to 15 ft
-          footprints << OpenstudioStandards::Geometry.create_core_and_perimeter_polygons(length, width, bar_hash[:center_of_footprint])
+          footprints << OpenstudioStandards::Geometry.create_core_and_perimeter_polygons(length, width, bar_hash[:center_of_footprint], zone_resolver: bar_hash[:zone_resolver])
         end
 
         # set primary space type to building default space type
@@ -952,6 +1278,12 @@ module OpenstudioStandards
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Created bar envelope with floor area of #{OpenStudio.toNeatString(new_floor_area_ip, 0, true)} ft^2. Total building area is #{OpenStudio.toNeatString(final_floor_area_ip, 0, true)} ft^2.")
       end
 
+      # warn about grouped thermal zones that mix space types with different setpoints
+      if !bar_hash[:zone_resolver].nil?
+        new_zones = new_spaces.map(&:thermalZone).select(&:is_initialized).map(&:get).uniq
+        OpenstudioStandards::Geometry.perimeter_core_warn_mixed_setpoints(new_zones, bar_hash[:template])
+      end
+
       return new_spaces
     end
 
@@ -984,6 +1316,13 @@ module OpenstudioStandards
       bar_hash[:building_wwr_s] = args[:wwr]
       bar_hash[:building_wwr_e] = args[:wwr]
       bar_hash[:building_wwr_w] = args[:wwr]
+
+      # perimeter and core layout inputs (convert depths to meters)
+      bar_hash[:perimeter_zone_depth] = OpenStudio.convert(args.fetch(:perimeter_zone_depth, 15.0), 'ft', 'm').get
+      bar_hash[:perimeter_depth_min] = OpenStudio.convert(args.fetch(:perimeter_depth_min, 8.0), 'ft', 'm').get
+      bar_hash[:perimeter_depth_max] = OpenStudio.convert(args.fetch(:perimeter_depth_max, 25.0), 'ft', 'm').get
+      bar_hash[:zone_resolver] = args[:zone_resolver]
+      bar_hash[:template] = args[:template]
 
       # round up non integer stoires to next integer
       num_stories_round_up = num_stories.ceil
@@ -1246,9 +1585,16 @@ module OpenstudioStandards
     # @option args [Boolean] :top_story_exterior_exposed_roof (true) Is the top story an exterior roof
     # @option args [String] :story_multiplier_method ('Basements Ground Mid Top') Calculation method for story multiplier. Options are 'None' and 'Basements Ground Mid Top'
     # @option args [Boolean] :make_mid_story_surfaces_adiabatic (true) Make mid story floor surfaces adiabatic. If set to true, this will skip surface intersection and make mid story floors and celings adiabatic, not just at multiplied gaps.
-    # @option args [String] :bar_division_method ('Multiple Space Types - Individual Stories Sliced') Division method for bar space types. Options are 'Multiple Space Types - Simple Sliced', 'Multiple Space Types - Individual Stories Sliced', 'Single Space Type - Core and Perimeter'
-    # @option args [String] :double_loaded_corridor ('Primary Space Type') Method for double loaded corridor. Add double loaded corridor for building types that have a defined circulation space type, to the selected space types. Options are 'None' and 'Primary Space Type'
+    # @option args [String] :bar_division_method ('Multiple Space Types - Individual Stories Sliced') Division method for bar space types. Options are 'Multiple Space Types - Simple Sliced', 'Multiple Space Types - Individual Stories Sliced', 'Single Space Type - Core and Perimeter', and 'Multiple Space Types - Perimeter and Core Sliced' (positions larger/occupied space types on the perimeter and smaller/support space types in the interior core)
+    # @option args [String] :double_loaded_corridor ('Primary Space Type') Method for double loaded corridor. Add double loaded corridor for building types that have a defined circulation space type, to the selected space types. Options are 'None' and 'Primary Space Type'. Ignored by the 'Multiple Space Types - Perimeter and Core Sliced' division method.
     # @option args [String] :space_type_sort_logic ('Building Type > Size') Space type sorting method. Options are 'Size' and 'Building Type > Size'
+    # @option args [Double] :perimeter_zone_depth (15.0) Target perimeter zone depth in ft, used by the 'Multiple Space Types - Perimeter and Core Sliced' division method when there are no core space types
+    # @option args [Double] :perimeter_depth_min (8.0) Minimum perimeter zone depth in ft for the perimeter and core division method
+    # @option args [Double] :perimeter_depth_max (25.0) Maximum perimeter zone depth in ft for the perimeter and core division method
+    # @option args [Double] :position_size_threshold (0.05) Fraction of building floor area below which an unclassified space type is biased toward the core (larger toward the perimeter)
+    # @option args [String] :zoning_method ('Individual Spaces') Thermal zone grouping method. Options are 'Individual Spaces' (one zone per space), 'Perimeter Orientation and Core' (one zone per facade plus a combined core zone, load-distinct types zoned individually), and 'Space Type Groups' (custom grouping driven by :zone_groups)
+    # @option args [Array<Hash>, String] :zone_groups (nil) Custom thermal zone groups for the 'Space Type Groups' zoning method, or a JSON string encoding one. Each entry has :name, :space_types ('BuildingType|SpaceType' keys), :zone_per ('group', 'space', 'facade', or 'space_type'), and an optional :position filter ('core' or 'perimeter')
+    # @option args [String] :zone_group_default ('heuristic') Fallback for spaces unmatched by any :zone_groups entry. Options are 'heuristic' and 'individual'
     # @option args [String] :template ('90.1-2013') target standard
     # @param building_type_hash [Array<Hash>] array of building type hashes
     # @option building_type_hash [Double] :frac_bldg_area fraction of building area
@@ -1281,6 +1627,17 @@ module OpenstudioStandards
       args[:double_loaded_corridor] = args.fetch(:double_loaded_corridor, 'Primary Space Type')
       args[:space_type_sort_logic] = args.fetch(:space_type_sort_logic, 'Building Type > Size')
       args[:template] = args.fetch(:template, '90.1-2013')
+      args[:perimeter_zone_depth] = args.fetch(:perimeter_zone_depth, 15.0)
+      args[:perimeter_depth_min] = args.fetch(:perimeter_depth_min, 8.0)
+      args[:perimeter_depth_max] = args.fetch(:perimeter_depth_max, 25.0)
+      args[:position_size_threshold] = args.fetch(:position_size_threshold, 0.05)
+      args[:zoning_method] = args.fetch(:zoning_method, 'Individual Spaces')
+      args[:zone_groups] = args.fetch(:zone_groups, nil)
+      args[:zone_group_default] = args.fetch(:zone_group_default, 'heuristic')
+
+      # build the thermal zone group resolver for the perimeter/core and sliced layouts
+      args[:zone_resolver] = OpenstudioStandards::Geometry.resolve_zone_groups(args)
+      return false if args[:zone_resolver] == false
 
       # get defaults for the primary building type. User-supplied :building_form_defaults
       # values win over the built-in lookup, which returns nil for non-standard building types.
@@ -1417,7 +1774,9 @@ module OpenstudioStandards
         building_type_hash = building_type_hash.sort_by { |k, v| v[:frac_bldg_area] }
       end
       building_type_hash.each do |building_type, building_type_hash|
-        if args[:double_loaded_corridor] == 'Primary Space Type'
+        if args[:double_loaded_corridor] == 'Primary Space Type' && args[:bar_division_method] == 'Multiple Space Types - Perimeter and Core Sliced'
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', 'Ignoring double loaded corridor input for the perimeter and core division method; circulation space types are placed in the core by position.')
+        elsif args[:double_loaded_corridor] == 'Primary Space Type'
 
           # see if building type has circulation space type, if so then merge that along with default space type into hash key in place of space type
           default_st = nil
@@ -1467,6 +1826,11 @@ module OpenstudioStandards
             if args[:wwr] == 0 && hash.key?(:wwr)
               multi_height_space_types_hash[space_type][:wwr] = hash[:wwr]
             end
+            # carry positioning inputs and the building fraction for perimeter/core layout
+            %i[position orientation circ].each do |key|
+              multi_height_space_types_hash[space_type][key] = hash[key] unless hash[key].nil?
+            end
+            multi_height_space_types_hash[space_type][:ratio_of_bldg_total] = ratio_of_bldg_total
           else
             # only add wwr if 0 used for wwr arg and if space type has wwr as key
             space_types_hash[space_type] = { floor_area: final_floor_area, space_type: space_type }
@@ -1477,8 +1841,19 @@ module OpenstudioStandards
             if hash[:double_loaded_corridor]
               space_types_hash[space_type][:children] = hash[:children]
             end
+            # carry positioning inputs and the building fraction for perimeter/core layout
+            %i[position orientation circ].each do |key|
+              space_types_hash[space_type][key] = hash[key] unless hash[key].nil?
+            end
+            space_types_hash[space_type][:ratio_of_bldg_total] = ratio_of_bldg_total
           end
         end
+      end
+
+      # resolve perimeter/core positions for the perimeter and core division method
+      if args[:bar_division_method] == 'Multiple Space Types - Perimeter and Core Sliced'
+        OpenstudioStandards::Geometry.resolve_space_type_positions(space_types_hash, args)
+        OpenstudioStandards::Geometry.resolve_space_type_positions(multi_height_space_types_hash, args) unless multi_height_space_types_hash.empty?
       end
 
       # resort if not sorted by building type
@@ -1540,7 +1915,8 @@ module OpenstudioStandards
 
       # check if dual bar is needed
       dual_bar = false
-      if specified_bar_width_si > 0.0 && args[:bar_division_method] == 'Multiple Space Types - Individual Stories Sliced'
+      dual_bar_division_methods = ['Multiple Space Types - Individual Stories Sliced', 'Multiple Space Types - Perimeter and Core Sliced']
+      if specified_bar_width_si > 0.0 && dual_bar_division_methods.include?(args[:bar_division_method])
         if length / width != args[:ns_to_ew_ratio]
 
           if args[:ns_to_ew_ratio] >= 1.0 && args[:ns_to_ew_ratio] > length / width
@@ -1565,7 +1941,7 @@ module OpenstudioStandards
             end
           end
         end
-      elsif args[:perim_mult] > 1.0 && args[:bar_division_method] == 'Multiple Space Types - Individual Stories Sliced'
+      elsif args[:perim_mult] > 1.0 && dual_bar_division_methods.include?(args[:bar_division_method])
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', 'You selected a perimeter multiplier greater than 1.0 for a supported bar division method. This will result in two detached rectangular buildings if secondary bar meets minimum size requirements.')
         dual_bar = true
       elsif args[:perim_mult] > 1.0
@@ -1739,6 +2115,10 @@ module OpenstudioStandards
                     space_types_hash_secondary[k] = { floor_area: hash_area, space_type: v[:space_type], children: v[:children] }
                   else
                     space_types_hash_secondary[k] = { floor_area: hash_area, space_type: v[:space_type] }
+                  end
+                  # carry resolved positioning onto the secondary bar entries
+                  %i[position position_source orientation].each do |key|
+                    space_types_hash_secondary[k][key] = v[key] unless v[key].nil?
                   end
                 end
                 space_types_hash[k][:floor_area] -= hash_area
@@ -2211,6 +2591,14 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{entry[:building_type]} | #{entry[:space_type]}) must include a positive numeric :ratio")
           return nil
         end
+        unless entry[:position].nil? || %w[perimeter core any].include?(entry[:position].to_s)
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{entry[:building_type]} | #{entry[:space_type]}) has an invalid :position '#{entry[:position]}', expected one of perimeter, core, any")
+          return nil
+        end
+        unless entry[:orientation].nil? || (entry[:orientation].is_a?(Array) && entry[:orientation].all? { |o| %w[north south east west].include?(o.to_s) })
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{entry[:building_type]} | #{entry[:space_type]}) has an invalid :orientation #{entry[:orientation].inspect}, expected an array of north/south/east/west")
+          return nil
+        end
         entries << entry
       end
 
@@ -2225,7 +2613,10 @@ module OpenstudioStandards
     # @option args [Array<Hash>, String] :space_type_ratios array of space type ratio entries, or a JSON string encoding one.
     #   Each entry requires :building_type, :space_type, and :ratio (fractions should add up to 1.0), and may include
     #   :story_height (ft), :wwr, :default (Boolean), :circ (Boolean), and :space_type_gen (Boolean) which
-    #   override the values harvested from the standards space type lookup. Building and space types should
+    #   override the values harvested from the standards space type lookup. For the
+    #   'Multiple Space Types - Perimeter and Core Sliced' division method an entry may also include
+    #   :position ('perimeter', 'core', or 'any') and :orientation (an array of 'north'/'south'/'east'/'west'
+    #   facade preferences, only meaningful for perimeter space types). Building and space types should
     #   come from the selected OpenStudio Standards template.
     # @option args [String] :space_type_hash_string legacy input form, a string like
     #   'BuildingType | SpaceType => 0.75, BuildingType | SpaceType => 0.25'. Used when :space_type_ratios is absent.
@@ -2269,7 +2660,7 @@ module OpenstudioStandards
         end
 
         # user-supplied per-entry metadata wins over harvested values
-        %i[story_height wwr default circ space_type_gen].each do |key|
+        %i[story_height wwr default circ space_type_gen position orientation].each do |key|
           space_type_info_hash[key] = entry[key] unless entry[key].nil?
         end
 

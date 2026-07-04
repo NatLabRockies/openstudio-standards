@@ -79,7 +79,8 @@ module OpenstudioStandards
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
     def self.create_core_and_perimeter_polygons(length, width,
                                                 footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                                perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+                                                perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get,
+                                                zone_resolver: nil)
       # key is name, value is a hash, one item of which is polygon. Another could be space type.
       hash_of_point_vectors = {}
 
@@ -162,6 +163,20 @@ module OpenstudioStandards
         hash_of_point_vectors['Whole Story Space'][:polygon] = whole_story_polygon
       end
 
+      # stamp thermal zone group labels by facade/core for optional zoning
+      unless zone_resolver.nil?
+        hash_of_point_vectors.each do |key, data|
+          band, facade = case key
+                         when /North/ then [:perimeter, 'N']
+                         when /South/ then [:perimeter, 'S']
+                         when /East/ then [:perimeter, 'E']
+                         when /West/ then [:perimeter, 'W']
+                         else [:core, nil]
+                         end
+          data[:zone_group] = zone_resolver.call(data[:space_type], band, facade)
+        end
+      end
+
       return hash_of_point_vectors
     end
 
@@ -173,7 +188,7 @@ module OpenstudioStandards
     # @param footprint_origin_point [OpenStudio::Point3d] OpenStudio Point3d object for the new origin
     # @param story_hash [Hash] A hash of building story information including space origin z value and space height
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
-    def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash)
+    def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash, zone_resolver: nil)
       # total building floor area to calculate ratios from space type floor areas
       total_floor_area = 0.0
       target_per_space_type = {}
@@ -300,7 +315,7 @@ module OpenstudioStandards
         end
 
         # creating footprint for story
-        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(space_types_local_count, length, width, footprint_origin_point)
+        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(space_types_local_count, length, width, footprint_origin_point, zone_resolver: zone_resolver)
       end
       return footprints
     end
@@ -316,7 +331,8 @@ module OpenstudioStandards
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
     def self.create_sliced_bar_simple_polygons(space_types, length, width,
                                                footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                               perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+                                               perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get,
+                                               zone_resolver: nil)
       hash_of_point_vectors = {} # key is name, value is a hash, one item of which is polygon. Another could be space type
 
       reverse_slice = false
@@ -604,6 +620,29 @@ module OpenstudioStandards
         end
       end
 
+      # stamp thermal zone group labels for optional zoning: perimeter strips (A/C) by
+      # facade, core (B) and whole-slice fallbacks left to individual zones
+      unless zone_resolver.nil?
+        hash_of_point_vectors.each do |key, data|
+          space_type = data[:space_type]
+          if key =~ / B (?:end_a|end_b|)\z/
+            band = :core
+            facade = nil
+          elsif key =~ / A (?:end_a|end_b|)\z/
+            band = :perimeter
+            facade = reverse_slice ? 'E' : 'S'
+          elsif key =~ / C (?:end_a|end_b|)\z/
+            band = :perimeter
+            facade = reverse_slice ? 'W' : 'N'
+          else
+            # whole-slice fallback spans both facades; leave it in its own zone
+            data[:zone_group] = nil
+            next
+          end
+          data[:zone_group] = zone_resolver.call(space_type, band, facade)
+        end
+      end
+
       return hash_of_point_vectors
     end
 
@@ -638,6 +677,9 @@ module OpenstudioStandards
 
       # hash of new spaces (only change boundary conditions for these)
       new_spaces = []
+
+      # thermal zones shared by grouped spaces, keyed by [story, zone_group label]
+      group_zones = {}
 
       # loop through story_hash and polygons to generate all of the spaces
       story_hash.each_with_index do |(story_name, story_data), index|
@@ -701,6 +743,21 @@ module OpenstudioStandards
             'thermal_zone_multiplier' => story_data[:multiplier],
             'floor_to_floor_height' => story_data[:space_height]
           }
+
+          # optional thermal zone grouping: spaces sharing a (story, zone_group) share a zone
+          zone_group = space_data[:zone_group]
+          unless zone_group.nil?
+            zone = group_zones[[story, zone_group]]
+            if zone.nil?
+              zone = OpenStudio::Model::ThermalZone.new(model)
+              zone.setName("Zone #{story.name} #{zone_group}")
+              zone.setMultiplier(story_data[:multiplier])
+              zone.additionalProperties.setFeature('zone_group', zone_group.to_s)
+              group_zones[[story, zone_group]] = zone
+            end
+            options['make_thermal_zone'] = false
+            options['thermal_zone'] = zone
+          end
 
           # make space
           space = OpenstudioStandards::Geometry.create_space_from_polygon(model, space_data[:polygon].first, space_data[:polygon], options)
@@ -798,6 +855,412 @@ module OpenstudioStandards
       end
 
       return space
+    end
+
+    # name of a space type key for logging (SpaceType object or string)
+    #
+    # @api private
+    # @param space_type [OpenStudio::Model::SpaceType, Object] space type key
+    # @return [String] display name
+    def self.perimeter_core_space_type_name(space_type)
+      space_type.respond_to?(:name) ? space_type.name.to_s : space_type.to_s
+    end
+
+    # solve the shared perimeter depth d so that the aggregate geometric core area equals
+    # the assigned core area: sum_s m_s (L_s - 2d)(W_s - 2d) = a_core. Returns the smaller
+    # positive root, or the target depth when there is no core area or no real root.
+    #
+    # @api private
+    # @return [Double] perimeter depth in meters
+    def self.perimeter_core_solve_depth(sum_m, sum_m_lw, sum_m_area, a_core, d_target, min_dim, area_tol)
+      return [d_target, (min_dim / 2.0) - area_tol].min if a_core <= area_tol
+
+      a = 4.0 * sum_m
+      b = -2.0 * sum_m_lw
+      c = sum_m_area - a_core
+      disc = (b * b) - (4.0 * a * c)
+      return [d_target, (min_dim / 2.0) - area_tol].min if disc < 0.0 || a.abs < area_tol
+
+      d = (-b - Math.sqrt(disc)) / (2.0 * a)
+      return d
+    end
+
+    # order core-assigned types for spilling to the perimeter on core overflow:
+    # size-biased first (largest area first), then keyword/default, then circ.
+    # Explicit assignments are excluded (they never move on overflow).
+    #
+    # @api private
+    # @return [Array] ordered array of space type keys
+    def self.perimeter_core_overflow_order(core_types)
+      by = lambda do |sources|
+        core_types.select { |_st, h| sources.include?(h[:position_source]) }
+                  .sort_by { |_st, h| -h[:floor_area] }
+                  .map(&:first)
+      end
+      by.call(['size']) + by.call(%w[keyword default]) + by.call(['circ'])
+    end
+
+    # order perimeter-assigned types for spilling to the core on core underflow:
+    # size-biased (smallest first), then keyword/default (largest first), then explicit last.
+    #
+    # @api private
+    # @return [Array<Array>] ordered array of [space_type, is_explicit] pairs
+    def self.perimeter_core_underflow_order(perim_types)
+      size = perim_types.select { |_st, h| h[:position_source] == 'size' }
+                        .sort_by { |_st, h| h[:floor_area] }.map { |st, _| [st, false] }
+      kw = perim_types.select { |_st, h| %w[keyword default].include?(h[:position_source]) }
+                      .sort_by { |_st, h| -h[:floor_area] }.map { |st, _| [st, false] }
+      ex = perim_types.select { |_st, h| h[:position_source] == 'explicit' }
+                      .sort_by { |_st, h| -h[:floor_area] }.map { |st, _| [st, true] }
+      size + kw + ex
+    end
+
+    # facade letters (in walk order) for an orientation preference array
+    #
+    # @api private
+    # @return [Array<String>] subset of %w[S E N W]
+    def self.perimeter_core_orientation_facades(orientation)
+      map = { 'north' => 'N', 'south' => 'S', 'east' => 'E', 'west' => 'W' }
+      facades = Array(orientation).map { |o| map[o.to_s] }.compact
+      %w[S E N W].select { |f| facades.include?(f) }
+    end
+
+    # consolidate sliver runs of a band by concentrating a type that is below the minimum
+    # width on every story onto the fewest stories, compensating with the largest type in
+    # the band so that per-story band totals and per-type building totals are preserved.
+    # Mutates draw in place.
+    #
+    # @api private
+    # @param draw [Hash] space_type => Array of per-floor areas by story index
+    # @param story_entries [Array<Hash>] story dimensions and multipliers
+    # @param min_area_per_story [Array<Double>] minimum per-floor area per story to clear a sliver
+    # @param warnings [Array<String>] warning accumulator
+    # @param band_label [String] 'perimeter' or 'core' for messages
+    # @return [void]
+    def self.perimeter_core_consolidate!(draw, story_entries, min_area_per_story, warnings, band_label)
+      tol = 1.0e-9
+      types = draw.keys.select { |t| draw[t].any? { |val| val > tol } }
+      return if types.size <= 1
+
+      partner = types.max_by { |t| draw[t].sum }
+      types.each do |t|
+        next if t == partner
+
+        present = (0...story_entries.size).select { |i| draw[t][i] > tol }
+        next if present.size <= 1
+        next unless present.all? { |i| draw[t][i] < min_area_per_story[i] - tol }
+
+        target = present.max_by { |i| story_entries[i][:multiplier] * (story_entries[i][:length] * story_entries[i][:width]) }
+        present.each do |i|
+          next if i == target
+
+          m_i = story_entries[i][:multiplier]
+          m_tg = story_entries[target][:multiplier]
+          mult_move = draw[t][i] * m_i
+          next if (draw[partner][target] * m_tg) < mult_move - tol
+
+          draw[t][i] = 0.0
+          draw[t][target] += mult_move / m_tg
+          draw[partner][i] += mult_move / m_i
+          draw[partner][target] -= mult_move / m_tg
+        end
+
+        if draw[t][target] < min_area_per_story[target] - tol
+          warnings << "#{band_label} space type #{OpenstudioStandards::Geometry.perimeter_core_space_type_name(t)} remains below the minimum width after consolidation."
+        end
+      end
+    end
+
+    # allocate space types into perimeter and core bands and produce per-story rectangles.
+    # Pure area math with no OpenStudio geometry so it can be unit tested in isolation.
+    # See docs/design/space_type_positioning_plan.md Phase 2 for the normative algorithm.
+    #
+    # @param space_types [Hash] space_type => hash with :floor_area (m^2, building total for
+    #   this bar), :position ('perimeter'|'core'), :position_source, optional :orientation
+    # @param story_entries [Array<Hash>] one per story footprint, each with :length, :width
+    #   (meters, already reduced for a partial top story) and :multiplier
+    # @param args [Hash] :perimeter_zone_depth, :perimeter_depth_min, :perimeter_depth_max
+    #   (meters), optional :valid_bar_width_min (meters, defaults to 3 ft)
+    # @return [Hash] { depth:, fallback: nil|:sliced, rects: Array (per story) of rect hashes
+    #   { space_type:, band:, facade:, x0:, y0:, x1:, y1: }, moves: Array, warnings: Array }
+    def self.perimeter_core_allocation(space_types, story_entries, args)
+      warnings = []
+      moves = []
+      area_tol = 1.0e-6
+
+      d_min = args[:perimeter_depth_min]
+      d_max = args[:perimeter_depth_max]
+      d_target = args[:perimeter_zone_depth]
+      min_run = args.fetch(:valid_bar_width_min, OpenStudio.convert(3.0, 'ft', 'm').get)
+
+      # Step 9 - degenerate guard (checked first)
+      if story_entries.any? { |s| [s[:length], s[:width]].min < (2.5 * d_min) }
+        warnings << 'Bar is too narrow for a meaningful core; falling back to sliced layout.'
+        return { depth: nil, fallback: :sliced, rects: [], moves: moves, warnings: warnings }
+      end
+
+      # Step 1 - partition
+      core_types = space_types.select { |_st, h| h[:position] == 'core' }
+      perim_types = space_types.select { |_st, h| h[:position] == 'perimeter' }
+      a_core = core_types.values.sum { |h| h[:floor_area] }
+
+      sum_m = story_entries.sum { |s| s[:multiplier].to_f }
+      sum_m_lw = story_entries.sum { |s| s[:multiplier] * (s[:length] + s[:width]) }
+      sum_m_area = story_entries.sum { |s| s[:multiplier] * s[:length] * s[:width] }
+      min_dim = story_entries.map { |s| [s[:length], s[:width]].min }.min
+
+      # Step 2 - depth solve
+      d_star = OpenstudioStandards::Geometry.perimeter_core_solve_depth(sum_m, sum_m_lw, sum_m_area, a_core, d_target, min_dim, area_tol)
+
+      # Step 3 - clamp
+      d = [[d_star, d_min].max, d_max].min
+
+      geometric_core = lambda do |depth|
+        story_entries.sum { |s| s[:multiplier] * (s[:length] - (2 * depth)) * (s[:width] - (2 * depth)) }
+      end
+
+      core_area = Hash.new(0.0)
+      perim_area = Hash.new(0.0)
+      space_types.each do |st, h|
+        if h[:position] == 'core'
+          core_area[st] = h[:floor_area]
+        else
+          perim_area[st] = h[:floor_area]
+        end
+      end
+
+      # Step 4 - spill to rebalance
+      delta = geometric_core.call(d) - a_core
+      if delta < -area_tol
+        need = -delta
+        OpenstudioStandards::Geometry.perimeter_core_overflow_order(core_types).each do |st|
+          break if need <= area_tol
+
+          move = [core_area[st], need].min
+          next if move <= area_tol
+
+          core_area[st] -= move
+          perim_area[st] += move
+          need -= move
+          moves << { space_type: st, area: move, from: :core, to: :perimeter, reason: 'core overflow' }
+        end
+        if need > area_tol
+          remaining_core = core_area.values.sum
+          d = OpenstudioStandards::Geometry.perimeter_core_solve_depth(sum_m, sum_m_lw, sum_m_area, remaining_core, d_target, min_dim, area_tol)
+          d = [[d, area_tol].max, (min_dim / 2.0) - area_tol].min
+          warnings << 'Explicit core space types exceed the maximum core size; perimeter depth reduced below the minimum to fit.'
+        end
+      elsif delta > area_tol
+        need = delta
+        OpenstudioStandards::Geometry.perimeter_core_underflow_order(perim_types).each do |st, is_explicit|
+          break if need <= area_tol
+
+          move = [perim_area[st], need].min
+          next if move <= area_tol
+
+          perim_area[st] -= move
+          core_area[st] += move
+          need -= move
+          moves << { space_type: st, area: move, from: :perimeter, to: :core, reason: 'core underflow' }
+          warnings << "Explicit perimeter space type #{OpenstudioStandards::Geometry.perimeter_core_space_type_name(st)} placed partly in the core to fill the interior." if is_explicit
+        end
+      end
+
+      # Step 5 - distribute each type's band area across stories proportional to capacity
+      c_s1 = story_entries.map { |s| (s[:length] - (2 * d)) * (s[:width] - (2 * d)) }
+      p_s1 = story_entries.map { |s| 2 * d * (s[:length] + s[:width] - (2 * d)) }
+      sum_mc = story_entries.each_with_index.sum { |s, i| s[:multiplier] * c_s1[i] }
+      sum_mp = story_entries.each_with_index.sum { |s, i| s[:multiplier] * p_s1[i] }
+
+      core_draw = Hash.new { |h, k| h[k] = Array.new(story_entries.size, 0.0) }
+      perim_draw = Hash.new { |h, k| h[k] = Array.new(story_entries.size, 0.0) }
+      space_types.each_key do |st|
+        story_entries.each_index do |i|
+          core_draw[st][i] = core_area[st] * c_s1[i] / sum_mc if core_area[st] > area_tol && sum_mc > area_tol
+          perim_draw[st][i] = perim_area[st] * p_s1[i] / sum_mp if perim_area[st] > area_tol && sum_mp > area_tol
+        end
+      end
+
+      # Step 6 - sliver consolidation (per band)
+      OpenstudioStandards::Geometry.perimeter_core_consolidate!(perim_draw, story_entries, story_entries.map { min_run * d }, warnings, 'perimeter')
+      OpenstudioStandards::Geometry.perimeter_core_consolidate!(core_draw, story_entries, story_entries.map { |s| min_run * (s[:width] - (2 * d)) }, warnings, 'core')
+
+      # Steps 7 and 8 - facade seeding and rect emission, per story
+      rects = []
+      story_entries.each_with_index do |s, i|
+        l = s[:length]
+        w = s[:width]
+        story_rects = []
+
+        # Step 7 - facade seeding
+        budget = { 'S' => d * (l - (2 * d)), 'N' => d * (l - (2 * d)), 'E' => d * w, 'W' => d * w }
+        remaining = budget.dup
+        assign = { 'S' => [], 'E' => [], 'N' => [], 'W' => [] }
+        place = lambda do |st, area, facade|
+          assign[facade] << { space_type: st, area: area }
+          remaining[facade] -= area
+        end
+
+        perim_here = space_types.keys.select { |st| perim_draw[st][i] > area_tol }
+        oriented = perim_here.select { |st| space_types[st][:orientation] }
+        unoriented = perim_here - oriented
+
+        oriented.each do |st|
+          area_left = perim_draw[st][i]
+          prefs = OpenstudioStandards::Geometry.perimeter_core_orientation_facades(space_types[st][:orientation])
+          prefs.each do |f|
+            break if area_left <= area_tol
+
+            take = [area_left, remaining[f]].min
+            next if take <= area_tol
+
+            place.call(st, take, f)
+            area_left -= take
+          end
+          next if area_left <= area_tol
+
+          warnings << "Perimeter space type #{OpenstudioStandards::Geometry.perimeter_core_space_type_name(st)} preferred facades are full; overflow placed on adjacent facades."
+          %w[S E N W].each do |f|
+            break if area_left <= area_tol
+            next if prefs.include?(f)
+
+            take = [area_left, remaining[f]].min
+            next if take <= area_tol
+
+            place.call(st, take, f)
+            area_left -= take
+          end
+        end
+
+        unoriented.sort_by { |st| -perim_draw[st][i] }.each do |st|
+          area_left = perim_draw[st][i]
+          while area_left > area_tol
+            f = %w[S E N W].max_by { |ff| remaining[ff] }
+            take = [area_left, remaining[f]].min
+            break if take <= area_tol
+
+            place.call(st, take, f)
+            area_left -= take
+          end
+        end
+
+        # Step 8 - emit perimeter rects per facade
+        x_cursor = d
+        assign['S'].each do |seg|
+          width_seg = seg[:area] / d
+          story_rects << { space_type: seg[:space_type], band: :perimeter, facade: 'S', x0: x_cursor, y0: 0.0, x1: x_cursor + width_seg, y1: d }
+          x_cursor += width_seg
+        end
+        y_cursor = 0.0
+        assign['E'].each do |seg|
+          height_seg = seg[:area] / d
+          story_rects << { space_type: seg[:space_type], band: :perimeter, facade: 'E', x0: l - d, y0: y_cursor, x1: l, y1: y_cursor + height_seg }
+          y_cursor += height_seg
+        end
+        x_cursor = d
+        assign['N'].each do |seg|
+          width_seg = seg[:area] / d
+          story_rects << { space_type: seg[:space_type], band: :perimeter, facade: 'N', x0: x_cursor, y0: w - d, x1: x_cursor + width_seg, y1: w }
+          x_cursor += width_seg
+        end
+        y_cursor = 0.0
+        assign['W'].each do |seg|
+          height_seg = seg[:area] / d
+          story_rects << { space_type: seg[:space_type], band: :perimeter, facade: 'W', x0: 0.0, y0: y_cursor, x1: d, y1: y_cursor + height_seg }
+          y_cursor += height_seg
+        end
+
+        # core slices along x, largest type first
+        core_here = space_types.keys.select { |st| core_draw[st][i] > area_tol }.sort_by { |st| -core_draw[st][i] }
+        x_cursor = d
+        core_here.each do |st|
+          width_seg = core_draw[st][i] / (w - (2 * d))
+          story_rects << { space_type: st, band: :core, facade: nil, x0: x_cursor, y0: d, x1: x_cursor + width_seg, y1: w - d }
+          x_cursor += width_seg
+        end
+
+        rects << story_rects
+      end
+
+      return { depth: d, fallback: nil, rects: rects, moves: moves, warnings: warnings }
+    end
+
+    # create perimeter and core footprints for a bar, positioning larger space types along
+    # the facades and smaller/support space types in the interior core. Returns the same
+    # footprints shape as {create_sliced_bar_multi_polygons}, one entry per building story.
+    #
+    # @param space_types [Hash] space_type => hash with :floor_area, :position, and
+    #   optional :orientation (see {resolve_space_type_positions})
+    # @param length [Double] length of the bar in meters
+    # @param width [Double] width of the bar in meters
+    # @param footprint_origin_point [OpenStudio::Point3d] center of the footprint
+    # @param story_hash [Hash] building story information (space_origin_z, space_height,
+    #   multiplier, and :partial_story_multiplier on the top story)
+    # @param args [Hash] :perimeter_zone_depth, :perimeter_depth_min, :perimeter_depth_max
+    #   (meters), optional :valid_bar_width_min (meters), optional :zone_resolver (callable
+    #   taking (space_type, band, facade) and returning a zone-group label or nil)
+    # @return [Array<Hash>] array of footprint hashes, one per story
+    def self.create_perimeter_core_bar_polygons(space_types, length, width,
+                                                footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
+                                                story_hash = {}, args = {})
+      # build per-story dimensions and multipliers, reducing the top story if partial
+      story_entries = []
+      story_hash.each_with_index do |(_k, v), i|
+        l = length
+        w = width
+        if i + 1 == story_hash.size && v[:partial_story_multiplier]
+          edge_multiplier = Math.sqrt(v[:partial_story_multiplier])
+          l *= edge_multiplier
+          w *= edge_multiplier
+        end
+        story_entries << { length: l, width: w, multiplier: v[:multiplier] || 1 }
+      end
+
+      allocation = OpenstudioStandards::Geometry.perimeter_core_allocation(space_types, story_entries, args)
+      allocation[:warnings].each do |msg|
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', msg)
+      end
+
+      # graceful fallback for a bar too narrow to have a core
+      if allocation[:fallback] == :sliced
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'Perimeter and core layout is not possible for this bar; using sliced layout instead.')
+        return OpenstudioStandards::Geometry.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash, zone_resolver: args[:zone_resolver])
+      end
+
+      allocation[:moves].each do |m|
+        area_ip = OpenStudio.convert(m[:area], 'm^2', 'ft^2').get
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Moved #{OpenStudio.toNeatString(area_ip, 0, true)} ft^2 of #{OpenstudioStandards::Geometry.perimeter_core_space_type_name(m[:space_type])} from #{m[:from]} to #{m[:to]} (#{m[:reason]}).")
+      end
+      depth_ip = OpenStudio.convert(allocation[:depth], 'm', 'ft').get
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Perimeter and core layout using a perimeter depth of #{OpenStudio.toNeatString(depth_ip, 1, true)} ft.")
+
+      zone_resolver = args[:zone_resolver]
+      footprints = []
+      allocation[:rects].each_with_index do |story_rects, i|
+        entry = story_entries[i]
+        x_delta = footprint_origin_point.x - (entry[:length] / 2.0)
+        y_delta = footprint_origin_point.y - (entry[:width] / 2.0)
+        hash_of_point_vectors = {}
+        counters = Hash.new(0)
+        story_rects.each do |r|
+          space_type = r[:space_type]
+          polygon = OpenStudio::Point3dVector.new
+          polygon << OpenStudio::Point3d.new(r[:x0] + x_delta, r[:y0] + y_delta, 0.0)
+          polygon << OpenStudio::Point3d.new(r[:x0] + x_delta, r[:y1] + y_delta, 0.0)
+          polygon << OpenStudio::Point3d.new(r[:x1] + x_delta, r[:y1] + y_delta, 0.0)
+          polygon << OpenStudio::Point3d.new(r[:x1] + x_delta, r[:y0] + y_delta, 0.0)
+
+          base = r[:band] == :core ? "#{space_type.name} Core" : "#{space_type.name} Perim #{r[:facade]}"
+          counters[base] += 1
+          name = "#{base} #{counters[base]}"
+
+          zone_group = zone_resolver ? zone_resolver.call(space_type, r[:band], r[:facade]) : nil
+          hash_of_point_vectors[name] = { space_type: space_type, polygon: polygon, zone_group: zone_group }
+        end
+        footprints << hash_of_point_vectors
+      end
+
+      return footprints
     end
   end
 end

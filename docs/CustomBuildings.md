@@ -93,6 +93,78 @@ Each entry requires `building_type`, `space_type`, and `ratio` (all ratios sum t
 - `wwr` — per-space-type window-to-wall ratio (used when the building-level wwr resolves to 0)
 - `default` / `circ` — mark one perimeter and one circulation space type per building type to enable double-loaded corridor placement
 - `space_type_gen` — set `false` to create the space type without geometry
+- `position` / `orientation` — plan position and facade preference for the perimeter/core division method (see [Positioning and zoning space types](#positioning-and-zoning-space-types))
+
+## Positioning and zoning space types
+
+By default the bar geometry gives every space type exterior walls. To place occupied space
+types along the facades and support space types in the interior, set the form key
+`bar_division_method` to `"Multiple Space Types - Perimeter and Core Sliced"`. Space types
+are then classified as **perimeter** (facades, windows) or **core** (interior, no exterior
+exposure), and the floor areas still match the requested ratios exactly.
+
+### How a space type is classified
+
+Precedence, strongest first:
+
+1. **Explicit** — the `position` key on a space type ratio entry (`"perimeter"`, `"core"`,
+   or `"any"`).
+2. **Circulation flag** — an entry marked `circ: true` is placed in the core.
+3. **Name heuristic** — keywords in the standards space type name:
+
+| Position | Example keywords |
+|---|---|
+| core | corridor, restroom, stair, storage, mechanical, electrical, data center, server, IT closet, refrigeration, walk-in, cooler, freezer, janitor, laundry, locker |
+| perimeter | office, classroom, lecture, patient room, guest room, exam, dining, retail, sales, lobby, apartment, ward, daycare, library |
+
+Names matching no keyword are classified by size: types smaller than
+`position_size_threshold` (default 0.05 of the building) go to the core, larger ones to the
+perimeter. A keyword match always wins over size. When the core-assigned area does not fit
+the geometry, area spills between bands (never moving explicit assignments before automatic
+ones); the log records each move.
+
+An optional `orientation` array (`["south", "east"]`, …) on a perimeter entry biases it
+toward those facades. It is a preference: overflow continues onto adjacent facades.
+
+Depth of the perimeter band is solved from the core area and clamped to
+`[perimeter_depth_min, perimeter_depth_max]` (default 8–25 ft); `perimeter_zone_depth`
+(default 15 ft) is the target used when there are no core space types.
+
+### Grouping spaces into thermal zones
+
+Independently of position, the form key `zoning_method` controls how spaces become thermal
+zones:
+
+- `"Individual Spaces"` (default) — one zone per space.
+- `"Perimeter Orientation and Core"` — per story, one zone per facade (N/S/E/W) plus a
+  combined core zone; load-distinct types (mechanical, electrical, data center, server,
+  kitchen, lab, refrigeration) each get their own zone.
+- `"Space Type Groups"` — custom grouping driven by the `zone_groups` form key.
+
+Each `zone_groups` entry has a `name`, a `space_types` list of `"BuildingType|SpaceType"`
+keys (a bare space type name matches across building types), a `zone_per` granularity
+(`"group"` = one zone per story, `"space"` = one per space, `"facade"` = one per facade run,
+`"space_type"` = one per space type), and an optional `position` filter (`"core"` or
+`"perimeter"`). Spaces unmatched by any group fall back per `zone_group_default`
+(`"heuristic"` or `"individual"`). Grouped zones carry a `zone_group` additional property,
+and zone names follow `Zone <story> <label>` (e.g. `Zone Story ground perimeter S`,
+`Zone Story ground core support`). When a perimeter multiplier greater than 1 produces two
+detached bars, each bar gets its own zones and the second bar's names are auto-suffixed
+(`Zone Story ground core 1`) — this is expected, not a duplicate.
+
+```jsonc
+"form": {
+  "bar_division_method": "Multiple Space Types - Perimeter and Core Sliced",
+  "zoning_method": "Space Type Groups",
+  "zone_groups": [
+    { "name": "core support", "space_types": ["PrimarySchool|Corridor", "PrimarySchool|Restroom"], "zone_per": "group", "position": "core" },
+    { "name": "electrical",   "space_types": ["PrimarySchool|Mechanical"], "zone_per": "space" },
+    { "name": "classrooms",   "space_types": ["PrimarySchool|Classroom"], "zone_per": "facade" }
+  ]
+}
+```
+
+See `data/examples/custom_perimeter_core_building.json` for a complete spec.
 
 ### Override matching
 
@@ -142,3 +214,9 @@ The wrapper composes three calls you can also use directly:
 | `No aspect ratio form default is available for building type '...'` | non-standard primary type at the geometry level without form info | supply `form` values or `form.building_form_defaults` |
 | `... entry 'X' did not match any space type's schedule set or standards space type` (warning) | override key matches nothing | inspect the model's space type additional properties for valid keys |
 | Space type has no loads/schedules after the run (warning: `... was not found in the standards data`) | space type pair missing from standards data | use a valid donor pair; overrides can adjust its values afterwards |
+| `... placed partly in the core to fill the interior` (info) | more perimeter-assigned area than the facades hold | expected for deep floor plates; assign more types to the core or lower the aspect ratio to reduce it |
+| `... preferred facades are full; overflow placed on adjacent facades` (warning) | an `orientation` preference could not be fully honored | reduce the type's area or spread the preference across more facades |
+| `... perimeter depth reduced below the minimum to fit` (warning) | explicit `core` area exceeds the interior even at the maximum depth | reduce explicit core ratios or raise `perimeter_depth_max` |
+| `Bar is too narrow for a meaningful core; using sliced layout instead` (warning) | aspect ratio/width leaves no interior | lower `ns_to_ew_ratio` or increase floor area |
+| `Thermal zone ... groups space types with different standards setpoint schedules` (warning) | a zone group mixes types with different setpoints | put the type in its own `zone_groups` entry, or rely on the zone-alone heuristic |
+| `... matched multiple zone groups; using the first` (warning) | overlapping `zone_groups` entries | order groups by precedence or make `space_types` lists disjoint |

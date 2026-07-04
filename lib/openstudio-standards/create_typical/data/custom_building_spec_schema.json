@@ -99,6 +99,19 @@
         "space_type_gen": {
           "type": "boolean",
           "description": "When false, the space type is created but no geometry is generated for it (used for undeveloped or basement space types)."
+        },
+        "position": {
+          "type": "string",
+          "enum": ["perimeter", "core", "any"],
+          "description": "Plan position for the 'Multiple Space Types - Perimeter and Core Sliced' division method. 'perimeter' places the space type along the facades with exterior walls and windows, 'core' places it in the interior with no exterior exposure, and 'any' lets the layout decide by size. Overrides the automatic name/size heuristics."
+        },
+        "orientation": {
+          "type": "array",
+          "description": "Preferred facades for a perimeter-positioned space type, used by the 'Multiple Space Types - Perimeter and Core Sliced' division method. A preference, not a guarantee: overflow continues onto adjacent facades.",
+          "items": {
+            "type": "string",
+            "enum": ["north", "south", "east", "west"]
+          }
         }
       }
     },
@@ -185,13 +198,49 @@
         "make_mid_story_surfaces_adiabatic": { "type": "boolean", "description": "When true (default), mid-story floor/ceiling surfaces are adiabatic instead of intersected and matched." },
         "bar_division_method": {
           "type": "string",
-          "enum": ["Multiple Space Types - Simple Sliced", "Multiple Space Types - Individual Stories Sliced", "Single Space Type - Core and Perimeter"],
-          "description": "How the bar is divided into spaces. Defaults to 'Multiple Space Types - Individual Stories Sliced'."
+          "enum": ["Multiple Space Types - Simple Sliced", "Multiple Space Types - Individual Stories Sliced", "Single Space Type - Core and Perimeter", "Multiple Space Types - Perimeter and Core Sliced"],
+          "description": "How the bar is divided into spaces. Defaults to 'Multiple Space Types - Individual Stories Sliced'. 'Multiple Space Types - Perimeter and Core Sliced' positions perimeter-classified space types along the facades and core-classified space types in the interior (see the space_type_ratios position and orientation keys and the perimeter_* form keys)."
+        },
+        "perimeter_zone_depth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Target perimeter zone depth in ft for the 'Multiple Space Types - Perimeter and Core Sliced' division method, used when there are no core space types. Defaults to 15."
+        },
+        "perimeter_depth_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Minimum perimeter zone depth in ft for the perimeter and core division method. Defaults to 8."
+        },
+        "perimeter_depth_max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Maximum perimeter zone depth in ft for the perimeter and core division method. Defaults to 25."
+        },
+        "position_size_threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Fraction of building floor area below which an unclassified space type is biased toward the core (larger types toward the perimeter). Defaults to 0.05."
+        },
+        "zoning_method": {
+          "type": "string",
+          "enum": ["Individual Spaces", "Perimeter Orientation and Core", "Space Type Groups"],
+          "description": "How spaces are grouped into thermal zones. 'Individual Spaces' (default) makes one zone per space. 'Perimeter Orientation and Core' makes one zone per facade plus a combined core zone per story, with load-distinct types (mechanical, electrical, kitchen, etc.) zoned individually. 'Space Type Groups' groups by the zone_groups key."
+        },
+        "zone_groups": {
+          "type": "array",
+          "description": "Custom thermal zone groups for the 'Space Type Groups' zoning method.",
+          "items": { "$ref": "#/$defs/zone_group_entry" }
+        },
+        "zone_group_default": {
+          "type": "string",
+          "enum": ["heuristic", "individual"],
+          "description": "How spaces unmatched by any zone_groups entry are zoned. 'heuristic' applies the 'Perimeter Orientation and Core' grouping; 'individual' gives each unmatched space its own zone. Defaults to 'heuristic'."
         },
         "double_loaded_corridor": {
           "type": "string",
           "enum": ["None", "Primary Space Type"],
-          "description": "Double-loaded corridor placement. Defaults to 'Primary Space Type', which sandwiches a circ-flagged space type between default-flagged space types."
+          "description": "Double-loaded corridor placement. Defaults to 'Primary Space Type', which sandwiches a circ-flagged space type between default-flagged space types. Ignored by the 'Multiple Space Types - Perimeter and Core Sliced' division method."
         },
         "space_type_sort_logic": {
           "type": "string",
@@ -209,6 +258,35 @@
             "first_story": { "type": "number", "exclusiveMinimum": 0, "description": "Default first story height in ft, for building types with a taller ground floor." },
             "perim_mult": { "type": "number", "minimum": 1, "description": "Default perimeter multiplier." }
           }
+        }
+      }
+    },
+    "zone_group_entry": {
+      "type": "object",
+      "required": ["name", "space_types"],
+      "additionalProperties": false,
+      "description": "A custom thermal zone group for the 'Space Type Groups' zoning method.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Zone name stem for the group, e.g. 'core support'. Zone names become 'Zone <story> <name>'."
+        },
+        "space_types": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Space types in the group, as 'BuildingType|SpaceType' keys (a bare space type name matches across building types).",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "zone_per": {
+          "type": "string",
+          "enum": ["group", "space", "facade", "space_type"],
+          "description": "Zone granularity: 'group' (one zone per story for the whole group), 'space' (one zone per space), 'facade' (one zone per facade run per story, perimeter types only), or 'space_type' (one zone per space type per story). Defaults to 'group'."
+        },
+        "position": {
+          "type": "string",
+          "enum": ["core", "perimeter"],
+          "description": "Optional filter that only matches spaces that landed in the given band, e.g. group core corridors while perimeter corridor overflow zones with its facade."
         }
       }
     },

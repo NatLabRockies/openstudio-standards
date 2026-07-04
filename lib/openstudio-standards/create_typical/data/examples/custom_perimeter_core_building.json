@@ -1,0 +1,35 @@
+{
+  "$schema": "../custom_building_spec_schema.json",
+  "name": "Perimeter Core Community School",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "PrimarySchool",
+  "space_type_ratios": [
+    { "building_type": "PrimarySchool", "space_type": "Classroom", "ratio": 0.45, "position": "perimeter", "orientation": ["south", "east"] },
+    { "building_type": "PrimarySchool", "space_type": "Office", "ratio": 0.15, "position": "perimeter" },
+    { "building_type": "PrimarySchool", "space_type": "Gym", "ratio": 0.10 },
+    { "building_type": "PrimarySchool", "space_type": "Corridor", "ratio": 0.10, "position": "core" },
+    { "building_type": "PrimarySchool", "space_type": "Restroom", "ratio": 0.10, "position": "core" },
+    { "building_type": "PrimarySchool", "space_type": "Mechanical", "ratio": 0.10, "position": "core" }
+  ],
+  "form": {
+    "total_bldg_floor_area": 60000.0,
+    "num_stories_above_grade": 2,
+    "perim_mult": 1.0,
+    "bar_division_method": "Multiple Space Types - Perimeter and Core Sliced",
+    "perimeter_zone_depth": 15.0,
+    "perimeter_depth_min": 8.0,
+    "perimeter_depth_max": 25.0,
+    "zoning_method": "Space Type Groups",
+    "zone_group_default": "heuristic",
+    "zone_groups": [
+      { "name": "core support", "space_types": ["PrimarySchool|Corridor", "PrimarySchool|Restroom"], "zone_per": "group", "position": "core" },
+      { "name": "electrical", "space_types": ["PrimarySchool|Mechanical"], "zone_per": "space" },
+      { "name": "classrooms", "space_types": ["PrimarySchool|Classroom"], "zone_per": "facade" }
+    ]
+  },
+  "typical_options": {
+    "add_hvac": false,
+    "schedule_method": "parametric"
+  }
+}
