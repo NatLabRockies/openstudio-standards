@@ -1282,15 +1282,23 @@ module OpenstudioStandards
       args[:space_type_sort_logic] = args.fetch(:space_type_sort_logic, 'Building Type > Size')
       args[:template] = args.fetch(:template, '90.1-2013')
 
-      # get defaults for the primary building type
+      # get defaults for the primary building type. User-supplied :building_form_defaults
+      # values win over the built-in lookup, which returns nil for non-standard building types.
       primary_building_type = args[:primary_building_type]
-      building_form_defaults = OpenstudioStandards::Geometry.building_form_defaults(primary_building_type)
+      building_form_defaults = OpenstudioStandards::Geometry.building_form_defaults(primary_building_type) || {}
+      if args[:building_form_defaults].is_a?(Hash)
+        building_form_defaults = building_form_defaults.merge(args[:building_form_defaults].transform_keys(&:to_sym))
+      end
 
       # if aspect ratio, story height or wwr have argument value of 0 then use smart building type defaults
       # store list of defaulted items
       defaulted_args = []
 
       if args[:ns_to_ew_ratio].abs < 0.01
+        if building_form_defaults[:aspect_ratio].nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "No aspect ratio form default is available for building type '#{primary_building_type}'. Provide a non-zero :ns_to_ew_ratio argument or an :aspect_ratio value in :building_form_defaults.")
+          return false
+        end
         args[:ns_to_ew_ratio] = building_form_defaults[:aspect_ratio]
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "0.0 value for aspect ratio will be replaced with smart default for #{primary_building_type} of #{building_form_defaults[:aspect_ratio]}.")
       end
@@ -1309,12 +1317,20 @@ module OpenstudioStandards
       end
 
       if args[:floor_height].abs < 0.01
+        if building_form_defaults[:typical_story].nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "No typical story height form default is available for building type '#{primary_building_type}'. Provide a non-zero :floor_height argument or a :typical_story value in :building_form_defaults.")
+          return false
+        end
         args[:floor_height] = building_form_defaults[:typical_story]
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "0.0 value for floor height will be replaced with smart default for #{primary_building_type} of #{building_form_defaults[:typical_story]}.")
         defaulted_args << 'floor_height'
       end
       # because of this can't set wwr to 0.0. If that is desired then we can change this to check for 1.0 instead of 0.0
       if args[:wwr].abs < 0.01
+        if building_form_defaults[:wwr].nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "No window to wall ratio form default is available for building type '#{primary_building_type}'. Provide a non-zero :wwr argument or a :wwr value in :building_form_defaults.")
+          return false
+        end
         args[:wwr] = building_form_defaults[:wwr]
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "0.0 value for window to wall ratio will be replaced with smart default for #{primary_building_type} of #{building_form_defaults[:wwr]}.")
       end
@@ -2135,35 +2151,102 @@ module OpenstudioStandards
       return true
     end
 
+    # normalize the space type ratio input arguments to create_bar_from_space_type_ratios
+    # into an array of entry hashes. Accepts the structured :space_type_ratios argument
+    # (Array<Hash> or JSON string encoding one) or the legacy :space_type_hash_string.
+    #
+    # @param args [Hash] user arguments, see create_bar_from_space_type_ratios
+    # @return [Array<Hash>, nil] array of entry hashes with keys :building_type, :space_type,
+    #   :ratio, and optional :story_height, :wwr, :default, :circ, :space_type_gen.
+    #   Returns nil if the input is missing or invalid.
+    def self.space_type_ratio_entries_from_args(args)
+      input = args[:space_type_ratios]
+
+      # parse JSON string form of :space_type_ratios
+      if input.is_a?(String)
+        begin
+          input = JSON.parse(input, symbolize_names: true)
+        rescue JSON::ParserError => e
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "Could not parse :space_type_ratios JSON string: #{e.message}")
+          return nil
+        end
+      end
+
+      # fall back to the legacy delimited string
+      if input.nil?
+        hash_string = args[:space_type_hash_string]
+        if hash_string.nil? || hash_string.empty?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'args hash passed to create_bar_from_space_type_ratios must include a non-empty :space_type_ratios or :space_type_hash_string')
+          return nil
+        end
+        input = []
+        hash_string.split(/, /) do |entry|
+          entry_map = entry.split(/=>/)
+          key = entry_map[0].to_s.strip
+          building_type, space_type = key.split('|').map { |name| name.to_s.strip }
+          value_str = entry_map[1]
+          input << { building_type: building_type,
+                     space_type: space_type,
+                     ratio: value_str.nil? ? nil : value_str.strip.to_f }
+        end
+      end
+
+      unless input.is_a?(Array) && !input.empty?
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ':space_type_ratios must be a non-empty array of hashes, or a JSON string encoding one')
+        return nil
+      end
+
+      entries = []
+      input.each_with_index do |raw_entry, i|
+        unless raw_entry.is_a?(Hash)
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} is not a hash")
+          return nil
+        end
+        entry = raw_entry.transform_keys(&:to_sym)
+        if entry[:building_type].to_s.empty? || entry[:space_type].to_s.empty?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} must include a :building_type and :space_type")
+          return nil
+        end
+        unless entry[:ratio].is_a?(Numeric) && entry[:ratio] > 0.0
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{entry[:building_type]} | #{entry[:space_type]}) must include a positive numeric :ratio")
+          return nil
+        end
+        entries << entry
+      end
+
+      return entries
+    end
+
     # create bar from space type ratios
     # arguments are passed through to lower level methods.
     # See create_bar_from_args_and_building_type_hash for additional argument options.
     #
     # @param args [Hash] user arguments
-    # @option args [String] :space_type_hash_string  Space types ratio string in the form 'BuildingType | SpaceType => 0.75, BuildingType | SpaceType => 0.25'. Fractions should add up to 1. All space types should come from the selected OpenStudio Standards template.
+    # @option args [Array<Hash>, String] :space_type_ratios array of space type ratio entries, or a JSON string encoding one.
+    #   Each entry requires :building_type, :space_type, and :ratio (fractions should add up to 1.0), and may include
+    #   :story_height (ft), :wwr, :default (Boolean), :circ (Boolean), and :space_type_gen (Boolean) which
+    #   override the values harvested from the standards space type lookup. Building and space types should
+    #   come from the selected OpenStudio Standards template.
+    # @option args [String] :space_type_hash_string legacy input form, a string like
+    #   'BuildingType | SpaceType => 0.75, BuildingType | SpaceType => 0.25'. Used when :space_type_ratios is absent.
+    # @option args [String] :primary_building_type building type that determines building form defaults.
+    #   Defaults to the building type of the first ratio entry.
     # @option args [String] :template ('90.1-2013') target standard
     # @return [Boolean] returns true if successful, false if not
     def self.create_bar_from_space_type_ratios(model, args)
-      if args[:space_type_hash_string].empty?
-        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'args hash passed to create_bar_from_space_type_ratios must include a non-empty :space_type_hash_string')
-        return false
-      end
+      args = args.transform_keys(&:to_sym)
+      entries = OpenstudioStandards::Geometry.space_type_ratio_entries_from_args(args)
+      return false if entries.nil?
+
       template = args.fetch(:template, '90.1-2013')
 
-      # process arg into hash
-      space_type_hash_name = {}
-      args[:space_type_hash_string][0..-1].split(/, /) do |entry|
-        entry_map = entry.split(/=>/)
-        value_str = entry_map[1]
-        space_type_hash_name[entry_map[0].strip[0..-1].to_s] = value_str.nil? ? '' : value_str.strip[0..-1].to_f
-      end
-
-      # create building type hash from space type ratios
+      # create building type hash from space type ratio entries
       building_type_hash = {}
       building_type_fraction_of_building = 0.0
-      space_type_hash_name.each do |building_space_type, ratio|
-        building_type = building_space_type.split('|')[0].strip
-        space_type = building_space_type.split('|')[1].strip
+      entries.each do |entry|
+        building_type = entry[:building_type]
+        space_type = entry[:space_type]
+        ratio = entry[:ratio]
 
         # harvest height and circ info from get_space_types_from_building_type(building_type, template, whole_building = true)
         building_type_lookup_info = OpenstudioStandards::CreateTypical.get_space_types_from_building_type(building_type, template: template)
@@ -2185,18 +2268,20 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{space_type} looks like an invalid space type for #{building_type}")
         end
 
-        # extend harvested data with custom ratios from space type ratio string argument.
+        # user-supplied per-entry metadata wins over harvested values
+        %i[story_height wwr default circ space_type_gen].each do |key|
+          space_type_info_hash[key] = entry[key] unless entry[key].nil?
+        end
+
+        # extend harvested data with custom ratios from space type ratio entries.
+        space_type_info_hash[:ratio] = ratio
         if building_type_hash.key?(building_type)
           building_type_hash[building_type][:frac_bldg_area] += ratio
-          space_type_info_hash[:ratio] = ratio
           building_type_hash[building_type][:space_types][space_type] = space_type_info_hash
         else
           building_type_hash[building_type] = {}
           building_type_hash[building_type][:frac_bldg_area] = ratio
-          space_type_info_hash[:ratio] = ratio
-          space_types = {}
-          space_types[space_type] = space_type_info_hash
-          building_type_hash[building_type][:space_types] = space_types
+          building_type_hash[building_type][:space_types] = { space_type => space_type_info_hash }
         end
         building_type_fraction_of_building += ratio
       end
@@ -2209,14 +2294,18 @@ module OpenstudioStandards
       end
 
       # identify primary building type for building form defaults
-      # update to choose building with highest ratio
-      primary_building_type = building_type_hash.keys.first
-
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using building type #{primary_building_type} from the first ratio as the primary building type. This determines the building form defaults.")
+      if args[:primary_building_type].to_s.empty?
+        primary_building_type = building_type_hash.keys.first
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using building type #{primary_building_type} from the first ratio as the primary building type. This determines the building form defaults.")
+      else
+        primary_building_type = args[:primary_building_type]
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using user-specified building type #{primary_building_type} as the primary building type. This determines the building form defaults.")
+      end
 
       # call create_bar_from_args_and_building_type_hash to generate bar
       args[:primary_building_type] = primary_building_type
-      OpenstudioStandards::Geometry.create_bar_from_args_and_building_type_hash(model, args, building_type_hash)
+      result = OpenstudioStandards::Geometry.create_bar_from_args_and_building_type_hash(model, args, building_type_hash)
+      return false if result == false
 
       return true
     end

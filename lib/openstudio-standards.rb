@@ -109,9 +109,12 @@ module OpenstudioStandards
   # CreateTypical Module
   require_relative 'openstudio-standards/create_typical/enumerations'
   require_relative 'openstudio-standards/create_typical/space_type_ratios'
+  require_relative 'openstudio-standards/create_typical/space_type_load_overrides'
   require_relative 'openstudio-standards/create_typical/create_typical'
   require_relative 'openstudio-standards/create_typical/space_type_blend'
   require_relative 'openstudio-standards/create_typical/space_type_information'
+  require_relative 'openstudio-standards/create_typical/spec_validation'
+  require_relative 'openstudio-standards/create_typical/create_custom'
 
   # QAQC Module
   require_relative 'openstudio-standards/qaqc/calibration'

@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
     spec.add_development_dependency 'parallel_tests', '~> 3.7.0'
   end
   spec.add_development_dependency 'codecov'
+  spec.add_development_dependency 'json_schemer', '~> 2.0'
   spec.add_development_dependency 'minitest', '~> 5.26.0'
   spec.add_development_dependency 'minitest-ci'
   spec.add_development_dependency 'minitest-parallel_fork'

@@ -53,6 +53,15 @@ module OpenstudioStandards
     #   Structure is:
     #     ['systems'][N]['system_type'] = 'MY_CBECS_HVAC_TYPE' as defined in lib/openstudio-standards/hvac/cbecs_hvac.rb
     #     ['systems'][N]['thermal_zones'] = ['Zone 1', 'Zone 2', ...]
+    # @param load_overrides [Array<Hash>, String] runtime internal load overrides, as a Ruby array or JSON string.
+    #   Each entry is keyed by `space_type` (matched against the schedule set name or standards space type) or `"*"`,
+    #   with optional `people`/`lighting`/`electric_equipment`/`gas_equipment`/`ventilation` field hashes.
+    #   See CreateTypical.space_type_apply_load_overrides for fields and units.
+    # @param primary_building_type [String] Standard building type that drives the default construction set,
+    #   residential classification, internal mass, and prototype HVAC assumptions. When nil, the standards
+    #   building type with the largest space type floor area in the model is used.
+    # @param building_name [String] Label for the building. Sets the Building object name and a
+    #   'custom_building_type' additional property. Does not affect any standards lookups.
     # @return [Boolean] returns true if successful, false if not
     def self.create_typical_building_from_model(model,
                                                 template,
@@ -87,25 +96,22 @@ module OpenstudioStandards
                                                 wknd_op_hrs_start_time: 8.0,
                                                 wknd_op_hrs_duration: 8.0,
                                                 schedule_overrides: nil,
+                                                load_overrides: nil,
                                                 hoo_var_method: 'hours',
                                                 enable_dst: true,
                                                 unmet_hours_tolerance_r: 1.0,
                                                 remove_objects: true,
                                                 user_hvac_mapping: nil,
+                                                primary_building_type: nil,
+                                                building_name: nil,
                                                 sizing_run_directory: nil)
       # sizing run directory
       sizing_run_directory = Dir.pwd if sizing_run_directory.nil?
 
-      # accept schedule_overrides as a Ruby array (API callers) or a JSON string
-      # (flat-typed measure callers). See space_type_apply_parametric_internal_load_schedules.
-      if schedule_overrides.is_a?(String) && !schedule_overrides.strip.empty?
-        begin
-          schedule_overrides = JSON.parse(schedule_overrides, symbolize_names: true)
-        rescue JSON::ParserError => e
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "Could not parse schedule_overrides JSON string: #{e.message}")
-          schedule_overrides = nil
-        end
-      end
+      # accept overrides as Ruby arrays (API callers) or JSON strings (flat-typed measure callers).
+      # See space_type_apply_parametric_internal_load_schedules and space_type_apply_load_overrides.
+      schedule_overrides = OpenstudioStandards::CreateTypical.parse_overrides_argument(schedule_overrides, 'schedule_overrides')
+      load_overrides = OpenstudioStandards::CreateTypical.parse_overrides_argument(load_overrides, 'load_overrides')
 
       # report initial condition of model
       initial_object_size = model.getModelObjects.size
@@ -255,6 +261,11 @@ module OpenstudioStandards
             next
           end
 
+          # apply runtime internal load overrides on top of the standard loads
+          if load_overrides.is_a?(Array) && !load_overrides.empty?
+            OpenstudioStandards::CreateTypical.space_type_apply_load_overrides(space_type, load_overrides)
+          end
+
           # apply internal load schedules
           if schedule_method == 'prototype'
             standard.space_type_apply_standard_internal_load_schedules(space_type)
@@ -277,16 +288,23 @@ module OpenstudioStandards
         end
 
         # warn about override entries that matched no space type in the model
-        if schedule_method != 'prototype' && schedule_overrides.is_a?(Array) && !schedule_overrides.empty?
+        checked_overrides = {}
+        checked_overrides['schedule_overrides'] = schedule_overrides if schedule_method != 'prototype'
+        checked_overrides['load_overrides'] = load_overrides
+        if checked_overrides.values.any? { |o| o.is_a?(Array) && !o.empty? }
           available_keys = ['*']
           model.getSpaceTypes.each do |st|
             available_keys << st.additionalProperties.getFeatureAsString('schedule_set').get if st.additionalProperties.getFeatureAsString('schedule_set').is_initialized
             available_keys << st.additionalProperties.getFeatureAsString('standards_space_type').get if st.additionalProperties.getFeatureAsString('standards_space_type').is_initialized
           end
-          schedule_overrides.each do |entry|
-            key = (entry[:space_type] || entry[:schedule_set] || entry[:standards_space_type]).to_s
-            unless available_keys.include?(key)
-              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "schedule_overrides entry '#{key}' did not match any space type's schedule set or standards space type.")
+          checked_overrides.each do |override_name, overrides|
+            next unless overrides.is_a?(Array)
+
+            overrides.each do |entry|
+              key = (entry[:space_type] || entry[:schedule_set] || entry[:standards_space_type]).to_s
+              unless available_keys.include?(key)
+                OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "#{override_name} entry '#{key}' did not match any space type's schedule set or standards space type.")
+              end
             end
           end
         end
@@ -304,25 +322,43 @@ module OpenstudioStandards
       end
 
       # identify primary building type (used for construction, and ideally HVAC as well)
-      building_types = {}
-      model.getSpaceTypes.sort.each do |space_type|
-        # populate hash of building types
-        if space_type.standardsBuildingType.is_initialized
-          bldg_type = space_type.standardsBuildingType.get
-          if building_types.key?(bldg_type)
-            building_types[bldg_type] += space_type.floorArea
+      if primary_building_type.nil?
+        building_types = {}
+        model.getSpaceTypes.sort.each do |space_type|
+          # populate hash of building types
+          if space_type.standardsBuildingType.is_initialized
+            bldg_type = space_type.standardsBuildingType.get
+            if building_types.key?(bldg_type)
+              building_types[bldg_type] += space_type.floorArea
+            else
+              building_types[bldg_type] = space_type.floorArea
+            end
           else
-            building_types[bldg_type] = space_type.floorArea
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Can't identify building type for #{space_type.name}")
           end
-        else
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Can't identify building type for #{space_type.name}")
         end
+        # @todo this fails if no space types, or maybe just no space types with standards
+        primary_bldg_type = building_types.key(building_types.values.max)
+      else
+        # user-specified primary building type; must be a standard building type
+        # since it drives construction set and other standards data lookups
+        if OpenstudioStandards::Geometry.building_form_defaults(primary_building_type).nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "primary_building_type '#{primary_building_type}' is not a recognized standard building type.")
+          return false
+        end
+        primary_bldg_type = primary_building_type
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Using user-specified primary building type #{primary_bldg_type} for construction set, internal mass, and HVAC assumption lookups.")
       end
-      # @todo this fails if no space types, or maybe just no space types with standards
-      primary_bldg_type = building_types.key(building_types.values.max)
       # Used for some lookups in the standards gem
       lookup_building_type = standard.model_get_lookup_name(primary_bldg_type)
       model.getBuilding.setStandardsBuildingType(primary_bldg_type)
+
+      # label the building when a custom building name is provided.
+      # This is a label only and does not affect standards lookups.
+      unless building_name.to_s.empty?
+        model.getBuilding.setName(building_name)
+        model.getBuilding.additionalProperties.setFeature('custom_building_type', building_name)
+      end
 
       # set FC factor constructions before adding other constructions
       standard.model_set_below_grade_wall_constructions(model, lookup_building_type, climate_zone)

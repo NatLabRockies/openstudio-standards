@@ -1054,11 +1054,14 @@ module OpenstudioStandards
     # @param schedule_overrides [Array<Hash>, nil] caller-supplied overrides
     # @param schedule_set_name [String, nil] resolved schedule set name
     # @param standards_space_type [String, nil] resolved standards space type
+    # @param section_keys [Array<Symbol>] override section names to merge. Defaults to the
+    #   parametric schedule sections; CreateTypical.space_type_apply_load_overrides passes
+    #   its internal load sections instead.
     # @return [Hash] merged overrides, e.g. { occupancy: {...}, lighting: {...}, ... }
-    def self.resolve_schedule_overrides(schedule_overrides, schedule_set_name, standards_space_type)
+    def self.resolve_schedule_overrides(schedule_overrides, schedule_set_name, standards_space_type,
+                                        section_keys: %i[occupancy lighting electric_equipment gas_equipment hot_water_equipment])
       return {} if schedule_overrides.nil? || schedule_overrides.empty?
 
-      section_keys = %i[occupancy lighting electric_equipment gas_equipment hot_water_equipment]
       key_fields = %i[space_type schedule_set standards_space_type]
       merged = {}
 

@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NREL/openstudio-standards/blob/master/lib/openstudio-standards/create_typical/data/custom_building_spec_schema.json",
+  "title": "Custom building specification",
+  "description": "Input specification for OpenstudioStandards::CreateTypical.create_custom_building_from_spec. Defines a custom building type as a named mix of standard space types with custom area ratios, building form, schedule overrides, and internal load overrides. Building, space type, template, and climate zone names are validated against live standards data at runtime, not by this schema.",
+  "type": "object",
+  "required": ["template", "climate_zone", "space_type_ratios"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional reference to this schema file, enables editor autocomplete and validation."
+    },
+    "name": {
+      "type": "string",
+      "description": "Label for the custom building. Sets the Building object name and a 'custom_building_type' additional property. Does not affect standards lookups."
+    },
+    "template": {
+      "type": "string",
+      "minLength": 1,
+      "description": "OpenStudio Standards template, e.g. '90.1-2013'. Must be resolvable by Standard.build (checked at runtime).",
+      "examples": ["90.1-2013", "90.1-2019", "ComStock 90.1-2013"]
+    },
+    "climate_zone": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ASHRAE or CEC climate zone, e.g. 'ASHRAE 169-2013-4A'.",
+      "examples": ["ASHRAE 169-2013-4A"]
+    },
+    "primary_building_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Standard building type that drives building form defaults, the default construction set, residential classification, internal mass, and prototype HVAC assumptions. Must be a standard building type (checked at runtime). When omitted, the building type of the first ratio entry drives the form and the largest space type floor area drives the rest.",
+      "examples": ["MediumOffice", "Warehouse"]
+    },
+    "space_type_ratios": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Space types making up the building and their fractions of total floor area. Ratios should sum to 1.0 (checked at runtime).",
+      "items": { "$ref": "#/$defs/space_type_ratio_entry" }
+    },
+    "form": { "$ref": "#/$defs/form" },
+    "schedule_overrides": {
+      "type": "array",
+      "description": "Runtime parametric schedule overrides, applied field-by-field over the standard parametric schedule parameters. Only used with schedule_method 'parametric' (the default).",
+      "items": { "$ref": "#/$defs/schedule_override_entry" }
+    },
+    "load_overrides": {
+      "type": "array",
+      "description": "Runtime internal load overrides, applied on top of the loads created from standards space type data.",
+      "items": { "$ref": "#/$defs/load_override_entry" }
+    },
+    "typical_options": {
+      "type": "object",
+      "description": "Additional keyword arguments passed through to create_typical_building_from_model, e.g. {\"add_hvac\": false, \"schedule_method\": \"parametric\"}. Keys are validated at runtime against the method signature. climate_zone, primary_building_type, building_name, schedule_overrides, and load_overrides are managed by the top-level spec keys and are not allowed here."
+    }
+  },
+  "$defs": {
+    "space_type_ratio_entry": {
+      "type": "object",
+      "required": ["building_type", "space_type", "ratio"],
+      "additionalProperties": false,
+      "properties": {
+        "building_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Standard building type the space type is drawn from, e.g. 'MediumOffice'. Checked against standards data for the template at runtime."
+        },
+        "space_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Standard space type within the building type, e.g. 'Conference'. Checked against standards data for the template at runtime."
+        },
+        "ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Fraction of total building floor area for this space type. All ratios should sum to 1.0."
+        },
+        "story_height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Custom story height for this space type in ft. Creates a custom-height bar section when the building floor height is left to its smart default."
+        },
+        "wwr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Window to wall ratio for this space type's exterior walls. Only used when the building-level wwr resolves to 0 (e.g. Warehouse form defaults)."
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Marks this space type as the default (perimeter) space type for double-loaded corridor placement. Exactly one default and one circ entry per building type enables the double-loaded corridor."
+        },
+        "circ": {
+          "type": "boolean",
+          "description": "Marks this space type as the circulation space type for double-loaded corridor placement."
+        },
+        "space_type_gen": {
+          "type": "boolean",
+          "description": "When false, the space type is created but no geometry is generated for it (used for undeveloped or basement space types)."
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Building form arguments passed through to the bar geometry generator. All values are optional; a value of 0 (the default) means 'use the smart default for the primary building type'.",
+      "properties": {
+        "total_bldg_floor_area": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Total building floor area in ft^2. Defaults to 10000."
+        },
+        "single_floor_area": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Single floor area in ft^2. When greater than 0, overrides total_bldg_floor_area and disables custom-height bars."
+        },
+        "num_stories_above_grade": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Number of stories above grade. Defaults to 1."
+        },
+        "num_stories_below_grade": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories below grade. Defaults to 0."
+        },
+        "floor_height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Typical floor-to-floor height in ft. 0 uses the smart default for the primary building type."
+        },
+        "custom_height_bar": {
+          "type": "boolean",
+          "description": "When true (default), space types with a story_height get a dedicated custom-height bar section."
+        },
+        "building_rotation": {
+          "type": "number",
+          "description": "Building rotation in degrees from north."
+        },
+        "ns_to_ew_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "North-south to east-west aspect ratio. 0 uses the smart default for the primary building type."
+        },
+        "perim_mult": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Perimeter multiplier. 0 uses the smart default; other values must be >= 1.0."
+        },
+        "bar_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Bar width in ft. Non-zero values override the perimeter multiplier."
+        },
+        "bar_sep_dist_mult": {
+          "type": "number",
+          "description": "Bar separation distance multiplier for dual-bar buildings. Defaults to 10."
+        },
+        "wwr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Building window to wall ratio. 0 uses the smart default for the primary building type."
+        },
+        "party_wall_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of exterior wall area with an adjacent structure."
+        },
+        "party_wall_stories_north": { "type": "integer", "minimum": 0, "description": "Number of stories with party walls on the north facade." },
+        "party_wall_stories_south": { "type": "integer", "minimum": 0, "description": "Number of stories with party walls on the south facade." },
+        "party_wall_stories_east": { "type": "integer", "minimum": 0, "description": "Number of stories with party walls on the east facade." },
+        "party_wall_stories_west": { "type": "integer", "minimum": 0, "description": "Number of stories with party walls on the west facade." },
+        "bottom_story_ground_exposed_floor": { "type": "boolean", "description": "When true (default), the bottom story floor is ground exposed." },
+        "top_story_exterior_exposed_roof": { "type": "boolean", "description": "When true (default), the top story roof is exterior exposed." },
+        "story_multiplier_method": {
+          "type": "string",
+          "enum": ["None", "Basements Ground Mid Top"],
+          "description": "Story multiplier method. Defaults to 'Basements Ground Mid Top'."
+        },
+        "make_mid_story_surfaces_adiabatic": { "type": "boolean", "description": "When true (default), mid-story floor/ceiling surfaces are adiabatic instead of intersected and matched." },
+        "bar_division_method": {
+          "type": "string",
+          "enum": ["Multiple Space Types - Simple Sliced", "Multiple Space Types - Individual Stories Sliced", "Single Space Type - Core and Perimeter"],
+          "description": "How the bar is divided into spaces. Defaults to 'Multiple Space Types - Individual Stories Sliced'."
+        },
+        "double_loaded_corridor": {
+          "type": "string",
+          "enum": ["None", "Primary Space Type"],
+          "description": "Double-loaded corridor placement. Defaults to 'Primary Space Type', which sandwiches a circ-flagged space type between default-flagged space types."
+        },
+        "space_type_sort_logic": {
+          "type": "string",
+          "enum": ["Size", "Building Type > Size"],
+          "description": "Order in which space types are laid out along the bar. Defaults to 'Building Type > Size'."
+        },
+        "building_form_defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Form default values that override the built-in lookup for the primary building type. Required when primary_building_type is not a standard building type and the corresponding form arguments are left at 0.",
+          "properties": {
+            "aspect_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Default north-south to east-west aspect ratio." },
+            "wwr": { "type": "number", "minimum": 0, "maximum": 1, "description": "Default window to wall ratio." },
+            "typical_story": { "type": "number", "exclusiveMinimum": 0, "description": "Default typical story height in ft." },
+            "first_story": { "type": "number", "exclusiveMinimum": 0, "description": "Default first story height in ft, for building types with a taller ground floor." },
+            "perim_mult": { "type": "number", "minimum": 1, "description": "Default perimeter multiplier." }
+          }
+        }
+      }
+    },
+    "schedule_override_entry": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["space_type"] },
+        { "required": ["schedule_set"] },
+        { "required": ["standards_space_type"] }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": { "type": "string", "description": "Match key: a schedule set name, a standards space type (e.g. 'conference/meeting/multipurpose'), or '*' for all space types." },
+        "schedule_set": { "type": "string", "description": "Match key: a parametric schedule set name." },
+        "standards_space_type": { "type": "string", "description": "Match key: a standards space type name." },
+        "occupancy": { "$ref": "#/$defs/schedule_override_section" },
+        "lighting": { "$ref": "#/$defs/schedule_override_section" },
+        "electric_equipment": { "$ref": "#/$defs/schedule_override_section" },
+        "gas_equipment": { "$ref": "#/$defs/schedule_override_section" },
+        "hot_water_equipment": { "$ref": "#/$defs/schedule_override_section" }
+      }
+    },
+    "schedule_override_section": {
+      "type": "object",
+      "description": "Parametric schedule parameter overrides for one load. Common fields are base and peak (schedule fraction values); any parametric expansion or derivation parameter accepted by the schedules module may be supplied.",
+      "properties": {
+        "base": { "type": "number", "minimum": 0, "maximum": 1, "description": "Schedule fraction outside operating hours." },
+        "peak": { "type": "number", "minimum": 0, "maximum": 1, "description": "Schedule fraction at peak occupancy." }
+      },
+      "additionalProperties": true
+    },
+    "load_override_entry": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["space_type"] },
+        { "required": ["schedule_set"] },
+        { "required": ["standards_space_type"] }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": { "type": "string", "description": "Match key: a schedule set name, a standards space type (e.g. 'classroom/lecture/training'), or '*' for all space types." },
+        "schedule_set": { "type": "string", "description": "Match key: a parametric schedule set name." },
+        "standards_space_type": { "type": "string", "description": "Match key: a standards space type name." },
+        "people": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "people_per_1000_ft2": { "type": "number", "minimum": 0, "description": "Occupant density in people per 1000 ft^2." }
+          }
+        },
+        "lighting": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "w_per_area": { "type": "number", "minimum": 0, "description": "Lighting power density in W/ft^2." },
+            "w_per_person": { "type": "number", "minimum": 0, "description": "Lighting power in W/person." }
+          }
+        },
+        "electric_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "w_per_area": { "type": "number", "minimum": 0, "description": "Electric equipment power density in W/ft^2." }
+          }
+        },
+        "gas_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "btu_per_hr_per_area": { "type": "number", "minimum": 0, "description": "Gas equipment power density in Btu/hr per ft^2." }
+          }
+        },
+        "ventilation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cfm_per_person": { "type": "number", "minimum": 0, "description": "Outdoor air flow per person in cfm." },
+            "cfm_per_area": { "type": "number", "minimum": 0, "description": "Outdoor air flow per floor area in cfm/ft^2." },
+            "ach": { "type": "number", "minimum": 0, "description": "Outdoor air flow in air changes per hour." }
+          }
+        }
+      }
+    }
+  }
+}
