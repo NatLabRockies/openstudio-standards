@@ -750,6 +750,13 @@ module BTAP
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
 
           # Maintain initial uprated Uo as AdditionalProperty.
+
+          # Don't set this as a surface AdditionalProperty - favour surface-referenced
+          # construction instead. @todo !!!!
+
+          # !!!!
+
+          # ...
           v[:surfaces].each do |id|
             surface = model.getSurfaceByName(id)
             next if surface.empty?
