@@ -94,6 +94,47 @@ class TestCustomBuildingSpecSchema < Minitest::Test
     end
   end
 
+  # a structurally valid spec using typical (level-1) space type entries
+  def typical_base_spec
+    {
+      'template' => '90.1-2013',
+      'climate_zone' => 'ASHRAE 169-2013-4A',
+      'primary_building_type' => 'MediumOffice',
+      'space_type_ratios' => [
+        { 'space_type' => 'office', 'ratio' => 0.7 },
+        { 'space_type' => 'conference/meeting/multipurpose', 'ratio' => 0.3 }
+      ]
+    }
+  end
+
+  def test_typical_space_type_entries
+    # valid typical spec passes both validators
+    spec = typical_base_spec
+    assert(@schemer.valid?(spec), 'typical entry spec should pass schema validation')
+    runtime_errors = OpenstudioStandards::CreateTypical.validate_custom_building_spec(JSON.parse(JSON.generate(spec), symbolize_names: true))
+    assert_empty(runtime_errors, "typical entry spec fails runtime validation: #{runtime_errors}")
+
+    # these are structurally valid per the schema; the runtime validator must catch them
+    mixed = typical_base_spec
+    mixed['space_type_ratios'][0] = { 'building_type' => 'MediumOffice', 'space_type' => 'OpenOffice', 'ratio' => 0.7 }
+
+    bad_name = typical_base_spec
+    bad_name['space_type_ratios'][0]['space_type'] = 'not a typical space type'
+
+    no_primary = typical_base_spec.tap { |s| s.delete('primary_building_type') }
+
+    managed_load_method = typical_base_spec.merge('typical_options' => { 'space_type_load_method' => 'typical' })
+
+    { 'mixed entry forms' => mixed,
+      'unknown typical space type' => bad_name,
+      'typical entries without primary_building_type' => no_primary,
+      'space_type_load_method in typical_options' => managed_load_method }.each do |label, bad_spec|
+      assert(@schemer.valid?(bad_spec), "'#{label}' spec should pass schema validation")
+      runtime_errors = OpenstudioStandards::CreateTypical.validate_custom_building_spec(JSON.parse(JSON.generate(bad_spec), symbolize_names: true))
+      refute_empty(runtime_errors, "'#{label}' spec should fail runtime validation")
+    end
+  end
+
   def test_runtime_validator_live_data_checks
     # the schema cannot express these; the runtime validator must catch them
     bad_template = base_spec.merge('template' => 'not-a-template')

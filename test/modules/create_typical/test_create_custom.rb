@@ -86,6 +86,59 @@ class TestCreateCustom < Minitest::Test
     end
   end
 
+  def test_create_custom_building_from_spec_typical_space_types
+    spec = JSON.parse(File.read("#{@examples_dir}/custom_typical_space_types_building.json"), symbolize_names: true)
+    spec[:typical_options][:sizing_run_directory] = "#{__dir__}/output/#{__method__}"
+
+    model = OpenStudio::Model::Model.new
+    result = @create.create_custom_building_from_spec(model, spec)
+    assert(result)
+
+    # six space types from the ratio entries, typed by the level-1 typical name.
+    # No standards building type is set on the space types themselves; the SDK getter
+    # reports the Building-level value (the primary building type) by inheritance.
+    assert_equal(6, model.getSpaceTypes.size)
+    model.getSpaceTypes.each do |space_type|
+      assert(space_type.standardsSpaceType.is_initialized)
+      assert_equal('MediumOffice', space_type.standardsBuildingType.get,
+                   "#{space_type.name} should inherit the building-level standards building type")
+    end
+
+    office = model.getSpaceTypes.find { |st| st.standardsSpaceType.get == 'office' }
+    refute_nil(office)
+
+    # typical lighting: definitions carry the lighting technology properties
+    assert_operator(office.lights.size, :>, 0, 'office should have typical lights')
+    lights_def = office.lights.first.lightsDefinition
+    assert(lights_def.additionalProperties.getFeatureAsString('lighting_technology').is_initialized,
+           'lights should come from the typical lighting data')
+
+    # typical equipment: office electric equipment created (median fallback when the
+    # space type carries no standards building type)
+    assert_operator(office.electricEquipment.size, :>, 0, 'office should have typical electric equipment')
+
+    # typical ventilation: office gets ASHRAE 62.1 office space rates
+    dsoa = office.designSpecificationOutdoorAir
+    assert(dsoa.is_initialized, 'office should have a design specification outdoor air object')
+    assert_in_delta(OpenStudio.convert(5.0, 'ft^3/min', 'm^3/s').get, dsoa.get.outdoorAirFlowperPerson, 0.0001)
+
+    # parametric schedules resolved from the level-1 schedule set
+    assert(office.defaultScheduleSet.is_initialized)
+    assert(office.defaultScheduleSet.get.lightingSchedule.is_initialized, 'office should have a lighting schedule')
+
+    # load override created people on the classroom space type (typical path adds no occupancy yet)
+    classroom = model.getSpaceTypes.find { |st| st.standardsSpaceType.get == 'classroom/lecture/training' }
+    refute_nil(classroom)
+    assert_operator(classroom.people.size, :>, 0, 'classroom load override should create a People load')
+    expected_density_si = OpenStudio.convert(40.0 / 1000.0, 'people/ft^2', 'people/m^2').get
+    assert_in_delta(expected_density_si, classroom.people.first.peopleDefinition.peopleperSpaceFloorArea.get, 0.0001)
+
+    # primary building type drives the building-level standards building type
+    assert_equal('MediumOffice', model.getBuilding.standardsBuildingType.get)
+
+    model.save("#{__dir__}/output/test_create_custom_building_from_spec_typical.osm", true)
+  end
+
   def test_create_custom_building_from_spec_invalid_leaves_model_untouched
     spec = {
       template: '90.1-2013',

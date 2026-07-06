@@ -1,6 +1,9 @@
 # Custom Building Types
 
-openstudio-standards can create a complete typical model of a **custom building type**: a named mix of standard space types with custom area ratios, building form, schedule overrides, and internal load overrides. This is done without adding any new standards data — the custom building borrows loads, schedules, ventilation, and service water heating from standard *donor* space types, then applies your overrides on top.
+openstudio-standards can create a complete typical model of a **custom building type**: a named mix of space types with custom area ratios, building form, schedule overrides, and internal load overrides. The space type mix comes in one of two forms:
+
+- **standard (donor) space types** — `BuildingType | SpaceType` pairs from the standards data for the template, which borrow loads, schedules, ventilation, and service water heating from the standard data
+- **typical space types** — building-type-agnostic space types from `lib/openstudio-standards/space_type/data/level_1_space_types.json` (e.g. `office`, `classroom/lecture/training`), which build loads from the typical lighting, equipment, and ventilation data
 
 ## Concept: donor space types
 
@@ -11,6 +14,27 @@ Every space type in a model carries a `standardsBuildingType` and `standardsSpac
 - **schedule overrides** — parametric schedule parameters (base, peak, ...) per space use
 - **load overrides** — occupant density, lighting/equipment power density, ventilation rates
 - **a name** — a label on the Building object that does not affect any lookup
+
+## Concept: typical space types
+
+Alternatively, the mix can be built directly from the **typical space types** in `lib/openstudio-standards/space_type/data/level_1_space_types.json` by omitting `building_type` from every ratio entry:
+
+```jsonc
+"space_type_ratios": [
+  { "space_type": "office", "ratio": 0.7, "default": true },
+  { "space_type": "corridor", "ratio": 0.2, "circ": true },
+  { "space_type": "restroom", "ratio": 0.1 }
+]
+```
+
+These are the same space type names that `schedule_overrides` and `load_overrides` match on, so one vocabulary describes the whole spec. The generated space types carry the typical name as their `standardsSpaceType` and no standards building type of their own (the OpenStudio SDK reports the Building-level standards building type — the `primary_building_type` — by inheritance), and `create_typical_building_from_model` runs with `space_type_load_method: 'typical'`, which bypasses the standards space type load lookups and instead builds:
+
+- **interior lighting** from the InteriorLighting module data (illuminance targets by lighting space type and a lighting technology generation — set `"lighting_generation"` in `typical_options` to change it)
+- **electric and gas equipment** from the Equipment module data (when a space type's standards building type has no entry, the median value across building types is used)
+- **outdoor air ventilation** from the Ventilation module data, with rates derived from ASHRAE 62.1 (ASHRAE 170 for health care space types)
+- **parametric schedules and thermostats** from the schedule set and thermostat data associated with each typical space type
+
+Typical **occupancy** (People) and **service water heating** equipment definitions are not created yet; use `load_overrides` (`people`) to add occupant densities in the meantime. A top-level `primary_building_type` is required in this form, since it drives the building form defaults, construction set, internal mass, and HVAC assumptions and cannot be inferred from the entries. The two entry forms cannot be mixed in one spec.
 
 ## One-call API
 
@@ -79,7 +103,7 @@ Rules the schema cannot express are checked at runtime against live standards da
 | `climate_zone` | yes | e.g. `ASHRAE 169-2013-4A` |
 | `space_type_ratios` | yes | array of space type ratio entries (below) |
 | `name` | no | building label; sets the Building name and a `custom_building_type` additional property |
-| `primary_building_type` | no | standard building type driving form defaults, construction set, internal mass, and HVAC assumptions; defaults to the first entry's type (form) and the largest floor area (the rest) |
+| `primary_building_type` | no* | standard building type driving form defaults, construction set, internal mass, and HVAC assumptions; defaults to the first entry's type (form) and the largest floor area (the rest). *Required when the ratio entries are typical space types |
 | `form` | no | bar geometry arguments (see schema for the full list) |
 | `schedule_overrides` | no | parametric schedule overrides |
 | `load_overrides` | no | internal load overrides |
@@ -87,7 +111,7 @@ Rules the schema cannot express are checked at runtime against live standards da
 
 ### Space type ratio entries
 
-Each entry requires `building_type`, `space_type`, and `ratio` (all ratios sum to 1.0). Optional per-entry keys override the built-in space type metadata:
+Each entry requires `space_type` and `ratio` (all ratios sum to 1.0). With a `building_type`, `space_type` is a standard space type within that building type; without one, it is a typical space type from `level_1_space_types.json` (all entries must use the same form). Optional per-entry keys override the built-in space type metadata:
 
 - `story_height` (ft) — gives the space type its own taller/shorter bar section
 - `wwr` — per-space-type window-to-wall ratio (used when the building-level wwr resolves to 0)
@@ -142,3 +166,7 @@ The wrapper composes three calls you can also use directly:
 | `No aspect ratio form default is available for building type '...'` | non-standard primary type at the geometry level without form info | supply `form` values or `form.building_form_defaults` |
 | `... entry 'X' did not match any space type's schedule set or standards space type` (warning) | override key matches nothing | inspect the model's space type additional properties for valid keys |
 | Space type has no loads/schedules after the run (warning: `... was not found in the standards data`) | space type pair missing from standards data | use a valid donor pair; overrides can adjust its values afterwards |
+| `spec.space_type_ratios: entries mix standard ... with typical space types` | some entries have `building_type` and some don't | use one entry form for all entries |
+| `'X' is not a typical space type` | typical entry name not in `level_1_space_types.json` | check spelling against the `space_type_name` values in that file |
+| `spec.primary_building_type: required when space_type_ratios entries are typical space types` | typical entries with no `primary_building_type` | add a standard `primary_building_type` |
+| `No electric equipment space type data for '...' ... Using the median value` (info) | typical space type has no equipment data for the building's standards building type | expected for typical mixes; use `load_overrides` to set a specific value |

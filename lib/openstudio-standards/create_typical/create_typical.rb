@@ -27,6 +27,15 @@ module OpenstudioStandards
     # @param wall_construction_type [String] wall construction type.
     #  Options are 'Inferred', 'Mass', 'Metal Building', 'WoodFramed', 'SteelFramed'
     # @param add_space_type_loads [Boolean] Populate existing standards space types in the model with internal loads
+    # @param space_type_load_method [String] Source of the space type internal load definitions. Options are 'standards' or 'typical'.
+    #   'standards' (default) uses the standards space type data for the template via space_type_apply_internal_loads.
+    #   'typical' bypasses the standards space type lookups and instead builds loads from the module-level typical data:
+    #   interior lighting from the InteriorLighting module, electric and gas equipment from the Equipment module, and
+    #   outdoor air ventilation from the Ventilation module. It expects space types whose standardsSpaceType is one of the
+    #   space types in lib/openstudio-standards/space_type/data/level_1_space_types.json (e.g. 'office', 'classroom/lecture/training').
+    #   Typical occupancy and service water heating equipment definitions are not yet available.
+    # @param lighting_generation [String] Lighting generation to assume for typical interior lighting.
+    #   Only used with space_type_load_method 'typical'. See InteriorLighting.create_typical_interior_lighting.
     # @param add_daylighting_controls [Boolean] Add daylighting controls
     # @param add_infiltration [Boolean] Adds infiltration to the model based on cosntruction
     # @param add_elevators [Boolean] Apply elevators directly to a space in the model instead of to a space type
@@ -77,6 +86,8 @@ module OpenstudioStandards
                                                 add_constructions: true,
                                                 wall_construction_type: 'Inferred',
                                                 add_space_type_loads: true,
+                                                space_type_load_method: 'standards',
+                                                lighting_generation: 'gen4_led',
                                                 add_daylighting_controls: true,
                                                 add_infiltration: true,
                                                 add_elevators: true,
@@ -112,6 +123,15 @@ module OpenstudioStandards
       # See space_type_apply_parametric_internal_load_schedules and space_type_apply_load_overrides.
       schedule_overrides = OpenstudioStandards::CreateTypical.parse_overrides_argument(schedule_overrides, 'schedule_overrides')
       load_overrides = OpenstudioStandards::CreateTypical.parse_overrides_argument(load_overrides, 'load_overrides')
+
+      # validate the space type load method
+      unless ['standards', 'typical'].include?(space_type_load_method)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "space_type_load_method '#{space_type_load_method}' is not recognized. Options are 'standards' or 'typical'.")
+        return false
+      end
+      if space_type_load_method == 'typical' && schedule_method == 'prototype'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "The 'prototype' schedule method relies on standards space type data and will likely not find schedules for space types using the 'typical' load method. The 'parametric' schedule method is recommended.")
+      end
 
       # report initial condition of model
       initial_object_size = model.getModelObjects.size
@@ -232,7 +252,14 @@ module OpenstudioStandards
       end
 
       # set space type additional properties
-      standard.prototype_space_type_map(model, reset_standards_space_type: false, set_additional_properties: true)
+      if space_type_load_method == 'typical'
+        # space types are expected to carry a level-1 standards space type directly
+        # (e.g. 'office'), so resolve the lighting, equipment, ventilation, and
+        # schedule set properties from it without the prototype space type mapping
+        OpenstudioStandards::SpaceType.set_standards_space_type_additional_properties(model)
+      else
+        standard.prototype_space_type_map(model, reset_standards_space_type: false, set_additional_properties: true)
+      end
 
       # add internal loads to space types
       if add_space_type_loads
@@ -251,14 +278,26 @@ module OpenstudioStandards
           model.getDefaultScheduleSets.each(&:remove)
         end
 
+        # the 'typical' load method builds loads from module-level typical data instead of
+        # the standards space type lookups. These methods loop over all space types in the
+        # model and key off the additional properties set above. Schedules and overrides
+        # are still applied per space type in the loop below.
+        if space_type_load_method == 'typical'
+          OpenstudioStandards::InteriorLighting.create_typical_interior_lighting(model, lighting_generation: lighting_generation)
+          OpenstudioStandards::Equipment.create_typical_equipment(model, building_type_fallback: true)
+          OpenstudioStandards::Ventilation.create_typical_ventilation(model)
+          # @todo create typical occupancy (People) definitions once typical occupancy data is available
+          # @todo create typical service water heating equipment definitions once typical service water heating data is available
+        end
+
         model.getSpaceTypes.sort.each do |space_type|
-          # split out parts here to allow different options for lighting and ventilation
-          # lighting standard or technology
-          # ventilation standard
-          test = standard.space_type_apply_internal_loads(space_type)
-          if test == false
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Could not add loads for #{space_type.name}. Not expected for #{template}")
-            next
+          # apply loads from standards space type data, unless the typical methods above created them
+          unless space_type_load_method == 'typical'
+            test = standard.space_type_apply_internal_loads(space_type)
+            if test == false
+              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Could not add loads for #{space_type.name}. Not expected for #{template}")
+              next
+            end
           end
 
           # apply runtime internal load overrides on top of the standard loads
@@ -339,6 +378,10 @@ module OpenstudioStandards
         end
         # @todo this fails if no space types, or maybe just no space types with standards
         primary_bldg_type = building_types.key(building_types.values.max)
+        if primary_bldg_type.nil?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', 'Could not identify a primary building type from the model space types. Provide the primary_building_type argument.')
+          return false
+        end
       else
         # user-specified primary building type; must be a standard building type
         # since it drives construction set and other standards data lookups

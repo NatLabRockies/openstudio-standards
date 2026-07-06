@@ -59,15 +59,15 @@ module OpenstudioStandards
           else
             # if not, get the heating and cooling thermostat schedule by standards building type
             if space_type.standardsBuildingType.is_initialized
-              # select down to building type
-              space_type_data = space_type_data.select { |h| h[:standards_building_type] == space_type.standardsBuildingType.get }
-              if space_type_data.empty?
-                OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ThermalZone', "No thermostat schedule data is available for space type '#{space_type.name} with standards space type #{space_type_name} and standards building type #{space_type.standardsBuildingType.get}. Unable to create thermostat schedules.")
-                next
-              else
-                heating_thermostat_sch_name = space_type_data[0][:heating_setpoint_schedule]
-                cooling_thermostat_sch_name = space_type_data[0][:cooling_setpoint_schedule]
+              # select down to building type; the data uses standards lookup names, e.g. 'Office' for 'MediumOffice'
+              lookup_building_type = std.model_get_lookup_name(space_type.standardsBuildingType.get)
+              building_type_data = space_type_data.select { |h| h[:standards_building_type] == lookup_building_type }
+              if building_type_data.empty?
+                OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ThermalZone', "No thermostat schedule data is available for space type '#{space_type.name}' with standards space type #{space_type_name} and standards building type #{space_type.standardsBuildingType.get}. Using a default schedule for this space type.")
+                building_type_data = [space_type_data[0]]
               end
+              heating_thermostat_sch_name = building_type_data[0][:heating_setpoint_schedule]
+              cooling_thermostat_sch_name = building_type_data[0][:cooling_setpoint_schedule]
             else
               # unable to find standards building type
               OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ThermalZone', "Multiple thermostat schedules are available for space type '#{space_type.name} with standards space type #{space_type_name} depending on building type, but building type is not specified. Using a default schedule for this space type.")

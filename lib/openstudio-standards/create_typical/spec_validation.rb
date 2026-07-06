@@ -14,6 +14,17 @@ module OpenstudioStandards
       JSON.parse(File.read(CUSTOM_BUILDING_SPEC_SCHEMA_PATH))
     end
 
+    # Path to the level-1 typical space types data in the SpaceType module
+    LEVEL_1_SPACE_TYPES_PATH = File.join(__dir__, '..', 'space_type', 'data', 'level_1_space_types.json')
+
+    # Names of the level-1 typical space types, the valid space_type values for
+    # spec space_type_ratios entries without a building_type
+    #
+    # @return [Array<String>] typical space type names, e.g. 'office'
+    def self.level_1_space_type_names
+      JSON.parse(File.read(LEVEL_1_SPACE_TYPES_PATH)).map { |row| row['space_type_name'] }
+    end
+
     # Validate a custom building specification for create_custom_building_from_spec.
     # Structural rules (required keys, types, ranges, unknown keys) come from the shipped
     # JSON Schema; checks the schema cannot express (template resolvable, space type pairs
@@ -52,10 +63,20 @@ module OpenstudioStandards
         errors << "spec.space_type_ratios: ratios sum to #{ratio_sum.round(4)}, expected 1.0"
       end
 
-      # building_type | space_type pairs should exist in the standards space type data.
+      # ratio entries come in two forms: standard entries carrying a building_type, checked
+      # against the standards space type data, and typical entries without one, checked
+      # against the level-1 typical space type names. The two forms drive different internal
+      # load paths in create_typical_building_from_model, so they cannot be mixed.
+      standard_entries, typical_entries = string_spec['space_type_ratios'].each_with_index.partition { |entry, _| !entry['building_type'].to_s.empty? }
+      if !standard_entries.empty? && !typical_entries.empty?
+        errors << 'spec.space_type_ratios: entries mix standard building_type | space_type pairs with typical space types (no building_type). Use one form for all entries.'
+        return errors
+      end
+
+      # standard entries: building_type | space_type pairs should exist in the standards space type data.
       # Entries carrying their own geometry metadata only warn, since geometry can proceed without a match.
       metadata_keys = %w[story_height wwr default circ space_type_gen]
-      string_spec['space_type_ratios'].each_with_index do |entry, i|
+      standard_entries.each do |entry, i|
         building_type = entry['building_type']
         space_type = entry['space_type']
         search_criteria = {
@@ -70,6 +91,21 @@ module OpenstudioStandards
           errors << message
         else
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "#{message}. Geometry will be generated from the entry metadata, but no internal loads or schedules will be applied.")
+        end
+      end
+
+      # typical entries: space types should exist in the level-1 typical space type data,
+      # and a primary_building_type is required since no building type is available to infer from
+      unless typical_entries.empty?
+        level_1_space_type_names = OpenstudioStandards::CreateTypical.level_1_space_type_names
+        typical_entries.each do |entry, i|
+          space_type = entry['space_type']
+          next if level_1_space_type_names.include?(space_type)
+
+          errors << "spec.space_type_ratios[#{i}]: '#{space_type}' is not a typical space type. See lib/openstudio-standards/space_type/data/level_1_space_types.json for valid names."
+        end
+        if string_spec['primary_building_type'].to_s.empty?
+          errors << 'spec.primary_building_type: required when space_type_ratios entries are typical space types, to drive the building form defaults and construction set.'
         end
       end
 
@@ -91,6 +127,8 @@ module OpenstudioStandards
         typical_options.each_key do |key|
           if managed_keys.include?(key)
             errors << "spec.typical_options.#{key}: managed by the corresponding top-level spec key, set it there instead"
+          elsif key == 'space_type_load_method'
+            errors << 'spec.typical_options.space_type_load_method: determined from the space_type_ratios entry form (entries without a building_type use the typical load method)'
           elsif !allowed_keys.include?(key)
             errors << "spec.typical_options.#{key}: not an argument of create_typical_building_from_model"
           end

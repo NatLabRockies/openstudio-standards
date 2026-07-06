@@ -1352,11 +1352,11 @@ module OpenstudioStandards
 
       # creating space types for requested building types
       building_type_hash.each do |building_type, building_type_hash|
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating Space Types for #{building_type}.")
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating Space Types for #{building_type.nil? ? 'typical space types with no standards building type' : building_type}.")
 
         # mapping building_type name is needed for a few methods
         temp_standard = Standard.build(args[:template])
-        building_type = temp_standard.model_get_lookup_name(building_type)
+        building_type = temp_standard.model_get_lookup_name(building_type) unless building_type.nil?
 
         # create space_type_map from array
         sum_of_ratios = 0.0
@@ -1364,11 +1364,12 @@ module OpenstudioStandards
         building_type_hash[:space_types].each do |space_type_name, hash|
           next if hash[:space_type_gen] == false # space types like undeveloped and basement are skipped.
 
-          # create space type
+          # create space type. Space types from entries without a building type carry
+          # only a standards space type, e.g. a level-1 typical space type name.
           space_type = OpenStudio::Model::SpaceType.new(model)
-          space_type.setStandardsBuildingType(building_type)
+          space_type.setStandardsBuildingType(building_type) unless building_type.nil?
           space_type.setStandardsSpaceType(space_type_name)
-          space_type.setName("#{building_type} #{space_type_name}")
+          space_type.setName([building_type, space_type_name].compact.join(' '))
 
           # set color
           test = temp_standard.space_type_apply_rendering_color(space_type)
@@ -2156,9 +2157,11 @@ module OpenstudioStandards
     # (Array<Hash> or JSON string encoding one) or the legacy :space_type_hash_string.
     #
     # @param args [Hash] user arguments, see create_bar_from_space_type_ratios
-    # @return [Array<Hash>, nil] array of entry hashes with keys :building_type, :space_type,
-    #   :ratio, and optional :story_height, :wwr, :default, :circ, :space_type_gen.
-    #   Returns nil if the input is missing or invalid.
+    # @return [Array<Hash>, nil] array of entry hashes with keys :space_type, :ratio,
+    #   and optional :building_type, :story_height, :wwr, :default, :circ, :space_type_gen.
+    #   Entries without a :building_type name a typical space type directly (e.g. a space type
+    #   from lib/openstudio-standards/space_type/data/level_1_space_types.json) and produce
+    #   space types with no standards building type. Returns nil if the input is missing or invalid.
     def self.space_type_ratio_entries_from_args(args)
       input = args[:space_type_ratios]
 
@@ -2203,12 +2206,14 @@ module OpenstudioStandards
           return nil
         end
         entry = raw_entry.transform_keys(&:to_sym)
-        if entry[:building_type].to_s.empty? || entry[:space_type].to_s.empty?
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} must include a :building_type and :space_type")
+        if entry[:space_type].to_s.empty?
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} must include a :space_type")
           return nil
         end
+        # entries without a building type name a typical space type directly
+        entry[:building_type] = nil if entry[:building_type].to_s.empty?
         unless entry[:ratio].is_a?(Numeric) && entry[:ratio] > 0.0
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{entry[:building_type]} | #{entry[:space_type]}) must include a positive numeric :ratio")
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', ":space_type_ratios entry #{i} (#{[entry[:building_type], entry[:space_type]].compact.join(' | ')}) must include a positive numeric :ratio")
           return nil
         end
         entries << entry
@@ -2223,10 +2228,14 @@ module OpenstudioStandards
     #
     # @param args [Hash] user arguments
     # @option args [Array<Hash>, String] :space_type_ratios array of space type ratio entries, or a JSON string encoding one.
-    #   Each entry requires :building_type, :space_type, and :ratio (fractions should add up to 1.0), and may include
+    #   Each entry requires :space_type and :ratio (fractions should add up to 1.0), and may include
     #   :story_height (ft), :wwr, :default (Boolean), :circ (Boolean), and :space_type_gen (Boolean) which
-    #   override the values harvested from the standards space type lookup. Building and space types should
-    #   come from the selected OpenStudio Standards template.
+    #   override the values harvested from the standards space type lookup. With a :building_type, the building
+    #   and space types should come from the selected OpenStudio Standards template. Entries without a
+    #   :building_type name a typical space type directly (e.g. from
+    #   lib/openstudio-standards/space_type/data/level_1_space_types.json) and produce space types with no
+    #   standards building type of their own; provide :primary_building_type or :building_form_defaults
+    #   since no building type is available for the form defaults.
     # @option args [String] :space_type_hash_string legacy input form, a string like
     #   'BuildingType | SpaceType => 0.75, BuildingType | SpaceType => 0.25'. Used when :space_type_ratios is absent.
     # @option args [String] :primary_building_type building type that determines building form defaults.
@@ -2248,24 +2257,26 @@ module OpenstudioStandards
         space_type = entry[:space_type]
         ratio = entry[:ratio]
 
-        # harvest height and circ info from get_space_types_from_building_type(building_type, template, whole_building = true)
-        building_type_lookup_info = OpenstudioStandards::CreateTypical.get_space_types_from_building_type(building_type, template: template)
-        if building_type_lookup_info.empty?
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{building_type} looks like an invalid building type for #{template}")
-        end
+        # harvest height and circ info from get_space_types_from_building_type(building_type, template, whole_building = true).
+        # Entries without a building type name a typical space type directly and have nothing to harvest.
         space_type_info_hash = {}
-        if building_type_lookup_info.key?(space_type)
-          if building_type_lookup_info[space_type].key?(:story_height)
-            space_type_info_hash[:story_height] = building_type_lookup_info[space_type][:story_height]
+        unless building_type.nil?
+          building_type_lookup_info = OpenstudioStandards::CreateTypical.get_space_types_from_building_type(building_type, template: template)
+          if building_type_lookup_info == false || building_type_lookup_info.empty?
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{building_type} looks like an invalid building type for #{template}")
+          elsif building_type_lookup_info.key?(space_type)
+            if building_type_lookup_info[space_type].key?(:story_height)
+              space_type_info_hash[:story_height] = building_type_lookup_info[space_type][:story_height]
+            end
+            if building_type_lookup_info[space_type].key?(:default)
+              space_type_info_hash[:default] = building_type_lookup_info[space_type][:default]
+            end
+            if building_type_lookup_info[space_type].key?(:circ)
+              space_type_info_hash[:circ] = building_type_lookup_info[space_type][:circ]
+            end
+          else
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{space_type} looks like an invalid space type for #{building_type}")
           end
-          if building_type_lookup_info[space_type].key?(:default)
-            space_type_info_hash[:default] = building_type_lookup_info[space_type][:default]
-          end
-          if building_type_lookup_info[space_type].key?(:circ)
-            space_type_info_hash[:circ] = building_type_lookup_info[space_type][:circ]
-          end
-        else
-          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{space_type} looks like an invalid space type for #{building_type}")
         end
 
         # user-supplied per-entry metadata wins over harvested values
@@ -2296,7 +2307,11 @@ module OpenstudioStandards
       # identify primary building type for building form defaults
       if args[:primary_building_type].to_s.empty?
         primary_building_type = building_type_hash.keys.first
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using building type #{primary_building_type} from the first ratio as the primary building type. This determines the building form defaults.")
+        if primary_building_type.nil?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'No :primary_building_type was provided and the space type ratio entries carry no building types. Building form defaults are unavailable; form arguments left at 0 will fail unless :building_form_defaults supplies values.')
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using building type #{primary_building_type} from the first ratio as the primary building type. This determines the building form defaults.")
+        end
       else
         primary_building_type = args[:primary_building_type]
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "Creating bar based space type ratios provided. Using user-specified building type #{primary_building_type} as the primary building type. This determines the building form defaults.")

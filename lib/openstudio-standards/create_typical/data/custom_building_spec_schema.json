@@ -30,13 +30,13 @@
     "primary_building_type": {
       "type": "string",
       "minLength": 1,
-      "description": "Standard building type that drives building form defaults, the default construction set, residential classification, internal mass, and prototype HVAC assumptions. Must be a standard building type (checked at runtime). When omitted, the building type of the first ratio entry drives the form and the largest space type floor area drives the rest.",
+      "description": "Standard building type that drives building form defaults, the default construction set, residential classification, internal mass, and prototype HVAC assumptions. Must be a standard building type (checked at runtime). When omitted, the building type of the first ratio entry drives the form and the largest space type floor area drives the rest. Required when the space_type_ratios entries are typical space types (no building_type), since no building type is available to infer from.",
       "examples": ["MediumOffice", "Warehouse"]
     },
     "space_type_ratios": {
       "type": "array",
       "minItems": 1,
-      "description": "Space types making up the building and their fractions of total floor area. Ratios should sum to 1.0 (checked at runtime).",
+      "description": "Space types making up the building and their fractions of total floor area. Ratios should sum to 1.0 (checked at runtime). Entries come in two forms that cannot be mixed within one spec: standard entries with a building_type and space_type drawn from the standards data for the template, or typical entries with only a space_type naming a typical space type from lib/openstudio-standards/space_type/data/level_1_space_types.json (e.g. 'office', 'classroom/lecture/training'). Typical entries use the same space type vocabulary as schedule_overrides and load_overrides, require a top-level primary_building_type, and build internal loads from the typical lighting, equipment, and ventilation data instead of the standards space type data.",
       "items": { "$ref": "#/$defs/space_type_ratio_entry" }
     },
     "form": { "$ref": "#/$defs/form" },
@@ -52,24 +52,24 @@
     },
     "typical_options": {
       "type": "object",
-      "description": "Additional keyword arguments passed through to create_typical_building_from_model, e.g. {\"add_hvac\": false, \"schedule_method\": \"parametric\"}. Keys are validated at runtime against the method signature. climate_zone, primary_building_type, building_name, schedule_overrides, and load_overrides are managed by the top-level spec keys and are not allowed here."
+      "description": "Additional keyword arguments passed through to create_typical_building_from_model, e.g. {\"add_hvac\": false, \"schedule_method\": \"parametric\"}. Keys are validated at runtime against the method signature. climate_zone, primary_building_type, building_name, schedule_overrides, and load_overrides are managed by the top-level spec keys and are not allowed here. space_type_load_method is determined from the space_type_ratios entry form and is not allowed here either."
     }
   },
   "$defs": {
     "space_type_ratio_entry": {
       "type": "object",
-      "required": ["building_type", "space_type", "ratio"],
+      "required": ["space_type", "ratio"],
       "additionalProperties": false,
       "properties": {
         "building_type": {
           "type": "string",
           "minLength": 1,
-          "description": "Standard building type the space type is drawn from, e.g. 'MediumOffice'. Checked against standards data for the template at runtime."
+          "description": "Standard building type the space type is drawn from, e.g. 'MediumOffice'. Checked against standards data for the template at runtime. When omitted, space_type instead names a typical space type from level_1_space_types.json and internal loads come from the typical lighting, equipment, and ventilation data; all entries must then omit building_type."
         },
         "space_type": {
           "type": "string",
           "minLength": 1,
-          "description": "Standard space type within the building type, e.g. 'Conference'. Checked against standards data for the template at runtime."
+          "description": "With building_type: a standard space type within the building type, e.g. 'Conference', checked against standards data for the template at runtime. Without building_type: a typical space type from level_1_space_types.json, e.g. 'office' or 'conference/meeting/multipurpose' - the same names schedule_overrides and load_overrides match on."
         },
         "ratio": {
           "type": "number",
