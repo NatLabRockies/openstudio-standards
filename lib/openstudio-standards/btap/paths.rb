@@ -1,4 +1,4 @@
-# File paths related to the common resources folder.
+# BTAP::File paths related to the common resources folder.
 
 module BTAP::Paths
   class << self
@@ -22,10 +22,12 @@ module BTAP::Paths
     resources / "materials_hvac.csv"
   ]
 
-  CONSTRUCTIONS_PATH    = resources / "constructions.json"
-  CARBON_OPAQUE_PATH    = resources / "carbon_opaque.csv"
-  CARBON_GLAZING_PATH   = resources / "carbon_glazing.csv"
-  CARBON_FRAME_PATH     = resources / "carbon_frame.csv"
-  THERMAL_BRIDGING_PATH = resources / "thermal_bridging.csv"
-  MECH_SIZING_PATH      = resources / "mech_sizing.json"
+  CONSTRUCTIONS_PATH       = resources / "constructions.json"
+  CARBON_OPAQUE_PATH       = resources / "carbon_opaque.csv"
+  CARBON_GLAZING_PATH      = resources / "carbon_glazing.csv"
+  CARBON_FRAME_PATH        = resources / "carbon_frame.csv"
+  THERMAL_BRIDGING_PATH    = resources / "thermal_bridging.csv"
+  MECH_SIZING_PATH         = resources / "mech_sizing.json"
+  NECB_BUILDING_TYPES_PATH = resources / "necb_building_types.csv"
+  NECB_SPACE_TYPES_PATH    = resources / "necb_space_types.csv"
 end
