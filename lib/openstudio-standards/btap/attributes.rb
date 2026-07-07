@@ -67,7 +67,7 @@ module BTAP
       @use_tbd              = use_tbd
       @building_performance = building_performance
       @tbd_edge_tallies     = tbd_edge_tallies
-      @costing_database     = BTAPDatabase.instance
+      @costing_database     = Database.instance
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [

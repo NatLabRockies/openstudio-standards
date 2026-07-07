@@ -1,6 +1,7 @@
 require 'openstudio'
 
 module BTAP
+
   # BTAP Analysis
   #
   # Class to instantiate post-analysis mechanisms like costing or carbon
@@ -14,17 +15,16 @@ module BTAP
     # @param output_folder [String]
     def initialize(output_folder:)
       @output_folder = output_folder
-      @cp            = CommonPaths.instance
     end
 
     # Run BTAP Costing.
     #
     # @param costs_csv [String] Path to a custom costing CSV file if custom
-    #   costing is desired.
-    # @param costs_local_factors_path [String] Path to a custom costing
-    #   localization factors CSV file if custom costing is desired.
-    def run_costing(costs_csv: @cp.costs_path, factors_csv: @cp.costs_local_factors_path)
-      costing = BTAPCosting.new(costs_csv: costs_csv, factors_csv: factors_csv, attributes: @attributes)
+    #                           costing is desired.
+    # @param factors_csv [String] Path to a custom costing localization factors
+    #                             CSV file if custom costing is desired.
+    def run_costing(costs_csv: Paths.costs_path, factors_csv: Paths.costs_local_factors_path)
+      costing = Costing.new(costs_csv: costs_csv, factors_csv: factors_csv, attributes: @attributes)
 
       cost_result, _ = costing.cost_audit_all(
         model: @model,
@@ -45,7 +45,7 @@ module BTAP
 
     # Run BTAP Carbon.
     def run_carbon
-      carbon = BTAPCarbon.new(attributes: @attributes, standards_data: @standard.standards_data)
+      carbon = Carbon.new(attributes: @attributes, standards_data: @standard.standards_data)
       carbon_result = carbon.audit_embodied_carbon
 
       if not @qaqc.nil?
@@ -174,7 +174,7 @@ module BTAP
     # @param path [String]
     def self.load_cache(path)
       cache = File.open(path, "r") { |file| JSON.load(file) }
-      cache["building_performance"] = cache["building_performance"].to_sym
+      cache["building_performance"] = cache["building_performance"].to_sym unless cache["building_performance"].nil?
       return LoadedCache.new(cache)
     end
   end

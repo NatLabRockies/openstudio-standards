@@ -15,7 +15,7 @@ optparse = OptionParser.new do |opts|
   opts.on('--output_path NAME', "Default is #{@options[:output_folder]} ") { |s| @options[:output_folder] = s }
 end
 optparse.parse!
-BTAPDatapoint.new(input_folder: @options[:input_folder],
+BTAP::Datapoint.new(input_folder: @options[:input_folder],
                   output_folder: @options[:output_folder],
                   weather_folder: @options[:weather_folder])
 
