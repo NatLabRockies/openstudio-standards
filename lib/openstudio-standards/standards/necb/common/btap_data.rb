@@ -24,8 +24,7 @@ class BTAPData
     oerd_utility_pricing = false
     @model = model
     @error_warning = []
-    # sets sql file.
-    set_sql_file(model.sqlFile)
+    @sqlite_file = model.sqlFile
     @standard = Standard.build('NECB2011')
     @standards_data = @standard.load_standards_database_new()
     @btap_data = {}
@@ -2187,10 +2186,6 @@ class BTAPData
     end
     # It is not cast-able to any subclass.. so returning original object.
     return object
-  end
-
-  def set_sql_file(file)
-    @sqlite_file = file
   end
 
   def measure_metrics(qaqc)

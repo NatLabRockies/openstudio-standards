@@ -51,17 +51,18 @@ class NECB2015 < NECB2011
 
   def apply_loop_pump_power(model:, sizing_run_dir:)
     # NECB2015 Custom code
-    # Do another sizing run to take into account adjustments to equipment efficiency etc. on capacities. This was done primarily
-    # because the cooling tower loop capacity is affected by the chiller COP.  If the chiller COP is not properly set then
-    # the cooling tower loop capacity can be significantly off which will affect the NECB 2015 maximum loop pump capacity.  Found
-    # all sizing was off somewhat if the additional sizing run was not done.
+    # Do another sizing run to take into account adjustments to equipment
+    # efficiency etc. on capacities. This was done primarily because the cooling
+    # tower loop capacity is affected by the chiller COP. If the chiller COP is
+    # not properly set then the cooling tower loop capacity can be significantly
+    # off which will affect the NECB 2015 maximum loop pump capacity. Found all
+    # sizing was off somewhat if the additional sizing run was not done.
     if model_run_sizing_run(model, "#{sizing_run_dir}/SR2") == false
       raise('sizing run 2 failed!')
     end
 
     # Apply maxmimum loop pump power normalized by peak demand by served spaces as per NECB2015 5.2.6.3.(1)
     apply_maximum_loop_pump_power(model)
-    # model = BTAP::FileIO::remove_duplicate_materials_and_constructions(model)
     return model
   end
 
