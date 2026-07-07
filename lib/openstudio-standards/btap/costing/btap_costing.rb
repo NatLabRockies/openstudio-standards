@@ -1,5 +1,3 @@
-require 'json'
-
 module BTAP
   class Costing
 

@@ -1,8 +1,7 @@
-require 'singleton'
-require 'json'
-require 'csv'
+# BTAP Database
+#
+# Singleton class to centralize all database operations.
 
-# Singleton class to centralize all database operations
 module BTAP
   class Database
     include Singleton

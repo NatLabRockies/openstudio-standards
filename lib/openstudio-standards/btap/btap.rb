@@ -20,8 +20,8 @@
 
 require 'fileutils'
 require 'singleton'
-require 'find'
-require 'date'
+require 'json'
+require 'csv'
 require 'tbd'
 require_relative 'attributes'
 require_relative 'fileio'
