@@ -1,4 +1,4 @@
-require_relative '../../../lib/openstudio-standards.rb'
+require_relative '../../../lib/openstudio-standards'
 require 'optparse'
 require 'logger'
 require 'minitest/autorun'

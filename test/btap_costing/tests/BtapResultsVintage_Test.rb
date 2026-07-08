@@ -1,12 +1,12 @@
-require_relative '../../../lib/openstudio-standards.rb'
-require_relative '../../../lib/openstudio-standards/btap/btap_test_helper.rb'
+require_relative '../../../lib/openstudio-standards'
+require_relative '../../helpers/btap_results_helper'
 require 'minitest/autorun'
 require 'optparse'
 require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-class BTAPResults_Vintage_Test < Minitest::Test
+class BTAP::Results_Vintage_Test < Minitest::Test
   def test_results_vintage()
     #building_type = 'Outpatient'
     building_type = 'LargeHotel'
@@ -50,7 +50,7 @@ class BTAPResults_Vintage_Test < Minitest::Test
                                                    lights_type: lights_type,
                                                    lights_scale: lights_scale,
                                                    baseline_system_zones_map_option: baseline_system_zones_map_option,
-                                                   cached: BTAPResultsHelper.cached)
+                                                   cached: BTAP::ResultsHelper.cached)
   end
 
   def create_model_simulate_and_qaqc_regression_test(epw_file:,
@@ -66,7 +66,7 @@ class BTAPResults_Vintage_Test < Minitest::Test
     model_name = "#{building_type}-#{template}-DefaultFuel-#{File.basename(epw_file, '.epw')}"
     test_dir   = "#{File.dirname(__FILE__)}/output"
     run_dir    = "#{test_dir}/#{model_name}"
-    helper     = BTAPResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
+    helper     = BTAP::ResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
 
     Dir.mkdir(test_dir) unless Dir.exist?(test_dir)
     Dir.mkdir(run_dir) unless Dir.exist?(run_dir)
