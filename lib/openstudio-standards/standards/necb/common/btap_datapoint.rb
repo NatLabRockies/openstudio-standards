@@ -1,6 +1,5 @@
 require 'openstudio'
 require 'securerandom'
-require 'optparse'
 require 'yaml'
 
 module BTAP
