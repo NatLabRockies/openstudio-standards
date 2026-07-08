@@ -141,7 +141,6 @@ module OpenstudioStandards
 
   # BTAP (Natural Resources Canada)
   require_relative 'openstudio-standards/btap/btap'
-  require_relative 'openstudio-standards/btap/paths'
   require_relative 'openstudio-standards/btap/costing/database'
   require_relative 'openstudio-standards/btap/costing/btap_costing'
   require_relative 'openstudio-standards/btap/carbon/btap_carbon'
