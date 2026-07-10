@@ -107,13 +107,13 @@ module BTAP
         end
       end
 
-      #Creates a new ruleset schedule object. This is the basic schedule component
-      #used in openstudio.
-      #name = string: name of schedule
-      #type = TEMPERATURE, ON_OFF, FRACTION
-      #hourArrayValues = a 3 x 24 array representing week, sat and sun hours.
-      #examples:
-      #hourArrayValues =
+      # Creates a new ruleset schedule object. This is the basic schedule component
+      # used in openstudio.
+      # name = string: name of schedule
+      # type = TEMPERATURE, ON_OFF, FRACTION
+      # hourArrayValues = a 3 x 24 array representing week, sat and sun hours.
+      # examples:
+      # hourArrayValues =
       #    [
       #      [18,18,18,18,21,21,21,21,23,23,23,23,23,23,21,21,21,18,18,18,18,18,18,18],#Weekday
       #      [18,18,18,18,21,21,21,21,23,23,23,23,23,23,21,21,21,18,18,18,18,18,18,18],#Saturday
@@ -122,9 +122,9 @@ module BTAP
       # or if you need a constant temperature you can use this shorthand method.
       #    heat_setpoint_array =
       #      [
-      #      Array.new(24){21}, #Weekday
-      #      Array.new(24){21}, #Sat
-      #      Array.new(24){21}, #Sun
+      #      Array.new(24){21}, # Weekday
+      #      Array.new(24){21}, # Sat
+      #      Array.new(24){21}, # Sun
       #    ]
       def self.create_annual_ruleset_schedule(model,name,type,hourArrayValues,start_date = "Jan-1",end_date = "Dec-31" )
         raise("array size not 3x24. Please verify your hourly array") if hourArrayValues.size != 3 or hourArrayValues[0].size != 24 or hourArrayValues[1].size != 24 or hourArrayValues[2].size != 24
