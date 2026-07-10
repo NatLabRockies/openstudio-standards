@@ -100,7 +100,7 @@ class NECB_TBD_Tests < Minitest::Test
     @addprop = true
 
     tag = "space_conditioning_category"
-    tg  = "btap_Uo"
+    tg  = "btap_uo"
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
 
     fdback = []

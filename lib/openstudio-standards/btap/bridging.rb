@@ -581,9 +581,11 @@ module BTAP
     # @option argh [:good, :bad] :quality of thermal bridging (derating only)
     # @option argh [Boolean] :interpolate between costed Uo (uprate only)
     def initialize(model = nil, argh = {})
-      # btp       = BTAP::Resources::Envelope::Constructions # alias
       mth       = "BTAP::Bridging::#{__callee__}"
-      tag       = "btap_Uo"
+      tag_typ   = "btap_type" # opaque surface type, e.g. "wall"
+      tag_id    = "btap_id"   # BTAP costed construction identifier
+      tag_uo    = "btap_uo"   # clear-field U-factor, before derating
+      tag_m2    = "btap_m2"   # net area (m2)
       @model    = {}
       @tally    = {}
       @feedback = {logs: []}
@@ -678,7 +680,6 @@ module BTAP
         @model[:stypes].each do |stypes|
           next unless comply.key?(stypes) # true only if uprating
 
-          # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
           opt            = {}
           opt[:stype   ] = stypes
           opt[:perform ] = perform
@@ -690,6 +691,7 @@ module BTAP
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
           assembly = self.costed_assembly(opt)
 
+          # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
           uo = target ? self.costed_uo(assembly, target) : nil
 
           if uo
@@ -749,23 +751,19 @@ module BTAP
 
           v[:r] = TBD.resetUo(lc, v[:filmRSI], v[:index], v[:uo])
 
-          # Maintain initial uprated Uo as AdditionalProperty.
+          # Re/set to each construction the following AdditionalProperties:
+          lc.additionalProperties.setFeature("btap_uo", v[:uo])
 
-          # Don't set this as a surface AdditionalProperty - favour surface-referenced
-          # construction instead. @todo !!!!
 
-          # !!!!
-
-          # ...
-          v[:surfaces].each do |id|
-            surface = model.getSurfaceByName(id)
-            next if surface.empty?
-
-            surface = surface.get
-            next unless surface.additionalProperties.getFeatureAsDouble(tag).empty?
-
-            surface.additionalProperties.setFeature(tag, v[:uo])
-          end
+          # v[:surfaces].each do |id|
+          #   surface = model.getSurfaceByName(id)
+          #   next if surface.empty?
+          #
+          #   surface = surface.get
+          #   next unless surface.additionalProperties.getFeatureAsDouble(tag).empty?
+          #
+          #   surface.additionalProperties.setFeature(tag, v[:uo])
+          # end
         end
       end
 
@@ -990,7 +988,6 @@ module BTAP
           @model[:constructions][ide][:r        ] = surface[:r]     # material
           @model[:constructions][ide][:uo       ] = nil             # assembly
           @model[:constructions][ide][:compliant] = nil             # assembly
-          @model[:constructions][ide][:psi      ] = {}              # assembly
           @model[:constructions][ide][:btapID   ] = ""              # assembly
           @model[:constructions][ide][:set      ] = set             # assembly
           @model[:constructions][ide][:m2       ] = 0               # cumulative
@@ -999,6 +996,8 @@ module BTAP
           @model[:constructions][ide][:stypes   ] = []
           @model[:constructions][ide][:surfaces ] = []
           @model[:constructions][ide][:spaces   ] = []
+
+          # Assign :lp or :hp costed construction to match required Uo.
         end
 
         @model[:constructions][ide][:m2      ] += m2
@@ -1048,6 +1047,10 @@ module BTAP
 
             surface.get.setConstruction(lc)
           end
+
+          # Set to each construction the following AdditionalProperties:
+          # lc.additionalProperties.setFeature("btap_uo", v[:uo])
+          # lc.additionalProperties.setFeature("btap_m2", v[:m2])
         end
 
         nb += 1 if v[:stypes] == :walls

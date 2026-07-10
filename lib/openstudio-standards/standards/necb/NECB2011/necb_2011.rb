@@ -888,8 +888,6 @@ class NECB2011 < Standard
       argh[:cladding ] = @structure.cladding
       argh[:finish   ] = @structure.finish
 
-      assign_contruction_to_adiabatic_surfaces(model)
-
       # Add default BUILDING construction sets.
       unless add_construction_sets(model.getSpaces, true, necb_hdd, argh)
         raise('NECB: Failed to assign default BUILDING construction sets')

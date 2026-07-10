@@ -562,10 +562,14 @@ class NECB2011
   end
 
   ##
-  # Adds default construction sets, applied to a model's building object, or to
-  # one or more spaces. Parameters are based on previously-set 'category' &
-  # 'structure' parameters. An alternative to 'model_apply_construction' &
-  # 'apply_standard_construction_properties'.
+  # Adds default construction sets to the building (or to selected spaces). The
+  # solution is an alternative option to BTAP's 'model_apply_construction' &
+  # 'apply_standard_construction_properties'. Parameters are based on previously
+  # set 'category' & 'structure' parameters. Constructions that are part of
+  # the building envelope inherit the AdditionalProperty "btap_uo" (usually the
+  # NECB-required clear-field Uo factor), and the AdditionalProperty "btap_id"
+  # (usually the BTAP costed construction identifier). Both "btap_uo"/"btap_id"
+  # may be reset when uprating (per NECB 2017/2025) - see btap/bridging.rb
   #
   # @author denis@rd2.ca
   #
@@ -636,6 +640,12 @@ class NECB2011
     cld = a[:cladding ] ? a[:cladding ] : :light
     fsh = a[:finish   ] ? a[:finish   ] : :light
 
+    # Argument hash to identify BTAP costed assembly.
+    argh            = {}
+    argh[:framing ] = frm
+    argh[:cladding] = cld
+    argh[:finish  ] = fsh
+
     # Filling in the blanks: U-factors.
     eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", out, hdd)
     eRoofU  = a[:eRoofU ] ? a[:eRoofU ] : max_u_necb("roofceiling", out, hdd)
@@ -673,10 +683,22 @@ class NECB2011
     specs[:clad  ] = :heavy  if ctg == "robust"
     specs[:finish] = :medium if ctg == "robust"
     specs[:finish] = :medium if frm == :cmu
+    argh[:perform] = :lp
+    argh[:stype  ] = :walls
     eWall          = TBD.genConstruction(model, specs)
 
+    # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eWall)
     TBD.assignUniqueMaterial(eWall, lyr[:index]) if lyr[:index]
+    id  = BTAP::Bridging.costed_assembly(argh)
+
+    unless BTAP::Bridging.costed_uo(id, eWallU)
+      argh[:perform] = :hp
+      id = BTAP::Bridging.costed_assembly(argh)
+    end
+
+    eWall.additionalProperties.setFeature("btap_uo", eWallU)
+    eWall.additionalProperties.setFeature("btap_id", id)
 
     # Outdoor-facing roof.
     specs          = {}
@@ -689,10 +711,22 @@ class NECB2011
     specs[:finish] = :medium if ctg == "robust"
     specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
     specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
+    argh[:perform] = :lp
+    argh[:stype  ] = :roofs
     eRoof          = TBD.genConstruction(model, specs)
 
+    # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eRoof)
     TBD.assignUniqueMaterial(eRoof, lyr[:index]) if lyr[:index]
+    id  = BTAP::Bridging.costed_assembly(argh)
+
+    unless BTAP::Bridging.costed_uo(id, eRoofU)
+      argh[:perform] = :hp
+      id = BTAP::Bridging.costed_assembly(argh)
+    end
+
+    eRoof.additionalProperties.setFeature("btap_uo", eRoofU)
+    eRoof.additionalProperties.setFeature("btap_id", id)
 
     # Outdoor-facing floor.
     specs          = {}
@@ -701,10 +735,22 @@ class NECB2011
     specs[:finish] = :medium unless frm == :wood
     specs[:finish] = :heavy      if ctg == "housing" && stc == :concrete
     specs[:finish] = :heavy      if ctg == "lodging" && stc == :concrete
+    argh[:perform] = :lp
+    argh[:stype  ] = :floors
     eFloor         = TBD.genConstruction(model, specs)
 
+    # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eFloor)
     TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
+    id  = BTAP::Bridging.costed_assembly(argh)
+
+    unless BTAP::Bridging.costed_uo(id, eFloorU)
+      argh[:perform] = :hp
+      id = BTAP::Bridging.costed_assembly(argh)
+    end
+
+    eFloor.additionalProperties.setFeature("btap_uo", eFloorU)
+    eFloor.additionalProperties.setFeature("btap_id", id)
 
     extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
     extSPACE.setName("BTAP exterior constructions")
@@ -743,6 +789,7 @@ class NECB2011
       # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gFloor)
       TBD.assignUniqueMaterial(gFloor, lyr[:index]) if lyr[:index]
+      gFloor.additionalProperties.setFeature("btap_uo", gFloorU)
 
       # Insulated basement wall. A more nuanced treatment is necessary for
       # multiple basement stories - no insulation required below 2.4m from grade.
@@ -751,8 +798,10 @@ class NECB2011
       specs[:uo    ] = gWallU
       gWall          = TBD.genConstruction(model, specs)
 
+      # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gWall)
       TBD.assignUniqueMaterial(gWall, lyr[:index]) if lyr[:index]
+      gWall.additionalProperties.setFeature("btap_uo", gWallU)
 
       # Insulated basement roof. Again, a more nuanced approach is necessary if
       # the basement roof is below 1.2m from grade (e.g. a tunnel).
@@ -763,8 +812,10 @@ class NECB2011
       specs[:finish] = :heavy
       gRoof          = TBD.genConstruction(model, specs)
 
+      # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gRoof)
       TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
+      gRoof.additionalProperties.setFeature("btap_uo", gRoofU)
 
       # Shading.
       specs        = {}
@@ -783,10 +834,6 @@ class NECB2011
       specs[:uo  ] = fenU
       specs[:shgc] = fenSHGC
       fen          = TBD.genConstruction(model, specs)
-
-      fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
-      skySHGC  = a[:skySHGC ] ? a[:skySHGC ] : 0.60
-      doorSHGC = a[:doorSHGC] ? a[:doorSHGC] : 0.60
 
       # Outdoor-facing, horizontal skylight.
       specs        = {}
@@ -846,6 +893,17 @@ class NECB2011
       setSPACE.setDefaultInteriorSurfaceConstructions(intSPACE)
       setSPACE.setAdiabaticSurfaceConstruction(iWall)
       setSPACE.setInteriorPartitionConstruction(iWall)
+
+      model.getSurfaces.each do |surface|
+        bc = surface.outsideBoundaryCondition.downcase
+        next unless ["adiabatic", "othersidecoefficients"].include?(bc)
+
+        if surface.surfaceType.downcase == "wall"
+          surface.setConstruction(iWall)
+        else
+          surface.setConstruction(iFloor)
+        end
+      end
     end
 
     # Unconditioned, unoccupied spaces (e.g. attics) inherit their own
@@ -921,10 +979,21 @@ class NECB2011
       specs          = {}
       specs[:type  ] = :partition
       specs[:uo    ] = eWallU
+      argh[:perform] = :lp
+      argh[:stype  ] = :walls
       iAtticWall     = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticWall)
       TBD.assignUniqueMaterial(iAtticWall, lyr[:index]) if lyr[:index]
+      id  = BTAP::Bridging.costed_assembly(argh)
+
+      unless BTAP::Bridging.costed_uo(id, eWallU)
+        argh[:perform] = :hp
+        id = BTAP::Bridging.costed_assembly(argh)
+      end
+
+      iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
+      iAtticWall.additionalProperties.setFeature("btap_id", id)
 
       specs          = {}
       specs[:type  ] = :floor
@@ -932,10 +1001,21 @@ class NECB2011
       specs[:frame ] = :heavy
       specs[:finish] = :none
       specs[:finish] = :heavy if stc == :concrete
+      argh[:perform] = :lp
+      argh[:stype  ] = :floors
       iAtticFloor    = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticFloor)
       TBD.assignUniqueMaterial(iAtticFloor, lyr[:index]) if lyr[:index]
+      id  = BTAP::Bridging.costed_assembly(argh)
+
+      unless BTAP::Bridging.costed_uo(id, eFloorU)
+        argh[:perform] = :hp
+        id = BTAP::Bridging.costed_assembly(argh)
+      end
+
+      iAtticFloor.additionalProperties.setFeature("btap_uo", eFloorU)
+      iAtticFloor.additionalProperties.setFeature("btap_id", id)
 
       specs          = {}
       specs[:type  ] = :floor
@@ -944,10 +1024,21 @@ class NECB2011
       specs[:frame ] = :heavy if frm == :wood
       specs[:clad  ] = :none
       specs[:clad  ] = :heavy if ctg == "robust"
+      argh[:perform] = :lp
+      argh[:stype  ] = :walls
       iAtticRoof     = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticRoof)
       TBD.assignUniqueMaterial(iAtticRoof, lyr[:index]) if lyr[:index]
+      id  = BTAP::Bridging.costed_assembly(argh)
+
+      unless BTAP::Bridging.costed_uo(id, eRoofU)
+        argh[:perform] = :hp
+        id = BTAP::Bridging.costed_assembly(argh)
+      end
+
+      iAtticRoof.additionalProperties.setFeature("btap_uo", eFloorU)
+      iAtticRoof.additionalProperties.setFeature("btap_id", id)
 
       intATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
       solATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
