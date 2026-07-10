@@ -33,5 +33,6 @@ module BTAP
     MECH_SIZING_PATH         = resources / "mech_sizing.json"
     NECB_BUILDING_TYPES_PATH = resources / "necb_building_types.csv"
     NECB_SPACE_TYPES_PATH    = resources / "necb_space_types.csv"
+    NEB_PRICES_PATH          = resources / "neb_end_use_prices.csv"
   end
 end
