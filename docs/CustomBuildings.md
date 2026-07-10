@@ -29,12 +29,14 @@ Alternatively, the mix can be built directly from the **typical space types** in
 
 These are the same space type names that `schedule_overrides` and `load_overrides` match on, so one vocabulary describes the whole spec. The generated space types carry the typical name as their `standardsSpaceType` and no standards building type of their own (the OpenStudio SDK reports the Building-level standards building type — the `primary_building_type` — by inheritance), and `create_typical_building_from_model` runs with `space_type_load_method: 'typical'`, which bypasses the standards space type load lookups and instead builds:
 
+- **occupancy** at the template (code version) occupant densities from the standards space types data, resolved through the same validated mapping as ventilation; unmapped space types get no occupancy. The `load_overrides` `people` section overrides the result, either directly or through `keep_standard_design_level` (see the load override fields below).
+
 - **interior lighting** from the InteriorLighting module data (illuminance targets by lighting space type and a lighting technology generation — set `"lighting_generation"` in `typical_options` to change it)
 - **electric and gas equipment** from the Equipment module data (when a space type's standards building type has no entry, the median value across building types is used)
-- **outdoor air ventilation** from the Ventilation module data, with rates derived from ASHRAE 62.1 (ASHRAE 170 for health care space types)
+- **outdoor air ventilation** at the template (code version) rates from the standards space types data, resolved through a validated mapping of typical space types to standards space types (`lib/openstudio-standards/space_type/data/level_1_standards_space_type_map.json`, covering the ASHRAE 90.1, DOE Ref, and DEER templates; DEER vintages after 2020 resolve to the DEER 2020 rows they share); space types without a mapping fall back to Ventilation module data derived from ASHRAE 62.1 (ASHRAE 170 for health care space types). Either way, the `load_overrides` `ventilation` section overrides the resulting rates.
 - **parametric schedules and thermostats** from the schedule set and thermostat data associated with each typical space type
 
-Typical **occupancy** (People) and **service water heating** equipment definitions are not created yet; use `load_overrides` (`people`) to add occupant densities in the meantime. A top-level `primary_building_type` is required in this form, since it drives the building form defaults, construction set, internal mass, and HVAC assumptions and cannot be inferred from the entries. The two entry forms cannot be mixed in one spec.
+Typical **service water heating** equipment definitions are not created yet. A top-level `primary_building_type` is required in this form, since it drives the building form defaults, construction set, internal mass, and HVAC assumptions and cannot be inferred from the entries. The two entry forms cannot be mixed in one spec.
 
 ## One-call API
 
@@ -137,13 +139,15 @@ end
 
 | Section | Fields |
 |---|---|
-| `people` | `people_per_1000_ft2` |
+| `people` | `people_per_1000_ft2`, `keep_standard_design_level` |
 | `lighting` | `w_per_area` (W/ft²), `w_per_person` |
 | `electric_equipment` | `w_per_area` (W/ft²) |
 | `gas_equipment` | `btu_per_hr_per_area` (Btu/hr·ft²) |
 | `ventilation` | `cfm_per_person`, `cfm_per_area` (cfm/ft²), `ach` |
 
 When an override targets a load the standards data created no instance for (e.g. adding people to a corridor with zero standard occupant density), the load is created.
+
+By default `people_per_1000_ft2` sets the design occupancy level. With `keep_standard_design_level: true`, the design level from the standard input is kept and the space type's **occupancy schedule peak** is adjusted instead, so that the peak occupancy (design level × peak schedule value) matches `people_per_1000_ft2` — useful for modeling partial occupancy without changing the installed density. This only takes effect with the parametric schedule method, and a warning is logged for any derived load schedule (lighting, equipment, ...) whose `base_peak_mode` is `relative`, since those schedules follow the occupancy values and will shift along with the adjusted peak.
 
 ## Lower-level APIs
 

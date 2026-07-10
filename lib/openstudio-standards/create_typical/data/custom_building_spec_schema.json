@@ -256,7 +256,8 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "people_per_1000_ft2": { "type": "number", "minimum": 0, "description": "Occupant density in people per 1000 ft^2." }
+            "people_per_1000_ft2": { "type": "number", "minimum": 0, "description": "Occupant density in people per 1000 ft^2. By default this sets the design occupancy level; see keep_standard_design_level." },
+            "keep_standard_design_level": { "type": "boolean", "description": "When true, keep the design occupancy level from the standard input and instead adjust the space type's occupancy schedule peak so the peak occupancy (design level * peak schedule value) matches people_per_1000_ft2. Only takes effect with the parametric schedule method. When false or omitted, people_per_1000_ft2 sets the design occupancy level and the schedule is not adjusted." }
           }
         },
         "lighting": {

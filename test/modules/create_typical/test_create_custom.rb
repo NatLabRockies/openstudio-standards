@@ -89,6 +89,18 @@ class TestCreateCustom < Minitest::Test
   def test_create_custom_building_from_spec_typical_space_types
     spec = JSON.parse(File.read("#{@examples_dir}/custom_typical_space_types_building.json"), symbolize_names: true)
     spec[:typical_options][:sizing_run_directory] = "#{__dir__}/output/#{__method__}"
+    # user ventilation override on top of the template-based standards rates
+    spec[:load_overrides] << { space_type: 'lounge/breakroom', ventilation: { cfm_per_area: 0.25 } }
+
+    # keep_standard_design_level: target a peak occupancy at half the standard conference density
+    standard = Standard.build('90.1-2013')
+    conference_props = standard.model_find_object(standard.standards_data['space_types'],
+                                                  'template' => '90.1-2013', 'building_type' => 'Office', 'space_type' => 'Conference')
+    refute_nil(conference_props)
+    conference_standard_occ = conference_props['occupancy_per_area'].to_f
+    conference_target_occ = (conference_standard_occ * 0.5).round(2)
+    spec[:load_overrides] << { space_type: 'conference/meeting/multipurpose',
+                               people: { people_per_1000_ft2: conference_target_occ, keep_standard_design_level: true } }
 
     model = OpenStudio::Model::Model.new
     result = @create.create_custom_building_from_spec(model, spec)
@@ -117,21 +129,51 @@ class TestCreateCustom < Minitest::Test
     # space type carries no standards building type)
     assert_operator(office.electricEquipment.size, :>, 0, 'office should have typical electric equipment')
 
-    # typical ventilation: office gets ASHRAE 62.1 office space rates
+    # ventilation defaults to the template rates from the standards space types data,
+    # resolved through the level-1 standards space type mapping
     dsoa = office.designSpecificationOutdoorAir
     assert(dsoa.is_initialized, 'office should have a design specification outdoor air object')
     assert_in_delta(OpenStudio.convert(5.0, 'ft^3/min', 'm^3/s').get, dsoa.get.outdoorAirFlowperPerson, 0.0001)
+    vent_source = dsoa.get.additionalProperties.getFeatureAsString('ventilation_source')
+    assert(vent_source.is_initialized)
+    assert_equal('90.1-2013 Office | OpenOffice', vent_source.get, 'office ventilation should come from the template standards data')
+
+    # user load override wins over the template-based ventilation rates
+    lounge = model.getSpaceTypes.find { |st| st.standardsSpaceType.get == 'lounge/breakroom' }
+    refute_nil(lounge)
+    lounge_dsoa = lounge.designSpecificationOutdoorAir.get
+    assert_in_delta(OpenStudio.convert(0.25, 'ft^3/min*ft^2', 'm^3/s*m^2').get, lounge_dsoa.outdoorAirFlowperFloorArea, 0.0001,
+                    'lounge ventilation should follow the user load override')
 
     # parametric schedules resolved from the level-1 schedule set
     assert(office.defaultScheduleSet.is_initialized)
     assert(office.defaultScheduleSet.get.lightingSchedule.is_initialized, 'office should have a lighting schedule')
 
-    # load override created people on the classroom space type (typical path adds no occupancy yet)
+    # occupancy defaults to the template densities from the standards space types data
+    assert_operator(office.people.size, :>, 0, 'office should have typical occupancy')
+    occ_source = office.people.first.peopleDefinition.additionalProperties.getFeatureAsString('occupancy_source')
+    assert(occ_source.is_initialized)
+    assert_equal('90.1-2013 Office | OpenOffice', occ_source.get, 'office occupancy should come from the template standards data')
+
+    # direct people load override sets the design occupancy level on the classroom space type
     classroom = model.getSpaceTypes.find { |st| st.standardsSpaceType.get == 'classroom/lecture/training' }
     refute_nil(classroom)
-    assert_operator(classroom.people.size, :>, 0, 'classroom load override should create a People load')
+    assert_operator(classroom.people.size, :>, 0, 'classroom should have a People load')
     expected_density_si = OpenStudio.convert(40.0 / 1000.0, 'people/ft^2', 'people/m^2').get
     assert_in_delta(expected_density_si, classroom.people.first.peopleDefinition.peopleperSpaceFloorArea.get, 0.0001)
+
+    # keep_standard_design_level: conference keeps the standard density and the occupancy
+    # schedule peak is adjusted so peak occupancy matches the override target
+    conference = model.getSpaceTypes.find { |st| st.standardsSpaceType.get == 'conference/meeting/multipurpose' }
+    refute_nil(conference)
+    expected_standard_si = OpenStudio.convert(conference_standard_occ / 1000.0, 'people/ft^2', 'people/m^2').get
+    assert_in_delta(expected_standard_si, conference.people.first.peopleDefinition.peopleperSpaceFloorArea.get, 0.0001,
+                    'conference should keep the standard design occupancy level')
+    expected_peak = conference_target_occ / conference_standard_occ
+    occ_sch = conference.defaultScheduleSet.get.numberofPeopleSchedule.get.to_ScheduleRuleset.get
+    day_schedules = [occ_sch.defaultDaySchedule] + occ_sch.scheduleRules.map(&:daySchedule)
+    values = day_schedules.flat_map { |day_sch| OpenstudioStandards::Schedules.schedule_day_get_hourly_values(day_sch) }
+    assert_in_delta(expected_peak, values.max, 0.01, 'conference occupancy schedule peak should hit the override target')
 
     # primary building type drives the building-level standards building type
     assert_equal('MediumOffice', model.getBuilding.standardsBuildingType.get)

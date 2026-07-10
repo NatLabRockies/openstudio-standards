@@ -30,10 +30,14 @@ module OpenstudioStandards
     # @param space_type_load_method [String] Source of the space type internal load definitions. Options are 'standards' or 'typical'.
     #   'standards' (default) uses the standards space type data for the template via space_type_apply_internal_loads.
     #   'typical' bypasses the standards space type lookups and instead builds loads from the module-level typical data:
-    #   interior lighting from the InteriorLighting module, electric and gas equipment from the Equipment module, and
-    #   outdoor air ventilation from the Ventilation module. It expects space types whose standardsSpaceType is one of the
+    #   occupancy from the Occupancy module, interior lighting from the InteriorLighting module, electric and gas
+    #   equipment from the Equipment module, and outdoor air ventilation from the Ventilation module. Occupancy and
+    #   ventilation default to the template (code version) values from the standards space types data via the level-1
+    #   standards space type mapping; unmapped space types get no occupancy and fall back to typical ASHRAE 62.1
+    #   ventilation rates. Use the load_overrides people and ventilation sections to override the resulting values.
+    #   It expects space types whose standardsSpaceType is one of the
     #   space types in lib/openstudio-standards/space_type/data/level_1_space_types.json (e.g. 'office', 'classroom/lecture/training').
-    #   Typical occupancy and service water heating equipment definitions are not yet available.
+    #   Typical service water heating equipment definitions are not yet available.
     # @param lighting_generation [String] Lighting generation to assume for typical interior lighting.
     #   Only used with space_type_load_method 'typical'. See InteriorLighting.create_typical_interior_lighting.
     # @param add_daylighting_controls [Boolean] Add daylighting controls
@@ -283,10 +287,15 @@ module OpenstudioStandards
         # model and key off the additional properties set above. Schedules and overrides
         # are still applied per space type in the loop below.
         if space_type_load_method == 'typical'
+          # occupancy and ventilation default to the template (code version) values from the
+          # standards space types data, resolved through the level-1 standards space type
+          # mapping; unmapped space types get no occupancy and fall back to the typical
+          # ASHRAE 62.1 ventilation data. Use the load_overrides people and ventilation
+          # sections to override the resulting values.
+          OpenstudioStandards::Occupancy.create_typical_occupancy(model, template: template)
           OpenstudioStandards::InteriorLighting.create_typical_interior_lighting(model, lighting_generation: lighting_generation)
           OpenstudioStandards::Equipment.create_typical_equipment(model, building_type_fallback: true)
-          OpenstudioStandards::Ventilation.create_typical_ventilation(model)
-          # @todo create typical occupancy (People) definitions once typical occupancy data is available
+          OpenstudioStandards::Ventilation.create_typical_ventilation(model, template: template)
           # @todo create typical service water heating equipment definitions once typical service water heating data is available
         end
 

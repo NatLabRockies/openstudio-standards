@@ -1102,6 +1102,8 @@ module OpenstudioStandards
     #   with optional `occupancy`/`lighting`/`electric_equipment`/`gas_equipment`/`hot_water_equipment`
     #   field hashes that override the standard params at field granularity (precedence: override >
     #   building hours + offsets > standard).
+    #   An 'occupancy_peak_override' additional property on the space type (set by a
+    #   keep_standard_design_level people load override) wins over all other occupancy peak inputs.
     # @return [Boolean] returns true if successful, false if not
     def self.space_type_apply_parametric_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_hot_water_equipment: true,
                                                                  wkdy_start_time: nil, wkdy_duration: nil, wknd_start_time: nil, wknd_duration: nil, schedule_overrides: nil)
@@ -1177,6 +1179,38 @@ module OpenstudioStandards
       # An occupancy override wins over building hours + offsets and the standards.
       occ_params = occ_params.merge(overrides[:occupancy]) if overrides[:occupancy].is_a?(Hash)
 
+      data_dir = "#{File.dirname(__FILE__)}/data"
+
+      # A keep_standard_design_level people load override adjusts the occupancy schedule peak
+      # instead of the design occupancy level (see CreateTypical.space_type_apply_load_overrides).
+      # It is computed to hit a specific peak occupancy, so it wins over other peak inputs.
+      if space_type.additionalProperties.getFeatureAsDouble('occupancy_peak_override').is_initialized
+        occupancy_peak_override = space_type.additionalProperties.getFeatureAsDouble('occupancy_peak_override').get
+        occ_params[:peak] = occupancy_peak_override
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Schedules', "#{space_type.name} occupancy schedule peak set to #{occupancy_peak_override.round(3)} from the occupancy_peak_override additional property.")
+
+        # derived load schedules with base_peak_mode 'relative' follow the raw occupancy
+        # presence values, so the adjusted occupancy peak also shifts those schedules.
+        # 'absolute' mode (the default) normalizes presence over the occupancy base/peak
+        # and is unaffected.
+        { derived_interior_lighting_parameters: 'default_lighting_parameters.json',
+          derived_electric_equipment_parameters: 'default_electric_equipment_parameters.json',
+          derived_gas_equipment_parameters: 'default_gas_equipment_parameters.json',
+          derived_hot_water_equipment_parameters: 'default_hot_water_equipment_parameters.json' }.each do |slot, params_file|
+          load_name = space_type_properties[slot]
+          next if load_name.nil?
+
+          load_params = JSON.parse(File.read("#{data_dir}/#{params_file}"), symbolize_names: true).find { |s| s[:name] == load_name }
+          next if load_params.nil?
+
+          section_key = slot.to_s.sub('derived_', '').sub('interior_', '').sub('_parameters', '').to_sym
+          base_peak_mode = (overrides[section_key].is_a?(Hash) && overrides[section_key][:base_peak_mode]) || load_params[:base_peak_mode]
+          if base_peak_mode.to_s == 'relative'
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Schedules', "#{space_type.name} derived load schedule '#{load_name}' uses base_peak_mode 'relative', so the schedule derived from occupancy will be adjusted along with the occupancy schedule peak.")
+          end
+        end
+      end
+
       # Timing carried into derived loads (used by the 'up_down' derivation; other
       # derivation types inherit timing from the occupancy schedule they transform).
       derived_timing = {}
@@ -1203,8 +1237,6 @@ module OpenstudioStandards
         occupancy_activity_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(space_type.model, 120.0, name: "#{space_type.name} Occupant Activity Schedule")
         default_sch_set.setPeopleActivityLevelSchedule(occupancy_activity_sch)
       end
-
-      data_dir = "#{File.dirname(__FILE__)}/data"
 
       # Interior lighting: direct parametric schedule or occupancy-derived parameters
       if set_lights && !space_type_properties[:derived_interior_lighting_parameters].nil?

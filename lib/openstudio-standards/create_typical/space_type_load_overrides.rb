@@ -35,7 +35,7 @@ module OpenstudioStandards
     # entry's fields win over the wildcard's field-by-field.
     #
     # Supported sections and fields (IP units, matching standards data conventions):
-    #   people:             { people_per_1000_ft2: Numeric }
+    #   people:             { people_per_1000_ft2: Numeric, keep_standard_design_level: Boolean }
     #   lighting:           { w_per_area: Numeric (W/ft^2), w_per_person: Numeric (W/person) }
     #   electric_equipment: { w_per_area: Numeric (W/ft^2) }
     #   gas_equipment:      { btu_per_hr_per_area: Numeric (Btu/hr*ft^2) }
@@ -44,6 +44,14 @@ module OpenstudioStandards
     # When an override targets a load the standards data created no instance for
     # (e.g. adding people to a space type with zero standard occupant density), the
     # load instance and definition are created.
+    #
+    # When the people override sets keep_standard_design_level true, the design occupancy
+    # level from the standard input is kept, and the space type's occupancy schedule peak is
+    # instead adjusted so that the peak occupancy (design level * peak schedule value) matches
+    # people_per_1000_ft2. The adjustment is stored as an 'occupancy_peak_override' additional
+    # property on the space type and consumed by
+    # Schedules.space_type_apply_parametric_internal_load_schedules, so it only takes effect
+    # with the parametric schedule method applied after this method.
     #
     # @param space_type [OpenStudio::Model::SpaceType] space type object
     # @param load_overrides [Array<Hash>] override entries
@@ -68,18 +76,40 @@ module OpenstudioStandards
       # people
       if overrides[:people].is_a?(Hash) && overrides[:people][:people_per_1000_ft2].is_a?(Numeric)
         people_per_1000_ft2 = overrides[:people][:people_per_1000_ft2]
+        keep_standard_design_level = overrides[:people][:keep_standard_design_level] == true
         instance = space_type.people.min_by { |i| i.name.to_s }
-        if instance.nil?
-          definition = OpenStudio::Model::PeopleDefinition.new(space_type.model)
-          definition.setName("#{space_type.name} People Definition")
-          instance = OpenStudio::Model::People.new(definition)
-          instance.setName("#{space_type.name} People")
-          instance.setSpaceType(space_type)
-          definition.setFractionRadiant(0.3)
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "#{space_type.name} had no people, created one for the load override.")
+
+        if keep_standard_design_level
+          # keep the standard design occupancy level and adjust the occupancy schedule peak
+          # so that the peak occupancy matches the override
+          standard_density_si = instance.nil? ? nil : instance.peopleDefinition.peopleperSpaceFloorArea
+          if standard_density_si.nil? || standard_density_si.empty? || standard_density_si.get <= 0.0
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "#{space_type.name} load override requested keep_standard_design_level but there is no standard occupancy design level to keep. Setting the occupancy level directly.")
+            keep_standard_design_level = false
+          else
+            standard_per_1000_ft2 = OpenStudio.convert(standard_density_si.get, 'people/m^2', 'people/ft^2').get * 1000.0
+            occupancy_peak = people_per_1000_ft2 / standard_per_1000_ft2
+            if occupancy_peak > 1.0
+              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "#{space_type.name} load override peak occupancy of #{people_per_1000_ft2} people/1000 ft^2 exceeds the standard design level of #{standard_per_1000_ft2.round(2)} people/1000 ft^2, requiring an occupancy schedule peak of #{occupancy_peak.round(3)} above 1.0.")
+            end
+            space_type.additionalProperties.setFeature('occupancy_peak_override', occupancy_peak)
+            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "#{space_type.name} load override keeping standard occupancy design level of #{standard_per_1000_ft2.round(2)} people/1000 ft^2 and setting the occupancy schedule peak to #{occupancy_peak.round(3)} so peak occupancy matches #{people_per_1000_ft2} people/1000 ft^2.")
+          end
         end
-        instance.peopleDefinition.setPeopleperSpaceFloorArea(OpenStudio.convert(people_per_1000_ft2 / 1000.0, 'people/ft^2', 'people/m^2').get)
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "#{space_type.name} load override set occupancy to #{people_per_1000_ft2} people/1000 ft^2.")
+
+        unless keep_standard_design_level
+          if instance.nil?
+            definition = OpenStudio::Model::PeopleDefinition.new(space_type.model)
+            definition.setName("#{space_type.name} People Definition")
+            instance = OpenStudio::Model::People.new(definition)
+            instance.setName("#{space_type.name} People")
+            instance.setSpaceType(space_type)
+            definition.setFractionRadiant(0.3)
+            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "#{space_type.name} had no people, created one for the load override.")
+          end
+          instance.peopleDefinition.setPeopleperSpaceFloorArea(OpenStudio.convert(people_per_1000_ft2 / 1000.0, 'people/ft^2', 'people/m^2').get)
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "#{space_type.name} load override set occupancy to #{people_per_1000_ft2} people/1000 ft^2.")
+        end
       end
 
       # lighting
