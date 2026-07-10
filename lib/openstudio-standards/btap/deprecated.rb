@@ -925,6 +925,83 @@ module BTAP
     end
   end # module Schedules
 
+  module Resources
+    module Envelope
+      module Constructions
+
+        # This checks if the construction layer can be modified to set thermal resistance of the whole construction to
+        # be less than the required resistance
+        # @author Chris Kirney <chris.kirney@canada.ca>
+        # @param mat_resistance <Fixnum>
+        # @param total_conductance <Fixnum>
+        # @param req_conductance <Fixnum>
+        # @return [<Fixnum>] layer resistance needed to meet construction material resistance, -999 if this is not enough
+        def self.should_modify_layer(mat_resistance:, total_conductance:, req_conductance:)
+          # Determine if the amount of resistance you can modify in this layer is greater than the amount of resistance
+          # you have to change.
+          if mat_resistance > ((1.0 / total_conductance) - (1.0 / req_conductance))
+            # If yes, determine what the resistance for this layer should be to meet the required resistance of the
+            # entire assembly.  Then return the new resistance value.
+            target_res = mat_resistance - ((1.0 / total_conductance) - (1.0 / req_conductance))
+            return target_res
+          else
+            # If no, then return an unambiguous no.
+            return -999
+          end
+        end
+      end # module Constructions
+
+      module ConstructionSets
+
+        #This method set the default construction set from an OSM library file and the construction set name.
+        #params construction_library_file [String] Path to osm file that contains the contruction set to be used.
+        #params construction_set_name [String] Name of the construction set to be used.
+        def self.set_construction_set_by_file(model, construction_library_file, construction_set_name, runner = nil)
+          BTAP::runner_register("Info", "set_construction_set_by_file(#{construction_library_file}, #{construction_set_name})")
+          #check if file exists
+          unless File.exist?(construction_library_file) == true
+            BTAP::runner_register("Error", "Could not find #{construction_library_file}", runner)
+            return false
+          end
+          construction_set = BTAP::Resources::Envelope::ConstructionSets::get_construction_set_from_library(construction_library_file, construction_set_name)
+          #check if construction set name exists and can apply to the model.
+          unless model.building.get.setDefaultConstructionSet(construction_set.clone(model).to_DefaultConstructionSet.get)
+            BTAP::runner_register("Error", "Could not use default construction set #{construction_set_name} from #{construction_library_file} ", runner)
+            return false
+          end
+          #sets all surfaces to use default constructions except adiabatic, where it does a hard assignment of the interior wall construction type.
+          model.getPlanarSurfaces.sort.each { |item| item.resetConstruction }
+          #if the default construction set is defined..try to assign the interior wall to the adiabatic surfaces
+          BTAP::Resources::Envelope::assign_interior_surface_construction_to_adiabatic_surfaces(model, runner)
+          BTAP::runner_register("Info", "set_construction_set_by_file(#{construction_library_file}, #{construction_set_name}) Completed Sucessfully.")
+          return true
+        end
+
+        #This method gets construction set object from external library
+        #@author phylroy.lopez@nrcan.gc.ca
+        #@param construction_library_file [String]
+        #@param construction_set_name [String]
+        #@return [Boolean] optional_construction_set
+        def self.get_construction_set_from_library(construction_library_file, construction_set_name)
+          #Load Contruction osm library.
+          if File.exist?(construction_library_file)
+            construction_lib = BTAP::FileIO::load_osm(construction_library_file)
+            #Get construction set..
+            optional_construction_set = construction_lib.getDefaultConstructionSetByName(construction_set_name)
+            if optional_construction_set.empty?
+              raise("#{construction_set_name} does not exist in #{construction_library_file} library ")
+            else
+              return optional_construction_set.get
+            end
+          else
+            raise("Error : Construction Lib #{construction_library_file} does not exist!")
+          end
+          return false
+        end
+      end # module ConstructionSets
+    end # module Envelope
+  end # module Resources
+
   # Deprecate all the methods in the BTAP module according to the proc below.
   # Note for this to work properly this file should be the first BTAP-related
   # file required by `btap.rb` so that only the methods in this file are
