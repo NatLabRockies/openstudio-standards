@@ -5,7 +5,8 @@ class BTAPPRE1980
                                                                    baseboard_type:,
                                                                    hw_loop:,
                                                                    necb_reference_hp:false,
-                                                                   necb_reference_hp_supp_fuel:'DefaultFuel')
+                                                                   necb_reference_hp_supp_fuel:'DefaultFuel',
+                                                                   control_zone: nil)
     system_data = {}
     system_data[:name] = 'Sys_4_PSZ'
     system_data[:CentralCoolingDesignSupplyAirTemperature] = 13.0
@@ -56,7 +57,7 @@ class BTAPPRE1980
     # NOTE: This is the same as system type 3 (single zone make-up air unit and single zone rooftop unit are both PSZ systems)
     # SHOULD WE COMBINE sys3 and sys4 into one script?
     #
-    control_zone = determine_control_zone(zones)
+    control_zone = determine_control_zone(zones, control_zone: control_zone)
 
     always_on = model.alwaysOnDiscreteSchedule
 

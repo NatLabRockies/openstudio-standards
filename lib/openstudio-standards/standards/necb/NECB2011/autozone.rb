@@ -1418,7 +1418,16 @@ class NECB2011
   end
 
   # This method will determine the control zone from the last sizing run space loads.
-  def determine_control_zone(zones)
+  # @param zones [Array<OpenStudio::Model::ThermalZone>] the zones served by the single-zone system
+  # @param control_zone [OpenStudio::Model::ThermalZone, nil] when supplied (and one of +zones+),
+  #   it is used directly as the control zone, short-circuiting the load-based election so no
+  #   sizing run / stored loads are required. When nil (default), the existing behaviour applies:
+  #   the zone with the largest stored heating load is chosen.
+  def determine_control_zone(zones, control_zone: nil)
+    unless control_zone.nil?
+      raise('control_zone must be one of the passed zones') unless zones.include?(control_zone)
+      return control_zone
+    end
     # In this case the control zone is the load with the largest heating loads. This may cause overheating of some zones.
     # but this is preferred to unmet heating.
     # Iterate through zones.
@@ -1476,7 +1485,7 @@ class NECB2011
     return rendering_color
   end
 
-  def create_hvac_by_name(model:, hvac_system_name:, zones:, hw_loop: nil)
+  def create_hvac_by_name(model:, hvac_system_name:, zones:, hw_loop: nil, control_zone: nil)
     # Get the HVAC system properties
     # Get the HVAC system properties from  lib/openstudio-standards/standards/necb/NECB2011/data/systems.json from description field.
     hvac_system_data = self.standards_data['hvac_types'].find { |system| system['description'] == hvac_system_name }
@@ -1518,7 +1527,8 @@ class NECB2011
               heating_coil_type: heating_coil_type,
               baseboard_type: baseboard_type,
               hw_loop: hw_loop,
-              new_auto_zoner: true)
+              new_auto_zoner: true,
+              control_zone: control_zone)
     when 'sys_4'
       heating_coil_type = self.fuel_type_set.heating_coil_type_sys4 if self.fuel_type_set.force_airloop_hot_water && heating_coil_type != 'DX'
       add_sys4_single_zone_make_up_air_unit_with_baseboard_heating(model: model,
@@ -1527,7 +1537,8 @@ class NECB2011
                                                                    zones: zones,
                                                                    heating_coil_type: heating_coil_type,
                                                                    baseboard_type: baseboard_type,
-                                                                   hw_loop: hw_loop)
+                                                                   hw_loop: hw_loop,
+                                                                   control_zone: control_zone)
     when 'sys_5'
       add_sys2_FPFC_sys5_TPFC( model: model,
                                                 zones:zones,

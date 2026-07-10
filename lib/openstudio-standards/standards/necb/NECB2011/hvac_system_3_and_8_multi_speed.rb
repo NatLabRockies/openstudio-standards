@@ -5,7 +5,8 @@ class NECB2011
                                                                                         heating_coil_type:,
                                                                                         baseboard_type:,
                                                                                         hw_loop:,
-                                                                                        new_auto_zoner: true)
+                                                                                        new_auto_zoner: true,
+                                                                                        control_zone: nil)
     system_data = {}
     system_data[:name] = 'Sys_3_PSZ'
     system_data[:CentralCoolingDesignSupplyAirTemperature] = 13.0
@@ -48,7 +49,7 @@ class NECB2011
       air_loop = add_system_3_and_8_airloop_multi_speed(heating_coil_type,
                                                         model,
                                                         system_data,
-                                                        determine_control_zone(zones))
+                                                        determine_control_zone(zones, control_zone: control_zone))
       # Add Zone equipment
       zones.each do |zone| # Zone sizing temperature difference
         sizing_zone = zone.sizingZone

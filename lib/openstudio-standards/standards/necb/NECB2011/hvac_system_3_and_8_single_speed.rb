@@ -7,14 +7,16 @@ class NECB2011
                                                                             baseboard_type:,
                                                                             hw_loop:,
                                                                             new_auto_zoner: true,
-                                                                            multispeed: false)
+                                                                            multispeed: false,
+                                                                            control_zone: nil)
     if multispeed
       add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_multi_speed(model: model,
                                                                                         zones: zones,
                                                                                         heating_coil_type: heating_coil_type,
                                                                                         baseboard_type: baseboard_type,
                                                                                         hw_loop: hw_loop,
-                                                                                        new_auto_zoner: new_auto_zoner)
+                                                                                        new_auto_zoner: new_auto_zoner,
+                                                                                        control_zone: control_zone)
     else
       add_sys3and8_single_zone_packaged_rooftop_unit_with_baseboard_heating_single_speed(model: model,
                                                                                          necb_reference_hp: necb_reference_hp,
@@ -23,7 +25,8 @@ class NECB2011
                                                                                          heating_coil_type: heating_coil_type,
                                                                                          baseboard_type: baseboard_type,
                                                                                          hw_loop: hw_loop,
-                                                                                         new_auto_zoner: new_auto_zoner)
+                                                                                         new_auto_zoner: new_auto_zoner,
+                                                                                         control_zone: control_zone)
 
     end
   end
@@ -37,7 +40,8 @@ class NECB2011
                                                                                          heating_coil_type:,
                                                                                          baseboard_type:,
                                                                                          hw_loop:,
-                                                                                         new_auto_zoner: true)
+                                                                                         new_auto_zoner: true,
+                                                                                         control_zone: nil)
     system_data = {}
     system_data[:name] = 'Sys_3_PSZ'
     system_data[:CentralCoolingDesignSupplyAirTemperature] = 13.0
@@ -79,7 +83,7 @@ class NECB2011
       air_loop = add_system_3_and_8_airloop(heating_coil_type,
                                             model,
                                             system_data,
-                                            determine_control_zone(zones),
+                                            determine_control_zone(zones, control_zone: control_zone),
                                             necb_reference_hp: necb_reference_hp,
                                             necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel,
                                             hw_loop: hw_loop)

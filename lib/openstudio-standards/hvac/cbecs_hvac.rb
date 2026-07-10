@@ -9,7 +9,7 @@ module OpenstudioStandards
     # Table C-31
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
-    # @param standard [String] standard template, e.g. '90.1-2013'
+    # @param standard [Standard] a built standard object, e.g. Standard.build('90.1-2013')
     # @param hvac_system_type [String] HVAC system type
     # @param zones [Array<OpenStudio::Model::ThermalZone>] Array of OpenStudio ThermalZone objects
     # @return [Boolean] returns true if successful, false if not

@@ -128,6 +128,84 @@ module OpenstudioStandards
       return model
     end
 
+    # Remove HVAC serving only the given thermal zones, leaving the rest of the model untouched.
+    # Removes the zones' zone equipment (except exhaust fans), removes air loops that serve only
+    # the given zones (and detaches the given zones from air loops shared with other zones), and
+    # removes any plant loop left with no demand-side equipment (keeping service-hot-water loops).
+    # Use this to replace (rather than stack on top of) an existing system on a subset of zones.
+    #
+    # @param model [OpenStudio::Model::Model] OpenStudio model object
+    # @param zones [Array<OpenStudio::Model::ThermalZone>] thermal zones to clear of HVAC
+    # @return [OpenStudio::Model::Model] OpenStudio model object
+    def self.remove_hvac_from_zones(model, zones)
+      zone_handles = zones.map { |zone| zone.handle.to_s }
+
+      # 1. Zone equipment on the given zones (baseboards, PTAC/PTHP, fan coils, VRF terminals, ...)
+      zones.each do |zone|
+        zone.equipment.each do |equipment|
+          next if equipment.to_FanZoneExhaust.is_initialized
+
+          equipment.remove
+        end
+      end
+
+      # 2. Air loops serving the given zones: remove entirely if they serve only these zones,
+      #    otherwise detach just the given zones from the shared loop.
+      model.getAirLoopHVACs.each do |air_loop|
+        served = air_loop.thermalZones
+        next if (served.map { |z| z.handle.to_s } & zone_handles).empty?
+
+        if served.all? { |z| zone_handles.include?(z.handle.to_s) }
+          air_loop.remove
+        else
+          served.each { |z| air_loop.removeBranchForZone(z) if zone_handles.include?(z.handle.to_s) }
+        end
+      end
+
+      # 3. Remove plant loops orphaned by the above (no demand-side equipment left), keeping SHW.
+      #    Iterate to a fixpoint: a water-cooled chiller straddles its chilled-water loop (supply)
+      #    and condenser loop (demand), so removing the chilled-water loop only strands the chiller;
+      #    removing the stranded chiller then frees the condenser loop on the next pass.
+      loop do
+        changed = false
+
+        model.getPlantLoops.each do |plant_loop|
+          shw_use = plant_loop.demandComponents.any? do |component|
+            component.to_WaterUseConnections.is_initialized || component.to_CoilWaterHeatingDesuperheater.is_initialized
+          end
+          next if shw_use
+
+          demand_equipment = plant_loop.demandComponents.reject do |component|
+            component.to_Node.is_initialized ||
+              component.to_ConnectorMixer.is_initialized ||
+              component.to_ConnectorSplitter.is_initialized ||
+              component.to_PipeAdiabatic.is_initialized ||
+              component.to_PipeIndoor.is_initialized ||
+              component.to_PipeOutdoor.is_initialized
+          end
+          next unless demand_equipment.empty?
+
+          plant_loop.remove
+          changed = true
+        end
+
+        # A chiller no longer connected to a chilled-water (supply) loop is stranded; remove it so
+        # its condenser loop can be reclaimed on the next pass.
+        model.getChillerElectricEIRs.each do |chiller|
+          next unless chiller.plantLoop.empty?
+
+          chiller.remove
+          changed = true
+        end
+
+        break unless changed
+      end
+
+      OpenstudioStandards::HVAC.remove_unused_curves(model)
+
+      return model
+    end
+
     # renames air loop nodes to readable values
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object

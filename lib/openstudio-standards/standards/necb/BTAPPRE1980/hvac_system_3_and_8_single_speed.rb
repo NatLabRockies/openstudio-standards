@@ -8,7 +8,8 @@ class BTAPPRE1980
                                                                                          hw_loop:,
                                                                                          new_auto_zoner: true,
                                                                                          necb_reference_hp: false,
-                                                                                         necb_reference_hp_supp_fuel: 'DefaultFuel')
+                                                                                         necb_reference_hp_supp_fuel: 'DefaultFuel',
+                                                                                         control_zone: nil)
 
     system_data = {}
     system_data[:name] = 'Sys_3_PSZ'
@@ -52,7 +53,7 @@ class BTAPPRE1980
       air_loop = add_system_3_and_8_airloop(heating_coil_type,
                                             model,
                                             system_data,
-                                            determine_control_zone(zones),
+                                            determine_control_zone(zones, control_zone: control_zone),
                                             necb_reference_hp: necb_reference_hp,
                                             necb_reference_hp_supp_fuel: necb_reference_hp_supp_fuel,
                                             hw_loop: hw_loop)
