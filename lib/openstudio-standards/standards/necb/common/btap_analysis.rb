@@ -112,7 +112,7 @@ module BTAP
         @cache.data["building_performance"],
         @cache.data["tbd_edge_tallies"])
       @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
-      @qaqc = BTAPDatapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
+      @qaqc = BTAP::Datapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
     end
   end
 
