@@ -1,11 +1,11 @@
+# BTAP Attributes
+#
 # This file extends some of the OpenStudio classes to add some new methods
 # and parameters for convenience. Additionally, it also houses methods
 # involving the pre-processing of an OpenStudio model for shared use in one
 # of BTAP's facilities, for now BTAP Costing and BTAP Carbon. Currently,
 # this pre-processing involves retrieving the correct constructions for
 # envelopes and a few attributes for thermal bridging.
-
-require "openstudio"
 
 module BTAP
   class OpenStudio::Model::Model
