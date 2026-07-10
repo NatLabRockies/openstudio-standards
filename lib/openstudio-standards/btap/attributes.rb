@@ -212,14 +212,14 @@ module BTAP
       # in the Surface and SubSurfaces classes. Here are a list of parameters
       # of the hash:
       #
-      # @param name        [String]
-      # @param description [String]
-      # @param type        [String] Material type, either "opaque" or "glazing".
-      # @param id_layers   [Array[Integer]]
-      # @param rsi         [Float]
-      # @param fenestration_number_of_panes [String] ExteriorWindow only.
-      # @param frame_material               [String] ExteriorWindow only.
-      # @param fenestration_type            [String] ExteriorWindow only.
+      # name        [String]
+      # description [String]
+      # type        [String] Material type, either "opaque" or "glazing".
+      # id_layers   [Array[Integer]]
+      # rsi         [Float]
+      # fenestration_number_of_panes [String] ExteriorWindow only.
+      # frame_material               [String] ExteriorWindow only.
+      # fenestration_type            [String] ExteriorWindow only.
       construction_candidates.each do |construction_rsi, construction_hash|
 
         # Store all candidate constructions for reference when doing linear
