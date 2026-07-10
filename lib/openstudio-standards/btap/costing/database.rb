@@ -72,15 +72,12 @@ module BTAP
       end
     end
 
-    # Validate the construction sets and the AHU items.
-    def validate_database()
-      validate_ahu_items_and_quantities()
-    end
-
-    # This method verifies that, for a given row the number of items listed in the 'id_layers' column is the same as the
-    # number of quantities listed in the 'Id_layers_quantity_multipliers' column in the 'hvac_vent_ahu' sheet in the
-    # costing spreadsheet.  If there is a difference in the number of items and number of quantities in a row then that
-    # row needs to be investigated and fixed.
+    # This method verifies that, for a given row the number of items listed
+    # in the 'id_layers' column is the same as the number of quantities listed
+    # in the 'Id_layers_quantity_multipliers' column in the 'hvac_vent_ahu'
+    # sheet in the costing spreadsheet. If there is a difference in the number
+    # of items and number of quantities in a row then that row needs to be
+    # investigated and fixed.
     def validate_ahu_items_and_quantities()
       # Find out if there are a different number of items and number oof quantities in any row of the 'hvac_vent_ahu'
       # sheet.
