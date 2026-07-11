@@ -1,0 +1,82 @@
+{
+  "comment": "NECB reference performance curves, extracted from openstudio-standards necb/NECB2011/hvac_systems.rb add_onespeed_DX_coil (cooling) and add_onespeed_htg_DX_coil (heating). Names follow the NECB reference curve convention.",
+  "curves": {
+    "DXCOOL-NECB2011-REF-CAPFT": {
+      "type": "biquadratic",
+      "coeff_1_constant": 0.867905,
+      "coeff_2_x": 0.0142459,
+      "coeff_3_x2": 0.000554364,
+      "coeff_4_y": -0.00755748,
+      "coeff_5_y2": 3.3048e-05,
+      "coeff_6_xy": -0.000191808,
+      "min_x": 13.0, "max_x": 24.0, "min_y": 24.0, "max_y": 46.0
+    },
+    "DXCOOL-NECB2011-REF-CAPFFLOW": {
+      "type": "quadratic",
+      "coeff_1_constant": 1.0, "coeff_2_x": 0.0, "coeff_3_x2": 0.0,
+      "min_x": 0.0, "max_x": 1.0
+    },
+    "DXCOOL-NECB2011-REF-COOLEIRFT": {
+      "type": "biquadratic",
+      "coeff_1_constant": 0.116936,
+      "coeff_2_x": 0.0284933,
+      "coeff_3_x2": -0.000411156,
+      "coeff_4_y": 0.0214108,
+      "coeff_5_y2": 0.000161028,
+      "coeff_6_xy": -0.000679104,
+      "min_x": 13.0, "max_x": 24.0, "min_y": 24.0, "max_y": 46.0
+    },
+    "DXCOOL-NECB2011-REF-EIRFFLOW": {
+      "type": "quadratic",
+      "coeff_1_constant": 1.0, "coeff_2_x": 0.0, "coeff_3_x2": 0.0,
+      "min_x": 0.0, "max_x": 1.0
+    },
+    "DXCOOL-NECB2011-REF-COOLPLFFPLR": {
+      "type": "cubic",
+      "coeff_1_constant": 0.0277,
+      "coeff_2_x": 4.9151,
+      "coeff_3_x2": -8.184,
+      "coeff_4_x3": 4.2702,
+      "min_x": 0.7, "max_x": 1.0
+    },
+    "DXHEAT-NECB2011-REF-CAPFT": {
+      "type": "cubic",
+      "coeff_1_constant": 0.729009,
+      "coeff_2_x": 0.0319275,
+      "coeff_3_x2": 0.000136404,
+      "coeff_4_x3": -8.748e-06,
+      "min_x": -20.0, "max_x": 20.0
+    },
+    "DXHEAT-NECB2011-REF-CAPFFLOW": {
+      "type": "cubic",
+      "coeff_1_constant": 0.84,
+      "coeff_2_x": 0.16,
+      "coeff_3_x2": 0.0,
+      "coeff_4_x3": 0.0,
+      "min_x": 0.5, "max_x": 1.5
+    },
+    "DXHEAT-NECB2011-REF-EIRFT": {
+      "type": "cubic",
+      "coeff_1_constant": 1.2183,
+      "coeff_2_x": -0.03612,
+      "coeff_3_x2": 0.00142,
+      "coeff_4_x3": -2.68e-05,
+      "min_x": -20.0, "max_x": 20.0
+    },
+    "DXHEAT-NECB2011-REF-EIRFFLOW": {
+      "type": "quadratic",
+      "coeff_1_constant": 1.3824,
+      "coeff_2_x": -0.4336,
+      "coeff_3_x2": 0.0512,
+      "min_x": 0.0, "max_x": 1.0
+    },
+    "DXHEAT-NECB2011-REF-PLFFPLR": {
+      "type": "cubic",
+      "coeff_1_constant": 0.3696,
+      "coeff_2_x": 2.3362,
+      "coeff_3_x2": -2.9577,
+      "coeff_4_x3": 1.2596,
+      "min_x": 0.7, "max_x": 1.0
+    }
+  }
+}
