@@ -55,6 +55,7 @@ module OpenStudioHVAC
           else
             cost_ahu(air_loop, sys_type, flow)
           end
+          cost_terminal_boxes(air_loop)
           cost_zone_distribution(air_loop)
         end
       end
@@ -88,7 +89,7 @@ module OpenStudioHVAC
       end
 
       def cost_ahu(air_loop, sys_type, flow_m3s)
-        cfm = flow_m3s * 2118.88
+        lps = flow_m3s * 1000.0 # Supply_air buckets are L/s (legacy get_ahu_mult semantics)
         htg, clg = coil_keys(air_loop)
         rows = @db.ahu_assemblies.select do |r|
           r['Sys_type'].to_i == sys_type && r['Htg'] == htg && r['Clg'] == clg
@@ -97,11 +98,24 @@ module OpenStudioHVAC
           @warnings << "no AHU assembly for sys_type #{sys_type} htg=#{htg} clg=#{clg} (#{air_loop.nameString}) — AHU not costed"
           return
         end
-        candidates = rows.select { |r| r['Supply_air'].to_f >= cfm }
-        row = candidates.min_by { |r| r['Supply_air'].to_f } || rows.max_by { |r| r['Supply_air'].to_f }
-        # legacy get_ahu_mult scales ALL layer quantities by airflow / bucket airflow
-        # (confirmed by ledger parity: fractional quantities like 0.648 = cfm/Supply_air)
-        base_quantity = cfm / row['Supply_air'].to_f
+        # Exact legacy get_ahu_mult algorithm: number of units = ceil(L/s / largest bucket);
+        # re-select the smallest bucket >= L/s-per-unit; scale layers by flow/bucket.
+        max_bucket = rows.map { |r| r['Supply_air'].to_f }.max
+        unit_count = (lps / max_bucket) > (lps / max_bucket).to_i ? (lps / max_bucket).to_i + 1 : (lps / max_bucket).round
+        unit_count = 1 if unit_count < 1
+        per_unit_lps = lps / unit_count
+        row = rows.select { |r| r['Supply_air'].to_f >= per_unit_lps }
+                  .min_by { |r| r['Supply_air'].to_f } || rows.max_by { |r| r['Supply_air'].to_f }
+        base_quantity = unit_count * (per_unit_lps / row['Supply_air'].to_f)
+        cfm = lps * 2.11888
+
+        # Pipe-class layers inside id_layers are unused variants; legacy costs AHU valve
+        # piping through a dedicated BOM sized from the mech_sizing valve-diameter table
+        # (empirically: range evaluated in cfm, cool-valve diameter, next-largest material
+        # size). Reproduced in cost_ahu_piping below.
+        pipe_classes = /pipe|valve|insulation|plug|strainer|circuitsetter|balancing|controls/i
+        cost_ahu_piping(air_loop, cfm, base_quantity) if %w[HW CHW].include?(htg) || clg == 'CHW'
+
         # id_layers reference materials_hvac material_id -> map to the cost line-item id
         note = "AHU #{air_loop.nameString} (#{cfm.round} cfm, sys#{sys_type} #{htg}/#{clg})"
         ids = row['id_layers'].to_s.split(',').map(&:strip)
@@ -112,11 +126,94 @@ module OpenStudioHVAC
             @warnings << "AHU layer material_id #{material_id} not in materials_hvac — layer not costed (#{note})"
             next
           end
+          next if material['Material'].to_s =~ pipe_classes # handled by cost_ahu_piping
           @ledger.add(id: material['id'], quantity: base_quantity * (mult || 1.0),
                       tags: %w[VENTILATION],
                       material_mult: material['material_mult'].to_f.zero? ? 1.0 : material['material_mult'].to_f,
                       labour_mult: material['labour_mult'].to_f.zero? ? 1.0 : material['labour_mult'].to_f,
                       note: "#{note} [#{material['Material']}]")
+        end
+      end
+
+      # AHU hydronic valve-piping BOM (empirically matched to the legacy sys6 ledger):
+      # per AHU, scaled by the AHU airflow scale — 32.8 LF pipe + insulation, 2 each of
+      # valve/elbow/tee/reducer/union, 1 each of plug/strainer/circuit setter/balancing/
+      # controls — sized next-largest from the cool-valve diameter (range keyed in cfm).
+      AHU_PIPING_BOM = [
+        ['SteelPipe', :dia, 32.8], ['PipeInsulation', :dia, 32.8],
+        ['ValvesBig', :dia, 2.0], ['SteelPipeElbow', :dia, 2.0], ['SteelPipeTee', :dia, 2.0],
+        ['SteelPipeRed', :dia, 2.0], ['SteelPipeUnion', :dia, 2.0],
+        ['SteelPlug', 0.75, 1.0], ['Strainers', :dia, 1.0], ['CircuitSetter', :dia, 1.0],
+        ['Balancing', nil, 1.0], ['Controls', nil, 1.0]
+      ].freeze
+
+      def cost_ahu_piping(air_loop, cfm, scale)
+        piping = @db.mech_sizing.find { |c| c['component'] == 'piping' }&.fetch('table', [])
+        pipe_row = piping.find { |r| cfm >= r['ahu_airflow_range_Literpers'][0].to_f && cfm < r['ahu_airflow_range_Literpers'][1].to_f } ||
+                   piping.max_by { |r| r['ahu_airflow_range_Literpers'][1].to_f }
+        dia = pipe_row ? pipe_row['cool_valve_pipe_dia_inch'].to_f : 2.0
+
+        AHU_PIPING_BOM.each do |material, size_key, qty_per|
+          size = size_key == :dia ? dia : size_key
+          rows = @db.materials(material)
+          row = if size
+                  rows.select { |r| r['Size'].to_f >= size }.min_by { |r| r['Size'].to_f } ||
+                    rows.max_by { |r| r['Size'].to_f }
+                else
+                  rows.first
+                end
+          next @warnings << "no materials_hvac entry '#{material}' — AHU piping item not costed" if row.nil?
+
+          @ledger.add(id: row['id'], quantity: qty_per * scale, tags: %w[VENTILATION],
+                      material_mult: row['material_mult'].to_f.zero? ? 1.0 : row['material_mult'].to_f,
+                      labour_mult: row['labour_mult'].to_f.zero? ? 1.0 : row['labour_mult'].to_f,
+                      note: "AHU piping #{air_loop.nameString} (#{material} #{size || '-'}\")")
+        end
+      end
+
+      # Terminal mixing boxes per air terminal (legacy get_airloop_terminal_type mapping):
+      # VAV Reheat -> VAVFanMixingBoxesHtg, VAV NoReheat -> VAVFanMixingBoxesClg,
+      # CV Reheat -> CVMixingBoxes. Sized by the terminal's max air flow (per zone unit).
+      def cost_terminal_boxes(air_loop)
+        air_loop.thermalZones.sort_by(&:nameString).each do |zone|
+          mult = zone.multiplier.to_f
+          zone.equipment.each do |eq|
+            terminal, box = nil, nil
+            if eq.to_AirTerminalSingleDuctVAVReheat.is_initialized
+              terminal = eq.to_AirTerminalSingleDuctVAVReheat.get
+              box = 'VAVFanMixingBoxesHtg'
+              flow = terminal.maximumAirFlowRate
+              flow = terminal.autosizedMaximumAirFlowRate unless flow.is_initialized
+            elsif eq.to_AirTerminalSingleDuctVAVNoReheat.is_initialized
+              terminal = eq.to_AirTerminalSingleDuctVAVNoReheat.get
+              box = 'VAVFanMixingBoxesClg'
+              flow = terminal.maximumAirFlowRate
+              flow = terminal.autosizedMaximumAirFlowRate unless flow.is_initialized
+            elsif eq.to_AirTerminalSingleDuctConstantVolumeReheat.is_initialized
+              terminal = eq.to_AirTerminalSingleDuctConstantVolumeReheat.get
+              box = 'CVMixingBoxes'
+              flow = terminal.maximumAirFlowRate
+              flow = terminal.autosizedMaximumAirFlowRate unless flow.is_initialized
+            end
+            next if box.nil?
+
+            unless flow.is_initialized
+              @warnings << "no max air flow for terminal #{terminal.nameString} — box not costed"
+              next
+            end
+            cfm = (flow.get / mult) * 2118.88
+            rows = @db.materials(box)
+            row = rows.select { |r| r['Size'].to_f >= cfm }.min_by { |r| r['Size'].to_f } ||
+                  rows.max_by { |r| r['Size'].to_f }
+            if row.nil?
+              @warnings << "no materials_hvac entry '#{box}' — terminal box not costed"
+              next
+            end
+            @ledger.add(id: row['id'], quantity: mult, tags: %w[VENTILATION],
+                        material_mult: row['material_mult'].to_f.zero? ? 1.0 : row['material_mult'].to_f,
+                        labour_mult: row['labour_mult'].to_f.zero? ? 1.0 : row['labour_mult'].to_f,
+                        note: "terminal box #{terminal.nameString} (#{box}, #{cfm.round} cfm)")
+          end
         end
       end
 
