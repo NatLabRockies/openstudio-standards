@@ -98,12 +98,10 @@ module OpenStudioHVAC
           return
         end
         candidates = rows.select { |r| r['Supply_air'].to_f >= cfm }
-        row = candidates.min_by { |r| r['Supply_air'].to_f }
-        base_quantity = 1.0
-        if row.nil?
-          row = rows.max_by { |r| r['Supply_air'].to_f }
-          base_quantity = cfm / row['Supply_air'].to_f # oversize scaling (approximation)
-        end
+        row = candidates.min_by { |r| r['Supply_air'].to_f } || rows.max_by { |r| r['Supply_air'].to_f }
+        # legacy get_ahu_mult scales ALL layer quantities by airflow / bucket airflow
+        # (confirmed by ledger parity: fractional quantities like 0.648 = cfm/Supply_air)
+        base_quantity = cfm / row['Supply_air'].to_f
         # id_layers reference materials_hvac material_id -> map to the cost line-item id
         note = "AHU #{air_loop.nameString} (#{cfm.round} cfm, sys#{sys_type} #{htg}/#{clg})"
         ids = row['id_layers'].to_s.split(',').map(&:strip)
