@@ -52,11 +52,17 @@ standard.model_apply_hvac_efficiency_standard(model, 'NECB HDD Method')
 | `psz` | `PSZ RTU {Gas,Electric} and DX Coils and {Hot Water,Electric} Baseboard` (+ `with exhaust` variants) | NECB sys3 / sys4, unified into one implementation |
 | `vav_reheat` | `MZ BU RTU {Electric,Hot Water} Heating Coil {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller and {Electric,Hot Water} Baseboard` | NECB sys6: per-story built-up VAV, supply+return fans, CHW/CW plant |
 | `fan_coils` | `{FPFC,TPFC} MAU {DX,Chilled Water} Coils with {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller` | NECB sys2/sys5: per-zone fan coils + CV make-up air unit. TPFC names are NEW (the legacy catalog had no sys5 descriptions) |
+| `mau_ptac` | `PSZ MAU {Hot Water,Electric} and DX Coils and {Hot Water,Electric} Baseboard with PTAC` | NECB sys1: 100% OA make-up air unit + per-zone PTAC + baseboards |
 
-Coming next: MAU + PTAC (NECB sys1). Planned extensions:
-CBECS descriptive types mapped onto these families, and NECB ECM system topologies (hs08–hs16).
-NECB reference-heat-pump variants are out of scope for now (they require regional standards
-data; future work via config injection).
+44 catalog names covering all NECB reference systems sys1–sys6 (non-heat-pump). Every family
+is parity-verified against the legacy openstudio-standards NECB builders (object inventory,
+sizing fields, quirks and all — pipe-names byte-identical), and the topology + host-efficiency
+contract is integration-verified (NECB2011 capacity-binned values + reference curves land on
+gem-built coils after the host's sizing/efficiency pass).
+
+Planned extensions: CBECS descriptive types mapped onto these families, and NECB ECM system
+topologies (hs08–hs16). NECB reference-heat-pump variants are out of scope for now (they
+require regional standards data; future work via config injection).
 
 ## Design notes
 
