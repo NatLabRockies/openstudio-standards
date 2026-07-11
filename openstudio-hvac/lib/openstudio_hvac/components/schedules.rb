@@ -18,6 +18,14 @@ module OpenStudioHVAC
       sch
     end
 
+    # Always-off on/off schedule (0 all year).
+    #
+    # @param model [OpenStudio::Model::Model]
+    # @return [OpenStudio::Model::ScheduleRuleset]
+    def self.always_off(model)
+      constant_ruleset(model, 'Always Off', 0)
+    end
+
     # Two-pipe fan-coil seasonal availability schedules: heating Jan-Jun + Nov-Dec,
     # cooling Jul-Oct (port of NECB create_heating_cooling_on_off_availability_schedule).
     #

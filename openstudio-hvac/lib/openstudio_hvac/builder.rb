@@ -4,7 +4,8 @@ module OpenStudioHVAC
     FAMILIES = {
       'psz' => Systems::PSZ,
       'vav_reheat' => Systems::VAVReheat,
-      'fan_coils' => Systems::FanCoils
+      'fan_coils' => Systems::FanCoils,
+      'mau_ptac' => Systems::MauPtac
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)
