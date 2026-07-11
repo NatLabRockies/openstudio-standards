@@ -67,14 +67,19 @@ sizing block — the host's sizing conventions apply):
 
 | CBECS name | Family | Notes |
 |---|---|---|
-| `Baseboard electric` | `baseboards` | zone baseboards only, no air system |
-| `Baseboard gas boiler` | `baseboards` | hot-water baseboards + gas boiler loop |
-| `PSZ-AC with electric coil` / `PSZ-AC with gas coil` | `psz` (`per_zone: true`) | **one packaged unit per zone** (the CBECS/90.1 convention), each controlling its own zone |
+| `Baseboard electric` / `Baseboard gas boiler` | `baseboards` | zone baseboards only, no air system |
+| `PSZ-AC with electric coil` / `... gas coil` / `... electric baseboard heat` / `... gas boiler` | `psz` (`per_zone: true`) | **one packaged unit per zone** (the CBECS/90.1 convention); gas-boiler variant puts hot-water coils on each unit |
+| `PTAC with baseboard electric` / `... gas boiler` | `zone_terminal` | **self-ventilating** no-heat PTACs (cooling + OA) with baseboards doing the heating |
+| `PTHP` | `zone_terminal` | per-zone packaged terminal heat pumps (DX heat/cool + electric supplemental) |
+| `Window AC with baseboard electric` | `zone_terminal` | cooling-only window units (EER 8.5) + electric baseboards |
+| `Gas unit heaters` / `Electric unit heaters` | `unit_heaters` | per-zone unit heaters, CV fan |
+| `VAV chiller with gas boiler reheat` | `vav_reheat` | central VAV + CHW cooling + gas-boiler HW heat/reheat |
 
 Zone partitioning (heated-only zones get unit heaters/baseboards, cooled-only get the system)
 remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`.
-CBECS backlog (needs unported topologies/options): PTAC/PTHP with self-ventilation, Window AC,
-Forced Air Furnace, heat-pump and district variants, VAV/PVAV composites, DOAS/ERV suffixes.
+Remaining CBECS backlog: Forced Air Furnace / Residential AC (residential furnace machinery),
+heat-pump (WSHP/GSHP) and district variants, PVAV (DX VAV) composites, evaporative coolers,
+DOAS/ERV suffix composites.
 
 ### NECB ECM names — complete (hs08–hs16)
 

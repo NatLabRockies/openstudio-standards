@@ -630,6 +630,93 @@
       "needs_boiler": false,
       "origin": "necb_ecm",
       "comment": "NECB ECM hs16: hs15 with an ASHP (DX) DOAS + supplemental coil."
+    },
+    {
+      "name": "PTAC with baseboard electric",
+      "family": "zone_terminal",
+      "unit_type": "ptac",
+      "heating_type": "None",
+      "baseboard_type": "Electric",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "no-heat PTAC (cooling + ventilation) with electric baseboards doing the heating"
+    },
+    {
+      "name": "PTAC with baseboard gas boiler",
+      "family": "zone_terminal",
+      "unit_type": "ptac",
+      "heating_type": "None",
+      "baseboard_type": "Hot Water",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "origin": "cbecs"
+    },
+    {
+      "name": "PTHP",
+      "family": "zone_terminal",
+      "unit_type": "pthp",
+      "baseboard_type": "None",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "Window AC with baseboard electric",
+      "family": "zone_terminal",
+      "unit_type": "window_ac",
+      "baseboard_type": "Electric",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "cooling-only window units (EER 8.5) + electric baseboards"
+    },
+    {
+      "name": "Gas unit heaters",
+      "family": "unit_heaters",
+      "heating_type": "Gas",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "Electric unit heaters",
+      "family": "unit_heaters",
+      "heating_type": "Electric",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "PSZ-AC with electric baseboard heat",
+      "family": "psz",
+      "sys_abbr": "psz_ac",
+      "per_zone": true,
+      "heating_coil_type": "Electric",
+      "baseboard_type": "Electric",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "PSZ-AC with gas boiler",
+      "family": "psz",
+      "sys_abbr": "psz_ac",
+      "per_zone": true,
+      "heating_coil_type": "Hot Water",
+      "baseboard_type": "None",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "origin": "cbecs",
+      "comment": "per-zone packaged units with hot-water coils served by a gas boiler loop"
+    },
+    {
+      "name": "VAV chiller with gas boiler reheat",
+      "family": "vav_reheat",
+      "sys_abbr": "sys_6",
+      "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water",
+      "baseboard_type": "None",
+      "chiller_type": "Scroll",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "needs_chiller": true,
+      "origin": "cbecs",
+      "comment": "central VAV, chilled-water cooling, gas-boiler hot-water heat + reheat (NECB sizing block reused)"
     }
   ]
 }

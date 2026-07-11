@@ -10,7 +10,9 @@ module OpenStudioHVAC
       'doas_pthp' => Systems::DoasPthp,
       'ecm_ashp_baseboard' => Systems::AshpBaseboard,
       'ecm_doas_vrf' => Systems::DoasVrf,
-      'ecm_hp_fancoils' => Systems::HpPlantFanCoils
+      'ecm_hp_fancoils' => Systems::HpPlantFanCoils,
+      'zone_terminal' => Systems::ZoneTerminal,
+      'unit_heaters' => Systems::UnitHeaters
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)
