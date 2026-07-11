@@ -16,7 +16,9 @@ module OpenStudioHVAC
       'furnace' => Systems::Furnace,
       'evap_cooler' => Systems::EvapCooler,
       'wshp' => Systems::Wshp,
-      'doas' => Systems::Doas
+      'doas' => Systems::Doas,
+      'vrf' => Systems::Vrf,
+      'zone_ervs' => Systems::ZoneErvs
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)
@@ -72,7 +74,11 @@ module OpenStudioHVAC
                                                 source: resolved.fetch('hw_source', 'boiler'))
       end
       chw_loop = nil
-      chw_loop = Systems::PlantLoops.chilled_water(model, chiller_type: resolved.fetch('chiller_type', 'Scroll')) if resolved['needs_chiller']
+      if resolved['needs_chiller']
+        chw_loop = Systems::PlantLoops.chilled_water(model,
+                                                     chiller_type: resolved.fetch('chiller_type', 'Scroll'),
+                                                     source: resolved.fetch('chw_source', 'water_cooled'))
+      end
 
       air_loops = system_class.new(resolved).build(model, zones,
                                                    control_zone: control_zone,

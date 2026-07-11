@@ -122,9 +122,13 @@ module OpenStudioHVAC
 
       private
 
+      # config 'heat_rejection': 'fluid_cooler' (default), 'cooling_tower', or 'ground'
+      # (vertical ground heat exchanger, no boiler — the GSHP variant).
       def build_hp_loop(model, boiler_fuel:)
         existing = model.getPlantLoops.find { |pl| pl.nameString == 'Heat Pump Loop' }
         return existing if existing
+
+        heat_rejection = config.fetch('heat_rejection', 'fluid_cooler')
 
         loop = OpenStudio::Model::PlantLoop.new(model)
         loop.setName('Heat Pump Loop')
@@ -139,16 +143,29 @@ module OpenStudioHVAC
         pump.setName("#{loop.nameString} Pump")
         pump.addToNode(loop.supplyInletNode)
 
-        boiler = OpenStudio::Model::BoilerHotWater.new(model)
-        boiler.setName("#{loop.nameString} Boiler")
-        boiler.setFuelType(boiler_fuel)
-        loop.addSupplyBranchForComponent(boiler)
+        unless heat_rejection == 'ground'
+          boiler = OpenStudio::Model::BoilerHotWater.new(model)
+          boiler.setName("#{loop.nameString} Boiler")
+          boiler.setFuelType(boiler_fuel)
+          loop.addSupplyBranchForComponent(boiler)
+        end
 
-        cooler = OpenStudio::Model::EvaporativeFluidCoolerSingleSpeed.new(model)
-        cooler.setName("#{loop.nameString} Fluid Cooler")
-        cooler.setDesignSprayWaterFlowRate(0.002208)
-        cooler.setPerformanceInputMethod('UFactorTimesAreaAndDesignWaterFlowRate')
-        loop.addSupplyBranchForComponent(cooler)
+        case heat_rejection
+        when 'ground'
+          ghx = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
+          ghx.setName("#{loop.nameString} Ground HX")
+          loop.addSupplyBranchForComponent(ghx)
+        when 'cooling_tower'
+          tower = OpenStudio::Model::CoolingTowerSingleSpeed.new(model)
+          tower.setName("#{loop.nameString} Cooling Tower")
+          loop.addSupplyBranchForComponent(tower)
+        else # fluid_cooler
+          cooler = OpenStudio::Model::EvaporativeFluidCoolerSingleSpeed.new(model)
+          cooler.setName("#{loop.nameString} Fluid Cooler")
+          cooler.setDesignSprayWaterFlowRate(0.002208)
+          cooler.setPerformanceInputMethod('UFactorTimesAreaAndDesignWaterFlowRate')
+          loop.addSupplyBranchForComponent(cooler)
+        end
 
         loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
         OpenStudio::Model::PipeAdiabatic.new(model).addToNode(loop.supplyOutletNode)
@@ -159,6 +176,50 @@ module OpenStudioHVAC
         spm.setLowSetpointSchedule(Schedules.constant_ruleset(model, 'HP Loop Low Temp', 10.0))
         spm.addToNode(loop.supplyOutletNode)
         loop
+      end
+    end
+
+    # VRF: outdoor VRF unit + per-zone terminal units (the CBECS 'VRF' name). Standalone
+    # 'VRF' lets terminals ventilate (default OA); in 'DOAS with VRF' composites the
+    # terminals' OA is zeroed (config 'zone_ventilation': false) and the DOAS ventilates.
+    class Vrf < BaseSystem
+      def build(model, zones, control_zone: nil, namer: :default, hw_loop: nil, chw_loop: nil)
+        outdoor_unit = EcmAir.add_outdoor_vrf_unit(model)
+        vent = config.fetch('zone_ventilation', true)
+        zones.sort_by(&:nameString).each do |zone|
+          terminal = EcmAir.add_zone_vrf_terminal(model, zone, outdoor_unit)
+          next unless vent
+
+          # restore default (autosized) OA on the terminal for the self-ventilating case
+          terminal.autosizeOutdoorAirFlowRateDuringCoolingOperation
+          terminal.autosizeOutdoorAirFlowRateDuringHeatingOperation
+          terminal.autosizeOutdoorAirFlowRateWhenNoCoolingorHeatingisNeeded
+        end
+        []
+      end
+    end
+
+    # Per-zone energy recovery ventilators (the 'with ERVs' suffix): a standalone zone ERV
+    # with supply/exhaust fans and a sensible+latent air-to-air heat exchanger.
+    class ZoneErvs < BaseSystem
+      def build(model, zones, control_zone: nil, namer: :default, hw_loop: nil, chw_loop: nil)
+        zones.sort_by(&:nameString).each do |zone|
+          supply_fan = OpenStudio::Model::FanOnOff.new(model)
+          supply_fan.setName("#{zone.nameString} ERV Supply Fan")
+          exhaust_fan = OpenStudio::Model::FanOnOff.new(model)
+          exhaust_fan.setName("#{zone.nameString} ERV Exhaust Fan")
+
+          erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
+          heat_exchanger = OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent.new(model)
+          heat_exchanger.setName("#{zone.nameString} ERV HX")
+          heat_exchanger.setSupplyAirOutletTemperatureControl(false)
+
+          erv = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilator.new(model, heat_exchanger, supply_fan, exhaust_fan)
+          erv.setName("#{zone.nameString} ERV")
+          erv.setController(erv_controller)
+          erv.addToThermalZone(zone)
+        end
+        []
       end
     end
 

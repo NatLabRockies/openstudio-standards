@@ -991,6 +991,165 @@
         }
       ],
       "comment": "DOAS ventilates; no-MAU four-pipe fan coils condition (chiller + boiler plant)"
+    },
+    {
+      "name": "VRF",
+      "family": "vrf",
+      "zone_ventilation": true,
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "outdoor VRF unit + self-ventilating zone terminals"
+    },
+    {
+      "name": "Zone ERVs",
+      "family": "zone_ervs",
+      "needs_boiler": false,
+      "origin": "generic",
+      "comment": "per-zone energy recovery ventilators - the 'with ERVs' suffix part for composites"
+    },
+    {
+      "name": "DOAS with VRF",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "VRF",
+          "config": {
+            "zone_ventilation": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with water source heat pumps cooling tower with boiler",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "Water source heat pumps",
+          "config": {
+            "heat_rejection": "cooling_tower"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with water source heat pumps with ground source heat pump",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "Water source heat pumps",
+          "config": {
+            "heat_rejection": "ground"
+          }
+        }
+      ],
+      "comment": "GSHP: vertical ground heat exchanger on the HP loop, no boiler"
+    },
+    {
+      "name": "DOAS with fan coil chiller with district hot water",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false,
+            "hw_source": "district"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with fan coil air-cooled chiller with boiler",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false,
+            "chw_source": "air_cooled"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with fan coil air-cooled chiller with district hot water",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false,
+            "chw_source": "air_cooled",
+            "hw_source": "district"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with fan coil district chilled water with boiler",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false,
+            "chw_source": "district"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DOAS with fan coil district chilled water with district hot water",
+      "family": "composite",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false,
+            "chw_source": "district",
+            "hw_source": "district"
+          }
+        }
+      ]
     }
   ]
 }

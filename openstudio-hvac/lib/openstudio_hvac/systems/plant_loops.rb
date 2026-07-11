@@ -92,10 +92,14 @@ module OpenStudioHVAC
       # @param chiller_type [String] 'Scroll', 'Centrifugal', 'Rotary Screw', 'Reciprocating'
       #   (embedded in the chiller names, which host efficiency rules key on)
       # @param reuse [Boolean] return an existing chiller loop when present (default true)
+      # @param source [String] 'water_cooled' (default: dual chillers + condenser loop +
+      #   tower), 'air_cooled' (single air-cooled chiller, no condenser loop), or
+      #   'district' (DistrictCooling object — the CBECS 'district chilled water' pattern)
       # @return [OpenStudio::Model::PlantLoop] the chilled-water loop
-      def self.chilled_water(model, chiller_type: 'Scroll', reuse: true)
+      def self.chilled_water(model, chiller_type: 'Scroll', reuse: true, source: 'water_cooled')
         if reuse
           existing = find_chilled_water(model)
+          existing ||= model.getPlantLoops.find { |pl| pl.nameString == 'Chilled Water Loop' }
           return existing unless existing.nil?
         end
 
@@ -108,18 +112,31 @@ module OpenStudioHVAC
         sizing_plant.setLoopDesignTemperatureDifference(6.0)
 
         chw_pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-
-        chiller1 = OpenStudio::Model::ChillerElectricEIR.new(model)
-        chiller2 = OpenStudio::Model::ChillerElectricEIR.new(model)
-        chiller1.setCondenserType('WaterCooled')
-        chiller2.setCondenserType('WaterCooled')
-        # Names are load-bearing downstream (NECB chiller efficiency rules match on them).
-        chiller1.setName("Primary Chiller WaterCooled #{chiller_type}".strip)
-        chiller2.setName("Secondary Chiller WaterCooled #{chiller_type}".strip)
-
         chw_pump.addToNode(chw_loop.supplyInletNode)
-        chw_loop.addSupplyBranchForComponent(chiller1)
-        chw_loop.addSupplyBranchForComponent(chiller2)
+
+        case source
+        when 'district'
+          district = OpenStudio::Model::DistrictCooling.new(model)
+          district.setName('District Chilled Water')
+          chw_loop.addSupplyBranchForComponent(district)
+          chiller1 = chiller2 = nil
+        when 'air_cooled'
+          chiller1 = OpenStudio::Model::ChillerElectricEIR.new(model)
+          chiller1.setCondenserType('AirCooled')
+          chiller1.setName("Primary Chiller AirCooled #{chiller_type}".strip)
+          chw_loop.addSupplyBranchForComponent(chiller1)
+          chiller2 = nil
+        else # water_cooled
+          chiller1 = OpenStudio::Model::ChillerElectricEIR.new(model)
+          chiller2 = OpenStudio::Model::ChillerElectricEIR.new(model)
+          chiller1.setCondenserType('WaterCooled')
+          chiller2.setCondenserType('WaterCooled')
+          # Names are load-bearing downstream (NECB chiller efficiency rules match on them).
+          chiller1.setName("Primary Chiller WaterCooled #{chiller_type}".strip)
+          chiller2.setName("Secondary Chiller WaterCooled #{chiller_type}".strip)
+          chw_loop.addSupplyBranchForComponent(chiller1)
+          chw_loop.addSupplyBranchForComponent(chiller2)
+        end
         chw_loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
         OpenStudio::Model::PipeAdiabatic.new(model).addToNode(chw_loop.supplyOutletNode)
 
@@ -127,6 +144,8 @@ module OpenStudioHVAC
           model, Schedules.constant_ruleset(model, 'CHW Temp', 7.0)
         )
         chw_stpt.addToNode(chw_loop.supplyOutletNode)
+
+        return chw_loop unless source == 'water_cooled'
 
         # --- condenser water ---
         cw_loop = OpenStudio::Model::PlantLoop.new(model)

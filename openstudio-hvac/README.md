@@ -86,11 +86,15 @@ sizing block — the host's sizing conventions apply):
 built on the same zones — the mechanism for the whole CBECS `DOAS with <zone system>` matrix;
 additional combinations are catalog data, not code.
 
+| `VRF` / `DOAS with VRF` | `vrf` (+composite) | outdoor VRF unit + zone terminals; standalone terminals self-ventilate, the DOAS composite zeroes terminal OA |
+| `DOAS with water source heat pumps {fluid cooler, cooling tower} with boiler` / `... with ground source heat pump` | `composite` (`doas` + `wshp`) | `heat_rejection`: fluid cooler / cooling tower / vertical ground HX (GSHP — no boiler) |
+| `DOAS with fan coil {chiller, air-cooled chiller, district chilled water} with {boiler, district hot water}` | `composite` | full 3×2 matrix via `chw_source` / `hw_source` part configs |
+| `Zone ERVs` | `zone_ervs` | per-zone energy recovery ventilators — the `with ERVs` suffix part for composites |
+
 Zone partitioning (heated-only zones get unit heaters/baseboards, cooled-only get the system)
-remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`.
-Remaining (thin) tail: GSHP variant of the WSHP loop, VRF-based CBECS names (can map onto the
-ECM `ecm_doas_vrf` family), zone-ERV suffixes, and filling out the composite matrix as catalog
-rows.
+remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`. Any
+additional CBECS combination is now composable as a catalog row (a `composite` with `parts`
+and per-part `config` overrides) — no new code required.
 
 ### NECB reference heat pump names (sys1/3/4 ASHP)
 
