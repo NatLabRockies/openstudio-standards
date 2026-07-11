@@ -533,6 +533,16 @@
       "needs_boiler": false,
       "origin": "cbecs",
       "comment": "one packaged unit per zone (CBECS/90.1 convention); no NECB sizing block - host sizing applies"
+    },
+    {
+      "name": "hs11_ashp_pthp",
+      "family": "doas_pthp",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "supp_htg_fuel": "Electric",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs11: DOAS + ASHP + zone PTHPs. Topology only - ECM curves/COPs applied by the host's apply_efficiency_ecm_hs11_ashp_pthp after sizing."
     }
   ]
 }

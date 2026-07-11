@@ -76,8 +76,18 @@ remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_sys
 CBECS backlog (needs unported topologies/options): PTAC/PTHP with self-ventilation, Window AC,
 Forced Air Furnace, heat-pump and district variants, VAV/PVAV composites, DOAS/ERV suffixes.
 
-Planned extensions: remaining CBECS types (above), and NECB ECM system topologies (hs08–hs16).
-NECB reference-heat-pump variants are out of scope for now (they require regional standards
+### NECB ECM names (first increment)
+
+| ECM name | Family | Notes |
+|---|---|---|
+| `hs11_ashp_pthp` | `doas_pthp` | DOAS + air-source heat pump + zone PTHPs. **Topology only** — the capacity-binned ECM curves/COPs are applied by the host's `apply_efficiency_ecm_hs11_ashp_pthp` after sizing, exactly as in the legacy flow (where build-time curve application is provisional and re-done post-sizing). |
+
+ECM backlog (same pattern): hs08/hs13 (CCASHP/ASHP + VRF — needs the VRF outdoor unit +
+terminals port), hs09/hs12 (CCASHP/ASHP + baseboards, VAV multizone variant), hs14–hs16
+(GSHP/CAWHP fan coils — needs ECM plant-loop machinery).
+
+Planned extensions: remaining CBECS types (above) and ECM systems (above). NECB
+reference-heat-pump variants are out of scope for now (they require regional standards
 data; future work via config injection).
 
 ## Design notes

@@ -6,7 +6,8 @@ module OpenStudioHVAC
       'vav_reheat' => Systems::VAVReheat,
       'fan_coils' => Systems::FanCoils,
       'mau_ptac' => Systems::MauPtac,
-      'baseboards' => Systems::BaseboardsOnly
+      'baseboards' => Systems::BaseboardsOnly,
+      'doas_pthp' => Systems::DoasPthp
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)

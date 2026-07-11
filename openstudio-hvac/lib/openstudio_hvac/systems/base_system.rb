@@ -52,10 +52,17 @@ module OpenStudioHVAC
         s
       end
 
-      # Apply the sizing block's zone-level fields (TemperatureDifference method + factors).
+      # Apply the sizing block's zone-level fields: either the TemperatureDifference method
+      # (NECB reference systems) or absolute supply temperatures (ECM systems), plus factors.
       def apply_zone_sizing(zone)
         sz = zone.sizingZone
         z = sizing
+        if z['zone_cooling_design_supply_air_temperature']
+          sz.setZoneCoolingDesignSupplyAirTemperature(z['zone_cooling_design_supply_air_temperature'])
+        end
+        if z['zone_heating_design_supply_air_temperature']
+          sz.setZoneHeatingDesignSupplyAirTemperature(z['zone_heating_design_supply_air_temperature'])
+        end
         if z['zone_cooling_design_supply_air_temperature_input_method']
           sz.setZoneCoolingDesignSupplyAirTemperatureInputMethod(z['zone_cooling_design_supply_air_temperature_input_method'])
         end
