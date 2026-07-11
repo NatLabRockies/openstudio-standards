@@ -12,7 +12,11 @@ module OpenStudioHVAC
       'ecm_doas_vrf' => Systems::DoasVrf,
       'ecm_hp_fancoils' => Systems::HpPlantFanCoils,
       'zone_terminal' => Systems::ZoneTerminal,
-      'unit_heaters' => Systems::UnitHeaters
+      'unit_heaters' => Systems::UnitHeaters,
+      'furnace' => Systems::Furnace,
+      'evap_cooler' => Systems::EvapCooler,
+      'wshp' => Systems::Wshp,
+      'doas' => Systems::Doas
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)
@@ -44,13 +48,29 @@ module OpenStudioHVAC
       resolved = Catalog.resolve(system_name)
       resolved = resolved.merge(config.transform_keys(&:to_s)) if config
 
+      Teardown.remove_hvac_from_zones(model, zones) if remove_existing
+
+      # Composite: a name that builds several catalog parts on the same zones
+      # (e.g. 'DOAS with fan coil chiller with boiler' = DOAS part + no-MAU fan-coil part).
+      if resolved['family'] == 'composite'
+        air_loops = resolved.fetch('parts').flat_map do |part|
+          build_system(model, part.fetch('name'), zones,
+                       control_zone: control_zone, namer: namer,
+                       config: part['config']).air_loops
+        end
+        return Result.new(system_name: system_name, family: 'composite',
+                          air_loops: air_loops, control_zone: control_zone)
+      end
+
       system_class = FAMILIES[resolved['family']]
       raise(ArgumentError, "no builder registered for family '#{resolved['family']}'") if system_class.nil?
 
-      Teardown.remove_hvac_from_zones(model, zones) if remove_existing
-
       hw_loop = nil
-      hw_loop = Systems::PlantLoops.hot_water(model, fuel: resolved.fetch('boiler_fuel', 'NaturalGas')) if resolved['needs_boiler']
+      if resolved['needs_boiler']
+        hw_loop = Systems::PlantLoops.hot_water(model,
+                                                fuel: resolved.fetch('boiler_fuel', 'NaturalGas'),
+                                                source: resolved.fetch('hw_source', 'boiler'))
+      end
       chw_loop = nil
       chw_loop = Systems::PlantLoops.chilled_water(model, chiller_type: resolved.fetch('chiller_type', 'Scroll')) if resolved['needs_chiller']
 

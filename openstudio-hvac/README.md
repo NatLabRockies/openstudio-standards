@@ -75,11 +75,22 @@ sizing block — the host's sizing conventions apply):
 | `Gas unit heaters` / `Electric unit heaters` | `unit_heaters` | per-zone unit heaters, CV fan |
 | `VAV chiller with gas boiler reheat` | `vav_reheat` | central VAV + CHW cooling + gas-boiler HW heat/reheat |
 
+| `Forced air furnace` / `Residential AC with baseboard electric` | `furnace` (+composite) | per-zone CV furnace / cooling-only central AC loops |
+| `Baseboard district hot water` | `baseboards` (`hw_source: 'district'`) | hot-water baseboards on a district-heating loop, no boilers |
+| `PVAV with gas boiler reheat` | `vav_reheat` (`cooling_type: 'dx'`) | packaged VAV: two-speed DX cooling, gas-boiler HW heat/reheat |
+| `Direct evap coolers with baseboard electric` / `... no heat` | `evap_cooler` (+composite) | per-zone direct evap coolers, supply follows outdoor wet-bulb (legacy EMS availability program not replicated — documented) |
+| `DOAS with water source heat pumps fluid cooler with boiler` | `composite` (`doas` + `wshp`) | HP condenser loop (boiler + evaporative fluid cooler) + per-zone water-to-air HPs; DOAS ventilates |
+| `DOAS with fan coil chiller with boiler` | `composite` (`doas` + `fan_coils` `mau: false`) | DOAS ventilates; no-MAU four-pipe fan coils condition |
+
+**Composites**: a `composite` catalog row lists `parts` (other catalog names + config overrides)
+built on the same zones — the mechanism for the whole CBECS `DOAS with <zone system>` matrix;
+additional combinations are catalog data, not code.
+
 Zone partitioning (heated-only zones get unit heaters/baseboards, cooled-only get the system)
 remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`.
-Remaining CBECS backlog: Forced Air Furnace / Residential AC (residential furnace machinery),
-heat-pump (WSHP/GSHP) and district variants, PVAV (DX VAV) composites, evaporative coolers,
-DOAS/ERV suffix composites.
+Remaining (thin) tail: GSHP variant of the WSHP loop, VRF-based CBECS names (can map onto the
+ECM `ecm_doas_vrf` family), zone-ERV suffixes, and filling out the composite matrix as catalog
+rows.
 
 ### NECB reference heat pump names (sys1/3/4 ASHP)
 

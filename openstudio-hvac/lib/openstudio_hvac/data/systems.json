@@ -869,6 +869,128 @@
       "needs_boiler": false,
       "origin": "necb_reference_hp",
       "comment": "NECB reference heat pump sys1: 100% OA MAU with ASHP DX coils, CAV reheat terminals (fuel from name), baseboards"
+    },
+    {
+      "name": "Forced air furnace",
+      "family": "furnace",
+      "heating": true,
+      "cooling": false,
+      "ventilation": true,
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "Residential AC with baseboard electric",
+      "family": "composite",
+      "origin": "cbecs",
+      "needs_boiler": false,
+      "parts": [
+        {
+          "name": "Forced air furnace",
+          "config": {
+            "heating": false,
+            "cooling": true,
+            "ventilation": false
+          }
+        },
+        {
+          "name": "Baseboard electric"
+        }
+      ],
+      "comment": "central AC (cooling-only per-zone loops, no OA) + electric baseboards"
+    },
+    {
+      "name": "Baseboard district hot water",
+      "family": "baseboards",
+      "baseboard_type": "Hot Water",
+      "needs_boiler": true,
+      "hw_source": "district",
+      "origin": "cbecs"
+    },
+    {
+      "name": "PVAV with gas boiler reheat",
+      "family": "vav_reheat",
+      "sys_abbr": "pvav",
+      "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water",
+      "baseboard_type": "None",
+      "cooling_type": "dx",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "needs_chiller": false,
+      "origin": "cbecs",
+      "comment": "packaged VAV: two-speed DX cooling, gas-boiler hot-water heat + reheat"
+    },
+    {
+      "name": "Direct evap coolers with baseboard electric",
+      "family": "composite",
+      "origin": "cbecs",
+      "needs_boiler": false,
+      "parts": [
+        {
+          "name": "Direct evap coolers with no heat"
+        },
+        {
+          "name": "Baseboard electric"
+        }
+      ]
+    },
+    {
+      "name": "Direct evap coolers with no heat",
+      "family": "evap_cooler",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "DOAS ventilation only",
+      "family": "doas",
+      "heating_type": "Electric",
+      "sizing": "necb_mau_ptac",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "the ventilation half of 'DOAS with <zone system>' composites"
+    },
+    {
+      "name": "Water source heat pumps",
+      "family": "wshp",
+      "boiler_fuel": "NaturalGas",
+      "ventilation": false,
+      "sizing": "necb_psz",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "condenser loop (boiler + evaporative fluid cooler) + per-zone water-to-air HPs; ventilate via a DOAS part"
+    },
+    {
+      "name": "DOAS with water source heat pumps fluid cooler with boiler",
+      "family": "composite",
+      "origin": "cbecs",
+      "needs_boiler": false,
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "Water source heat pumps"
+        }
+      ]
+    },
+    {
+      "name": "DOAS with fan coil chiller with boiler",
+      "family": "composite",
+      "origin": "cbecs",
+      "needs_boiler": false,
+      "parts": [
+        {
+          "name": "DOAS ventilation only"
+        },
+        {
+          "name": "FPFC MAU DX Coils with Scroll Chiller",
+          "config": {
+            "mau": false
+          }
+        }
+      ],
+      "comment": "DOAS ventilates; no-MAU four-pipe fan coils condition (chiller + boiler plant)"
     }
   ]
 }

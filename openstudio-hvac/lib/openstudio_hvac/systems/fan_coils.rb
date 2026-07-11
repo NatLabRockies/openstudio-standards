@@ -28,8 +28,20 @@ module OpenStudioHVAC
         fan_coil_type = config.fetch('fan_coil_type', 'FPFC')
         mau_cooling_type = config.fetch('mau_cooling_type', 'DX')
         mau_heating_coil_type = config.fetch('mau_heating_coil_type', 'Gas')
+        with_mau = config.fetch('mau', true)
 
         clg_avail_sch, htg_avail_sch = Schedules.seasonal_availability(model)
+
+        # --- fan coils only (no MAU): ventilation comes from elsewhere, e.g. a DOAS
+        #     composite part (the CBECS 'DOAS with fan coil ...' pattern) ---
+        unless with_mau
+          zones.each do |zone|
+            apply_zone_sizing(zone)
+            add_zone_fan_coil(model, zone, fan_coil_type, always_on, htg_avail_sch, clg_avail_sch,
+                              hw_loop: hw_loop, chw_loop: chw_loop)
+          end
+          return []
+        end
 
         # --- make-up air unit ---
         air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -72,21 +84,8 @@ module OpenStudioHVAC
         # --- zones: sizing, fan coils, diffusers ---
         zones.each do |zone|
           apply_zone_sizing(zone)
-
-          fc_fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
-          if fan_coil_type == 'TPFC'
-            fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, htg_avail_sch)
-            fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, clg_avail_sch)
-          else # FPFC
-            fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
-            fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, always_on)
-          end
-          hw_loop.addDemandBranchForComponent(fc_htg_coil)
-          chw_loop.addDemandBranchForComponent(fc_clg_coil)
-
-          fan_coil = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, always_on, fc_fan, fc_clg_coil, fc_htg_coil)
-          fan_coil.addToThermalZone(zone)
-
+          add_zone_fan_coil(model, zone, fan_coil_type, always_on, htg_avail_sch, clg_avail_sch,
+                            hw_loop: hw_loop, chw_loop: chw_loop)
           diffuser = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, always_on)
           air_loop.addBranchForZone(zone, diffuser.to_StraightComponent)
         end
@@ -111,6 +110,23 @@ module OpenStudioHVAC
       end
 
       private
+
+      def add_zone_fan_coil(model, zone, fan_coil_type, always_on, htg_avail_sch, clg_avail_sch, hw_loop:, chw_loop:)
+        fc_fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
+        if fan_coil_type == 'TPFC'
+          fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, htg_avail_sch)
+          fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, clg_avail_sch)
+        else # FPFC
+          fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+          fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, always_on)
+        end
+        hw_loop.addDemandBranchForComponent(fc_htg_coil)
+        chw_loop.addDemandBranchForComponent(fc_clg_coil)
+
+        fan_coil = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, always_on, fc_fan, fc_clg_coil, fc_htg_coil)
+        fan_coil.addToThermalZone(zone)
+        fan_coil
+      end
 
       # Legacy sys2 emits short fuel tokens ('g'/'e') for the MAU heating coil.
       def legacy_htg_part(mau_heating_coil_type)

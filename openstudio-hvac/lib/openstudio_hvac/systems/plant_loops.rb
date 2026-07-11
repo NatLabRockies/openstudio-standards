@@ -20,10 +20,13 @@ module OpenStudioHVAC
       # @param fuel [String] primary boiler fuel (OpenStudio Boiler fuel type keyword)
       # @param backup_fuel [String] secondary boiler fuel (defaults to primary)
       # @param reuse [Boolean] return an existing boiler loop when present (default true)
+      # @param source [String] 'boiler' (default) or 'district' (DistrictHeating object
+      #   instead of boilers — the CBECS 'district hot water' pattern)
       # @return [OpenStudio::Model::PlantLoop]
-      def self.hot_water(model, fuel: 'NaturalGas', backup_fuel: nil, reuse: true)
+      def self.hot_water(model, fuel: 'NaturalGas', backup_fuel: nil, reuse: true, source: 'boiler')
         if reuse
           existing = find_hot_water(model)
+          existing ||= model.getPlantLoops.find { |pl| pl.nameString == 'Hot Water Loop' }
           return existing unless existing.nil?
         end
 
@@ -37,23 +40,30 @@ module OpenStudioHVAC
 
         # Variable speed (legacy note: constant-speed showed run-away plant temperatures)
         pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-
-        boiler1 = OpenStudio::Model::BoilerHotWater.new(model)
-        boiler2 = OpenStudio::Model::BoilerHotWater.new(model)
-        boiler1.setFuelType(fuel)
-        boiler2.setFuelType(backup_fuel)
-        # Names are load-bearing downstream (NECB boiler efficiency rules match on them).
-        boiler1.setName('Primary Boiler')
-        boiler2.setName('Secondary Boiler')
-
-        boiler_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
-        supply_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
-
         pump.addToNode(hw_loop.supplyInletNode)
-        hw_loop.addSupplyBranchForComponent(boiler1)
-        hw_loop.addSupplyBranchForComponent(boiler2)
-        hw_loop.addSupplyBranchForComponent(boiler_bypass_pipe)
-        supply_outlet_pipe.addToNode(hw_loop.supplyOutletNode)
+
+        if source == 'district'
+          district = if model.version < OpenStudio::VersionString.new('3.7.0')
+                       OpenStudio::Model::DistrictHeating.new(model)
+                     else
+                       OpenStudio::Model::DistrictHeatingWater.new(model)
+                     end
+          district.setName('District Hot Water')
+          hw_loop.addSupplyBranchForComponent(district)
+        else
+          boiler1 = OpenStudio::Model::BoilerHotWater.new(model)
+          boiler2 = OpenStudio::Model::BoilerHotWater.new(model)
+          boiler1.setFuelType(fuel)
+          boiler2.setFuelType(backup_fuel)
+          # Names are load-bearing downstream (NECB boiler efficiency rules match on them).
+          boiler1.setName('Primary Boiler')
+          boiler2.setName('Secondary Boiler')
+          hw_loop.addSupplyBranchForComponent(boiler1)
+          hw_loop.addSupplyBranchForComponent(boiler2)
+        end
+
+        hw_loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
+        OpenStudio::Model::PipeAdiabatic.new(model).addToNode(hw_loop.supplyOutletNode)
 
         stpt = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
         stpt.setControlVariable('Temperature')

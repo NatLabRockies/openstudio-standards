@@ -14,8 +14,11 @@ module OpenStudioHVAC
       # @param hw_loop [OpenStudio::Model::PlantLoop, nil] for hot-water coil/reheat/baseboards
       # @param chw_loop [OpenStudio::Model::PlantLoop] chilled-water loop for the cooling coil
       # @return [Array<OpenStudio::Model::AirLoopHVAC>]
+      # config 'cooling_type': 'chilled_water' (default, NECB sys6) or 'dx' (packaged VAV —
+      # the CBECS PVAV pattern: two-speed DX cooling, no chiller plant).
       def build(model, zones, control_zone: nil, namer: :default, hw_loop: nil, chw_loop: nil)
-        raise(ArgumentError, 'VAVReheat requires a chilled water loop (needs_chiller)') if chw_loop.nil?
+        dx_cooling = config.fetch('cooling_type', 'chilled_water') == 'dx'
+        raise(ArgumentError, 'VAVReheat requires a chilled water loop (needs_chiller)') if chw_loop.nil? && !dx_cooling
 
         heating_coil_type = config['heating_coil_type']
         baseboard_type = config['baseboard_type']
@@ -65,8 +68,13 @@ module OpenStudioHVAC
         return_fan.setName('Sys6 Return Fan')   # for host fan rules
 
         htg_coil = Coils.heating_coil(model, heating_coil_type, always_on, hw_loop: hw_loop)
-        clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, always_on)
-        chw_loop.addDemandBranchForComponent(clg_coil)
+        if config.fetch('cooling_type', 'chilled_water') == 'dx'
+          clg_coil = OpenStudio::Model::CoilCoolingDXTwoSpeed.new(model)
+          clg_coil.setName('CoilCoolingDXTwoSpeed_PVAV')
+        else
+          clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, always_on)
+          chw_loop.addDemandBranchForComponent(clg_coil)
+        end
 
         oa_system = build_oa_system(model)
 
@@ -107,7 +115,7 @@ module OpenStudioHVAC
                      parts: {
                        sys_hr: 'none',
                        sys_htg: heating_coil_type,
-                       sys_clg: 'Chilled Water',
+                       sys_clg: config.fetch('cooling_type', 'chilled_water') == 'dx' ? 'dx' : 'Chilled Water',
                        sys_sf: 'vv',
                        zone_htg: baseboard_type,
                        zone_clg: 'none',
