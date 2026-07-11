@@ -2,7 +2,8 @@ module OpenStudioHVAC
   # The public facade.
   module Builder
     FAMILIES = {
-      'psz' => Systems::PSZ
+      'psz' => Systems::PSZ,
+      'vav_reheat' => Systems::VAVReheat
     }.freeze
 
     Result = Struct.new(:system_name, :family, :air_loops, :control_zone, keyword_init: true)
@@ -41,11 +42,14 @@ module OpenStudioHVAC
 
       hw_loop = nil
       hw_loop = Systems::PlantLoops.hot_water(model, fuel: resolved.fetch('boiler_fuel', 'NaturalGas')) if resolved['needs_boiler']
+      chw_loop = nil
+      chw_loop = Systems::PlantLoops.chilled_water(model, chiller_type: resolved.fetch('chiller_type', 'Scroll')) if resolved['needs_chiller']
 
       air_loops = system_class.new(resolved).build(model, zones,
                                                    control_zone: control_zone,
                                                    namer: namer,
-                                                   hw_loop: hw_loop)
+                                                   hw_loop: hw_loop,
+                                                   chw_loop: chw_loop)
 
       Result.new(system_name: system_name, family: resolved['family'],
                  air_loops: air_loops, control_zone: control_zone)

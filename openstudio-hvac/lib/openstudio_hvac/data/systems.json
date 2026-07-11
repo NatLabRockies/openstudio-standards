@@ -40,6 +40,102 @@
       "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
       "family": "psz", "sys_abbr": "sys_4", "sizing": "necb_psz",
       "heating_coil_type": "Electric", "baseboard_type": "Electric", "needs_boiler": false
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Electric", "chiller_type": "Scroll",
+      "needs_boiler": false, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Hot Water", "chiller_type": "Scroll",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Electric", "chiller_type": "Centrifugal",
+      "needs_boiler": false, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Hot Water", "chiller_type": "Centrifugal",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Electric", "chiller_type": "Rotary Screw",
+      "needs_boiler": false, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Hot Water", "chiller_type": "Rotary Screw",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Electric", "chiller_type": "Reciprocating",
+      "needs_boiler": false, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Electric", "baseboard_type": "Hot Water", "chiller_type": "Reciprocating",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Electric", "chiller_type": "Scroll",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Hot Water", "chiller_type": "Scroll",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Electric", "chiller_type": "Centrifugal",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Hot Water", "chiller_type": "Centrifugal",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Electric", "chiller_type": "Rotary Screw",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Hot Water", "chiller_type": "Rotary Screw",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Electric", "chiller_type": "Reciprocating",
+      "needs_boiler": true, "needs_chiller": true
+    },
+    {
+      "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+      "family": "vav_reheat", "sys_abbr": "sys_6", "sizing": "necb_vav",
+      "heating_coil_type": "Hot Water", "baseboard_type": "Hot Water", "chiller_type": "Reciprocating",
+      "needs_boiler": true, "needs_chiller": true
     }
   ]
 }

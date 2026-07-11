@@ -65,6 +65,88 @@ module OpenStudioHVAC
 
         hw_loop
       end
+
+      # Find an existing chilled-water loop (one with a chiller on the supply side), or nil.
+      def self.find_chilled_water(model)
+        model.getPlantLoops.find do |pl|
+          pl.supplyComponents(OpenStudio::Model::ChillerElectricEIR.iddObjectType).any?
+        end
+      end
+
+      # Build a chilled-water loop (7C exit / 6K dT, variable-speed pump, primary + secondary
+      # water-cooled chillers, constant 7C setpoint) AND its condenser-water loop (29C / 6K,
+      # single-speed cooling tower 24/35/5/6 design temps, constant 29C setpoint), ported from
+      # NECB setup_chw_loop_with_components / setup_cw_loop_with_components.
+      #
+      # @param model [OpenStudio::Model::Model]
+      # @param chiller_type [String] 'Scroll', 'Centrifugal', 'Rotary Screw', 'Reciprocating'
+      #   (embedded in the chiller names, which host efficiency rules key on)
+      # @param reuse [Boolean] return an existing chiller loop when present (default true)
+      # @return [OpenStudio::Model::PlantLoop] the chilled-water loop
+      def self.chilled_water(model, chiller_type: 'Scroll', reuse: true)
+        if reuse
+          existing = find_chilled_water(model)
+          return existing unless existing.nil?
+        end
+
+        # --- chilled water ---
+        chw_loop = OpenStudio::Model::PlantLoop.new(model)
+        chw_loop.setName('Chilled Water Loop')
+        sizing_plant = chw_loop.sizingPlant
+        sizing_plant.setLoopType('Cooling')
+        sizing_plant.setDesignLoopExitTemperature(7.0)
+        sizing_plant.setLoopDesignTemperatureDifference(6.0)
+
+        chw_pump = OpenStudio::Model::PumpVariableSpeed.new(model)
+
+        chiller1 = OpenStudio::Model::ChillerElectricEIR.new(model)
+        chiller2 = OpenStudio::Model::ChillerElectricEIR.new(model)
+        chiller1.setCondenserType('WaterCooled')
+        chiller2.setCondenserType('WaterCooled')
+        # Names are load-bearing downstream (NECB chiller efficiency rules match on them).
+        chiller1.setName("Primary Chiller WaterCooled #{chiller_type}".strip)
+        chiller2.setName("Secondary Chiller WaterCooled #{chiller_type}".strip)
+
+        chw_pump.addToNode(chw_loop.supplyInletNode)
+        chw_loop.addSupplyBranchForComponent(chiller1)
+        chw_loop.addSupplyBranchForComponent(chiller2)
+        chw_loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
+        OpenStudio::Model::PipeAdiabatic.new(model).addToNode(chw_loop.supplyOutletNode)
+
+        chw_stpt = OpenStudio::Model::SetpointManagerScheduled.new(
+          model, Schedules.constant_ruleset(model, 'CHW Temp', 7.0)
+        )
+        chw_stpt.addToNode(chw_loop.supplyOutletNode)
+
+        # --- condenser water ---
+        cw_loop = OpenStudio::Model::PlantLoop.new(model)
+        cw_loop.setName('Condenser Water Loop')
+        cw_sizing = cw_loop.sizingPlant
+        cw_sizing.setLoopType('Condenser')
+        cw_sizing.setDesignLoopExitTemperature(29.0)
+        cw_sizing.setLoopDesignTemperatureDifference(6.0)
+
+        cw_pump = OpenStudio::Model::PumpVariableSpeed.new(model)
+        clg_tower = OpenStudio::Model::CoolingTowerSingleSpeed.new(model)
+        clg_tower.setDesignInletAirWetBulbTemperature(24.0)
+        clg_tower.setDesignInletAirDryBulbTemperature(35.0)
+        clg_tower.setDesignApproachTemperature(5.0)
+        clg_tower.setDesignRangeTemperature(6.0)
+
+        cw_pump.addToNode(cw_loop.supplyInletNode)
+        cw_loop.addSupplyBranchForComponent(clg_tower)
+        cw_loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
+        OpenStudio::Model::PipeAdiabatic.new(model).addToNode(cw_loop.supplyOutletNode)
+        cw_loop.addDemandBranchForComponent(chiller1)
+        cw_loop.addDemandBranchForComponent(chiller2)
+
+        cw_stpt = OpenStudio::Model::SetpointManagerScheduled.new(
+          model, Schedules.constant_ruleset(model, 'CW Temp', 29.0)
+        )
+        cw_stpt.addToNode(cw_loop.supplyOutletNode)
+
+        chw_loop
+      end
     end
   end
 end

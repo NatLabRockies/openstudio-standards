@@ -17,8 +17,9 @@ module OpenStudioHVAC
       # @param control_zone [OpenStudio::Model::ThermalZone] drives the shared handler
       # @param namer [Symbol] :default or :necb_pipe_name
       # @param hw_loop [OpenStudio::Model::PlantLoop, nil] for hot-water coil/baseboards
+      # @param chw_loop [OpenStudio::Model::PlantLoop, nil] unused (DX cooling); shared contract
       # @return [Array<OpenStudio::Model::AirLoopHVAC>]
-      def build(model, zones, control_zone:, namer: :default, hw_loop: nil)
+      def build(model, zones, control_zone:, namer: :default, hw_loop: nil, chw_loop: nil)
         always_on = model.alwaysOnDiscreteSchedule
         heating_coil_type = config['heating_coil_type']
         baseboard_type = config['baseboard_type']

@@ -33,35 +33,39 @@ module OpenStudioHVAC
       'ptac' => 'zc>ptac', 'pthp' => 'zc>pthp'
     }.freeze
 
-    # Build the NECB pipe-name from name parts. Token semantics and ordering match
-    # openstudio-standards assign_base_sys_name exactly (sys_hr, sys_clg, sys_htg, sys_sf,
-    # zone_htg, zone_clg, sys_rf).
+    # Build the NECB pipe-name from name parts. Token semantics match openstudio-standards
+    # assign_base_sys_name exactly, and — like the legacy method — tokens are emitted in the
+    # PARTS HASH INSERTION ORDER (legacy systems differ: sys3/sys4 put sys_clg before
+    # sys_htg; sys6 puts sys_htg before sys_clg). Callers pass parts in the legacy order.
     #
     # @param sys_abbr [String] e.g. 'sys_3'
     # @param sys_oa [String] 'mixed' or 'doas'
-    # @param parts [Hash] sys_hr:, sys_clg:, sys_htg:, sys_sf:, zone_htg:, zone_clg:, sys_rf:
+    # @param parts [Hash] insertion-ordered subset of
+    #   sys_hr:, sys_clg:, sys_htg:, sys_sf:, zone_htg:, zone_clg:, sys_rf:
     # @return [String]
     def self.necb_pipe_name(sys_abbr:, sys_oa:, parts:)
-      htg = parts.fetch(:sys_htg, 'none').to_s.downcase
-      clg = parts.fetch(:sys_clg, 'none').to_s.downcase
+      htg = (parts[:sys_htg] || 'none').to_s.downcase
 
-      # Legacy quirk preserved: DX cooling paired with heat-pump heating reads 'sc>ashp'.
-      clg_token = if clg == 'dx' && ['dx', 'ashp>c-g', 'ashp>c-e', 'ashp>c-hw'].include?(htg)
-                    'sc>ashp'
-                  else
-                    CLG_TOKENS.fetch(clg, 'sc>none')
-                  end
+      tokens = parts.map do |key, value|
+        v = value.to_s.downcase
+        case key.to_sym
+        when :sys_hr then 'shr>none'
+        when :sys_clg
+          # Legacy quirk preserved: DX cooling paired with heat-pump heating reads 'sc>ashp'.
+          if v == 'dx' && ['dx', 'ashp>c-g', 'ashp>c-e', 'ashp>c-hw'].include?(htg)
+            'sc>ashp'
+          else
+            CLG_TOKENS.fetch(v, 'sc>none')
+          end
+        when :sys_htg then HTG_TOKENS.fetch(v, 'sh>none')
+        when :sys_sf then "ssf>#{FAN_TOKENS.fetch(v, 'none')}"
+        when :zone_htg then ZONE_HTG_TOKENS.fetch(v, 'zh>none')
+        when :zone_clg then ZONE_CLG_TOKENS.fetch(v, 'zc>none')
+        when :sys_rf then "srf>#{FAN_TOKENS.fetch(v, 'none')}"
+        end
+      end.compact
 
-      [
-        sys_abbr, sys_oa,
-        'shr>none',
-        clg_token,
-        HTG_TOKENS.fetch(htg, 'sh>none'),
-        "ssf>#{FAN_TOKENS.fetch(parts.fetch(:sys_sf, 'none').to_s.downcase, 'none')}",
-        ZONE_HTG_TOKENS.fetch(parts.fetch(:zone_htg, 'none').to_s.downcase, 'zh>none'),
-        ZONE_CLG_TOKENS.fetch(parts.fetch(:zone_clg, 'none').to_s.downcase, 'zc>none'),
-        "srf>#{FAN_TOKENS.fetch(parts.fetch(:sys_rf, 'none').to_s.downcase, 'none')}"
-      ].join('|') + '|'
+      ([sys_abbr, sys_oa] + tokens).join('|') + '|'
     end
 
     # Apply a name to an air loop per the selected namer.

@@ -68,6 +68,17 @@ module OpenStudioHVAC
           changed = true
         end
 
+        # Water coils stranded by an air-loop removal stay attached as plant demand
+        # components; remove them so their loop can empty on the next pass.
+        (model.getCoilCoolingWaters + model.getCoilHeatingWaters).each do |coil|
+          next if coil.airLoopHVAC.is_initialized
+          next if coil.containingHVACComponent.is_initialized
+          next if coil.containingZoneHVACComponent.is_initialized
+
+          coil.remove
+          changed = true
+        end
+
         break unless changed
       end
 
