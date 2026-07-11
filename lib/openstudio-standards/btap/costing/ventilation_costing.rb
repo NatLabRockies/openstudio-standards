@@ -172,7 +172,7 @@ class BTAPCosting
           if suppcomp.isRatedCapacityAutosized
             mech_capacity = suppcomp.autosizedRatedCapacity.to_f/1000.0
           else
-            suppcomp.ratedCapacity.to_f/1000.0
+            mech_capacity = suppcomp.ratedCapacity.to_f/1000.0
           end
           cat_search = 'coils'
           heat_cap['HW'] += mech_capacity
@@ -538,7 +538,7 @@ class BTAPCosting
     # Find the new capacity of the pieces of equipment
     new_cap = loop_equip[:mech_capacity_kw].to_f/multiplier.to_f
     # Find the smallest piece of costed equimpent that meets the new size requirement.
-    return_equip = heat_cool_cost.select{|data| data['Size'].to_f >= new_cap}.min_by{|element| element['Size'.to_f]}
+    return_equip = heat_cool_cost.select{|data| data['Size'].to_f >= new_cap}.min_by{|element| element['Size'].to_f}
     # If no costed equipment can be found that matches this new size then something is wrong and use the largest piece
     # you found before.
     return_equip = max_size if (return_equip.nil? || return_equip.empty?)
@@ -781,7 +781,7 @@ class BTAPCosting
     heat_cool_cost_data = @costing_database['raw']['materials_hvac'].select {|data|
       data['Material'].to_s.upcase == equipment_info[:cat_search].to_s.upcase and
         data['Size'].to_f.round(8) >= equipment_info[:mech_capacity_kw].to_f
-    }.min_by{|heat_cool| heat_cool[:mech_capcity_kw].to_f}
+    }.min_by{|heat_cool| heat_cool['Size'].to_f}
     # If it cannot find any then assume the largest piece of equipment in the costing spreadsheet is too small and
     # figure out how many of a smaller piece of equipment are required and what the smaller piece of equipment would be.
     if heat_cool_cost_data.nil? || heat_cool_cost_data.empty?
@@ -959,7 +959,7 @@ class BTAPCosting
               mult: utility_dist + rt_roof_dist*value
           }
           heat_type['Gas'] = 0
-          mech_to_roof_rep[:Gas_Line_m] == (utility_dist + rt_roof_dist*value).round(1)
+          mech_to_roof_rep[:Gas_Line_m] = (utility_dist + rt_roof_dist*value).round(1)
         when 'HW'
           ut_search << {
               mat: 'SteelPipe',
@@ -1085,7 +1085,7 @@ class BTAPCosting
       box_name = 'VAVFanMixingBoxesHtg'
     when /OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat/
       terminal = eq.to_AirTerminalSingleDuctConstantVolumeNoReheat.get
-      box_nam = nil
+      box_name = nil
     else
       terminal = nil
       box_name = nil
@@ -1454,9 +1454,9 @@ class BTAPCosting
     return {start_point: furthest_line, mid_point: target_cent, end_point: nil} unless full_length
 
     x_dist_ref = (furthest_line[:line][:int][0].round(tol) - target_cent[0].round(tol))
-    x_dist_ref == 1 if x_dist_ref == 0
+    x_dist_ref = 1 if x_dist_ref == 0
     y_dist_ref = (furthest_line[:line][:int][1].round(tol) - target_cent[1].round(tol))
-    y_dist_ref == 1 if y_dist_ref == 0
+    y_dist_ref = 1 if y_dist_ref == 0
     x_side_ref = x_dist_ref/x_dist_ref.abs
     y_side_ref = y_dist_ref/y_dist_ref.abs
     linea_eq = get_line_eq(a: target_cent, b: furthest_line[:line][:int], tol: tol)
