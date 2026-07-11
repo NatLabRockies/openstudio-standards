@@ -13,6 +13,7 @@ require_relative 'openstudio_hvac/systems/plant_loops'
 require_relative 'openstudio_hvac/systems/baseboards'
 require_relative 'openstudio_hvac/systems/psz'
 require_relative 'openstudio_hvac/systems/vav_reheat'
+require_relative 'openstudio_hvac/systems/fan_coils'
 require_relative 'openstudio_hvac/builder'
 
 # OpenStudioHVAC builds HVAC system topologies on OpenStudio thermal zones by

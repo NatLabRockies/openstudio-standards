@@ -51,8 +51,9 @@ standard.model_apply_hvac_efficiency_standard(model, 'NECB HDD Method')
 |---|---|---|
 | `psz` | `PSZ RTU {Gas,Electric} and DX Coils and {Hot Water,Electric} Baseboard` (+ `with exhaust` variants) | NECB sys3 / sys4, unified into one implementation |
 | `vav_reheat` | `MZ BU RTU {Electric,Hot Water} Heating Coil {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller and {Electric,Hot Water} Baseboard` | NECB sys6: per-story built-up VAV, supply+return fans, CHW/CW plant |
+| `fan_coils` | `{FPFC,TPFC} MAU {DX,Chilled Water} Coils with {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller` | NECB sys2/sys5: per-zone fan coils + CV make-up air unit. TPFC names are NEW (the legacy catalog had no sys5 descriptions) |
 
-Coming next: fan coils FPFC/TPFC + MAU (NECB sys2/5), MAU + PTAC (sys1). Planned extensions:
+Coming next: MAU + PTAC (NECB sys1). Planned extensions:
 CBECS descriptive types mapped onto these families, and NECB ECM system topologies (hs08–hs16).
 NECB reference-heat-pump variants are out of scope for now (they require regional standards
 data; future work via config injection).
