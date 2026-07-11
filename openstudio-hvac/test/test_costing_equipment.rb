@@ -37,8 +37,11 @@ class TestCostingEquipment < Minitest::Test
     model.getBoilerHotWaters.each { |b| b.setNominalCapacity(50_000.0) } # 50 kW
     ledger, quantifier = quantify(model)
 
-    boiler_items = ledger.items.select { |i| i['note'].to_s.include?('boiler') }
+    boiler_items = ledger.items.select { |i| i['note'].to_s.match?(/\Aboiler .* kW\z/) }
     assert_equal 2, boiler_items.size, 'primary + secondary'
+    # geometry pass adds flue + fuel/electrical runs + header piping for the boiler loop
+    assert(ledger.items.any? { |i| i['note'].to_s.include?('flue') }, 'gas boiler flue costed')
+    assert(ledger.items.any? { |i| i['note'].to_s.include?('header piping') }, 'header piping costed')
     # NECB boiler efficiency not applied (unsized) -> default eff -> bucket varies; assert costed either way
     assert(ledger.items.any? { |i| i['tags'].include?('HEATING_COOLING') })
     # HW baseboards produce ConvectCopper items with capacity warning (unsized) or entries

@@ -21,6 +21,7 @@ class TestCostingE2E < Minitest::Test
     # hard-size in lieu of a sizing run
     result.air_loops.each { |al| al.setDesignSupplyAirFlowRate(2.0) } # m3/s (~4238 cfm)
     model.getCoilCoolingDXSingleSpeeds.each { |c| c.setRatedTotalCoolingCapacity(40_000.0) }
+    model.getZoneHVACBaseboardConvectiveElectrics.each { |b| b.setNominalCapacity(2_000.0) }
 
     report = OpenStudioHVAC.cost(model, systems: [result], city: 'TORONTO', province_state: 'ONTARIO')
 
@@ -29,7 +30,8 @@ class TestCostingE2E < Minitest::Test
     assert_operator report.by_category['DISTRIBUTION'].to_f, :>, 0, 'zone duct/diffusers costed'
     assert_operator report.by_category['ZONAL'].to_f, :>, 0, 'electric baseboards costed'
     assert(report.items.any? { |i| i['note'].to_s.include?('AHU') })
-    assert(report.warnings.any? { |w| w.include?('trunk duct') }, 'deferred geometry is a warning, not silence')
+    assert(report.items.any? { |i| i['note'].to_s.include?('mech room -> roof') },
+           'geometry-derived utility runs costed')
   end
 
   def test_hydronic_vav_costs_plant_and_ahu

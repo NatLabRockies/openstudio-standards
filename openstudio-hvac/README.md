@@ -175,23 +175,42 @@ report.total          # $
 report.by_category    # HEATING_COOLING / ZONAL / VENTILATION / DISTRIBUTION
 report.items          # re-costable ledger: [{id, quantity, mults, tags, cost}]
 report.warnings       # anything uncosted is EXPLICIT (never silent zeros)
+# mech_room_name: 'Space 5' pins the mechanical room for geometry-derived items;
+# default election matches legacy (Electrical/Mechanical space type, else the
+# lowest-storey conditioned space closest to the building centre)
 ```
 
-- **Requires a sized model** (capacities/flows read from hard or autosized values).
+- **Requires a sized model** (capacities/flows read from hard or autosized values; some
+  fallbacks — hot-water coil capacities, zone heating loads — additionally use the attached
+  SQL file when present).
 - **What's costed:** plant (boilers by fuel/efficiency bucket, chillers by compressor/condenser
   type, towers, pumps + VFDs, AWHP/GSHP), zonal (PTAC/PTHP/fan coils/VRF terminals + outdoor
   units/baseboards/unit heaters/WSHP/zone ERVs — WSHP/ERV extend legacy coverage), AHU
-  assemblies (component layers × quantities), zone distribution (diffusers, ductwork lbs,
-  duct insulation ft²), with RS-Means-style city localization and per-item material/labour
-  multipliers. The ledger can be re-priced for any city or custom database.
+  assemblies (component layers × quantities), air-loop coil equipment (hydronic/DX/gas/electric
+  coils, DX condensing units + refrigerant piping, CCASHP extras), and the **full geometry
+  layer** (SDK-only ports of the legacy mech-room/roof-centroid/storey-edge helpers):
+  boiler/chiller flues, fuel lines and electrical utility runs, piping-to-pumps, hot/chilled
+  water header piping distribution, tower risers, mech-room-to-roof gas/HW/CHW/electrical
+  lines, central + floor trunk ducts, per-terminal hydronic piping and electrical runs,
+  HW-baseboard copper convectors with perimeter distribution piping/wiring, HRV cores with
+  return fans, and per-zone duct distribution (diffusers, ductwork lbs, insulation, flex duct)
+  — with RS-Means-style city localization and per-item material/labour multipliers. The
+  ledger can be re-priced for any city or custom database.
 - **Data & licensing:** vendored CSVs are ~91% `placeholder` values in an RS-Means-derived
   schema (`lib/openstudio_hvac/data/costing/README.md`); real licensed values are injected via
   `costs_csv:` and must never be committed.
-- **Documented deferrals (explicit warnings):** trunk-duct/flue/utility-run geometry costing;
-  district energy connection costs; evaporative-cooler media (no unit-cost data exists — legacy
-  never costed it either); fan-coil MAU ventilation (matches legacy sys-2 handling). Line-item
-  parity vs legacy `BTAPCosting` on NECB archetypes is the outstanding validation step (requires
-  a full BTAP analysis run for the reference ledger).
+- **Parity vs legacy `BTAPCosting` (NECB sys6 on the 5-zone fixture, same sized model):**
+  ledger diff is **28/28 ids matched, zero quantity differences, zero one-sided ids**; the
+  legacy zonal domain total is reproduced **exactly to the dollar**. The only deviations are
+  documented *corrections of a legacy defect*: E+ reports no sized `Rated Capacity` for
+  hot-water coils, so legacy misclassifies hydronic AHUs as heat pumps — selecting the wrong
+  `hvac_vent_ahu` assembly row (dropping the heating-coil valve-piping set), omitting the
+  mech-room-to-roof HW line, and never costing the air-loop HW heating coil. The gem costs
+  the correct HW assembly and roof line (the HW coil itself is uncostable from E+ output in
+  both implementations — the gem warns, legacy is silent).
+- **Documented deferrals (explicit warnings):** district energy connection costs;
+  evaporative-cooler media (no unit-cost data exists — legacy never costed it either);
+  fan-coil MAU ventilation (matches legacy sys-2 handling).
 
 ## Design notes
 

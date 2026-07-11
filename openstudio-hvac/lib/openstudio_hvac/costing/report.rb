@@ -12,8 +12,11 @@ module OpenStudioHVAC
     # @param city [String, nil] cost location; nil => nearest city to the model's weather site
     # @param province_state [String, nil]
     # @param costs_csv [String, nil] inject licensed cost values (see data/costing/README.md)
+    # @param mech_room_name [String, nil] pin the mechanical-room space by name for the
+    #   geometry-derived items (utility runs, flues, header piping); nil => legacy
+    #   election (Electrical/Mechanical space type, else lowest storey closest to centre)
     # @return [Report]
-    def self.cost(model, systems: nil, city: nil, province_state: nil, costs_csv: nil)
+    def self.cost(model, systems: nil, city: nil, province_state: nil, costs_csv: nil, mech_room_name: nil)
       database = Database.new(costs_csv: costs_csv)
       ledger = Ledger.new
 
@@ -24,7 +27,7 @@ module OpenStudioHVAC
         province_state ||= location['province_state']
       end
 
-      equipment = EquipmentQuantifier.new(database, ledger)
+      equipment = EquipmentQuantifier.new(database, ledger, mech_room_name: mech_room_name)
       equipment.quantify_plant(model)
       equipment.quantify_zonal(model)
 
@@ -36,7 +39,7 @@ module OpenStudioHVAC
         end
       end
       ventilation = VentilationQuantifier.new(database, ledger)
-      ventilation.quantify(model, loop_families)
+      ventilation.quantify(model, loop_families, mech_room_name: mech_room_name)
 
       priced = ledger.price(database, province_state: province_state, city: city)
       Report.new(total: priced['total'],
