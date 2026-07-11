@@ -1,0 +1,502 @@
+[
+  {
+    "component": "piping",
+    "table": [
+      {
+        "ahu_airflow_range_Literpers": [
+          0,
+          1000
+        ],
+        "heat_valve_pipe_dia_inch": 1.0,
+        "cool_valve_pipe_dia_inch": 1.25
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          1000,
+          2500
+        ],
+        "heat_valve_pipe_dia_inch": 1.25,
+        "cool_valve_pipe_dia_inch": 1.5
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          2500,
+          4000
+        ],
+        "heat_valve_pipe_dia_inch": 1.5,
+        "cool_valve_pipe_dia_inch": 2.0
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          4000,
+          6000
+        ],
+        "heat_valve_pipe_dia_inch": 2.0,
+        "cool_valve_pipe_dia_inch": 2.5
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          6000,
+          8000
+        ],
+        "heat_valve_pipe_dia_inch": 2.0,
+        "cool_valve_piep_dia_inch": 2.5
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          8000,
+          12000
+        ],
+        "heat_valve_pipe_dia_inch": 2.5,
+        "cool_valve_pipe_dia_inch": 3.0
+      },
+      {
+        "ahu_airflow_range_Literpers": [
+          12000,
+          15000
+        ],
+        "heat_valve_pipe_dia_inch": 3.0,
+        "cool_valve_pipe_dia_inch": 4.0
+      }
+    ]
+  },
+  {
+    "component": "trunk",
+    "table": [
+      {
+        "max_flow_range_m3pers": [
+          0,
+          0.14
+        ],
+        "duct_dia_inch": 5
+      },      {
+        "max_flow_range_m3pers": [
+          0.14,
+          0.19
+        ],
+        "duct_dia_inch": 6
+      },      {
+        "max_flow_range_m3pers": [
+          0.19,
+          0.25
+        ],
+        "duct_dia_inch": 7
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.25,
+          0.35
+        ],
+        "duct_dia_inch": 8
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.35,
+          0.59
+        ],
+        "duct_dia_inch": 10
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.59,
+          0.94
+        ],
+        "duct_dia_inch": 12
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.94,
+          1.39
+        ],
+        "duct_dia_inch": 14
+      },
+      {
+        "max_flow_range_m3pers": [
+          1.39,
+          1.95
+        ],
+        "duct_dia_inch": 16
+      },
+      {
+        "max_flow_range_m3pers": [
+          1.95,
+          2.75
+        ],
+        "duct_dia_inch": 18
+      },
+      {
+        "max_flow_range_m3pers": [
+          2.75,
+          3.8
+        ],
+        "duct_dia_inch": 20
+      },
+      {
+        "max_flow_range_m3pers": [
+          3.8,
+          4.7
+        ],
+        "duct_dia_inch": 22
+      },
+      {
+        "max_flow_range_m3pers": [
+          4.7,
+          5.9
+        ],
+        "duct_dia_inch": 24
+      },
+      {
+        "max_flow_range_m3pers": [
+          5.9,
+          9.5
+        ],
+        "duct_dia_inch": 30
+      },
+      {
+        "max_flow_range_m3pers": [
+          9.5,
+          9999
+        ],
+        "duct_dia_inch": 36
+      }
+    ]
+  },
+  {
+    "component": "diff_duct",
+    "table": [
+      {
+        "max_flow_range_m3pers": [
+          0,
+          0.094
+        ],
+        "diff_num": 2,
+        "duct_weight_lbs": 55,
+        "duct_ins_ft2": 40,
+        "flex_duct_LinFt": 16
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.094,
+          0.188
+        ],
+        "diff_num": 3,
+        "duct_weight_lbs": 125,
+        "duct_ins_ft2": 96,
+        "flex_duct_LinFt": 24
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.188,
+          0.283
+        ],
+        "diff_num": 4,
+        "duct_weight_lbs": 190,
+        "duct_ins_ft2": 144,
+        "flex_duct_LinFt": 32
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.283,
+          0.377
+        ],
+        "diff_num": 4,
+        "duct_weight_lbs": 225,
+        "duct_ins_ft2": 196,
+        "flex_duct_LinFt": 32
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.377,
+          0.472
+        ],
+        "diff_num": 5,
+        "duct_weight_lbs": 290,
+        "duct_ins_ft2": 224,
+        "flex_duct_LinFt": 40
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.472,
+          0.59
+        ],
+        "diff_num": 6,
+        "duct_weight_lbs": 395,
+        "duct_ins_ft2": 306,
+        "flex_duct_LinFt": 48
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.59,
+          0.707
+        ],
+        "diff_num": 6,
+        "duct_weight_lbs": 495,
+        "duct_ins_ft2": 380,
+        "flex_duct_LinFt": 48
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.707,
+          0.944
+        ],
+        "diff_num": 8,
+        "duct_weight_lbs": 795,
+        "duct_ins_ft2": 528,
+        "flex_duct_LinFt": 64
+      },
+      {
+        "max_flow_range_m3pers": [
+          0.944,
+          999
+        ],
+        "diff_num": 0.12,
+        "duct_weight_lbs": 40,
+        "duct_ins_ft2": 25,
+        "flex_duct_LinFt": 10
+      }
+    ]
+  },
+  {
+    "component": "vel_prof",
+    "table" : [
+      {
+        "vel_fpm": 1800,
+        "space_types": [
+          "Food preparation",
+          "Food preparation - vented",
+          "Lab - classrooms",
+          "Lab - research",
+          "Workshop space",
+          "Automotive - repair",
+          "Fire station - engine room",
+          "Hospital - laundry/washing",
+          "Mfg - detailed",
+          "Mfg - equipment",
+          "Mfg - bay H < 7.5m",
+          "Mfg - bay H > 15m",
+          "Mfg - 7.5 <= bay H <= 15m",
+          "Museum - restoration",
+          "Parking garage space",
+          "Transp. baggage",
+          "Warehouse - fine",
+          "Warehouse - fine - refrigerated",
+          "Warehouse - med/blk",
+          "Warehouse - med/blk - refrigerated",
+          "Warehouse - med/blk2",
+          "Warehouse - med/blk2 - refrigerated",
+          "Storage area",
+          "Storage area - occsens",
+          "Storage area - refrigerated",
+          "Storage area - refrigerated - occsens",
+          "Copy/Print room",
+          "Emergency vehicle garage",
+          "Food preparation area",
+          "Laboratory - classrooms",
+          "Laboratory - other",
+          "Laundry/Washing area",
+          "Loading dock interior",
+          "Workshop",
+          "Manufacturing facility detailed manufacturing area",
+          "Manufacturing facility equipment room",
+          "Manufacturing facility extra high bay area (> 15 m floor-to-ceiling height)",
+          "Manufacturing facility high bay area (7.5 to 15 m floor-to-ceiling height)",
+          "Manufacturing facility low bay area (< 7.5 m floor-to-ceiling height)",
+          "Museum restoration room",
+          "Post office sorting area",
+          "Transportation facility baggage/carousel area",
+          "Warehouse storage area medium to bulky palletized items",
+          "Warehouse storage area small hand-carried items(4)"
+        ]
+      },
+      {
+        "vel_fpm": 800,
+        "space_types": [
+          "Dormitory - living quarters",
+          "Dwelling Unit(s)",
+          "Fire station - quarters",
+          "Hospital - patient room",
+          "Hotel/Motel - rooms",
+          "Hway lodging - rooms",
+          "Guest room",
+          "Dormitory living quarters",
+          "Dwelling units general",
+          "Dwelling units long-term",
+          "Fire station sleeping quarters",
+          "Health care facility patient room"
+        ]
+      },
+      {
+        "vel_fpm": 1400,
+        "space_types": [
+          "other"
+        ]
+      }
+    ]
+  },
+  {
+    "component": "tz_dist_info",
+    "table": [
+      {
+        "airflow_m3ps": [0, 0.094],
+        "diffusers": 2,
+        "ducting_lbs": 55,
+        "duct_insulation_ft2": 40,
+        "flex_duct_ft": 16
+      },
+      {
+        "airflow_m3ps": [0.094, 0.188],
+        "diffusers": 3,
+        "ducting_lbs": 125,
+        "duct_insulation_ft2": 96,
+        "flex_duct_ft": 24
+      },
+      {
+        "airflow_m3ps": [0.188, 0.283],
+        "diffusers": 4,
+        "ducting_lbs": 190,
+        "duct_insulation_ft2": 144,
+        "flex_duct_ft": 32
+      },
+      {
+        "airflow_m3ps": [0.283, 0.377],
+        "diffusers": 4,
+        "ducting_lbs": 225,
+        "duct_insulation_ft2": 196,
+        "flex_duct_ft": 32
+      },
+      {
+        "airflow_m3ps": [0.377, 0.472],
+        "diffusers": 5,
+        "ducting_lbs": 290,
+        "duct_insulation_ft2": 224,
+        "flex_duct_ft": 40
+      },
+      {
+        "airflow_m3ps": [0.472, 0.59],
+        "diffusers": 6,
+        "ducting_lbs": 395,
+        "duct_insulation_ft2": 306,
+        "flex_duct_ft": 48
+      },
+      {
+        "airflow_m3ps": [0.59, 0.707],
+        "diffusers": 6,
+        "ducting_lbs": 495,
+        "duct_insulation_ft2": 380,
+        "flex_duct_ft": 48
+      },
+      {
+        "airflow_m3ps": [0.707, 0.944],
+        "diffusers": 8,
+        "ducting_lbs": 795,
+        "duct_insulation_ft2": 528,
+        "flex_duct_ft": 64
+      },
+      {
+        "airflow_m3ps": [0.944, 999],
+        "diffusers": 0.12,
+        "ducting_lbs": 40,
+        "duct_insulation_ft2": 25,
+        "flex_duct_ft": 10
+      }
+    ]
+  },
+  {
+    "component": "flex_duct",
+    "table": [
+      {
+        "airflow_m3ps": [0, 0.1],
+        "diameter_in": 4
+      },
+      {
+        "airflow_m3ps": [0.1, 0.5],
+        "diameter_in": 6
+      },
+      {
+        "airflow_m3ps": [0.5, 0.944],
+        "diameter_in": 10
+      },
+      {
+        "airflow_m3ps": [0.944, 999],
+        "diameter_in": 12
+      }
+    ]
+  },
+  {
+    "component": "shw_space_types",
+    "table": [
+      "Confinement cell",
+      "Dormitory",
+      "Dwelling",
+      "Electrical/Mechanical",
+      "Food preparation",
+      "Guest",
+      "patient room",
+      "Lab",
+      "laundry",
+      "Locker room",
+      "Lounge",
+      "Washroom",
+      "Workshop"
+    ]
+  },
+  {
+    "component": "exclusive_shw_space_types",
+    "table": [
+      "Washroom"
+    ]
+  },
+  {
+    "component": "ahu_airflow",
+    "table": [
+      {
+        "ahu_airflow_range_lps": [
+          0,
+          1000
+        ],
+        "DX_coil_sizing_kW": 22,
+        "htg_coil_sizing_kW": 35.91
+      },
+      {
+        "ahu_airflow_range_lps": [
+          1000,
+          2500
+        ],
+        "DX_coil_sizing_kW": 55,
+        "htg_coil_sizing_kW": 89.78
+      },
+      {
+        "ahu_airflow_range_lps": [
+          2500,
+          5000
+        ],
+        "DX_coil_sizing_kW": 110,
+        "htg_coil_sizing_kW": 179.57
+      },
+      {
+        "ahu_airflow_range_lps": [
+          5000,
+          7500
+        ],
+        "DX_coil_sizing_kW": 165,
+        "htg_coil_sizing_kW": 269.35
+      },
+      {
+        "ahu_airflow_range_lps": [
+          7500,
+          10000
+        ],
+        "DX_coil_sizing_kW": 220,
+        "htg_coil_sizing_kW": 359.14
+      },
+      {
+        "ahu_airflow_range_lps": [
+          10000,
+          15001
+        ],
+        "DX_coil_sizing_kW": 330,
+        "htg_coil_sizing_kW": 538.70
+      }
+    ]
+  }
+]
