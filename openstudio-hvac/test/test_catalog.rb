@@ -10,7 +10,8 @@ class TestCatalog < Minitest::Test
   def test_list_filtered
     gas = OpenStudioHVAC.systems(filter: 'Gas')
     assert gas.any?
-    assert(gas.all? { |r| r['name'].downcase.include?('gas') }, 'filter is case-insensitive')
+    assert(gas.all? { |r| r['name'].downcase.include?('gas') || r['canonical_name'].downcase.include?('gas') },
+           'filter matches legacy or canonical names, case-insensitively')
 
     psz = OpenStudioHVAC.systems(family: 'psz')
     assert psz.any?

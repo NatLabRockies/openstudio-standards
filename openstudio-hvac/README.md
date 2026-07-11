@@ -134,6 +134,30 @@ variables are still added).
 Planned extensions: remaining CBECS types (above). NECB reference-heat-pump variants are out
 of scope for now (they require regional standards data; future work via config injection).
 
+## Canonical names — one consolidated grammar
+
+The catalog's legacy names carry three inherited dialects (CBECS fuel-first
+`'Baseboard gas boiler'`, NECB medium-first `'... Hot Water Baseboard'`, ECM ids
+`'hs11_ashp_pthp'`). They remain the stable keys — byte-matched to their upstream
+vocabularies. On top of them, every row gets a **canonical name generated from its
+structured config** (so it is consistent by construction and cannot drift):
+
+```
+<primary system>[ + <zone equipment>][ (<plant>)]
+```
+
+| Legacy | Canonical (generated) |
+|---|---|
+| `Baseboard gas boiler` | `hot water baseboards (gas boiler)` |
+| `PSZ RTU Gas and DX Coils and Hot Water Baseboard` | `packaged single-zone DX with gas heat + hot water baseboards (gas boiler)` |
+| `hs08_ccashp_vrf` | `DOAS cold-climate ASHP + VRF` |
+| `hs14_cgshp_fancoils` | `four-pipe fan coils on a ground-source heat pump plant` |
+
+`OpenStudioHVAC.systems` lists both (`name` + `canonical_name`); `build_system` and
+`Catalog.resolve` accept either (plus optional per-row `aliases`). Canonical names are
+verified unique and disjoint from the legacy set, and are the recommended surface for new
+code and tool/MCP integrations.
+
 ## Design notes
 
 - **The name is the API.** Each catalog row fully specifies topology + fuels/coils/baseboard,
