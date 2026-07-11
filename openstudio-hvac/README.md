@@ -81,6 +81,20 @@ Remaining CBECS backlog: Forced Air Furnace / Residential AC (residential furnac
 heat-pump (WSHP/GSHP) and district variants, PVAV (DX VAV) composites, evaporative coolers,
 DOAS/ERV suffix composites.
 
+### NECB reference heat pump names (sys1/3/4 ASHP)
+
+The `necb_reference_hp` variants are now covered — the legacy regional-fuel lookup proved
+unnecessary because the supplemental/reheat fuel is **encoded in the name** (e.g. "ASHP with
+**Gas** Supp. Heat Coils", "with **Electric** Reheat"):
+
+| Name pattern | Family | Notes |
+|---|---|---|
+| `PSZ RTU [with exhaust] ASHP with {Gas,Electric} and ASHP with {Gas,Electric} Supp. Heat Coils and {Hot Water,Electric} Baseboard` | `psz` (`heating_coil_type: 'DX'`) | sys3/sys4 ASHP: DX heat/cool (`_ashp` names, −10 °C compressor cutoff) + supplemental coil, DX sizing factors 1.0/1.3 |
+| `PSZ RTU ASHP with {Gas,Electric} and ASHP Coils and {Hot Water,Electric} Baseboard with {Gas,Electric} Reheat` | `mau_ptac` (`reference_hp: true`) | sys1 ASHP: 100% OA MAU with ASHP DX coils, warmest SPM 13–20 °C, Total-load sizing, CAV reheat terminals + baseboards |
+
+sys6's reference-HP variant remains out (the legacy catalog has no descriptions for it;
+add rows + a `vav_reheat` DX option if ever needed).
+
 ### NECB ECM names — complete (hs08–hs16)
 
 All ECMs are **topology only**: capacity-binned ECM curves/COPs are applied by the host's

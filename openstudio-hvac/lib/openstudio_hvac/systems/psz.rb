@@ -45,14 +45,25 @@ module OpenStudioHVAC
         fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
         fan.setName("#{config['sys_abbr']} Supply Fan")
 
-        # Coil names are load-bearing for host efficiency dispatch (e.g. NECB '_dx' selectors).
-        clg_coil = Coils.dx_cooling_single_speed(model, always_on)
-        htg_coil = Coils.heating_coil(model, heating_coil_type, always_on, hw_loop: hw_loop)
+        # Coil names are load-bearing for host efficiency dispatch (NECB '_dx'/'_ashp' selectors).
+        reference_hp = heating_coil_type == 'DX'
+        if reference_hp
+          clg_coil = Coils.dx_cooling_single_speed(model, always_on, name: 'CoilCoolingDXSingleSpeed_ashp')
+          htg_coil = Coils.dx_heating_single_speed(model, always_on, name: 'CoilHeatingDXSingleSpeed_ashp')
+          supp_coil = Coils.heating_coil(model, config.fetch('supp_htg_fuel', 'Electric'), always_on, hw_loop: hw_loop)
+        else
+          clg_coil = Coils.dx_cooling_single_speed(model, always_on)
+          htg_coil = Coils.heating_coil(model, heating_coil_type, always_on, hw_loop: hw_loop)
+          supp_coil = nil
+        end
 
         oa_system = build_oa_system(model)
 
+        # Legacy insertion order at the supply inlet: fan, (supp), htg, clg, oa ->
+        # airflow OA -> clg -> htg -> (supp) -> fan.
         supply_inlet_node = air_loop.supplyInletNode
         fan.addToNode(supply_inlet_node)
+        supp_coil.addToNode(supply_inlet_node) if supp_coil
         htg_coil.addToNode(supply_inlet_node)
         clg_coil.addToNode(supply_inlet_node)
         oa_system.addToNode(supply_inlet_node)
@@ -76,14 +87,25 @@ module OpenStudioHVAC
           air_loop.addBranchForZone(zone, diffuser.to_StraightComponent)
         end
 
+        htg_part = heating_coil_type
+        clg_part = 'dx'
+        if reference_hp
+          clg_part = 'ashp'
+          supp = config.fetch('supp_htg_fuel', 'Electric')
+          htg_part = case supp
+                     when 'Gas', 'NaturalGas' then 'ashp>c-g'
+                     when 'Hot Water', 'HotWater' then 'ashp>c-hw'
+                     else 'ashp>c-e'
+                     end
+        end
         Naming.apply(namer, air_loop,
                      system_name: config['name'],
                      sys_abbr: config['sys_abbr'],
                      sys_oa: 'mixed',
                      parts: {
                        sys_hr: 'none',
-                       sys_clg: 'dx',
-                       sys_htg: heating_coil_type,
+                       sys_clg: clg_part,
+                       sys_htg: htg_part,
                        sys_sf: 'cv',
                        zone_htg: baseboard_type,
                        zone_clg: 'none',
