@@ -19,7 +19,21 @@ module OpenStudioHVAC
       # @param hw_loop [OpenStudio::Model::PlantLoop, nil] for hot-water coil/baseboards
       # @param chw_loop [OpenStudio::Model::PlantLoop, nil] unused (DX cooling); shared contract
       # @return [Array<OpenStudio::Model::AirLoopHVAC>]
+      #
+      # Config 'per_zone': true builds ONE packaged unit PER ZONE (each zone its own control
+      # zone) — the CBECS/90.1 PSZ convention — instead of the NECB convention of one shared
+      # unit over the zone group controlled by +control_zone+.
       def build(model, zones, control_zone:, namer: :default, hw_loop: nil, chw_loop: nil)
+        if config['per_zone']
+          return zones.map { |zone| build_unit(model, [zone], zone, namer: namer, hw_loop: hw_loop) }
+        end
+
+        [build_unit(model, zones, control_zone, namer: namer, hw_loop: hw_loop)]
+      end
+
+      private
+
+      def build_unit(model, zones, control_zone, namer:, hw_loop:)
         always_on = model.alwaysOnDiscreteSchedule
         heating_coil_type = config['heating_coil_type']
         baseboard_type = config['baseboard_type']
@@ -76,7 +90,7 @@ module OpenStudioHVAC
                        sys_rf: 'none'
                      },
                      suffix: control_zone.nameString)
-        [air_loop]
+        air_loop
       end
     end
   end

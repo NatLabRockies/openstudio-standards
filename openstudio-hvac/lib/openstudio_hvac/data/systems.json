@@ -496,6 +496,43 @@
       "baseboard_type": "Electric",
       "needs_boiler": false,
       "comment": "legacy NECB systems.json sys1 name (non-heat-pump)"
+    },
+    {
+      "name": "Baseboard electric",
+      "family": "baseboards",
+      "baseboard_type": "Electric",
+      "needs_boiler": false,
+      "origin": "cbecs"
+    },
+    {
+      "name": "Baseboard gas boiler",
+      "family": "baseboards",
+      "baseboard_type": "Hot Water",
+      "boiler_fuel": "NaturalGas",
+      "needs_boiler": true,
+      "origin": "cbecs"
+    },
+    {
+      "name": "PSZ-AC with electric coil",
+      "family": "psz",
+      "sys_abbr": "psz_ac",
+      "per_zone": true,
+      "heating_coil_type": "Electric",
+      "baseboard_type": "None",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "one packaged unit per zone (CBECS/90.1 convention); no NECB sizing block - host sizing applies"
+    },
+    {
+      "name": "PSZ-AC with gas coil",
+      "family": "psz",
+      "sys_abbr": "psz_ac",
+      "per_zone": true,
+      "heating_coil_type": "Gas",
+      "baseboard_type": "None",
+      "needs_boiler": false,
+      "origin": "cbecs",
+      "comment": "one packaged unit per zone (CBECS/90.1 convention); no NECB sizing block - host sizing applies"
     }
   ]
 }

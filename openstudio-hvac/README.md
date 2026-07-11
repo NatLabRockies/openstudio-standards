@@ -60,9 +60,25 @@ sizing fields, quirks and all — pipe-names byte-identical), and the topology +
 contract is integration-verified (NECB2011 capacity-binned values + reference curves land on
 gem-built coils after the host's sizing/efficiency pass).
 
-Planned extensions: CBECS descriptive types mapped onto these families, and NECB ECM system
-topologies (hs08–hs16). NECB reference-heat-pump variants are out of scope for now (they
-require regional standards data; future work via config injection).
+### CBECS names (first increment)
+
+CBECS descriptive types build through the same families (`origin: "cbecs"` rows; no NECB
+sizing block — the host's sizing conventions apply):
+
+| CBECS name | Family | Notes |
+|---|---|---|
+| `Baseboard electric` | `baseboards` | zone baseboards only, no air system |
+| `Baseboard gas boiler` | `baseboards` | hot-water baseboards + gas boiler loop |
+| `PSZ-AC with electric coil` / `PSZ-AC with gas coil` | `psz` (`per_zone: true`) | **one packaged unit per zone** (the CBECS/90.1 convention), each controlling its own zone |
+
+Zone partitioning (heated-only zones get unit heaters/baseboards, cooled-only get the system)
+remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`.
+CBECS backlog (needs unported topologies/options): PTAC/PTHP with self-ventilation, Window AC,
+Forced Air Furnace, heat-pump and district variants, VAV/PVAV composites, DOAS/ERV suffixes.
+
+Planned extensions: remaining CBECS types (above), and NECB ECM system topologies (hs08–hs16).
+NECB reference-heat-pump variants are out of scope for now (they require regional standards
+data; future work via config injection).
 
 ## Design notes
 
