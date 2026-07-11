@@ -158,6 +158,41 @@ structured config** (so it is consistent by construction and cannot drift):
 verified unique and disjoint from the legacy set, and are the recommended surface for new
 code and tool/MCP integrations.
 
+## Costing — all systems, all families
+
+Unlike openstudio-standards (which can only cost NECB/ECM systems, by parsing `SYS_n` from
+air-loop names), the gem costs **every family**: because it built the system, the AHU/
+distribution assembly class comes from the catalog family — no name parsing.
+
+```ruby
+result = OpenStudioHVAC.build_system(model, name, zones)
+# ... size the model (host sizing run, or hard-set capacities) ...
+report = OpenStudioHVAC.cost(model,
+                             systems: [result],        # maps loops -> families for AHU costing
+                             city: 'TORONTO', province_state: 'ONTARIO',  # or inferred from site
+                             costs_csv: nil)           # inject licensed values; else placeholders
+report.total          # $
+report.by_category    # HEATING_COOLING / ZONAL / VENTILATION / DISTRIBUTION
+report.items          # re-costable ledger: [{id, quantity, mults, tags, cost}]
+report.warnings       # anything uncosted is EXPLICIT (never silent zeros)
+```
+
+- **Requires a sized model** (capacities/flows read from hard or autosized values).
+- **What's costed:** plant (boilers by fuel/efficiency bucket, chillers by compressor/condenser
+  type, towers, pumps + VFDs, AWHP/GSHP), zonal (PTAC/PTHP/fan coils/VRF terminals + outdoor
+  units/baseboards/unit heaters/WSHP/zone ERVs — WSHP/ERV extend legacy coverage), AHU
+  assemblies (component layers × quantities), zone distribution (diffusers, ductwork lbs,
+  duct insulation ft²), with RS-Means-style city localization and per-item material/labour
+  multipliers. The ledger can be re-priced for any city or custom database.
+- **Data & licensing:** vendored CSVs are ~91% `placeholder` values in an RS-Means-derived
+  schema (`lib/openstudio_hvac/data/costing/README.md`); real licensed values are injected via
+  `costs_csv:` and must never be committed.
+- **Documented deferrals (explicit warnings):** trunk-duct/flue/utility-run geometry costing;
+  district energy connection costs; evaporative-cooler media (no unit-cost data exists — legacy
+  never costed it either); fan-coil MAU ventilation (matches legacy sys-2 handling). Line-item
+  parity vs legacy `BTAPCosting` on NECB archetypes is the outstanding validation step (requires
+  a full BTAP analysis run for the reference ledger).
+
 ## Design notes
 
 - **The name is the API.** Each catalog row fully specifies topology + fuels/coils/baseboard,

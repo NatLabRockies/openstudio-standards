@@ -27,6 +27,8 @@ require_relative 'openstudio_hvac/systems/small_systems'
 require_relative 'openstudio_hvac/costing/database'
 require_relative 'openstudio_hvac/costing/ledger'
 require_relative 'openstudio_hvac/costing/quantify_equipment'
+require_relative 'openstudio_hvac/costing/ventilation'
+require_relative 'openstudio_hvac/costing/report'
 require_relative 'openstudio_hvac/builder'
 
 # OpenStudioHVAC builds HVAC system topologies on OpenStudio thermal zones by
@@ -50,5 +52,10 @@ module OpenStudioHVAC
   # Zone-scoped teardown. See Teardown.remove_hvac_from_zones.
   def self.remove_hvac_from_zones(model, zones)
     Teardown.remove_hvac_from_zones(model, zones)
+  end
+
+  # HVAC capital costing on a SIZED model. See Costing.cost.
+  def self.cost(model, **kwargs)
+    Costing.cost(model, **kwargs)
   end
 end
