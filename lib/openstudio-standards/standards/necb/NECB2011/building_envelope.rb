@@ -1002,7 +1002,7 @@ class NECB2011
       specs[:finish] = :none
       specs[:finish] = :heavy if stc == :concrete
       argh[:perform] = :lp
-      argh[:stype  ] = :floors
+      argh[:stype  ] = :roofs
       iAtticFloor    = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticFloor)

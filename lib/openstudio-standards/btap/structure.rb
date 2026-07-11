@@ -456,7 +456,7 @@ module BTAP
         return
       end
 
-      # Customized story/spacetype/space STRUCTURE attributes, overriding
+      # Customized space-specific STRUCTURE attributes, overriding
       # default/custom building-wide attributes.
       data[:tags].each do |tag|
         cspaces.each do |space|
@@ -465,7 +465,8 @@ module BTAP
           next if zn.empty?
           next unless space.floorArea > 0
 
-          # Retrieve/validate tagged AdditionalProperty.
+          # Retrieve/validate tagged AdditionalProperty (if assigned to story,
+          # spacetype or space).
           prp = self.property(space, tag)
           next unless prp
 
@@ -514,7 +515,7 @@ module BTAP
       # Prune customized spaces from common collection.
       @spaces.keys.each { |id| cspaces.delete(model.getSpaceByName(id).get) }
 
-      # Only customized spaces? Base building STRUCTURE on most common one.
+      # Only customized spaces left? Base building STRUCTURE on most common one.
       if cspaces.empty?
         custom = []
         id     = @spaces.keys.first

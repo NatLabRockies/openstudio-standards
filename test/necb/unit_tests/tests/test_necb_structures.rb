@@ -48,9 +48,9 @@ class NECB_Structure_Tests < Minitest::Test
 
     @templates = [
       # "NECB2011",
-      # "NECB2015",
+      "NECB2015",
       # "NECB2017",
-      "NECB2020",
+      # "NECB2020",
       # "NECB2025"
     ]
 
@@ -307,6 +307,53 @@ class NECB_Structure_Tests < Minitest::Test
             err_msg2 = "#{id2} empty adiabatic surface construction (#{cas})?"
             assert_empty(offcset.adiabaticSurfaceConstruction, err_msg1)
             assert_empty(fineset.adiabaticSurfaceConstruction, err_msg2)
+
+            # Validate generated constructions.
+            cs = model.getConstructions.select { |c| c.getNetArea > 0 }
+            err_msg = "# un/insulated constructions (#{cas})"
+            assert_equal(cs.size, 11, err_msg)
+
+            # Isolate insulated constructions, i.e. part of building envelope.
+            cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+            err_msg = "# insulated constructions (#{cas})"
+            assert_equal(cs.size, 6, err_msg)
+
+            if template == "NECB2015" # no uprating: Uo match NECB requirements
+              slab_m2 = 0
+              roof_m2 = 0
+              wall_m2 = 0
+
+              cs.each do |c|
+                uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
+                m2 = c.getNetArea
+                id = c.nameString
+
+                # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
+                #
+                # OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
+                # OSut:CON:roof   U-factor : 0.162 W/m2.K (3045 m2) # bulk storage
+                # OSut:CON:roof 3 U-factor : 0.162 W/m2.K (1324 m2) # fine storage
+                # OSut:CON:wall   U-factor : 0.210 W/m2.K (1058 m2) # bulk storage
+                # OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # office
+                # OSut:CON:wall 1 U-factor : 0.210 W/m2.K ( 100 m2) # fine storage
+                err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
+
+                if id.downcase.include?("wall")
+                  wall_m2 += m2
+                  assert_equal(uo.round(3), 0.210, err_msg)
+                elsif id.downcase.include?("roof")
+                  roof_m2 += m2
+                  assert_equal(uo.round(3), 0.162, err_msg)
+                else # slab-on-grade
+                  slab_m2 += m2
+                  assert_equal(uo.round(3), 0.757, err_msg)
+                end
+              end
+
+              # NECB2015: 5% SSR ratio.
+              err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
+              assert_equal((0.95 * slab_m2).round, roof_m2.round, err_msg)
+            end
           else
             nb  = 1
             nb += 1 unless plenums.empty?
@@ -316,6 +363,55 @@ class NECB_Structure_Tests < Minitest::Test
             assert_equal(csets.size, nb, err_msg)
             err_msg = "# custom spaces (#{cas})?"
             assert_equal(s.spaces.size, 0, err_msg)
+
+            # Validate constructions (QuickServiceRestaurant case):
+            #   - insulated slab-on-grade
+            #   - sloped attic
+            #   - insulated attic floor
+            #   - insulated slab & attic floor should have same area
+            if template == "NECB2015"
+              cs = model.getConstructions.select { |c| c.getNetArea > 0 }
+              err_msg = "# un/insulated constructions (#{cas})"
+              assert_equal(cs.size, 6, err_msg)
+
+              # Isolate insulated constructions, i.e. part of building envelope.
+              cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              err_msg = "# insulated constructions (#{cas})"
+              assert_equal(cs.size, 3, err_msg)
+
+              slab_m2  = 0
+              floor_m2 = 0 # insulated attic floor - not uninsulated sloped roofs
+              wall_m2  = 0
+
+              cs.each do |c|
+                uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
+                m2 = c.getNetArea
+                id = c.nameString
+
+                # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
+                #
+                # OSut:CON:slab    U-factor : 0.757 W/m2.K (232 m2)
+                # OSut:CON:floor 2 U-factor : 0.162 W/m2.K (232 m2)
+                # OSut:CON:wall    U-factor : 0.210 W/m2.K (124 m2)
+                err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
+
+                if id.downcase.include?("wall")
+                  wall_m2 += m2
+                  assert_equal(uo.round(3), 0.210, err_msg)
+                elsif id.downcase.include?("floor")
+                  floor_m2 += m2
+                  assert_equal(uo.round(3), 0.162, err_msg)
+                else # slab-on-grade
+                  slab_m2 += m2
+                  assert_equal(uo.round(3), 0.757, err_msg)
+                end
+              end
+
+              # No sloped skylights in initial BTAP solution. Attic floor area
+              # should equal slab-on-grade area.
+              err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
+              assert_equal(slab_m2.round, floor_m2.round, err_msg)
+            end
           end
 
           # Limit anaylsis to CONDITIONED spaces (e.g. no vented attics).
