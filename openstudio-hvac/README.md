@@ -76,19 +76,29 @@ remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_sys
 CBECS backlog (needs unported topologies/options): PTAC/PTHP with self-ventilation, Window AC,
 Forced Air Furnace, heat-pump and district variants, VAV/PVAV composites, DOAS/ERV suffixes.
 
-### NECB ECM names (first increment)
+### NECB ECM names — complete (hs08–hs16)
+
+All ECMs are **topology only**: capacity-binned ECM curves/COPs are applied by the host's
+`apply_efficiency_ecm_*` pass after sizing, exactly as in the legacy flow (where build-time
+curve application is provisional and re-done post-sizing). Structural equipment curves that
+the efficiency pass does *not* re-set (hs14's W2W HCAPF/HPOWERF, hs15's CAWHP biquadratics)
+ship in `curves.json`.
 
 | ECM name | Family | Notes |
 |---|---|---|
-| `hs11_ashp_pthp` | `doas_pthp` | DOAS + air-source heat pump + zone PTHPs. **Topology only** — the capacity-binned ECM curves/COPs are applied by the host's `apply_efficiency_ecm_hs11_ashp_pthp` after sizing, exactly as in the legacy flow (where build-time curve application is provisional and re-done post-sizing). |
+| `hs08_ccashp_vrf` / `hs13_ashp_vrf` | `ecm_doas_vrf` | Outdoor VRF unit (heat recovery, −25 °C) + zone VRF terminals + DOAS (CCASHP variable-speed / ASHP single-speed DX) |
+| `hs09_ccashp_baseboard` / `hs12_ashp_baseboard` | `ecm_ashp_baseboard` | DOAS (default) + PTAC cooling + baseboards; `vent_type: 'mixed'` gives the multizone-VAV variant (warmest SPM, VV fans, electric-reheat terminals) |
+| `hs11_ashp_pthp` | `doas_pthp` | DOAS + ASHP + zone PTHPs |
+| `hs14_cgshp_fancoils` | `ecm_hp_fancoils` | Ground-source W2W HP + boiler backup, water/air-cooled chillers, district-modeled GLHX loop, DOAS + 4-pipe fan coils |
+| `hs15_cawhp_fancoils` / `hs16_ashp_cawhp_fancoils` | `ecm_hp_fancoils` | Central air-to-water plant-loop-EIR HP companion pair + boiler backup; hs16 adds an ASHP DX DOAS |
 
-ECM backlog (same pattern): hs08/hs13 (CCASHP/ASHP + VRF — needs the VRF outdoor unit +
-terminals port), hs09/hs12 (CCASHP/ASHP + baseboards, VAV multizone variant), hs14–hs16
-(GSHP/CAWHP fan coils — needs ECM plant-loop machinery).
+Documented deviations from legacy: the `'AirSoure'` typo (a silently failing condenser-type
+set on the hs15 heating HP) is corrected to `'AirSource'`; hs14's destructive
+`model.getOutputVariables.each(&:remove)` is not replicated (the district-rate output
+variables are still added).
 
-Planned extensions: remaining CBECS types (above) and ECM systems (above). NECB
-reference-heat-pump variants are out of scope for now (they require regional standards
-data; future work via config injection).
+Planned extensions: remaining CBECS types (above). NECB reference-heat-pump variants are out
+of scope for now (they require regional standards data; future work via config injection).
 
 ## Design notes
 

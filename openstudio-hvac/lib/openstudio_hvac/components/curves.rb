@@ -25,6 +25,7 @@ module OpenStudioHVAC
               when 'biquadratic' then build_biquadratic(model, spec)
               when 'quadratic'   then build_quadratic(model, spec)
               when 'cubic'       then build_cubic(model, spec)
+              when 'quadlinear'  then build_quadlinear(model, spec)
               else raise(ArgumentError, "unknown curve type '#{spec['type']}' for '#{name}'")
               end
       curve.setName(name)
@@ -43,6 +44,26 @@ module OpenStudioHVAC
       curve.setMaximumValueofx(spec['max_x'])
       curve.setMinimumValueofy(spec['min_y'])
       curve.setMaximumValueofy(spec['max_y'])
+      curve.setMinimumCurveOutput(spec['min_out']) if spec['min_out']
+      curve.setMaximumCurveOutput(spec['max_out']) if spec['max_out']
+      curve
+    end
+
+    def self.build_quadlinear(model, spec)
+      curve = OpenStudio::Model::CurveQuadLinear.new(model)
+      curve.setCoefficient1Constant(spec['coeff_1'])
+      curve.setCoefficient2w(spec['coeff_2'])
+      curve.setCoefficient3x(spec['coeff_3'])
+      curve.setCoefficient4y(spec['coeff_4'])
+      curve.setCoefficient5z(spec['coeff_5'])
+      curve.setMinimumValueofw(spec['min_w'])
+      curve.setMaximumValueofw(spec['max_w'])
+      curve.setMinimumValueofx(spec['min_x'])
+      curve.setMaximumValueofx(spec['max_x'])
+      curve.setMinimumValueofy(spec['min_y'])
+      curve.setMaximumValueofy(spec['max_y'])
+      curve.setMinimumValueofz(spec['min_z'])
+      curve.setMaximumValueofz(spec['max_z'])
       curve
     end
 

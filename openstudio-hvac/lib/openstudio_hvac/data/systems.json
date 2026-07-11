@@ -543,6 +543,93 @@
       "needs_boiler": false,
       "origin": "necb_ecm",
       "comment": "NECB ECM hs11: DOAS + ASHP + zone PTHPs. Topology only - ECM curves/COPs applied by the host's apply_efficiency_ecm_hs11_ashp_pthp after sizing."
+    },
+    {
+      "name": "hs09_ccashp_baseboard",
+      "family": "ecm_ashp_baseboard",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "air_eqpt": "ccashp",
+      "vent_type": "doas",
+      "baseboard_type": "Electric",
+      "supp_htg_fuel": "Electric",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs09: DOAS + cold-climate ASHP (variable-speed DX) + PTAC cooling + baseboards. Topology only."
+    },
+    {
+      "name": "hs12_ashp_baseboard",
+      "family": "ecm_ashp_baseboard",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "air_eqpt": "ashp",
+      "vent_type": "doas",
+      "baseboard_type": "Electric",
+      "supp_htg_fuel": "Electric",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs12: DOAS + ASHP (single-speed DX) + PTAC cooling + baseboards. Topology only."
+    },
+    {
+      "name": "hs08_ccashp_vrf",
+      "family": "ecm_doas_vrf",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "air_eqpt": "ccashp",
+      "supp_htg_fuel": "Electric",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs08: DOAS (CCASHP) + outdoor VRF unit with heat recovery + zone VRF terminals. Topology only."
+    },
+    {
+      "name": "hs13_ashp_vrf",
+      "family": "ecm_doas_vrf",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "air_eqpt": "ashp",
+      "supp_htg_fuel": "Electric",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs13: DOAS (ASHP) + outdoor VRF unit + zone VRF terminals (hs08 with single-speed DX). Topology only."
+    },
+    {
+      "name": "hs14_cgshp_fancoils",
+      "family": "ecm_hp_fancoils",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "plant_type": "gshp",
+      "air_eqpt": "hydronic",
+      "supp_htg_fuel": "None",
+      "boiler_fuel": "Electricity",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs14: ground-source W2W HP heating plant + water/air-cooled chillers + district-modeled GLHX loop + DOAS + 4-pipe fan coils. Topology + structural W2W curves; sizing-dependent values host-side."
+    },
+    {
+      "name": "hs15_cawhp_fancoils",
+      "family": "ecm_hp_fancoils",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "plant_type": "cawhp",
+      "air_eqpt": "hydronic",
+      "supp_htg_fuel": "None",
+      "boiler_fuel": "Electricity",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs15: central air-to-water plant-loop-EIR heat pumps (companion pair) + boiler backup + DOAS + 4-pipe fan coils."
+    },
+    {
+      "name": "hs16_ashp_cawhp_fancoils",
+      "family": "ecm_hp_fancoils",
+      "sys_abbr": "sys_1",
+      "sizing": "ecm_doas",
+      "plant_type": "cawhp",
+      "air_eqpt": "ashp",
+      "supp_htg_fuel": "Electric",
+      "boiler_fuel": "Electricity",
+      "needs_boiler": false,
+      "origin": "necb_ecm",
+      "comment": "NECB ECM hs16: hs15 with an ASHP (DX) DOAS + supplemental coil."
     }
   ]
 }

@@ -18,19 +18,22 @@ module OpenStudioHVAC
 
     CLG_TOKENS = {
       'none' => 'sc>none', 'chilled water' => 'sc>c-chw', 'hydronic' => 'sc>c-chw',
-      'dx' => 'sc>dx', 'ccashp' => 'sc>ccashp', 'ashp' => 'sc>ashp'
+      'dx' => 'sc>dx', 'ccashp' => 'sc>ccashp', 'ashp' => 'sc>ashp',
+      'coil_chw' => nil # legacy quirk: unmatched token; the namer pass drops the segment
     }.freeze
 
     FAN_TOKENS = { 'none' => 'none', 'cv' => 'cv', 'vv' => 'vv' }.freeze
 
     ZONE_HTG_TOKENS = {
       'none' => 'zh>none', 'electric' => 'zh>b-e', 'hot water' => 'zh>b-hw',
-      'tpfc' => 'zh>tpfc', 'fpfc' => 'zh>fpfc', 'pthp' => 'zh>pthp'
+      'tpfc' => 'zh>tpfc', 'fpfc' => 'zh>fpfc', 'pthp' => 'zh>pthp', 'vrf' => 'zh>vrf',
+      'fancoil_4pipe' => 'zh>fancoil_4pipe' # legacy update_sys_name splices the raw value
     }.freeze
 
     ZONE_CLG_TOKENS = {
       'none' => 'zc>none', 'tpfc' => 'zc>tpfc', 'fpfc' => 'zc>fpfc',
-      'ptac' => 'zc>ptac', 'pthp' => 'zc>pthp'
+      'ptac' => 'zc>ptac', 'pthp' => 'zc>pthp', 'vrf' => 'zc>vrf',
+      'fancoil_4pipe' => 'zc>fancoil_4pipe'
     }.freeze
 
     # Build the NECB pipe-name from name parts. Token semantics match openstudio-standards
@@ -54,8 +57,10 @@ module OpenStudioHVAC
           # Legacy quirk preserved: DX cooling paired with heat-pump heating reads 'sc>ashp'.
           if v == 'dx' && ['dx', 'ashp>c-g', 'ashp>c-e', 'ashp>c-hw'].include?(htg)
             'sc>ashp'
+          elsif CLG_TOKENS.key?(v)
+            CLG_TOKENS[v]   # may be nil (segment dropped, e.g. 'coil_chw')
           else
-            CLG_TOKENS.fetch(v, 'sc>none')
+            'sc>none'
           end
         when :sys_htg then HTG_TOKENS.fetch(v, 'sh>none')
         when :sys_sf then "ssf>#{FAN_TOKENS.fetch(v, 'none')}"

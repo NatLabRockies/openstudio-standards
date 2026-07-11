@@ -16,7 +16,11 @@ require_relative 'openstudio_hvac/systems/vav_reheat'
 require_relative 'openstudio_hvac/systems/fan_coils'
 require_relative 'openstudio_hvac/systems/mau_ptac'
 require_relative 'openstudio_hvac/systems/baseboards_only'
+require_relative 'openstudio_hvac/components/ecm_air'
 require_relative 'openstudio_hvac/systems/doas_pthp'
+require_relative 'openstudio_hvac/systems/ashp_baseboard'
+require_relative 'openstudio_hvac/systems/doas_vrf'
+require_relative 'openstudio_hvac/systems/hp_plant_fancoils'
 require_relative 'openstudio_hvac/builder'
 
 # OpenStudioHVAC builds HVAC system topologies on OpenStudio thermal zones by
