@@ -52,10 +52,9 @@ report = OpenStudioLighting.cost(model, vintage: '2020', city: 'TORONTO',
   astronomical-clock control.
 - **Fixture costing**: per-space fixture sets by ceiling-height bin; the
   NECB2020 catalog is LED-only (why legacy hard-forces LED — the gem detects
-  the modeled type and falls back with an audit note); daylighting-SENSOR
-  costing is not ported (tied to the unmodeled daylighting geometry) — $0 +
-  info without controls, loud warning with them. Dollar parity vs legacy
-  `cost_audit_lighting` on the LED/NECB2020 path.
+  the modeled type and falls back with an audit note). Dollar parity vs legacy
+  `cost_audit_lighting` on the LED/NECB2020 path. Daylighting sensors are
+  costed when controls exist (see Daylighting below).
 
 ## Testing
 
@@ -75,6 +74,21 @@ rulesets); fixture costing matches legacy `cost_audit_lighting` to the dollar.
 
 ## Documented future
 
-Daylighting: photocontrols, the 8.4.4.5.(5)–(12) reference daylighting geometry,
-and the daylighting-sensor costing that depends on it · exterior-lighting
-schedules beyond astronomical clock · 2011–2017 backfill.
+Photocontrol energy evaluation, the 4.2.2 threshold-based sensor placement
+(primary-sidelighted-area / effective-aperture geometry) and the
+8.4.4.5.(5)–(12) reference daylighting geometry · exterior-lighting schedules
+beyond astronomical clock · 2011–2017 backfill.
+
+## Daylighting
+
+`OpenStudioLighting.add_daylighting_controls(model, vintage:)` places a
+DaylightingControl in every space with exterior fenestration (the legacy
+"all daylighted spaces" option): stepped ×2 control, space-type
+`target_illuminance_setpoint`, sensor at the lowest-floor bounding-box centre
++0.8 m, zone primary control at fraction 1.0. Costing then prices sensors per
+controlled zone — ceil(fixtures/4) with the legacy per-sensor BOM (sensor row
+407 + 30 ft wiring + 30 ft PVC conduit + box). Audited deviation: the fixture
+count uses the whole zone area (an upper bound) until the daylighted-area
+geometry (primary sidelighted / under-skylight) is ported; the 4.2.2
+threshold-based placement and the 8.4.4.5.(5)–(12) reference daylighting
+geometry remain documented futures.

@@ -2,7 +2,7 @@
   "provenance": {
     "vintage": "2025",
     "generated": "2026-07-12",
-    "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPD values are IDENTICAL to 2020: Table 4.2.1.6 (2025) transcribed in full (lpd_space_functions_2025.json) and joined to the 2020 space-type records by normalized name — 162 exact matches with ZERO value differences (incl. all three atrium bins 4.2/5.2/6.5 W/m2 and manual spot checks of every rename); residual unmatched rows are renames ('Health care facility' -> 'Healthcare facility', the legacy 'Penitentary' typo, atrium bin phrasing) and dwelling units (handled by 8.4.4.5.(2), not the table). The significant edition diff is STRUCTURAL: 2025 added the per-row 4.2.2.1 lighting-control requirement matrix (vendored in lpd_space_functions_2025.json) and reorganized 4.2.2. Table 4.2.1.5 (2025) also transcribed (lpd_building_types_2025.json).",
+    "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPD values are IDENTICAL to 2020: Table 4.2.1.6 (2025) transcribed in full (lpd_space_functions_2025.json) and joined to the 2020 space-type records by normalized name \u2014 162 exact matches with ZERO value differences (incl. all three atrium bins 4.2/5.2/6.5 W/m2 and manual spot checks of every rename); residual unmatched rows are renames ('Health care facility' -> 'Healthcare facility', the legacy 'Penitentary' typo, atrium bin phrasing) and dwelling units (handled by 8.4.4.5.(2), not the table). The significant edition diff is STRUCTURAL: 2025 added the per-row 4.2.2.1 lighting-control requirement matrix (vendored in lpd_space_functions_2025.json) and reorganized 4.2.2. Table 4.2.1.5 (2025) also transcribed (lpd_building_types_2025.json).",
     "changes_vs_2020": {
       "interior_lpd_values": "none found",
       "controls": "4.2.2 reorganized into per-space-function requirement matrix (4.2.2.1 sentences); vendored as controls_4_2_2_1 per row"
@@ -12,27 +12,61 @@
   "sensor_schedule_lpd_threshold_w_per_ft2": 0.799256505,
   "dwelling_unit_lpd_w_per_m2": 5.0,
   "atrium_led": {
-    "below_12m": { "intercept": 0.0, "slope": 1.06 },
-    "at_or_above_12m": { "intercept": 4.3, "slope": 0.71 }
+    "below_12m": {
+      "intercept": 0.0,
+      "slope": 1.06
+    },
+    "at_or_above_12m": {
+      "intercept": 4.3,
+      "slope": 0.71
+    }
   },
   "article_coverage": {
     "articles": [
-      { "article": "4.2.1.4.", "title": "Methods of Determining Interior Lighting Power Allowance", "status": "implemented",
-        "how": "space-function method via NECB space-type records; building-type method via the vendored 2025 4.2.1.5 table" },
-      { "article": "4.2.1.5.", "title": "Building Type Method LPD", "status": "implemented",
-        "how": "2025 table vendored (lpd_building_types_2025.json)" },
-      { "article": "4.2.1.6.", "title": "Space Function Method LPD", "status": "implemented",
-        "how": "2025 table transcribed in full and verified value-identical to the 2020 space-type records (162 joined rows, 0 deltas)" },
-      { "article": "4.2.2.1.", "title": "Interior lighting controls (2025 requirement matrix)", "status": "partial",
-        "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); occupancy-based control is modeled via the sensor-schedule synthesis",
-        "gaps": "control hardware and the non-occupancy 2025 control categories (bi-level, daylight responsive, scheduled shut-off) are not modeled as objects" },
-      { "article": "4.2.3.1.", "title": "Exterior Lighting Power Allowances", "status": "implemented",
-        "how": "allowance calculator over the vendored Tables 4.2.3.1.-A..-E (2025 verified essentially unchanged, Table -D similarity 0.978) + ExteriorLights creation" },
-      { "article": "4.3.2.10.", "title": "Occupancy/personal control factors", "status": "implemented",
-        "how": "space-type keys drive the sensor-schedule synthesis" },
-      { "article": "8.4.5.x (lighting)", "title": "Reference building lighting (2025 renumbering of 8.4.4.5)", "status": "partial",
-        "how": "allowance LPD + fractions implemented as in 2020; citation prefix follows the 2025 renumbered performance path",
-        "gaps": "dwelling 5 W/m2 planned; daylighting sentences not modeled" }
+      {
+        "article": "4.2.1.4.",
+        "title": "Methods of Determining Interior Lighting Power Allowance",
+        "status": "implemented",
+        "how": "space-function method via NECB space-type records; building-type method via the vendored 2025 4.2.1.5 table"
+      },
+      {
+        "article": "4.2.1.5.",
+        "title": "Building Type Method LPD",
+        "status": "implemented",
+        "how": "2025 table vendored (lpd_building_types_2025.json)"
+      },
+      {
+        "article": "4.2.1.6.",
+        "title": "Space Function Method LPD",
+        "status": "implemented",
+        "how": "2025 table transcribed in full and verified value-identical to the 2020 space-type records (162 joined rows, 0 deltas)"
+      },
+      {
+        "article": "4.2.2.1.",
+        "title": "Interior lighting controls (2025 requirement matrix)",
+        "status": "partial",
+        "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); occupancy-based control is modeled via the sensor-schedule synthesis | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM",
+        "gaps": "4.2.2 threshold-based placement (primary-sidelighted-area / effective-aperture geometry) not ported; photocontrol energy evaluation not modeled"
+      },
+      {
+        "article": "4.2.3.1.",
+        "title": "Exterior Lighting Power Allowances",
+        "status": "implemented",
+        "how": "allowance calculator over the vendored Tables 4.2.3.1.-A..-E (2025 verified essentially unchanged, Table -D similarity 0.978) + ExteriorLights creation"
+      },
+      {
+        "article": "4.3.2.10.",
+        "title": "Occupancy/personal control factors",
+        "status": "implemented",
+        "how": "space-type keys drive the sensor-schedule synthesis"
+      },
+      {
+        "article": "8.4.5.x (lighting)",
+        "title": "Reference building lighting (2025 renumbering of 8.4.4.5)",
+        "status": "partial",
+        "how": "allowance LPD + fractions implemented as in 2020; citation prefix follows the 2025 renumbered performance path | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM",
+        "gaps": "4.2.2 threshold-based placement (primary-sidelighted-area / effective-aperture geometry) not ported; photocontrol energy evaluation not modeled"
+      }
     ]
   }
 }

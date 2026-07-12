@@ -45,7 +45,7 @@ module OpenStudioLighting
           end
         end
 
-        daylighting_note(model, audit)
+        total += daylighting_note(model, database, template, province_state, city, section, audit)
         section['total_lighting_cost'] = total.round(2)
         audit.decision(:costing_lighting, 'lighting fixtures costed by space (ceiling-height fixture bins)',
                        inputs: { spaces: section['space_report'].size, template: template },
@@ -172,16 +172,77 @@ module OpenStudioLighting
         end
       end
 
-      def daylighting_note(model, audit)
-        controls = model.getDaylightingControls.size
-        if controls.zero?
+      # Daylighting-sensor costing (port of cost_audit_daylighting_sensor_control's
+      # per-sensor BOM: sensor row 407 + wiring row 10 x 0.3 CLF + PVC conduit row
+      # 17 x 30 LF + box row 14, per sensor x zone multiplier). Sensor counts:
+      # ceil(fixtures / 4) per zone — DEVIATION (audited): legacy derives the
+      # fixture count from the DAYLIGHTED-AREA portion (primary sidelighted /
+      # under-skylight geometry, not yet ported); this port uses the zone's whole
+      # floor area x the fixture density, an upper bound.
+      SENSOR_BOM = [[407, 1.0, 'daylight sensor (remote, dimming)'],
+                    [10, 30.0 / 100.0, 'sensor wiring (30 ft)'],
+                    [17, 30.0, 'sensor PVC conduit (30 ft)'],
+                    [14, 1.0, 'sensor box']].freeze
+
+      def daylighting_note(model, database, template, province_state, city, section, audit)
+        zones = model.getThermalZones.sort_by(&:nameString).select { |z| z.primaryDaylightingControl.is_initialized }
+        if zones.empty?
           audit.info(:costing_lighting, 'no daylighting controls in the model — daylighting-sensor costing $0 (matches legacy)')
-        else
-          audit.warn(:costing_lighting,
-                     "#{controls} daylighting control(s) present but daylighting-sensor costing is NOT ported " \
-                     '(legacy derives sensor counts from 8.4.4.5 daylighted-area geometry, which this gem ' \
-                     'family does not model) — sensors are UNCOSTED')
+          return 0.0
         end
+
+        total = 0.0
+        sensors_total = 0
+        zones.each do |zone|
+          fixtures = zone_fixture_count(zone, database, template)
+          sensors = (fixtures / 4.0).ceil * zone.multiplier
+          next if sensors.zero?
+
+          sensors_total += sensors
+          SENSOR_BOM.each do |layer_id, quantity, label|
+            material = database.materials_lighting.find { |row| row['lighting_type_id'].to_s == layer_id.to_s }
+            next if material.nil?
+
+            costs = database.cost_record(material['id'])
+            regional = database.regional_factors(province_state, city, material['id'])
+            line = (costs['materialOpCost'] * regional[0] / 100.0 +
+                    costs['laborOpCost'] * regional[1] / 100.0) * quantity * sensors
+            total += line
+            audit.info(:costing_lighting, "daylighting #{label}", target: zone.nameString,
+                       inputs: { sensors: sensors, quantity_each: quantity }, value: "$#{line.round(2)}")
+          end
+        end
+        audit.decision(:costing_lighting,
+                       'daylighting sensors costed (ceil(fixtures/4) per controlled zone; fixture count from ' \
+                       'WHOLE zone area — legacy restricts to the daylighted-area portion, not yet ported: upper bound)',
+                       inputs: { zones: zones.size, sensors: sensors_total }, value: "$#{total.round(2)}")
+        section['daylighting_sensor_cost'] = total.round(2)
+        total
+      end
+
+      def zone_fixture_count(zone, database, template)
+        count = 0.0
+        zone.spaces.each do |space|
+          next if space.spaceType.empty? || space.spaceType.get.standardsSpaceType.empty?
+
+          space_type = space.spaceType.get.standardsSpaceType.get
+          building_type = space.spaceType.get.standardsBuildingType.get
+          set = database.lighting_sets.find do |row|
+            row['template'].to_s.gsub(/\s*/, '') == template &&
+              row['building_type'].to_s.downcase == building_type.downcase &&
+              row['space_type'].to_s.downcase == space_type.downcase
+          end
+          next if set.nil?
+
+          floor_ft2 = OpenStudio.convert(space.floorArea, 'm^2', 'ft^2').get
+          ceiling_ft = space.floorArea.positive? ? OpenStudio.convert(space.volume / space.floorArea, 'm', 'ft').get : 0
+          column = HEIGHT_COLUMNS.find { |limit, _| ceiling_ft < limit }[1]
+          fixture = database.lighting.find { |row| row['lighting_type_id'].to_s == set[column].to_s }
+          next if fixture.nil?
+
+          count += floor_ft2 / 1000.0 * fixture['Fix_1000ft'].to_f
+        end
+        count
       end
     end
   end

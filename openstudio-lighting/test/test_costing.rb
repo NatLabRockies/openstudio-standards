@@ -55,14 +55,22 @@ class TestCosting < Minitest::Test
     assert(audit.entries.any? { |e| e[:action].include?('carries only LED') })
   end
 
-  def test_daylighting_controls_warn_loudly
+  def test_daylighting_sensors_costed
     model = costed_fixture_model
-    control = OpenStudio::Model::DaylightingControl.new(model)
-    control.setSpace(model.getSpaces.first)
+    wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
+    wall.setWindowToWallRatio(0.3)
     audit = OpenStudioLighting::AuditLog.new
-    OpenStudioLighting.cost(model, vintage: '2020', city: CITY, province_state: PROVINCE, audit: audit)
-    assert(audit.warnings.any? { |w| w[:action].include?('UNCOSTED') },
-           'daylighting sensors present but unported costing warns')
+    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', audit: audit)
+    assert_operator created, :>=, 1, 'a daylighted space got a control'
+    control = model.getDaylightingControls.first
+    assert_equal 400.0, control.illuminanceSetpoint, 'office target illuminance from the space-type data'
+    assert_equal 'Stepped', control.lightingControlType
+
+    base = OpenStudioLighting.cost(costed_fixture_model, vintage: '2020', city: CITY, province_state: PROVINCE)
+    report = OpenStudioLighting.cost(model, vintage: '2020', city: CITY, province_state: PROVINCE, audit: audit)
+    assert_operator report.lighting['daylighting_sensor_cost'], :>, 0, 'sensors costed (BOM 407/10/17/14)'
+    assert_operator report.total, :>, base.total, 'sensor cost adds to the fixture total'
+    assert(audit.entries.any? { |e| e[:action].include?('upper bound') }, 'area deviation audited')
   end
 
   def test_legacy_parity_led_2020

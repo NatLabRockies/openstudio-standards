@@ -60,6 +60,7 @@ end
 require_relative 'openstudio_lighting/necb/apply_lights'
 require_relative 'openstudio_lighting/necb/exterior'
 require_relative 'openstudio_lighting/necb/reference'
+require_relative 'openstudio_lighting/necb/daylighting'
 require_relative 'openstudio_lighting/costing/database'
 require_relative 'openstudio_lighting/costing/fixtures'
 require_relative 'openstudio_lighting/costing/report'
