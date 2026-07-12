@@ -1,0 +1,62 @@
+{
+  "provenance": {
+    "source": "NECB 2020 Tables 4.2.3.1.-A..-E via the building-codes MCP (necb:2020). 2025 verified essentially unchanged (Table -D edition diff similarity 0.978, minor wording only) — both vintages use this dataset.",
+    "generated": "2026-07-12",
+    "notes": "Zone 0 has no allowances anywhere. Table -C rows other than facades apply at a single value wherever permitted (zones 1/2-4 per the code text); the PDF extraction merges those cells — values below transcribed with their applicable zones."
+  },
+  "lighting_zones": {
+    "0": "Undeveloped areas within national/provincial/territorial parks, forest land, rural and other undeveloped areas",
+    "1": "Developed areas within national/provincial/territorial parks, and rural areas",
+    "2": "Residential zoning, neighbourhood business districts, light industrial with limited nighttime use, residential mixed-use",
+    "3": "All other areas",
+    "4": "High-activity commercial districts"
+  },
+  "basic_site_allowance_w": { "0": 0, "1": 350, "2": 400, "3": 500, "4": 900 },
+  "tradable": [
+    { "key": "parking_and_drives_m2", "application": "Uncovered parking areas and drives", "unit": "W/m2",
+      "by_zone": { "1": 0.32, "2": 0.43, "3": 0.65, "4": 0.86 } },
+    { "key": "walkways_narrow_m", "application": "Walkways less than 3 m wide", "unit": "W/m",
+      "by_zone": { "1": 1.6, "2": 1.6, "3": 2.0, "4": 2.3 } },
+    { "key": "walkways_wide_m2", "application": "Walkways >= 3 m wide, plaza and special feature areas", "unit": "W/m2",
+      "by_zone": { "1": 1.1, "2": 1.1, "3": 1.2, "4": 1.5 } },
+    { "key": "dining_m2", "application": "Dining areas", "unit": "W/m2",
+      "by_zone": { "1": 7.0, "2": 7.0, "3": 8.1, "4": 10.2 } },
+    { "key": "stairways_m2", "application": "Stairways", "unit": "W/m2",
+      "by_zone": { "1": 6.5, "2": 7.5, "3": 7.5, "4": 7.5 } },
+    { "key": "pedestrian_tunnels_m2", "application": "Pedestrian tunnels", "unit": "W/m2",
+      "by_zone": { "1": 1.3, "2": 1.3, "3": 1.5, "4": 2.3 } },
+    { "key": "landscape_m2", "application": "Landscape lighting", "unit": "W/m2",
+      "by_zone": { "1": 0.32, "2": 0.43, "3": 0.43, "4": 0.43 } },
+    { "key": "entrances_exits_m", "application": "Pedestrian and vehicular entrances/exits", "unit": "W/m of opening",
+      "by_zone": { "1": 46, "2": 46, "3": 69, "4": 69 } },
+    { "key": "entry_canopies_m2", "application": "Entry canopies", "unit": "W/m2",
+      "by_zone": { "1": 2.1, "2": 2.7, "3": 4.3, "4": 4.3 } },
+    { "key": "loading_docks_m2", "application": "Loading docks", "unit": "W/m2",
+      "by_zone": { "1": 3.8, "2": 3.8, "3": 3.8, "4": 3.8 } },
+    { "key": "sales_canopies_m2", "application": "Sales canopies (free-standing and attached)", "unit": "W/m2",
+      "by_zone": { "1": 4.3, "2": 4.3, "3": 6.5, "4": 7.5 } },
+    { "key": "outdoor_sales_m2", "application": "Outdoor sales open areas (incl. vehicle sales lots)", "unit": "W/m2",
+      "by_zone": { "1": 2.1, "2": 2.1, "3": 3.8, "4": 5.4 } },
+    { "key": "street_frontage_m", "application": "Street frontage for vehicle sales lots (in addition to open area)", "unit": "W/m",
+      "by_zone": { "2": 23, "3": 23, "4": 69 } }
+  ],
+  "non_tradable": [
+    { "key": "facades_m2", "application": "Building facades (per illuminated wall/surface area)", "unit": "W/m2",
+      "by_zone": { "2": 1.1, "3": 1.6, "4": 2.2 } },
+    { "key": "facades_m", "application": "Building facades (per illuminated wall/surface length)", "unit": "W/m",
+      "by_zone": { "2": 8.2, "3": 12.3, "4": 16.4 } },
+    { "key": "atm_locations", "application": "ATMs and night depositories (per location)", "unit": "W",
+      "by_zone": { "1": 135, "2": 135, "3": 135, "4": 135 } },
+    { "key": "atm_additional", "application": "Additional ATMs (per ATM per location)", "unit": "W",
+      "by_zone": { "1": 45, "2": 45, "3": 45, "4": 45 } },
+    { "key": "guarded_entrances_m2", "application": "Entrances/gatehouse inspection stations at guarded facilities", "unit": "W/m2",
+      "by_zone": { "1": 5.4, "2": 5.4, "3": 5.4, "4": 5.4 } },
+    { "key": "emergency_loading_m2", "application": "Loading areas for emergency service vehicles", "unit": "W/m2",
+      "by_zone": { "1": 3.8, "2": 3.8, "3": 3.8, "4": 3.8 } },
+    { "key": "drive_up_windows", "application": "Drive-up windows and doors (per drive-through)", "unit": "W",
+      "by_zone": { "1": 200, "2": 200, "3": 200, "4": 200 } },
+    { "key": "parking_24h_retail_entries", "application": "Parking near 24-hour retail entrances (per main entry)", "unit": "W",
+      "by_zone": { "1": 400, "2": 400, "3": 400, "4": 400 } }
+  ],
+  "uncovered_percent_of_interior": { "0": 0, "1": 65, "2": 65, "3": 80, "4": 100 }
+}

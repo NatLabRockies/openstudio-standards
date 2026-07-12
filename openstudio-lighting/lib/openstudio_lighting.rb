@@ -58,3 +58,5 @@ module OpenStudioLighting
 end
 
 require_relative 'openstudio_lighting/necb/apply_lights'
+require_relative 'openstudio_lighting/necb/exterior'
+require_relative 'openstudio_lighting/necb/reference'
