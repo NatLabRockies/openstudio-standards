@@ -295,7 +295,7 @@ class BTAPCosting
         end
 
         # If natural gas tanks are present include fuel line and connectors
-        if (num_reg_gas_tanks + num_reg_gas_tanks) > 0
+        if (num_reg_gas_tanks + num_high_eff_gas_tanks) > 0
           # Gas tanks require fuel line+valves+connectors
           utilCost += (fuelLineCost * util_dist + fuelFittingCost) * (num_reg_gas_tanks + num_high_eff_gas_tanks)
 

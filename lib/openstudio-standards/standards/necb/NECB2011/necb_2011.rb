@@ -2131,7 +2131,7 @@ class NECB2011 < Standard
     # Interate through all spaces in model.. not just ones that have space type defined.. Is this right sara?
     space_type.spaces.sort.each do |space|
       # Get only the wall type surfaces and iterate throught them.
-      space.surfaces.sort.select(&:surfaceType == 'Wall').each do |wall_surface|
+      space.surfaces.sort.select { |surface| surface.surfaceType == 'Wall' }.each do |wall_surface|
         # Find the vertex with the max z value.
         vertex_with_max_height = wall_surface.vertices.max_by(&:z)
         # replace max if this surface has something bigger.

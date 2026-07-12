@@ -23,9 +23,11 @@ class BTAPCosting
     model.getThermalZonesSorted.each do |zone|
       # Iterate through spaces.
       spaceNum = 0  # Counting number of spaces for reporting
-      total_with_region = 0
       zone.getSpacesSorted.each do |space|
         spaceNum += 1  # Counting number of spaces for reporting
+        # Reset per SPACE: previously initialized once per zone, so spaces with a
+        # 'Nil' fixture type reported the PREVIOUS space's cost in the reports.
+        total_with_region = 0
         # Get SpaceType defined for space.. if not defined it will skip the spacetype. May have to deal with Attic spaces.
         if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
           raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space for costing.")
