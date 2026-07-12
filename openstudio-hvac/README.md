@@ -40,9 +40,24 @@ the control zone must be one of the served zones.
 OpenStudioHVAC.build_system(model, 'PSZ RTU Electric and DX Coils and Electric Baseboard', zones)
 
 # 2. sizing: any runner. The gem is SDK-only and never executes simulations — it only
-#    READS hard/autosized values afterwards. Use the openstudio CLI, your own workflow,
-#    or the openstudio-standards helper:
-Standard.build('NECB2020').model_run_sizing_run(model, sizing_dir)
+#    READS hard/autosized values afterwards. Pure SDK + openstudio CLI, no other gems
+#    (smoke-tested recipe; needs a weather file + its .ddy design days):
+ddy = OpenStudio::EnergyPlus.loadAndTranslateIdf(ddy_path).get
+ddy.getDesignDays.each { |dd| model.addObject(dd.clone) }
+sim = model.getSimulationControl
+sim.setDoZoneSizingCalculation(true)
+sim.setDoSystemSizingCalculation(true)
+sim.setDoPlantSizingCalculation(true)
+sim.setRunSimulationforSizingPeriods(true)
+sim.setRunSimulationforWeatherFileRunPeriods(false)
+model.save("#{sizing_dir}/in.osm", true)
+osw = OpenStudio::WorkflowJSON.new
+osw.setSeedFile("#{sizing_dir}/in.osm")
+osw.saveAs("#{sizing_dir}/in.osw")
+system("openstudio run -w #{sizing_dir}/in.osw")
+model.setSqlFile(OpenStudio::SqlFile.new(OpenStudio::Path.new("#{sizing_dir}/run/eplusout.sql")))
+# -> autosized accessors (capacities/flows) now resolve on the model
+#    (openstudio-standards users can equivalently call model_run_sizing_run)
 
 # 3. code efficiencies: NATIVE for NECB 2020/2025 (capacity-binned COP/EER/thermal
 #    efficiencies + NECB performance curves, parity-gated 0-mismatch vs the legacy pass):
