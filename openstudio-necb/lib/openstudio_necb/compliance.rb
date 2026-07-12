@@ -82,12 +82,16 @@ module OpenStudioNECB
       end
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
-      proposed = load_model(model)
-      apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+      proposed = nil
+      audit.with_building('input model') do
+        proposed = load_model(model)
+        apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+      end
       audit.decision(:compliance, 'performance-path run started',
                      inputs: { vintage: vintage, simulate: simulate, costing: costing },
                      article: '8.4.1.2.(1)')
 
+      audit.building = 'proposed building'
       if simulate != :none
         %i[epw ddy].each do |key|
           raise(ArgumentError, "weather[:#{key}] is required when simulate: #{simulate}") unless weather[key]
@@ -110,16 +114,20 @@ module OpenStudioNECB
       end
 
       # 2. reference building: HVAC then envelope on ONE clone, same audit
-      reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
-                                                             building: building, audit: audit)
-      reference = reference_result.model
-      OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
-                                                  actual_roof_absorptance_used: actual_roof_absorptance_used,
-                                                  thermal_bridging: thermal_bridging, audit: audit)
-      if reference_daylighting
-        OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
-                                                       proposed: proposed, audit: audit)
+      reference = nil
+      audit.with_building('reference building') do
+        reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
+                                                               building: building, audit: audit)
+        reference = reference_result.model
+        OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
+                                                    actual_roof_absorptance_used: actual_roof_absorptance_used,
+                                                    thermal_bridging: thermal_bridging, audit: audit)
+        if reference_daylighting
+          OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
+                                                         proposed: proposed, audit: audit)
+        end
       end
+      audit.building = nil
       audit.info(:compliance,
                  '8.4.3.2 operating schedules and internal loads are IDENTICAL between proposed and ' \
                  'reference by construction (the reference is a clone; neither transform touches loads ' \
@@ -130,10 +138,12 @@ module OpenStudioNECB
       # 3. size the reference, then re-apply efficiencies on sized equipment
       #    (the openstudio-hvac contract: efficiency rows are capacity-binned)
       if simulate != :none
-        Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
-        OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit)
-        audit.info(:compliance, 'reference sized; efficiencies re-applied on sized capacities',
-                   target: 'reference')
+        audit.with_building('reference building') do
+          Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
+          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit)
+          audit.info(:compliance, 'reference sized; efficiencies re-applied on sized capacities',
+                     target: 'reference')
+        end
       end
 
       report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
@@ -214,17 +224,22 @@ module OpenStudioNECB
                        report_html: false, report_options: {}, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
-      proposed = load_model(model)
-      apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+      proposed = nil
+      audit.with_building('input model') do
+        proposed = load_model(model)
+        apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+      end
       audit.decision(:compliance, 'ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) — no reference building',
                      inputs: { vintage: vintage, archetypes: archetype_areas.keys },
                      article: '8.4.4.1.')
 
+      audit.building = 'proposed building'
       if simulate != :none
         %i[epw ddy].each { |k| raise(ArgumentError, "weather[:#{k}] required") unless weather[k] }
         Runner.attach_weather!(proposed, epw: weather[:epw], ddy: weather[:ddy])
       end
       hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
+      audit.building = nil # BET derivation + verdicts are comparisons, not model work
 
       report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
                  'path' => 'eui', 'proposed' => {}, 'reference' => {} }
@@ -259,13 +274,15 @@ module OpenStudioNECB
       end
 
       if costing
-        hvac_cost = OpenStudioHVAC.cost(proposed, city: city, province_state: province_state,
-                                        costs_csv: costs_csv, audit: audit)
-        envelope_cost = OpenStudioEnvelope.cost(proposed, city: hvac_cost.city,
-                                                province_state: hvac_cost.province_state,
-                                                costs_csv: costs_csv, audit: audit)
-        report['proposed']['cost'] = { 'hvac' => hvac_cost.total, 'envelope' => envelope_cost.total,
-                                       'total' => (hvac_cost.total + envelope_cost.total).round(2) }
+        audit.with_building('proposed building') do
+          hvac_cost = OpenStudioHVAC.cost(proposed, city: city, province_state: province_state,
+                                          costs_csv: costs_csv, audit: audit)
+          envelope_cost = OpenStudioEnvelope.cost(proposed, city: hvac_cost.city,
+                                                  province_state: hvac_cost.province_state,
+                                                  costs_csv: costs_csv, audit: audit)
+          report['proposed']['cost'] = { 'hvac' => hvac_cost.total, 'envelope' => envelope_cost.total,
+                                         'total' => (hvac_cost.total + envelope_cost.total).round(2) }
+        end
       end
 
       report['compliant'] = compliant
@@ -438,22 +455,24 @@ module OpenStudioNECB
           bump = bumps[label]
           next unless bump[:heating] || bump[:cooling]
 
-          factors = bump_sizing_factors(model, step, heating: bump[:heating], cooling: bump[:cooling])
-          record['bumped'][label] = factors
-          audit.decision(:compliance,
-                         "capacity increase #{iteration}: #{label} #{bump.select { |_, v| v }.keys.join('+')} " \
-                         'sizing factor(s) raised — building re-sized and re-run',
-                         inputs: { building: label, step: step, iteration: iteration }.merge(factors),
-                         article: '8.4.1.2.(5)')
+          audit.with_building("#{label} building") do
+            factors = bump_sizing_factors(model, step, heating: bump[:heating], cooling: bump[:cooling])
+            record['bumped'][label] = factors
+            audit.decision(:compliance,
+                           "capacity increase #{iteration}: #{label} #{bump.select { |_, v| v }.keys.join('+')} " \
+                           'sizing factor(s) raised — building re-sized and re-run',
+                           inputs: { building: label, step: step, iteration: iteration }.merge(factors),
+                           article: '8.4.1.2.(5)')
 
-          dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
-          if label == 'reference'
-            # size on the new factors FIRST so efficiencies re-bin on the new
-            # capacities, then run the energy simulation
-            Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
-            OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit)
+            dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
+            if label == 'reference'
+              # size on the new factors FIRST so efficiencies re-bin on the new
+              # capacities, then run the energy simulation
+              Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
+              OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit)
+            end
+            run_annual(model, dir, run_period, report[label])
           end
-          run_annual(model, dir, run_period, report[label])
         end
 
         record['unmet_after'] = { 'proposed' => report['proposed']['unmet_occupied_hours'],
@@ -502,15 +521,17 @@ module OpenStudioNECB
 
     def cost_models(proposed, reference, report, city:, province_state:, costs_csv:, audit:)
       { 'proposed' => proposed, 'reference' => reference }.each do |label, model|
-        hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
-                                   costs_csv: costs_csv, audit: audit)
-        envelope = OpenStudioEnvelope.cost(model, city: hvac.city, province_state: hvac.province_state,
-                                           costs_csv: costs_csv, audit: audit)
-        report[label]['cost'] = {
-          'hvac' => hvac.total, 'envelope' => envelope.total,
-          'total' => (hvac.total + envelope.total).round(2),
-          'city' => hvac.city, 'province_state' => hvac.province_state
-        }
+        audit.with_building("#{label} building") do
+          hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
+                                     costs_csv: costs_csv, audit: audit)
+          envelope = OpenStudioEnvelope.cost(model, city: hvac.city, province_state: hvac.province_state,
+                                             costs_csv: costs_csv, audit: audit)
+          report[label]['cost'] = {
+            'hvac' => hvac.total, 'envelope' => envelope.total,
+            'total' => (hvac.total + envelope.total).round(2),
+            'city' => hvac.city, 'province_state' => hvac.province_state
+          }
+        end
       end
       delta = report['proposed'].dig('cost', 'total') - report['reference'].dig('cost', 'total')
       report['incremental_cost_proposed_vs_reference'] = delta.round(2)

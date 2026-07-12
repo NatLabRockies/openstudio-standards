@@ -11,15 +11,33 @@ module OpenStudioHVAC
   # of diffing models, and debugging failures reads as a narrative.
   #
   # Entry schema (all optional except step/action/level):
-  #   { step:, target:, action:, inputs:, value:, article:, evidence:, level: }
+  #   { step:, target:, action:, inputs:, value:, article:, evidence:, building:, level: }
   #   level: :decision | :info | :warning
+  #
+  # building: WHICH model the entry is about ('input model', 'proposed building',
+  # 'reference building') — stamped automatically from the current #building
+  # context, which a pipeline sets at phase boundaries (one audit spans several
+  # models; without the stamp a warning can't be traced to the model it belongs
+  # to). nil = cross-building comparison or verdict.
   #
   # Contract: warnings are never silent — anything skipped/unknown lands here.
   class AuditLog
       attr_reader :entries
+      attr_accessor :building
 
       def initialize
         @entries = []
+        @building = nil
+      end
+
+      # Stamp every entry recorded inside the block with the given building
+      # context; restores the previous context afterwards (nestable).
+      def with_building(name)
+        previous = @building
+        @building = name
+        yield
+      ensure
+        @building = previous
       end
 
       # @param step [Symbol] pipeline stage (:characterize, :selection, :build, :rules, :efficiency)
@@ -54,6 +72,7 @@ module OpenStudioHVAC
       def to_s
         @entries.map do |e|
           line = format('[%-8s] %-13s %s', e[:level], e[:step], e[:action])
+          line += " | building: #{e[:building]}" if e[:building]
           line += " | target: #{e[:target]}" if e[:target]
           line += " | inputs: #{compact_hash(e[:inputs])}" if e[:inputs]
           line += " | value: #{e[:value]}" if e[:value]
@@ -68,7 +87,7 @@ module OpenStudioHVAC
       def add(level, step, action, target, inputs, value, article, evidence)
         @entries << { step: step, target: target, action: action, inputs: inputs,
                       value: value, article: article, evidence: evidence,
-                      level: level }.compact
+                      building: @building, level: level }.compact
         self
       end
 

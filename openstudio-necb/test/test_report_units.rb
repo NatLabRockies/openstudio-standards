@@ -31,8 +31,13 @@ class TestReportUnits < Minitest::Test
     audit.decision(:compliance, 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)',
                    inputs: { proposed_kwh: 90_000.0, bet_kwh: 120_000.0 }, article: '8.4.4.1.(2)')
     audit.decision(:coverage, '8.4.2.3 climatic data taken from model inputs', article: '8.4.2.3.')
-    audit.warn(:efficiency, 'unsized DX coil skipped by capacity-binned lookup',
-               target: 'Coil 1', article: 'Table 5.2.12.1.')
+    audit.with_building('reference building') do
+      audit.warn(:efficiency, 'unsized DX coil skipped by capacity-binned lookup',
+                 target: 'Coil 1', article: 'Table 5.2.12.1.')
+    end
+    audit.with_building('input model') do
+      audit.warn(:loads, 'space with no space type assigned', target: 'Space 9')
+    end
     audit
   end
 
@@ -92,6 +97,26 @@ class TestReportUnits < Minitest::Test
     assert_equal rows.sort_by { |r| Checklist.article_sort_key(r.article) }.map(&:article), rows.map(&:article),
                  'rows are article-sorted'
     assert rows.all? { |r| r.audit_index.is_a?(Integer) }, 'every row anchors an audit entry'
+  end
+
+  def test_building_stamp_traces_issues_to_their_model
+    audit = canned_audit
+    ref_warn = audit.entries.find { |e| e[:step] == :efficiency }
+    input_warn = audit.entries.find { |e| e[:step] == :loads }
+    verdict = audit.entries.find { |e| e[:article] == '8.4.1.2.(2)' }
+    assert_equal 'reference building', ref_warn[:building], 'warning stamped with its model'
+    assert_equal 'input model', input_warn[:building]
+    assert_nil verdict[:building], 'cross-building verdicts carry no stamp'
+    assert_nil audit.building, 'with_building restores the outer context'
+
+    rows = Checklist.rows(audit.entries)
+    assert_equal 'reference building', rows.find { |r| r.article == 'Table 5.2.12.1.' }.building
+
+    html = OpenStudioNECB::Report.render(canned_result)
+    assert_includes html, 'bldg-reference', 'reference chip rendered'
+    assert_includes html, 'bldg-input', 'input-model chip rendered'
+    assert_includes html, '>Applies to<', 'checklist/audit tables carry the Applies-to column'
+    assert_includes audit.to_s, 'building: reference building', 'audit.txt narrative carries the stamp'
   end
 
   def test_checklist_measured_values

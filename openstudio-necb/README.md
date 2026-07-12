@@ -63,6 +63,12 @@ result.audit                # ONE audit — run_dir/audit.json + audit.txt
 result.reference_model      # the fully-transformed reference building
 ```
 
+Every audit entry is stamped with **which model it is about** (`building:`
+`'input model'` | `'proposed building'` | `'reference building'`; absent =
+cross-building comparison/verdict) — the pipeline sets the context at each
+phase boundary, so a warning is always traceable to the model it belongs to
+in `audit.txt`, `audit.json`, and the HTML report's "Applies to" chips.
+
 ## What the pipeline does
 
 1. Clones the proposed model, attaches weather (EPW + DDY design days).

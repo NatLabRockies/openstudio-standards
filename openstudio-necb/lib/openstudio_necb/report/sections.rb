@@ -136,12 +136,16 @@ module OpenStudioNECB
         table_rows = rows.map do |row|
           [H.raw(H.glyph(row.glyph)),
            H.raw(%(<a href="#audit-#{row.audit_index}">#{H.esc(row.article.empty? ? '—' : row.article)}</a>)),
+           H.raw(H.building_chip(row.building)),
            row.statement, row.measured || '—']
         end
-        body = H.table(['', 'Article', 'Requirement / determination', 'Measured values'], table_rows)
+        body = H.table(['', 'Article', 'Applies to', 'Requirement / determination', 'Measured values'], table_rows)
         body += %(<p class="meta">#{H.glyph(:pass)} complies &nbsp; #{H.glyph(:fail)} does not comply &nbsp;
           #{H.glyph(:warning)} warning / modeller attention &nbsp; #{H.glyph(:info)} scope note &nbsp;
-          #{H.glyph(:na)} informational. Each article links to the full audit entry.</p>)
+          #{H.glyph(:na)} informational. "Applies to" says WHICH model the row is about —
+          #{H.building_chip('input model')} the .osm as submitted, #{H.building_chip('proposed building')} the
+          proposed design as run, #{H.building_chip('reference building')} the code-generated reference,
+          #{H.building_chip(nil)} a cross-building verdict. Each article links to the full audit entry.</p>)
         H.section('checklist', 'Compliance checklist', body)
       end
 
@@ -338,10 +342,11 @@ module OpenStudioNECB
         end
         unless warnings.empty?
           rows = warnings.map do |e, i|
-            [H.raw(H.glyph(:warning)), e[:article].to_s, "#{e[:target] ? "#{e[:target]}: " : ''}#{e[:action]}",
+            [H.raw(H.glyph(:warning)), H.raw(H.building_chip(e[:building])), e[:article].to_s,
+             "#{e[:target] ? "#{e[:target]}: " : ''}#{e[:action]}",
              H.raw(%(<a href="#audit-#{i}">entry #{i}</a>))]
           end
-          body << "<h3>All warnings (#{warnings.size})</h3>#{H.table(['', 'Article', 'Warning', 'Audit'], rows)}"
+          body << "<h3>All warnings (#{warnings.size})</h3>#{H.table(['', 'Applies to', 'Article', 'Warning', 'Audit'], rows)}"
         end
         body = '<p>No coverage notes or warnings recorded.</p>' if body.empty?
         H.section('coverage', 'Scope, coverage and warnings', body, page_break: true)
@@ -354,10 +359,11 @@ module OpenStudioNECB
           # decisions get a neutral glyph here; the checklist carries the verdict
           glyph_kind = { 'warn' => :warning, 'warning' => :warning, 'info' => :info }.fetch(level, :na)
           %(<tr id="audit-#{i}"><td>#{i}</td><td>#{H.glyph(glyph_kind)} #{H.esc(level)}</td>) +
+            %(<td>#{H.building_chip(e[:building])}</td>) +
             %(<td>#{H.esc(e[:step])}</td><td>#{H.esc(e[:target])}</td><td>#{H.esc(e[:action])}</td>) +
             %(<td>#{H.esc(e[:article])}</td><td>#{H.esc(compact_inputs(e))}</td></tr>)
         end.join
-        table = %(<table><thead><tr><th>#</th><th>Level</th><th>Step</th><th>Target</th>) +
+        table = %(<table><thead><tr><th>#</th><th>Level</th><th>Applies to</th><th>Step</th><th>Target</th>) +
                 %(<th>Action</th><th>Article</th><th>Inputs / value</th></tr></thead><tbody>#{rows}</tbody></table>)
         H.section('audit', 'Full audit trail',
                   H.details("#{ctx[:audit_entries].size} audited entries (every value used and article applied)", table))
@@ -412,13 +418,14 @@ module OpenStudioNECB
         return '' if picked.empty?
 
         rows = picked.first(60).map do |e, i|
-          [H.raw(H.glyph(%i[warn warning].include?(e[:level]) ? :warning : :info)), e[:article].to_s,
+          [H.raw(H.glyph(%i[warn warning].include?(e[:level]) ? :warning : :info)),
+           H.raw(H.building_chip(e[:building])), e[:article].to_s,
            "#{e[:target] ? "#{e[:target]}: " : ''}#{e[:action]}",
            H.raw(%(<a href="#audit-#{i}">##{i}</a>))]
         end
         note = picked.size > 60 ? %(<p class="meta">Showing 60 of #{picked.size} — see the full audit trail.</p>) : ''
         H.details("Audited decisions for this domain (#{picked.size})",
-                  H.table(['', 'Article', 'Decision', 'Audit'], rows) + note)
+                  H.table(['', 'Applies to', 'Article', 'Decision', 'Audit'], rows) + note)
       end
     end
   end

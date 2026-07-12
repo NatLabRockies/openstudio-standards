@@ -68,6 +68,19 @@ module OpenStudioNECB
         unit ? "#{text} #{unit}" : text
       end
 
+      # Which-model tag for audit-derived rows: proposed (blue), reference
+      # (gray), input model (amber); nil = a cross-building comparison/verdict.
+      def building_chip(name)
+        return %(<span class="bldg bldg-na">comparison</span>) if name.nil? || name.to_s.empty?
+
+        klass = case name.to_s
+                when /reference/i then 'bldg-reference'
+                when /input/i then 'bldg-input'
+                else 'bldg-proposed'
+                end
+        %(<span class="bldg #{klass}">#{esc(name.to_s.sub(/ building\z/, ''))}</span>)
+      end
+
       def details(summary, body, open: false)
         %(<details#{open ? ' open' : ''}><summary>#{esc(summary)}</summary>#{body}</details>)
       end
@@ -107,6 +120,10 @@ module OpenStudioNECB
                 vertical-align: middle; margin: 0 .25rem 0 .8rem; }
         .warnstrip { background: #fff3cd; border: 2px solid #9a6700; padding: .6rem .8rem;
                      font-weight: 600; margin: .6rem 0; }
+        .bldg { display: inline-block; padding: .05rem .45rem; border-radius: .7rem;
+                font-size: .75rem; font-weight: 700; color: #fff; white-space: nowrap; }
+        .bldg-proposed { background: #1a5276; } .bldg-reference { background: #7f8c8d; }
+        .bldg-input { background: #9a6700; } .bldg-na { background: #fff; color: #555; border: 1px solid #999; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         svg { width: 100%; height: auto; }
         nav.toc { font-size: .85rem; margin: .6rem 0 1rem; }

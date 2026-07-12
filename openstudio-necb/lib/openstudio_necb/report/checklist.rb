@@ -5,7 +5,7 @@ module OpenStudioNECB
     # become scope notes, and every warning is elevated so the checklist can
     # never look cleaner than the run actually was.
     module Checklist
-      Row = Struct.new(:glyph, :article, :statement, :measured, :audit_index, keyword_init: true)
+      Row = Struct.new(:glyph, :article, :statement, :measured, :audit_index, :building, keyword_init: true)
 
       # The audit convention SHOUTS violations ('EXCEEDS', 'does NOT meet',
       # 'BELOW the') while pass texts stay lowercase ('does not exceed',
@@ -22,13 +22,14 @@ module OpenStudioNECB
         audit_entries.each_with_index do |entry, index|
           step = entry[:step].to_s
           if %i[warn warning].include?(entry[:level])
-            out << Row.new(glyph: :warning, article: entry[:article].to_s,
+            out << Row.new(glyph: :warning, article: entry[:article].to_s, building: entry[:building],
                            statement: statement_for(entry), measured: measured_for(entry), audit_index: index)
           elsif step == 'compliance' && entry[:level] == :decision
             out << Row.new(glyph: verdict_glyph(entry[:action].to_s), article: entry[:article].to_s,
+                           building: entry[:building],
                            statement: statement_for(entry), measured: measured_for(entry), audit_index: index)
           elsif step == 'coverage' && entry[:level] == :decision
-            out << Row.new(glyph: :info, article: entry[:article].to_s,
+            out << Row.new(glyph: :info, article: entry[:article].to_s, building: entry[:building],
                            statement: statement_for(entry), measured: nil, audit_index: index)
           end
         end
