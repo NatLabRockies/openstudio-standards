@@ -163,6 +163,16 @@ module OpenStudioHVAC
       assignment.catalog_name = variant.fetch('name')
       assignment.config = variant['config']
 
+      # 8.4.4.6.(2)/8.4.5.6.(2): purchased cooling is represented by an air-cooled
+      # electric chiller.
+      if facts.dig(:purchased_energy, :cooling) || group[:cooling_energy_types].include?('Purchased')
+        pc = selection['special_rules']['purchased_cooling']
+        assignment.config = (assignment.config || {}).merge('chw_source' => pc['chiller_source'])
+        assignment.articles << pc['article']
+        audit&.decision(:selection, 'purchased cooling energy -> represented by air-cooled electric chiller',
+                        target: group[:zones].join(','), article: pc['article'])
+      end
+
       audit&.decision(:selection, 'reference system selected',
                       target: group[:air_loop] || group[:zones].join(','),
                       inputs: { category: assignment.category, energy_type: assignment.energy_type,
@@ -226,12 +236,43 @@ module OpenStudioHVAC
                        article: assignment.articles.compact.uniq.join('; '))
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
+        apply_energy_recovery_rule(result.air_loops, info, ruleset, audit)
       end
 
       apply_oversizing_caps(model, reference, ruleset, audit)
       Efficiency.apply(reference, vintage: vintage, audit: audit)
+      emit_article_coverage(ruleset, audit)
 
       ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    # Completeness accounting: every article of the reference subsection is written to
+    # the audit with its handling status and how many decisions cited it this run —
+    # unimplemented or partially-implemented articles surface as warnings, so a missed
+    # requirement is visible in every log rather than discovered by review.
+    def self.emit_article_coverage(ruleset, audit)
+      coverage = ruleset['article_coverage']
+      return if coverage.nil?
+
+      cited = Hash.new(0)
+      audit.entries.each do |entry|
+        entry[:article].to_s.scan(/8\.4\.\d+\.\d+\./) { |a| cited[a] += 1 }
+      end
+
+      coverage['articles'].each do |art|
+        applied = cited.select { |a, _| a.start_with?(art['article']) }.values.sum
+        inputs = { status: art['status'], decisions_citing: applied }
+        case art['status']
+        when 'implemented', 'satisfied_by_clone', 'host_scope'
+          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}#{art['how'] ? ": #{art['how']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        else # partial / not_implemented
+          audit.warn(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}" \
+                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
+                                "#{art['gaps'] ? ". Gaps: #{art['gaps']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        end
+      end
     end
 
     def self.clone_model(model)
@@ -310,6 +351,142 @@ module OpenStudioHVAC
                          article: ruleset.fetch('heat_pump_reference')['article'])
         end
       end
+    end
+
+    # 8.4.4.19 (2020) / 8.4.5.19 (2025): where Subsection 5.2.10 applies, the reference
+    # system shall be modeled with energy recovery, used to preheat the outside air.
+    # The 5.2.10.1 trigger is SPECIFICATION-based, not sizing-based: exhaust heat
+    # content [kW] = 0.00123 x OA(L/s) x (avg exhaust T - winter design T), with OA from
+    # the spaces' DesignSpecificationOutdoorAir, exhaust T from the zones' heating
+    # design-day setpoints, and the winter design temperature from the weather .stat
+    # file (or the building: {winter_design_temp_c:} override). Anything unevaluable
+    # warns — never a silent skip.
+    def self.apply_energy_recovery_rule(air_loops, info, ruleset, audit)
+      rule = ruleset['energy_recovery']
+      return if rule.nil?
+
+      Array(air_loops).each do |air_loop|
+        oa_system = air_loop.airLoopHVACOutdoorAirSystem
+        next if oa_system.empty? # no OA intake: 5.2.10 does not apply
+
+        ehc = exhaust_heat_content_kw(air_loop, info, audit)
+        next if ehc.nil?
+
+        if ehc <= rule['exhaust_heat_content_threshold_kw']
+          audit.decision(:rules, 'energy recovery not required (exhaust heat content below threshold)',
+                         target: air_loop.nameString,
+                         inputs: { exhaust_heat_content_kw: ehc.round(1),
+                                   threshold_kw: rule['exhaust_heat_content_threshold_kw'] },
+                         article: rule['trigger_article'])
+          next
+        end
+
+        erv = add_energy_recovery(air_loop, oa_system.get, rule)
+        audit.decision(:rules, 'energy recovery added to reference system',
+                       target: air_loop.nameString,
+                       inputs: { exhaust_heat_content_kw: ehc.round(1),
+                                 threshold_kw: rule['exhaust_heat_content_threshold_kw'] },
+                       value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% effectiveness (#{erv.nameString})",
+                       article: "#{rule['article']}; #{rule['trigger_article']}")
+      end
+    end
+
+    # Legacy exhaust-heat-content calculation (NECB2011 hvac_systems.rb:200-279).
+    def self.exhaust_heat_content_kw(air_loop, info, audit)
+      sum_oa = 0.0
+      sum_oa_t = 0.0
+      air_loop.thermalZones.each do |zone|
+        heat_design_t = zone_heating_design_temp(zone)
+        zone_oa = zone.spaces.sum do |space|
+          spec = space.designSpecificationOutdoorAir
+          spec.is_initialized ? spec.get.outdoorAirFlowperFloorArea * space.floorArea * zone.multiplier : 0.0
+        end
+        sum_oa += zone_oa
+        sum_oa_t += zone_oa * heat_design_t
+      end
+      if sum_oa.zero?
+        audit.warn(:rules, 'energy-recovery trigger not evaluable: no DesignSpecificationOutdoorAir on served spaces',
+                   target: air_loop.nameString, article: '5.2.10.1.')
+        return nil
+      end
+
+      outdoor_t = winter_design_temp(air_loop.model, info, audit)
+      return nil if outdoor_t.nil?
+
+      avg_exhaust_t = sum_oa_t / sum_oa
+      0.00123 * sum_oa * 1000.0 * (avg_exhaust_t - outdoor_t)
+    end
+
+    def self.zone_heating_design_temp(zone)
+      thermostat = zone.thermostat
+      return 21.0 unless thermostat.is_initialized && thermostat.get.to_ThermostatSetpointDualSetpoint.is_initialized
+
+      schedule = thermostat.get.to_ThermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule
+      return 21.0 unless schedule.is_initialized && schedule.get.to_ScheduleRuleset.is_initialized
+
+      schedule.get.to_ScheduleRuleset.get.winterDesignDaySchedule.values.max || 21.0
+    end
+
+    # Winter (heating) design temperature: explicit override wins; else parse the .stat
+    # file beside the model's weather file (99.6% heating dry-bulb, matching legacy).
+    def self.winter_design_temp(model, info, audit)
+      return info[:winter_design_temp_c].to_f if info[:winter_design_temp_c]
+
+      weather = model.weatherFile
+      if weather.is_initialized && weather.get.path.is_initialized
+        stat_path = weather.get.path.get.to_s.sub(/\.epw\z/i, '.stat')
+        if File.exist?(stat_path)
+          line = File.readlines(stat_path).find { |l| l =~ /^\s*Heating(\s+-?\d)/ }
+          values = line.to_s.scan(/-?\d+(?:\.\d+)?/).map(&:to_f)
+          return values[1] if values.size > 1
+        end
+      end
+      audit.warn(:rules, 'energy-recovery trigger not evaluable: no winter design temperature ' \
+                         '(no .stat file beside the weather file; pass building: {winter_design_temp_c:})',
+                 article: '5.2.10.1.')
+      nil
+    end
+
+    # Legacy air_loop_hvac_apply_energy_recovery_ventilator recipe: rotary HX, 50%
+    # effectiveness at all conditions, economizer lockout, ExhaustOnly frost control,
+    # -23.3 degC threshold, and an OA-pretreat setpoint manager on the HX outlet.
+    def self.add_energy_recovery(air_loop, oa_system, rule)
+      model = air_loop.model
+      hx = rule['hx']
+      erv = OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent.new(model)
+      erv.setName("#{air_loop.nameString} ERV")
+      erv.setHeatExchangerType(hx['type'])
+      erv.setEconomizerLockout(hx['economizer_lockout'])
+      erv.setSupplyAirOutletTemperatureControl(true)
+      erv.setFrostControlType(hx['frost_control'])
+      eff = rule['effectiveness']
+      erv.setSensibleEffectivenessat100HeatingAirFlow(eff)
+      erv.setLatentEffectivenessat100HeatingAirFlow(eff)
+      erv.setSensibleEffectivenessat100CoolingAirFlow(eff)
+      erv.setLatentEffectivenessat100CoolingAirFlow(eff)
+      if erv.respond_to?(:setSensibleEffectivenessat75HeatingAirFlow)
+        erv.setSensibleEffectivenessat75HeatingAirFlow(eff)
+        erv.setLatentEffectivenessat75HeatingAirFlow(eff)
+        erv.setSensibleEffectivenessat75CoolingAirFlow(eff)
+        erv.setLatentEffectivenessat75CoolingAirFlow(eff)
+      end
+      erv.setThresholdTemperature(hx['threshold_temperature_c'])
+      erv.setInitialDefrostTimeFraction(hx['initial_defrost_time_fraction'])
+      erv.setRateofDefrostTimeFractionIncrease(hx['rate_of_defrost_increase'])
+      erv.addToNode(oa_system.outboardOANode.get)
+
+      spm = OpenStudio::Model::SetpointManagerOutdoorAirPretreat.new(model)
+      spm.setMinimumSetpointTemperature(-99.0)
+      spm.setMaximumSetpointTemperature(99.0)
+      spm.setMinimumSetpointHumidityRatio(0.00001)
+      spm.setMaximumSetpointHumidityRatio(1.0)
+      mixed_air_node = oa_system.mixedAirModelObject.get.to_Node.get
+      spm.setReferenceSetpointNode(mixed_air_node)
+      spm.setMixedAirStreamNode(mixed_air_node)
+      spm.setOutdoorAirStreamNode(oa_system.outboardOANode.get)
+      spm.setReturnAirStreamNode(oa_system.returnAirModelObject.get.to_Node.get)
+      spm.addToNode(erv.primaryAirOutletModelObject.get.to_Node.get)
+      erv
     end
 
     # 8.4.4.8: reference oversizing = the lesser of the proposed oversizing and the cap

@@ -452,5 +452,156 @@
   "hydronic_pumps": {
     "article": "8.4.5.14.(1)-(2)",
     "text": "head and efficiency identical to the proposed pump; multiple pumps -> one pump with the combined peak shaft power"
+  },
+  "energy_recovery": {
+    "article": "8.4.5.19.(1)-(2)",
+    "trigger_article": "5.2.10.1. (exhaust heat content)",
+    "exhaust_heat_content_threshold_kw": 150.0,
+    "exhaust_heat_content_formula": "0.00123 x OA(L/s) x (avg exhaust T - winter design T) [kW]; OA from space DesignSpecificationOutdoorAir (per-floor-area convention), exhaust T from zone heating design-day setpoints, winter design T from the weather .stat file (or building: {winter_design_temp_c:} override)",
+    "effectiveness": 0.5,
+    "hx": {
+      "type": "Rotary",
+      "economizer_lockout": true,
+      "frost_control": "ExhaustOnly",
+      "threshold_temperature_c": -23.3,
+      "initial_defrost_time_fraction": 0.167,
+      "rate_of_defrost_increase": 1.44
+    },
+    "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system."
+  },
+  "article_coverage": {
+    "note": "Complete accounting of Subsection 8.4.5 articles and how this gem handles each - emitted into every reference_hvac audit so nothing is silently missed. Statuses: implemented / partial / not_implemented / satisfied_by_clone / host_scope.",
+    "articles": [
+      {
+        "article": "8.4.5.1.",
+        "title": "General — reference building basis (prescriptive components, all energy uses)",
+        "status": "host_scope",
+        "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW prescriptive conformance is host-side."
+      },
+      {
+        "article": "8.4.5.2.",
+        "title": "Operating Schedules, Internal Loads and Service Water Heating Loads",
+        "status": "satisfied_by_clone",
+        "how": "The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required."
+      },
+      {
+        "article": "8.4.5.3.",
+        "title": "Building Envelope Components (solar absorptance)",
+        "status": "host_scope",
+        "how": "Envelope rules are out of the HVAC scope (host-side future work)."
+      },
+      {
+        "article": "8.4.5.4.",
+        "title": "Envelope Thermal Characteristics (lightweight construction)",
+        "status": "host_scope",
+        "how": "Envelope rules are out of the HVAC scope (host-side future work)."
+      },
+      {
+        "article": "8.4.5.5.",
+        "title": "Lighting",
+        "status": "host_scope",
+        "how": "Lighting rules are out of the HVAC scope (host-side future work)."
+      },
+      {
+        "article": "8.4.5.6.",
+        "title": "Purchased Energy",
+        "status": "partial",
+        "how": "Purchased HEATING is represented by a gas-fired boiler (energy type = gas, sentence (1)(a)); purchased COOLING forces an air-cooled electric chiller (sentence (2)(a)) via the chw_source config.",
+        "gaps": "Capacity-ratio clauses (1)(b)/(2)(b) are sizing-time and not enforced; purchased SHW (3) is host-scope."
+      },
+      {
+        "article": "8.4.5.7.",
+        "title": "HVAC System Selection (Tables -A/-B)",
+        "status": "implemented",
+        "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules, HP redirect per sentence (4).",
+        "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host; Table -B note (3) facade-orientation grouping for >4-storey System 6 is not automated (zone groups follow the proposed grouping)."
+      },
+      {
+        "article": "8.4.5.8.",
+        "title": "Equipment Oversizing",
+        "status": "implemented",
+        "how": "Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded."
+      },
+      {
+        "article": "8.4.5.9.",
+        "title": "Heating System",
+        "status": "partial",
+        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (4); boiler plant staging 176/352 kW incl. modulating flow mode + 25% floor and HWST 82/60 reset conventions applied via plant defaults + efficiency pass (6).",
+        "gaps": "Terminal/secondary capacity split (3), multi-energy capacity ratios (5), and furnace multi-stage modeling (7: staged objects) are sizing-time refinements not yet modeled."
+      },
+      {
+        "article": "8.4.5.10.",
+        "title": "Cooling Systems",
+        "status": "partial",
+        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (3); chiller plant: 2100 kW split, 7 C CHWST, 25% modulating floor (6) via plant defaults + efficiency pass.",
+        "gaps": "Terminal/secondary capacity split (7) and DX multi-stage modeling (8) are sizing-time refinements not yet modeled."
+      },
+      {
+        "article": "8.4.5.11.",
+        "title": "Cooling Tower Systems",
+        "status": "partial",
+        "how": "Tower cell count (1750 kW rule) and fan power set from chiller heat rejection in the efficiency pass.",
+        "gaps": "35/29 C inlet/outlet, 24 C wb rating and condenser pump specifics are not explicitly set (host/sizing refinements)."
+      },
+      {
+        "article": "8.4.5.12.",
+        "title": "Cooling with Outside Air (economizers)",
+        "status": "not_implemented",
+        "gaps": "Economizer requirements (5.2.2.7/8/9 via Table -12) are not applied to reference systems yet."
+      },
+      {
+        "article": "8.4.5.13.",
+        "title": "Heat Pumps",
+        "status": "partial",
+        "how": "Proposed ASHP/WSHP/GSHP redirects the reference to the Table -13 packaged rooftop ASHP; -10 C heating cutoff applied (2)(d).",
+        "gaps": "Capacity rules (2)(b)-(c) (cooling-peak sizing without oversizing, 8.3/-8.3 C capacity profile) and the 33% auxiliary-fuel election (2)(g) are sizing/annual-energy-time and not yet modeled."
+      },
+      {
+        "article": "8.4.5.14.",
+        "title": "Hydronic Pumps",
+        "status": "partial",
+        "gaps": "Pump head/efficiency identical-to-proposed (1), combined-pump consolidation (2) and pump power-vs-flow curves (4) are not yet transferred from the proposed model (reference pumps use gem plant defaults)."
+      },
+      {
+        "article": "8.4.5.15.",
+        "title": "Outdoor Air",
+        "status": "satisfied_by_clone",
+        "how": "Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1).",
+        "gaps": "DCV strategies (2) are not copied onto rebuilt reference systems."
+      },
+      {
+        "article": "8.4.5.16.",
+        "title": "Space Temperature Control (radiant workaround, throttling range)",
+        "status": "not_implemented",
+        "gaps": "Radiant-system +-2 C schedule adjustment (1) and throttling-range matching (2) are not applied (only relevant when the proposed design has radiant systems)."
+      },
+      {
+        "article": "8.4.5.17.",
+        "title": "Fans (exhaust fans, fan power vs flow curves)",
+        "status": "partial",
+        "how": "Proposed zone exhaust fans are preserved through replace_system (teardown deliberately keeps FanZoneExhaust), satisfying (1).",
+        "gaps": "Fan power-vs-flow curve selection ((2)-(5), Table -17) is not applied (host/sizing refinement)."
+      },
+      {
+        "article": "8.4.5.18.",
+        "title": "Supply Air Systems (airflow rates, fan specs)",
+        "status": "partial",
+        "how": "Fan specs applied: systems 1-5 supply 640 Pa @ 40% with no return-fan spec; system 6 supply 1000 Pa @ 55% + return 250 Pa @ 30% ((3)-(4)); system 6 13 C SAT via the catalog sizing block.",
+        "gaps": "Supply-airflow determination at 21/11 C deltas ((1)-(2)) is sizing-time; sentences (5)-(6) (identical fan power / 5.2.12.1-included fan energy) are not modeled."
+      },
+      {
+        "article": "8.4.5.19.",
+        "title": "Energy Recovery Systems",
+        "status": "implemented",
+        "how": "5.2.10.1 exhaust-heat-content trigger (>150 kW, specification-based) evaluated per reference air loop; rotary HX @ 50% effectiveness with OA-pretreat control added where required.",
+        "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope)."
+      },
+      {
+        "article": "8.4.5.20.",
+        "title": "Service Water Heating Systems",
+        "status": "host_scope",
+        "how": "SHW reference rules are out of the HVAC scope (host-side future work)."
+      }
+    ]
   }
 }

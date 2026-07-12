@@ -242,7 +242,22 @@ OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020')  # Table 5.2.12.
   dependency at runtime**.
 - **Reference modeling rules**: oversizing capped at min(proposed, 30%/10%) (8.4.4.8),
   fan specs (8.4.4.18: sys 1/3/4/5 → 640 Pa @ 40%, no return fan; sys 6 → 1000 Pa @ 55%
-  supply + 250 Pa @ 30% return), heat-pump −10 °C heating cutoff (8.4.4.13).
+  supply + 250 Pa @ 30% return), heat-pump −10 °C heating cutoff (8.4.4.13), purchased
+  cooling → air-cooled electric chiller (8.4.4.6.(2)), and **energy recovery
+  (8.4.4.19)**: the 5.2.10.1 exhaust-heat-content trigger (>150 kW) is evaluated per
+  reference air loop — specification-based (OA specs × heating setpoints × winter
+  design temperature from the .stat file or `building: {winter_design_temp_c:}`), so no
+  sizing run is needed — and adds the rotary HX @ 50% effectiveness with OA-pretreat
+  control where required. Proposed zone exhaust fans are preserved through
+  `replace_system` (8.4.4.17.(1)).
+- **Article-coverage accounting**: every audit ends with a `:coverage` section listing
+  **all 20 articles** of the reference subsection with a handling status
+  (implemented / partial / not-implemented / satisfied-by-clone / host-scope), the
+  number of decisions that cited each article in that run, and the declared gaps —
+  partial and unimplemented articles surface as **warnings in every log** (e.g.
+  economizers 8.4.4.12, radiant workaround 8.4.4.16), so a missed requirement is
+  visible per run rather than discovered in review. The manifest lives in the rules
+  JSON and is lint-tested for completeness on both vintages.
 - **Efficiencies** (`apply_efficiencies`): SDK-only port of the NECB pass — boilers
   (incl. 176/352 kW primary/secondary staging), chillers (2100 kW split, 25% modulating
   floor, tower cell/fan rules), single-speed DX cooling/heating, gas coils, with the
