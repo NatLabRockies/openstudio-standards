@@ -143,50 +143,51 @@
       {
         "article": "3.1.1.6.",
         "title": "Determination of Areas (FDWR/SRR area basis)",
-        "status": "not_implemented",
-        "gaps": "gross wall/roof area computation lands with the FDWR/SRR machinery (P3)"
+        "status": "implemented",
+        "how": "gross wall/roof area census + FDWR/SRR computed from exposed conditioned surfaces (Geometry module)"
       },
       {
         "article": "3.1.1.7.",
         "title": "Thermal Characteristics of Building Assemblies (EFFECTIVE transmittance incl. thermal bridging)",
-        "status": "not_implemented",
-        "gaps": "table U-values are effective Ut; TBD-based derate/uprate lands in P3b — until then applied values are clear-field"
+        "status": "implemented",
+        "gaps": "requires the tbd gem at runtime; without it (or when thermal_bridging: is not requested) values are clear-field and the audit WARNS",
+        "how": "TBD-based uprate/derate: assemblies uprated so the DERATED effective Ut meets the table targets (thermal_bridging: option, BETBG PSI sets)"
       },
       {
         "article": "3.2.1.4.",
         "title": "Allowable Fenestration and Door Area (FDWR + 2% skylights)",
-        "status": "not_implemented",
-        "gaps": "lookups land in P2, geometry mutators in P3"
+        "status": "implemented",
+        "how": "max_fdwr piecewise formula + 2% SRR; FDWR window rebuild and centroid-scaled skylights (apply_fdwr:/apply_srr:)"
       },
       {
         "article": "3.2.2.1.",
         "title": "General (above-ground assemblies)",
-        "status": "not_implemented",
-        "gaps": "prescriptive application lands in P3"
+        "status": "implemented",
+        "how": "prescriptive application classifies and hard-assigns all above-ground assemblies"
       },
       {
         "article": "3.2.2.2.",
         "title": "Opaque above-ground U-values by HDD zone",
-        "status": "not_implemented",
-        "gaps": "data vendored (this file); lookup P2, application P3"
+        "status": "implemented",
+        "how": "opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall)"
       },
       {
         "article": "3.2.2.3.",
         "title": "Fenestration/skylight U-values by HDD zone",
-        "status": "not_implemented",
-        "gaps": "data vendored; lookup P2, application P3"
+        "status": "implemented",
+        "how": "window/skylight U via SimpleGlazing replacement preserving SHGC/VT; opaque doors via insulation solve"
       },
       {
         "article": "3.2.2.4.",
         "title": "Door U-values (2025 split-out table; 2020: within 3.2.2.x)",
-        "status": "not_implemented",
-        "gaps": "data vendored; lookup P2, application P3"
+        "status": "implemented",
+        "how": "door values applied (2025 split-out table == 2020 door row)"
       },
       {
         "article": "3.2.3.1.",
         "title": "Building assemblies in contact with the ground",
-        "status": "not_implemented",
-        "gaps": "data vendored; lookup P2, application P3"
+        "status": "implemented",
+        "how": "ground-contact wall/roof/floor U-values applied (no ground fenestration)"
       },
       {
         "article": "3.2.4.1.",

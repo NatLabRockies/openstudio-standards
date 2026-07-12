@@ -24,7 +24,7 @@ module OpenStudioEnvelope
       SURFACE_CLASS = { 'Wall' => 'wall', 'RoofCeiling' => 'roofceiling', 'Floor' => 'floor' }.freeze
 
       def apply(model, vintage:, hdd: nil, apply_fdwr: false, apply_srr: false,
-                include_films: false, audit: nil)
+                include_films: false, thermal_bridging: nil, audit: nil)
         audit ||= AuditLog.new
         hdd = Climate.hdd18(model, hdd: hdd, audit: audit)
         raise(ArgumentError, 'HDD unresolvable: pass hdd: explicitly or set a weather file') if hdd.nil?
@@ -68,6 +68,18 @@ module OpenStudioEnvelope
           limit = NECB.max_srr(vintage: vintage, audit: audit)
           skylight_construction ||= subsurface_target_construction(model, 'skylight', vintage, hdd, include_films, cache, audit)
           Geometry.apply_srr(model, limit, skylight_construction, audit: audit)
+        end
+
+        # 3.1.1.7: table values are EFFECTIVE transmittance — uprate for thermal
+        # bridging when requested (psi set name/Hash, or true for the default set).
+        if thermal_bridging
+          psi = thermal_bridging == true ? 'regular (BETBG)' : thermal_bridging
+          ThermalBridging.apply(model, vintage: vintage, hdd: hdd, psi_set: psi, audit: audit)
+        else
+          audit.warn(:thermal_bridging,
+                     'thermal bridging not requested — applied U-values are clear-field; ' \
+                     'NECB 3.1.1.7 requires EFFECTIVE transmittance (pass thermal_bridging:)',
+                     article: '3.1.1.7.')
         end
 
         audit
@@ -157,9 +169,11 @@ module OpenStudioEnvelope
 
     # Facade
     def self.apply_prescriptive(model, vintage:, hdd: nil, apply_fdwr: false,
-                                apply_srr: false, include_films: false, audit: nil)
+                                apply_srr: false, include_films: false,
+                                thermal_bridging: nil, audit: nil)
       Prescriptive.apply(model, vintage: vintage, hdd: hdd, apply_fdwr: apply_fdwr,
-                         apply_srr: apply_srr, include_films: include_films, audit: audit)
+                         apply_srr: apply_srr, include_films: include_films,
+                         thermal_bridging: thermal_bridging, audit: audit)
     end
   end
 end
