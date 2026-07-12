@@ -66,4 +66,29 @@ module FixtureHelper
     assert_empty severe, "#{context}: E+ severe errors:\n#{severe.join("\n")}"
     assert_match(/EnergyPlus Completed Successfully/, err, "#{context}: E+ did not complete")
   end
+
+  # Facility 'Time Setpoint Not Met During Occupied' hours from the run's SQL.
+  # @return [Hash] { heating: Float, cooling: Float }
+  def unmet_occupied_hours(sql)
+    query = lambda do |column|
+      value = sql.execAndReturnFirstDouble(
+        "SELECT Value FROM TabularDataWithStrings WHERE ReportName='SystemSummary' " \
+        "AND TableName='Time Setpoint Not Met' AND RowName='Facility' AND ColumnName='#{column}'"
+      )
+      value.is_initialized ? value.get : nil
+    end
+    { heating: query.call('During Occupied Heating'), cooling: query.call('During Occupied Cooling') }
+  end
+
+  # The comfort gate: the generated system must actually CONDITION the zones, not just
+  # simulate cleanly. Thresholds are for the simulated period (a broken system shows up
+  # as ~every occupied hour unmet, not a handful).
+  def assert_zones_conditioned(sql, context, max_heating_hours:, max_cooling_hours:)
+    unmet = unmet_occupied_hours(sql)
+    refute_nil unmet[:heating], "#{context}: no unmet-hours data in SQL"
+    assert_operator unmet[:heating], :<=, max_heating_hours,
+                    "#{context}: #{unmet[:heating]} occupied heating hours unmet (limit #{max_heating_hours}) — system not conditioning"
+    assert_operator unmet[:cooling], :<=, max_cooling_hours,
+                    "#{context}: #{unmet[:cooling]} occupied cooling hours unmet (limit #{max_cooling_hours})"
+  end
 end

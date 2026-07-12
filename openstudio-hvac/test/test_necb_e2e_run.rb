@@ -50,8 +50,10 @@ class TestNecbE2ERun < Minitest::Test
     assert_in_delta 0.90, boiler.nominalThermalEfficiency, 1e-6
   end
 
-  # WSHP proposed -> Table 8.4.4.13 ASHP reference: sizes cleanly, HP COPs land.
-  def test_ashp_reference_sizes_cleanly
+  # WSHP proposed -> Table 8.4.4.13 ASHP reference: a January week in Toronto forces
+  # operation BELOW the -10 C compressor cutoff, so unmet hours prove the supplemental
+  # heat + baseboards actually carry the load when the heat pump locks out.
+  def test_ashp_reference_conditions_through_a_cold_week
     proposed = attach_weather!(load_fixture)
     zones = proposed.getThermalZones.sort_by(&:nameString)
     OpenStudioHVAC.build_system(proposed, 'Water source heat pumps', zones)
@@ -60,8 +62,10 @@ class TestNecbE2ERun < Minitest::Test
                                                  building: { storeys: 1, zone_types: office_types(proposed) })
     assert_equal ['hp'], result.assignments.map(&:reference_system).uniq
 
-    ref_run = run_energyplus!(result.model, "#{@dir}/ashp_ref")
-    assert_clean_energyplus_run(ref_run, 'reference (ASHP per Table 8.4.4.13)')
+    ref_run = run_energyplus!(result.model, "#{@dir}/ashp_week", sizing_only: false)
+    assert_clean_energyplus_run(ref_run, 'reference (ASHP per Table 8.4.4.13, one-week run)')
+    assert_zones_conditioned(result.model.sqlFile.get, 'ASHP reference week',
+                             max_heating_hours: 24, max_cooling_hours: 6)
 
     OpenStudioHVAC::NECB.apply_efficiencies(result.model, vintage: '2020')
     hp = result.model.getCoilHeatingDXSingleSpeeds.min_by(&:nameString)
@@ -88,6 +92,8 @@ class TestNecbE2ERun < Minitest::Test
 
     ref_run = run_energyplus!(result.model, "#{@dir}/sys6_week", sizing_only: false)
     assert_clean_energyplus_run(ref_run, 'reference (sys6 + ERV, one-week run)')
+    assert_zones_conditioned(result.model.sqlFile.get, 'sys6 reference week',
+                             max_heating_hours: 24, max_cooling_hours: 6)
 
     # the simulation produced actual HVAC energy use (end-uses summary, GJ)
     sql = result.model.sqlFile.get

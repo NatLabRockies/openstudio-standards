@@ -336,10 +336,16 @@ ruby test/test_necb_e2e_run.rb
 
 `test_necb_e2e_run.rb` is the simulation gate: gem-built proposed systems and their NECB
 references must translate, size, and run in EnergyPlus with **no Fatal and no Severe
-errors** — a design-day sizing run for the sys3 and ASHP references (with efficiencies
-landing on the sized results), and a one-week January simulation of a sys6 reference
-with its 8.4.4.19 ERV active (VAV + plants + rotary HX + OA-pretreat controls at
-runtime, verified to produce HVAC energy). Weather fixtures (Toronto EPW/DDY/STAT) ship
-in `test/fixtures/weather/` so the suite is self-contained.
+errors**, and the week-long runs must **actually condition the zones** — facility
+"Time Setpoint Not Met During Occupied" hours are asserted (≤ 24 h heating / ≤ 6 h
+cooling for the simulated January week; a miswired system fails every occupied hour).
+Scenarios: a design-day sizing run for the sys3 reference (with efficiencies landing on
+the sized results); a one-week Toronto January run of the **ASHP reference** — cold
+enough to force operation below the −10 °C compressor cutoff, so the unmet-hours gate
+proves the supplemental heat + baseboards carry the load through heat-pump lockout; and
+a one-week run of a sys6 reference with its 8.4.4.19 ERV active (VAV + plants + rotary
+HX + OA-pretreat controls at runtime, verified to produce HVAC energy). Weather
+fixtures (Toronto EPW/DDY/STAT) ship in `test/fixtures/weather/` so the suite is
+self-contained.
 
 Plain ruby + the OpenStudio SDK bindings — no bundler required.
