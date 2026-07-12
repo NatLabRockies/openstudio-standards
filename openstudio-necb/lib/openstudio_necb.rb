@@ -11,6 +11,21 @@ begin
 rescue LoadError
   require File.expand_path('../../openstudio-envelope/lib/openstudio_envelope', __dir__)
 end
+begin
+  require 'openstudio_loads'
+rescue LoadError
+  require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
+end
+begin
+  require 'openstudio_lighting'
+rescue LoadError
+  require File.expand_path('../../openstudio-lighting/lib/openstudio_lighting', __dir__)
+end
+begin
+  require 'openstudio_shw'
+rescue LoadError
+  require File.expand_path('../../openstudio-shw/lib/openstudio_shw', __dir__)
+end
 
 require_relative 'openstudio_necb/version'
 require_relative 'openstudio_necb/runner'

@@ -45,15 +45,24 @@ module OpenStudioNECB
     #   failing building's capacities may be incrementally increased (0 disables)
     # @param capacity_step [Float] multiplier applied to the failing building's
     #   heating/cooling sizing factor per iteration
+    # @param necb_loads [Hash, nil] bare-geometry on-ramp: apply the NECB space-use
+    #   gems to the proposed clone BEFORE anything else. Keys:
+    #   space_type_map: {space name => [building_type, space_type]} (required),
+    #   lights_type: 'NECB_Default'|'LED' (default NECB_Default),
+    #   shw_fuel: 'NaturalGas'|'Electricity'|'FuelOilNo2'|nil (nil = no SHW),
+    #   hvac_system: catalog name for OpenStudioHVAC.build_system (nil = keep
+    #   whatever HVAC the model carries)
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
                                costing: false, city: nil, province_state: nil,
                                costs_csv: nil, thermal_bridging: nil,
                                actual_roof_absorptance_used: false,
-                               max_capacity_iterations: 3, capacity_step: 1.25, audit: nil)
+                               max_capacity_iterations: 3, capacity_step: 1.25,
+                               necb_loads: nil, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
       proposed = load_model(model)
+      apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
       audit.decision(:compliance, 'performance-path run started',
                      inputs: { vintage: vintage, simulate: simulate, costing: costing },
                      article: '8.4.1.2.(1)')
@@ -137,6 +146,26 @@ module OpenStudioNECB
 
       # never mutate the caller's model — the pipeline sizes/simulates its own copy
       model.clone(true).to_Model
+    end
+
+    # The bare-geometry on-ramp: NECB space types -> loads -> lighting -> SHW ->
+    # (optionally) an HVAC system, all on the proposed clone with the shared audit.
+    def apply_necb_loads(proposed, vintage, options, audit)
+      map = options[:space_type_map] || options['space_type_map']
+      raise(ArgumentError, 'necb_loads requires space_type_map: {space name => [building_type, space_type]}') if map.nil?
+
+      OpenStudioLoads.assign_space_types(proposed, map, vintage: vintage, audit: audit)
+      OpenStudioLoads::NECB.apply_loads(proposed, vintage: vintage, audit: audit)
+      OpenStudioLighting.apply_lights(proposed, vintage: vintage,
+                                      lights_type: options[:lights_type] || 'NECB_Default', audit: audit)
+      shw_fuel = options[:shw_fuel]
+      OpenStudioSHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
+      hvac = options[:hvac_system]
+      OpenStudioHVAC.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString)) if hvac
+      audit.decision(:compliance, 'NECB space-use gems applied to the proposed (bare-geometry on-ramp)',
+                     inputs: { spaces_mapped: map.size, lights_type: options[:lights_type] || 'NECB_Default',
+                               shw_fuel: shw_fuel || 'none', hvac_system: hvac || 'model as given' },
+                     article: '8.4.3.2.')
     end
 
     def run_annual(model, dir, run_period, section)

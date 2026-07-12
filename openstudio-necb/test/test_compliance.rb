@@ -138,6 +138,40 @@ class TestCompliance < Minitest::Test
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
 
+  # The bare-geometry on-ramp: strip the fixture of loads AND HVAC, hand the
+  # pipeline only geometry + a space-type map, and get a full compliance run.
+  def test_bare_geometry_on_ramp
+    skip 'openstudio CLI not available' unless openstudio_cli?
+    bare = load_fixture
+    bare.getThermostatSetpointDualSetpoints.each(&:remove)
+    bare.getPeoples.each(&:remove)
+    bare.getPeopleDefinitions.each(&:remove)
+    bare.getLightss.each(&:remove)
+    bare.getLightsDefinitions.each(&:remove)
+    bare.getElectricEquipments.each(&:remove)
+    bare.getElectricEquipmentDefinitions.each(&:remove)
+    bare.getSpaceTypes.each(&:remove)
+
+    map = bare.getSpaces.to_h { |s| [s.nameString, ['Space Function', 'Office enclosed > 25 m2']] }
+    dir = Dir.mktmpdir('osnecb-onramp-')
+    result = OpenStudioNECB.performance_compliance(
+      bare, vintage: '2020', simulate: :sizing, weather: weather,
+      building: { storeys: 1, zone_types: zone_types_for(bare), winter_design_temp_c: -20 },
+      necb_loads: { space_type_map: map, shw_fuel: 'NaturalGas', hvac_system: 'Baseboard gas boiler' },
+      run_dir: dir)
+
+    refute_empty result.proposed_model.getPeoples.to_a, 'loads applied'
+    refute_empty result.proposed_model.getLightss.to_a, 'lighting applied'
+    refute_empty result.proposed_model.getWaterUseEquipments.to_a, 'SHW applied'
+    refute_empty result.proposed_model.getPlantLoops.to_a, 'HVAC built'
+    steps = result.audit.entries.map { |e| e[:step] }.uniq
+    %i[loads lighting shw selection].each { |s| assert_includes steps, s, 'on-ramp steps in ONE audit' }
+    wall = result.reference_model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
+    assert_match(/Lightweight/, wall.construction.get.nameString, 'reference generated from the on-ramped proposed')
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
   def test_caller_model_never_mutated
     model = proposed_with_hvac
     before = model.getSurfaces.map { |s| s.construction.get.nameString }.sort
