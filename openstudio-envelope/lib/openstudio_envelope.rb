@@ -3,6 +3,7 @@ require 'openstudio'
 require_relative 'openstudio_envelope/version'
 require_relative 'openstudio_envelope/audit_log'
 require_relative 'openstudio_envelope/necb/audit_log'
+require_relative 'openstudio_envelope/climate'
 
 # OpenStudioEnvelope applies NECB building-envelope requirements to OpenStudio models
 # from vendored, article-tagged rule data (data/necb/envelope_rules_<vintage>.json,
@@ -29,3 +30,5 @@ module OpenStudioEnvelope
     end
   end
 end
+
+require_relative 'openstudio_envelope/necb/rules'
