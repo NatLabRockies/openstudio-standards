@@ -1,0 +1,36 @@
+{
+  "provenance": {
+    "source": "NECB 2025 Subsection 8.4.4 'Energy Use Intensity' via the building-codes MCP (necb:2025) \u2014 the NEW 2025 compliance path inserted at 8.4.4 (the 2020 reference-building articles renumbered to 8.4.5). BET = sum(A_i x EUI_i) + PL (8.4.4.1.(2)); applicable only where >= 90% of gross interior floor area maps to the listed archetypes (8.4.4.1.(1)) and HDD < 9000 (Table note (1)); unlisted space functions distribute proportionally (8.4.4.1.(4)); PL = process loads in excess of the Table 8.4.4.2 receptacle defaults; exterior lighting per 8.4.4.1.(5).",
+    "generated": "2026-07-12"
+  },
+  "applicability": {
+    "min_archetype_floor_fraction": 0.9,
+    "max_hdd": 9000
+  },
+  "archetype_eui_kwh_per_m2": {
+    "School (K-12)": 125,
+    "Multi-unit residential building, not more than 6 storeys": 225,
+    "Multi-unit residential building, more than 6 storeys": 175,
+    "Office": 175
+  },
+  "archetype_defaults_table_8_4_4_2": {
+    "School (K-12)": {
+      "occupant_density_m2_per_person": 8,
+      "receptacle_w_per_m2": 5,
+      "swh_l_per_h_per_occupant": 1.2,
+      "schedule": "D"
+    },
+    "Multi-unit residential building": {
+      "occupant_density_m2_per_person": 25,
+      "receptacle_w_per_m2": 5,
+      "swh_l_per_h_per_occupant": 9.8,
+      "schedule": "G"
+    },
+    "Office": {
+      "occupant_density_m2_per_person": 25,
+      "receptacle_w_per_m2": 7.5,
+      "swh_l_per_h_per_occupant": 1.8,
+      "schedule": "A"
+    }
+  }
+}

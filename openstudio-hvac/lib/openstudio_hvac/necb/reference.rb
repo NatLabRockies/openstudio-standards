@@ -237,6 +237,7 @@ module OpenStudioHVAC
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
         apply_energy_recovery_rule(result.air_loops, info, ruleset, audit)
+        apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
       end
 
       apply_oversizing_caps(model, reference, ruleset, audit)
@@ -300,6 +301,35 @@ module OpenStudioHVAC
           st.get.standardsSpaceType.is_initialized ? st.get.standardsSpaceType.get : st.get.nameString
         end.first.to_s.sub(/\ASpace Function\s*/i, '')
         [zone.nameString, type]
+      end
+    end
+
+    # 8.4.4.12 (2025: 8.4.5.12): reference cooling-with-outside-air. Table -12
+    # routes systems 1/3/4/6 and all heat-pump systems to 5.2.2.8 (air
+    # economizer: up to 100% outdoor air, differential reversion) and systems
+    # 2/5 to 5.2.2.9 (WATER-side economizer — hydronic, not modeled: loud gap).
+    def self.apply_economizers(air_loops, reference_system, vintage, audit)
+      prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+      if [2, 5].include?(reference_system)
+        audit.warn(:build, 'system 2/5 reference cooling-with-outside-air is the 5.2.2.9 WATER economizer — ' \
+                           'hydronic economizers are not modeled (gap)', article: "#{prefix}.12.")
+        return
+      end
+
+      Array(air_loops).each do |air_loop|
+        oa_system = air_loop.airLoopHVACOutdoorAirSystem
+        next if oa_system.empty?
+
+        has_cooling = air_loop.supplyComponents.any? do |component|
+          component.iddObjectType.valueName =~ /Coil_Cooling|CoilSystem_Cooling/
+        end
+        next unless has_cooling
+
+        controller = oa_system.get.getControllerOutdoorAir
+        controller.setEconomizerControlType('DifferentialEnthalpy')
+        audit.decision(:build, 'air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)',
+                       target: air_loop.nameString,
+                       article: "#{prefix}.12. (Table -12 -> 5.2.2.8)")
       end
     end
 

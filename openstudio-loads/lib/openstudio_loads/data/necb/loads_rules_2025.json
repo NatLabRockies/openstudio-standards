@@ -39,9 +39,9 @@
       },
       {
         "article": "8.4.3.5.",
-        "title": "Simulation Parameters (Table 8.4.3.5.)",
-        "status": "not_implemented",
-        "gaps": "simulation-parameter table not enforced by this gem; the openstudio-necb umbrella controls run parameters"
+        "title": "Assumed chiller performance for Part 8 calculations (Table 8.4.3.5)",
+        "status": "host_scope",
+        "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) \u2014 an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)"
       }
     ]
   }

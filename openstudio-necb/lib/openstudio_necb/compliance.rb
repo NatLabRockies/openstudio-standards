@@ -52,13 +52,32 @@ module OpenStudioNECB
     #   shw_fuel: 'NaturalGas'|'Electricity'|'FuelOilNo2'|nil (nil = no SHW),
     #   hvac_system: catalog name for OpenStudioHVAC.build_system (nil = keep
     #   whatever HVAC the model carries)
+    # @param path [:reference, :eui] :reference = the 8.4.4 (2025: 8.4.5)
+    #   reference-building comparison; :eui = the NECB 2025 8.4.4 archetype-EUI
+    #   building energy target (BET = sum(A_i x EUI_i) + PL — no reference
+    #   building is generated or simulated)
+    # @param archetype_areas [Hash{String=>Numeric,nil}] :eui path only —
+    #   archetype => floor area m2 (nil = remainder of the model's floor area)
+    # @param process_loads_kwh [Numeric] :eui path PL term (8.4.4.1.(2))
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
                                costing: false, city: nil, province_state: nil,
                                costs_csv: nil, thermal_bridging: nil,
                                actual_roof_absorptance_used: false,
                                max_capacity_iterations: 3, capacity_step: 1.25,
-                               necb_loads: nil, reference_daylighting: false, audit: nil)
+                               necb_loads: nil, reference_daylighting: false,
+                               path: :reference, archetype_areas: nil,
+                               process_loads_kwh: 0.0, audit: nil)
+      if path == :eui
+        raise(ArgumentError, 'the archetype-EUI path is a NECB 2025 feature (vintage: 2025)') unless vintage.to_s == '2025'
+        raise(ArgumentError, ':eui path requires archetype_areas: {archetype => m2 or nil}') if archetype_areas.nil?
+
+        return eui_compliance(model, vintage: vintage, weather: weather, hdd: hdd,
+                              run_dir: run_dir, simulate: simulate, run_period: run_period,
+                              archetype_areas: archetype_areas, process_loads_kwh: process_loads_kwh,
+                              costing: costing, city: city, province_state: province_state,
+                              costs_csv: costs_csv, necb_loads: necb_loads, audit: audit)
+      end
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
       proposed = load_model(model)
@@ -134,6 +153,17 @@ module OpenStudioNECB
                                 'no energy comparison performed (compliance undetermined)')
       end
 
+      # NECB 2025 Part 11: operational GHG performance level (needs a province)
+      if vintage.to_s == '2025' && simulate == :annual && province_state
+        proposed_ghg = Tiers.operational_ghg_kg(report['proposed'], province_state)
+        reference_ghg = Tiers.operational_ghg_kg(report['reference'], province_state)
+        if proposed_ghg && reference_ghg&.positive?
+          report['proposed']['ghg_kg_co2e'] = proposed_ghg
+          report['reference']['ghg_kg_co2e'] = reference_ghg
+          report['ghg'] = Tiers.ghg_level(proposed_ghg, reference_ghg, audit: audit)
+        end
+      end
+
       # 5. unified costing of BOTH models (same audit)
       cost_models(proposed, reference, report, city: city, province_state: province_state,
                   costs_csv: costs_csv, audit: audit) if costing
@@ -150,6 +180,76 @@ module OpenStudioNECB
 
       # never mutate the caller's model — the pipeline sizes/simulates its own copy
       model.clone(true).to_Model
+    end
+
+    # The NECB 2025 8.4.4 archetype-EUI path: the building energy target comes
+    # from Table 8.4.4.1 (BET = sum(A_i x EUI_i) + PL) — NO reference building
+    # is generated or simulated. Compliance: proposed annual consumption <= BET;
+    # the Section 10 tier is computed against the same BET.
+    def eui_compliance(model, vintage:, weather:, hdd:, run_dir:, simulate:, run_period:,
+                       archetype_areas:, process_loads_kwh:, costing:, city:,
+                       province_state:, costs_csv:, necb_loads:, audit:)
+      audit ||= AuditLog.new
+      FileUtils.mkdir_p(run_dir)
+      proposed = load_model(model)
+      apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+      audit.decision(:compliance, 'ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) — no reference building',
+                     inputs: { vintage: vintage, archetypes: archetype_areas.keys },
+                     article: '8.4.4.1.')
+
+      if simulate != :none
+        %i[epw ddy].each { |k| raise(ArgumentError, "weather[:#{k}] required") unless weather[k] }
+        Runner.attach_weather!(proposed, epw: weather[:epw], ddy: weather[:ddy])
+      end
+      hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
+
+      report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
+                 'path' => 'eui', 'proposed' => {}, 'reference' => {} }
+      target = Tiers.eui_building_energy_target(archetype_areas, proposed.getBuilding.floorArea,
+                                                hdd: hdd, process_loads_kwh: process_loads_kwh, audit: audit)
+      report['reference'] = { 'method' => 'archetype EUI (Table 8.4.4.1)',
+                              'building_energy_target_kwh' => target['bet_kwh'],
+                              'lines' => target['lines'] }
+
+      compliant = nil
+      if simulate == :annual
+        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
+        proposed_kwh = report['proposed']['total_site_kwh']
+        compliant = proposed_kwh <= target['bet_kwh']
+        audit.decision(:compliance,
+                       compliant ? 'proposed does not exceed the archetype-EUI building energy target' : 'proposed EXCEEDS the archetype-EUI building energy target',
+                       inputs: { proposed_kwh: proposed_kwh, bet_kwh: target['bet_kwh'] },
+                       article: '8.4.4.1.(2)')
+        report.merge!(Tiers.energy_tier(proposed_kwh, target['bet_kwh'], audit: audit))
+        if province_state
+          ghg = Tiers.operational_ghg_kg(report['proposed'], province_state)
+          report['proposed']['ghg_kg_co2e'] = ghg if ghg
+        end
+        if run_period
+          audit.warn(:compliance, 'run period is SHORTENED — not a code-compliant annual determination')
+          report['annual'] = false
+        else
+          report['annual'] = true
+        end
+      elsif simulate == :sizing
+        Runner.run_energyplus!(proposed, File.join(run_dir, 'proposed_sizing'), sizing_only: true)
+      end
+
+      if costing
+        hvac_cost = OpenStudioHVAC.cost(proposed, city: city, province_state: province_state,
+                                        costs_csv: costs_csv, audit: audit)
+        envelope_cost = OpenStudioEnvelope.cost(proposed, city: hvac_cost.city,
+                                                province_state: hvac_cost.province_state,
+                                                costs_csv: costs_csv, audit: audit)
+        report['proposed']['cost'] = { 'hvac' => hvac_cost.total, 'envelope' => envelope_cost.total,
+                                       'total' => (hvac_cost.total + envelope_cost.total).round(2) }
+      end
+
+      report['compliant'] = compliant
+      report['warnings'] = audit.warnings.map { |w| w[:action] }
+      write_outputs(run_dir, report, audit)
+      ComplianceResult.new(proposed_model: proposed, reference_model: nil,
+                           report: report, audit: audit, compliant: compliant, run_dir: run_dir)
     end
 
     # The bare-geometry on-ramp: NECB space types -> loads -> lighting -> SHW ->
@@ -193,6 +293,7 @@ module OpenStudioNECB
                      inputs: { proposed_kwh: proposed_kwh, reference_building_energy_target_kwh: reference_kwh },
                      value: "margin #{(reference_kwh - proposed_kwh).round(1)} kWh (#{(100.0 * (reference_kwh - proposed_kwh) / reference_kwh).round(1)}%)",
                      article: '8.4.1.2.(2)')
+      report.merge!(Tiers.energy_tier(proposed_kwh, reference_kwh, audit: audit))
 
       unmet_ok = evaluate_unmet(report, vintage, audit)
 

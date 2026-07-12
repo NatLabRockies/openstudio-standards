@@ -34,6 +34,7 @@ require_relative 'openstudio_hvac/costing/report'
 require_relative 'openstudio_hvac/necb/audit_log'
 require_relative 'openstudio_hvac/necb/reference'
 require_relative 'openstudio_hvac/necb/efficiency'
+require_relative 'openstudio_hvac/necb/checker'
 require_relative 'openstudio_hvac/classify'
 require_relative 'openstudio_hvac/builder'
 

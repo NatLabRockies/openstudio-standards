@@ -474,7 +474,7 @@
     "articles": [
       {
         "article": "8.4.5.1.",
-        "title": "General — reference building basis (prescriptive components, all energy uses)",
+        "title": "General \u2014 reference building basis (prescriptive components, all energy uses)",
         "status": "host_scope",
         "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW prescriptive conformance is host-side."
       },
@@ -546,8 +546,9 @@
       {
         "article": "8.4.5.12.",
         "title": "Cooling with Outside Air (economizers)",
-        "status": "not_implemented",
-        "gaps": "Economizer requirements (5.2.2.7/8/9 via Table -12) are not applied to reference systems yet."
+        "status": "partial",
+        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled \u2014 loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
+        "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA"
       },
       {
         "article": "8.4.5.13.",
@@ -578,9 +579,8 @@
       {
         "article": "8.4.5.17.",
         "title": "Fans (exhaust fans, fan power vs flow curves)",
-        "status": "partial",
-        "how": "Proposed zone exhaust fans are preserved through replace_system (teardown deliberately keeps FanZoneExhaust), satisfying (1).",
-        "gaps": "Fan power-vs-flow curve selection ((2)-(5), Table -17) is not applied (host/sizing refinement)."
+        "status": "implemented",
+        "how": "VAV fan power-vs-flow curves from Table -17 applied in the (post-sizing) efficiency pass, row selected by rated power per sentences (3)-(5); the below-D floor is approximated by the E+ minimum-flow-fraction clamp (equals E within table rounding)"
       },
       {
         "article": "8.4.5.18.",

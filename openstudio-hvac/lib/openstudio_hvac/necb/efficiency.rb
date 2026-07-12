@@ -58,6 +58,7 @@ module OpenStudioHVAC
         model.getCoilCoolingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_cooling(c, tables, audit) }
         model.getCoilHeatingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating(c, tables, audit) }
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
+        model.getFanVariableVolumes.sort_by(&:nameString).each { |f| apply_fan_power_curve(f, vintage, audit) }
         audit&.info(:efficiency, 'NECB efficiency pass complete',
                     inputs: { vintage: vintage,
                               boilers: model.getBoilerHotWaters.size,
@@ -66,6 +67,54 @@ module OpenStudioHVAC
                               dx_heating: model.getCoilHeatingDXSingleSpeeds.size,
                               gas_coils: model.getCoilHeatingGass.size })
         true
+      end
+
+      # 8.4.4.17.(2)-(5) (2025: 8.4.5.17): VAV fan power-vs-flow curves from
+      # Table 8.4.4.17. Selection by rated fan power ((3)-(5)): default = airfoil/
+      # backward-inclined riding the fan curve; VAV fans > 7.5 kW and < 25 kW =
+      # airfoil/backward-inclined WITH inlet vanes; >= 25 kW = forward curved
+      # with inlet vanes. E+ mapping: coefficients A/B/C -> c1/c2/c3 (c4=c5=0)
+      # and the below-D floor (P = E x Prated) approximated by the Fan Power
+      # Minimum Flow Fraction = D clamp — the polynomial at D equals E within
+      # the table's rounding (verified for all three rows).
+      FAN_CURVES = {
+        'airfoil riding fan curve' => { a: 0.227143, b: 1.178929, c: -0.41071, d: 0.47, e: 0.68 },
+        'airfoil with inlet vanes' => { a: 0.584345, b: -0.57917, c: 0.970238, d: 0.35, e: 0.50 },
+        'forward curved with inlet vanes' => { a: 0.339619, b: -0.84814, c: 1.495671, d: 0.25, e: 0.22 }
+      }.freeze
+
+      def apply_fan_power_curve(fan, vintage, audit)
+        flow = fan.maximumFlowRate.is_initialized ? fan.maximumFlowRate.get : nil
+        flow ||= fan.autosizedMaximumFlowRate.is_initialized ? fan.autosizedMaximumFlowRate.get : nil
+        if flow.nil?
+          audit&.warn(:efficiency, "#{fan.nameString}: flow not sized — 8.4.4.17 fan curve selection needs the " \
+                                   'rated power; run sizing first (curve not applied)')
+          return
+        end
+
+        power_kw = fan.pressureRise * flow / (fan.fanTotalEfficiency * 1000.0)
+        row_name = if power_kw > 7.5 && power_kw < 25.0
+                     'airfoil with inlet vanes'
+                   elsif power_kw >= 25.0
+                     'forward curved with inlet vanes'
+                   else
+                     'airfoil riding fan curve'
+                   end
+        row = FAN_CURVES[row_name]
+        fan.setFanPowerCoefficient1(row[:a])
+        fan.setFanPowerCoefficient2(row[:b])
+        fan.setFanPowerCoefficient3(row[:c])
+        fan.setFanPowerCoefficient4(0.0)
+        fan.setFanPowerCoefficient5(0.0)
+        fan.setFanPowerMinimumFlowRateInputMethod('Fraction')
+        fan.setFanPowerMinimumFlowFraction(row[:d])
+        prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+        audit&.decision(:efficiency, "VAV fan power curve set (#{row_name})",
+                        target: fan.nameString,
+                        inputs: { rated_kw: power_kw.round(2), coefficients: [row[:a], row[:b], row[:c]],
+                                  minimum_flow_fraction: row[:d] },
+                        value: "below-D floor (E=#{row[:e]}) approximated by the minimum-flow clamp",
+                        article: "#{prefix}.17.(2)-(5); Table #{prefix}.17.")
       end
 
       # ---------------- table lookup (legacy model_find_object semantics) ----------------
