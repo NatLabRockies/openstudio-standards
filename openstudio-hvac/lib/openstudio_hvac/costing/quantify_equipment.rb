@@ -7,10 +7,11 @@ module OpenStudioHVAC
     class EquipmentQuantifier
       attr_reader :warnings
 
-      def initialize(database, ledger, mech_room_name: nil)
+      def initialize(database, ledger, mech_room_name: nil, audit: nil)
         @db = database
         @ledger = ledger
         @mech_room_name = mech_room_name
+        @audit = audit
         @warnings = []
       end
 
@@ -48,6 +49,11 @@ module OpenStudioHVAC
                     material_mult: row['material_mult'].to_f.zero? ? 1.0 : row['material_mult'].to_f,
                     labour_mult: row['labour_mult'].to_f.zero? ? 1.0 : row['labour_mult'].to_f,
                     note: context)
+        @audit&.decision(:costing_equipment, context,
+                         inputs: { lookup: lookup, size: size.is_a?(Numeric) ? size.round(2) : size },
+                         value: "item #{row['id']} x #{(units * count).round(3)}",
+                         evidence: row['description'].to_s[0, 70],
+                         article: 'materials_hvac (next-largest-size rule)')
         units
       end
 
@@ -57,7 +63,16 @@ module OpenStudioHVAC
 
         @geo_model = model
         @geo = Geometry.building_data(model, mech_room_name: @mech_room_name)
-        @warnings << 'building geometry could not be resolved (no conditioned spaces?) — utility runs/flues/header piping not costed' if @geo.nil?
+        if @geo.nil?
+          @warnings << 'building geometry could not be resolved (no conditioned spaces?) — utility runs/flues/header piping not costed'
+        else
+          @audit&.decision(:costing_geometry, 'building geometry resolved for distance-based items',
+                           target: @geo[:mech_room][:space].nameString,
+                           inputs: { storeys: @geo[:storeys], mech_room_in_basement: @geo[:mech_room_in_basement] },
+                           value: "utility #{@geo[:util_dist_ft].round(1)} ft, roof #{@geo[:ht_roof_ft].round(1)} ft, " \
+                                  "horizontal #{@geo[:horz_dist_ft].round(1)} ft, floor height #{@geo[:flr_height_ft].round(1)} ft",
+                           article: 'legacy getGeometryData port')
+        end
         @geo
       end
 

@@ -192,13 +192,20 @@ distribution assembly class comes from the catalog family — no name parsing.
 result = OpenStudioHVAC.build_system(model, name, zones)
 # ... size the model (host sizing run, or hard-set capacities) ...
 report = OpenStudioHVAC.cost(model,
-                             systems: [result],        # maps loops -> families for AHU costing
+                             systems: [result],        # OPTIONAL: highest-fidelity loop->family map
                              city: 'TORONTO', province_state: 'ONTARIO',  # or inferred from site
                              costs_csv: nil)           # inject licensed values; else placeholders
 report.total          # $
 report.by_category    # HEATING_COOLING / ZONAL / VENTILATION / DISTRIBUTION
 report.items          # re-costable ledger: [{id, quantity, mults, tags, cost}]
 report.warnings       # anything uncosted is EXPLICIT (never silent zeros)
+report.audit          # AuditLog: classification, selection math, per-item decisions
+
+# GENERAL OSMs: systems: is optional. Unmapped air loops are classified automatically —
+# exactly when recognizable (gem catalog names, legacy sys_N pipe names), structurally
+# otherwise (multizone VAV -> sys6 class, packaged single-zone -> sys3 class, ...), with
+# structural guesses reported as warnings. cost(model) on a foreign OSM costs the whole
+# mechanical scope, not just plant/zonal.
 # mech_room_name: 'Space 5' pins the mechanical room for geometry-derived items;
 # default election matches legacy (Electrical/Mechanical space type, else the
 # lowest-storey conditioned space closest to the building centre)

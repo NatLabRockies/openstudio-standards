@@ -36,9 +36,10 @@ module OpenStudioHVAC
 
       attr_reader :warnings
 
-      def initialize(database, ledger)
+      def initialize(database, ledger, audit: nil)
         @db = database
         @ledger = ledger
+        @audit = audit
         @warnings = []
       end
 
@@ -167,6 +168,11 @@ module OpenStudioHVAC
                     material_mult: row['material_mult'].to_f.zero? ? 1.0 : row['material_mult'].to_f,
                     labour_mult: row['labour_mult'].to_f.zero? ? 1.0 : row['labour_mult'].to_f,
                     note: context)
+        @audit&.decision(tags.include?('DISTRIBUTION') ? :costing_distribution : :costing_ventilation,
+                         context,
+                         inputs: { lookup: lookup, size: size.is_a?(Numeric) ? size.round(2) : size },
+                         value: "item #{row['id']} x #{(units * quantity).round(3)}",
+                         evidence: row['description'].to_s[0, 70])
         units
       end
 
@@ -198,6 +204,13 @@ module OpenStudioHVAC
         row = rows.select { |r| r['Supply_air'].to_f >= per_unit_lps }
                   .min_by { |r| r['Supply_air'].to_f } || rows.max_by { |r| r['Supply_air'].to_f }
         base_quantity = unit_count * (per_unit_lps / row['Supply_air'].to_f)
+        @audit&.decision(:costing_ventilation, 'AHU assembly selected (legacy get_ahu_mult rule)',
+                         target: air_loop.nameString,
+                         inputs: { flow_lps: lps.round(1), sys_type: sys_type, htg: htg, clg: clg,
+                                   unit_count: unit_count, bucket_lps: row['Supply_air'].to_f },
+                         value: "assembly scaled to #{base_quantity.round(3)} " \
+                                "(#{unit_count} unit(s) x #{per_unit_lps.round(0)}/#{row['Supply_air']} L/s)",
+                         article: 'hvac_vent_ahu (L/s buckets, ceil units, re-select)')
 
         # id_layers reference materials_hvac material_id -> map to the cost line-item id
         note = "AHU #{air_loop.nameString} (#{(lps * 2.11888).round} cfm, sys#{sys_type} #{htg}/#{clg})"

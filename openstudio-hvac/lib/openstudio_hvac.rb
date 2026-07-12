@@ -1,6 +1,7 @@
 require 'openstudio'
 
 require_relative 'openstudio_hvac/version'
+require_relative 'openstudio_hvac/audit_log'
 require_relative 'openstudio_hvac/validation'
 require_relative 'openstudio_hvac/teardown'
 require_relative 'openstudio_hvac/naming'
