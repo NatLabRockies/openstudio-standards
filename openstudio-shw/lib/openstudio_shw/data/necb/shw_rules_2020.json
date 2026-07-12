@@ -3,7 +3,7 @@
     "vintage": "2020",
     "generated": "2026-07-12",
     "method": "Algorithm parameters transcribed from the legacy NECB2020 water_heater_mixed_apply_efficiency and auto_size_shw_capacity, cross-verified against NECB 2020 Table 6.2.2.1 via the building-codes MCP (electric standby-loss formulas, gas-fired storage UEF ladders by tank volume + first-hour rating, Et >= 90% + SL formula for large equipment, oil rows). SHW demand data (peak flows, temperatures, schedules) lives in the openstudio-loads space-type records. Runtime never contacts the MCP.",
-    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking — treated as Part 6 minimums (coverage: partial)."
+    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking \u2014 treated as Part 6 minimums (coverage: partial)."
   },
   "autosize": {
     "supply_temperature_default_c": 60.0,
@@ -28,19 +28,66 @@
     "fuel_fired": {
       "burner_efficiency": 0.82,
       "uef_bins_76_to_208_l": [
-        { "fhr_max": 68, "intercept": 0.3456, "slope": -0.00053, "draw_gal": 10 },
-        { "fhr_max": 193, "intercept": 0.5982, "slope": -0.0005, "draw_gal": 38 },
-        { "fhr_max": 284, "intercept": 0.6483, "slope": -0.00045, "draw_gal": 55 },
-        { "fhr_max": null, "intercept": 0.692, "slope": -0.00034, "draw_gal": 84 }
+        {
+          "fhr_max": 68,
+          "intercept": 0.3456,
+          "slope": -0.00053,
+          "draw_gal": 10
+        },
+        {
+          "fhr_max": 193,
+          "intercept": 0.5982,
+          "slope": -0.0005,
+          "draw_gal": 38
+        },
+        {
+          "fhr_max": 284,
+          "intercept": 0.6483,
+          "slope": -0.00045,
+          "draw_gal": 55
+        },
+        {
+          "fhr_max": null,
+          "intercept": 0.692,
+          "slope": -0.00034,
+          "draw_gal": 84
+        }
       ],
       "uef_bins_208_to_380_l": [
-        { "fhr_max": 68, "intercept": 0.647, "slope": -0.00016, "draw_gal": 10 },
-        { "fhr_max": 193, "intercept": 0.7689, "slope": -0.00013, "draw_gal": 38 },
-        { "fhr_max": 284, "intercept": 0.7897, "slope": -0.00011, "draw_gal": 55 },
-        { "fhr_max": null, "intercept": 0.8072, "slope": -0.00008, "draw_gal": 84 }
+        {
+          "fhr_max": 68,
+          "intercept": 0.647,
+          "slope": -0.00016,
+          "draw_gal": 10
+        },
+        {
+          "fhr_max": 193,
+          "intercept": 0.7689,
+          "slope": -0.00013,
+          "draw_gal": 38
+        },
+        {
+          "fhr_max": 284,
+          "intercept": 0.7897,
+          "slope": -0.00011,
+          "draw_gal": 55
+        },
+        {
+          "fhr_max": null,
+          "intercept": 0.8072,
+          "slope": -8e-05,
+          "draw_gal": 84
+        }
       ],
-      "uef_22_to_30_5_kw_max_454_l": { "intercept": 0.8107, "slope": -0.00021 },
-      "large": { "thermal_efficiency": 0.9, "sl_w": "0.84 x (1.25 x kW + 16.57 x sqrt(V_litres))", "ua_divisor_f": 70.0 },
+      "uef_22_to_30_5_kw_max_454_l": {
+        "intercept": 0.8107,
+        "slope": -0.00021
+      },
+      "large": {
+        "thermal_efficiency": 0.9,
+        "sl_w": "0.84 x (1.25 x kW + 16.57 x sqrt(V_litres))",
+        "ua_divisor_f": 70.0
+      },
       "maguire_roberts": {
         "q_load_btu": "draw_gal x 8.30074 x 0.99826 x (125 - 58)",
         "recovery_efficiency": "eff + q_load x (uef - eff) / (24 x cap_btu_hr x uef)",
@@ -48,28 +95,64 @@
       }
     },
     "part_load_curve": {
-      "name": "SWH-EFFFPLR-NECB2011", "form": "Cubic",
-      "coefficients": [0.7576, 1.0071, -1.4443, 0.6844],
-      "applies_to": ["NaturalGas", "FuelOilNo2"]
+      "name": "SWH-EFFFPLR-NECB2011",
+      "form": "Cubic",
+      "coefficients": [
+        0.7576,
+        1.0071,
+        -1.4443,
+        0.6844
+      ],
+      "applies_to": [
+        "NaturalGas",
+        "FuelOilNo2"
+      ]
     },
-    "parasitic": { "on_cycle_heat_fraction": 0.0, "off_cycle_heat_fraction": 0.8 }
+    "parasitic": {
+      "on_cycle_heat_fraction": 0.0,
+      "off_cycle_heat_fraction": 0.8
+    }
   },
   "article_coverage": {
     "articles": [
-      { "article": "6.2.2.1.", "title": "Service water heater performance (Table 6.2.2.1)", "status": "partial",
-        "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation",
-        "gaps": "heat-pump, instantaneous, solar-thermal and pool-heater classes not modeled (legacy scope)" },
-      { "article": "6.2.3.-6.2.7.", "title": "SWH controls, piping insulation, pools, booster heaters", "status": "not_implemented",
-        "gaps": "piping insulation, temperature maintenance controls, pool covers etc. not modeled (legacy scope)" },
-      { "article": "8.4.3.2. (SWH loads)", "title": "Service water heating loads representative of the building", "status": "implemented",
-        "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data)" },
-      { "article": "8.4.4.20.(1)", "title": "Reference SWH identical to proposed (storage, power, energy type)", "status": "satisfied_by_clone",
-        "how": "the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel" },
-      { "article": "8.4.4.20.(2)", "title": "HP-source SWH -> air-source HP in the reference", "status": "not_implemented",
-        "gaps": "heat-pump SWH is not modeled at all (see 6.2.2.1 gaps); the rule is vacuous until it is" },
-      { "article": "8.4.4.20.(3)-(4)", "title": "Remaining reference SWH sentences", "status": "partial",
+      {
+        "article": "6.2.2.1.",
+        "title": "Service water heater performance (Table 6.2.2.1)",
+        "status": "partial",
+        "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented",
+        "gaps": "solar-thermal and pool-heater classes not modeled (legacy scope); HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)"
+      },
+      {
+        "article": "6.2.3.-6.2.7.",
+        "title": "SWH controls, piping insulation, pools, booster heaters",
+        "status": "not_implemented",
+        "gaps": "piping insulation, temperature maintenance controls, pool covers etc. not modeled (legacy scope)"
+      },
+      {
+        "article": "8.4.3.2. (SWH loads)",
+        "title": "Service water heating loads representative of the building",
+        "status": "implemented",
+        "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data)"
+      },
+      {
+        "article": "8.4.4.20.(1)",
+        "title": "Reference SWH identical to proposed (storage, power, energy type)",
+        "status": "satisfied_by_clone",
+        "how": "the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel"
+      },
+      {
+        "article": "8.4.4.20.(2)",
+        "title": "HP-source SWH -> air-source HP in the reference",
+        "status": "implemented",
+        "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction"
+      },
+      {
+        "article": "8.4.4.20.(3)-(4)",
+        "title": "Remaining reference SWH sentences",
+        "status": "partial",
         "how": "treated as Part 6 minimums via apply_efficiency on the reference",
-        "gaps": "sentence text falls in a PDF-extraction chunk gap; not machine-verified" }
+        "gaps": "sentence text falls in a PDF-extraction chunk gap; not machine-verified"
+      }
     ]
   }
 }

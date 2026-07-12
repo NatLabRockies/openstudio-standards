@@ -124,10 +124,12 @@ module OpenStudioSHW
           'parasitic_loss_w' => parasitic, 'spaces_w_dhw' => spaces }
       end
 
-      # Build the full SHW system: auto-size, create the loop + WaterHeaterMixed +
+      # Build the full SHW system: auto-size, create the loop + water heater +
       # pump, one WaterUseConnections/WaterUseEquipment per demanding space, apply
       # Part 6 efficiency on the sized heater.
-      # @param fuel ['NaturalGas', 'Electricity', 'FuelOilNo2']
+      # @param fuel ['NaturalGas', 'Electricity', 'FuelOilNo2', 'HeatPump'] —
+      #   'HeatPump' builds an air-source WaterHeaterHeatPump (pumped condenser)
+      #   around the tank, with the code EF/UEF floor as the coil's rated COP
       def apply_shw(model, vintage: '2020', fuel: 'NaturalGas', shw_scale: 1.0, audit: nil)
         audit ||= AuditLog.new
         sizing = auto_size(model, vintage: vintage, shw_scale: shw_scale, audit: audit)
@@ -138,19 +140,49 @@ module OpenStudioSHW
 
         rules = NECB.rules(vintage)['autosize']
         data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
-        loop = build_loop(model, sizing, fuel, rules, audit)
+        heat_pump = fuel.to_s == 'HeatPump'
+        loop = build_loop(model, sizing, heat_pump ? 'Electricity' : fuel, rules, audit)
 
         sizing['spaces_w_dhw'].each do |entry|
           add_water_use(model, loop, entry, data_vintage, audit)
         end
 
-        Efficiency.apply_efficiency(loop.supplyComponents(OpenStudio::Model::WaterHeaterMixed.iddObjectType)
-                                        .map { |c| c.to_WaterHeaterMixed.get }.first,
-                                    vintage: vintage, audit: audit)
+        tank = loop.supplyComponents(OpenStudio::Model::WaterHeaterMixed.iddObjectType)
+                   .map { |c| c.to_WaterHeaterMixed.get }.first
+        if heat_pump
+          hpwh = wrap_heat_pump(model, tank, sizing, audit)
+          Efficiency.apply_heat_pump_efficiency(hpwh, vintage: vintage, audit: audit)
+        else
+          Efficiency.apply_efficiency(tank, vintage: vintage, audit: audit)
+        end
         audit.decision(:shw, 'service water heating added',
                        inputs: { fuel: fuel, spaces: sizing['spaces_w_dhw'].size },
                        article: '8.4.3.2. (SWH loads)')
         loop
+      end
+
+      # Air-source heat-pump water heater (8.4.4.20.(2) energy type): a pumped-
+      # condenser WaterHeaterHeatPump wrapping the loop tank, placed in the zone
+      # of the largest demanding space (the compressor draws from and rejects to
+      # that zone's air). The legacy family only ever COSTED HPWH tanks; the
+      # detailed stratified-tank/EMS recipe upstream is deliberately not ported —
+      # this is the bounded SDK construction, audited.
+      def wrap_heat_pump(model, tank, sizing, audit)
+        hpwh = OpenStudio::Model::WaterHeaterHeatPump.new(model)
+        hpwh.setName("#{(sizing['tank_volume_si'] * 1000).round}L HPWH")
+        default_tank = hpwh.tank
+        hpwh.setTank(tank)
+        default_tank.remove
+
+        zone_space = sizing['spaces_w_dhw'].max_by { |e| e['space'].floorArea }['space']
+        if zone_space.thermalZone.is_initialized
+          hpwh.addToThermalZone(zone_space.thermalZone.get)
+          audit.info(:shw, 'HPWH compressor placed in the largest demanding space\'s zone',
+                     target: zone_space.thermalZone.get.nameString)
+        else
+          audit.warn(:shw, 'HPWH has no zone (largest demanding space is unzoned) — ambient defaults apply')
+        end
+        hpwh
       end
 
       def build_loop(model, sizing, fuel, rules, audit)

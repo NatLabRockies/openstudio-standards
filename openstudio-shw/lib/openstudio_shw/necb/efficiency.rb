@@ -29,6 +29,14 @@ module OpenStudioSHW
         ua_btu_hr_f = nil
         evidence = nil
 
+        # Instantaneous water heaters (Table 6.2.2.1 instantaneous rows): the code
+        # bounds gas instantaneous at Vr <= 7.6 L — treat tanks at/below that (or
+        # named instantaneous) as tankless: UEF/Et applied as thermal efficiency,
+        # zero standby UA.
+        if volume_l <= 7.6 || water_heater.nameString =~ /instantaneous/i
+          return apply_instantaneous(water_heater, fuel, capacity, audit)
+        end
+
         case fuel
         when 'Electricity'
           electric = rules['electric']
@@ -86,6 +94,57 @@ module OpenStudioSHW
                        inputs: { fuel: fuel, capacity_kw: (capacity / 1000).round(2), volume_l: volume_l.round(1),
                                  thermal_efficiency: efficiency.round(4), ua_w_per_k: ua_w_k.round(4) },
                        evidence: evidence, article: '6.2.2.1.')
+        true
+      end
+
+      # Instantaneous rows of Table 6.2.2.1. Gas < 59 kW: UEF 0.86 (< 6.4 L/min)
+      # or 0.87 (>= 6.4 L/min) — rated flow is not model-resolvable, so the
+      # CONSERVATIVE 0.86 is used (audited); gas all others: Et >= 94%. Oil:
+      # Et >= 80% (< 37.8 L) / 78%. Electric instantaneous carries footnote (6)
+      # (no numeric requirement) — modeled at 1.0.
+      def apply_instantaneous(water_heater, fuel, capacity, audit)
+        efficiency, evidence =
+          case fuel
+          when 'NaturalGas'
+            capacity < 59_000 ? [0.86, 'gas instantaneous < 59 kW: UEF 0.86 (conservative low-flow row; rated flow unknown)'] : [0.94, 'gas instantaneous, all others: Et 0.94']
+          when 'FuelOilNo2'
+            [0.80, 'oil instantaneous < 37.8 L: Et 0.80']
+          when 'Electricity'
+            [1.0, 'electric instantaneous: footnote (6), no numeric requirement — modeled at 1.0']
+          else
+            audit.warn(:shw_efficiency, "#{water_heater.nameString}: instantaneous fuel '#{fuel}' not supported")
+            return false
+          end
+        water_heater.setHeaterThermalEfficiency(efficiency)
+        water_heater.setOffCycleLossCoefficienttoAmbientTemperature(0.0)
+        water_heater.setOnCycleLossCoefficienttoAmbientTemperature(0.0)
+        water_heater.setName("#{water_heater.nameString} #{efficiency.round(3)} Therm Eff Instantaneous")
+        audit.decision(:shw_efficiency, 'instantaneous water heater performance applied (tankless: zero standby UA)',
+                       target: water_heater.nameString,
+                       inputs: { fuel: fuel, capacity_kw: (capacity / 1000).round(2), thermal_efficiency: efficiency },
+                       evidence: evidence, article: '6.2.2.1. (instantaneous rows)')
+        true
+      end
+
+      # Heat-pump water heater performance: the code floor (2020: EF >= 2.1;
+      # 2025: UEF >= 2.23) applied as the DX coil's rated COP — CONSERVATIVE
+      # (rated COP >= EF in practice since EF includes tank standby), audited.
+      def apply_heat_pump_efficiency(hpwh, vintage: '2020', audit: nil)
+        audit ||= AuditLog.new
+        floor = vintage.to_s == '2025' ? 2.23 : 2.1
+        metric = vintage.to_s == '2025' ? 'UEF' : 'EF'
+        coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPump
+        if coil.empty?
+          audit.warn(:shw_efficiency, "#{hpwh.nameString}: no air-to-water HP coil found — performance not applied")
+          return false
+        end
+
+        coil.get.setRatedCOP(floor)
+        audit.decision(:shw_efficiency,
+                       "heat-pump water heater performance applied: rated COP set to the code floor #{metric} #{floor} " \
+                       '(conservative — rated COP exceeds EF in practice since EF includes tank standby)',
+                       target: hpwh.nameString, inputs: { "#{metric.downcase}_floor": floor },
+                       article: '6.2.2.1. (storage-type heat pump)')
         true
       end
 

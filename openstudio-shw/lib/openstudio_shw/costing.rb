@@ -75,9 +75,12 @@ module OpenStudioSHW
       efficiency = tank.heaterThermalEfficiency.is_initialized ? tank.heaterThermalEfficiency.get : 0.0
       high_efficiency = efficiency >= 0.85
 
+      hphw_tanks = tank.model.getWaterHeaterHeatPumps.map { |hp| hp.tank.nameString } +
+                   tank.model.getWaterHeaterHeatPumpWrappedCondensers.map { |hp| hp.tank.nameString }
       lookup, count_key =
         case tank.heaterFuelType
-        when /Electric/i then %w[WaterElec elec]
+        when /Electric/i
+          hphw_tanks.include?(tank.nameString) ? %w[HPHW_Heater hphw] : %w[WaterElec elec]
         when /NaturalGas/i then high_efficiency ? %w[WaterGas_HE he_gas] : %w[WaterGas reg_gas]
         when /Oil/i then high_efficiency ? %w[WaterOil_HE he_oil] : %w[WaterOil reg_oil]
         else
@@ -120,8 +123,10 @@ module OpenStudioSHW
       ht_roof = geo[:ht_roof_ft]
 
       non_hphw = counts[:tanks] - counts[:hphw]
-      quantifier.add('Conduit', nil, %w[SHW], 'SHW electric utility conduit', count: util * non_hphw)
-      quantifier.add('Wiring', 14, %w[SHW], 'SHW electric utility wire', count: util / 100.0 * non_hphw)
+      if non_hphw.positive? # legacy: HPHW tanks are excluded from the electric utility run
+        quantifier.add('Conduit', nil, %w[SHW], 'SHW electric utility conduit', count: util * non_hphw)
+        quantifier.add('Wiring', 14, %w[SHW], 'SHW electric utility wire', count: util / 100.0 * non_hphw)
+      end
 
       reg_fuel = counts[:reg_gas] + counts[:reg_oil]
       he_fuel = counts[:he_gas] + counts[:he_oil]
