@@ -50,4 +50,11 @@ module OpenStudioLighting
       end
     end
   end
+
+  # Apply NECB interior lighting to every tagged space type. See NECB::ApplyLights.
+  def self.apply_lights(model, **kwargs)
+    NECB.apply_lights(model, **kwargs)
+  end
 end
+
+require_relative 'openstudio_lighting/necb/apply_lights'
