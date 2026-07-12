@@ -2,7 +2,7 @@
   "provenance": {
     "vintage": "2020",
     "generated": "2026-07-12",
-    "method": "Data tables vendored from the openstudio-standards NECB2020 MERGED standards_data (space_types_2020.json, schedules_2020.json — see their provenance blocks); article structure and values verified against the building-codes MCP server (necb:2020). Runtime never contacts the MCP.",
+    "method": "Data tables vendored from the openstudio-standards NECB2020 MERGED standards_data (space_types_2020.json, schedules_2020.json \u2014 see their provenance blocks); article structure and values verified against the building-codes MCP server (necb:2020). Runtime never contacts the MCP.",
     "verification": {
       "schedule_sets": "Table A-8.4.3.2.(1)-A cell-verified against the vendored NECB-A-* schedules (occupants, lighting, receptacle, fans, 24C cooling / 18-20-22C heating setpoints, SWH fractions per Mon-Fri/Sat/Sun)",
       "load_densities": "Table A-8.4.3.2.(2)-B (89 space functions) retrieved in full: occupant density m2/occupant, receptacle W/m2, SWH W/occupant, schedule letters, illuminance"
@@ -22,7 +22,7 @@
         "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
         "status": "partial",
         "how": "sentences (1)-(2) via NECB space-type data: occupancy + receptacle (electric/gas equipment) densities and NECB-<letter> schedule sets (occupancy, equipment, fan, heating/cooling setpoints) applied per space type; ventilation OA and space-type infiltration applied from the same records",
-        "gaps": "lighting power + lighting schedules EXCLUDED (openstudio-lighting gem territory); service-water-heating loads + SWH schedules EXCLUDED (openstudio-shw gem territory); illuminance levels are lighting-design data (not modelled); sentence (3) semi-heated set-point-from-specifications not implemented"
+        "gaps": "lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules EXCLUDED (openstudio-shw gem territory); illuminance levels are lighting-design data (not modelled); sentence (3) semi-heated set-point-from-specifications not implemented"
       },
       {
         "article": "8.4.3.3.",

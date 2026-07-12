@@ -378,3 +378,6 @@ Plain ruby + the OpenStudio SDK bindings — no bundler required.
 - [openstudio-loads](../openstudio-loads) — NECB space-use loads and schedules
   (people, plug loads, ventilation OA, NECB schedule sets, set-points): the
   bare-geometry on-ramp that makes gem-only proposed buildings possible.
+- [openstudio-lighting](../openstudio-lighting) — NECB Part 4 lighting (LPD
+  allowances, occupancy-sensor schedules, LED, exterior allowances, reference
+  lighting, fixture costing), built on openstudio-loads.
