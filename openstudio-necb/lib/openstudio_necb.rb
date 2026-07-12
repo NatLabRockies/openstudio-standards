@@ -31,6 +31,7 @@ require_relative 'openstudio_necb/version'
 require_relative 'openstudio_necb/runner'
 require_relative 'openstudio_necb/tiers'
 require_relative 'openstudio_necb/compliance'
+require_relative 'openstudio_necb/report'
 
 # OpenStudioNECB is the UMBRELLA: it composes the SDK-only domain gems
 # (openstudio-hvac reference systems + efficiencies, openstudio-envelope

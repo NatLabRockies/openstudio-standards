@@ -67,7 +67,8 @@ module OpenStudioNECB
                                max_capacity_iterations: 3, capacity_step: 1.25,
                                necb_loads: nil, reference_daylighting: false,
                                path: :reference, archetype_areas: nil,
-                               process_loads_kwh: 0.0, audit: nil)
+                               process_loads_kwh: 0.0, eui_supplement: nil,
+                               report_html: false, report_options: {}, audit: nil)
       if path == :eui
         raise(ArgumentError, 'the archetype-EUI path is a NECB 2025 feature (vintage: 2025)') unless vintage.to_s == '2025'
         raise(ArgumentError, ':eui path requires archetype_areas: {archetype => m2 or nil}') if archetype_areas.nil?
@@ -76,7 +77,8 @@ module OpenStudioNECB
                               run_dir: run_dir, simulate: simulate, run_period: run_period,
                               archetype_areas: archetype_areas, process_loads_kwh: process_loads_kwh,
                               costing: costing, city: city, province_state: province_state,
-                              costs_csv: costs_csv, necb_loads: necb_loads, audit: audit)
+                              costs_csv: costs_csv, necb_loads: necb_loads,
+                              report_html: report_html, report_options: report_options, audit: audit)
       end
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
@@ -168,11 +170,31 @@ module OpenStudioNECB
       cost_models(proposed, reference, report, city: city, province_state: province_state,
                   costs_csv: costs_csv, audit: audit) if costing
 
+      # eui_supplement (2025): the 8.4.4 archetype-EUI verdict computed AGAINST
+      # THE SAME proposed annual result — one run, both compliance paths.
+      if eui_supplement && vintage.to_s == '2025' && report['proposed']['total_site_kwh']
+        supplement_target = Tiers.eui_building_energy_target(
+          eui_supplement[:archetype_areas] || eui_supplement['archetype_areas'],
+          proposed.getBuilding.floorArea, hdd: hdd,
+          process_loads_kwh: eui_supplement[:process_loads_kwh] || 0.0, audit: audit)
+        proposed_kwh = report['proposed']['total_site_kwh']
+        eui_ok = proposed_kwh <= supplement_target['bet_kwh']
+        audit.decision(:compliance,
+                       eui_ok ? 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)' : 'proposed does NOT meet the archetype-EUI target (8.4.4 path)',
+                       inputs: { proposed_kwh: proposed_kwh, bet_kwh: supplement_target['bet_kwh'] },
+                       article: '8.4.4.1.(2)')
+        report['eui_path'] = { 'bet_kwh' => supplement_target['bet_kwh'],
+                               'compliant' => eui_ok, 'lines' => supplement_target['lines'] }
+                             .merge(Tiers.energy_tier(proposed_kwh, supplement_target['bet_kwh']))
+      end
+
       report['compliant'] = compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
       write_outputs(run_dir, report, audit)
-      ComplianceResult.new(proposed_model: proposed, reference_model: reference,
-                           report: report, audit: audit, compliant: compliant, run_dir: run_dir)
+      result = ComplianceResult.new(proposed_model: proposed, reference_model: reference,
+                                    report: report, audit: audit, compliant: compliant, run_dir: run_dir)
+      Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
+      result
     end
 
     def load_model(model)
@@ -188,7 +210,8 @@ module OpenStudioNECB
     # the Section 10 tier is computed against the same BET.
     def eui_compliance(model, vintage:, weather:, hdd:, run_dir:, simulate:, run_period:,
                        archetype_areas:, process_loads_kwh:, costing:, city:,
-                       province_state:, costs_csv:, necb_loads:, audit:)
+                       province_state:, costs_csv:, necb_loads:,
+                       report_html: false, report_options: {}, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
       proposed = load_model(model)
@@ -248,8 +271,10 @@ module OpenStudioNECB
       report['compliant'] = compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
       write_outputs(run_dir, report, audit)
-      ComplianceResult.new(proposed_model: proposed, reference_model: nil,
-                           report: report, audit: audit, compliant: compliant, run_dir: run_dir)
+      result = ComplianceResult.new(proposed_model: proposed, reference_model: nil,
+                                    report: report, audit: audit, compliant: compliant, run_dir: run_dir)
+      Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
+      result
     end
 
     # The bare-geometry on-ramp: NECB space types -> loads -> lighting -> SHW ->

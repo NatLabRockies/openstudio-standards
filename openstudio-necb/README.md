@@ -52,7 +52,10 @@ result = OpenStudioNECB.performance_compliance(
   run_dir: 'runs/my_building',
   simulate: :annual,                   # :annual | :sizing | :none
   costing: true, costs_csv: 'licensed_costs.csv',  # runtime injection only
-  thermal_bridging: 'efficient (BETBG)')
+  thermal_bridging: 'efficient (BETBG)',
+  report_html: true,                   # write run_dir/compliance_report.html
+  report_options: { project_name: 'My Building', address: '...', permit_number: '...',
+                    prepared_by: '...', professional_of_record: '...' })
 
 result.compliant            # true / false (nil unless simulate: :annual)
 result.report               # written to run_dir/report.json
@@ -90,16 +93,45 @@ result.reference_model      # the fully-transformed reference building
 | `:sizing` | sizing only (models generated, sized, costable) | nil |
 | `:none` | model transforms only — proposed stays UNSIZED (loud warning: kW thresholds and capacity bins fall back) | nil |
 
+## AHJ compliance report (HTML)
+
+`report_html: true` (or `OpenStudioNECB::Report.write_html(result, path, options)`
+on any `ComplianceResult`) renders **one self-contained HTML file** for
+building-permit submission — no external resources, no scripts (native
+`<details>` only), print-ready. Its structure mirrors the City of Vancouver
+*Building Energy Design Statement* (the canonical Canadian AHJ intake form):
+
+1. project header + verdict banner (PASS/FAIL per path, Tier, GHG-level badges)
+2. compliance-path declaration (8.4.1.2 performance / 8.4.4 archetype-EUI)
+3. an article-sorted **checklist derived from the audit log** — every row links
+   to its full audit entry in the appendix; warnings can never be hidden
+4. per-domain sections — Energy (paired end-use bars, totals with dashed target
+   lines, unmet hours, capacity-iteration history), **GHG (2025 Part 11)**,
+   Envelope (area-weighted U-values, FDWR/SRR), HVAC (proposed-vs-reference
+   system-layout schematics), Lighting, Loads, SHW, costing totals if run
+5. coverage + warnings appendix, the full collapsed audit trail, signature blocks
+
+On a 2025 reference-path run, `eui_supplement: { archetype_areas: {...},
+process_loads_kwh: 0 }` ALSO computes the 8.4.4 archetype-EUI building energy
+target against the same annual result — one run, both compliance-path verdicts
+in the report (`report['eui_path']`).
+
+Out of scope (by design): jurisdiction-specific signed PDF forms (this report is
+the evidence package attached to them), French localization, and line-item cost
+ledgers (totals only — licensed unit costs are never embedded).
+
 ## Testing
 
 ```bash
 cd openstudio-necb
-ruby test/test_compliance.rb   # 5 tests: :none transforms, :sizing + unified
-                               # costing, :annual week-run full determination,
-                               # 8.4.1.2.(5) capacity-iteration convergence of a
-                               # deliberately undersized building (4-week January
-                               # run), caller-model immutability. E+ runs skip
-                               # without the openstudio CLI.
+ruby test/test_compliance.rb   # :none transforms, :sizing + unified costing,
+                               # :annual week-run full determination, 8.4.1.2.(5)
+                               # capacity-iteration convergence, caller-model
+                               # immutability. E+ runs skip without the CLI.
+ruby test/test_tiers_eui.rb    # Section 10 tiers, 2025 8.4.4 EUI path, Part 11 GHG
+ruby test/test_report_units.rb       # SDK-free renderer units + golden SVG
+ruby test/test_report_model_query.rb # SDK extraction (chains, envelope, glazing)
+ruby test/test_report_html.rb        # whole-document renders from real pipelines
 ```
 
 Test fixtures are shared with the sibling gems (no third copy of the weather trio).
