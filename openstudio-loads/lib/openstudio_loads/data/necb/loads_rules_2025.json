@@ -1,0 +1,48 @@
+{
+  "provenance": {
+    "vintage": "2025",
+    "generated": "2026-07-12",
+    "method": "NECB 2025 verified against the building-codes MCP server (necb:2025). The 2025 loads data is IDENTICAL to 2020: Table A-8.4.3.2.(2)-B retrieved in full for both editions and compared row-by-row (all 89 space functions: occupant density, receptacle, SWH, schedule letters, illuminance equal; only headers reformatted and the 'Parent Space Type' column dropped); schedule set A-8.4.3.2.(1)(b)-A cell-verified identical to 2020's A-8.4.3.2.(1)-A. This vintage therefore SHARES the 2020 data tables (space_types_2020.json / schedules_2020.json).",
+    "changes_vs_2020": {
+      "schedule_tables_renumbered": "A-8.4.3.2.(1)-A..K -> A-8.4.3.2.(1)(b)-A..K (Article 8.4.3.2 restructured into clauses in 2025)",
+      "values": "none found"
+    }
+  },
+  "data_vintage_alias": "2020",
+  "schedule_table_prefix": "A-8.4.3.2.(1)(b)",
+  "article_coverage": {
+    "articles": [
+      {
+        "article": "8.4.3.1.",
+        "title": "Thermal Blocks",
+        "status": "host_scope",
+        "how": "thermal-block/zoning decisions belong to the modeller or the HVAC autozoning layer, not the loads pass"
+      },
+      {
+        "article": "8.4.3.2.",
+        "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
+        "status": "partial",
+        "how": "sentences (1)-(2) via NECB space-type data (2025 values verified identical to 2020; schedule citations renumbered to A-8.4.3.2.(1)(b)): occupancy + receptacle densities and NECB-<letter> schedule sets applied per space type; ventilation OA and space-type infiltration applied from the same records",
+        "gaps": "lighting power + lighting schedules EXCLUDED (openstudio-lighting gem territory); service-water-heating loads + SWH schedules EXCLUDED (openstudio-shw gem territory); illuminance levels are lighting-design data (not modelled); semi-heated set-point-from-specifications not implemented"
+      },
+      {
+        "article": "8.4.3.3.",
+        "title": "Air Leakage",
+        "status": "host_scope",
+        "how": "implemented in the openstudio-envelope gem; the loads pass applies only the space-type modelling infiltration"
+      },
+      {
+        "article": "8.4.3.4.",
+        "title": "HVAC System Operation",
+        "status": "host_scope",
+        "how": "fan/system operating schedules ship in the schedule sets; wiring them to systems is the openstudio-hvac / umbrella layer"
+      },
+      {
+        "article": "8.4.3.5.",
+        "title": "Simulation Parameters (Table 8.4.3.5.)",
+        "status": "not_implemented",
+        "gaps": "simulation-parameter table not enforced by this gem; the openstudio-necb umbrella controls run parameters"
+      }
+    ]
+  }
+}
