@@ -184,6 +184,12 @@ module OpenStudioLighting
                     [17, 30.0, 'sensor PVC conduit (30 ft)'],
                     [14, 1.0, 'sensor box']].freeze
 
+      # Daylighting-sensor costing — the legacy daylighted-area rule
+      # (cost_audit_daylighting_sensor_control): per controlled zone,
+      # fixtures = sum over spaces of ceil(ft2/1000 x Fix_1000ft.to_i);
+      # sidelighted sensors = ceil(ceil(fixtures x primary_sidelighted_area /
+      # zone_area) / 4); skylight sensors likewise from the under-skylight area.
+      # Each sensor is the legacy BOM x zone multiplier.
       def daylighting_note(model, database, template, province_state, city, section, audit)
         zones = model.getThermalZones.sort_by(&:nameString).select { |z| z.primaryDaylightingControl.is_initialized }
         if zones.empty?
@@ -194,8 +200,12 @@ module OpenStudioLighting
         total = 0.0
         sensors_total = 0
         zones.each do |zone|
-          fixtures = zone_fixture_count(zone, database, template)
-          sensors = (fixtures / 4.0).ceil * zone.multiplier
+          data = zone_daylighting_data(zone, database, template)
+          next if data[:fixtures].zero? || data[:area_m2].zero?
+
+          side_sensors = ((data[:fixtures] * data[:sidelighted_m2] / data[:area_m2]).ceil / 4.0).ceil * zone.multiplier
+          sky_sensors = ((data[:fixtures] * data[:skylight_m2] / data[:area_m2]).ceil / 4.0).ceil * zone.multiplier
+          sensors = side_sensors + sky_sensors
           next if sensors.zero?
 
           sensors_total += sensors
@@ -209,21 +219,29 @@ module OpenStudioLighting
                     costs['laborOpCost'] * regional[1] / 100.0) * quantity * sensors
             total += line
             audit.info(:costing_lighting, "daylighting #{label}", target: zone.nameString,
-                       inputs: { sensors: sensors, quantity_each: quantity }, value: "$#{line.round(2)}")
+                       inputs: { sidelighted_sensors: side_sensors, skylight_sensors: sky_sensors,
+                                 quantity_each: quantity }, value: "$#{line.round(2)}")
           end
         end
         audit.decision(:costing_lighting,
-                       'daylighting sensors costed (ceil(fixtures/4) per controlled zone; fixture count from ' \
-                       'WHOLE zone area — legacy restricts to the daylighted-area portion, not yet ported: upper bound)',
-                       inputs: { zones: zones.size, sensors: sensors_total }, value: "$#{total.round(2)}")
+                       'daylighting sensors costed from the DAYLIGHTED-AREA fixture ratio (legacy rule: ' \
+                       'ceil(ceil(fixtures x area ratio)/4) per aperture type per controlled zone)',
+                       inputs: { zones: zones.size, sensors: sensors_total },
+                       value: "$#{total.round(2)}", article: '4.2.2.4.; 4.2.2.5.; 4.2.2.9.')
         section['daylighting_sensor_cost'] = total.round(2)
         total
       end
 
-      def zone_fixture_count(zone, database, template)
-        count = 0.0
-        zone.spaces.each do |space|
+      # Zone fixture count (per-space ceil, Fix_1000ft truncated to integer as
+      # legacy does) + accumulated daylighted areas + zone floor area.
+      def zone_daylighting_data(zone, database, template)
+        fixtures = 0
+        area_m2 = 0.0
+        sidelighted = 0.0
+        skylight = 0.0
+        zone.spaces.sort_by(&:nameString).each do |space|
           next if space.spaceType.empty? || space.spaceType.get.standardsSpaceType.empty?
+          next if space.spaceType.get.nameString.downcase.include?('undefined')
 
           space_type = space.spaceType.get.standardsSpaceType.get
           building_type = space.spaceType.get.standardsBuildingType.get
@@ -232,17 +250,28 @@ module OpenStudioLighting
               row['building_type'].to_s.downcase == building_type.downcase &&
               row['space_type'].to_s.downcase == space_type.downcase
           end
-          next if set.nil?
-
-          floor_ft2 = OpenStudio.convert(space.floorArea, 'm^2', 'ft^2').get
-          ceiling_ft = space.floorArea.positive? ? OpenStudio.convert(space.volume / space.floorArea, 'm', 'ft').get : 0
-          column = HEIGHT_COLUMNS.find { |limit, _| ceiling_ft < limit }[1]
-          fixture = database.lighting.find { |row| row['lighting_type_id'].to_s == set[column].to_s }
-          next if fixture.nil?
-
-          count += floor_ft2 / 1000.0 * fixture['Fix_1000ft'].to_f
+          if set
+            floor_ft2 = OpenStudio.convert(space.floorArea, 'm^2', 'ft^2').get
+            height_ft = max_space_height_ft(space)
+            column = HEIGHT_COLUMNS.find { |limit, _| height_ft < limit }[1]
+            fixture = database.lighting.find { |row| row['lighting_type_id'].to_s == set[column].to_s }
+            fixtures += (floor_ft2 / 1000.0 * fixture['Fix_1000ft'].to_i).ceil if fixture
+          end
+          area_m2 += space.floorArea
+          sidelighted += NECB::Daylighting.sidelighting_parameters(space)[:area_m2]
+          skylight += NECB::Daylighting.skylight_parameters(space)[:area_m2]
         end
-        count
+        { fixtures: fixtures, area_m2: area_m2, sidelighted_m2: sidelighted, skylight_m2: skylight }
+      end
+
+      # Legacy DSC uses the max wall-vertex height (not volume/area) for the bin.
+      def max_space_height_ft(space)
+        height = 0.0
+        space.surfaces.select { |s| s.surfaceType == 'Wall' }.each do |wall|
+          top = wall.vertices.map(&:z).max
+          height = top if top && top > height
+        end
+        OpenStudio.convert(height, 'm', 'ft').get
       end
     end
   end

@@ -45,8 +45,8 @@
         "article": "4.2.2.1.",
         "title": "Interior lighting controls (2025 requirement matrix)",
         "status": "partial",
-        "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); occupancy-based control is modeled via the sensor-schedule synthesis | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM",
-        "gaps": "4.2.2 threshold-based placement (primary-sidelighted-area / effective-aperture geometry) not ported; photocontrol energy evaluation not modeled"
+        "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); occupancy-based control is modeled via the sensor-schedule synthesis | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name)",
+        "gaps": "photocontrol ENERGY evaluation not modeled; 8.4.4.5.(5)-(12) reference daylighting geometry not modeled"
       },
       {
         "article": "4.2.3.1.",
@@ -64,8 +64,8 @@
         "article": "8.4.5.x (lighting)",
         "title": "Reference building lighting (2025 renumbering of 8.4.4.5)",
         "status": "partial",
-        "how": "allowance LPD + fractions implemented as in 2020; citation prefix follows the 2025 renumbered performance path | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM",
-        "gaps": "4.2.2 threshold-based placement (primary-sidelighted-area / effective-aperture geometry) not ported; photocontrol energy evaluation not modeled"
+        "how": "allowance LPD + fractions implemented as in 2020; citation prefix follows the 2025 renumbered performance path | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name)",
+        "gaps": "photocontrol ENERGY evaluation not modeled; 8.4.4.5.(5)-(12) reference daylighting geometry not modeled"
       }
     ]
   }

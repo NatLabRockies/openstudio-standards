@@ -74,21 +74,32 @@ rulesets); fixture costing matches legacy `cost_audit_lighting` to the dollar.
 
 ## Documented future
 
-Photocontrol energy evaluation, the 4.2.2 threshold-based sensor placement
-(primary-sidelighted-area / effective-aperture geometry) and the
-8.4.4.5.(5)–(12) reference daylighting geometry · exterior-lighting schedules
-beyond astronomical clock · 2011–2017 backfill.
+Photocontrol energy evaluation and the 8.4.4.5.(5)–(12) reference daylighting
+geometry · exterior-lighting schedules beyond astronomical clock · 2011–2017
+backfill.
 
 ## Daylighting
 
-`OpenStudioLighting.add_daylighting_controls(model, vintage:)` places a
-DaylightingControl in every space with exterior fenestration (the legacy
-"all daylighted spaces" option): stepped ×2 control, space-type
-`target_illuminance_setpoint`, sensor at the lowest-floor bounding-box centre
-+0.8 m, zone primary control at fraction 1.0. Costing then prices sensors per
-controlled zone — ceil(fixtures/4) with the legacy per-sensor BOM (sensor row
-407 + 30 ft wiring + 30 ft PVC conduit + box). Audited deviation: the fixture
-count uses the whole zone area (an upper bound) until the daylighted-area
-geometry (primary sidelighted / under-skylight) is ported; the 4.2.2
-threshold-based placement and the 8.4.4.5.(5)–(12) reference daylighting
-geometry remain documented futures.
+`OpenStudioLighting.add_daylighting_controls(model, vintage:, option:)` places
+DaylightingControls (stepped ×2, space-type `target_illuminance_setpoint`,
+sensor at the lowest-floor bounding-box centre +0.8 m, zone primary at 1.0):
+
+- `option: 'all'` — every space with exterior fenestration (legacy
+  add_daylighting_controls option).
+- `option: 'NECB_Default'` — only where the 4.2.2 thresholds require sensors,
+  driven by the **ported daylighted-area geometry**: primary sidelighted area
+  (4.2.2.9 — window width + ≤0.6 m side offsets × min(head height, space
+  depth)), daylighted area under skylights (4.2.2.5), and the effective
+  apertures (4.2.2.7/4.2.2.10). Parity-exact vs legacy
+  `get_parameters_sidelighting`/`get_parameters_skylight`. Legacy defects
+  preserved and audited: a space is excepted if it fails ANY single criterion
+  (so window-only spaces are always excepted — their skylight area is 0);
+  skylight-only spaces compute zero area (the accumulator sits inside the
+  window loop); and the ≥25 m² office exemption compares against the 2011-era
+  name `'Office - enclosed'`, which never matches NECB2020 space types (pass
+  `office_match: :any_enclosed_office` for the intent).
+
+Sensor costing uses the legacy daylighted-area rule: per controlled zone,
+fixtures = Σ ceil(ft²/1000 × Fix_1000ft), sensors =
+ceil(ceil(fixtures × area-ratio)/4) per aperture type, each priced with the
+per-sensor BOM (sensor row 407 + 30 ft wiring + 30 ft PVC conduit + box).

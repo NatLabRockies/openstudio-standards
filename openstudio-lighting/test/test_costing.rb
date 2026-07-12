@@ -70,7 +70,8 @@ class TestCosting < Minitest::Test
     report = OpenStudioLighting.cost(model, vintage: '2020', city: CITY, province_state: PROVINCE, audit: audit)
     assert_operator report.lighting['daylighting_sensor_cost'], :>, 0, 'sensors costed (BOM 407/10/17/14)'
     assert_operator report.total, :>, base.total, 'sensor cost adds to the fixture total'
-    assert(audit.entries.any? { |e| e[:action].include?('upper bound') }, 'area deviation audited')
+    assert(audit.entries.any? { |e| e[:action].include?('DAYLIGHTED-AREA fixture ratio') },
+           'sensor counts come from the legacy daylighted-area rule, not the whole zone')
   end
 
   def test_legacy_parity_led_2020

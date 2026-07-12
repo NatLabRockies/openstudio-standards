@@ -48,8 +48,8 @@
         "article": "4.2.2.3.-4.2.2.12.",
         "title": "Other interior lighting controls (daylighting, exterior control, etc.)",
         "status": "partial",
-        "gaps": "4.2.2 threshold-based placement (primary-sidelighted-area / effective-aperture geometry) not ported; photocontrol energy evaluation not modeled",
-        "how": "daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM"
+        "gaps": "photocontrol ENERGY evaluation not modeled; 8.4.4.5.(5)-(12) reference daylighting geometry not modeled",
+        "how": "daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name)"
       },
       {
         "article": "4.2.3.1.",
