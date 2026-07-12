@@ -1,0 +1,223 @@
+{
+  "provenance": {
+    "code": "NECB",
+    "edition": "2025",
+    "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors, split out in 2025), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). ALL VALUES VERIFIED IDENTICAL to NECB 2020 (opaque/fenestration/ground tables byte-match; 2025 door table equals the 2020 door row). Performance-path articles renumbered 8.4.4.x -> 8.4.5.x (verbatim text).",
+    "generated": "2026-07-12",
+    "articles": [
+      "3.1.1.6",
+      "3.1.1.7",
+      "3.2.1.4",
+      "3.2.2.2",
+      "3.2.2.3",
+      "3.2.2.4",
+      "3.2.3.1",
+      "8.4.5.1",
+      "8.4.5.3",
+      "8.4.5.4"
+    ],
+    "note": "Runtime never contacts the MCP. U-values are EFFECTIVE transmittance per 3.1.1.7."
+  },
+  "u_values_units": "W/(m2.K) — maximum overall (EFFECTIVE) thermal transmittance",
+  "u_values": {
+    "outdoors": {
+      "wall": {
+        "3000": 0.29,
+        "4000": 0.265,
+        "5000": 0.24,
+        "6000": 0.215,
+        "7000": 0.19,
+        "9999": 0.165
+      },
+      "roofceiling": {
+        "3000": 0.164,
+        "4000": 0.156,
+        "5000": 0.138,
+        "6000": 0.121,
+        "7000": 0.117,
+        "9999": 0.11
+      },
+      "floor": {
+        "3000": 0.193,
+        "4000": 0.175,
+        "5000": 0.156,
+        "6000": 0.138,
+        "7000": 0.121,
+        "9999": 0.117
+      },
+      "window": {
+        "3000": 1.9,
+        "4000": 1.9,
+        "5000": 1.73,
+        "6000": 1.73,
+        "7000": 1.44,
+        "9999": 1.44
+      },
+      "skylight": {
+        "3000": 2.69,
+        "4000": 2.69,
+        "5000": 2.41,
+        "6000": 2.41,
+        "7000": 2.01,
+        "9999": 2.01
+      },
+      "door": {
+        "3000": 2.12,
+        "4000": 1.9,
+        "5000": 1.9,
+        "6000": 1.9,
+        "7000": 1.9,
+        "9999": 1.44
+      }
+    },
+    "ground": {
+      "wall": {
+        "3000": 0.568,
+        "4000": 0.379,
+        "5000": 0.284,
+        "6000": 0.284,
+        "7000": 0.284,
+        "9999": 0.21
+      },
+      "roofceiling": {
+        "3000": 0.568,
+        "4000": 0.379,
+        "5000": 0.284,
+        "6000": 0.284,
+        "7000": 0.284,
+        "9999": 0.21
+      },
+      "floor": {
+        "3000": 0.757,
+        "4000": 0.757,
+        "5000": 0.757,
+        "6000": 0.757,
+        "7000": 0.757,
+        "9999": 0.379
+      }
+    }
+  },
+  "fdwr": {
+    "article": "3.2.1.4.(1)",
+    "text": "FDWR = 0.40 for HDD <= 4000; FDWR = (2000 - 0.2 x HDD)/3000 for 4000 < HDD < 7000; FDWR = 0.20 for HDD >= 7000",
+    "boundary_note": "Code text says <= 4000 -> 0.40; legacy openstudio-standards uses < 4000 with the linear branch at exactly 4000 — identical result ((2000-800)/3000 = 0.40).",
+    "pieces": [
+      {
+        "max_hdd": 4000,
+        "value": 0.4
+      },
+      {
+        "min_hdd": 4000,
+        "max_hdd": 7000,
+        "linear": {
+          "intercept": 2000.0,
+          "slope": -0.2,
+          "divisor": 3000.0
+        }
+      },
+      {
+        "min_hdd": 7000,
+        "value": 0.2
+      }
+    ]
+  },
+  "srr_max": {
+    "article": "3.2.1.4.(2)",
+    "value": 0.02,
+    "text": "The total skylight area shall be less than 2% of the gross roof area"
+  },
+  "hdd_bins_note": "keys are HDD bin CEILINGS {3000,4000,5000,6000,7000,9999} = zones 4/5/6/7A/7B/8; lookup rule (legacy-exact): first value where hdd < key, fallback 0.110",
+  "reference_envelope": {
+    "articles": "8.4.5.1.(2), 8.4.5.3., 8.4.5.4.",
+    "roof_absorptance_if_actual_used": 0.7,
+    "note": "populated fully in P4 (lightweight layers from Note A-8.4.4.4.(1), air leakage from 8.4.3.3.(3))"
+  },
+  "article_coverage": {
+    "note": "Envelope-slice coverage; statuses flip as phases land.",
+    "articles": [
+      {
+        "article": "3.1.1.5.",
+        "title": "Determination of Thermal Characteristics",
+        "status": "host_scope"
+      },
+      {
+        "article": "3.1.1.6.",
+        "title": "Determination of Areas (FDWR/SRR area basis)",
+        "status": "not_implemented",
+        "gaps": "gross wall/roof area computation lands with the FDWR/SRR machinery (P3)"
+      },
+      {
+        "article": "3.1.1.7.",
+        "title": "Thermal Characteristics of Building Assemblies (EFFECTIVE transmittance incl. thermal bridging)",
+        "status": "not_implemented",
+        "gaps": "table U-values are effective Ut; TBD-based derate/uprate lands in P3b — until then applied values are clear-field"
+      },
+      {
+        "article": "3.2.1.4.",
+        "title": "Allowable Fenestration and Door Area (FDWR + 2% skylights)",
+        "status": "not_implemented",
+        "gaps": "lookups land in P2, geometry mutators in P3"
+      },
+      {
+        "article": "3.2.2.1.",
+        "title": "General (above-ground assemblies)",
+        "status": "not_implemented",
+        "gaps": "prescriptive application lands in P3"
+      },
+      {
+        "article": "3.2.2.2.",
+        "title": "Opaque above-ground U-values by HDD zone",
+        "status": "not_implemented",
+        "gaps": "data vendored (this file); lookup P2, application P3"
+      },
+      {
+        "article": "3.2.2.3.",
+        "title": "Fenestration/skylight U-values by HDD zone",
+        "status": "not_implemented",
+        "gaps": "data vendored; lookup P2, application P3"
+      },
+      {
+        "article": "3.2.2.4.",
+        "title": "Door U-values (2025 split-out table; 2020: within 3.2.2.x)",
+        "status": "not_implemented",
+        "gaps": "data vendored; lookup P2, application P3"
+      },
+      {
+        "article": "3.2.3.1.",
+        "title": "Building assemblies in contact with the ground",
+        "status": "not_implemented",
+        "gaps": "data vendored; lookup P2, application P3"
+      },
+      {
+        "article": "3.2.4.1.",
+        "title": "Air Leakage",
+        "status": "not_implemented",
+        "gaps": "air-barrier requirements are not modeled (documented future)"
+      },
+      {
+        "article": "8.4.5.1.",
+        "title": "Reference building basis (envelope meets Section 3.2)",
+        "status": "not_implemented",
+        "gaps": "reference envelope lands in P4"
+      },
+      {
+        "article": "8.4.5.2.",
+        "title": "Operating schedules/loads identical",
+        "status": "host_scope",
+        "how": "HVAC-side handled by openstudio-hvac reference_hvac (satisfied by clone there)"
+      },
+      {
+        "article": "8.4.5.3.",
+        "title": "Reference envelope: absorptance, FDWR scaling, shading, fenestration optics",
+        "status": "not_implemented",
+        "gaps": "greenfield implementation lands in P4"
+      },
+      {
+        "article": "8.4.5.4.",
+        "title": "Lightweight construction + space thermal characteristics",
+        "status": "not_implemented",
+        "gaps": "greenfield implementation lands in P4"
+      }
+    ]
+  }
+}
