@@ -212,6 +212,53 @@ report.warnings       # anything uncosted is EXPLICIT (never silent zeros)
   evaporative-cooler media (no unit-cost data exists — legacy never costed it either);
   fan-coil MAU ventilation (matches legacy sys-2 handling).
 
+## NECB performance path: proposed + reference HVAC
+
+Self-contained NECB 2020 reference-HVAC generation (Division B, Subsection 8.4.4) — the
+proposed→reference transform the legacy performance-compliance scaffold never implemented:
+
+```ruby
+facts  = OpenStudioHVAC.characterize(model)        # ANY OSM -> neutral facts hash
+result = OpenStudioHVAC::NECB.reference_hvac(model, vintage: '2020',
+                                             building: { storeys: 3 })  # optional overrides
+result.model        # the reference model (clone; the proposed model is untouched)
+result.assignments  # per zone group: System 1-6/'hp', catalog name, energy type, articles
+result.audit        # AuditLog: every decision with inputs, evidence and article citation
+puts result.audit   # human narrative; result.audit.to_json for QAQC pipelines
+
+OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020')  # Table 5.2.12.1, sized model
+```
+
+- **Classifier** (`characterize`): reads arbitrary proposed models via a structural
+  loop-composition walk (gem-built and legacy pipe-named systems are recognized exactly);
+  yields heated/cooled, heating/cooling energy types (resolved through plant loops), heat
+  pumps, purchased energy, terminal types, design cooling kW.
+- **Selection** (Table 8.4.4.7.-A): space-type categories + storey bands + the 20 kW
+  data-centre threshold; residential heated-only/copy-proposed/through-the-wall rules; the
+  8.4.4.13 heat-pump override (reference = packaged rooftop ASHP, System 2 exempt);
+  energy type follows the proposed system (8.4.4.9/10), purchased heating represented by
+  gas (8.4.4.6). Rules live in `data/necb/reference_rules_2020.json` — generated offline
+  from the building-codes MCP server with an article citation on every block; **zero MCP
+  dependency at runtime**.
+- **Reference modeling rules**: oversizing capped at min(proposed, 30%/10%) (8.4.4.8),
+  fan specs (8.4.4.18: sys 1/3/4/5 → 640 Pa @ 40%, no return fan; sys 6 → 1000 Pa @ 55%
+  supply + 250 Pa @ 30% return), heat-pump −10 °C heating cutoff (8.4.4.13).
+- **Efficiencies** (`apply_efficiencies`): SDK-only port of the NECB pass — boilers
+  (incl. 176/352 kW primary/secondary staging), chillers (2100 kW split, 25% modulating
+  floor, tower cell/fan rules), single-speed DX cooling/heating, gas coils, with the
+  vendored Table 5.2.12.1 tables + 31 NECB performance curves
+  (`data/necb/efficiencies_2020.json`). **Parity-gated:** 0 mismatches vs legacy
+  `model_apply_hvac_efficiency_standard` (NECB2020) across efficiencies, COPs, staging,
+  curves and tower sizing on sys3/sys6/reference-HP.
+- **Audit-first**: every decision (classification evidence, rule row + inputs, build
+  action, `min(proposed 1.5, cap 1.3)` arithmetic, table row per efficiency value)
+  carries its NECB article — QAQC reads the log instead of diffing models. Warnings are
+  never silent (unsized capacities, unlisted space types per 8.4.4.7.(3)).
+- **Scope/limits (v1)**: HVAC only (envelope/lighting/SHW reference rules and compliance
+  simulation stay host-side); NECB 2020 (2025 and 2011–2017 are data drops away); the gem
+  never runs simulations — size the proposed model first for capacity-threshold rules,
+  and re-run `apply_efficiencies` after sizing the reference model.
+
 ## Design notes
 
 - **The name is the API.** Each catalog row fully specifies topology + fuels/coils/baseboard,

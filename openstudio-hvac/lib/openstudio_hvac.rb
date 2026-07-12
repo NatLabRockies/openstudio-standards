@@ -74,4 +74,10 @@ module OpenStudioHVAC
   def self.characterize(model, audit: nil)
     Classify.characterize(model, audit: audit)
   end
+
+  # Replace whatever HVAC currently serves these zones with a catalog system
+  # (zone-scoped teardown + build_system).
+  def self.replace_system(model, system_name, zones, **kwargs)
+    Builder.build_system(model, system_name, zones, **kwargs, remove_existing: true)
+  end
 end

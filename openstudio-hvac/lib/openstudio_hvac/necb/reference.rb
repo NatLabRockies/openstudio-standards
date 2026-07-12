@@ -173,6 +173,164 @@ module OpenStudioHVAC
       assignment
     end
 
+    # ==================== the proposed -> reference HVAC transform ====================
+
+    ReferenceResult = Struct.new(:model, :assignments, :audit, keyword_init: true)
+
+    # Generate the NECB reference HVAC for a proposed model (any OSM). The proposed
+    # model is untouched: the reference is built on a clone.
+    #
+    # Pipeline (all article-tagged in the audit): characterize the proposed HVAC ->
+    # select reference systems per Table 8.4.4.7.-A -> replace each zone group's HVAC
+    # with the mapped catalog system (energy type follows proposed) -> apply the
+    # reference modeling rules (8.4.4.8 oversizing caps, 8.4.4.18 fan specs, 8.4.4.13
+    # heat-pump operating limits) -> apply vintage minimum efficiencies.
+    #
+    # Sizing: the gem never runs simulations. Capacity-threshold selection rules and
+    # the proposed-oversizing comparison use sized values when present and warn when
+    # not; run your sizing pass on the proposed model first for full fidelity, and on
+    # the returned reference model before applying downstream (efficiencies re-apply
+    # cleanly via NECB.apply_efficiencies after sizing).
+    #
+    # @param model [OpenStudio::Model::Model] the proposed model
+    # @param vintage [String]
+    # @param building [Hash, nil] overrides for :storeys, :zone_types,
+    #   :kitchen_hood_zones, :refrigerated_zones (defaults derived from the model)
+    # @param audit [AuditLog, nil]
+    # @return [ReferenceResult] model (clone), assignments, audit
+    def self.reference_hvac(model, vintage: '2020', building: nil, audit: nil)
+      audit ||= AuditLog.new
+      reference = clone_model(model)
+
+      facts = Classify.characterize(reference, audit: audit)
+      info = building_info(reference, building, audit)
+      assignments = select_reference_systems(facts: facts, building: info,
+                                             vintage: vintage, audit: audit)
+
+      ruleset = rules(vintage)
+      zones_by_name = reference.getThermalZones.to_h { |z| [z.nameString, z] }
+      assignments.each do |assignment|
+        if assignment.action == :copy_proposed
+          audit.info(:build, 'proposed system retained in reference (residential rule)',
+                     target: assignment.zones.join(','),
+                     article: assignment.articles.compact.join('; '))
+          next
+        end
+
+        zones = assignment.zones.map { |n| zones_by_name.fetch(n) }
+        result = OpenStudioHVAC.replace_system(reference, assignment.catalog_name, zones,
+                                               config: assignment.config)
+        audit.decision(:build, 'reference system built', target: assignment.zones.join(','),
+                       inputs: { system: assignment.reference_system, action: assignment.action },
+                       value: assignment.catalog_name,
+                       article: assignment.articles.compact.uniq.join('; '))
+        apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
+        apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
+      end
+
+      apply_oversizing_caps(model, reference, ruleset, audit)
+      Efficiency.apply(reference, vintage: vintage, audit: audit)
+
+      ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    def self.clone_model(model)
+      clone = model.clone
+      clone.respond_to?(:to_Model) ? clone.to_Model : clone
+    end
+
+    # Building info defaults derived from the model, overridable by the caller.
+    def self.building_info(model, overrides, audit)
+      info = { storeys: Costing::Geometry.above_ground_storeys(model),
+               zone_types: zone_space_types(model) }
+      info.merge!(overrides.transform_keys(&:to_sym)) if overrides
+      audit.info(:characterize, 'building info for selection',
+                 inputs: { storeys: info[:storeys],
+                           typed_zones: info[:zone_types].count { |_, v| !v.to_s.empty? } })
+      info
+    end
+
+    def self.zone_space_types(model)
+      model.getThermalZones.to_h do |zone|
+        type = zone.spaces.filter_map do |space|
+          st = space.spaceType
+          next nil unless st.is_initialized
+
+          st.get.standardsSpaceType.is_initialized ? st.get.standardsSpaceType.get : st.get.nameString
+        end.first.to_s.sub(/\ASpace Function\s*/i, '')
+        [zone.nameString, type]
+      end
+    end
+
+    # 8.4.4.18.(3): systems 1/3/4/5 -> supply fan 640 Pa @ 40% combined efficiency, no
+    # return fan. 8.4.4.18.(4): system 6 -> supply 1000 Pa @ 55%, return 250 Pa @ 30%.
+    def self.apply_fan_rules(air_loops, reference_system, ruleset, audit)
+      fans = ruleset.fetch('fans')
+      spec = reference_system == 6 ? fans['system_6'] : fans['systems_1_3_4_5']
+      Array(air_loops).each do |air_loop|
+        air_loop.supplyComponents.each do |comp|
+          fan = comp.to_FanConstantVolume.is_initialized ? comp.to_FanConstantVolume.get : nil
+          fan ||= comp.to_FanVariableVolume.is_initialized ? comp.to_FanVariableVolume.get : nil
+          next if fan.nil?
+
+          is_return = fan.nameString =~ /return/i
+          pa = is_return ? spec['return_pa'] : spec['supply_pa']
+          eff = is_return ? spec['return_efficiency'] : spec['supply_efficiency']
+          next if pa.nil? # sys 1/3/4/5 has no return-fan spec
+
+          fan.setPressureRise(pa)
+          set_fan_total_efficiency(fan, eff)
+          audit.decision(:rules, "#{is_return ? 'return' : 'supply'} fan set to reference spec",
+                         target: fan.nameString,
+                         value: "#{pa} Pa @ #{(eff * 100).round}% combined fan-motor efficiency",
+                         article: fans['article'])
+        end
+      end
+    end
+
+    def self.set_fan_total_efficiency(fan, efficiency)
+      if fan.respond_to?(:setFanTotalEfficiency)
+        fan.setFanTotalEfficiency(efficiency)
+      else
+        fan.setFanEfficiency(efficiency)
+      end
+    end
+
+    # 8.4.4.13.(2)(d): the reference heat pump shall not operate in heating mode below -10degC.
+    def self.apply_heat_pump_limits(air_loops, ruleset, audit)
+      cutoff = ruleset.fetch('heat_pump_reference')['heating_cutoff_oat_c']
+      Array(air_loops).each do |air_loop|
+        air_loop.supplyComponents.each do |comp|
+          next unless comp.to_CoilHeatingDXSingleSpeed.is_initialized
+
+          coil = comp.to_CoilHeatingDXSingleSpeed.get
+          coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(cutoff)
+          audit.decision(:rules, 'heat pump heating cutoff set', target: coil.nameString,
+                         value: "compressor off below #{cutoff} degC",
+                         article: ruleset.fetch('heat_pump_reference')['article'])
+        end
+      end
+    end
+
+    # 8.4.4.8: reference oversizing = the lesser of the proposed oversizing and the cap
+    # (30% heating / 10% cooling), applied via the model-wide sizing factors.
+    def self.apply_oversizing_caps(proposed, reference, ruleset, audit)
+      caps = ruleset.fetch('oversizing')
+      sizing = proposed.getSizingParameters
+      heat_prop = sizing.heatingSizingFactor
+      cool_prop = sizing.coolingSizingFactor
+      heat_ref = [heat_prop, 1.0 + caps['heating_max_fraction']].min
+      cool_ref = [cool_prop, 1.0 + caps['cooling_max_fraction']].min
+      ref_sizing = reference.getSizingParameters
+      ref_sizing.setHeatingSizingFactor(heat_ref)
+      ref_sizing.setCoolingSizingFactor(cool_ref)
+      audit.decision(:rules, 'equipment oversizing capped',
+                     inputs: { proposed_heating: heat_prop, proposed_cooling: cool_prop },
+                     value: "heating sizing factor #{heat_ref.round(3)} = min(proposed #{heat_prop.round(3)}, cap #{(1.0 + caps['heating_max_fraction']).round(2)}); " \
+                            "cooling #{cool_ref.round(3)} = min(proposed #{cool_prop.round(3)}, cap #{(1.0 + caps['cooling_max_fraction']).round(2)})",
+                     article: caps['article'])
+    end
+
     # 8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;
     # 8.4.4.6.(1): purchased heating is represented by a gas-fired boiler.
     def self.reference_energy_type(group, selection, facts, audit)
