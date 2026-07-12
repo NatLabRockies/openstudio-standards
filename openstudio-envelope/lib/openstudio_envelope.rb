@@ -32,3 +32,6 @@ module OpenStudioEnvelope
 end
 
 require_relative 'openstudio_envelope/necb/rules'
+require_relative 'openstudio_envelope/constructions'
+require_relative 'openstudio_envelope/geometry'
+require_relative 'openstudio_envelope/necb/prescriptive'
