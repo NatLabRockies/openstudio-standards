@@ -436,7 +436,9 @@ module OpenStudioHVAC
       if weather.is_initialized && weather.get.path.is_initialized
         stat_path = weather.get.path.get.to_s.sub(/\.epw\z/i, '.stat')
         if File.exist?(stat_path)
-          line = File.readlines(stat_path).find { |l| l =~ /^\s*Heating(\s+-?\d)/ }
+          # .stat files carry Latin-1 degree symbols; read tolerantly
+          lines = File.readlines(stat_path, encoding: 'ISO-8859-1').map { |l| l.encode('UTF-8', invalid: :replace, undef: :replace) }
+          line = lines.find { |l| l =~ /^\s*Heating(\s+-?\d)/ }
           values = line.to_s.scan(/-?\d+(?:\.\d+)?/).map(&:to_f)
           return values[1] if values.size > 1
         end

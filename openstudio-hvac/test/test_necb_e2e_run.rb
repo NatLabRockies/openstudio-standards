@@ -1,0 +1,101 @@
+require_relative 'test_helper'
+require 'tmpdir'
+
+# Full proposed -> reference -> EnergyPlus gate: the generated systems must actually
+# RUN (translate, size, and — for the controls case — simulate a week) with no Fatal
+# and no Severe errors. Pure gem + openstudio CLI; skips if the CLI is unavailable.
+#
+# ~4 EnergyPlus executions; expect a few minutes.
+class TestNecbE2ERun < Minitest::Test
+  include FixtureHelper
+
+  def setup
+    skip 'openstudio CLI not available' unless openstudio_cli?
+    @dir = Dir.mktmpdir('oshvac-e2e-')
+  end
+
+  def teardown
+    FileUtils.remove_entry(@dir) if @dir && File.exist?(@dir)
+  end
+
+  def office_types(model)
+    model.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] }
+  end
+
+  # Proposed CBECS baseboards runs in E+; its sys3-gas reference sizes cleanly and the
+  # efficiency pass lands real capacity-binned values on the sized reference.
+  def test_proposed_and_sys3_reference_size_cleanly
+    proposed = attach_weather!(load_fixture)
+    zones = proposed.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(proposed, 'Baseboard gas boiler', zones)
+
+    run_dir = run_energyplus!(proposed, "#{@dir}/proposed")
+    assert_clean_energyplus_run(run_dir, 'proposed (Baseboard gas boiler)')
+
+    result = OpenStudioHVAC::NECB.reference_hvac(proposed,
+                                                 building: { storeys: 1, zone_types: office_types(proposed) })
+    assert_equal [3], result.assignments.map(&:reference_system).uniq
+
+    ref_run = run_energyplus!(result.model, "#{@dir}/reference")
+    assert_clean_energyplus_run(ref_run, 'reference (sys3 gas)')
+
+    # efficiencies on the now-sized reference: no 'not sized' warnings, values applied
+    audit = OpenStudioHVAC::NECB::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(result.model, vintage: '2020', audit: audit)
+    assert_empty audit.warnings.select { |w| w[:action].include?('not sized') },
+                 'all components sized after the reference E+ run'
+    gas_coil = result.model.getCoilHeatingGass.min_by(&:nameString)
+    assert_operator gas_coil.gasBurnerEfficiency, :>=, 0.80
+    boiler = result.model.getBoilerHotWaters.find { |b| b.nameString.include?('Primary') }
+    assert_in_delta 0.90, boiler.nominalThermalEfficiency, 1e-6
+  end
+
+  # WSHP proposed -> Table 8.4.4.13 ASHP reference: sizes cleanly, HP COPs land.
+  def test_ashp_reference_sizes_cleanly
+    proposed = attach_weather!(load_fixture)
+    zones = proposed.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(proposed, 'Water source heat pumps', zones)
+
+    result = OpenStudioHVAC::NECB.reference_hvac(proposed,
+                                                 building: { storeys: 1, zone_types: office_types(proposed) })
+    assert_equal ['hp'], result.assignments.map(&:reference_system).uniq
+
+    ref_run = run_energyplus!(result.model, "#{@dir}/ashp_ref")
+    assert_clean_energyplus_run(ref_run, 'reference (ASHP per Table 8.4.4.13)')
+
+    OpenStudioHVAC::NECB.apply_efficiencies(result.model, vintage: '2020')
+    hp = result.model.getCoilHeatingDXSingleSpeeds.min_by(&:nameString)
+    assert_operator hp.ratedCOP, :>, 2.0
+    assert_in_delta(-10.0, hp.minimumOutdoorDryBulbTemperatureforCompressorOperation, 1e-6)
+  end
+
+  # The controls gate: a sys6 reference WITH the 8.4.4.19 ERV simulates a January week
+  # (VAV + boiler/chiller plants + rotary HX + OA-pretreat SPM all active at runtime).
+  def test_sys6_reference_with_erv_simulates_a_week
+    proposed = attach_weather!(load_fixture)
+    zones = proposed.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(proposed, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard', zones)
+    proposed.getSpaces.each do |space|
+      spec = OpenStudio::Model::DesignSpecificationOutdoorAir.new(proposed)
+      spec.setOutdoorAirFlowperFloorArea(0.02) # forces the 150 kW ERV trigger
+      space.setDesignSpecificationOutdoorAir(spec)
+    end
+
+    result = OpenStudioHVAC::NECB.reference_hvac(proposed,
+                                                 building: { storeys: 3, zone_types: office_types(proposed) })
+    assert_equal [6], result.assignments.map(&:reference_system).uniq
+    refute_empty result.model.getHeatExchangerAirToAirSensibleAndLatents, 'ERV present'
+
+    ref_run = run_energyplus!(result.model, "#{@dir}/sys6_week", sizing_only: false)
+    assert_clean_energyplus_run(ref_run, 'reference (sys6 + ERV, one-week run)')
+
+    # the simulation produced actual HVAC energy use (end-uses summary, GJ)
+    sql = result.model.sqlFile.get
+    hvac_gj = %i[electricityFans electricityCooling electricityHeating electricityPumps
+                 naturalGasHeating].sum do |meter|
+      value = sql.send(meter)
+      value.is_initialized ? value.get : 0.0
+    end
+    assert_operator hvac_gj, :>, 0.0, 'week run produced HVAC energy use (fans/pumps/heating/cooling)'
+  end
+end
