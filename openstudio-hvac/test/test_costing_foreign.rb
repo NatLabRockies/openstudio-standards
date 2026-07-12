@@ -92,4 +92,32 @@ class TestCostingForeign < Minitest::Test
     end
     assert JSON.parse(audit.to_json).size.positive?
   end
+
+  # ONE audit for compliance + costing: thread a single AuditLog through
+  # reference_hvac and cost and get one chronological narrative.
+  def test_unified_audit_across_reference_and_costing
+    model = load_fixture
+    zones = model.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', zones)
+    types = model.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] }
+
+    audit = OpenStudioHVAC::AuditLog.new
+    result = OpenStudioHVAC::NECB.reference_hvac(
+      model, building: { storeys: 1, zone_types: types, winter_design_temp_c: -20 }, audit: audit
+    )
+    ref = result.model
+    ref.getBoilerHotWaters.each { |b| b.setNominalCapacity(60_000.0) }
+    ref.getCoilCoolingDXSingleSpeeds.each { |c| c.setRatedTotalCoolingCapacity(15_000.0) }
+    report = OpenStudioHVAC.cost(ref, city: 'TORONTO', province_state: 'ONTARIO', audit: audit)
+
+    assert report.audit.equal?(result.audit), 'one AuditLog object end to end'
+    steps = audit.entries.map { |e| e[:step] }.uniq
+    # compliance narrative first, costing narrative after — one chronological log
+    %i[characterize selection build rules efficiency coverage costing_equipment costing].each do |step|
+      assert_includes steps, step
+    end
+    assert_operator steps.index(:coverage), :<, steps.index(:costing_equipment),
+                    'reference generation precedes costing in the same log'
+    assert JSON.parse(audit.to_json).size > 50
+  end
 end

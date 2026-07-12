@@ -258,6 +258,16 @@ result.audit        # AuditLog: every decision with inputs, evidence and article
 puts result.audit   # human narrative; result.audit.to_json for QAQC pipelines
 
 OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020')  # Table 5.2.12.1, sized model
+
+# ONE audit for compliance + costing: thread a single AuditLog through the pipeline
+# and get one chronological, article-tagged narrative (JSON for QAQC, text for humans):
+audit  = OpenStudioHVAC::AuditLog.new
+ref    = OpenStudioHVAC::NECB.reference_hvac(model, vintage: '2020', audit: audit)
+# ... size ref.model ...
+report = OpenStudioHVAC.cost(ref.model, audit: audit)
+audit.entries.map { |e| e[:step] }.uniq
+# => characterize, selection, build, rules, efficiency, coverage,
+#    costing_equipment, costing_geometry, costing_classification, ..., costing
 ```
 
 - **Classifier** (`characterize`): reads arbitrary proposed models via a structural
