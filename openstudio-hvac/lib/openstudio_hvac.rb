@@ -30,6 +30,9 @@ require_relative 'openstudio_hvac/costing/geometry'
 require_relative 'openstudio_hvac/costing/quantify_equipment'
 require_relative 'openstudio_hvac/costing/ventilation'
 require_relative 'openstudio_hvac/costing/report'
+require_relative 'openstudio_hvac/necb/audit_log'
+require_relative 'openstudio_hvac/necb/reference'
+require_relative 'openstudio_hvac/classify'
 require_relative 'openstudio_hvac/builder'
 
 # OpenStudioHVAC builds HVAC system topologies on OpenStudio thermal zones by
@@ -58,5 +61,16 @@ module OpenStudioHVAC
   # HVAC capital costing on a SIZED model. See Costing.cost.
   def self.cost(model, **kwargs)
     Costing.cost(model, **kwargs)
+  end
+
+  # Characterize ANY model's HVAC into a neutral, serializable facts hash
+  # (zone groups, energy types, heat pumps, purchased energy, plants).
+  # See Classify.characterize.
+  #
+  # @param model [OpenStudio::Model::Model]
+  # @param audit [NECB::AuditLog, nil] records evidence for every conclusion
+  # @return [Hash] the facts schema
+  def self.characterize(model, audit: nil)
+    Classify.characterize(model, audit: audit)
   end
 end

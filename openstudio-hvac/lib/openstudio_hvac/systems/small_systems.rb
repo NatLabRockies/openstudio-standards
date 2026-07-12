@@ -10,11 +10,10 @@ module OpenStudioHVAC
         heating = config.fetch('heating', true)
         cooling = config.fetch('cooling', false)
         ventilation = config.fetch('ventilation', true)
-        label = heating && cooling ? 'Furnace with AC' : (heating ? 'Furnace' : 'Central AC')
 
         zones.sort_by(&:nameString).map do |zone|
           air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
-          air_loop.setName("#{zone.nameString} #{label}")
+          air_loop.setName("#{config.fetch('name')} | #{zone.nameString}")
 
           fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
           fan.setName("#{air_loop.nameString} Fan")
@@ -54,7 +53,7 @@ module OpenStudioHVAC
         always_on = model.alwaysOnDiscreteSchedule
         zones.sort_by(&:nameString).map do |zone|
           air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
-          air_loop.setName("#{zone.nameString} Evaporative Cooler")
+          air_loop.setName("#{config.fetch('name')} | #{zone.nameString}")
 
           fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
           fan.setName("#{air_loop.nameString} Fan")
