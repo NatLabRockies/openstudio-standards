@@ -1,0 +1,163 @@
+require 'openstudio'
+
+require_relative 'openstudio_geometry/version'
+require_relative 'openstudio_geometry/audit_log'
+require_relative 'openstudio_geometry/wizards'
+require_relative 'openstudio_geometry/bar'
+
+# OpenStudioGeometry creates parametric building geometry — the authoring
+# on-ramp for the gem family (and the future MCP surface): footprint wizards
+# (rectangle, aspect-ratio, courtyard, H, L, T, U) with perimeter/core zoning,
+# below-grade storeys, and matched surfaces. SDK-only; shared AuditLog schema.
+#
+# Downstream: OpenStudioLoads.assign_space_types + apply_loads,
+# OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
+# OpenStudioHVAC.build_system, OpenStudioEnvelope prescriptive/reference,
+# OpenStudioNECB.performance_compliance.
+module OpenStudioGeometry
+  SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
+
+  # Keyword-friendly facade over the wizards. Returns the model (a fresh one is
+  # created when none is given); every call is audited with the full parameter
+  # set so downstream QAQC can reproduce the massing.
+  #
+  #   OpenStudioGeometry.create(shape: 'rectangle', length: 40, width: 25,
+  #                             above_ground_storys: 3, audit: audit)
+  def self.create(shape:, model: nil, audit: nil, **params)
+    audit ||= AuditLog.new
+    model ||= OpenStudio::Model::Model.new
+    shape = shape.to_s.downcase
+    raise(ArgumentError, "unknown shape '#{shape}' (#{SHAPES.join(', ')})") unless SHAPES.include?(shape)
+
+    result = case shape
+             when 'rectangle'
+               Wizards.create_shape_rectangle(model,
+                                              *ordered(params, %i[length width above_ground_storys under_ground_storys
+                                                                  floor_to_floor_height plenum_height perimeter_zone_depth
+                                                                  initial_height],
+                                               [100.0, 100.0, 3, 1, 3.8, 1.0, 4.57, 0.0]))
+             when 'aspect_ratio'
+               Wizards.create_shape_aspect_ratio(model,
+                                                 *ordered(params, %i[aspect_ratio floor_area rotation num_floors
+                                                                     floor_to_floor_height plenum_height perimeter_zone_depth],
+                                                  [0.5, 1000.0, 0.0, 3, 3.8, 1.0, 4.57]))
+             when 'courtyard'
+               Wizards.create_shape_courtyard(model,
+                                              *ordered(params, %i[length width courtyard_length courtyard_width
+                                                                  num_floors floor_to_floor_height plenum_height
+                                                                  perimeter_zone_depth],
+                                               [50.0, 30.0, 15.0, 5.0, 3, 3.8, 1.0, 4.57]))
+             when 'h'
+               Wizards.create_shape_h(model,
+                                      *ordered(params, %i[length left_width center_width right_width left_end_length
+                                                          right_end_length left_upper_end_offset right_upper_end_offset
+                                                          num_floors floor_to_floor_height plenum_height
+                                                          perimeter_zone_depth],
+                                       [40.0, 40.0, 10.0, 40.0, 15.0, 15.0, 15.0, 15.0, 3, 3.8, 1.0, 4.57]))
+             when 'l'
+               Wizards.create_shape_l(model,
+                                      *ordered(params, %i[length width lower_end_width upper_end_length
+                                                          num_floors floor_to_floor_height plenum_height
+                                                          perimeter_zone_depth],
+                                       [40.0, 40.0, 20.0, 20.0, 3, 3.8, 1.0, 4.57]))
+             when 't'
+               Wizards.create_shape_t(model,
+                                      *ordered(params, %i[length width upper_end_width lower_end_length
+                                                          left_end_offset num_floors floor_to_floor_height
+                                                          plenum_height perimeter_zone_depth],
+                                       [40.0, 40.0, 20.0, 20.0, 10.0, 3, 3.8, 1.0, 4.57]))
+             when 'u'
+               Wizards.create_shape_u(model,
+                                      *ordered(params, %i[length left_width right_width left_end_length
+                                                          right_end_length left_end_offset num_floors
+                                                          floor_to_floor_height plenum_height perimeter_zone_depth],
+                                       [40.0, 40.0, 40.0, 15.0, 15.0, 25.0, 3, 3.8, 1.0, 4.57]))
+             end
+    raise(ArgumentError, "#{shape} wizard rejected the parameters (see the OpenStudio log)") if result.nil?
+
+    audit.decision(:geometry, "#{shape} massing created",
+                   inputs: params.merge(shape: shape,
+                                        spaces: model.getSpaces.size,
+                                        storeys: model.getBuildingStorys.size))
+    model
+  end
+
+  # The family-native bar entry: sliced bar massing with NECB space types
+  # assigned by ratio in ONE step — geometry AND standards tagging, ready for
+  # OpenStudioLoads.apply_loads without a separate assign_space_types call.
+  # (The upstream DOE/DEER ratio wrappers are not ported; this replaces them
+  # for the NECB family.)
+  #
+  #   OpenStudioGeometry.bar(
+  #     space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
+  #                          ['Space Function', 'Corridor/Transition area other-sch-A'] => 0.3 },
+  #     length: 50.0, width: 20.0, num_stories_above_grade: 3, wwr: 0.4)
+  #
+  # @param space_type_ratios [Hash{Array(String,String)=>Numeric}] (building_type,
+  #   space_type) pairs => floor-area ratios (normalized internally)
+  # @param division_method ['Multiple Space Types - Simple Sliced',
+  #   'Multiple Space Types - Individual Stories Sliced', 'Single Space Type - Core and Perimeter']
+  def self.bar(space_type_ratios:, model: nil, length: 50.0, width: 20.0,
+               num_stories_above_grade: 3, num_stories_below_grade: 0,
+               floor_height: 3.8, wwr: 0.4,
+               division_method: 'Multiple Space Types - Simple Sliced',
+               story_multiplier_method: 'None',
+               make_mid_story_surfaces_adiabatic: false,
+               party_wall_fraction: 0.0,
+               party_wall_stories_north: 0, party_wall_stories_south: 0,
+               party_wall_stories_east: 0, party_wall_stories_west: 0,
+               bottom_story_ground_exposed_floor: true,
+               top_story_exterior_exposed_roof: true,
+               audit: nil)
+    audit ||= AuditLog.new
+    model ||= OpenStudio::Model::Model.new
+    raise(ArgumentError, 'space_type_ratios must not be empty') if space_type_ratios.empty?
+
+    num_stories = num_stories_below_grade + num_stories_above_grade
+    total_area = length * width * num_stories
+    ratio_sum = space_type_ratios.values.sum.to_f
+    space_types_hash = {}
+    space_type_ratios.each do |(building_type, space_type_name), ratio|
+      space_type = OpenStudio::Model::SpaceType.new(model)
+      space_type.setName("#{building_type} #{space_type_name}")
+      space_type.setStandardsBuildingType(building_type)
+      space_type.setStandardsSpaceType(space_type_name)
+      space_types_hash[space_type] = { floor_area: total_area * ratio / ratio_sum }
+    end
+
+    args = { num_stories_below_grade: num_stories_below_grade,
+             num_stories_above_grade: num_stories_above_grade,
+             bar_division_method: division_method,
+             story_multiplier_method: story_multiplier_method,
+             make_mid_story_surfaces_adiabatic: make_mid_story_surfaces_adiabatic,
+             wwr: wwr,
+             party_wall_fraction: party_wall_fraction,
+             party_wall_stories_north: party_wall_stories_north,
+             party_wall_stories_south: party_wall_stories_south,
+             party_wall_stories_east: party_wall_stories_east,
+             party_wall_stories_west: party_wall_stories_west,
+             bottom_story_ground_exposed_floor: bottom_story_ground_exposed_floor,
+             top_story_exterior_exposed_roof: top_story_exterior_exposed_roof }
+
+    result = Bar.bar_hash_setup_run(model, args, length, width, floor_height,
+                                    OpenStudio::Point3d.new(0, 0, 0), space_types_hash, num_stories)
+    raise('bar creation failed (see the OpenStudio log)') if result == false
+
+    audit.decision(:geometry, 'sliced bar massing created with NECB space types assigned by ratio',
+                   inputs: { length: length, width: width, wwr: wwr,
+                             stories_above: num_stories_above_grade, stories_below: num_stories_below_grade,
+                             division_method: division_method,
+                             space_types: space_type_ratios.keys.map { |bt, st| "#{bt}|#{st}" },
+                             spaces: model.getSpaces.size })
+    model
+  end
+
+  # Positional-argument adapter: the wizards keep their upstream positional
+  # signatures; unknown keys raise so typos never silently fall to defaults.
+  def self.ordered(params, keys, defaults)
+    unknown = params.keys.map(&:to_sym) - keys
+    raise(ArgumentError, "unknown parameter(s) #{unknown.join(', ')} — expected #{keys.join(', ')}") unless unknown.empty?
+
+    keys.each_with_index.map { |key, index| params.key?(key) ? params[key] : defaults[index] }
+  end
+end

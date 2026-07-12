@@ -385,3 +385,6 @@ Plain ruby + the OpenStudio SDK bindings — no bundler required.
   (demand from space-type data, auto-sized plant, Table 6.2.2.1 UEF
   efficiencies, reference treatment, costing on this gem's engine), built on
   openstudio-loads.
+- [openstudio-geometry](../openstudio-geometry) — parametric massing (footprint
+  wizards + the Goldwasser bar engine with NECB space types assigned by ratio):
+  the authoring on-ramp that makes the whole chain gem-only from nothing.
