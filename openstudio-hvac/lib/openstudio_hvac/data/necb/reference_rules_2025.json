@@ -1,0 +1,457 @@
+{
+  "provenance": {
+    "code": "NECB",
+    "edition": "2025",
+    "source": "National Energy Code of Canada for Buildings 2025, Division B, Subsection 8.4.5 (reference building) - retrieved via the building-codes MCP server (necb:2025), Tables 8.4.5.7.-A/-B/8.4.5.13 and Articles 8.4.5.6-8.4.5.18",
+    "generated": "2026-07-12",
+    "articles": [
+      "8.4.5.6",
+      "8.4.5.7",
+      "8.4.5.8",
+      "8.4.5.9",
+      "8.4.5.10",
+      "8.4.5.13",
+      "8.4.5.14",
+      "8.4.5.18"
+    ],
+    "note": "NECB 2025 renumbered the performance path: reference-building HVAC rules moved from Subsection 8.4.4 (2020) to 8.4.5; part-load curves moved to 8.4.6. All rule VALUES verified identical to 2020 via MCP retrieval and edition diff (selection tables byte-identical; oversizing 30%/10%; fan specs 640Pa/40% and 1000Pa/55%+250Pa/30%; boiler staging 176/352 kW; furnace/DX staging 66 kW; chiller plant 2100 kW/7C/6C; tower 1750 kW cells; HP -10C cutoff). Wording change: the supply-fan rule now reads *HVAC systems 1 to 5* (2020: *1, 3, 4 and 5*) - same effective coverage.",
+    "efficiency_vintage_fallback": "2020",
+    "efficiency_fallback_reason": "NECB 2025 Table 5.2.12.1.-A (unitary equipment) changed significantly vs 2020 (MCP diff: similarity 0.77, headers restructured - SEER2/EER2 metric transition); the 2025 minimum-performance tables are not yet transcribed. apply_efficiencies falls back to 2020 values with an audit warning."
+  },
+  "selection": {
+    "table": "8.4.5.7.-A",
+    "article": "8.4.5.7.(1)",
+    "default_category": "General Area",
+    "default_category_article": "8.4.5.7.(3): 'If the building or space type ... is not listed in Table 8.4.5.7.-A, the type that most closely corresponds to that thermal block shall be used'",
+    "categories": [
+      {
+        "category": "Assembly Area",
+        "keywords": [
+          "exhibit",
+          "conference",
+          "meeting",
+          "multi-purpose",
+          "performing arts",
+          "theatre",
+          "theater",
+          "courtroom",
+          "classroom",
+          "lecture",
+          "training room",
+          "worship",
+          "fellowship hall",
+          "sports centre",
+          "arena seating",
+          "swimming pool seating",
+          "waiting room",
+          "assembly",
+          "audience",
+          "auditorium"
+        ],
+        "rules": [
+          {
+            "max_storeys": 4,
+            "reference_system": 3
+          },
+          {
+            "min_storeys": 5,
+            "reference_system": 6
+          }
+        ]
+      },
+      {
+        "category": "Automotive Area",
+        "keywords": [
+          "repair garage",
+          "storage garage",
+          "fire engine",
+          "truck dock",
+          "bus platform",
+          "train platform",
+          "automotive",
+          "garage"
+        ],
+        "rules": [
+          {
+            "reference_system": 4
+          }
+        ]
+      },
+      {
+        "category": "Data Processing Area",
+        "keywords": [
+          "data centre",
+          "data center",
+          "control room",
+          "computer",
+          "server room",
+          "data processing"
+        ],
+        "rules": [
+          {
+            "min_cooling_kw_exclusive": 20,
+            "reference_system": 2,
+            "article": "8.4.5.7.-A: 'Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2'"
+          },
+          {
+            "reference_system": 1
+          }
+        ]
+      },
+      {
+        "category": "General Area",
+        "keywords": [
+          "office",
+          "banking",
+          "healthcare clinic",
+          "clinic",
+          "library",
+          "retail",
+          "mall",
+          "concourse",
+          "gymnasium",
+          "athletic",
+          "swimming pool",
+          "exercise",
+          "dressing room",
+          "lighting control",
+          "atrium",
+          "lobby",
+          "corridor",
+          "conference room"
+        ],
+        "rules": [
+          {
+            "max_storeys": 2,
+            "reference_system": 3
+          },
+          {
+            "min_storeys": 3,
+            "reference_system": 6
+          }
+        ]
+      },
+      {
+        "category": "Historical Collections Area",
+        "keywords": [
+          "archival",
+          "museum",
+          "gallery archive",
+          "archives"
+        ],
+        "rules": [
+          {
+            "reference_system": 2
+          }
+        ]
+      },
+      {
+        "category": "Hospital Area",
+        "keywords": [
+          "operating theatre",
+          "operating room",
+          "emergency room",
+          "patient",
+          "recovery room",
+          "clean room",
+          "hospital laborator",
+          "forensics",
+          "hospital"
+        ],
+        "rules": [
+          {
+            "reference_system": 3
+          }
+        ]
+      },
+      {
+        "category": "Indoor Arena",
+        "keywords": [
+          "ice rink",
+          "curling",
+          "indoor arena"
+        ],
+        "rules": [
+          {
+            "reference_system": 2
+          }
+        ]
+      },
+      {
+        "category": "Industrial Area",
+        "keywords": [
+          "industrial",
+          "manufacturing",
+          "workshop"
+        ],
+        "rules": [
+          {
+            "reference_system": 3
+          }
+        ]
+      },
+      {
+        "category": "Residential/Accommodation Area",
+        "keywords": [
+          "residential",
+          "dwelling",
+          "apartment",
+          "hotel",
+          "motel",
+          "guest room",
+          "suite"
+        ],
+        "rules": [
+          {
+            "special": "residential"
+          }
+        ]
+      },
+      {
+        "category": "Sleeping Area",
+        "keywords": [
+          "dormitory",
+          "detention",
+          "sleeping quarters",
+          "dorm"
+        ],
+        "rules": [
+          {
+            "reference_system": 3
+          }
+        ]
+      },
+      {
+        "category": "Supermarket/Food Service Area",
+        "keywords": [
+          "grocery",
+          "supermarket",
+          "bar lounge",
+          "leisure",
+          "cafeteria",
+          "fast food",
+          "family dining",
+          "dining",
+          "restaurant",
+          "food preparation",
+          "kitchen"
+        ],
+        "rules": [
+          {
+            "condition": "kitchen_hood",
+            "reference_system": 4,
+            "article": "8.4.5.7.-A: 'food preparation with kitchen hood or vented appliance -> System 4'"
+          },
+          {
+            "reference_system": 3
+          }
+        ]
+      },
+      {
+        "category": "Warehouse Area",
+        "keywords": [
+          "warehouse",
+          "material storage",
+          "self-storage",
+          "baggage",
+          "sorting",
+          "material handling",
+          "storage area",
+          "storage"
+        ],
+        "rules": [
+          {
+            "condition": "refrigerated",
+            "reference_system": 5,
+            "article": "8.4.5.7.-A: 'All sizes of refrigerated space -> System 5'"
+          },
+          {
+            "reference_system": 4
+          }
+        ]
+      }
+    ],
+    "special_rules": {
+      "residential": {
+        "article": "8.4.5.7.-A (Residential/Accommodation Area)",
+        "heated_only": {
+          "reference_system": 1,
+          "text": "Where the proposed building or space is heated only, the reference building or space shall use System 1."
+        },
+        "compatible_cooling": {
+          "action": "copy_proposed",
+          "text": "Where ... heated as well as being cooled with an air-cooled unitary, packaged terminal or room air conditioner (or heat pumps), or fan coils, the reference ... shall be modeled as being identical to that of the proposed building or space"
+        },
+        "otherwise": {
+          "action": "through_the_wall",
+          "reference_system": 1,
+          "text": "otherwise, the reference building or space shall use through-the-wall systems."
+        }
+      },
+      "heat_pump": {
+        "article": "8.4.5.13.(1)-(2) + Table 8.4.5.13",
+        "text": "Where the proposed ... includes an air-source, water-source or ground-source heat pump ..., the reference building's HVAC system for that thermal block shall be an air-source heat pump described in Table 8.4.5.13 (packaged unitary rooftop heat pump, CV, furnace + baseboards auxiliary). System 2 selections keep Table 8.4.5.7.-B.",
+        "applies_to_systems": [
+          1,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reference_system": "hp"
+      },
+      "purchased_heating": {
+        "article": "8.4.5.6.(1)",
+        "text": "one gas-fired modulating boiler complying with Section 5.2. shall be used to represent the purchased energy equipment",
+        "energy_type": "NaturalGas"
+      },
+      "purchased_cooling": {
+        "article": "8.4.5.6.(2)",
+        "text": "one air-cooled electric chiller ... shall be used to represent the purchased energy equipment",
+        "chiller_source": "air_cooled"
+      }
+    }
+  },
+  "system_definitions": {
+    "table": "8.4.5.7.-B",
+    "1": {
+      "description": "Unitary air conditioner with baseboard heating; CV; air-cooled DX; hot water (fuel-fired boiler) or electric baseboard",
+      "gas": {
+        "name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC"
+      },
+      "electric": {
+        "name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC"
+      }
+    },
+    "2": {
+      "description": "Four-pipe fan-coil; CV; water-cooled water chiller; fuel-fired or electric resistance water boiler",
+      "gas": {
+        "name": "FPFC MAU Chilled Water Coils with Scroll Chiller"
+      },
+      "electric": {
+        "name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+        "config": {
+          "boiler_fuel": "Electricity"
+        }
+      }
+    },
+    "3": {
+      "description": "Single-zone packaged rooftop unit with baseboard heating; CV; air-cooled DX",
+      "gas": {
+        "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+      },
+      "electric": {
+        "name": "PSZ RTU Electric and DX Coils and Electric Baseboard"
+      }
+    },
+    "4": {
+      "description": "Single-zone make-up air unit with baseboard heating; CV; air-cooled DX",
+      "gas": {
+        "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard"
+      },
+      "electric": {
+        "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard"
+      }
+    },
+    "5": {
+      "description": "Two-pipe fan-coil; CV; water-cooled water chiller; no heating system",
+      "gas": {
+        "name": "TPFC MAU Chilled Water Coils with Scroll Chiller"
+      },
+      "electric": {
+        "name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+        "config": {
+          "boiler_fuel": "Electricity"
+        }
+      }
+    },
+    "6": {
+      "description": "Multi-zone built-up system with baseboard heating; VV; water-cooled water chiller",
+      "gas": {
+        "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard"
+      },
+      "electric": {
+        "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard"
+      }
+    },
+    "hp": {
+      "description": "Table 8.4.5.13: packaged unitary rooftop heat pump, CV; auxiliary furnace + baseboards",
+      "gas": {
+        "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard"
+      },
+      "electric": {
+        "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard"
+      }
+    }
+  },
+  "oversizing": {
+    "article": "8.4.5.8.(1)-(2)",
+    "heating_max_fraction": 0.3,
+    "cooling_max_fraction": 0.1,
+    "text": "heating oversized by the lesser of (proposed %, 30%); cooling oversized by the lesser of (proposed %, 10%)"
+  },
+  "heating_plant": {
+    "article": "8.4.5.9.(6)",
+    "single_boiler_max_kw": 176,
+    "two_boiler_max_kw": 352,
+    "modulating_min_fraction": 0.25,
+    "pump": "primary constant speed",
+    "delta_t_c": 16,
+    "hw_reset": {
+      "at_oat_c": [
+        -16,
+        0
+      ],
+      "supply_c": [
+        82,
+        60
+      ]
+    }
+  },
+  "furnace_staging": {
+    "article": "8.4.5.9.(7)",
+    "two_stage_max_kw": 66,
+    "stage_size_kw": 66
+  },
+  "cooling_plant": {
+    "article": "8.4.5.10.(6)",
+    "single_chiller_max_kw": 2100,
+    "chw_supply_c": 7,
+    "delta_t_c": 6,
+    "pump": "primary constant speed",
+    "modulating_min_fraction": 0.25
+  },
+  "dx_staging": {
+    "article": "8.4.5.10.(8)",
+    "two_stage_max_kw": 66,
+    "stage_size_kw": 66
+  },
+  "fans": {
+    "article": "8.4.5.18.(3)-(4)",
+    "systems_1_3_4_5": {
+      "supply_pa": 640,
+      "supply_efficiency": 0.4,
+      "return_fan": false
+    },
+    "system_6": {
+      "supply_air_temp_c": 13,
+      "supply_pa": 1000,
+      "supply_efficiency": 0.55,
+      "return_pa": 250,
+      "return_efficiency": 0.3
+    },
+    "text_2025": "8.4.5.18.(3): HVAC systems 1 to 5 -> supply 640 Pa @ 40%, no return fan; (4): system 6 -> 13C SAT, supply 1000 Pa @ 55%, return 250 Pa @ 30%"
+  },
+  "heat_pump_reference": {
+    "article": "8.4.5.13.(2)",
+    "cooling_capacity": "peak cooling load, without oversizing",
+    "heating_capacity_at_8_3_c": "equal to cooling capacity",
+    "heating_capacity_at_minus_8_3_c_fraction": 0.5,
+    "heating_cutoff_oat_c": -10,
+    "aux_energy_type_threshold_fraction": 0.33
+  },
+  "hydronic_pumps": {
+    "article": "8.4.5.14.(1)-(2)",
+    "text": "head and efficiency identical to the proposed pump; multiple pumps -> one pump with the combined peak shaft power"
+  }
+}

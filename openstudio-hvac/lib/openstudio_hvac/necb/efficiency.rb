@@ -28,11 +28,30 @@ module OpenStudioHVAC
         end
       end
 
+      # The efficiency vintage to actually apply: the requested vintage when its tables
+      # are vendored, else the fallback its rules file declares (e.g. NECB 2025 falls
+      # back to 2020 until the restructured Table 5.2.12.1 series is transcribed).
+      # @return [Array(String, String or nil)] [effective vintage, fallback reason or nil]
+      def effective_vintage(vintage)
+        return [vintage.to_s, nil] if File.exist?(File.join(RULES_DIR, "efficiencies_#{vintage}.json"))
+
+        provenance = NECB.rules(vintage)['provenance']
+        fallback = provenance['efficiency_vintage_fallback']
+        raise(ArgumentError, "no NECB efficiency data for vintage '#{vintage}' and no declared fallback") if fallback.nil?
+
+        [fallback.to_s, provenance['efficiency_fallback_reason'] || "vintage #{vintage} tables not vendored"]
+      end
+
       # Apply NECB minimum-performance values + curves to every supported component.
       # @param model [OpenStudio::Model::Model] sized model
       # @param vintage [String] e.g. '2020'
       # @param audit [AuditLog, nil]
       def apply(model, vintage: '2020', audit: nil)
+        vintage, fallback_reason = effective_vintage(vintage)
+        if fallback_reason
+          audit&.warn(:efficiency, "efficiency tables fall back to NECB #{vintage} values: #{fallback_reason}",
+                      article: 'Table 5.2.12.1')
+        end
         tables = data(vintage)
         model.getBoilerHotWaters.sort_by(&:nameString).each { |b| apply_boiler(b, tables, audit) }
         model.getChillerElectricEIRs.sort_by(&:nameString).each { |c| apply_chiller(c, tables, audit) }

@@ -254,10 +254,16 @@ OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020')  # Table 5.2.12.
   action, `min(proposed 1.5, cap 1.3)` arithmetic, table row per efficiency value)
   carries its NECB article — QAQC reads the log instead of diffing models. Warnings are
   never silent (unsized capacities, unlisted space types per 8.4.4.7.(3)).
+- **Vintages**: NECB **2020** and **2025**. 2025 renumbered the performance path
+  (8.4.4 → 8.4.5; values verified identical via the MCP edition diff), so
+  `vintage: '2025'` produces the same selections with 2025 article citations. 2025
+  efficiency application falls back to the 2020 Table 5.2.12.1 values **with an audit
+  warning** until the restructured 2025 tables (SEER2/EER2) are transcribed.
+  2011–2017 are data drops away.
 - **Scope/limits (v1)**: HVAC only (envelope/lighting/SHW reference rules and compliance
-  simulation stay host-side); NECB 2020 (2025 and 2011–2017 are data drops away); the gem
-  never runs simulations — size the proposed model first for capacity-threshold rules,
-  and re-run `apply_efficiencies` after sizing the reference model.
+  simulation stay host-side); the gem never runs simulations — size the proposed model
+  first for capacity-threshold rules, and re-run `apply_efficiencies` after sizing the
+  reference model.
 
 ## Design notes
 
