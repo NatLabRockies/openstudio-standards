@@ -8,8 +8,11 @@ module OpenStudioNECB
   #   (3) unmet heating hours <= 100 h/year for both buildings
   #   (4) unmet cooling hours: proposed within +10% of reference (2025 8.4.4 path:
   #       proposed <= 100 h; 8.4.5 path: within +10% or 20 h, whichever is greater)
-  #   (5) where (3)/(4) fail, capacities shall be incrementally increased — this
-  #       pipeline REPORTS the failure (loud warning); it does not auto-iterate.
+  #   (5) where (3)/(4) fail, capacities of the primary and secondary systems
+  #       shall be incrementally increased until the loads are met — implemented
+  #       as an iteration loop on the failing building's global sizing factors
+  #       (SizingParameters), bounded by max_capacity_iterations; a still-failing
+  #       result after the cap is a loud warning + non-compliance.
   #
   # One clone, one audit: reference_hvac (openstudio-hvac) then reference_envelope
   # (openstudio-envelope) transform a single reference model, and optional costing
@@ -38,11 +41,16 @@ module OpenStudioNECB
     # @param thermal_bridging [String, Hash, nil] TBD PSI set for the envelope transforms
     # @param audit [AuditLog, nil]
     # @return [ComplianceResult]
+    # @param max_capacity_iterations [Integer] 8.4.1.2.(5) bound: how many times a
+    #   failing building's capacities may be incrementally increased (0 disables)
+    # @param capacity_step [Float] multiplier applied to the failing building's
+    #   heating/cooling sizing factor per iteration
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
                                costing: false, city: nil, province_state: nil,
                                costs_csv: nil, thermal_bridging: nil,
-                               actual_roof_absorptance_used: false, audit: nil)
+                               actual_roof_absorptance_used: false,
+                               max_capacity_iterations: 3, capacity_step: 1.25, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
       proposed = load_model(model)
@@ -92,10 +100,15 @@ module OpenStudioNECB
                  'proposed' => {}, 'reference' => {} }
       compliant = nil
 
-      # 4. the energy comparison (8.4.1.2.(2)-(4))
+      # 4. the energy comparison (8.4.1.2.(2)-(4)) with the sentence-(5) capacity
+      #    iteration loop
       if simulate == :annual
+        report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
         run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
         run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'])
+        iterate_capacities(proposed, reference, report, vintage: vintage, run_dir: run_dir,
+                           run_period: run_period, max_iterations: max_capacity_iterations,
+                           step: capacity_step, audit: audit)
         compliant = evaluate(report, vintage, run_period, audit)
       elsif simulate == :sizing
         audit.info(:compliance, 'simulate: :sizing — both models generated and sized; ' \
@@ -155,31 +168,171 @@ module OpenStudioNECB
     end
 
     def evaluate_unmet(report, vintage, audit)
+      status = unmet_status(report, vintage)
+      audit.decision(:compliance,
+                     status[:heating_ok] ? 'unmet heating hours within 100 h for both buildings' : 'unmet heating hours EXCEED 100 h',
+                     inputs: { proposed_h: status[:heat_p], reference_h: status[:heat_r], limit_h: 100 },
+                     article: '8.4.1.2.(3)')
+      if status[:cooling_vacuous]
+        audit.decision(:compliance,
+                       'sentence (4) is vacuous — the proposed building has no mechanical cooling ' \
+                       '(the clause applies to thermal blocks "for which mechanical cooling is provided"; ' \
+                       'explicit in the 2025 wording, applied consistently for 2020)',
+                       inputs: { proposed_h: status[:cool_p], reference_h: status[:cool_r] },
+                       article: '8.4.1.2.(4)')
+      else
+        audit.decision(:compliance,
+                       status[:cooling_ok] ? 'unmet cooling hours within the allowance over reference' : 'unmet cooling hours EXCEED the allowance',
+                       inputs: { proposed_h: status[:cool_p], reference_h: status[:cool_r],
+                                 allowance_h: status[:allowance].round(1) },
+                       article: '8.4.1.2.(4)')
+      end
+
+      unless status[:all_ok]
+        iterations = (report['capacity_iterations'] || []).size
+        audit.warn(:compliance,
+                   "8.4.1.2.(5): unmet-hours limits still not met after #{iterations} capacity " \
+                   'increase(s) — the building remains non-compliant; raise max_capacity_iterations, ' \
+                   'increase capacity_step, or fix the design (hard-sized equipment does not respond ' \
+                   'to sizing-factor increases).', article: '8.4.1.2.(5)')
+      end
+      status[:all_ok]
+    end
+
+    # The (3)/(4) arithmetic without audit side effects — shared by the formal
+    # verdicts and the capacity-iteration loop.
+    # (4): 2020 wording is +10% of reference; 2025's 8.4.5 path allows +10% or
+    # 20 h, whichever is greater.
+    def unmet_status(report, vintage)
       heat_p = report['proposed'].dig('unmet_occupied_hours', 'heating')
       heat_r = report['reference'].dig('unmet_occupied_hours', 'heating')
       cool_p = report['proposed'].dig('unmet_occupied_hours', 'cooling')
       cool_r = report['reference'].dig('unmet_occupied_hours', 'cooling')
 
-      heating_ok = !heat_p.nil? && !heat_r.nil? && heat_p <= 100.0 && heat_r <= 100.0
-      audit.decision(:compliance, heating_ok ? 'unmet heating hours within 100 h for both buildings' : 'unmet heating hours EXCEED 100 h',
-                     inputs: { proposed_h: heat_p, reference_h: heat_r, limit_h: 100 },
-                     article: '8.4.1.2.(3)')
-
-      # (4): 2020 wording is +10% of reference; 2025's 8.4.5 path allows +10% or
-      # 20 h, whichever is greater
       allowance = cool_r.to_f * 0.10
       allowance = [allowance, 20.0].max if vintage.to_s == '2025'
-      cooling_ok = !cool_p.nil? && !cool_r.nil? && cool_p <= cool_r + allowance
-      audit.decision(:compliance, cooling_ok ? 'unmet cooling hours within the allowance over reference' : 'unmet cooling hours EXCEED the allowance',
-                     inputs: { proposed_h: cool_p, reference_h: cool_r, allowance_h: allowance.round(1) },
-                     article: '8.4.1.2.(4)')
+      heating_p_ok = !heat_p.nil? && heat_p <= 100.0
+      heating_r_ok = !heat_r.nil? && heat_r <= 100.0
 
-      unless heating_ok && cooling_ok
-        audit.warn(:compliance, '8.4.1.2.(5): unmet-hours limits not met — primary/secondary system capacities ' \
-                                'shall be incrementally increased until loads are met. This pipeline reports the ' \
-                                'condition; it does not auto-iterate capacities.', article: '8.4.1.2.(5)')
+      # Sentence (4) applies to thermal blocks "for which mechanical cooling is
+      # provided" (explicit in the 2025 wording; applied consistently for 2020) —
+      # a proposed building without mechanical cooling accrues passive-overheating
+      # "unmet cooling" hours that are NOT a cooling-capacity shortfall.
+      cooling_vacuous = report['proposed']['mechanical_cooling'] == false
+      cooling_ok = cooling_vacuous || (!cool_p.nil? && !cool_r.nil? && cool_p <= cool_r + allowance)
+      indeterminate = [heat_p, heat_r].any?(&:nil?) ||
+                      (!cooling_vacuous && [cool_p, cool_r].any?(&:nil?))
+
+      { heat_p: heat_p, heat_r: heat_r, cool_p: cool_p, cool_r: cool_r,
+        allowance: allowance, indeterminate: indeterminate,
+        heating_p_ok: heating_p_ok, heating_r_ok: heating_r_ok,
+        heating_ok: heating_p_ok && heating_r_ok,
+        cooling_ok: cooling_ok, cooling_vacuous: cooling_vacuous,
+        all_ok: heating_p_ok && heating_r_ok && cooling_ok }
+    end
+
+    # Any mechanical cooling in the model? (cooling coils, chillers, evaporative
+    # coolers, district cooling, ideal-loads air systems)
+    def mechanical_cooling?(model)
+      pattern = /Coil_Cooling|CoilSystem_Cooling|Chiller|EvaporativeCooler|DistrictCooling|IdealLoadsAirSystem/
+      model.modelObjects.any? { |o| o.iddObjectType.valueName.match?(pattern) }
+    end
+
+    # 8.4.1.2.(5): "the capacities of the primary and secondary systems of the
+    # proposed building or the reference building, where applicable, shall be
+    # incrementally increased until those loads are met." Each failing building's
+    # global sizing factor (heating and/or cooling, whichever gate fails) is
+    # multiplied by `step` and the building re-sized and re-run; the reference
+    # additionally gets its capacity-binned efficiencies re-applied on the new
+    # sizes before its energy run. Bounded by max_iterations; every bump is an
+    # audited decision and the history lands in report['capacity_iterations'].
+    def iterate_capacities(proposed, reference, report, vintage:, run_dir:, run_period:,
+                           max_iterations:, step:, audit:)
+      history = []
+      report['capacity_iterations'] = history
+      return if max_iterations.to_i <= 0
+
+      max_iterations.times do |index|
+        status = unmet_status(report, vintage)
+        break if status[:all_ok]
+
+        if status[:indeterminate]
+          audit.warn(:compliance, 'unmet-hours data missing from SQL (no occupied hours?) — ' \
+                                  'capacity iteration cannot assess convergence; stopping',
+                     article: '8.4.1.2.(5)')
+          break
+        end
+
+        iteration = index + 1
+        bumps = {}
+        bumps['proposed'] = { heating: !status[:heating_p_ok], cooling: !status[:cooling_ok] }
+        bumps['reference'] = { heating: !status[:heating_r_ok], cooling: false }
+        record = { 'iteration' => iteration, 'bumped' => {} }
+
+        { 'proposed' => proposed, 'reference' => reference }.each do |label, model|
+          bump = bumps[label]
+          next unless bump[:heating] || bump[:cooling]
+
+          factors = bump_sizing_factors(model, step, heating: bump[:heating], cooling: bump[:cooling])
+          record['bumped'][label] = factors
+          audit.decision(:compliance,
+                         "capacity increase #{iteration}: #{label} #{bump.select { |_, v| v }.keys.join('+')} " \
+                         'sizing factor(s) raised — building re-sized and re-run',
+                         inputs: { building: label, step: step, iteration: iteration }.merge(factors),
+                         article: '8.4.1.2.(5)')
+
+          dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
+          if label == 'reference'
+            # size on the new factors FIRST so efficiencies re-bin on the new
+            # capacities, then run the energy simulation
+            Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
+            OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit)
+          end
+          run_annual(model, dir, run_period, report[label])
+        end
+
+        record['unmet_after'] = { 'proposed' => report['proposed']['unmet_occupied_hours'],
+                                  'reference' => report['reference']['unmet_occupied_hours'] }
+        history << record
+
+        # Stall detection: a bump that produced no improvement (>= 1 h) means the
+        # equipment is not responding to sizing factors (hard-sized, or the gate
+        # fails for equipment that does not exist) — iterating further is futile.
+        after = unmet_status(report, vintage)
+        improvements = []
+        improvements << (status[:heat_p].to_f - after[:heat_p].to_f) if bumps['proposed'][:heating]
+        improvements << (status[:cool_p].to_f - after[:cool_p].to_f) if bumps['proposed'][:cooling]
+        improvements << (status[:heat_r].to_f - after[:heat_r].to_f) if bumps['reference'][:heating]
+        next if after[:all_ok] || improvements.any? { |i| i >= 1.0 }
+
+        audit.warn(:compliance,
+                   "capacity iteration #{iteration} produced no unmet-hours improvement — the failing " \
+                   'equipment is not responding to sizing-factor increases (hard-sized capacity, or the ' \
+                   'gate concerns equipment the building does not have); stopping', article: '8.4.1.2.(5)')
+        record['stalled'] = true
+        break
       end
-      heating_ok && cooling_ok
+
+      final = unmet_status(report, vintage)
+      return unless history.any? && final[:all_ok]
+
+      audit.info(:compliance,
+                 "capacity iteration converged after #{history.size} increase(s) — unmet-hours loads are met",
+                 inputs: { iterations: history.size }, article: '8.4.1.2.(5)')
+    end
+
+    def bump_sizing_factors(model, step, heating:, cooling:)
+      sizing = model.getSizingParameters
+      result = {}
+      if heating
+        sizing.setHeatingSizingFactor(sizing.heatingSizingFactor * step)
+        result['heating_sizing_factor'] = sizing.heatingSizingFactor.round(3)
+      end
+      if cooling
+        sizing.setCoolingSizingFactor(sizing.coolingSizingFactor * step)
+        result['cooling_sizing_factor'] = sizing.coolingSizingFactor.round(3)
+      end
+      result
     end
 
     def cost_models(proposed, reference, report, city:, province_state:, costs_csv:, audit:)

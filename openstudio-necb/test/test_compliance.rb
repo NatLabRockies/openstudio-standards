@@ -80,6 +80,8 @@ class TestCompliance < Minitest::Test
     end
 
     refute_nil result.compliant, 'a determination was made'
+    assert_empty result.report['capacity_iterations'],
+                 'well-sized buildings need no 8.4.1.2.(5) capacity increases'
     assert_equal false, result.report['annual'], 'shortened run period flagged'
     assert(result.audit.warnings.any? { |w| w[:action].include?('SHORTENED') },
            'week-long run loudly flagged as not code-compliant')
@@ -94,6 +96,42 @@ class TestCompliance < Minitest::Test
     assert_equal report['compliant'], result.compliant
     audit_json = JSON.parse(File.read(File.join(dir, 'audit.json')))
     assert_operator audit_json.size, :>, 80, 'the unified audit is substantial'
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
+  # 8.4.1.2.(5): a deliberately UNDERSIZED proposed building (global heating
+  # sizing factor 0.25 — the reference inherits it through the min(proposed, 1.3)
+  # oversizing rule, so BOTH buildings fail sentence (3) initially) must converge
+  # through audited capacity increases over a 4-week Toronto January run.
+  def test_capacity_iteration_converges_undersized_building
+    skip 'openstudio CLI not available' unless openstudio_cli?
+    dir = Dir.mktmpdir('osnecb-iter-')
+    proposed = proposed_with_hvac
+    proposed.getSizingParameters.setHeatingSizingFactor(0.25)
+
+    result = OpenStudioNECB.performance_compliance(
+      proposed, vintage: '2020', simulate: :annual, weather: weather,
+      building: { storeys: 1, zone_types: zone_types_for(proposed), winter_design_temp_c: -20 },
+      run_dir: dir, max_capacity_iterations: 3, capacity_step: 3.0,
+      run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 28 })
+
+    history = result.report['capacity_iterations']
+    refute_empty history, 'the undersized building required capacity increases'
+    refute history.any? { |h| h['stalled'] }, 'autosized equipment responds to sizing factors'
+    first = history.first
+    assert first['bumped'].key?('proposed'), 'proposed heating capacity was increased'
+    assert_operator first['bumped']['proposed']['heating_sizing_factor'], :>, 0.25
+
+    final = result.report['proposed']['unmet_occupied_hours']['heating']
+    assert_operator final, :<=, 100.0, "converged: #{final} unmet heating hours after iteration"
+    ref_final = result.report['reference']['unmet_occupied_hours']['heating']
+    assert_operator ref_final, :<=, 100.0, 'reference converged too'
+
+    bump_decisions = result.audit.entries.select { |e| e[:article] == '8.4.1.2.(5)' && e[:level] == :decision }
+    refute_empty bump_decisions, 'every capacity increase is an audited decision'
+    assert(result.audit.entries.any? { |e| e[:action].include?('converged') })
+    assert Dir.exist?(File.join(dir, 'proposed_annual_iter1')), 'iteration run evidence kept'
   ensure
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end

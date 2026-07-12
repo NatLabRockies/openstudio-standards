@@ -16,9 +16,21 @@ SDK-only domain gems —
   energy target of the reference building
 - **(3)** unmet heating hours ≤ 100 h/year for both buildings
 - **(4)** unmet cooling hours: proposed within +10% of reference (2025: +10% or
-  20 h, whichever is greater, on the 8.4.5 path)
-- **(5)** where (3)/(4) fail: capacities *shall be incrementally increased* —
-  this pipeline REPORTS the condition loudly; it does not auto-iterate.
+  20 h, whichever is greater, on the 8.4.5 path). The clause applies to thermal
+  blocks *"for which mechanical cooling is provided"* — a proposed building with
+  no mechanical cooling passes (4) vacuously (passive-overheating hours are not
+  a cooling-capacity shortfall), with the determination audited.
+- **(5)** where (3)/(4) fail: capacities are **incrementally increased until the
+  loads are met** — the failing building's global heating/cooling sizing factors
+  (`SizingParameters`) are multiplied by `capacity_step:` (default 1.25), the
+  building re-sized and re-run (the reference additionally gets its
+  capacity-binned efficiencies re-applied on the new sizes before its energy
+  run), up to `max_capacity_iterations:` (default 3). Every bump is an audited
+  decision; the history lands in `report['capacity_iterations']` with per-run
+  evidence directories. A bump that yields no unmet-hours improvement (hard-sized
+  equipment does not respond to sizing factors) stalls the loop with a loud
+  warning instead of burning iterations; still-failing after the cap =
+  non-compliant + warning.
 
 This is the ONE place simulation execution lives (pure SDK + `openstudio` CLI,
 no measures, no openstudio-standards). The domain gems never simulate. One clone
@@ -61,8 +73,10 @@ result.reference_model      # the fully-transformed reference building
 6. `simulate: :annual` — full-year runs of both models (a `run_period:`
    override exists for tests, and any shortened period is flagged in the report
    and audit as NOT a code-compliant determination).
-7. 8.4.1.2 sentences (2)–(4) evaluated; every verdict lands in the audit with
-   its article; a (5) failure is a loud warning.
+7. 8.4.1.2 sentences (2)–(4) evaluated; when (3)/(4) fail, the sentence-(5)
+   capacity iteration loop bumps the failing building's sizing factors and
+   re-runs until the loads are met (or the iteration cap / a stall stops it).
+   Every verdict and every bump lands in the audit with its article.
 8. `costing: true` — HVAC (openstudio-hvac) + envelope (openstudio-envelope)
    costing of BOTH models into the same audit, with the incremental
    proposed-vs-reference cost in the report.
@@ -80,10 +94,12 @@ result.reference_model      # the fully-transformed reference building
 
 ```bash
 cd openstudio-necb
-ruby test/test_compliance.rb   # 4 tests: :none transforms, :sizing + unified
+ruby test/test_compliance.rb   # 5 tests: :none transforms, :sizing + unified
                                # costing, :annual week-run full determination,
-                               # caller-model immutability. E+ runs skip without
-                               # the openstudio CLI.
+                               # 8.4.1.2.(5) capacity-iteration convergence of a
+                               # deliberately undersized building (4-week January
+                               # run), caller-model immutability. E+ runs skip
+                               # without the openstudio CLI.
 ```
 
 Test fixtures are shared with the sibling gems (no third copy of the weather trio).
