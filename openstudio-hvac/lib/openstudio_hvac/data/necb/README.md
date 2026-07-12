@@ -11,10 +11,7 @@ purchased energy).
 - **2025**: NECB 2025 **renumbered the performance path** — the reference-building rules
   moved to Subsection **8.4.5** (Tables 8.4.5.7.-A/-B/8.4.5.13; part-load curves to
   8.4.6). All rule *values* were verified identical to 2020 via MCP retrieval + edition
-  diff; only article citations differ. The 2025 file declares
-  `efficiency_vintage_fallback: 2020` because Table 5.2.12.1.-A (unitary equipment) was
-  restructured in 2025 (SEER2/EER2 transition) and is not yet transcribed —
-  `apply_efficiencies` uses 2020 values with an audit warning until it is.
+  diff; only article citations differ.
 
 - **Source:** NECB 2020 code text retrieved through the building-codes MCP server
   (`necb:2020`, NRC copyright — the JSON stores rule VALUES and short quoted fragments
@@ -28,9 +25,23 @@ purchased energy).
   arbitrary space-type strings map to a category; unmatched types fall back to the
   default category per 8.4.4.7.(3) with an audit warning.
 
-## efficiencies_<vintage>.json (phase 3)
+## efficiencies_<vintage>.json
 
 Capacity-binned minimum-performance tables (boilers, chillers, unitary ACs, heat pumps,
-furnaces, heat rejection, fan/pump motor rules) vendored from openstudio-standards
-NECB<vintage> `data/*.json`, cross-checked against NECB Table 5.2.12.1. Same provenance
-and zero-runtime-dependency contract.
+furnaces, heat rejection) + the NECB performance curves. Same provenance and
+zero-runtime-dependency contract.
+
+- **2020**: vendored verbatim from openstudio-standards NECB2020 `data/*.json`
+  (= Table 5.2.12.1 values), curves from NECB2011 `curves.json`.
+- **2025**: transcribed/verified per-table from the NECB 2025 Table 5.2.12.1 series via
+  the MCP (letter map: -K chillers, -N boilers, -O furnaces, -A unitary ACs & HPs; the
+  file's `provenance.verification` block records the per-table result). Verified
+  **identical** to 2020: chillers (Path B COPc, every bin), boilers, furnaces, unitary-AC
+  SEER/EER ladder. **Real 2025 changes**: HP cooling < 19 kW is SEER 15 (2020: EER 11.0 —
+  the -A class merge), split-system HP heating HSPF 7.4 → 7.8. Additions: single-phase
+  SEER2/HSPF2 class rows (distinct subcategories, engine-neutral), COPh at −8.3 °C
+  (informational), and the NEW Table 5.2.12.1.-M plant-heat-pump heating COPs by leaving
+  water temperature (`plant_heat_pumps_heating`, informational). SEER2/EER2/HSPF2 convert
+  with the SEER/EER/HSPF formulas, matching the documented openstudio-standards
+  assumption. Table -C (PTAC/PTHP coefficients) changed moderately in 2025; that
+  coefficient path is not implemented by the engine (documented gap, same as 2020).

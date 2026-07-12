@@ -369,14 +369,21 @@ module OpenStudioHVAC
         return audit&.warn(:efficiency, 'no DX cooling efficiency row found — not set', target: name,
                            inputs: { heat_pump: heat_pump, heating_type: heating_type, capacity_btu_hr: cap_btuh.round }) if row.nil?
 
+        # SEER2/EER2 converted like SEER/EER — the documented openstudio-standards
+        # assumption (Standards.CoilCoolingDXSingleSpeed: 'assumed to be the same').
         cop, label =
           if row['minimum_seasonal_energy_efficiency_ratio']
             [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio']),
              "#{row['minimum_seasonal_energy_efficiency_ratio']}SEER"]
+          elsif row['minimum_seasonal_energy_efficiency_ratio_2']
+            [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio_2']),
+             "#{row['minimum_seasonal_energy_efficiency_ratio_2']}SEER2"]
           elsif row['minimum_seasonal_efficiency']
             [seer_to_cop_no_fan(row['minimum_seasonal_efficiency']), "#{row['minimum_seasonal_efficiency']}SEER"]
           elsif row['minimum_energy_efficiency_ratio']
             [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio']), "#{row['minimum_energy_efficiency_ratio']}EER"]
+          elsif row['minimum_energy_efficiency_ratio_2']
+            [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio_2']), "#{row['minimum_energy_efficiency_ratio_2']}EER2"]
           elsif row['minimum_full_load_efficiency']
             [eer_to_cop_no_fan(row['minimum_full_load_efficiency']), "#{row['minimum_full_load_efficiency']}EER"]
           end
@@ -415,6 +422,10 @@ module OpenStudioHVAC
           if row['minimum_heating_seasonal_performance_factor']
             [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor']),
              "#{row['minimum_heating_seasonal_performance_factor']}HSPF"]
+          elsif row['minimum_heating_seasonal_performance_factor_2']
+            # HSPF2 converted like HSPF (consistent with the SEER2/EER2 assumption)
+            [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor_2']),
+             "#{row['minimum_heating_seasonal_performance_factor_2']}HSPF2"]
           elsif row['minimum_coefficient_of_performance_heating']
             [cop_heating_to_cop_heating_no_fan(row['minimum_coefficient_of_performance_heating'], capacity_w),
              "#{row['minimum_coefficient_of_performance_heating']}COPH"]

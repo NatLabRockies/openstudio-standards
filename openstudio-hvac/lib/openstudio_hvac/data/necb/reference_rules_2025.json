@@ -15,8 +15,7 @@
       "8.4.5.18"
     ],
     "note": "NECB 2025 renumbered the performance path: reference-building HVAC rules moved from Subsection 8.4.4 (2020) to 8.4.5; part-load curves moved to 8.4.6. All rule VALUES verified identical to 2020 via MCP retrieval and edition diff (selection tables byte-identical; oversizing 30%/10%; fan specs 640Pa/40% and 1000Pa/55%+250Pa/30%; boiler staging 176/352 kW; furnace/DX staging 66 kW; chiller plant 2100 kW/7C/6C; tower 1750 kW cells; HP -10C cutoff). Wording change: the supply-fan rule now reads *HVAC systems 1 to 5* (2020: *1, 3, 4 and 5*) - same effective coverage.",
-    "efficiency_vintage_fallback": "2020",
-    "efficiency_fallback_reason": "NECB 2025 Table 5.2.12.1.-A (unitary equipment) changed significantly vs 2020 (MCP diff: similarity 0.77, headers restructured - SEER2/EER2 metric transition); the 2025 minimum-performance tables are not yet transcribed. apply_efficiencies falls back to 2020 values with an audit warning."
+    "efficiency_note": "Efficiency values ship in efficiencies_2025.json (transcribed/verified from NECB 2025 Tables 5.2.12.1.-K/-N/-O/-A via MCP; see its provenance.verification block for the per-table diff results). The 2020 fallback has been lifted."
   },
   "selection": {
     "table": "8.4.5.7.-A",

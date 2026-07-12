@@ -1,10 +1,12 @@
 require_relative 'test_helper'
 
-# NECB 2025 vintage: same rule VALUES as 2020 but the performance path moved from
-# Subsection 8.4.4 to 8.4.5 (verified via the codes MCP edition diff). Selections must
-# be identical across vintages while citations carry the 2025 article numbers; the
-# efficiency pass falls back to 2020 tables with an explicit audit warning until the
-# restructured 2025 Table 5.2.12.1 series is transcribed.
+# NECB 2025 vintage: same reference-rule VALUES as 2020 but the performance path moved
+# from Subsection 8.4.4 to 8.4.5 (verified via the codes MCP edition diff). Selections
+# must be identical across vintages while citations carry the 2025 article numbers.
+# Efficiencies are native 2025 (efficiencies_2025.json, transcribed from Tables
+# 5.2.12.1.-K/-N/-O/-A): chillers/boilers/furnaces/unitary-AC ladder verified identical
+# to 2020; the two real changes are HP cooling <19 kW EER 11.0 -> SEER 15 and
+# split-system HP heating HSPF 7.4 -> 7.8.
 class TestNecb2025 < Minitest::Test
   include FixtureHelper
 
@@ -55,11 +57,12 @@ class TestNecb2025 < Minitest::Test
     rules = OpenStudioHVAC::NECB.rules('2025')
     assert_equal '8.4.5.8.(1)-(2)', rules['oversizing']['article']
     assert_equal '2025', rules['provenance']['edition']
-    assert_equal '2020', rules['provenance']['efficiency_vintage_fallback']
+    assert_nil rules['provenance']['efficiency_vintage_fallback'], 'fallback lifted'
   end
 
-  # end-to-end reference_hvac at vintage 2025: correct topology + fallback warning
-  def test_reference_hvac_2025_with_efficiency_fallback
+  # end-to-end reference_hvac at vintage 2025: correct topology, native efficiencies,
+  # and NO fallback warning
+  def test_reference_hvac_2025_native_efficiencies
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
     OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', zones)
@@ -70,18 +73,52 @@ class TestNecb2025 < Minitest::Test
 
     assert_equal [3], result.assignments.map(&:reference_system).uniq
     refute_empty result.model.getAirLoopHVACs
-    # decisions cite 2025 articles
     selection = result.audit.entries.find { |e| e[:step] == :selection && e[:level] == :decision }
     assert_match(/8\.4\.5/, selection[:article])
-    # efficiency fallback is loud, never silent
-    fallback = result.audit.warnings.find { |w| w[:action].include?('fall back to NECB 2020') }
-    refute_nil fallback, 'expected the 2025->2020 efficiency fallback warning'
-    assert_match(/5\.2\.12\.1\.-A.*changed significantly/, fallback[:action])
+    assert_empty result.audit.warnings.select { |w| w[:action].include?('fall back') },
+                 '2025 efficiencies are native — no fallback warning'
   end
 
-  def test_2020_unaffected_by_fallback_machinery
-    vintage, reason = OpenStudioHVAC::NECB::Efficiency.effective_vintage('2020')
-    assert_equal '2020', vintage
-    assert_nil reason
+  def test_effective_vintage_native_for_both
+    %w[2020 2025].each do |v|
+      vintage, reason = OpenStudioHVAC::NECB::Efficiency.effective_vintage(v)
+      assert_equal v, vintage
+      assert_nil reason
+    end
+  end
+
+  # The two REAL 2025 efficiency changes (everything else verified identical to 2020):
+  # HP cooling < 19 kW: EER 11.0 (2020) -> SEER 15 (2025 Table 5.2.12.1.-A merged class)
+  def test_2025_small_heat_pump_cooling_is_seer_15
+    cops = {}
+    %w[2020 2025].each do |vintage|
+      model = load_fixture
+      zones = model.getThermalZones.sort_by(&:nameString)
+      OpenStudioHVAC.build_system(model, 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard', zones)
+      model.getCoilCoolingDXSingleSpeeds.each { |c| c.setRatedTotalCoolingCapacity(12_000.0) }
+      model.getCoilHeatingDXSingleSpeeds.each { |c| c.setRatedTotalHeatingCapacity(12_000.0) }
+      OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage)
+      coil = model.getCoilCoolingDXSingleSpeeds.min_by(&:nameString)
+      cops[vintage] = coil.ratedCOP.respond_to?(:is_initialized) ? coil.ratedCOP.get : coil.ratedCOP
+    end
+    # 2020: eer_to_cop_no_fan(11.0) = ((11*0.29307)+0.12)/0.88 ~= 3.800
+    assert_in_delta 3.800, cops['2020'], 0.01
+    # 2025: seer_to_cop_no_fan(15) = -0.0076*225 + 0.3796*15 = 3.984
+    assert_in_delta 3.984, cops['2025'], 0.01
+    # heating side unchanged: 7.4 HSPF (Single Package) both vintages
+  end
+
+  def test_2025_boiler_and_chiller_values_unchanged
+    model = load_fixture
+    zones = model.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard', zones)
+    model.getBoilerHotWaters.each { |b| b.setNominalCapacity(100_000.0) }
+    model.getChillerElectricEIRs.each { |c| c.setReferenceCapacity(200_000.0) }
+    OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2025')
+
+    primary = model.getBoilerHotWaters.find { |b| b.nameString.include?('Primary') }
+    assert_in_delta 0.90, primary.nominalThermalEfficiency, 1e-6 # -N: AFUE 90, unchanged
+    chiller = model.getChillerElectricEIRs.min_by(&:nameString)
+    assert_in_delta 3.517 / 0.77927, chiller.referenceCOP, 1e-3 # -K Path B, unchanged
   end
 end
