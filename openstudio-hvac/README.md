@@ -366,3 +366,12 @@ fixtures (Toronto EPW/DDY/STAT) ship in `test/fixtures/weather/` so the suite is
 self-contained.
 
 Plain ruby + the OpenStudio SDK bindings — no bundler required.
+
+## Sibling and umbrella gems
+
+- [openstudio-envelope](../openstudio-envelope) — the envelope domain gem
+  (prescriptive 3.2, thermal bridging via TBD, the reference-envelope transform,
+  envelope + thermal-bridging costing), same AuditLog schema.
+- [openstudio-necb](../openstudio-necb) — the umbrella: composes both domain gems
+  into the full NECB 8.4.1.2 performance-path determination (proposed vs
+  reference, sizing/annual simulation, unified costing, one audit).

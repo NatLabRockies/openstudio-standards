@@ -180,9 +180,12 @@ Parity gates (0 mismatches vs `Standard.build('NECB2020')`): U-value lookups acr
 - HDD via Table C-1 nearest city (haversine, 500 km tolerance) before falling back
   to the `.stat` file's 18 °C base line — same precedence as `get_necb_hdd18`.
 
+## The umbrella
+
+[openstudio-necb](../openstudio-necb) composes this gem with openstudio-hvac into
+the full NECB 8.4.1.2 performance-path determination: proposed vs reference,
+sizing/annual simulation, unified costing, one audit.
+
 ## Documented future (not yet in scope)
 
-2011/2015/2017 rule backfill · envelope + thermal-bridging costing (the P3b
-assembly/detail vocabulary is kept compatible with `btap/bridging.rb` for this) ·
-air-leakage refinements · an umbrella gem composing hvac + envelope reference
-generation with compliance simulation/reporting.
+2011/2015/2017 rule backfill · air-leakage refinements.
