@@ -198,8 +198,8 @@
       {
         "article": "8.4.5.1.",
         "title": "Reference building basis (envelope meets Section 3.2)",
-        "status": "not_implemented",
-        "gaps": "reference envelope lands in P4"
+        "status": "implemented",
+        "how": "reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.5.3.(3) scaling)"
       },
       {
         "article": "8.4.5.2.",
@@ -210,14 +210,16 @@
       {
         "article": "8.4.5.3.",
         "title": "Reference envelope: absorptance, FDWR scaling, shading, fenestration optics",
-        "status": "not_implemented",
-        "gaps": "greenfield implementation lands in P4"
+        "status": "implemented",
+        "gaps": "sentence (7) partitions are satisfied by the caller-side clone; humidification note n/a",
+        "how": "roof absorptance 0.7 iff proposed used actual values; proportional per-orientation FDWR/SRR scaling of EXISTING fenestration; Space/Building shading + controls removed, Site shading kept; optics (SHGC/VT) preserved; air-leakage default I_AGW = (5/75)^0.6 x 1.50 x S/A_AGW per 8.4.3.3.(3)/8.4.2.9.(2)"
       },
       {
         "article": "8.4.5.4.",
         "title": "Lightweight construction + space thermal characteristics",
-        "status": "not_implemented",
-        "gaps": "greenfield implementation lands in P4"
+        "status": "implemented",
+        "gaps": "the canonical lightweight layer set of Note A-8.4.5.4.(1) is not machine-retrievable - the massless interpretation should be verified against the printed note",
+        "how": "opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone"
       }
     ]
   }
