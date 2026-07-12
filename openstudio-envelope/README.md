@@ -96,6 +96,40 @@ Honesty rules:
 - Physically infeasible uprate (edge losses alone exceed the target) → TBD's
   refusal is forwarded into the audit, never swallowed.
 
+## Envelope + thermal-bridging costing
+
+`OpenStudioEnvelope.cost(model, ...)` prices ANY model's envelope the legacy BTAP way:
+each of the 16 costed surface types maps to a BTAP-* assembly catalog
+(`data/costing/constructions.json`), every catalog candidate's `id_layers` is priced
+through the materials sheets → cost table → regional factors, and each surface's
+$/ft² is the linear interpolation of that (RSI, cost) curve at the surface's own RSI
+(films included for opaque surfaces, `uprated_Uo` honoured after TBD runs). Glazing
+adds the nearest-SHGC solar-film premium; a TBD result adds the parapet allowance and
+the thermal-bridge edge piecework (`thermal_bridging.csv`, BETB details).
+
+```ruby
+report = OpenStudioEnvelope.cost(model,
+  structure: { framing: :steel }, performance: :lp,
+  tbd_result: tbd_result,          # from NECB::ThermalBridging.apply — TB edges + parapet
+  costs_csv: 'licensed_costs.csv', # runtime injection ONLY; never commit priced values
+  audit: audit)                    # ONE audit spans compliance + costing
+report.total; report.envelope['surface_types']; report.thermal_bridging['by_material']
+```
+
+Honesty + licensing notes:
+- The vendored costing sheets are UNPRICED (see `data/costing/README.md`); the priced
+  tables resolve from `costs_csv:`/`local_factors_csv:`, `OPENSTUDIO_COSTING_DIR`, or
+  the sibling openstudio-hvac gem's public vendored copies.
+- Cost-curve upper-bound overruns (no catalog assembly reaches the required RSI) flag
+  `unrealistic_assembly` + an audit WARNING — replacing legacy's silent $10¹² sentinel.
+- **Legacy defect fixed loudly**: legacy `cost_audit_thermal_bridging`'s `find` block
+  never tests the material id (its `total +=` body is truthy), so every thermal-bridge
+  edge is priced as materials_opaque row 1 — *gypsum wallboard*. The port matches BY id
+  and records the deviation in the audit.
+- Parity gates: interpolator exact vs `BTAP::LinearRegression`; all 92 catalog
+  candidates within a cent of legacy `cost_construction`; per-surface RSI ==
+  `TBD.rsi`; TB material quantities exact vs `BTAP::BridgingData`.
+
 ## Composing the full NECB reference building (with openstudio-hvac)
 
 ONE clone, ONE audit — HVAC then envelope:

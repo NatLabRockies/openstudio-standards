@@ -37,3 +37,19 @@ require_relative 'openstudio_envelope/geometry'
 require_relative 'openstudio_envelope/necb/prescriptive'
 require_relative 'openstudio_envelope/necb/thermal_bridging'
 require_relative 'openstudio_envelope/necb/reference'
+require_relative 'openstudio_envelope/costing/database'
+require_relative 'openstudio_envelope/costing/interpolate'
+require_relative 'openstudio_envelope/costing/assemblies'
+require_relative 'openstudio_envelope/costing/quantify'
+require_relative 'openstudio_envelope/costing/envelope_costs'
+require_relative 'openstudio_envelope/costing/thermal_bridging_costs'
+require_relative 'openstudio_envelope/costing/report'
+
+module OpenStudioEnvelope
+  # Cost a model's envelope (+ thermal bridging when a TBD result / tallies are
+  # given). See Costing.cost for options. Shares the AuditLog schema with
+  # openstudio-hvac so one audit spans compliance + HVAC costing + envelope costing.
+  def self.cost(model, **kwargs)
+    Costing.cost(model, **kwargs)
+  end
+end
