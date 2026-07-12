@@ -58,7 +58,7 @@ module OpenStudioNECB
                                costs_csv: nil, thermal_bridging: nil,
                                actual_roof_absorptance_used: false,
                                max_capacity_iterations: 3, capacity_step: 1.25,
-                               necb_loads: nil, audit: nil)
+                               necb_loads: nil, reference_daylighting: false, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
       proposed = load_model(model)
@@ -95,6 +95,10 @@ module OpenStudioNECB
       OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
                                                   actual_roof_absorptance_used: actual_roof_absorptance_used,
                                                   thermal_bridging: thermal_bridging, audit: audit)
+      if reference_daylighting
+        OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
+                                                       proposed: proposed, audit: audit)
+      end
       audit.info(:compliance,
                  '8.4.3.2 operating schedules and internal loads are IDENTICAL between proposed and ' \
                  'reference by construction (the reference is a clone; neither transform touches loads ' \

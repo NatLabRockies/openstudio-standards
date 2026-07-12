@@ -103,3 +103,19 @@ Sensor costing uses the legacy daylighted-area rule: per controlled zone,
 fixtures = Σ ceil(ft²/1000 × Fix_1000ft), sensors =
 ceil(ceil(fixtures × area-ratio)/4) per aperture type, each priced with the
 per-sensor BOM (sensor row 407 + 30 ft wiring + 30 ft PVC conduit + box).
+
+## Reference daylighting (8.4.4.5.(5)–(12))
+
+`OpenStudioLighting::NECB.reference_daylighting(reference, vintage:, proposed:)`
+evaluates photocontrols in the reference building by **detailed EnergyPlus
+daylighting**: interior reflectances set per (10)(b) (floor 0.15 / walls 0.50 /
+ceiling 0.80), fenestration VT identical to proposed by construction ((10)(d),
+the envelope transform preserves optics), set-points from the proposed
+building's photocontrols else the space-type illuminance ((11)), and the
+sentence-(12) FDL-factor fallback declared unnecessary since detailed
+daylighting is available. Audited interpretation: the analytic
+single-centered-window/skylight AREA convention of sentences (5)–(8) is
+replaced by the ported 4.2.2 threshold geometry on the reference's actual
+FDWR/SRR-scaled fenestration. The comparative E+ gate proves the evaluation is
+live (lighting energy drops when controls are present). Opt into the umbrella
+pipeline with `reference_daylighting: true`.
