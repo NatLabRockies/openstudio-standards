@@ -375,3 +375,6 @@ Plain ruby + the OpenStudio SDK bindings — no bundler required.
 - [openstudio-necb](../openstudio-necb) — the umbrella: composes both domain gems
   into the full NECB 8.4.1.2 performance-path determination (proposed vs
   reference, sizing/annual simulation, unified costing, one audit).
+- [openstudio-loads](../openstudio-loads) — NECB space-use loads and schedules
+  (people, plug loads, ventilation OA, NECB schedule sets, set-points): the
+  bare-geometry on-ramp that makes gem-only proposed buildings possible.

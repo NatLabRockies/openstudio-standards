@@ -86,6 +86,12 @@ module OpenStudioNECB
       OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
                                                   actual_roof_absorptance_used: actual_roof_absorptance_used,
                                                   thermal_bridging: thermal_bridging, audit: audit)
+      audit.info(:compliance,
+                 '8.4.3.2 operating schedules and internal loads are IDENTICAL between proposed and ' \
+                 'reference by construction (the reference is a clone; neither transform touches loads ' \
+                 'or schedules). Representativeness of the loads for the building type remains the ' \
+                 "modeller's input (see the openstudio-loads gem for NECB space-use data).",
+                 article: '8.4.3.2.(1)-(2)')
 
       # 3. size the reference, then re-apply efficiencies on sized equipment
       #    (the openstudio-hvac contract: efficiency rows are capacity-binned)

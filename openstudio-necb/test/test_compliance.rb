@@ -24,6 +24,8 @@ class TestCompliance < Minitest::Test
     wall = result.reference_model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     assert_match(/Lightweight/, wall.construction.get.nameString, 'reference envelope applied to the SAME clone')
     assert(result.audit.warnings.any? { |w| w[:action].include?('UNSIZED') }, 'unsized path warns loudly')
+    assert(result.audit.entries.any? { |e| e[:article] == '8.4.3.2.(1)-(2)' },
+           '8.4.3.2 loads-identity satisfied-by-clone note in the audit')
 
     report = JSON.parse(File.read(File.join(result.run_dir, 'report.json')))
     assert_nil report['compliant']
