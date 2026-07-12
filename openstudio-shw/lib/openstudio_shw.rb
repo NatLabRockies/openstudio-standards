@@ -40,3 +40,4 @@ end
 require_relative 'openstudio_shw/necb/demand'
 require_relative 'openstudio_shw/necb/efficiency'
 require_relative 'openstudio_shw/necb/reference'
+require_relative 'openstudio_shw/costing'

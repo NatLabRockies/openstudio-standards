@@ -23,7 +23,7 @@
         "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
         "status": "partial",
         "how": "sentences (1)-(2) via NECB space-type data (2025 values verified identical to 2020; schedule citations renumbered to A-8.4.3.2.(1)(b)): occupancy + receptacle densities and NECB-<letter> schedule sets applied per space type; ventilation OA and space-type infiltration applied from the same records",
-        "gaps": "lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules EXCLUDED (openstudio-shw gem territory); illuminance levels are lighting-design data (not modelled); semi-heated set-point-from-specifications not implemented"
+        "gaps": "lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules provided by the openstudio-shw gem (apply_shw after apply_loads); illuminance levels are lighting-design data (not modelled); semi-heated set-point-from-specifications not implemented"
       },
       {
         "article": "8.4.3.3.",

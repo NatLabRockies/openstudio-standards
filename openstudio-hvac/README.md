@@ -381,3 +381,7 @@ Plain ruby + the OpenStudio SDK bindings — no bundler required.
 - [openstudio-lighting](../openstudio-lighting) — NECB Part 4 lighting (LPD
   allowances, occupancy-sensor schedules, LED, exterior allowances, reference
   lighting, fixture costing), built on openstudio-loads.
+- [openstudio-shw](../openstudio-shw) — NECB Part 6 service water heating
+  (demand from space-type data, auto-sized plant, Table 6.2.2.1 UEF
+  efficiencies, reference treatment, costing on this gem's engine), built on
+  openstudio-loads.
