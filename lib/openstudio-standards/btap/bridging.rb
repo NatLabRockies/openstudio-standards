@@ -996,8 +996,6 @@ module BTAP
           @model[:constructions][ide][:stypes   ] = []
           @model[:constructions][ide][:surfaces ] = []
           @model[:constructions][ide][:spaces   ] = []
-
-          # Assign :lp or :hp costed construction to match required Uo.
         end
 
         @model[:constructions][ide][:m2      ] += m2

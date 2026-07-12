@@ -912,6 +912,7 @@ class NECB2011 < Standard
           first[:finish   ] = sp[:finish]
           custom           << first
 
+          # Group spaces when sharing common attributes.
           @structure.spaces.each do |id, sp|
             space = model.getSpaceByName(id)
             next if space.empty?

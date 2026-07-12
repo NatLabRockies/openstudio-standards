@@ -562,6 +562,50 @@ class NECB2011
   end
 
   ##
+  # Returns a layered construction's area-weighted surface air film resistances.
+  # Based on surface's 'netArea' (i.e. no validation wrt Frame & Dividers).
+  #
+  # @author denis@rd2.ca
+  #
+  # @param [OpenStudio::Model::LayeredConstruction] a construction
+  #
+  # @return [Float] area-weighted surface air film resistances (0 if error)
+  def filmRSI(construction = nil)
+    return 0 unless construction.is_a?(OpenStudio::Model::LayeredConstruction)
+
+    # Tally:
+    #   - areas of surfaces referencing the construction
+    #   - inverse of a surface air film resistances (similar to UA)
+    area  = 0
+    filmA = 0
+
+    construction.model.getSurfaces.each do |surface|
+      tp = surface.surfaceType.downcase
+      bc = surface.outsideBoundaryCondition.downcase
+      lc = surface.construction
+      fR = surface.filmResistance
+      m2 = surface.netArea
+      next if lc.empty?
+
+      lc = lc.get.to_LayeredConstruction
+      next if lc.empty?
+
+      lc = lc.get
+
+      # Reset if interzone.
+      if bc == "surface"
+        typ = tp == "wall" ? :partition : :ceiling
+        fR  = TBD.filmResistances(typ, surface.tilt)
+      end
+
+      area  += m2
+      filmA += m2 / fR
+    end
+
+    filmA > 0 ? area / filmA : 0
+  end
+
+  ##
   # Adds default construction sets to the building (or to selected spaces). The
   # solution is an alternative option to BTAP's 'model_apply_construction' &
   # 'apply_standard_construction_properties'. Parameters are based on previously
