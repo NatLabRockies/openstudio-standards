@@ -580,6 +580,7 @@ class NECB2011 < Standard
                                srr_set: srr_set,
                                srr_opt: srr_opt,
                                necb_hdd: necb_hdd)
+    set_construction_air_film_resistances(model: model)
     apply_thermal_bridging(model: model,
                            necb_hdd: necb_hdd,
                            structure: @structure,
@@ -978,6 +979,37 @@ class NECB2011 < Standard
     end
 
     model_create_thermal_zones(model, @space_multiplier_map)
+  end
+
+  ##
+  # Assign surface area-weighted air film resistances to insulated layered
+  # constructions. Applied only if constructions have valid AdditionalProperties
+  # "btap_uo" (currently limited to construction option "structure").
+  #
+  # @author: denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Boolean] true if successful
+  def set_construction_air_film_resistances(model: nil)
+    return false unless model.is_a?(OpenStudio::Model::Model)
+
+    model.getConstructions.each do |lc|
+      next if lc.additionalProperties.getFeatureAsDouble("btap_uo").empty?
+      next unless lc.getNetArea > 0
+
+      unless lc.is_a?(OpenStudio::Model::LayeredConstruction)
+        lc = lc.to_LayeredConstruction
+        next if lc.empty?
+
+        lc = lc.get
+      end
+
+      fR = filmR(lc)
+      lc.additionalProperties.setFeature("btap_fR", fR) if fR > 0
+    end
+
+    true
   end
 
   # Apply Kiva foundation model to floors/walls with ground boundary condition.

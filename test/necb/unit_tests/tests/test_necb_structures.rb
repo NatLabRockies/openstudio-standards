@@ -30,19 +30,19 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
-      # 'MediumOffice',
+      'LowriseApartment',
+      'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',
-      # 'NorthernHealthCare',
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
+      'SmallOffice',
       'Warehouse'
     ]
 
@@ -50,17 +50,14 @@ class NECB_Structure_Tests < Minitest::Test
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      # "NECB2020",
+      "NECB2020",
       # "NECB2025"
     ]
 
     @options = [
-      # "",
+      "",
       "structure"
     ]
-
-    # AdditionalProperty-based customization.
-    @addprop = true
 
     tg  = "co2_structure"
     tag = "space_conditioning_category"
@@ -84,7 +81,7 @@ class NECB_Structure_Tests < Minitest::Test
           #   - the office has a user-assigned wood structure
           #   - the fine storage space has user-assigned wood-framing
           #   - the bulk storage area has a user-assigned CMU structure
-          if @addprop && building == "Warehouse"
+          if building == "Warehouse"
             id1  = "Zone1 Office"
             id2  = "Zone2 Fine Storage"
             id3  = "Zone3 Bulk Storage"
@@ -255,7 +252,7 @@ class NECB_Structure_Tests < Minitest::Test
           # Although all 3 Warehouse spaces are customized, the solution applies
           # one of the customized default construction sets to the whole
           # building - only 2 space-specific default construction sets remain.
-          if @addprop && building == "Warehouse"
+          if building == "Warehouse" && option == "structure"
             err_msg = "# Default Construction Sets (#{cas})?"
             assert_equal(csets.size, 3, err_msg)    # 1x building + 2x spaces
             err_msg = "# custom spaces (#{cas})?"
@@ -321,13 +318,38 @@ class NECB_Structure_Tests < Minitest::Test
             err_msg = "# insulated constructions (#{cas})"
             assert_equal(cs.size, 6, err_msg)
 
-            if template == "NECB2015" # no uprating: Uo match NECB requirements
+            # Insulated (layered) constructions (i.e. part of the building
+            # envelope) inherit area-weighted air film resistances, if relying
+            # on the 'structure' option.
+            cs.each do |c|
+              id = c.nameString
+              fR = c.additionalProperties.getFeatureAsDouble("btap_fR")
+              err_msg = "#{id} 'btap_fR' (#{cas})"
+              refute_empty(fR)
+
+              fR = fR.get
+              fr = 0.150
+              fr = 0.136 if id.downcase.include?("roof")
+              fr = 0.160 if id.downcase.include?("slab")
+              # OSut:CON:roof 3 : 0.136
+              # OSut:CON:wall 2 : 0.150
+              # OSut:CON:wall   : 0.150
+              # OSut:CON:slab   : 0.160
+              # OSut:CON:roof   : 0.136
+              # OSut:CON:wall 1 : 0.150
+
+              err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+              assert_equal(fR.round(3), fr.round(3))
+            end
+
+            # BTAP 'costed' construction identifiers.
+            xds = ["BTAP-ExteriorWall-WoodFramed-5", "BTAP-ExteriorWall-Mass-2"]
+
+            # NECB2015: No uprating (Uo == NECB prescriptive requirements).
+            if template == "NECB2015"
               slab_m2 = 0
               roof_m2 = 0
               wall_m2 = 0
-
-              # BTAP costed construction identifiers.
-              xds = ["BTAP-ExteriorWall-WoodFramed-5", "BTAP-ExteriorWall-Mass-2"]
 
               cs.each do |c|
                 uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
@@ -369,6 +391,7 @@ class NECB_Structure_Tests < Minitest::Test
             nb  = 1
             nb += 1 unless plenums.empty?
             nb += 1 unless attics.empty?
+            next if option.empty?
 
             err_msg = "# Default Construction Sets (#{cas})?"
             assert_equal(csets.size, nb, err_msg)
@@ -380,7 +403,7 @@ class NECB_Structure_Tests < Minitest::Test
             #   - insulated attic floor
             #   - insulated slab-on-grade
             #   - insulated slab & attic floors should have same area
-            if building == "QuickServiceRestaurant" && template == "NECB2015"
+            if building == "QuickServiceRestaurant"
               cs = model.getConstructions.select { |c| c.getNetArea > 0 }
               err_msg = "# un/insulated constructions (#{cas})"
               assert_equal(cs.size, 6, err_msg)
@@ -390,50 +413,74 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "# insulated constructions (#{cas})"
               assert_equal(cs.size, 3, err_msg)
 
-              slab_m2  = 0
-              floor_m2 = 0 # insulated attic floor - not uninsulated sloped roofs
-              wall_m2  = 0
-
+              # Insulated (layered) constructions (i.e. part of the building
+              # envelope) inherit area-weighted air film resistances, if relying
+              # on the 'structure' option.
               cs.each do |c|
-                uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
-                m2 = c.getNetArea
                 id = c.nameString
-                xd = c.additionalProperties.getFeatureAsString("btap_id")
+                fR = c.additionalProperties.getFeatureAsDouble("btap_fR")
+                err_msg = "#{id} 'btap_fR' (#{cas})"
+                refute_empty(fR)
 
-                # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
-                #   OSut:CON:slab    U-factor : 0.757 W/m2.K (232 m2)
-                #   OSut:CON:floor 2 U-factor : 0.162 W/m2.K (232 m2)
-                #   OSut:CON:wall    U-factor : 0.210 W/m2.K (124 m2)
+                fR = fR.get
+                fr = 0.150
+                fr = 0.266 if id.downcase.include?("floor") # attic floor
+                fr = 0.160 if id.downcase.include?("slab")
+                # OSut:CON:floor 2 : 0.266 ... > 0.136 (roof)
+                # OSut:CON:slab    : 0.160
+                # OSut:CON:wall    : 0.150
 
-                if id.downcase.include?("wall")
-                  wall_m2 += m2
-                  err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
-                  assert_equal(uo.round(3), 0.210, err_msg)
-                  err_msg = "BTAP wall construction ID (#{cas})"
-                  refute_empty(xd, err_msg)
-                  err_msg = "BTAP costed wall construction ID (#{cas})"
-                  assert_equal(xd.get, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
-                elsif id.downcase.include?("floor")
-                  floor_m2 += m2
-                  err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
-                  assert_equal(uo.round(3), 0.162, err_msg)
-                  err_msg = "BTAP attic floor construction ID (#{cas})"
-                  refute_empty(xd, err_msg)
-                  err_msg = "BTAP costed attic floor construction ID (#{cas})"
-                  assert_equal(xd.get, "BTAP-ExteriorRoof-IEAD-4", err_msg)
-                else # slab-on-grade
-                  slab_m2 += m2
-                  err_msg = "BTAP NECB2015 slab-on-grade Uo-factor (#{cas})"
-                  assert_equal(uo.round(3), 0.757, err_msg)
-                  err_msg = "BTAP slab-on-grade construction ID (#{cas})"
-                  assert_empty(xd, err_msg)
-                end
+                err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+                assert_equal(fR.round(3), fr.round(3))
               end
 
-              # No sloped skylights in initial BTAP SRR solution. Attic floor
-              # area should therefore equal slab-on-grade area.
-              err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
-              assert_equal(slab_m2.round, floor_m2.round, err_msg)
+              # NECB2015: No uprating (Uo == NECB prescriptive requirements).
+              if template == "NECB2015"
+                slab_m2  = 0
+                floor_m2 = 0 # insulated attic 'floors' - no uninsulated 'roofs'
+                wall_m2  = 0
+
+                cs.each do |c|
+                  uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
+                  m2 = c.getNetArea
+                  id = c.nameString
+                  xd = c.additionalProperties.getFeatureAsString("btap_id")
+
+                  # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
+                  #   OSut:CON:slab    U-factor : 0.757 W/m2.K (232 m2)
+                  #   OSut:CON:floor 2 U-factor : 0.162 W/m2.K (232 m2)
+                  #   OSut:CON:wall    U-factor : 0.210 W/m2.K (124 m2)
+
+                  if id.downcase.include?("wall")
+                    wall_m2 += m2
+                    err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
+                    assert_equal(uo.round(3), 0.210, err_msg)
+                    err_msg = "BTAP wall construction ID (#{cas})"
+                    refute_empty(xd, err_msg)
+                    err_msg = "BTAP costed wall construction ID (#{cas})"
+                    assert_equal(xd.get, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
+                  elsif id.downcase.include?("floor")
+                    floor_m2 += m2
+                    err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
+                    assert_equal(uo.round(3), 0.162, err_msg)
+                    err_msg = "BTAP attic floor construction ID (#{cas})"
+                    refute_empty(xd, err_msg)
+                    err_msg = "BTAP costed attic floor construction ID (#{cas})"
+                    assert_equal(xd.get, "BTAP-ExteriorRoof-IEAD-4", err_msg)
+                  else # slab-on-grade
+                    slab_m2 += m2
+                    err_msg = "BTAP NECB2015 slab-on-grade Uo-factor (#{cas})"
+                    assert_equal(uo.round(3), 0.757, err_msg)
+                    err_msg = "BTAP slab-on-grade construction ID (#{cas})"
+                    assert_empty(xd, err_msg)
+                  end
+                end
+
+                # No sloped skylights in initial BTAP SRR solution. Attic floor
+                # area should therefore equal slab-on-grade area.
+                err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
+                assert_equal(slab_m2.round, floor_m2.round, err_msg)
+              end
             end
           end
 
@@ -528,10 +575,8 @@ class NECB_Structure_Tests < Minitest::Test
           if @test_passed
             co2_structure = s.co2[:columns] + s.co2[:partitions]
 
-            if @addprop
-              s.spaces.values.each do |prp|
-                co2_structure += prp[:co2][:columns] + prp[:co2][:partitions]
-              end
+            s.spaces.values.each do |prp|
+              co2_structure += prp[:co2][:columns] + prp[:co2][:partitions]
             end
 
             err_msg = "BUILDING kgCO2-e (#{cas}) 1?"
@@ -545,16 +590,14 @@ class NECB_Structure_Tests < Minitest::Test
             co2m2 = ": #{(co2_structure/cm2).round} kgCO2-e/m2 (A1-A3)"
             fdback << "#{cas} : #{s.category} (#{s.structure}, #{nst})" + co2m2
 
-            if @addprop
-              s.spaces.each do |id, prp|
-                next unless prp.key?(:structure)
-                next unless prp.key?(:m2)
+            s.spaces.each do |id, prp|
+              next unless prp.key?(:structure)
+              next unless prp.key?(:m2)
 
-                sp_co2 = prp[:co2][:columns] + prp[:co2][:partitions]
-                state  = "... #{id} : custom STRUCTURE #{prp[:structure]}"
-                state += " #{(sp_co2/prp[:m2]).round} kgCO2-e/m2 (A1-A3)"
-                fdback << state
-              end
+              sp_co2 = prp[:co2][:columns] + prp[:co2][:partitions]
+              state  = "... #{id} : custom STRUCTURE #{prp[:structure]}"
+              state += " #{(sp_co2/prp[:m2]).round} kgCO2-e/m2 (A1-A3)"
+              fdback << state
             end
           end
 

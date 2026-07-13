@@ -570,29 +570,31 @@ class NECB2011
   # @param [OpenStudio::Model::LayeredConstruction] a construction
   #
   # @return [Float] area-weighted surface air film resistances (0 if error)
-  def filmRSI(construction = nil)
+  def filmR(construction = nil)
     return 0 unless construction.is_a?(OpenStudio::Model::LayeredConstruction)
 
     # Tally:
-    #   - areas of surfaces referencing the construction
-    #   - inverse of a surface air film resistances (similar to UA)
+    #   - areas of each surface referencing the construction
+    #   - inverse of each surface air film resistances (similar to UA)
     area  = 0
     filmA = 0
 
     construction.model.getSurfaces.each do |surface|
       tp = surface.surfaceType.downcase
       bc = surface.outsideBoundaryCondition.downcase
-      lc = surface.construction
       fR = surface.filmResistance
       m2 = surface.netArea
+      lc = surface.construction
       next if lc.empty?
 
       lc = lc.get.to_LayeredConstruction
       next if lc.empty?
 
       lc = lc.get
+      next unless lc == construction
+      next unless lc.getNetArea.round > 0
 
-      # Reset if interzone.
+      # Reset surface air film resistance if interzone.
       if bc == "surface"
         typ = tp == "wall" ? :partition : :ceiling
         fR  = TBD.filmResistances(typ, surface.tilt)
