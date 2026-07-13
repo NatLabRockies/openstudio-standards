@@ -745,6 +745,7 @@ class NECB2011
 
     eWall.additionalProperties.setFeature("btap_uo", eWallU)
     eWall.additionalProperties.setFeature("btap_id", id)
+    eWall.additionalProperties.setFeature("btap_type", "walls")
 
     # Outdoor-facing roof.
     specs          = {}
@@ -773,6 +774,7 @@ class NECB2011
 
     eRoof.additionalProperties.setFeature("btap_uo", eRoofU)
     eRoof.additionalProperties.setFeature("btap_id", id)
+    eRoof.additionalProperties.setFeature("btap_type", "roofs")
 
     # Outdoor-facing floor.
     specs          = {}
@@ -797,6 +799,7 @@ class NECB2011
 
     eFloor.additionalProperties.setFeature("btap_uo", eFloorU)
     eFloor.additionalProperties.setFeature("btap_id", id)
+    eFloor.additionalProperties.setFeature("btap_type", "floors")
 
     extSPACE = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
     extSPACE.setName("BTAP exterior constructions")
@@ -1040,13 +1043,19 @@ class NECB2011
 
       iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)
+      iAtticWall.additionalProperties.setFeature("btap_type", "walls")
 
+      # Interzone (insulated) attic 'floors': insulation levels should match
+      # 'exposed roof' presciptive requirements of CONDITIONED spaces below.
       specs          = {}
-      specs[:type  ] = :floor
-      specs[:uo    ] = eFloorU
-      specs[:frame ] = :heavy
-      specs[:finish] = :none
-      specs[:finish] = :heavy if stc == :concrete
+      specs[:type  ] = :partition
+      specs[:uo    ] = eRoofU
+      specs[:frame ] = :medium unless frm == :wood
+      specs[:frame ] = :heavy      if ctg == "housing" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "lodging" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "robust"
+      specs[:clad  ] = :none       if ctg == "robust"
+      specs[:finish] = :none       if ctg == "robust"
       argh[:perform] = :lp
       argh[:stype  ] = :roofs
       iAtticFloor    = TBD.genConstruction(model, specs)
@@ -1060,18 +1069,24 @@ class NECB2011
         id = BTAP::Bridging.costed_assembly(argh)
       end
 
-      iAtticFloor.additionalProperties.setFeature("btap_uo", eFloorU)
+      iAtticFloor.additionalProperties.setFeature("btap_uo", eRoofU)
       iAtticFloor.additionalProperties.setFeature("btap_id", id)
+      iAtticFloor.additionalProperties.setFeature("btap_type", "roofs")
 
+      # Interzone (insulated) attic 'roofs' may be suitable for UNCONDITIONED
+      # crawlspaces (with CONDITIONED spaces above). Insulation levels should
+      # match 'exposed floor' presciptive requirements.
       specs          = {}
-      specs[:type  ] = :floor
-      specs[:uo    ] = eRoofU
-      specs[:frame ] = :light
-      specs[:frame ] = :heavy if frm == :wood
-      specs[:clad  ] = :none
-      specs[:clad  ] = :heavy if ctg == "robust"
+      specs[:type  ] = :partition
+      specs[:uo    ] = eFloorU
+      specs[:frame ] = :medium unless frm == :wood
+      specs[:frame ] = :heavy      if ctg == "housing" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "lodging" && stc == :concrete
+      specs[:frame ] = :heavy      if ctg == "robust"
+      specs[:clad  ] = :none       if ctg == "robust"
+      specs[:finish] = :none       if ctg == "robust"
       argh[:perform] = :lp
-      argh[:stype  ] = :walls
+      argh[:stype  ] = :floors
       iAtticRoof     = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticRoof)
@@ -1085,6 +1100,7 @@ class NECB2011
 
       iAtticRoof.additionalProperties.setFeature("btap_uo", eFloorU)
       iAtticRoof.additionalProperties.setFeature("btap_id", id)
+      iAtticRoof.additionalProperties.setFeature("btap_type", "floors")
 
       intATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
       solATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
@@ -1115,7 +1131,7 @@ class NECB2011
     # Treat interzone 'plenum' floors as uninsulated ceiling tiles.
     unless plenums.empty?
       specs          = {}
-      specs[:type  ] = :partition
+      specs[:type  ] = :ceiling
       specs[:uo    ] = nil
       specs[:clad  ] = :none
       specs[:finish] = :none

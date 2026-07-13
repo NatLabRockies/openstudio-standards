@@ -1006,7 +1006,7 @@ class NECB2011 < Standard
       end
 
       fR = filmR(lc)
-      lc.additionalProperties.setFeature("btap_fR", fR) if fR > 0
+      lc.additionalProperties.setFeature("btap_film", fR) if fR > 0
     end
 
     true

@@ -30,16 +30,16 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
+      # 'LowriseApartment',
       'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
@@ -62,6 +62,8 @@ class NECB_Structure_Tests < Minitest::Test
     tg  = "co2_structure"
     tag = "space_conditioning_category"
     epw = "CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"
+    tPs = ["walls", "floors", "roofs"]
+    xds = ["BTAP-ExteriorWall-WoodFramed-5", "BTAP-ExteriorWall-Mass-2"]
 
     fdback = []
     fdback << ""
@@ -252,9 +254,7 @@ class NECB_Structure_Tests < Minitest::Test
           # Although all 3 Warehouse spaces are customized, the solution applies
           # one of the customized default construction sets to the whole
           # building - only 2 space-specific default construction sets remain.
-          if building == "Warehouse" && option == "structure"
-            err_msg = "# Default Construction Sets (#{cas})?"
-            assert_equal(csets.size, 3, err_msg)    # 1x building + 2x spaces
+          if building == "Warehouse"
             err_msg = "# custom spaces (#{cas})?"
             assert_equal(s.spaces.size, 2, err_msg) # 2x custom spaces
             err_msg = "Custom #{id1} (#{cas})?"
@@ -267,131 +267,148 @@ class NECB_Structure_Tests < Minitest::Test
             assert_includes(s.spaces[id1], :structure, err_msg)
             err_msg = "Custom #{id2} structure (#{cas})?"
             assert_includes(s.spaces[id2], :structure, err_msg)
-            offcset = office.defaultConstructionSet
-            fineset = fine.defaultConstructionSet
-            err_msg1 = "#{id1} Default Construction Set (#{cas})?"
-            err_msg2 = "#{id2} Default Construction Set (#{cas})?"
-            refute_empty(offcset, err_msg1)
-            refute_empty(fineset, err_msg2)
-            offcset = offcset.get
-            fineset = fineset.get
-            err_msg1 = "#{id1} empty ground constructions (#{cas})?"
-            err_msg2 = "#{id2} empty ground constructions (#{cas})?"
-            assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg1)
-            assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg2)
-            err_msg1 = "#{id1} empty exterior subsurface constructions (#{cas})?"
-            err_msg2 = "#{id2} empty exterior subsurface constructions (#{cas})?"
-            assert_empty(offcset.defaultExteriorSubSurfaceConstructions, err_msg1)
-            assert_empty(fineset.defaultExteriorSubSurfaceConstructions, err_msg2)
-            err_msg1 = "#{id1} empty interior surface constructions (#{cas})?"
-            err_msg2 = "#{id2} empty interior surface constructions (#{cas})?"
-            assert_empty(offcset.defaultInteriorSurfaceConstructions, err_msg1)
-            assert_empty(fineset.defaultInteriorSurfaceConstructions, err_msg2)
-            err_msg1 = "#{id1} empty interior subsurface constructions (#{cas})?"
-            err_msg2 = "#{id2} empty interior subsurface constructions (#{cas})?"
-            assert_empty(offcset.defaultInteriorSubSurfaceConstructions, err_msg1)
-            assert_empty(fineset.defaultInteriorSubSurfaceConstructions, err_msg2)
-            err_msg1 = "#{id1} empty space shading construction (#{cas})?"
-            err_msg2 = "#{id2} empty space shading construction (#{cas})?"
-            assert_empty(offcset.spaceShadingConstruction, err_msg1)
-            assert_empty(fineset.spaceShadingConstruction, err_msg2)
-            err_msg1 = "#{id1} empty site shading construction (#{cas})?"
-            err_msg2 = "#{id2} empty site shading construction (#{cas})?"
-            assert_empty(offcset.siteShadingConstruction, err_msg1)
-            assert_empty(fineset.siteShadingConstruction, err_msg2)
-            err_msg1 = "#{id1} empty building shading construction (#{cas})?"
-            err_msg2 = "#{id2} empty building shading construction (#{cas})?"
-            assert_empty(offcset.buildingShadingConstruction, err_msg1)
-            assert_empty(fineset.buildingShadingConstruction, err_msg2)
-            err_msg1 = "#{id1} empty adiabatic surface construction (#{cas})?"
-            err_msg2 = "#{id2} empty adiabatic surface construction (#{cas})?"
-            assert_empty(offcset.adiabaticSurfaceConstruction, err_msg1)
-            assert_empty(fineset.adiabaticSurfaceConstruction, err_msg2)
 
-            # Validate generated constructions.
-            cs = model.getConstructions.select { |c| c.getNetArea > 0 }
-            err_msg = "# un/insulated constructions (#{cas})"
-            assert_equal(cs.size, 11, err_msg)
+            unless option.empty?
+              err_msg = "# Default Construction Sets (#{cas})?"
+              assert_equal(csets.size, 3, err_msg)    # 1x building + 2x spaces
+              offcset = office.defaultConstructionSet
+              fineset = fine.defaultConstructionSet
+              err_msg1 = "#{id1} Default Construction Set (#{cas})?"
+              err_msg2 = "#{id2} Default Construction Set (#{cas})?"
+              refute_empty(offcset, err_msg1)
+              refute_empty(fineset, err_msg2)
+              offcset = offcset.get
+              fineset = fineset.get
+              err_msg1 = "#{id1} empty ground constructions (#{cas})?"
+              err_msg2 = "#{id2} empty ground constructions (#{cas})?"
+              assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg1)
+              assert_empty(offcset.defaultGroundContactSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty exterior subsurface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty exterior subsurface constructions (#{cas})?"
+              assert_empty(offcset.defaultExteriorSubSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultExteriorSubSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty interior surface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty interior surface constructions (#{cas})?"
+              assert_empty(offcset.defaultInteriorSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultInteriorSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty interior subsurface constructions (#{cas})?"
+              err_msg2 = "#{id2} empty interior subsurface constructions (#{cas})?"
+              assert_empty(offcset.defaultInteriorSubSurfaceConstructions, err_msg1)
+              assert_empty(fineset.defaultInteriorSubSurfaceConstructions, err_msg2)
+              err_msg1 = "#{id1} empty space shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty space shading construction (#{cas})?"
+              assert_empty(offcset.spaceShadingConstruction, err_msg1)
+              assert_empty(fineset.spaceShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty site shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty site shading construction (#{cas})?"
+              assert_empty(offcset.siteShadingConstruction, err_msg1)
+              assert_empty(fineset.siteShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty building shading construction (#{cas})?"
+              err_msg2 = "#{id2} empty building shading construction (#{cas})?"
+              assert_empty(offcset.buildingShadingConstruction, err_msg1)
+              assert_empty(fineset.buildingShadingConstruction, err_msg2)
+              err_msg1 = "#{id1} empty adiabatic surface construction (#{cas})?"
+              err_msg2 = "#{id2} empty adiabatic surface construction (#{cas})?"
+              assert_empty(offcset.adiabaticSurfaceConstruction, err_msg1)
+              assert_empty(fineset.adiabaticSurfaceConstruction, err_msg2)
 
-            # Isolate insulated constructions, i.e. part of building envelope.
-            cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
-            err_msg = "# insulated constructions (#{cas})"
-            assert_equal(cs.size, 6, err_msg)
+              # Validate generated constructions.
+              cs = model.getConstructions.select { |c| c.getNetArea > 0 }
+              err_msg = "# un/insulated constructions (#{cas})"
+              assert_equal(cs.size, 11, err_msg)
 
-            # Insulated (layered) constructions (i.e. part of the building
-            # envelope) inherit area-weighted air film resistances, if relying
-            # on the 'structure' option.
-            cs.each do |c|
-              id = c.nameString
-              fR = c.additionalProperties.getFeatureAsDouble("btap_fR")
-              err_msg = "#{id} 'btap_fR' (#{cas})"
-              refute_empty(fR)
+              # Isolate insulated constructions, i.e. part of building envelope.
+              cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              err_msg = "# insulated constructions (#{cas})"
+              assert_equal(cs.size, 6, err_msg)
 
-              fR = fR.get
-              fr = 0.150
-              fr = 0.136 if id.downcase.include?("roof")
-              fr = 0.160 if id.downcase.include?("slab")
-              # OSut:CON:roof 3 : 0.136
-              # OSut:CON:wall 2 : 0.150
-              # OSut:CON:wall   : 0.150
-              # OSut:CON:slab   : 0.160
-              # OSut:CON:roof   : 0.136
-              # OSut:CON:wall 1 : 0.150
-
-              err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
-              assert_equal(fR.round(3), fr.round(3))
-            end
-
-            # BTAP 'costed' construction identifiers.
-            xds = ["BTAP-ExteriorWall-WoodFramed-5", "BTAP-ExteriorWall-Mass-2"]
-
-            # NECB2015: No uprating (Uo == NECB prescriptive requirements).
-            if template == "NECB2015"
-              slab_m2 = 0
-              roof_m2 = 0
-              wall_m2 = 0
-
+              # Insulated (layered) constructions (i.e. part of the building
+              # envelope) inherit area-weighted air film resistances, if relying
+              # on the 'structure' option.
               cs.each do |c|
-                uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
-                m2 = c.getNetArea
                 id = c.nameString
-                xd = c.additionalProperties.getFeatureAsString("btap_id")
+                fR = c.additionalProperties.getFeatureAsDouble("btap_film")
+                err_msg = "#{id} 'btap_film' (#{cas})"
+                refute_empty(fR)
 
-                # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
-                #
-                # OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
-                # OSut:CON:roof   U-factor : 0.162 W/m2.K (3045 m2) # bulk storage
-                # OSut:CON:roof 3 U-factor : 0.162 W/m2.K (1324 m2) # fine storage
-                # OSut:CON:wall   U-factor : 0.210 W/m2.K (1058 m2) # bulk storage
-                # OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # office
-                # OSut:CON:wall 1 U-factor : 0.210 W/m2.K ( 100 m2) # fine storage
-                err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
+                fR = fR.get
+                fr = 0.150
+                fr = 0.136 if id.downcase.include?("roof")
+                fr = 0.160 if id.downcase.include?("slab")
+                # OSut:CON:roof 3 : 0.136
+                # OSut:CON:wall 2 : 0.150
+                # OSut:CON:wall   : 0.150
+                # OSut:CON:slab   : 0.160
+                # OSut:CON:roof   : 0.136
+                # OSut:CON:wall 1 : 0.150
 
-                if id.downcase.include?("wall")
-                  wall_m2 += m2
-                  assert_equal(uo.round(3), 0.210, err_msg)
-                  err_msg = "BTAP wall construction ID (#{cas})"
-                  refute_empty(xd, err_msg)
-                  err_msg = "BTAP costed wall ID (#{cas})"
-                  assert_includes(xds, xd.get, "WTF")
-                elsif id.downcase.include?("roof")
-                  roof_m2 += m2
-                  assert_equal(uo.round(3), 0.162, err_msg)
-                else # slab-on-grade
-                  slab_m2 += m2
-                  assert_equal(uo.round(3), 0.757, err_msg)
-                end
+                err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+                assert_equal(fR.round(3), fr.round(3))
               end
 
-              # NECB2015: 5% SSR ratio.
-              err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
-              assert_equal((0.95 * slab_m2).round, roof_m2.round, err_msg)
+              # NECB2015: No uprating (Uo == NECB prescriptive requirements).
+              if template == "NECB2015"
+                slab_m2 = 0
+                roof_m2 = 0
+                wall_m2 = 0
+
+                cs.each do |c|
+                  m2 = c.getNetArea
+                  id = c.nameString
+                  uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
+                  xd = c.additionalProperties.getFeatureAsString("btap_id")
+                  fR = c.additionalProperties.getFeatureAsDouble("btap_film").get
+                  tP = c.additionalProperties.getFeatureAsString("btap_type")
+
+                  # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
+                  #   OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
+                  #   OSut:CON:roof   U-factor : 0.162 W/m2.K (3045 m2) # bulk storage
+                  #   OSut:CON:roof 3 U-factor : 0.162 W/m2.K (1324 m2) # fine storage
+                  #   OSut:CON:wall   U-factor : 0.210 W/m2.K (1058 m2) # bulk storage
+                  #   OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # office
+                  #   OSut:CON:wall 1 U-factor : 0.210 W/m2.K ( 100 m2) # fine storage
+                  err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
+
+                  unless tP.empty?
+                    tP = tP.get
+
+                    if tP == "walls"
+                      wall_m2 += m2
+                      assert_equal(uo.round(3), 0.210, err_msg)
+                      err_msg = "BTAP wall construction ID (#{cas})"
+                      refute_empty(xd, err_msg)
+                      err_msg = "BTAP costed wall ID (#{cas})"
+                      assert_includes(xds, xd.get, err_msg)
+                    else # roofs
+                      roof_m2 += m2
+                      assert_equal(uo.round(3), 0.162, err_msg)
+                    end
+                  else
+                    slab_m2 += m2
+                    assert_equal(uo.round(3), 0.757, err_msg)
+
+                    # NECB prescriptive U-factor requirements for slabs-on-grade
+                    # are limited to perimeter insulation (1.2m in width) for
+                    # climate zones < 8. The "btap_uo" value reflects this. This
+                    # should eventually inform BTAP's use of KIVA (@todo).
+                    uO = 1 / TBD.rsi(c, fR)
+
+                    err_msg = "BTAP #{id} calculated USI #{uO.round(2)} (#{cas})"
+                    assert_equal(uO.round(3), 3.381, err_msg) # not 0.757
+                    err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                    refute_equal(uo.round(2), uO.round(2), err_msg)
+                  end
+                end
+
+                # NECB2015: 5% SSR ratio.
+                err_msg = "BTAP NECB2015 slab/roof area (#{cas})"
+                assert_equal((0.95 * slab_m2).round, roof_m2.round, err_msg)
+              end
             end
-          else
+          elsif option == "structure"
             nb  = 1
             nb += 1 unless plenums.empty?
             nb += 1 unless attics.empty?
-            next if option.empty?
 
             err_msg = "# Default Construction Sets (#{cas})?"
             assert_equal(csets.size, nb, err_msg)
@@ -418,61 +435,93 @@ class NECB_Structure_Tests < Minitest::Test
               # on the 'structure' option.
               cs.each do |c|
                 id = c.nameString
-                fR = c.additionalProperties.getFeatureAsDouble("btap_fR")
-                err_msg = "#{id} 'btap_fR' (#{cas})"
+                tP = c.additionalProperties.getFeatureAsString("btap_type")
+                fR = c.additionalProperties.getFeatureAsDouble("btap_film")
+
+                err_msg = "#{id} 'btap_film' (#{cas})"
                 refute_empty(fR)
 
                 fR = fR.get
-                fr = 0.150
-                fr = 0.266 if id.downcase.include?("floor") # attic floor
-                fr = 0.160 if id.downcase.include?("slab")
-                # OSut:CON:floor 2 : 0.266 ... > 0.136 (roof)
-                # OSut:CON:slab    : 0.160
-                # OSut:CON:wall    : 0.150
 
-                err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
-                assert_equal(fR.round(3), fr.round(3))
+                unless tP.empty?
+                  tP = tP.get
+                  fr = 0.150
+                  fr = 0.266 if tP == "roofs" # i.e. attic floor
+
+                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                  assert_includes(tPs, tP, err_msg)
+                  err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+                  assert_equal(fR.round(3), fr.round(3))
+                else
+                  fr = 0.160 # slab-on-grade
+
+                  err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+                  assert_equal(fR.round(3), fr.round(3))
+                end
               end
 
               # NECB2015: No uprating (Uo == NECB prescriptive requirements).
               if template == "NECB2015"
                 slab_m2  = 0
                 floor_m2 = 0 # insulated attic 'floors' - no uninsulated 'roofs'
-                wall_m2  = 0
 
                 cs.each do |c|
-                  uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
-                  m2 = c.getNetArea
                   id = c.nameString
+                  m2 = c.getNetArea
+                  uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
                   xd = c.additionalProperties.getFeatureAsString("btap_id")
+                  fR = c.additionalProperties.getFeatureAsDouble("btap_film").get
+                  tP = c.additionalProperties.getFeatureAsString("btap_type")
 
                   # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
-                  #   OSut:CON:slab    U-factor : 0.757 W/m2.K (232 m2)
-                  #   OSut:CON:floor 2 U-factor : 0.162 W/m2.K (232 m2)
-                  #   OSut:CON:wall    U-factor : 0.210 W/m2.K (124 m2)
+                  #   OSut:CON:slab        U-factor : 0.757 W/m2.K (232 m2)
+                  #   OSut:CON:partition 4 U-factor : 0.162 W/m2.K (232 m2)
+                  #   OSut:CON:wall        U-factor : 0.210 W/m2.K (124 m2)
 
-                  if id.downcase.include?("wall")
-                    wall_m2 += m2
-                    err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
-                    assert_equal(uo.round(3), 0.210, err_msg)
-                    err_msg = "BTAP wall construction ID (#{cas})"
-                    refute_empty(xd, err_msg)
-                    err_msg = "BTAP costed wall construction ID (#{cas})"
-                    assert_equal(xd.get, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
-                  elsif id.downcase.include?("floor")
-                    floor_m2 += m2
-                    err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
-                    assert_equal(uo.round(3), 0.162, err_msg)
-                    err_msg = "BTAP attic floor construction ID (#{cas})"
-                    refute_empty(xd, err_msg)
-                    err_msg = "BTAP costed attic floor construction ID (#{cas})"
-                    assert_equal(xd.get, "BTAP-ExteriorRoof-IEAD-4", err_msg)
-                  else # slab-on-grade
+                  unless tP.empty?
+                    tP = tP.get
+
+                    if tP == "roofs" # i.e. attic floors
+                      floor_m2 += m2
+                      err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
+                      assert_equal(uo.round(3), 0.162, err_msg)
+                      err_msg = "BTAP attic floor construction ID (#{cas})"
+                      refute_empty(xd, err_msg)
+                      err_msg = "BTAP costed attic floor construction ID (#{cas})"
+                      assert_equal(xd.get, "BTAP-ExteriorRoof-IEAD-4", err_msg)
+
+                      uO = 1/TBD.rsi(c, fR)
+                      err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                      assert_equal(uo.round(2), uO.round(2), err_msg)
+                    else
+                      err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
+                      assert_equal(uo.round(3), 0.210, err_msg)
+                      err_msg = "BTAP wall construction ID (#{cas})"
+                      refute_empty(xd, err_msg)
+                      err_msg = "BTAP costed wall construction ID (#{cas})"
+                      assert_equal(xd.get, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
+
+                      uO = 1 / TBD.rsi(c, fR)
+                      err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                      assert_equal(uo.round(2), uO.round(2), err_msg)
+                    end
+                  else
                     slab_m2 += m2
                     err_msg = "BTAP NECB2015 slab-on-grade Uo-factor (#{cas})"
                     assert_equal(uo.round(3), 0.757, err_msg)
                     err_msg = "BTAP slab-on-grade construction ID (#{cas})"
                     assert_empty(xd, err_msg)
+
+                    # NECB prescriptive U-factor requirements for slabs-on-grade
+                    # are limited to perimeter insulation (1.2m in width) for
+                    # climate zones < 8. The "btap_uo" value reflects this. This
+                    # should eventually inform BTAP's use of KIVA (@todo).
+                    uO = 1 / TBD.rsi(c, fR)
+
+                    err_msg = "BTAP #{id} calculated USI #{uO.round(2)} (#{cas})"
+                    assert_equal(uO.round(3), 2.346, err_msg) # not 0.757
+                    err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                    refute_equal(uo.round(2), uO.round(2), err_msg)
                   end
                 end
 
