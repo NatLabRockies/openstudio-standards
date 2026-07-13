@@ -14,9 +14,11 @@ module OpenStudioNECB
   #       (SizingParameters), bounded by max_capacity_iterations; a still-failing
   #       result after the cap is a loud warning + non-compliance.
   #
-  # One clone, one audit: reference_hvac (openstudio-hvac) then reference_envelope
-  # (openstudio-envelope) transform a single reference model, and optional costing
-  # of both models lands in the same AuditLog.
+  # One clone, one audit: reference_hvac (openstudio-hvac), reference_envelope
+  # (openstudio-envelope), reference_lighting (openstudio-lighting — Part 4
+  # allowance LPDs) and reference_shw (openstudio-shw — Part 6 minimum
+  # efficiencies) transform a single reference model, and optional costing of
+  # both models lands in the same AuditLog.
   module Compliance
     ComplianceResult = Struct.new(:proposed_model, :reference_model, :report, :audit,
                                   :compliant, :run_dir, keyword_init: true)
@@ -122,17 +124,22 @@ module OpenStudioNECB
         OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
                                                     actual_roof_absorptance_used: actual_roof_absorptance_used,
                                                     thermal_bridging: thermal_bridging, audit: audit)
+        OpenStudioLighting::NECB.reference_lighting(reference, vintage: vintage, audit: audit)
         if reference_daylighting
           OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
                                                          proposed: proposed, audit: audit)
         end
+        OpenStudioSHW::NECB.reference_shw(reference, vintage: vintage, audit: audit)
       end
       audit.building = nil
       audit.info(:compliance,
-                 '8.4.3.2 operating schedules and internal loads are IDENTICAL between proposed and ' \
-                 'reference by construction (the reference is a clone; neither transform touches loads ' \
-                 'or schedules). Representativeness of the loads for the building type remains the ' \
-                 "modeller's input (see the openstudio-loads gem for NECB space-use data).",
+                 '8.4.3.2 operating schedules and occupancy/receptacle loads are identical between ' \
+                 'proposed and reference by construction (the reference is a clone; neither reset touches ' \
+                 'schedules or those loads); interior lighting power is reset to the Part 4 allowance per ' \
+                 '8.4.4.5.(1) (reference_lighting); service water heating efficiencies are reset to the ' \
+                 'Part 6 minimums per 8.4.4.20 (reference_shw). Representativeness of the loads for the ' \
+                 "building type remains the modeller's input (see the openstudio-loads gem for NECB " \
+                 'space-use data).',
                  article: '8.4.3.2.(1)-(2)')
 
       # 3. size the reference, then re-apply efficiencies on sized equipment

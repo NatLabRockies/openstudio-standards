@@ -61,10 +61,35 @@
         "how": "space-type keys drive the sensor-schedule synthesis"
       },
       {
-        "article": "8.4.5.x (lighting)",
-        "title": "Reference building lighting (2025 renumbering of 8.4.4.5)",
+        "article": "8.4.5.5.(1)",
+        "title": "Reference building interior lighting power = Part 4 allowance",
+        "status": "implemented",
+        "how": "apply_lights sets the allowance LPD from the space-type records"
+      },
+      {
+        "article": "8.4.5.5.(2)",
+        "title": "Dwelling units 5 W/m2",
+        "status": "implemented",
+        "how": "reference_lighting overrides dwelling space types to 5 W/m2"
+      },
+      {
+        "article": "8.4.5.5.(3)",
+        "title": "Occupancy/personal control factors in the reference",
         "status": "partial",
-        "how": "allowance LPD + fractions implemented as in 2020; citation prefix follows the 2025 renumbered performance path | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name) | reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)",
+        "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier \u2014 interpretation consistent with legacy NECB2015+",
+        "gaps": "strict reading multiplies installed power by Focc x Fpers"
+      },
+      {
+        "article": "8.4.5.5.(4)",
+        "title": "Radiant/convective/return-air fractions identical to proposed",
+        "status": "implemented",
+        "how": "fractions come from the same space-type records for both models"
+      },
+      {
+        "article": "8.4.5.5.(5)-(12)",
+        "title": "Reference daylighting geometry + photocontrols",
+        "status": "partial",
+        "how": "reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)",
         "gaps": "sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation)"
       }
     ]

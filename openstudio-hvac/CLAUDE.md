@@ -26,7 +26,14 @@ its `AuditLog` is the canonical copy the umbrella aliases.
 - **Article-coverage manifests:** each vintage ruleset JSON carries an
   `article_coverage` block (implemented / partial / not_implemented /
   satisfied_by_clone / host_scope); partial + not_implemented warn on every
-  run. `NECB_GEM_COVERAGE.md` at repo root is the generated rollup.
+  run. `host_scope` = the article is real NECB but owned by the umbrella or a
+  sibling gem — the `how` string names the delegate (e.g. "Delegated to
+  openstudio-shw"). `NECB_GEM_COVERAGE.md` at repo root is the rollup —
+  regenerate with `ruby scripts/generate_necb_gem_coverage.rb` (it also emits a
+  Cross-gem delegations table reconciling each host_scope article against the
+  sibling entry that covers it). The report reconciles the same way at render
+  time: a host_scope article with no covering entry in the run becomes a ▲
+  checklist warning.
 - **Licensing (hard rule):** licensed RS-Means values are runtime-injected via
   `costs_csv:` and NEVER committed. This gem's `data/costing/costs.csv` +
   `costs_local_factors.csv` are the pre-existing public vendored copies that

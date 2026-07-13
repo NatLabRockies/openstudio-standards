@@ -26,6 +26,12 @@ class TestCompliance < Minitest::Test
     assert(result.audit.warnings.any? { |w| w[:action].include?('UNSIZED') }, 'unsized path warns loudly')
     assert(result.audit.entries.any? { |e| e[:article] == '8.4.3.2.(1)-(2)' },
            '8.4.3.2 loads-identity satisfied-by-clone note in the audit')
+    assert(result.audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.5.') && e[:building] == 'reference building' },
+           'reference_lighting Part 4 allowance cited, stamped reference building')
+    assert(result.audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.20.') && e[:building] == 'reference building' },
+           'reference_shw Part 6 efficiencies cited, stamped reference building')
+    assert(result.audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') && w[:building] == 'reference building' },
+           'untagged fixture: reference_lighting warns loudly (daylighting gaps), no LPD change')
 
     report = JSON.parse(File.read(File.join(result.run_dir, 'report.json')))
     assert_nil report['compliant']

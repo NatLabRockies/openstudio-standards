@@ -30,7 +30,18 @@ class TestReportUnits < Minitest::Test
                    inputs: { proposed_h: 140.0, reference_h: 20.0, limit_h: 100 }, article: '8.4.1.2.(3)')
     audit.decision(:compliance, 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)',
                    inputs: { proposed_kwh: 90_000.0, bet_kwh: 120_000.0 }, article: '8.4.4.1.(2)')
-    audit.decision(:coverage, '8.4.2.3 climatic data taken from model inputs', article: '8.4.2.3.')
+    # implemented — no checklist row (appendix-only)
+    audit.info(:coverage, 'climatic data taken from model inputs',
+               inputs: { status: 'implemented', decisions_citing: 3 }, article: '8.4.2.3.')
+    # implementing entry that covers the host_scope delegation below
+    audit.info(:coverage, 'reference lighting applied (Part 4 allowance LPDs)',
+               inputs: { status: 'implemented', decisions_citing: 2 }, article: '8.4.4.5.')
+    # host_scope COVERED by 8.4.4.5. above (prefix match) — no checklist row
+    audit.info(:coverage, 'delegated to openstudio-lighting',
+               inputs: { status: 'host_scope', decisions_citing: 0 }, article: '8.4.4.5.(1)')
+    # host_scope ORPHAN — nothing implements 8.4.4.20. → warning checklist row
+    audit.info(:coverage, 'delegated to openstudio-shw',
+               inputs: { status: 'host_scope', decisions_citing: 0 }, article: '8.4.4.20.')
     audit.with_building('reference building') do
       audit.warn(:efficiency, 'unsized DX coil skipped by capacity-binned lookup',
                  target: 'Coil 1', article: 'Table 5.2.12.1.')
@@ -92,11 +103,25 @@ class TestReportUnits < Minitest::Test
     assert_equal :pass, by_article['8.4.1.2.(2)'].glyph, 'lowercase "does not exceed" is a PASS'
     assert_equal :fail, by_article['8.4.1.2.(3)'].glyph, 'uppercase EXCEED is a FAIL'
     assert_equal :pass, by_article['8.4.4.1.(2)'].glyph
-    assert_equal :info, by_article['8.4.2.3.'].glyph, 'coverage entries are scope notes'
     assert_equal :warning, by_article['Table 5.2.12.1.'].glyph, 'warnings elevate'
     assert_equal rows.sort_by { |r| Checklist.article_sort_key(r.article) }.map(&:article), rows.map(&:article),
                  'rows are article-sorted'
     assert rows.all? { |r| r.audit_index.is_a?(Integer) }, 'every row anchors an audit entry'
+  end
+
+  def test_coverage_reconciliation
+    rows = Checklist.rows(canned_audit.entries)
+    orphan = rows.find { |r| r.article == '8.4.4.20.' }
+    refute_nil orphan, 'orphan host_scope delegation surfaces on the checklist'
+    assert_equal :warning, orphan.glyph
+    assert_includes orphan.statement, 'NOT covered'
+    assert_nil rows.find { |r| r.article == '8.4.4.5.(1)' }, 'covered host_scope stays off the checklist'
+    assert_nil rows.find { |r| r.article == '8.4.2.3.' }, 'implemented coverage emits no checklist row'
+    assert_nil rows.find { |r| r.article == '8.4.4.5.' }, 'implemented coverage emits no checklist row'
+
+    html = OpenStudioNECB::Report.render(canned_result)
+    assert_includes html, 'delegated — covered by another gem'
+    assert_includes html, 'NOT covered in this run'
   end
 
   def test_building_stamp_traces_issues_to_their_model

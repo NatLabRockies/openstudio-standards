@@ -9,12 +9,18 @@ AuditLog spans everything.
 ## Pipeline (`Compliance.performance_compliance`)
 
 clone → weather attach → HDD (explicit → Table C-1 → .stat) → proposed sizing
-→ reference_hvac + reference_envelope (+ optional reference_daylighting) on
-ONE clone/audit → reference sizing → efficiencies RE-applied on sized
-capacities → annual runs → 8.4.1.2.(2)–(4) verdicts → sentence-(5) capacity
-auto-iteration (sizing-factor bumps, stall detection) → Section 10 tier →
-2025 Part 11 GHG → optional costing of both models → report.json / audit.json
-/ audit.txt → optional compliance_report.html.
+→ reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
+LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
+optional reference_daylighting on ONE clone/audit → reference sizing →
+efficiencies RE-applied on sized capacities → annual runs → 8.4.1.2.(2)–(4)
+verdicts → sentence-(5) capacity auto-iteration (sizing-factor bumps, stall
+detection) → Section 10 tier → 2025 Part 11 GHG → optional costing of both
+models → report.json / audit.json / audit.txt → optional compliance_report.html.
+
+All reference transforms run inside `audit.with_building('reference building')`
+so their entries and coverage are stamped and reconcilable. Only schedules and
+occupancy/receptacle loads stay identical-by-clone (8.4.3.2); lighting power
+and SHW efficiencies ARE regenerated to code on the reference.
 
 - Modes `simulate: :annual | :sizing | :none` (only `:annual` determines).
 - `path: :eui` (2025 only) — the 8.4.4 archetype-EUI path: BET =

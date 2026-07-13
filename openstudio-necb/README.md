@@ -77,19 +77,26 @@ in `audit.txt`, `audit.json`, and the HTML report's "Applies to" chips.
 3. `OpenStudioHVAC::NECB.reference_hvac` — reference systems on a fresh clone.
 4. `OpenStudioEnvelope::NECB.reference_envelope` — reference envelope on the
    SAME clone, same audit.
-5. Sizing run of the reference, then **efficiencies re-applied** on the sized
+5. `OpenStudioLighting::NECB.reference_lighting` — reference interior lighting
+   power reset to the Part 4 allowance (8.4.4.5.(1)), dwelling units to 5 W/m²;
+   then `OpenStudioSHW::NECB.reference_shw` — service water heater efficiencies
+   reset to Part 6 minimums (8.4.4.20). Both always run on the reference clone
+   (schedules and occupancy/receptacle loads stay identical-by-clone per
+   8.4.3.2; lighting power and SHW efficiency do NOT). `reference_daylighting`
+   remains opt-in.
+6. Sizing run of the reference, then **efficiencies re-applied** on the sized
    capacities (the openstudio-hvac contract).
-6. `simulate: :annual` — full-year runs of both models (a `run_period:`
+7. `simulate: :annual` — full-year runs of both models (a `run_period:`
    override exists for tests, and any shortened period is flagged in the report
    and audit as NOT a code-compliant determination).
-7. 8.4.1.2 sentences (2)–(4) evaluated; when (3)/(4) fail, the sentence-(5)
+8. 8.4.1.2 sentences (2)–(4) evaluated; when (3)/(4) fail, the sentence-(5)
    capacity iteration loop bumps the failing building's sizing factors and
    re-runs until the loads are met (or the iteration cap / a stall stops it).
    Every verdict and every bump lands in the audit with its article.
-8. `costing: true` — HVAC (openstudio-hvac) + envelope (openstudio-envelope)
+9. `costing: true` — HVAC (openstudio-hvac) + envelope (openstudio-envelope)
    costing of BOTH models into the same audit, with the incremental
    proposed-vs-reference cost in the report.
-9. `report.json`, `audit.json`, `audit.txt` written to `run_dir`.
+10. `report.json`, `audit.json`, `audit.txt` written to `run_dir`.
 
 ## Modes
 

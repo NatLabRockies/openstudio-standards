@@ -70,4 +70,23 @@ class TestExteriorAndReference < Minitest::Test
     OpenStudioLighting::NECB.reference_lighting(model, vintage: '2025', audit: audit)
     assert(audit.entries.any? { |e| e[:article].to_s.include?('8.4.5.5.(1)') }, '2025 renumbered citations')
   end
+
+  # The shared umbrella fixture (5ZoneNoHVAC) has ASHRAE-named, NECB-untagged
+  # space types. reference_lighting must warn-and-skip loudly on it (never raise),
+  # and emit exactly ONE set of article-coverage entries per call.
+  def test_reference_lighting_untagged_warns_and_single_coverage
+    model = load_fixture
+    audit = OpenStudioLighting::AuditLog.new
+    # reaching past this call at all proves it did not raise on the untagged model
+    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
+
+    assert(audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
+           'untagged model still warns loudly (daylighting gaps)')
+
+    coverage = audit.entries.select { |e| e[:step] == :coverage }
+    refute_empty coverage, 'lighting article coverage emitted on the untagged path'
+    articles = coverage.map { |e| e[:article] }
+    assert_equal articles.size, articles.uniq.size,
+                 'exactly one coverage entry per article (no duplicate emission)'
+  end
 end

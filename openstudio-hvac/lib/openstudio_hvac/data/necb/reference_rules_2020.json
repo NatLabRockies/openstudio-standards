@@ -474,7 +474,7 @@
         "article": "8.4.4.1.",
         "title": "General \u2014 reference building basis (prescriptive components, all energy uses)",
         "status": "host_scope",
-        "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW prescriptive conformance is host-side."
+        "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems."
       },
       {
         "article": "8.4.4.2.",
@@ -486,19 +486,19 @@
         "article": "8.4.4.3.",
         "title": "Building Envelope Components (solar absorptance)",
         "status": "host_scope",
-        "how": "Envelope rules are out of the HVAC scope (host-side future work)."
+        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.4.4.",
         "title": "Envelope Thermal Characteristics (lightweight construction)",
         "status": "host_scope",
-        "how": "Envelope rules are out of the HVAC scope (host-side future work)."
+        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.4.5.",
         "title": "Lighting",
         "status": "host_scope",
-        "how": "Lighting rules are out of the HVAC scope (host-side future work)."
+        "how": "Delegated to openstudio-lighting \u2014 reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12)."
       },
       {
         "article": "8.4.4.6.",
@@ -559,7 +559,8 @@
         "article": "8.4.4.14.",
         "title": "Hydronic Pumps",
         "status": "partial",
-        "gaps": "Pump head/efficiency identical-to-proposed (1), combined-pump consolidation (2) and pump power-vs-flow curves (4) are not yet transferred from the proposed model (reference pumps use gem plant defaults)."
+        "how": "Pumps ride the gem's plant-loop defaults (constant-speed riding the curve).",
+        "gaps": "Pump head/efficiency identical-to-proposed (1), combined-pump consolidation (2) and pump power-vs-flow curves (4) are not yet transferred from the proposed model."
       },
       {
         "article": "8.4.4.15.",
@@ -598,7 +599,7 @@
         "article": "8.4.4.20.",
         "title": "Service Water Heating Systems",
         "status": "host_scope",
-        "how": "SHW reference rules are out of the HVAC scope (host-side future work)."
+        "how": "Delegated to openstudio-shw \u2014 reference_shw re-applies Part 6 minimum efficiencies."
       }
     ]
   }

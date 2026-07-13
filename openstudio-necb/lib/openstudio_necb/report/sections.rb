@@ -333,12 +333,18 @@ module OpenStudioNECB
 
       # -- 10 ----------------------------------------------------------------
       def coverage_appendix(ctx)
-        entries = ctx[:audit_entries].each_with_index.select { |e, _| e[:step].to_s == 'coverage' }
-        warnings = ctx[:audit_entries].each_with_index.select { |e, _| %i[warn warning].include?(e[:level]) }
+        all = ctx[:audit_entries]
+        entries = all.each_with_index.select { |e, _| e[:step].to_s == 'coverage' }
+        warnings = all.each_with_index.select { |e, _| %i[warn warning].include?(e[:level]) }
+        covered = Checklist.covered_articles(all)
         body = +''
         unless entries.empty?
-          rows = entries.map { |e, i| [e[:article].to_s, e[:action].to_s, H.raw(%(<a href="#audit-#{i}">entry #{i}</a>))] }
-          body << "<h3>Article coverage notes</h3>#{H.table(['Article', 'Scope note', 'Audit'], rows)}"
+          rows = entries.map do |e, i|
+            glyph_kind, status_text = coverage_status(e, covered)
+            [H.raw(H.glyph(glyph_kind)), status_text, e[:article].to_s, e[:action].to_s,
+             H.raw(%(<a href="#audit-#{i}">entry #{i}</a>))]
+          end
+          body << "<h3>Article coverage notes</h3>#{H.table(['', 'Status', 'Article', 'Scope note', 'Audit'], rows)}"
         end
         unless warnings.empty?
           rows = warnings.map do |e, i|
@@ -350,6 +356,26 @@ module OpenStudioNECB
         end
         body = '<p>No coverage notes or warnings recorded.</p>' if body.empty?
         H.section('coverage', 'Scope, coverage and warnings', body, page_break: true)
+      end
+
+      # Glyph + human status for one coverage entry, reconciled against the set
+      # of articles actually implemented in this audit (host_scope delegations
+      # are ✓ when a sibling gem covers the article, ▲ when nobody did).
+      def coverage_status(entry, covered)
+        status = entry[:inputs].is_a?(Hash) ? entry[:inputs][:status].to_s : ''
+        case status
+        when 'implemented' then [:pass, 'implemented']
+        when 'satisfied_by_clone' then [:pass, 'satisfied by clone']
+        when 'host_scope'
+          if Checklist.covered?(entry[:article].to_s, covered)
+            [:pass, 'delegated — covered by another gem in this run']
+          else
+            [:warning, 'delegated — NOT covered in this run']
+          end
+        when 'partial' then [:warning, 'partial']
+        when 'not_implemented' then [:fail, 'not implemented']
+        else [:na, '—']
+        end
       end
 
       # -- 11 ----------------------------------------------------------------
