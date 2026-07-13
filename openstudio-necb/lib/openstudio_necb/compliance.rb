@@ -84,6 +84,8 @@ module OpenStudioNECB
       end
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
+      report = {}
+      begin
       proposed = nil
       audit.with_building('input model') do
         proposed = load_model(model)
@@ -212,6 +214,10 @@ module OpenStudioNECB
                                     report: report, audit: audit, compliant: compliant, run_dir: run_dir)
       Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
       result
+      rescue StandardError => e
+        flush_on_failure(run_dir, report, audit, e)
+        raise e
+      end
     end
 
     def load_model(model)
@@ -231,6 +237,8 @@ module OpenStudioNECB
                        report_html: false, report_options: {}, audit: nil)
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
+      report = {}
+      begin
       proposed = nil
       audit.with_building('input model') do
         proposed = load_model(model)
@@ -299,6 +307,10 @@ module OpenStudioNECB
                                     report: report, audit: audit, compliant: compliant, run_dir: run_dir)
       Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
       result
+      rescue StandardError => e
+        flush_on_failure(run_dir, report, audit, e)
+        raise e
+      end
     end
 
     # The bare-geometry on-ramp: NECB space types -> loads -> lighting -> SHW ->
@@ -552,6 +564,19 @@ module OpenStudioNECB
       File.write(File.join(run_dir, 'report.json'), JSON.pretty_generate(report))
       File.write(File.join(run_dir, 'audit.json'), audit.to_json)
       File.write(File.join(run_dir, 'audit.txt'), audit.to_s)
+    end
+
+    # On any failure mid-run, record the abort in the audit and flush the audit
+    # trail + whatever partial report exists to run_dir, so a broken proposed
+    # (which aborts before the reference is even built) still leaves diagnostics
+    # behind. The caller re-raises the original error afterwards.
+    def flush_on_failure(run_dir, report, audit, error)
+      audit.warn(:compliance, "run ABORTED before completion: #{error.class}: #{error.message}",
+                 inputs: { error_class: error.class.to_s }, article: '8.4.2.1.')
+      write_outputs(run_dir, report, audit)
+    rescue StandardError
+      # never let a write failure mask the original error
+      nil
     end
   end
 end

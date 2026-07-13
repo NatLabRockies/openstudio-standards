@@ -12,6 +12,32 @@ class TestCompliance < Minitest::Test
     { epw: EPW, ddy: DDY, stat: STAT }
   end
 
+  # A run that aborts mid-pipeline must still flush its audit trail to run_dir
+  # (a broken proposed dies before the reference is even built). The missing
+  # weather[:ddy] raises the existing ArgumentError at the weather guard, which
+  # now sits inside the diagnostics-capturing begin.
+  def test_failed_run_still_writes_audit_trail
+    dir = Dir.mktmpdir('osnecb-fail-')
+    error = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(
+        proposed_with_hvac, vintage: '2020', simulate: :annual,
+        weather: { epw: EPW }, # deliberately missing :ddy
+        building: { storeys: 1, zone_types: zone_types_for(load_fixture), winter_design_temp_c: -20 },
+        run_dir: dir)
+    end
+    assert_match(/ddy/, error.message, 'original error propagates unchanged')
+
+    assert File.exist?(File.join(dir, 'audit.txt')), 'audit.txt written despite the failure'
+    assert File.exist?(File.join(dir, 'audit.json')), 'audit.json written despite the failure'
+    assert File.exist?(File.join(dir, 'report.json')), 'partial report.json written'
+    audit_txt = File.read(File.join(dir, 'audit.txt'))
+    assert_includes audit_txt, 'ABORTED', 'the abort is recorded in the audit trail'
+    assert_includes audit_txt, 'performance-path run started',
+                    'the pre-failure narrative is preserved for debugging'
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
   def test_none_mode_transforms_without_simulation
     result = OpenStudioNECB.performance_compliance(
       proposed_with_hvac, vintage: '2020', simulate: :none, hdd: 3890,
