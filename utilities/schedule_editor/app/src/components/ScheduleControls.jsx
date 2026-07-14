@@ -2,6 +2,7 @@ import React from 'react'
 import { useAppState, useAppDispatch, SET_EDITOR_PARAMS } from '../context.jsx'
 import SliderWithInput from './SliderWithInput.jsx'
 import { controlPointParams, isWeekendProfile } from '../utils/expandParams.js'
+import { findProfileRecord } from '../utils/profiles.js'
 
 const CAT_LABEL = {
   Occupancy: 'Occupancy', Lighting: 'Lighting',
@@ -15,8 +16,7 @@ export default function ScheduleControls({ scheduleName, category = 'Occupancy',
   const dayType = state.activeDayType
 
   const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
-  const schedObj = allOccRecords.find(o => o.name === scheduleName && o.day_types === dayType)
-                || allOccRecords.find(o => o.name === scheduleName && o.day_types === 'Default')
+  const schedObj = findProfileRecord(allOccRecords, scheduleName, dayType)
 
   const profileKey = `${scheduleName}|${dayType}`
   const savedParams = state.editorParams.byProfile[profileKey] || {}
@@ -47,7 +47,7 @@ export default function ScheduleControls({ scheduleName, category = 'Occupancy',
       </div>
       {bhEnabled ? (
         <div style={{ fontSize: 11, color: '#777', marginBottom: 10, padding: '4px 6px', background: '#f0f4f8', borderRadius: 3 }}>
-          Hours from building-hours override ({isWeekendProfile(dayType) ? 'weekend' : 'weekday'}):
+          Hours from building-hours override ({isWeekendProfile(schedObj.day_types) ? 'weekend' : 'weekday'}):
           st {resolved.st}h → et {resolved.et}h
         </div>
       ) : (

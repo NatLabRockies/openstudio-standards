@@ -1,60 +1,68 @@
 import React from 'react'
 import {
   useAppState, useAppDispatch,
-  SET_PROFILE_META_EDIT, SET_ACTIVE_DAY_TYPE, SET_WORKING_COPY
+  SET_PROFILE_META_EDIT, SET_ACTIVE_DAY_TYPE
 } from '../context.jsx'
+import { findProfileRecord, profileKey } from '../utils/profiles.js'
+import { getParametricArray, patchParametricRecord } from '../utils/workingCopy.js'
+
+const VALID_TOKENS = ['Default', 'Wkdy', 'Wknd', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// Full ISO datetime (matching the data files) from a YYYY-MM-DD date input, or null.
+function toIso(dateStr) {
+  return dateStr ? `${dateStr}T00:00:00+00:00` : null
+}
 
 export default function ProfileMetaControls({ scheduleName, onDatesChanged }) {
   const state = useAppState()
   const dispatch = useAppDispatch()
-  const activeDayType = state.activeDayType
+  const activeKey = state.activeDayType
 
-  if (activeDayType === 'Default') return null
+  const allRecords = getParametricArray(state)
+  const record = findProfileRecord(allRecords, scheduleName, activeKey)
 
-  const metaKey = `${scheduleName}|${activeDayType}`
+  // The Default (catch-all, full-year) profile's metadata is not editable.
+  if (!record || record.day_types === 'Default') return null
+
+  const metaKey = `${scheduleName}|${activeKey}`
   const metaEdit = state.profileMetaEdits[metaKey] || {}
 
-  // Get current values from working copy or raw data
-  const allRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
-  const record = allRecords.find(o => o.name === scheduleName && o.day_types === activeDayType)
+  const currentDayType = metaEdit.dayType ?? record.day_types
+  const currentStartDate = metaEdit.startDate ?? (record.start_date ? record.start_date.split('T')[0] : '')
+  const currentEndDate = metaEdit.endDate ?? (record.end_date ? record.end_date.split('T')[0] : '')
 
-  const currentDayType = metaEdit.dayType ?? record?.day_types ?? activeDayType
-  const currentStartDate = metaEdit.startDate ?? (record?.start_date ? record.start_date.split('T')[0] : '')
-  const currentEndDate = metaEdit.endDate ?? (record?.end_date ? record.end_date.split('T')[0] : '')
-
-  const VALID_TOKENS = ['Default','Wkdy','Wknd','Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-  const datalistId = `valid-tokens-${scheduleName}-${activeDayType}`
+  const datalistId = `valid-tokens-${scheduleName}`
   const tokenError = currentDayType && !VALID_TOKENS.includes(currentDayType)
     ? `Invalid. Valid tokens: ${VALID_TOKENS.join(', ')}` : null
 
-  function updateRecord(newDayType, newStart, newEnd) {
-    if (!record) return
-    const updated = allRecords.map(o =>
-      o.name === scheduleName && o.day_types === activeDayType
-        ? { ...o, day_types: newDayType, start_date: newStart || null, end_date: newEnd || null }
-        : o
-    )
-    dispatch({ type: SET_WORKING_COPY, payload: { target: 'parametric_schedules', data: updated } })
+  // Apply an edit: patch the record (matched by the CURRENT active key) and re-point the
+  // active tab to the record's new profile key (day-type / dates change its identity).
+  function applyEdit(newDayType, newStart, newEnd) {
+    const nextRecord = {
+      ...record,
+      day_types: newDayType,
+      start_date: toIso(newStart),
+      end_date: toIso(newEnd),
+    }
+    patchParametricRecord(state, dispatch, scheduleName, activeKey, {
+      day_types: newDayType,
+      start_date: toIso(newStart),
+      end_date: toIso(newEnd),
+    })
+    dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: profileKey(nextRecord) })
   }
 
   function handleDayTypeChange(e) {
     const v = e.target.value
-    const meta = { dayType: v, startDate: currentStartDate, endDate: currentEndDate }
-    dispatch({ type: SET_PROFILE_META_EDIT, payload: { key: metaKey, meta } })
-    if (VALID_TOKENS.includes(v)) {
-      dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: v })
-      updateRecord(v, currentStartDate, currentEndDate)
-    }
+    dispatch({ type: SET_PROFILE_META_EDIT, payload: { key: metaKey, meta: { dayType: v, startDate: currentStartDate, endDate: currentEndDate } } })
+    if (VALID_TOKENS.includes(v)) applyEdit(v, currentStartDate, currentEndDate)
   }
 
   function handleDateChange(field, val) {
-    const meta = {
-      dayType: currentDayType,
-      startDate: field === 'start' ? val : currentStartDate,
-      endDate:   field === 'end'   ? val : currentEndDate,
-    }
-    dispatch({ type: SET_PROFILE_META_EDIT, payload: { key: metaKey, meta } })
-    updateRecord(currentDayType, meta.startDate, meta.endDate)
+    const startDate = field === 'start' ? val : currentStartDate
+    const endDate = field === 'end' ? val : currentEndDate
+    dispatch({ type: SET_PROFILE_META_EDIT, payload: { key: metaKey, meta: { dayType: currentDayType, startDate, endDate } } })
+    if (VALID_TOKENS.includes(currentDayType)) applyEdit(currentDayType, startDate, endDate)
     onDatesChanged?.()
   }
 

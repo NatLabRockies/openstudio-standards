@@ -2,9 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react'
 import {
   useAppState, useAppDispatch,
   SET_STANDARD_REFERENCE_OVERRIDE,
-  SET_ASHRAE_SPACE_TYPE_REF
+  SET_ASHRAE_SPACE_TYPE_REF,
+  SET_REFERENCE_SOURCE
 } from '../context.jsx'
 import { fetchSpaceTypes } from '../api.js'
+import { standardScheduleSetName } from '../utils/standardSchedules.js'
 
 const TEMPLATES = [
   '90.1-2004', '90.1-2007', '90.1-2010', '90.1-2013',
@@ -76,9 +78,63 @@ export default function StandardReferenceSelector({ scheduleInfos }) {
   const inputStyle = { padding: '3px 6px', fontSize: 11, border: '1px solid #ccc', borderRadius: 3, width: '100%', boxSizing: 'border-box' }
   const labelStyle = { fontSize: 11, fontWeight: 600, color: '#555', display: 'block', marginBottom: 2 }
 
+  const referenceSource = state.referenceSource
+  const standardSetName = standardScheduleSetName(state)
+  const standardCategories = useMemo(() => {
+    if (!standardSetName) return []
+    return (state.rawData.standardSchedules || [])
+      .filter(s => s.name === standardSetName)
+      .map(s => s.category)
+      .filter((c, i, arr) => arr.indexOf(c) === i)
+  }, [state.rawData.standardSchedules, standardSetName])
+
+  // source selector shared by both reference modes
+  const sourceSelector = (
+    <div style={{ marginBottom: 8 }}>
+      <label style={labelStyle}>Reference source</label>
+      <div style={{ display: 'flex', gap: 10, fontSize: 11 }}>
+        {[['ashrae', 'ASHRAE'], ['standard', 'Standard (PNNL)']].map(([value, text]) => (
+          <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="referenceSource"
+              checked={referenceSource === value}
+              onChange={() => dispatch({ type: SET_REFERENCE_SOURCE, payload: value })}
+              style={{ margin: 0 }}
+            />
+            {text}
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+
+  if (referenceSource === 'standard') {
+    // Standard schedules map directly by schedule set name, so no template/space type is needed.
+    return (
+      <div style={{ marginBottom: 12, padding: '8px', background: '#f5f5f5', borderRadius: 4, border: '1px solid #ddd' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#444', marginBottom: 6 }}>Reference</div>
+        {sourceSelector}
+        {standardSetName ? (
+          <div style={{ fontSize: 10, color: '#666' }}>
+            Mapped directly by schedule set: <span style={{ fontWeight: 600 }}>{standardSetName}</span>
+            {standardCategories.length === 0 && (
+              <div style={{ color: '#e67e22', marginTop: 2 }}>No standard schedules found for this schedule set.</div>
+            )}
+          </div>
+        ) : (
+          <div style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>
+            Select a space type to map its standard reference schedules.
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ marginBottom: 12, padding: '8px', background: '#f5f5f5', borderRadius: 4, border: '1px solid #ddd' }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: '#444', marginBottom: 6 }}>ASHRAE Reference</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#444', marginBottom: 6 }}>Reference</div>
+      {sourceSelector}
 
       <div style={{ marginBottom: 6 }}>
         <label style={labelStyle}>Template version</label>

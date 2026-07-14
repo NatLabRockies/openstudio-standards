@@ -65,7 +65,7 @@ function buildChartData(standardData, expandedData, gateData) {
   return allH.map(h => map[h])
 }
 
-export default function ProfileChart({ scheduleName, category, standardData, expandedData, gateData, hasError, errorMessage, isLoading, stTime, etTime, onEditControlPoints, spillNote }) {
+export default function ProfileChart({ scheduleName, category, standardData, standardLabel = 'Standard (ASHRAE)', expandedData, gateData, hasError, errorMessage, isLoading, stTime, etTime, onEditControlPoints, spillNote }) {
   const color = CATEGORY_COLORS[category] || '#999'
   const data = buildChartData(standardData, expandedData, gateData)
 
@@ -115,7 +115,7 @@ export default function ProfileChart({ scheduleName, category, standardData, exp
           {standardData && (
             <Line
               dataKey="standard"
-              name="Standard (ASHRAE)"
+              name={standardLabel}
               stroke="#aaa"
               strokeWidth={1.5}
               dot={false}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useAppState, useAppDispatch, SET_EDITOR_PARAMS } from '../context.jsx'
 import { findRecord, patchParametricRecord } from '../utils/workingCopy.js'
+import { profileLabel } from '../utils/profiles.js'
 import {
   evalControlPoint, encodePoint, parseExpr, buildExpr,
 } from '../utils/controlPointCodec.js'
@@ -219,7 +220,7 @@ export default function ControlPointEditor({ scheduleName, dayType, category, on
     <div style={overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={modal}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <h3 style={{ margin: 0, fontSize: 15 }}>Edit control points — {scheduleName} <span style={{ color: '#888', fontWeight: 400 }}>· {dayType}</span></h3>
+          <h3 style={{ margin: 0, fontSize: 15 }}>Edit control points — {scheduleName} <span style={{ color: '#888', fontWeight: 400 }}>· {record ? profileLabel(record) : dayType}</span></h3>
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', fontSize: 18, cursor: 'pointer', color: '#888' }}>✕</button>
         </div>
         <div style={{ fontSize: 11, color: '#777', marginBottom: 8 }}>

@@ -13,6 +13,7 @@ import { resolveKind } from '../utils/scheduleLookup.js'
 import { controlPointParams } from '../utils/expandParams.js'
 import { diurnalDeriveBody } from '../utils/diurnal.js'
 import { getLoadParamArray } from '../utils/workingCopy.js'
+import { findProfileRecord } from '../utils/profiles.js'
 
 const CATEGORY_ORDER = ['Occupancy','Lighting','ElectricEquipment','GasEquipment','HotWater','Diurnal']
 
@@ -64,8 +65,7 @@ export default function RightPane() {
     // Compute occupancy params to look up the expand key (same logic as DayTypePanel)
     const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
     const dayType = state.activeDayType
-    const schedObj = allOccRecords.find(o => o.name === occupancyName && o.day_types === dayType)
-                  || allOccRecords.find(o => o.name === occupancyName && o.day_types === 'Default')
+    const schedObj = findProfileRecord(allOccRecords, occupancyName, dayType)
     if (!schedObj) return
 
     const occParams = controlPointParams(state, schedObj, dayType)

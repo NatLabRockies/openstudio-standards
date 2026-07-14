@@ -59,6 +59,7 @@ export default function SaveButton({ onSuccess }) {
           ashraeSchedules: freshData.ashrae_schedules || [],
           cbesSchedules: freshData.cbes_schedules || [],
           deerSchedules: freshData.deer_schedules || [],
+          standardSchedules: freshData.standard_schedules || [],
           ashraeSpaceTypeMap: freshData.ashrae_space_type_map || {},
         }
       })

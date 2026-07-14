@@ -14,13 +14,14 @@ export function isWeekendProfile(dayType) {
   return WEEKEND_TOKENS.includes(dayType) && !NON_WEEKEND_TOKENS.includes(dayType)
 }
 
-export function controlPointParams(state, record, dayType, { offsets } = {}) {
-  const profileKey = `${record.name}|${dayType}`
-  const pp = state.editorParams.byProfile[profileKey] || {}
+export function controlPointParams(state, record, profileId, { offsets } = {}) {
+  const key = `${record.name}|${profileId}`
+  const pp = state.editorParams.byProfile[key] || {}
   const bh = state.editorParams.buildingHours
   let st, et
   if (bh && bh.enabled) {
-    if (isWeekendProfile(dayType)) { st = bh.wkndStart; et = bh.wkndStart + bh.wkndDuration }
+    // weekend determination uses the record's own day-type token, not the profile key
+    if (isWeekendProfile(record.day_types)) { st = bh.wkndStart; et = bh.wkndStart + bh.wkndDuration }
     else { st = bh.wkdyStart; et = bh.wkdyStart + bh.wkdyDuration }
   } else {
     st = pp.st ?? record.st_std

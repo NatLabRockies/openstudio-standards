@@ -5,13 +5,14 @@ import {
   SET_EXPANDED_PROFILE, SET_EXPANDED_PROFILE_ERROR
 } from '../context.jsx'
 import { derive, expandParametric } from '../api.js'
-import { getUniqueDayTypes } from '../utils/dayAssignment.js'
+import { findProfileRecord, dayTypeOf } from '../utils/profiles.js'
 import { createExpandDebounced } from '../utils/expandDebounced.js'
 import { resolveKind } from '../utils/scheduleLookup.js'
 import { controlPointParams, offsetsForActiveSet } from '../utils/expandParams.js'
 import { evalControlPoint } from '../utils/controlPointCodec.js'
 import { diurnalDeriveBody } from '../utils/diurnal.js'
 import { getLoadParamArray } from '../utils/workingCopy.js'
+import { standardScheduleData, standardScheduleSetName } from '../utils/standardSchedules.js'
 import AddProfileDialog from './AddProfileDialog.jsx'
 import ProfileChart from './ProfileChart.jsx'
 import ControlPointEditor from './ControlPointEditor.jsx'
@@ -51,7 +52,7 @@ function categoryFor(scheduleName, rawData, workingCopies) {
   return 'Occupancy'
 }
 
-export default function DayTypePanel({ occupancyScheduleName, assignments }) {
+export default function DayTypePanel({ occupancyScheduleName, assignments, profiles = [], colorMap = {} }) {
   const state = useAppState()
   const dispatch = useAppDispatch()
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -69,19 +70,12 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
 
   const allOccRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
 
-  const schedObjects = useMemo(() =>
-    occupancyScheduleName
-      ? allOccRecords.filter(o => o.name === occupancyScheduleName)
-      : [],
-    [occupancyScheduleName, allOccRecords]
-  )
-
-  const dayTypes = useMemo(() => {
-    const types = getUniqueDayTypes(schedObjects)
-    return ['Default', ...types.filter(t => t !== 'Default')]
-  }, [schedObjects])
-
-  const activeTab = dayTypes.includes(state.activeDayType) ? state.activeDayType : (dayTypes[0] || 'Default')
+  // activeTab is a profile key (day-type token + optional date range). Fall back to the
+  // first available profile when the current key isn't among this schedule's profiles.
+  const profileKeys = profiles.map(p => p.key)
+  const activeTab = profileKeys.includes(state.activeDayType) ? state.activeDayType : (profileKeys[0] || 'Default')
+  // day-type token of the active profile, for ASHRAE reference matching
+  const activeToken = dayTypeOf(activeTab)
 
   // Build schedule info for all selected schedules
   const scheduleInfos = useMemo(() => {
@@ -102,8 +96,7 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
     const offsets = offsetsForActiveSet(state)
     for (const { name, kind } of scheduleInfos) {
       if (kind !== 'occupancy' && kind !== 'direct') continue
-      const schedObj = occRecords.find(o => o.name === name && o.day_types === activeTab)
-                    || occRecords.find(o => o.name === name && o.day_types === 'Default')
+      const schedObj = findProfileRecord(occRecords, name, activeTab)
       if (!schedObj) continue
       const params = controlPointParams(state, schedObj, activeTab, { offsets: kind === 'direct' ? offsets : null })
       scheduleExpand(name, activeTab, schedObj, params)
@@ -114,8 +107,7 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
   useEffect(() => {
     if (!occupancyScheduleName) return
     const allOcc = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
-    const occSchedObj = allOcc.find(o => o.name === occupancyScheduleName && o.day_types === activeTab)
-                     || allOcc.find(o => o.name === occupancyScheduleName && o.day_types === 'Default')
+    const occSchedObj = findProfileRecord(allOcc, occupancyScheduleName, activeTab)
     if (!occSchedObj) return
 
     const occExpandParams = controlPointParams(state, occSchedObj, activeTab)
@@ -198,11 +190,12 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '8px 12px 0', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
-        {dayTypes.map(dt => (
-          <button key={dt} style={tabStyle(dt === activeTab)}
-            onClick={() => dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: dt })}>
-            {dt}
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '2px 0', padding: '8px 12px 0', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
+        {profiles.map(({ key, label }) => (
+          <button key={key} style={tabStyle(key === activeTab)}
+            onClick={() => dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: key })}>
+            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, marginRight: 5, verticalAlign: 'middle', background: colorMap[key] || '#ccc' }} />
+            {label}
           </button>
         ))}
         <button style={{ ...tabStyle(false), background: '#f0f8ff', color: '#0078d4', marginLeft: 4 }}
@@ -211,28 +204,35 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
 
       <div style={{ flex: 1, padding: '12px', overflow: 'auto' }}>
         {scheduleInfos.map(({ name, category, kind }) => {
-          const ashraeRefName = state.standardReferenceOverrides[name]
-          const ashraeObjs = state.rawData.ashraeSchedules.filter(s => {
-            const cat = s.category === 'Electric Equipment' ? 'ElectricEquipment'
-              : s.category === 'Service Water Heating' ? 'HotWater'
-              : s.category
-            return ashraeRefName ? s.name === ashraeRefName : cat === category
-          })
-          const ashraeObj = ashraeObjs.find(s => s.day_types === activeTab)
-                         || ashraeObjs.find(s => s.day_types === 'Default')
-          const standardData = ashraeObj?.values?.map((v, i) => ({ h: i, v })) || null
+          // reference (comparison) curve, from the active reference source
+          let standardData
+          if (state.referenceSource === 'standard') {
+            // 'Standard' schedules map directly by schedule set name (no template/space type)
+            standardData = standardScheduleData(
+              state.rawData.standardSchedules, standardScheduleSetName(state), category, activeToken
+            )
+          } else {
+            const ashraeRefName = state.standardReferenceOverrides[name]
+            const ashraeObjs = state.rawData.ashraeSchedules.filter(s => {
+              const cat = s.category === 'Electric Equipment' ? 'ElectricEquipment'
+                : s.category === 'Service Water Heating' ? 'HotWater'
+                : s.category
+              return ashraeRefName ? s.name === ashraeRefName : cat === category
+            })
+            const ashraeObj = ashraeObjs.find(s => s.day_types === activeToken)
+                           || ashraeObjs.find(s => s.day_types === 'Default')
+            standardData = ashraeObj?.values?.map((v, i) => ({ h: i, v })) || null
+          }
 
           const occRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
-          const schedObj = occRecords.find(o => o.name === name && o.day_types === activeTab)
-                        || occRecords.find(o => o.name === name && o.day_types === 'Default')
+          const schedObj = findProfileRecord(occRecords, name, activeTab)
 
           let expandedData = null
           // Resolve occupancy schedule object and its current st/et for reference lines
           const occScheduleName = occupancyScheduleName
           const allOccRecs = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
           const occSchedObjForChart = occScheduleName
-            ? (allOccRecs.find(o => o.name === occScheduleName && o.day_types === activeTab)
-              || allOccRecs.find(o => o.name === occScheduleName && o.day_types === 'Default'))
+            ? findProfileRecord(allOccRecs, occScheduleName, activeTab)
             : null
           const occParamsForChart = occSchedObjForChart
             ? controlPointParams(state, occSchedObjForChart, activeTab)
@@ -273,6 +273,7 @@ export default function DayTypePanel({ occupancyScheduleName, assignments }) {
               scheduleName={name}
               category={category}
               standardData={standardData}
+              standardLabel={state.referenceSource === 'standard' ? 'Standard (PNNL)' : 'Standard (ASHRAE)'}
               expandedData={expandedData}
               hasError={!!errorState}
               errorMessage={errorState?.message || null}

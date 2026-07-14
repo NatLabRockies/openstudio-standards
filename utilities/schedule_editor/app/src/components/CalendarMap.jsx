@@ -1,11 +1,6 @@
 import React from 'react'
 import { useAppDispatch, SET_ACTIVE_DAY_TYPE, SET_SELECTED_DATE } from '../context.jsx'
 
-const DAY_TYPE_COLORS = {
-  Default: '#b0b0b0', Wkdy: '#4a90d9', Wknd: '#e67e22',
-  Mon: '#2ecc71', Tue: '#1abc9c', Wed: '#3498db',
-  Thu: '#9b59b6', Fri: '#f39c12', Sat: '#e74c3c', Sun: '#e91e63',
-}
 const EMPTY_COLOR = '#eeeeee'
 
 const DOW_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -22,8 +17,9 @@ const STEP = CELL + GAP
 const DOW_W = 20   // left margin for day-of-week labels
 const MONTH_H = 16 // top margin for month labels
 
-export default function CalendarMap({ assignments, year }) {
+export default function CalendarMap({ assignments, year, profiles = [], colorMap = {} }) {
   const dispatch = useAppDispatch()
+  const labelByKey = Object.fromEntries(profiles.map(p => [p.key, p.label]))
 
   const jan1 = new Date(year, 0, 1)
   const firstDow = jan1.getDay()  // 0=Sun … 6=Sat
@@ -85,35 +81,39 @@ export default function CalendarMap({ assignments, year }) {
           </text>
         ))}
 
-        {/* Day cells */}
+        {/* Day cells — colored by the profile (day-type + date range) assigned to each day */}
         {days.map(({ isoDate, weekIndex, dow }) => {
-          const dayType = assignments?.[isoDate]
-          const fill = dayType ? (DAY_TYPE_COLORS[dayType] || EMPTY_COLOR) : EMPTY_COLOR
+          const key = assignments?.[isoDate]
+          const fill = key ? (colorMap[key] || EMPTY_COLOR) : EMPTY_COLOR
           const x = DOW_W + weekIndex * STEP
           const y = MONTH_H + dow * STEP
           return (
             <g
               key={isoDate}
               onClick={() => {
-                if (!dayType) return
+                if (!key) return
                 dispatch({ type: SET_SELECTED_DATE, payload: isoDate })
-                dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: dayType })
+                dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: key })
               }}
-              style={{ cursor: dayType ? 'pointer' : 'default' }}
+              style={{ cursor: key ? 'pointer' : 'default' }}
             >
-              <title>{`${isoDate}: ${dayType || '—'}`}</title>
+              <title>{`${isoDate}: ${(key && labelByKey[key]) || key || '—'}`}</title>
               <rect x={x} y={y} width={CELL} height={CELL} rx={2} ry={2} fill={fill} />
             </g>
           )
         })}
       </svg>
 
-      {/* Legend */}
+      {/* Legend — only the profiles present in the selected schedule */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 6 }}>
-        {Object.entries(DAY_TYPE_COLORS).map(([tok, col]) => (
-          <span key={tok} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11 }}>
-            <span style={{ width: 10, height: 10, background: col, borderRadius: 2, display: 'inline-block' }} />
-            {tok}
+        {profiles.map(({ key, label }) => (
+          <span
+            key={key}
+            onClick={() => dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: key })}
+            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, cursor: 'pointer' }}
+          >
+            <span style={{ width: 10, height: 10, background: colorMap[key] || EMPTY_COLOR, borderRadius: 2, display: 'inline-block' }} />
+            {label}
           </span>
         ))}
       </div>

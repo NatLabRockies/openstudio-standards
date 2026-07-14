@@ -24,6 +24,41 @@ CBES_SCHEDULES_PATH      = File.join(REPO_ROOT, 'lib/openstudio-standards/standa
 DEER_SCHEDULES_PATH      = File.join(REPO_ROOT, 'lib/openstudio-standards/standards/deer/data/deer.schedules.json')
 ASHRAE_SPACE_TYPE_MAP_PATH = File.join(__dir__, 'ashrae_space_type_map.json')
 
+# 'Standard' reference schedules from the PNNL building-energy-standards-data repository.
+# These are keyed by the schedule_set_name (matching level_1_space_types.json), so they map
+# directly to the parametric schedule profiles. The path can be overridden with the
+# STANDARD_SCHEDULES_PATH environment variable; it is optional and skipped if missing.
+STANDARD_SCHEDULES_PATH  = ENV.fetch(
+  'STANDARD_SCHEDULES_PATH',
+  'C:/Repos/PNNL/building-energy-standards-data/building_energy_standards_data/database_files/support_schedules.json'
+)
+
+# Convert a support_schedules.json record (hr_1..hr_24 hourly keys) to the same shape as the
+# standards schedule records the editor already consumes (a `values` array). hr_n is the value
+# for the nth hour, so it maps to hour index n-1 (matching values[i] -> hour i elsewhere).
+def standard_schedule_record(record)
+  values = (1..24).map { |n| record["hr_#{n}"] }.compact
+  {
+    'name'       => record['name'],
+    'category'   => record['category'],
+    'units'      => record['units'],
+    'day_types'  => record['day_types'],
+    'start_date' => record['start_date'],
+    'end_date'   => record['end_date'],
+    'type'       => record['type'],
+    'notes'      => record['annotation'],
+    'values'     => values
+  }
+end
+
+def load_standard_schedules
+  return [] unless File.exist?(STANDARD_SCHEDULES_PATH)
+
+  raw = JSON.parse(File.read(STANDARD_SCHEDULES_PATH))
+  records = raw.is_a?(Hash) ? (raw['schedules'] || []) : raw
+  records.map { |r| standard_schedule_record(r) }
+end
+
 require_relative File.join(REPO_ROOT, 'lib/openstudio-standards/schedules/create_parametric_schedule.rb')
 
 set :port, 4567
@@ -60,6 +95,8 @@ get '/api/data' do
 
   ashrae_space_type_map = File.exist?(ASHRAE_SPACE_TYPE_MAP_PATH) ? JSON.parse(File.read(ASHRAE_SPACE_TYPE_MAP_PATH)) : {}
 
+  standard_schedules = load_standard_schedules
+
   {
     space_types:          space_types,
     parametric_schedules: parametric_schedules,
@@ -71,6 +108,7 @@ get '/api/data' do
     ashrae_schedules:    ashrae_schedules,
     cbes_schedules:      cbes_schedules,
     deer_schedules:      deer_schedules,
+    standard_schedules:  standard_schedules,
     ashrae_space_type_map: ashrae_space_type_map
   }.to_json
 end

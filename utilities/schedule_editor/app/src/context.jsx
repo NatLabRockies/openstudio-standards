@@ -17,6 +17,7 @@ export const SET_WORKING_COPY = 'SET_WORKING_COPY'
 export const SET_EDITOR_PARAMS = 'SET_EDITOR_PARAMS'
 export const SET_PROFILE_META_EDIT = 'SET_PROFILE_META_EDIT'
 export const SET_ASHRAE_SPACE_TYPE_REF = 'SET_ASHRAE_SPACE_TYPE_REF'
+export const SET_REFERENCE_SOURCE = 'SET_REFERENCE_SOURCE'
 
 const initialState = {
   loading: true,
@@ -33,8 +34,13 @@ const initialState = {
     ashraeSchedules: [],
     cbesSchedules: [],
     deerSchedules: [],
+    standardSchedules: [],
     ashraeSpaceTypeMap: {},
   },
+
+  // Source for the reference (comparison) schedules: 'ashrae' (mapped by template + space type)
+  // or 'standard' (mapped directly by schedule set name from the PNNL support schedules).
+  referenceSource: 'ashrae',
 
   selectedSpaceType: null,
   selectedScheduleNames: [],
@@ -164,6 +170,9 @@ function reducer(state, action) {
 
     case SET_ASHRAE_SPACE_TYPE_REF:
       return { ...state, ashraeSpaceTypeRef: action.payload }
+
+    case SET_REFERENCE_SOURCE:
+      return { ...state, referenceSource: action.payload }
 
     default:
       return state

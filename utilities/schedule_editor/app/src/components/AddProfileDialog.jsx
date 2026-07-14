@@ -3,23 +3,35 @@ import {
   useAppState, useAppDispatch,
   SET_WORKING_COPY, SET_ACTIVE_DAY_TYPE
 } from '../context.jsx'
+import { profileKey } from '../utils/profiles.js'
 
 const VALID_TOKENS = ['Default','Wkdy','Wknd','Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
+function toIso(dateStr) {
+  return dateStr ? `${dateStr}T00:00:00+00:00` : null
+}
 
 export default function AddProfileDialog({ occupancyScheduleName, onClose }) {
   const state = useAppState()
   const dispatch = useAppDispatch()
+  const year = state.calendarYear
   const [dayType, setDayType] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  // New profiles default to a full-year 1/1–12/31 range.
+  const [startDate, setStartDate] = useState(`${year}-01-01`)
+  const [endDate, setEndDate] = useState(`${year}-12-31`)
 
   const isValidToken = VALID_TOKENS.includes(dayType.trim())
   const tokenError = dayType.trim() && !isValidToken
     ? `Invalid token. Valid: ${VALID_TOKENS.join(', ')}` : null
 
   const allRecords = state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
-  const alreadyExists = allRecords.some(
-    o => o.name === occupancyScheduleName && o.day_types === dayType.trim()
+
+  // A profile is identified by day-type + date range, so the same token may repeat with a
+  // different range. Only reject an exact duplicate profile (same token AND same range).
+  const prospective = { day_types: dayType.trim(), start_date: toIso(startDate), end_date: toIso(endDate) }
+  const prospectiveKey = isValidToken ? profileKey(prospective) : null
+  const alreadyExists = prospectiveKey != null && allRecords.some(
+    o => o.name === occupancyScheduleName && profileKey(o) === prospectiveKey
   )
   const canConfirm = isValidToken && !alreadyExists && dayType.trim() !== ''
 
@@ -33,12 +45,12 @@ export default function AddProfileDialog({ occupancyScheduleName, onClose }) {
     const newObj = {
       ...defaults[0],
       day_types: tok,
-      start_date: startDate || null,
-      end_date: endDate || null,
+      start_date: toIso(startDate),
+      end_date: toIso(endDate),
     }
     const updated = [...allRecords, newObj]
     dispatch({ type: SET_WORKING_COPY, payload: { target: 'parametric_schedules', data: updated } })
-    dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: tok })
+    dispatch({ type: SET_ACTIVE_DAY_TYPE, payload: profileKey(newObj) })
     onClose()
   }
 
@@ -71,16 +83,16 @@ export default function AddProfileDialog({ occupancyScheduleName, onClose }) {
             {VALID_TOKENS.filter(t => t !== 'Default').map(t => <option key={t} value={t} />)}
           </datalist>
           {tokenError && <span style={{ fontSize: 11, color: 'red' }}>{tokenError}</span>}
-          {alreadyExists && <span style={{ fontSize: 11, color: 'orange' }}>Profile already exists for this day type</span>}
+          {alreadyExists && <span style={{ fontSize: 11, color: 'orange' }}>A profile with this day type and date range already exists</span>}
         </div>
 
         <div style={fieldStyle}>
-          <label style={labelStyle}>Start date (YYYY-MM-DD, optional)</label>
+          <label style={labelStyle}>Start date (defaults to 1/1)</label>
           <input style={inputStyle} type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
         </div>
 
         <div style={fieldStyle}>
-          <label style={labelStyle}>End date (YYYY-MM-DD, optional)</label>
+          <label style={labelStyle}>End date (defaults to 12/31)</label>
           <input style={inputStyle} type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
         </div>
 

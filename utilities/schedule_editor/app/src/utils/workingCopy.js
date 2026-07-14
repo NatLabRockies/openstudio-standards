@@ -1,25 +1,27 @@
 import { SET_WORKING_COPY } from '../context.jsx'
+import { profileKey } from './profiles.js'
 
 // Active parametric_schedules array (working copy if present, else the raw array).
 export function getParametricArray(state) {
   return state.workingCopies.parametric_schedules || state.rawData.parametricSchedules
 }
 
-// Find the record for name + dayType, falling back to the Default day-type record.
-export function findRecord(state, name, dayType) {
+// Find the record for name + profile key, falling back to the Default profile.
+export function findRecord(state, name, key) {
   const arr = getParametricArray(state)
+  const forName = arr.filter(o => o.name === name)
   return (
-    arr.find(o => o.name === name && o.day_types === dayType) ||
-    arr.find(o => o.name === name && o.day_types === 'Default') ||
+    forName.find(o => profileKey(o) === key) ||
+    forName.find(o => o.day_types === 'Default') ||
     null
   )
 }
 
-// Merge `patch` into the record matching name + dayType (Default fallback) and
+// Merge `patch` into the record matching name + profile key (Default fallback) and
 // dispatch the updated parametric_schedules working copy.
-export function patchParametricRecord(state, dispatch, name, dayType, patch) {
+export function patchParametricRecord(state, dispatch, name, key, patch) {
   const arr = getParametricArray(state)
-  let idx = arr.findIndex(o => o.name === name && o.day_types === dayType)
+  let idx = arr.findIndex(o => o.name === name && profileKey(o) === key)
   if (idx === -1) idx = arr.findIndex(o => o.name === name && o.day_types === 'Default')
   if (idx === -1) return
   const next = arr.map((o, i) => (i === idx ? { ...o, ...patch } : o))
