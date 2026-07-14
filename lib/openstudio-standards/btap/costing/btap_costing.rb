@@ -78,18 +78,18 @@ module BTAP
       # Find the mechanical room.
       mech_room, cond_spaces = prototype_creator.find_mech_room(model)
 
-      envCost             = envelope_costing ? self.cost_audit_envelope(prototype_creator) : 0.0
+      envCost             = envelope_costing         ? self.cost_audit_envelope(prototype_creator)         : 0.0
       thermalBridgingCost = thermal_bridging_costing ? self.cost_audit_thermal_bridging(prototype_creator) : 0.0
-      lgtCost             = lighting_costing ? self.cost_audit_lighting(model, prototype_creator) : 0.0
-      boilerCost          = boilers_costing ? self.boiler_costing(model, prototype_creator) : 0.0
-      chillerCost         = chillers_costing ? self.chiller_costing(model, prototype_creator) : 0.0
-      coolingTowerCost    = cooling_towers_costing ? self.coolingtower_costing(model, prototype_creator) : 0.0
-      shwCost             = shw_costing ? self.shw_costing(model, prototype_creator) : 0.0
-      ventCost            = ventilation_costing ? self.ventilation_costing(
+      lgtCost             = lighting_costing         ? self.cost_audit_lighting(model, prototype_creator)  : 0.0
+      boilerCost          = boilers_costing          ? self.boiler_costing(model, prototype_creator)       : 0.0
+      chillerCost         = chillers_costing         ? self.chiller_costing(model, prototype_creator)      : 0.0
+      coolingTowerCost    = cooling_towers_costing   ? self.coolingtower_costing(model, prototype_creator) : 0.0
+      shwCost             = shw_costing              ? self.shw_costing(model, prototype_creator)          : 0.0
+      ventCost            = ventilation_costing      ? self.ventilation_costing(
         model, prototype_creator,template_type, mech_room, cond_spaces) : 0.0
-      zonalSystemCost     = zone_system_costing ? self.zonalsys_costing(
+      zonalSystemCost     = zone_system_costing      ? self.zonalsys_costing(
         model, prototype_creator, mech_room, cond_spaces) : 0.0
-      pvGroundCost        = renewables_costing ? self.cost_audit_pv_ground(model, prototype_creator) : 0.0
+      pvGroundCost        = renewables_costing       ? self.cost_audit_pv_ground(model, prototype_creator) : 0.0
 
       @costing_report["totals"] = {
         'envelope'            => envCost.round(0),
@@ -156,7 +156,7 @@ module BTAP
     end
 
     # This adds costed items to the array of cousted items which end up in
-    # btap_itmes.json. Note that the array this method uses is created in the
+    # btap_items.json. Note that the array this method uses is created in the
     # cost_audit_all method. The array is created with an initial element that
     # contains the city and province whose localiazation factors are used for
     # costing.
@@ -218,12 +218,12 @@ module BTAP
 
       # Add the costed item to the output output hash.
       @cost_items['Items'] << {
-        'id' => material_id,
-        'quantity' => quantity,
-        'material_mult' => material_mult,
-        'labour_mult' => labour_mult,
+        'id'             => material_id,
+        'quantity'       => quantity,
+        'material_mult'  => material_mult,
+        'labour_mult'    => labour_mult,
         'equipment_mult' => equip_mult,
-        'tags' => tags_out
+        'tags'           => tags_out
       }
     end
 
