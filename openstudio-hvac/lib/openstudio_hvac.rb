@@ -37,6 +37,7 @@ require_relative 'openstudio_hvac/necb/efficiency'
 require_relative 'openstudio_hvac/necb/checker'
 require_relative 'openstudio_hvac/classify'
 require_relative 'openstudio_hvac/builder'
+require_relative 'openstudio_hvac/catalog_report'
 
 # OpenStudioHVAC builds HVAC system topologies on OpenStudio thermal zones by
 # descriptive, fuel-encoding system name. Topology only — sizing runs and code
@@ -81,5 +82,16 @@ module OpenStudioHVAC
   # (zone-scoped teardown + build_system).
   def self.replace_system(model, system_name, zones, **kwargs)
     Builder.build_system(model, system_name, zones, **kwargs, remove_existing: true)
+  end
+
+  # Render a self-contained HTML catalog of EVERY buildable system. Each system
+  # is actually built on the bundled fixture and its real topology extracted, so
+  # the inline-SVG loop diagrams cannot drift from what the gem assembles. See
+  # CatalogReport.to_html.
+  #
+  # @param path [String, nil] if given, the HTML is also written here
+  # @return [String] the self-contained HTML document
+  def self.catalog_html(path = nil, **opts)
+    CatalogReport.to_html(path, **opts)
   end
 end
