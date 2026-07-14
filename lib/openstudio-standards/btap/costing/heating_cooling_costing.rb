@@ -1,34 +1,33 @@
 module BTAP
   class Costing
 
-    # --------------------------------------------------------------------------------------------------
-    # This function gets all costs associated with boilers (i.e., boilers, pumps, flues, electrical
-    # lines and boxes, fuel lines and distribution piping to zonal heating units)
-    # --------------------------------------------------------------------------------------------------
+    # This function gets all costs associated with boilers (i.e., boilers,
+    # pumps, flues, electrical lines and boxes, fuel lines and distribution
+    # piping to zonal heating units).
     def boiler_costing(model, prototype_creator)
 
-      #Global flag to determine if a GSHP is present
+      # Global flag to determine if a GSHP is present.
       @gshp_flag = false
 
-      #Global flag to determine if a AWHP is present
+      # Global flag to determine if a AWHP is present.
       @awhp_flag = false
 
       totalCost = 0.0
 
-      # Get regional cost factors for this province and city
+      # Get regional cost factors for this province and city.
       materials_hvac = @costing_database["raw"]["materials_hvac"]
       hvac_material = materials_hvac.select {|data|
-        data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error
+        data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error.
       regional_material, regional_installation =
           get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Get regional electric cost factors for this province and city
+      # Get regional electric cost factors for this province and city.
       hvac_material = materials_hvac.select {|data|
         data['Material'].to_s.upcase == "BOX" && data['Size'].to_i == 1}.first
       reg_mat_elec, reg_lab_elec =
         get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Store some geometry data for use below...
+      # Store some geometry data for use below.
       util_dist, ht_roof, nom_flr_hght, horz_dist, numAGFlrs, mechRmInBsmt = getGeometryData(model, prototype_creator)
 
       template_type = prototype_creator.template
@@ -37,28 +36,32 @@ module BTAP
       plant_loop_info[:boilers] = []
       plant_loop_info[:boilerpumps] = []
 
-      # Iterate through the plant loops to get boiler & pump data...
+      # Iterate through the plant loops to get boiler & pump data.
       model.getPlantLoops.each do |plant_loop|
-        next unless (plant_loop.name.get.to_s.downcase == "hot water loop") || (plant_loop.name.get.to_s.downcase == "hw plantloop")
+        next unless (plant_loop.name.get.to_s.downcase == "hot water loop") ||
+                    (plant_loop.name.get.to_s.downcase == "hw plantloop")
+
         plant_loop.supplyComponents.each do |supply_comp|
           if supply_comp.to_BoilerHotWater.is_initialized
             boiler = supply_comp.to_BoilerHotWater.get
             boiler_info = {}
             plant_loop_info[:boilers] << boiler_info
             boiler_info[:name] = boiler.name.get
-            # 2020-09-01 CK Include efficiency for boiler upgrade costing
+
+            # 2020-09-01 CK Include efficiency for boiler upgrade costing.
             boiler_info[:efficiency] = boiler.nominalThermalEfficiency.to_f
             if boiler.fuelType =~ /Electric/i
               boiler_info[:fueltype] = 'ElecBoilers'
             elsif boiler.fuelType =~ /NaturalGas/i
               boiler_info[:fueltype] = 'GasBoilers'
-              #2020-09-01 CK Include modifications for condensing and pulse gas boilers
+
+              # 2020-09-01 CK Include modifications for condensing and pulse gas boilers.
               if boiler_info[:efficiency] >= 0.827 && boiler_info[:efficiency] < 0.9
                 boiler_info[:fueltype] = "CondensingBoilers"
               elsif boiler_info[:efficiency] >= 0.9
                 boiler_info[:fueltype] = "PulseBoilers"
               end
-            elsif boiler.fuelType =~ /Oil/i       # Oil, FuelOil, FuelOil#2
+            elsif boiler.fuelType =~ /Oil/i  # Oil, FuelOil, FuelOil#2
               boiler_info[:fueltype] = 'OilBoilers'
             end
             boiler_info[:nominal_capacity] = boiler.nominalCapacity.to_f / 1000 # kW
@@ -128,16 +131,23 @@ module BTAP
       # Get costs associated with each boiler
       plant_loop_info[:boilers].each do |boiler|
 
-        # Get primary/secondary/backup boiler cost based on fuel type and capacity for each boiler
-        # 06-Sep-2019 JTB: Added check for no 'Primary' or 'Secondary' label and assume primary.
-        #    This boiler prefix name seemed to disappear after the heat pump work was committed.
+        # Get primary/secondary/backup boiler cost based on fuel type and
+        # capacity for each boiler.
+        # 06-Sep-2019 JTB: Added check for no 'Primary' or 'Secondary' label and
+        #   assume primary. This boiler prefix name seemed to disappear after
+        #   the heat pump work was committed.
         numBoilers += 1
-        if boiler[:name] =~ /primary/i || (boiler[:name] !~ /primary/i && boiler[:name] !~ /secondary/ && numBoilers == 1) || (boiler[:fueltype] == 'wshp') || (boiler[:fueltype] == 'Airtowaterhp')
+        if boiler[:name]     =~ /primary/i ||
+          (boiler[:name]     !~ /primary/i &&
+           boiler[:name]     !~ /secondary/ && numBoilers == 1) ||
+          (boiler[:fueltype] == 'wshp') ||
+          (boiler[:fueltype] == 'Airtowaterhp')
+
           primaryFuel = boiler[:fueltype]
           primaryCap = boiler[:nominal_capacity]
           matCost, labCost = getHVACCost(boiler[:name], boiler[:fueltype], boiler[:nominal_capacity], false)
 
-          # 2020-09-02 CK: Assume condensing oil boilers cost twice as much as non-condensing oil boilers
+          # 2020-09-02 CK: Assume condensing oil boilers cost twice as much as non-condensing oil boilers.
           if boiler[:fueltype] == 'OilBoilers' && boiler[:efficiency] >= 0.9
             thisBoilerCost = matCost * 2 * regional_material / 100.0 + labCost * regional_installation / 100.0
           else
@@ -145,15 +155,21 @@ module BTAP
           end
 
           # Flue and utility component costs (for gas and oil boilers only)
-          # 2020-09-02 CK:  Include pulse and condensing gas boilers to those with utility component costs
-          if boiler[:fueltype] == 'GasBoilers' || boiler[:fueltype] == 'OilBoilers' || boiler[:fueltype] == 'CondensingBoilers' || boiler[:fueltype] == 'PulseBoilers'
-            # Calculate flue costs once for all boilers since flues combined by header when multiple boilers
+          # 2020-09-02 CK: Include pulse and condensing gas boilers to those
+          #   with utility component costs.
+          if boiler[:fueltype] == 'GasBoilers'        ||
+             boiler[:fueltype] == 'OilBoilers'        ||
+             boiler[:fueltype] == 'CondensingBoilers' ||
+             boiler[:fueltype] == 'PulseBoilers'
+
+            # Calculate flue costs once for all boilers since flues combined by
+            # header when multiple boilers.
             # 6 inch diameter flue (#384)
             materialHash = get_cost_info(mat: 'Venting', size: '6')
             matCost, labCost = getCost('flue', materialHash, multiplier)
             flueVentCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            #6 inch elbow fitting (#386)
+            # 6 inch elbow fitting (#386)
             materialHash = get_cost_info(mat: 'VentingElbow', size: '6')
             matCost, labCost = getCost('flue elbow', materialHash, multiplier)
             flueElbowCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
@@ -173,14 +189,16 @@ module BTAP
             matCost, labCost = getCost('fuel line fitting connection', materialHash, multiplier)
             fuelFittingCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            # Header cost only non-zero if there is a secondary/backup gas/oil boiler
+            # Header cost is only non-zero if there is a secondary/backup
+            # gas/oil boiler.
             headerCost = 0.0
           else  # Electric has no flue
             flueVentCost = 0.0 ; flueElbowCost = 0.0 ; flueTopCost = 0.0 ; headerCost = 0.0
           end
 
           # Electric utility cost components (i.e., power lines).
-          # Calculate utility cost for primary boiler only since multiple boilers use common utilities
+          # Calculate utility cost for primary boiler only since multiple
+          # boilers use common utilities.
 
           # elec 600V #14 wire /100 ft (#848)
           materialHash = get_cost_info(mat: 'Wiring', size: 14)
@@ -192,13 +210,19 @@ module BTAP
           matCost, labCost = getCost('1 inch metal conduit', materialHash, multiplier)
           metalConduitCost = matCost * reg_mat_elec / 100.0 + labCost * reg_lab_elec / 100.0
 
-          # 2020-09-02 CK Adding Condensing and Pulse boilers to those that need additional connections
-          if boiler[:fueltype] == 'GasBoilers' || boiler[:fueltype] == 'CondensingBoilers' || boiler[:fueltype] == 'PulseBoilers'
-            # Gas boilers require fuel line+valves+connectors and electrical conduit
+          # 2020-09-02 CK Adding Condensing and Pulse boilers to those that need
+          #   additional connections
+          if boiler[:fueltype] == 'GasBoilers'        ||
+             boiler[:fueltype] == 'CondensingBoilers' ||
+             boiler[:fueltype] == 'PulseBoilers'
+
+            # Gas boilers require fuel line + valves + connectors and electrical
+            # conduit.
             utilCost += (fuelLineCost + metalConduitCost) * util_dist + fuelFittingCost +
                 elecWireCost * util_dist / 100
 
           elsif boiler[:fueltype] == 'OilBoilers'
+
             # Oil boilers require fuel line+valves+connectors and electrical conduit
 
             # Oil filtering system (#4)
@@ -215,9 +239,11 @@ module BTAP
                 elecWireCost * util_dist / 100 + oilFilterCost + oilTankCost
 
           elsif boiler[:fueltype].to_s.downcase == 'elecboilers' || boiler[:fueltype].to_s.downcase == 'wshp'
+
             # Electric boilers require only conduit
             utilCost += metalConduitCost * util_dist + elecWireCost * util_dist / 100
           elsif boiler[:fueltype].to_s.downcase == 'airtowaterhp'
+
             # Add heating buffer tank for awhp
             materialHash = get_cost_info(mat: 'solartank', size: 450)
             matCost, labCost = getCost('solartank', materialHash, multiplier)
@@ -226,39 +252,49 @@ module BTAP
 
         elsif boiler[:name] =~ /secondary/i || numBoilers > 1
           if boiler[:nominal_capacity] > 0.1
+
             # A secondary boiler exists so use it for costing
             matCost, labCost = getHVACCost(boiler[:name], boiler[:fueltype], boiler[:nominal_capacity], false)
-            # 2020-09-02 CK: Assume condensing oil boilers cost twice as much as non-condensing oil boilers
+
+            # 2020-09-02 CK: Assume condensing oil boilers cost twice as much as
+            #   non-condensing oil boilers
             if boiler[:fueltype] == 'OilBoilers' && boiler[:efficiency] >= 0.9
               thisBoilerCost = matCost * 2 * regional_material / 100.0 + labCost * regional_installation / 100.0
             else
               thisBoilerCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
             end
           else
+
             # Use existing value of thisBoilerCost to represent a backup boiler!
             # This just doubles the cost of the primary boiler.
-            # 2023-04-25:  Leaving backup boiler in energy model but no longer costing.
+            # 2023-04-25:  Leaving backup boiler in energy model but no longer
+            #   costing.
             backupBoiler = false
             thisBoilerCost = 0.0
             numBoilers -= 1
           end
 
-          # Flue costs set to zero if secondary boiler since already calculated in primary
+          # Flue costs set to zero if secondary boiler since already calculated
+          # in primary.
           flueVentCost = 0.0; flueElbowCost = 0.0; flueTopCost = 0.0
 
-          # Check if need a flue header (i.e., there are both primary and secondary/backup boilers)
-          if thisBoilerCost > 0.0 && ( (backupBoiler && primaryFuel != 'ElecBoilers') || (boiler[:fueltype] != 'ElecBoilers' && boiler[:fueltype] != 'wshp' && boiler[:fueltype] != 'Airtowaterhp'))
+          # Check if need a flue header (i.e., there are both primary and
+          # secondary/backup boilers)
+          if thisBoilerCost > 0.0 && ((backupBoiler && primaryFuel != 'ElecBoilers') ||
+             (boiler[:fueltype] != 'ElecBoilers' && boiler[:fueltype] != 'wshp' && boiler[:fueltype] != 'Airtowaterhp'))
+
             # 6 inch diameter header (#384)
             materialHash = get_cost_info(mat: 'Venting', size: 6)
             matCost, labCost = getCost('flue header', materialHash, multiplier)
             headerVentCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            #6 inch elbow fitting for header (#386)
+            # 6 inch elbow fitting for header (#386)
             materialHash = get_cost_info(mat: 'VentingElbow', size: 6)
             matCost, labCost = getCost('flue header elbow', materialHash, multiplier)
             headerElbowCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            # Assume a header length of 20 ft and an elbow fitting for each boiler connected to the header
+            # Assume a header length of 20 ft and an elbow fitting for each
+            # boiler connected to the header.
             headerCost = (headerVentCost * 20  + headerElbowCost) * numBoilers
           else
             headerCost = 0.0
@@ -267,62 +303,80 @@ module BTAP
         boilerCost += thisBoilerCost
         flueCost += flueVentCost * ht_roof + flueElbowCost + flueTopCost + headerCost
         if numBoilers > 1
-          # Adjust utility cost for extra fuel line fitting cost
+
+          # Adjust utility cost for extra fuel line fitting cost.
           utilCost += fuelFittingCost * (numBoilers - 1)
         end
       end
 
-      # Boiler pump costs
+      # Boiler pump costs.
       pumpCost = 0.0; pipingToPumpCost = 0.0; numPumps = 0; pumpName = ''; pumpSize = 0.0 ; pumpFlow = 0.0
       plant_loop_info[:boilerpumps].each do |pump|
         numPumps += 1
-        # Cost variable and constant volume pumps the same (the difference is in extra cost for VFD controller)
+
+        # Cost variable and constant volume pumps the same (the difference is in
+        # extra cost for VFD controller)
         pumpSize = pump[:size]; pumpName = pump[:name]
         pumpFlow += pump[:water_flow_m3_per_s].to_f
         matCost, labCost = getHVACCost(pumpName, 'Pumps', pumpSize, false)
         pumpCost += matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
         if pump[:name] =~ /variable/i
-          # Cost the VFD controller for the variable pump
+
+          # Cost the VFD controller for the variable pump.
           matCost, labCost = getHVACCost(pumpName, 'VFD', pumpSize, false)
           pumpCost += matCost * reg_mat_elec / 100.0 + labCost * reg_lab_elec / 100.0
         end
       end
       if numBoilers > 1 && numPumps < 2
+
         # Add pump costing for the backup boiler pump.
         pumpCost *= 2.0
-        numPumps = 2  # reset the number of pumps for piping costs below
+        numPumps = 2  # Reset the number of pumps for piping costs below.
       end
-      # Double the pump costs to accomodate the costing of a backup pumps for each boiler!
-      # No longer costing backup pumps.
-      # pumpCost *= 2.0
 
-      # Boiler water piping to pumps cost: Add piping elbows, valves and insulation from the boiler(s)
-      # to the pumps(s) assuming a pipe diameter of 1” and a distance of 10 ft per pump
+      # Double the pump costs to accomodate the costing of a backup pumps for
+      # each boiler!
+      # No longer costing backup pumps.
+
+      # Boiler water piping to pumps cost: Add piping elbows, valves and
+      # insulation from the boiler(s) to the pumps(s) assuming a pipe diameter
+      # of 1” and a distance of 10 ft per pump.
 
       if numBoilers > 0
-        # 1 inch Steel pipe
+
+        # 1 inch Steel pipe.
         matCost, labCost = getHVACCost('1 inch steel pipe', 'SteelPipe', 1)
         pipingToPumpCost += 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
 
-        # 1 inch Steel pipe insulation
+        # 1 inch Steel pipe insulation.
         matCost, labCost = getHVACCost('1 inch pipe insulation', 'PipeInsulation', 1)
         pipingToPumpCost += 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
 
-        # 1 inch Steel pipe elbow
+        # 1 inch Steel pipe elbow.
         matCost, labCost = getHVACCost('1 inch steel pipe elbow', 'SteelPipeElbow', 1)
         pipingToPumpCost += 2.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
 
-        # 1 inch gate valves
+        # 1 inch gate valves.
         matCost, labCost = getHVACCost('1 inch gate valves', 'ValvesGate', 1)
         pipingToPumpCost += 1.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
       end
 
       if numBoilers > 0
-        # Double pump piping cost to account for second boiler
+
+        # Double pump piping cost to account for second boiler.
         pipingToPumpCost *= numBoilers
 
-        hdrDistributionCost = getHeaderPipingDistributionCost(numAGFlrs, mechRmInBsmt, regional_material, regional_installation, reg_mat_elec, reg_lab_elec,
-                                                              pumpFlow, horz_dist, nom_flr_hght)
+        hdrDistributionCost = getHeaderPipingDistributionCost(
+          numAGFlrs,
+          mechRmInBsmt,
+          regional_material,
+          regional_installation,
+          reg_mat_elec,
+          reg_lab_elec,
+          pumpFlow,
+          horz_dist,
+          nom_flr_hght)
+
       else
         pipingToPumpCost = 0
         hdrDistributionCost = 0
@@ -331,45 +385,45 @@ module BTAP
       totalCost = boilerCost + flueCost + utilCost + pumpCost + pipingToPumpCost + hdrDistributionCost
 
           @costing_report['heating_and_cooling']['plant_equipment']  << {
-          'type' => 'boilers',
-          'nom_flr2flr_hght_ft' => nom_flr_hght.round(1),
-          'ht_roof_ft' => ht_roof.round(1),
-          'longest_distance_to_ext_ft' => horz_dist.round(1),
+          'type'                                   => 'boilers',
+          'nom_flr2flr_hght_ft'                    => nom_flr_hght.round(1),
+          'ht_roof_ft'                             => ht_roof.round(1),
+          'longest_distance_to_ext_ft'             => horz_dist.round(1),
           'wiring_and_gas_connections_distance_ft' => util_dist.round(1),
-          'equipment_cost' => boilerCost.round(0),
-          'flue_cost' => flueCost.round(0),
-          'wiring_and_gas_connections_cost' => utilCost.round(0),
-          'pump_cost' => pumpCost.round(0),
-          'piping_to_pump_cost' => pipingToPumpCost.round(0),
-          'header_distribution_cost' => hdrDistributionCost.round(0),
-          'total_cost' => totalCost.round(0)
+          'equipment_cost'                         => boilerCost.round(0),
+          'flue_cost'                              => flueCost.round(0),
+          'wiring_and_gas_connections_cost'        => utilCost.round(0),
+          'pump_cost'                              => pumpCost.round(0),
+          'piping_to_pump_cost'                    => pipingToPumpCost.round(0),
+          'header_distribution_cost'               => hdrDistributionCost.round(0),
+          'total_cost'                             => totalCost.round(0)
       }
       puts "\nHVAC Boiler costing data successfully generated. Total boiler costs: $#{totalCost.round(0)}"
 
       return totalCost
     end
 
-    # --------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Chiller costing is similar to boiler costing above
-    # --------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def chiller_costing(model, prototype_creator)
 
       totalCost = 0.0
 
-      # Get regional cost factors for this province and city
+      # Get regional cost factors for this province and city.
       materials_hvac = @costing_database["raw"]["materials_hvac"]
       hvac_material = materials_hvac.select {|data|
         data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error
       regional_material, regional_installation =
           get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Get regional electric cost factors for this province and city
+      # Get regional electric cost factors for this province and city.
       hvac_material = materials_hvac.select {|data|
         data['Material'].to_s.upcase == "BOX" && data['Size'].to_i == 1}.first
       reg_mat_elec, reg_lab_elec =
         get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Store some geometry data for use below...
+      # Store some geometry data for use below.
       util_dist, ht_roof, nom_flr_hght, horz_dist, numAGFlrs, mechRmInBsmt = getGeometryData(model, prototype_creator)
 
       template_type = prototype_creator.template
@@ -380,7 +434,7 @@ module BTAP
       plant_loop_info[:chillerpumps] = []
       awhp_chiller = false
 
-      # Iterate through the plant loops to get chiller & pump data...
+      # Iterate through the plant loops to get chiller & pump data.
       model.getPlantLoops.each do |plant_loop|
         next unless (plant_loop.name.get.to_s.downcase == "chilled water loop") || (plant_loop.name.get.to_s.downcase == "chw plantloop")
         plant_loop.supplyComponents.each do |supply_comp|
@@ -474,30 +528,41 @@ module BTAP
         end
       end
 
-      # Get costs associated with each chiller
+      # Get costs associated with each chiller.
       numChillers = 0 ; multiplier = 1.0
       primaryFuel = ''; primaryCap = 0
 
       plant_loop_info[:chillers].each do |chiller|
 
-        # Get primary/secondary/backup chiller cost based on type and capacity for each chiller
-        # 06-Sep-2019 JTB: Added check for no 'Primary' or 'Secondary' label and assume primary.
-        #    This chiller prefix name seemed to disappear after the heat pump work was committed.
+        # Get primary/secondary/backup chiller cost based on type and capacity
+        # for each chiller.
+        # 06-Sep-2019 JTB: Added check for no 'Primary' or 'Secondary' label and
+        #    assume primary. This chiller prefix name seemed to disappear after
+        #    the heat pump work was committed.
         numChillers += 1
         if chiller[:type].to_s.downcase == 'airtowaterhp'
           primaryFuel = chiller[:fuel]
-          primaryCap = chiller[:reference_capacity] #kW
-          # Add cooling buffer tank for awhp
+          primaryCap = chiller[:reference_capacity] # kW
+
+          # Add cooling buffer tank for AWHP.
           materialHash = get_cost_info(mat: 'solartank', size: 450)
-          matCost, labCost = getCost('solartank', materialHash, multiplier) #Costing for AWHP only buffer tank, AWHP included in boiler cost
+
+          # Costing for AWHP only buffer tank, AWHP included in boiler cost.
+          matCost, labCost = getCost('solartank', materialHash, multiplier)
           thisChillerCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
-          # Include 2 expansion tanks for awhp
+
+          # Include 2 expansion tanks for AWHP.
           materialHash = get_cost_info(mat: 'ExpansionTanks', size: 60)
-          matCost, labCost = getCost('ExpansionTanks', materialHash, multiplier) #Costing for AWHP only buffer tank, AWHP included in boiler cost
+
+          # Costing for AWHP only buffer tank, AWHP included in boiler cost.
+          matCost, labCost = getCost('ExpansionTanks', materialHash, multiplier)
           thisChillerCost += (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0) * 2
-          # Inclide glycol cost
+
+          # Include glycol cost.
           materalHash = get_cost_info(mat: 'glycol')
-          matCost, labCost = getCost('solartank', materialHash, multiplier) #Costing for AWHP only buffer tank, AWHP included in boiler cost
+
+          # Costing for AWHP only buffer tank, AWHP included in boiler cost.
+          matCost, labCost = getCost('solartank', materialHash, multiplier)
           thisChillerCost += (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0) * 2
 
           flueVentCost = 0.0 ; flueElbowCost = 0.0 ; flueTopCost = 0.0 ; headerCost = 0.0
@@ -510,15 +575,18 @@ module BTAP
           elsif chiller[:name].include?("ChillerElectricEIR_VSDCentrifugalWaterChiller")
             thisChillerCost = vsd_chiller_cost(primaryCap: primaryCap)
           end
+
           # Flue cost for gas (absorption) chillers!
           if chiller[:fuel] == 'NaturalGas'
-            # Calculate flue costs once for all chillets since flues combined by header when multiple chillers
+
+            # Calculate flue costs once for all chillets since flues combined by
+            # header when multiple chillers.
             # 6 inch diameter flue (#384)
             materialHash = get_cost_info(mat: 'Venting', size: 6)
             matCost, labCost = getCost('flue', materialHash, multiplier)
             flueVentCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            #6 inch elbow fitting (#386)
+            # 6 inch elbow fitting (#386)
             materialHash = get_cost_info(mat: 'VentingElbow', size: 6)
             matCost, labCost = getCost('flue elbow', materialHash, multiplier)
             flueElbowCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
@@ -546,7 +614,8 @@ module BTAP
           end
 
           # Electric utility costs (i.e., power lines).
-          # Calculate utility cost components for primary chiller only since multiple chillers use common utilities
+          # Calculate utility cost components for primary chiller only since
+          # multiple chillers use common utilities.
 
           # elec 600V #14 wire /100 ft (#848)
           materialHash = get_cost_info(mat: 'Wiring', size: 14)
@@ -559,21 +628,26 @@ module BTAP
           metalConduitCost = matCost * reg_mat_elec / 100.0 + labCost * reg_lab_elec / 100.0
 
           if chiller[:fuel] == 'NaturalGas'
-            # Gas chillers require fuel line+valves+connectors and electrical conduit
+
+            # Gas chillers require fuel line + valves + connectors and
+            # electrical conduit.
             utilCost += (fuelLineCost + metalConduitCost) * util_dist + fuelFittingCost + elecWireCost * util_dist / 100
 
           else # Electric
-            # Electric chillers require only conduit
+
+            # Electric chillers require only conduit.
             utilCost += metalConduitCost * util_dist + elecWireCost * util_dist / 100
           end
 
         elsif (chiller[:name].to_s.downcase =~ /secondary/i || numChillers > 1)
           if chiller[:reference_capacity] <= 0.1
+
             # Chiller cost is zero!
             thisChillerCost = 0.0
             numChillers -= 1
           else
-            # A secondary chiller exists so use it for costing
+
+            # A secondary chiller exists so use it for costing.
             if not chiller[:name].include?("ChillerElectricEIR_VSDCentrifugalWaterChiller")
               matCost, labCost = getHVACCost(chiller[:name], chiller[:type], chiller[:reference_capacity], false)
               thisChillerCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
@@ -582,22 +656,26 @@ module BTAP
             end
           end
 
-          # Flue costs set to zero if secondary chiler since already calculated in primary (if gas absorption)
+          # Flue costs set to zero if secondary chiler since already calculated
+          # in primary (if gas absorption).
           flueVentCost = 0.0; flueElbowCost = 0.0; flueTopCost = 0.0
 
-          # Check if need a flue header (i.e., both primary and secondary chillers are gas absorption)
+          # Check if need a flue header (i.e., both primary and secondary
+          # chillers are gas absorption).
           if thisChillerCost > 0.0 && primaryFuel == 'NaturalGas' && chiller[:fuel] == 'NaturalGas'
+
             # 6 inch diameter header (#384)
             materialHash = get_cost_info(mat: 'Venting', size: 6)
             matCost, labCost = getCost('flue header', materialHash, multiplier)
             headerVentCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            #6 inch elbow fitting for header (#386)
+            # 6 inch elbow fitting for header (#386)
             materialHash = get_cost_info(mat: 'VentingElbow', size: 6)
             matCost, labCost = getCost('flue header elbow', materialHash, multiplier)
             headerElbowCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
 
-            # Assume a header length of 20 ft and an elbow fitting for each boiler connected to the header
+            # Assume a header length of 20 ft and an elbow fitting for each
+            # boiler connected to the header.
             headerCost = (headerVentCost * 20 + headerElbowCost) * numChillers
           else
             headerCost = 0.0
@@ -610,24 +688,28 @@ module BTAP
           utilCost += fuelFittingCost * (numChillers - 1)
         end
         if numChillers < 2
+
           # Create a cost for a backup chiller by doubling cost of primary chiller
-          # 2023-04-25:  Although backup chillers may be modeled we are no longer counting them.
-          #chillerCost *= 2.0
+          # 2023-04-25:  Although backup chillers may be modeled we are no
+          #   longer counting them.
           numChillers = 1
         end
       end
 
-      # Chiller pump costs
+      # Chiller pump costs.
       pumpCost = 0.0; pipingToPumpCost = 0.0; numPumps = 0; pumpName = ''; pumpSize = 0.0 ; pumpFlow = 0.0
       plant_loop_info[:chillerpumps].each do |pump|
         numPumps += 1
-        # Cost variable and constant volume pumps the same (the difference is in extra cost for VFD controller)
+
+        # Cost variable and constant volume pumps the same (the difference is in
+        # extra cost for VFD controller).
         pumpSize = pump[:size]; pumpName = pump[:name]
         pumpFlow += pump[:water_flow_m3_per_s].to_f
         matCost, labCost = getHVACCost(pumpName, 'Pumps', pumpSize, false)
         indpumpCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
         if pump[:name] =~ /variable/i
-          # Cost the VFD controller for the variable pump costed above
+
+          # Cost the VFD controller for the variable pump costed above.
           matCost, labCost = getHVACCost(pumpName, 'VFD', pumpSize, false)
           indpumpCost += matCost * reg_mat_elec / 100.0 + labCost * reg_lab_elec / 100.0
         end
@@ -638,42 +720,60 @@ module BTAP
         end
       end
       if (numChillers > 1 && numPumps < 2)
+
         # Add pump costing for additional chillers
-        pumpCost *= 2.0
-        numPumps = 2  # reset the number of pumps for piping costs below
+        pumpCost   *= 2.0
+        numPumps    = 2  # Reset the number of pumps for piping costs below.
         numChillers = 2
       end
-      # Double the pump costs to accomodate the costing of backup pumps for each chiller!
-      # No longer costing backup pump CK 2023-06-23
-      #pumpCost *= 2.0
 
-      # Chiller water piping cost: Add piping elbows, valves and insulation from the chiller(s)
-      # to the pumps(s) assuming a pipe diameter of 1” and a distance of 10 ft per pump
+      # Double the pump costs to accomodate the costing of backup pumps for
+      # each chiller!
+      # CK 2023-06-23: No longer costing backup pump
+
+      # Chiller water piping cost: Add piping elbows, valves and insulation
+      # from the chiller(s) to the pumps(s) assuming a pipe diameter of 1” and a
+      # distance of 10 ft per pump.
       if numChillers > 0
-        # 1 inch Steel pipe
+
+        # 1 inch Steel pipe.
         matCost, labCost = getHVACCost('1 inch steel pipe', 'SteelPipe', 1)
-        pipingToPumpCost = 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
+        pipingToPumpCost = 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost *
+          regional_installation / 100.0)
 
-        # 1 inch Steel pipe insulation
+        # 1 inch Steel pipe insulation.
         matCost, labCost = getHVACCost('1 inch pipe insulation', 'PipeInsulation', 1)
-        pipingToPumpCost += 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
+        pipingToPumpCost += 10.0 * numPumps * (matCost * regional_material / 100.0 + labCost *
+          regional_installation / 100.0)
 
-        # 1 inch Steel pipe elbow
+        # 1 inch Steel pipe elbow.
         matCost, labCost = getHVACCost('1 inch steel pipe elbow', 'SteelPipeElbow', 1)
-        pipingToPumpCost += 2.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
+        pipingToPumpCost += 2.0 * numPumps * (matCost * regional_material / 100.0 + labCost *
+          regional_installation / 100.0)
 
-        # 1 inch gate valves
+        # 1 inch gate valves.
         matCost, labCost = getHVACCost('1 inch gate valves', 'ValvesGate', 1)
-        pipingToPumpCost += 1.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
+        pipingToPumpCost += 1.0 * numPumps * (matCost * regional_material / 100.0 + labCost *
+          regional_installation / 100.0)
       end
 
       if numChillers > 0
-        # Double pump piping cost to account for second chiller
+
+        # Double pump piping cost to account for second chiller.
         pipingToPumpCost *= 2 if awhp_chiller
         pipingToPumpCost *= numChillers
 
-        hdrDistributionCost = getHeaderPipingDistributionCost(numAGFlrs, mechRmInBsmt, regional_material, regional_installation, reg_mat_elec, reg_lab_elec,
-                                                              pumpFlow, horz_dist, nom_flr_hght)
+        hdrDistributionCost = getHeaderPipingDistributionCost(
+          numAGFlrs,
+          mechRmInBsmt,
+          regional_material,
+          regional_installation,
+          reg_mat_elec,
+          reg_lab_elec,
+          pumpFlow,
+          horz_dist,
+          nom_flr_hght)
+
       else
         pipingToPumpCost = 0
         hdrDistributionCost = 0
@@ -682,18 +782,18 @@ module BTAP
       totalCost = chillerCost + flueCost + utilCost + pumpCost + pipingToPumpCost + hdrDistributionCost
 
       @costing_report['heating_and_cooling']['plant_equipment']  << {
-          'type' => 'chillers',
-          'nom_flr2flr_hght_ft' => nom_flr_hght.round(1),
-          'ht_roof_ft' => ht_roof.round(1),
-          'longest_distance_to_ext_ft' => horz_dist.round(1),
+          'type'                                   => 'chillers',
+          'nom_flr2flr_hght_ft'                    => nom_flr_hght.round(1),
+          'ht_roof_ft'                             => ht_roof.round(1),
+          'longest_distance_to_ext_ft'             => horz_dist.round(1),
           'wiring_and_gas_connections_distance_ft' => util_dist.round(1),
-          'equipment_cost' => chillerCost.round(0),
-          'flue_cost' => flueCost.round(0),
-          'wiring_and_gas_connections_cost' => utilCost.round(0),
-          'pump_cost' => pumpCost.round(0),
-          'piping_to_pump_cost' => pipingToPumpCost.round(0),
-          'header_distribution_cost' => hdrDistributionCost.round(0),
-          'total_cost' => totalCost.round(0)
+          'equipment_cost'                         => chillerCost.round(0),
+          'flue_cost'                              => flueCost.round(0),
+          'wiring_and_gas_connections_cost'        => utilCost.round(0),
+          'pump_cost'                              => pumpCost.round(0),
+          'piping_to_pump_cost'                    => pipingToPumpCost.round(0),
+          'header_distribution_cost'               => hdrDistributionCost.round(0),
+          'total_cost'                             => totalCost.round(0)
       }
 
       puts "\nHVAC Chiller costing data successfully generated. Total chiller costs: $#{totalCost.round(0)}"
@@ -701,27 +801,27 @@ module BTAP
       return totalCost
     end
 
-    # ----------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Cooling tower (i.e., chiller condensor loop cooling) costing
-    # ----------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def coolingtower_costing(model, prototype_creator)
 
       totalCost = 0.0
 
-      # Get regional cost factors for this province and city
+      # Get regional cost factors for this province and city.
       materials_hvac = @costing_database["raw"]["materials_hvac"]
       hvac_material = materials_hvac.select {|data|
-        data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error
+        data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error.
       regional_material, regional_installation =
           get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Get regional electric cost factors for this province and city
+      # Get regional electric cost factors for this province and city.
       hvac_material = materials_hvac.select {|data|
         data['Material'].to_s.upcase == "BOX" && data['Size'].to_i == 1}.first
       reg_mat_elec, reg_lab_elec =
         get_regional_cost_factors(@costing_report['province_state'], @costing_report['city'], hvac_material)
 
-      # Store some geometry data for use below...
+      # Store some geometry data for use below.
       util_dist, ht_roof, nom_flr_hght, horz_dist, numAGFlrs, mechRmInBsmt = getGeometryData(model, prototype_creator)
 
       template_type = prototype_creator.template
@@ -735,7 +835,7 @@ module BTAP
       plant_loop_info[:groundloops] = []
       cltowertype = 'cooling_towers'
 
-      # Iterate through the plant loops to get cooling tower & pump data...
+      # Iterate through the plant loops to get cooling tower & pump data.
       model.getPlantLoops.each do |plant_loop|
         next unless (plant_loop.name.get.to_s =~ /Condenser Water Loop/i) || (plant_loop.name.get.to_s =~ /Condenser PlantLoop GLHX/i)
         plant_loop.supplyComponents.each do |supply_comp|
@@ -808,21 +908,24 @@ module BTAP
         end
       end
 
-      # Get costs associated with each cooling tower
+      # Get costs associated with each cooling tower.
       numTowers = 0 ; multiplier = 1.0
 
       plant_loop_info[:coolingtowers].each do |cltower|
-        # Get cooling tower cost based on capacity
+
+        # Get cooling tower cost based on capacity.
         numTowers += 1
         if numTowers == 1
           matCost, labCost = getHVACCost(cltower[:name], cltower[:type], cltower[:capacity], false)
           thisClTowerCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
         else  # Multiple cooling towers
           if cltower[:capacity] <= 0.1
+
             # Cooling tower cost is zero!
             thisClTowerCost = 0.0
           else
-            # A second cooling tower exists so use it for costing
+
+            # A second cooling tower exists so use it for costing.
             matCost, labCost = getHVACCost(cltower[:name], cltower[:type], cltower[:capacity], false)
             thisClTowerCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
           end
@@ -844,35 +947,30 @@ module BTAP
         utilCost += metalConduitCost * (ht_roof + 20) + elecWireCost * (ht_roof + 20) / 100
       end
 
-      # Cooling Tower (condensor) pump costs
+      # Cooling Tower (condensor) pump costs.
       pumpCost = 0.0; pipingCost = 0.0; numPumps = 0; pumpName = ''; pumpSize = 0.0
       plant_loop_info[:coolingtowerpumps].each do |pump|
         numPumps += 1
-        # Cost variable and constant volume pumps the same (VFD controller added if variable)
+
+        # Cost variable and constant volume pumps the same (VFD controller added
+        # if variable)
         pumpSize = pump[:size]; pumpName = pump[:name]
         matCost, labCost = getHVACCost(pumpName, 'Pumps', pumpSize, false)
         pumpCost += matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
         if pump[:name] =~ /variable/i
-          # Cost the VFD controller for the variable pump costed above
+
+          # Cost the VFD controller for the variable pump costed above.
           pumpSize = pump[:size]; pumpName = pump[:name]
           matCost, labCost = getHVACCost(pumpName, 'VFD', pumpSize, false)
           pumpCost += matCost * reg_mat_elec / 100.0 + labCost * reg_lab_elec / 100.0
         end
       end
-      if numTowers > 1 && numPumps < 2
-        # Add pump costing for the backup pump.
-        # 2023-04-25:  Not including backup tower or pump costs
-        # pumpCost *= 2.0
-      end
-      # Double the pump costs to accomodate the costing of a backup pump(s)!
-      # 2023-04-25 No longer including backup pumps
-      #pumpCost *= 2.0
-      #numPumps = 2  # reset the number of pumps for piping costs below
 
-
-      # Chiller water piping cost: Add piping elbows, valves and insulation from the chiller(s)
-      # to the pumps(s) assuming a pipe diameter of 1” and a distance of 10 ft per pump
+      # Chiller water piping cost: Add piping elbows, valves and insulation
+      # from the chiller(s) to the pumps(s) assuming a pipe diameter of 1” and a
+      # distance of 10 ft per pump.
       if numTowers > 0
+
         # 4 inch Steel pipe (vertical + horizontal)
         matCost, labCost = getHVACCost('4 inch steel pipe', 'SteelPipe', 4)
         pipingCost += (ht_roof * 2 + 10 * numPumps) * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
@@ -881,48 +979,55 @@ module BTAP
         matCost, labCost = getHVACCost('1 inch pipe insulation', 'PipeInsulation', 4)
         pipingCost += (ht_roof * 2 + 10 * numPumps) * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
 
-        # 4 inch Steel pipe elbow
+        # 4 inch Steel pipe elbow.
         matCost, labCost = getHVACCost('4 inch steel pipe tee', 'SteelPipeTee', 4)
         pipingCost += 1.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
 
-        # 4 inch valves
+        # 4 inch valves.
         matCost, labCost = getHVACCost('4 inch BFly valves', 'ValvesBFly', 4)
         pipingCost += 1.0 * numPumps * (matCost * regional_material / 100.0 + labCost * regional_installation / 100.0)
       end
 
-      # Note: No extra costs for piping for backup condenser pump or multiple cooling towers.
+      # NOTE: No extra costs for piping for backup condenser pump or multiple
+      # cooling towers.
 
-      # Calculate GSHP ground loop cost and interior piping
+      # Calculate GSHP ground loop cost and interior piping.
       unless plant_loop_info[:groundloops].empty?
-        # GSHP ground loop cost
-        # Not applying localization because costs are currently national estimates only (2023-06-19)
+
+        # GSHP ground loop cost.
+        # Not applying localization because costs are currently national
+        # estimates only (2023-06-19)
         cltowertype = 'ground_loop'
         largest_loop = plant_loop_info[:groundloops].max_by { |groundloop| groundloop[:nominal_capacity] }
         nominal_capacity = largest_loop[:nominal_capacity].to_f
         matCost, labCost = getHVACCost('GSHP ground loop', 'gshp_ground_loop', '')
         cltowerCost = matCost * nominal_capacity
 
-        # GSHP piping from building to bore field cost
-        # Not applying localization because costs are currently national estimates only (2023-06-19)
+        # GSHP piping from building to bore field cost.
+        # Not applying localization because costs are currently national
+        # estimates only (2023-06-19)
         gshp_dist = 50
         loop_flow = largest_loop[:plant_loop_flow_rate_m3ps]
         pipe_dia_mm = d = Math.sqrt(1.273*loop_flow/2.0)*1000
         matCost, labCost = getHVACCost('GSHP outdoor piping cost', 'gshp_buried_pipe', pipe_dia_mm, false)
         pipingCost = matCost * gshp_dist
 
-        # Interior piping cost
+        # Interior piping cost.
         # Get mechanical room lacotion (assume this is where the GSHP is)
         mech_room, cond_spaces = prototype_creator.find_mech_room(model)
         mech_centroid = mech_room["space_centroid"]
-        # Determine the length to the largest exterior wall
+
+        # Determine the length to the largest exterior wall.
         ground_spaces = []
         pipe_dists = []
-        # Determine the exterior ground walls touching the ground
-        # Get the spaces
+
+        # Determine the exterior ground walls touching the ground.
+        # Get the spaces.
         model.getSpaces.sort.each do |space|
           ground_surf = false
-          # Get the surfaces for the space and determine if any are contacting the ground.  If one is add it to the arroy
-          # of spaces
+
+          # Get the surfaces for the space and determine if any are contacting
+          # the ground. If one is add it to the array of spaces.
           space.surfaces.sort.each do |surface|
             if surface.isGroundSurface
               ground_surf = true
@@ -930,11 +1035,17 @@ module BTAP
           end
           ground_spaces << space if ground_surf == true
         end
-        # Go through all of the spaces contacting the ground
+
+        # Go through all of the spaces contacting the ground.
         ground_spaces.sort.each do |ground_space|
-          # Go through all of the surfaces for the space and determine which are exterior or foundation walls
-          ext_walls = ground_space.surfaces.select{ |surf| surf.surfaceType == 'Wall' && (surf.outsideBoundaryCondition == 'Outdoors' || surf.outsideBoundaryCondition == 'Foundation')}
-          # Get the largest exterior wall and the distance to its centroid to the mech room centroid
+          # Go through all of the surfaces for the space and determine which are
+          # exterior or foundation walls.
+          ext_walls = ground_space.surfaces.select{ |surf|
+            surf.surfaceType == 'Wall' &&
+            (surf.outsideBoundaryCondition == 'Outdoors' || surf.outsideBoundaryCondition == 'Foundation') }
+
+          # Get the largest exterior wall and the distance to its centroid to
+          # the mech room centroid.
           unless ext_walls.empty?
             ext_wall = ext_walls.max_by { |ext_wall| ext_wall.grossArea.to_f }
             pipe_dists << {
@@ -943,7 +1054,9 @@ module BTAP
             }
           end
         end
-        # Find the shortest distance to the 3 largest walls and pick the shortest one
+
+        # Find the shortest distance to the 3 largest walls and pick the
+        # shortest one.
         largest_walls = pipe_dists.max_by(3) { |wall| wall[:wall].grossArea.to_f }
         pipe_dist = largest_walls.min_by { |wall| wall[:pipe_dist].to_f }
         pipe_dist_ft = (OpenStudio.convert(pipe_dist[:pipe_dist], 'm', 'ft').get)
@@ -951,41 +1064,41 @@ module BTAP
         pipe_dia_inch = (OpenStudio.convert(pipe_dia_mm/1000, 'm', 'ft').get)*12.0
         pipe_dia_inch = 8.0 if pipe_dia_inch >= 8.0
 
-        # Include localization foctors in interior piping and fixtures
-        # Cost the interior pipe
+        # Include localization factors in interior piping and fixtures.
+        # Cost the interior pipe.
         matCost, labCost = getHVACCost('GSHP indoor piping cost', 'SteelPipe', pipe_dia_inch, false)
         pipingCost += (matCost*regional_material + labCost*regional_installation)*pipe_dist_ft*2.0/100.0
 
-        # Cost the pipe insulation
+        # Cost the pipe insulation.
         pipe_dia_inch = 4.0 if pipe_dia_inch > 4.0
         matCost, labCost = getHVACCost('GSHP indoor pipe insulation', 'PipeInsulation', pipe_dia_inch, false)
         pipingCost += (matCost*regional_material + labCost*regional_installation)*pipe_dist_ft*2.0/100.0
 
-        # Cost 1 valve
+        # Cost 1 valve.
         matCost, labCost = getHVACCost('GSHP indoor pipe valve', 'ValvesBig', 4.0)
         pipingCost += (matCost*regional_material + labCost*regional_installation)/100.0
 
-        # Cost 2 pipe tees
+        # Cost 2 pipe tees.
         matCost, labCost = getHVACCost('GSHP indoor pipe tees', 'SteelPipeTee', 4.0)
         pipingCost += (matCost*regional_material + labCost*regional_installation)*2.0/100.0
 
-        # Cost 8 pipe tees
+        # Cost 8 pipe tees.
         matCost, labCost = getHVACCost('GSHP indoor pipe elbows', 'SteelPipeElbow', 4.0)
         pipingCost += (matCost*regional_material + labCost*regional_installation)*8.0/100.0
       end
       totalCost = cltowerCost + utilCost + pumpCost + pipingCost
 
       @costing_report['heating_and_cooling']['plant_equipment']  << {
-          'type' => cltowertype,
-          'nom_flr2flr_hght_ft' => nom_flr_hght.round(1),
-          'ht_roof_ft' => ht_roof.round(1),
-          'longest_distance_to_ext_ft' => horz_dist.round(1),
+          'type'                                   => cltowertype,
+          'nom_flr2flr_hght_ft'                    => nom_flr_hght.round(1),
+          'ht_roof_ft'                             => ht_roof.round(1),
+          'longest_distance_to_ext_ft'             => horz_dist.round(1),
           'wiring_and_gas_connections_distance_ft' => util_dist.round(1),
-          'equipment_cost' => cltowerCost.round(0),
-          'wiring_and_gas_connections_cost' => utilCost.round(0),
-          'pump_cost' => pumpCost.round(0),
-          'piping_cost' => pipingCost.round(0),
-          'total_cost' => totalCost.round(0)
+          'equipment_cost'                         => cltowerCost.round(0),
+          'wiring_and_gas_connections_cost'        => utilCost.round(0),
+          'pump_cost'                              => pumpCost.round(0),
+          'piping_cost'                            => pipingCost.round(0),
+          'total_cost'                             => totalCost.round(0)
       }
 
       puts "\nHVAC Cooling Tower costing data successfully generated. Total cooling tower costs: $#{totalCost.round(0)}"
@@ -994,78 +1107,98 @@ module BTAP
     end
 
 
-    # This method determines how many pieces of equipment are required to satisfy the required size if 1 piece is not
-    # enough.  It takes in:
-    # materialLookup(String):  The name to search for in the 'Material' column of the materials_hvac sheet of the costing
-    #                           spreadsheet.
-    # materialSize(Float):  The size to search for in the 'Size' column of teh materials_hvac sheet of the costing
-    #                       spreadsheet.
-    # It returns:
-    # multiplier(Float):  Number of materialLookup with the largest size required to meet the materialSize.
+    # This method determines how many pieces of equipment are required to
+    # satisfy the required size if 1 piece is not enough.
+    #
+    # @param materialLookup [String] The name to search for in the 'Material'
+    #   column of the materials_hvac sheet of the costing spreadsheet.
+    #
+    # @param materialSize [Float] The size to search for in the 'Size' column of
+    #   the materials_hvac sheet of the costing spreadsheet.
+    #
+    # @return [Float] Number of materialLookup with the largest size required to meet the materialSize.
     def get_HVAC_multiplier(materialLookup, materialSize)
       multiplier = 1.0
       materials_hvac = @costing_database['raw']['materials_hvac'].select {|data|
         data['Material'].to_s.upcase == materialLookup.to_s.upcase
       }
       if materials_hvac.nil?
-        puts("Error: no hvac information available for equipment #{materialLookup}!")
-        raise
+        raise("Error: No HVAC information available for equipment #{materialLookup}!")
       elsif materials_hvac.empty?
-        puts("Error: no hvac information available for equipment #{materialLookup}!")
-        raise
+        raise("Error: No HVAC information available for equipment #{materialLookup}!")
       end
       materials_hvac.length == 1 ? max_size = materials_hvac[0] : max_size = materials_hvac.max_by {|d| d['Size'].to_f}
       if max_size['Size'].to_f <= 0
-        puts("Error: #{materialLookup} has a size of 0 or less.  Please check that the correct costing_database.json file is being used or check the costing spreadsheet!")
-        raise
+        raise("Error: #{materialLookup} has a size of 0 or less.")
       end
       mult = materialSize.to_f / (max_size['Size'].to_f)
-      multiplier = (mult.to_i).to_f.round(0) + 1  # Use next largest integer for multiplier
+
+      # Use next largest integer for multiplier.
+      multiplier = (mult.to_i).to_f.round(0) + 1
       return multiplier.to_f
     end
 
-    # This method provides the material and labour cost for a required piece of equimpment.  It takes in:
-    # name(String):  The name of a piece of equipment.  Is only used for error reporting and is not linked to anything
-    #                else.
-    # materialLookup(String):  The material type used to search hte 'Material' column of the materials_hvac sheet of the
-    #                          costing spreadsheet.
-    # materialSize(float):  The size of the equipment in whichever units are required when searching the 'Size' column of
-    #                       the costing spreadsheet.
-    # exactMatch(true/false):  A flag to indicate if the hvac equipment must match the size provided exactly or if the
-    #                          size is a minimum equipment size.
-    # It returns the material cost ond labor cost for the equipment including any multipliers.
+    # This method provides the material and labour cost for a required piece
+    # of equimpment.
+    #
+    # @param name [String] The name of a piece of equipment. Is only used for
+    #   error reporting and is not linked to anything else.
+    #
+    # @param materialLookup [String] The material type used to search the
+    #   'Material' column of the materials_hvac sheet of the costing data.
+    #
+    # @param materialSize [Float] The size of the equipment in whichever units
+    #   are required when searching the 'Size' column of the costing data.
+    #
+    # @param exactMatch [true/false] A flag to indicate if the hvac equipment
+    #   must match the size provided exactly or if the size is a minimum
+    #   equipment size.
+    #
+    # @return [Float] The material cost and labor cost for the equipment
+    #   including any multipliers.
     def getHVACCost(name, materialLookup, materialSize, exactMatch=true)
       eqCostInfo = getHVACDBInfo(name: name, materialLookup: materialLookup, materialSize: materialSize, exactMatch: exactMatch)
       return getCost(eqCostInfo[:name], eqCostInfo[:hvac_material], eqCostInfo[:multiplier])
     end
 
-    # This method was originally part of getHVACCOST but was split out because in some cases the information from the
-    # materials_hvac sheet of the costing spreadsheet was required but not tho cost.
-    # The method takes in:
-    # name(String):  The name of a piece of equipment.  Is only used for error reporting and is not linked to anything
-    #                else.
-    # materialLookup(String):  The material type used to search hte 'Material' column of the materials_hvac sheet of the
-    #                          costing spreadsheet.
-    # materialSize(float):  The size of the equipment in whichever units are required when searching the 'Size' column of
-    #                       the costing spreadsheet.
-    # exactMatch(true/false):  A flag to indicate if the hvac equipment must match the size provided exactly or if the
-    #                          size is a minimum equipment size.
+    # This method was originally part of getHVACCOST but was split out because
+    # in some cases the information from the materials_hvac sheet of the costing
+    # data was required but not the cost.
+    # @param name [String] The name of a piece of equipment. Is only used for
+    #   error reporting and is not linked to anything else.
     #
-    # The method returns a hash with the following composition:
+    # @param materialLookup [String] The material type used to search the
+    #   'Material' column of the materials_hvac sheet of the costing data.
+    #
+    # @param materialSize [Float] The size of the equipment in whichever units
+    #   are required when searching the 'Size' column of the costing data.
+    #
+    # @param exactMatch [True/False] A flag to indicate if the hvac equipment
+    #   must match the size provided exactly or if the size is a minimum
+    #   equipment size.
+    #
+    # @return [Hash] of the following composition:
     # {
-    # name(string):  Same as above.
-    # hvac_material(hash):  The costing spreadsheet information for the hvac equipment being searched for.
-    # multiplier(float):  Default is 1.  Will be higher if exactMatch is false, and no materialLookup could be found with
-    #                     a large enough materialSize in the costing spreadsheet. In this case, it is assumed that several
-    #                     pieced of equipment defined by hvact_material are used to satisfy the required materialSize.
-    #                     The multiplier defines the number of hvac_material required to meet the materialSize
+    #   name          [String] Same as above.
+    #   hvac_material [Hash]   The costing spreadsheet information for the hvac
+    #     equipment being searched for.
+    #
+    #   multiplier    [Float]  Default is 1.  Will be higher if exactMatch
+    #     is false, and no materialLookup could be found with a large enough
+    #     materialSize in the costing spreadsheet. In this case, it is assumed
+    #     that several pieced of equipment defined by hvact_material are used to
+    #     satisfy the required materialSize. The multiplier defines the number
+    #     of hvac_material required to meet the materialSize
     # }
     def getHVACDBInfo(name:, materialLookup:, materialSize:, exactMatch: true)
       multiplier = 1.0
       materials_hvac = @costing_database["raw"]["materials_hvac"]
       if materialSize == 'nil' || materialSize == '' || materialSize == nil
-        # When materialSize is blank because there is only one row in the data sheet, the value is nil
-        hvac_material = materials_hvac.select { |data| data['Material'].to_s.upcase == materialLookup.to_s.upcase }.first
+
+        # When materialSize is blank because there is only one row in the data
+        # sheet, the value is nil.
+        hvac_material = materials_hvac.select { |data|
+          data['Material'].to_s.upcase == materialLookup.to_s.upcase }.first
       else
         if exactMatch
           hvac_material = materials_hvac.select {|data|
@@ -1089,13 +1222,17 @@ module BTAP
           puts "HVAC material error! Could not find #{name} in materials_hvac!"
           raise
         else
-          # There is no exact match in the costing spreadsheet so redo search for next largest size
+
+          # There is no exact match in the costing spreadsheet so redo search
+          # for next largest size.
           hvac_material = materials_hvac.select {|data|
             data['Material'].to_s.upcase == materialLookup.to_s.upcase && data['Size'].to_f >= materialSize.to_f
           }.min_by{|mat_info| mat_info['Size'].to_f}
           if hvac_material.nil?
-            # The nominal capacity is greater than the maximum value in the API data for this boiler!
-            # Lookup cost for a capacity divided by the multiple of req'd size/max size.
+
+            # The nominal capacity is greater than the maximum value in the API
+            # data for this boiler! Lookup cost for a capacity divided by the
+            # multiple of req'd size/max size.
             multiplier = get_HVAC_multiplier( materialLookup, materialSize )
             hvac_materials = materials_hvac.select {|data|
               data['Material'].to_s.upcase == materialLookup.to_s.upcase && data['Size'].to_f >= materialSize.to_f / multiplier.to_f
@@ -1111,6 +1248,7 @@ module BTAP
           end
         end
       end
+
       # Create the return hash.
       costDBInfo = {
         name: name,
@@ -1120,7 +1258,10 @@ module BTAP
       return costDBInfo
     end
 
-
+    # @param materialType [String]
+    # @param materialHash [Hash]
+    # @param multiplier   [Float]
+    # @return [Array([Float], [Float])] Material cost, labour cost.
     def getCost(materialType, materialHash, multiplier)
       material_cost = 0.0 ; labour_cost = 0.0
       costing_data = @costing_database['costs'].detect do |data|
@@ -1130,17 +1271,26 @@ module BTAP
         puts "HVAC #{materialType} with id #{materialHash['id']} not found in the costing database. Skipping."
         raise
       else
+
         # Get cost information from lookup.
-        # Adjust for material and labour multiplier in costing spreadsheet 'materials_hvac' sheet 'material_mult' and
-        # 'labour_mult' columns.
-        (materialHash['material_mult'].nil?) || (materialHash['material_mult'].empty?) ? mat_mult = 1.0 : mat_mult = materialHash['material_mult'].to_f
-        (materialHash['labour_mult'].nil?) || (materialHash['labour_mult'].empty?) ? lab_mult = 1.0 : lab_mult = materialHash['labour_mult'].to_f
+        # Adjust for material and labour multiplier in costing spreadsheet
+        # 'materials_hvac' sheet 'material_mult' and 'labour_mult' columns.
+        (materialHash['material_mult'].nil?) || (materialHash['material_mult'].empty?) ?
+          mat_mult = 1.0 : mat_mult = materialHash['material_mult'].to_f
+
+        (materialHash['labour_mult'].nil?) || (materialHash['labour_mult'].empty?) ?
+          lab_mult = 1.0 : lab_mult = materialHash['labour_mult'].to_f
+
         material_cost = costing_data['baseCosts']['materialOpCost'].to_f * multiplier * mat_mult
         labour_cost = costing_data['baseCosts']['laborOpCost'].to_f * multiplier * lab_mult
       end
+require 'pry-byebug'; binding.pry; exit;
       return material_cost, labour_cost
     end
 
+    # @param model [OpenStudio::Model::Model]
+    # @param prototype_creator [Standard]
+    # @return [Array]
     def getGeometryData(model, prototype_creator)
       num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
       space_mod = OpenstudioStandards::Space
@@ -1150,7 +1300,8 @@ module BTAP
         if model.building.get.conditionedFloorArea.empty?
           model.getThermalZonesSorted.each do |tz|
             tz.spaces.sort.each do |tz_space|
-              flrArea += tz_space.floorArea.to_f if ( (space_mod.space_cooled?(tz_space)) || (space_mod.space_heated?(tz_space)) )
+              flrArea += tz_space.floorArea.to_f if ((space_mod.space_cooled?(tz_space)) ||
+                                                     (space_mod.space_heated?(tz_space)))
             end
           end
         else
@@ -1162,9 +1313,10 @@ module BTAP
         nominal_flr2flr_height = model.building.get.nominalFloortoFloorHeight.get
       end
 
-      # Location of mechanical room and utility distances for use below (space_centroid is an array
-      # in mech_room hash containing the x,y and z coordinates of space centroid). Utility distance
-      # uses the distance from the mech room centroid to the perimeter of the building.
+      # Location of mechanical room and utility distances for use below
+      # (space_centroid is an array in mech_room hash containing the x,y and z
+      # coordinates of space centroid). Utility distance uses the distance from
+      # the mech room centroid to the perimeter of the building.
       mech_room, cond_spaces = prototype_creator.find_mech_room(model)
       mech_room_story = nil
       target_cent = [mech_room['space_centroid'][0], mech_room['space_centroid'][1]]
@@ -1179,25 +1331,34 @@ module BTAP
         end
         break if found
       end
-      distance_info_hash = get_story_cent_to_edge( building_story: mech_room_story, prototype_creator: prototype_creator,
-                                                  target_cent: target_cent, full_length: false )
+      distance_info_hash = get_story_cent_to_edge(
+        building_story:    mech_room_story,
+        prototype_creator: prototype_creator,
+        target_cent:       target_cent,
+        full_length:       false)
+
       horizontal_dist = distance_info_hash[:start_point][:line][:dist]  # in metres
 
       ht_roof = 0.0
       util_dist = 0.0
       mechRmInBsmt = false
       if mech_room['space_centroid'][2] < 0
+
         # Mechanical room is in the basement (z dimension is negative).
         mechRmInBsmt = true
         ht_roof = (num_of_above_ground_stories + 1) * nominal_flr2flr_height
         util_dist = nominal_flr2flr_height + horizontal_dist
       elsif mech_room['space_centroid'][2] == 0
+
         # Mech room on ground floor
         ht_roof = num_of_above_ground_stories * nominal_flr2flr_height
         util_dist = horizontal_dist
       else
+
         # Mech room on some other floor
-        ht_roof = (num_of_above_ground_stories - (mech_room['space_centroid'][2]/nominal_flr2flr_height).round(0)) * nominal_flr2flr_height
+        ht_roof = (num_of_above_ground_stories -
+          (mech_room['space_centroid'][2]/nominal_flr2flr_height).round(0)) * nominal_flr2flr_height
+
         util_dist = ht_roof + horizontal_dist
       end
 
@@ -1209,15 +1370,15 @@ module BTAP
       return util_dist, ht_roof, nominal_flr2flr_height, horizontal_dist, num_of_above_ground_stories, mechRmInBsmt
     end
 
-    # --------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # This function gets all costs associated zonal heating and cooling systems
     # (i.e., zonal units, pumps, flues & utility costs)
-    # --------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def zonalsys_costing(model, prototype_creator, mech_room, cond_spaces)
 
       totalCost = 0.0
 
-      # Get regional cost factors for this province and city
+      # Get regional cost factors for this province and city.
       materials_hvac = @costing_database["raw"]["materials_hvac"]
       hvac_material = materials_hvac.select {|data|
         data['Material'].to_s == "GasBoilers"}.first  # Get any row from spreadsheet in case of region error
