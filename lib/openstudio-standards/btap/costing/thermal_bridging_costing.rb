@@ -9,15 +9,10 @@ class BTAPCosting
     # Note that no localization facors are used. This is because thermal
     # bridging edge tallies should be costed nationwide.
     material_quantities.each do |id, tbd_quantity|
-      # NOTE: the previous implementation wrapped this body in
-      # `materials_opaque.find do |material| ... end` WITHOUT testing the id —
-      # since the block body (`total_tbd_cost += ...`) is truthy, `find` stopped
-      # at the FIRST row, so every thermal-bridge material was priced as
-      # materials_opaque row 1 ("gypsum wallboard 0.5 in thick"). Materials are
-      # now matched by their id.
       material = @costing_database["raw"]["materials_opaque"].find do |data|
         data["materials_opaque_id"].to_s == id.to_s
       end
+
       if material.nil?
         puts "Thermal bridging material id #{id} not found in the materials_opaque sheet. Skipping."
         next
