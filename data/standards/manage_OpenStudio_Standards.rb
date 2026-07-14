@@ -186,8 +186,12 @@ def shorten_sheet_name(sheet_name)
 end
 
 # Determine the directory of the data based on the spreadsheet name
+def spreadsheet_title_directory_key(spreadsheet_title)
+  spreadsheet_title.gsub(/\(\w*\)(?:_[^-]*)?/, '')
+end
+
 def standard_parent_directory_from_spreadsheet_title(spreadsheet_title)
-  data_directory = spreadsheet_title.downcase.gsub('openstudio_standards-', '').gsub(/\(\w*\)/, '').split('-').first
+  data_directory = spreadsheet_title_directory_key(spreadsheet_title).downcase.gsub('openstudio_standards-', '').split('-').first
   # puts "Extracting standard parent directory from spreadsheet title #{spreadsheet_title} = #{data_directory}"
 
   return data_directory
@@ -250,7 +254,11 @@ BOOL_COLS = [
 # @param spreadsheet_titles
 # @param dataset_type [String] valid choices are 'os_stds' or 'data_lib'
 #   'os_stds' updates json files in openstudio standards, while 'data_lib' exports 90.1 jsons for the data library
-def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds', skip_templates: nil, schedules_notes_filter: nil)
+def export_spreadsheet_to_json(spreadsheet_titles,
+                               dataset_type: 'os_stds',
+                               skip_templates: nil,
+                               schedules_notes_filter: nil,
+                               template_remap: nil)
   if dataset_type == 'data_lib'
     standards_dir = File.expand_path("#{__dir__}/../../data/standards/export")
     skip_list = exclusion_list['data_lib']
@@ -281,7 +289,13 @@ def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds', skip
   warnings = []
   duplicate_data = []
   spreadsheet_titles.each do |spreadsheet_title|
-    this_warnings, this_duplicate_data = process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter)
+    this_warnings, this_duplicate_data = process_spreadsheet(spreadsheet_title,
+                                                             standards_dir,
+                                                             worksheets_to_skip,
+                                                             cols_to_skip,
+                                                             templates_to_skip,
+                                                             schedules_notes_filter,
+                                                             template_remap)
     warnings += this_warnings
     duplicate_data += this_duplicate_data
   end
@@ -537,7 +551,7 @@ def spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip
   return standards_data, warnings
 end
 
-def ensure_unicity(standards_data)
+def ensure_unicity(standards_data, spreadsheet_title)
   duplicate_data = []
 
   # Check for duplicate data in space_types_* sheets
@@ -592,7 +606,26 @@ def merge_space_types(standards_data)
   standards_data['space_types'] = space_types.values unless space_types.empty?
 end
 
-def process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter = nil)
+def remap_templates(standards_data, template_remap)
+  return if template_remap.nil? || template_remap.empty?
+
+  standards_data.each_value do |objs|
+    objs.each do |obj|
+      next unless obj.has_key?('template')
+      next unless template_remap.has_key?(obj['template'])
+
+      obj['template'] = template_remap[obj['template']]
+    end
+  end
+end
+
+def process_spreadsheet(spreadsheet_title,
+                        standards_dir,
+                        worksheets_to_skip,
+                        cols_to_skip,
+                        templates_to_skip,
+                        schedules_notes_filter = nil,
+                        template_remap = nil)
   # Path to the xlsx file
   xlsx_path = Pathname.new("#{__dir__}/#{spreadsheet_title}.xlsx")
 
@@ -603,7 +636,8 @@ def process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, co
 
 
   standards_data, warnings = spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip, schedules_notes_filter)
-  duplicate_data = ensure_unicity(standards_data)
+  remap_templates(standards_data, template_remap)
+  duplicate_data = ensure_unicity(standards_data, spreadsheet_title)
   merge_space_types(standards_data)
 
   ws = write_standards_hash_to_json(standards_data, spreadsheet_title, standards_dir, templates_to_skip)
@@ -614,7 +648,7 @@ end
 
 def get_template_dirs(spreadsheet_title, standards_dir)
     # Find all the template directories that match the search criteria embedded in the spreadsheet title
-  dirs = spreadsheet_title.gsub('OpenStudio_Standards-', '').gsub(/\(\w*\)/, '').split('-')
+  dirs = spreadsheet_title_directory_key(spreadsheet_title).gsub('OpenStudio_Standards-', '').split('-')
   new_dirs = []
   dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
   glob_string = "#{standards_dir}/#{new_dirs.join('/')}"

@@ -174,37 +174,59 @@ namespace :data do
 
   desc 'Generate 179D JSONs from OpenStudio_Standards spreadsheets'
   task 'update:179d' do
-
-    # The spreadsheet OpenStudio_Standards-ashrae_90_1(space_types).xlsx must
-    # be downloaded from the 179d_external folder in the data/standards folder
-
-    # I guess the spreadsheet should be named OpenStudio_Standards-ashrae_90_1-ALL-179d(space_types).xlsx
-    # but rather than fight it, I'll just move things around
-    d = Pathname.new("#{__dir__}/lib/openstudio-standards/standards/ashrae_90_1/179d_ashrae_90_1_2007")
-    FileUtils.mkdir_p(d)
-
-    schedules_notes_filter = [
-      # Regex, template assignment
-      [/ACM/i, '179d-90.1-2007'],
-      [/179D/i, '179d-90.1-2007']
+    standards_dir = Pathname.new("#{__dir__}/lib/openstudio-standards/standards")
+    standards_parent_dir = standards_dir / 'ashrae_90_1'
+    spreadsheet_configs = [
+      {
+        spreadsheet_title: 'OpenStudio_Standards-ashrae_90_1(space_types)',
+        base_template: '90.1-2007',
+        template: '179d-90.1-2007'
+      },
+      {
+        spreadsheet_title: 'OpenStudio_Standards-ashrae_90_1(space_types)_ACM2019',
+        base_template: '90.1-2019',
+        template: '179d-90.1-2019',
+        destination_parent_dir: standards_dir / 'ashrae_90_1_prm',
+        destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019',
+        template_remap: { '90.1-2019' => '179d-90.1-2019' }
+      }
     ]
-    export_spreadsheet_to_json(
-      ['OpenStudio_Standards-ashrae_90_1(space_types)'],
-      dataset_type: 'os_stds',
-      skip_templates: ['90.1-2007'],
-      schedules_notes_filter: schedules_notes_filter
-    )
 
-    proper_dir = Pathname.new("#{__dir__}/lib/openstudio-standards/standards/ashrae_90_1/ashrae_90_1_2007/179d_ashrae_90_1_2007")
-    FileUtils.mkdir_p(proper_dir)
-    d.glob('**/*.json').each do |f|
-      target_f = proper_dir / f.relative_path_from(d)
-      FileUtils.mkdir_p(target_f.parent)
-      FileUtils.mv(f, target_f)
+    spreadsheet_configs.each do |config|
+      template_dir_name = standard_directory_name_from_template(config[:template])
+      base_template_dir_name = standard_directory_name_from_template(config[:base_template])
+
+      temp_dir = standards_parent_dir / template_dir_name
+      FileUtils.mkdir_p(temp_dir)
+
+      schedules_notes_filter = [
+        # Regex, template assignment
+        [/ACM/i, config[:template]],
+        [/179D/i, config[:template]]
+      ]
+      export_spreadsheet_to_json(
+        [config[:spreadsheet_title]],
+        dataset_type: 'os_stds',
+        skip_templates: [config[:base_template]],
+        schedules_notes_filter: schedules_notes_filter,
+        template_remap: config[:template_remap]
+      )
+
+      proper_dir = if config[:destination_parent_dir]
+                     config[:destination_parent_dir] / config[:destination_dir_name]
+                   else
+                     standards_parent_dir / base_template_dir_name / template_dir_name
+                   end
+      FileUtils.mkdir_p(proper_dir)
+      temp_dir.glob('**/*.json').each do |f|
+        target_f = proper_dir / f.relative_path_from(temp_dir)
+        FileUtils.mkdir_p(target_f.parent)
+        FileUtils.mv(f, target_f, force: true)
+      end
+      FileUtils.rm_rf(temp_dir)
+      puts "Moved #{config[:template]} files to #{proper_dir}"
+      puts proper_dir.glob('**/*.json')
     end
-    FileUtils.rm_f(d)
-    puts "Moved files to #{proper_dir}"
-    puts proper_dir.glob("**/*.json")
   end
 
 end
