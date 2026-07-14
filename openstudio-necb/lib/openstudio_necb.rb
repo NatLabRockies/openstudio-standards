@@ -26,9 +26,13 @@ begin
 rescue LoadError
   require File.expand_path('../../openstudio-shw/lib/openstudio_shw', __dir__)
 end
+begin
+  require 'openstudio_simulation'
+rescue LoadError
+  require File.expand_path('../../openstudio-simulation/lib/openstudio_simulation', __dir__)
+end
 
 require_relative 'openstudio_necb/version'
-require_relative 'openstudio_necb/runner'
 require_relative 'openstudio_necb/tiers'
 require_relative 'openstudio_necb/compliance'
 require_relative 'openstudio_necb/report'
@@ -43,6 +47,12 @@ module OpenStudioNECB
   # The shared audit class (openstudio-hvac's and openstudio-envelope's are
   # schema-identical; one instance flows through both).
   AuditLog = OpenStudioHVAC::AuditLog
+
+  # Simulation execution now lives in the lowest-level family gem,
+  # openstudio-simulation (SDK+CLI, no compliance layer). Alias it so
+  # compliance.rb's Runner.attach_weather! / run_energyplus! / clean_run? /
+  # energy_results / unmet_occupied_hours keep working unchanged.
+  Runner = OpenStudioSimulation::Runner
 
   # Run the full performance-path pipeline. See Compliance.performance_compliance.
   def self.performance_compliance(model, **kwargs)

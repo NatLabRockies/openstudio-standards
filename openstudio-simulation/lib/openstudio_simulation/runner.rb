@@ -1,12 +1,18 @@
 require 'fileutils'
 
-module OpenStudioNECB
-  # Simulation execution — the SDK+CLI recipe (pure `openstudio` gem + the
-  # `openstudio` CLI; no measures, no openstudio-standards). Promoted to library
-  # code from the recipe proven in the domain gems' E2E suites and READMEs.
+module OpenStudioSimulation
+  # Simulation execution — the SDK+CLI recipe (pure `openstudio` gem + a
+  # pluggable execution backend; no measures, no openstudio-standards, no NECB).
+  #
+  # This module owns the BACKEND-AGNOSTIC parts: attach weather, prepare the run
+  # directory (sizing flags, run period, in.osm + in.osw), and parse results from
+  # the attached SQL. The actual EnergyPlus invocation is delegated to a Backend
+  # (see backends.rb) — Local (the `openstudio` CLI) by default, or a remote seam.
   module Runner
     module_function
 
+    # @return [Boolean] is the `openstudio` CLI on PATH? (convenience probe;
+    #   the Local backend runs its own check before executing)
     def openstudio_cli?
       @openstudio_cli = system('openstudio openstudio_version > /dev/null 2>&1') if @openstudio_cli.nil?
       @openstudio_cli
@@ -23,15 +29,19 @@ module OpenStudioNECB
       model
     end
 
-    # Run EnergyPlus via the CLI and attach the result SQL to the model.
+    # Prepare the run directory, run EnergyPlus via the chosen backend, and
+    # attach the result SQL to the model.
+    #
+    # Flow: model-prep (sizing flags, run period, save in.osm + in.osw) ->
+    # backend.execute(dir) -> attach dir/run/eplusout.sql to the model.
     #
     # @param sizing_only [Boolean] design-day sizing run only
     # @param run_period [Hash, nil] { begin_month:, begin_day:, end_month:, end_day: }
     #   override for the weather run (tests use one week; code compliance is annual)
+    # @param backend [Backend] execution backend — Local (CLI) by default; swap
+    #   for Remote (or any Backend) to run elsewhere without changing this method
     # @return [String] the run directory (contains eplusout.err / eplusout.sql)
-    def run_energyplus!(model, dir, sizing_only: false, run_period: nil)
-      raise('openstudio CLI not available on PATH') unless openstudio_cli?
-
+    def run_energyplus!(model, dir, sizing_only: false, run_period: nil, backend: Local.new)
       FileUtils.mkdir_p(dir)
       sim = model.getSimulationControl
       sim.setDoZoneSizingCalculation(true)
@@ -50,10 +60,8 @@ module OpenStudioNECB
       osw = OpenStudio::WorkflowJSON.new
       osw.setSeedFile("#{dir}/in.osm")
       osw.saveAs("#{dir}/in.osw")
-      ok = system("openstudio run -w #{dir}/in.osw > #{dir}/cli.log 2>&1")
-      err_path = "#{dir}/run/eplusout.err"
-      err = File.exist?(err_path) ? File.read(err_path) : '(no eplusout.err)'
-      raise("EnergyPlus run failed in #{dir}:\n#{err[/^.*Fatal.*$/] || err[-800..] || err}") unless ok
+
+      backend.execute(dir)
 
       model.setSqlFile(OpenStudio::SqlFile.new(OpenStudio::Path.new("#{dir}/run/eplusout.sql")))
       "#{dir}/run"
