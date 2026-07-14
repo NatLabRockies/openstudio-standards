@@ -132,7 +132,17 @@ module OpenStudioNECB
         .sig { display: inline-block; width: 45%; margin: 1.6rem 2% 0 0; border-top: 1px solid #111;
                padding-top: .3rem; font-size: .85rem; }
         footer { margin-top: 2rem; font-size: .75rem; color: #555; border-top: 1px solid #bbb; padding-top: .5rem; }
+        /* OpenStudio-App-style per-building loop dropdown chooser (inline JS) */
+        .hvac-select { margin: .5rem 0 1rem; }
+        .loop-select-label { font-weight: 600; font-size: .9rem; }
+        .loop-select { font-size: .9rem; padding: .2rem .4rem; margin-left: .3rem; }
+        .loop-panel[hidden] { display: none; }
+        .loop-panel-title { display: none; }
         @media print {
+          /* reveal every loop on paper (the chooser hides non-active panels on screen) */
+          .loop-panel[hidden] { display: block !important; }
+          .loop-panel-title { display: block; font-weight: 600; }
+          .loop-select-label { display: none; }
           body { max-width: none; padding: 0; font-size: 12px; }
           nav.toc { display: none; }
           section { break-inside: avoid; }

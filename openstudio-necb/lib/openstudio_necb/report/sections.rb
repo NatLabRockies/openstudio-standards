@@ -71,7 +71,16 @@ module OpenStudioNECB
           badges[0] = H.badge(report['compliant'] ? 'EUI PATH (8.4.4): PASS' : 'EUI PATH (8.4.4): FAIL',
                               report['compliant'] ? 'pass' : 'fail')
         end
-        badges << H.badge("TIER #{report['tier']}", 'tier') if report['tier']
+        # The performance-path tier (vs the reference building) and the EUI-path
+        # tier (vs the archetype target) measure the SAME proposed energy against
+        # DIFFERENT targets, so they can differ — label each by its path.
+        eui_tier = report.dig('eui_path', 'tier')
+        if report['tier'] && eui_tier
+          badges << H.badge("PERFORMANCE TIER #{report['tier']}", 'tier')
+          badges << H.badge("EUI TIER #{eui_tier}", 'tier')
+        elsif report['tier']
+          badges << H.badge("TIER #{report['tier']}", 'tier')
+        end
         badges << H.badge("GHG LEVEL #{report.dig('ghg', 'level')}", 'ghg') if report.dig('ghg', 'level')
         badges << H.badge('UNDETERMINED (no annual run)', 'warn') if report['compliant'].nil?
 
@@ -93,6 +102,13 @@ module OpenStudioNECB
         if report['annual'] == false
           strip = %(<p class="warnstrip">▲ SHORTENED RUN PERIOD — the results below use the same arithmetic
             but are NOT a code-compliant annual determination (NECB 8.4.1.2 requires a simulated year).</p>)
+        end
+        if report['tier'] && eui_tier && report['tier'] != eui_tier
+          bet = report.dig('eui_path', 'bet_kwh')
+          strip += %(<p class="meta">The performance-path tier (#{report['tier']}, vs the reference building
+            #{H.fmt(target_kwh, prec: 0)} kWh) and the EUI-path tier (#{eui_tier}, vs the archetype target
+            #{H.fmt(bet, prec: 0)} kWh) differ because the same proposed energy is measured against different
+            targets — a building declares the tier of whichever compliance path it uses.</p>)
         end
         %(<section id="verdict"><div class="banner"><span class="big">Compliance summary</span>
           #{badges.join(' ')}<span>#{numbers.join(' &nbsp;•&nbsp; ')}</span></div>#{strip}</section>)
@@ -266,22 +282,77 @@ module OpenStudioNECB
       end
 
       # -- 7 -----------------------------------------------------------------
+      # HVAC systems are drawn with openstudio-hvac's OpenStudio-App-style
+      # loop-diagram engine (the same one behind the system catalog), so the
+      # PROPOSED and REFERENCE buildings show faithful supply/demand topology with
+      # native OS App component icons rather than crude schematics. report.rb
+      # computes the diagram bundles off the SDK models (ctx[:proposed_hvac] /
+      # ctx[:reference_hvac], plain hashes); this SDK-free section only lays them
+      # out. The icon <defs> they reference are embedded once by report.rb.
       def hvac(ctx)
         body = +''
-        %i[proposed reference].each do |which|
-          data = ctx[which]
-          next if data.nil?
-
-          accent = which == :proposed ? H::PROPOSED_COLOR : H::REFERENCE_COLOR
-          loops = (data[:air_loops] || []) + (data[:plant_loops] || [])
-          next if loops.empty?
-
-          body << "<h3>#{which.to_s.capitalize} building systems</h3>"
-          loops.each { |loop| body << Diagrams.loop_schematic(loop, accent: accent) }
-        end
-        body = '<p>No air or plant loops present (e.g. zone-equipment-only design), or models not available.</p>' if body.empty?
+        body << hvac_building_block('Proposed building systems', ctx[:proposed_hvac],
+                                    group: 'p', present: ctx.key?(:proposed_hvac))
+        body << hvac_building_block('Reference building systems', ctx[:reference_hvac],
+                                    group: 'r', present: ctx.key?(:reference_hvac), reference: true)
         body << domain_audit_notes(ctx, :hvac)
         H.section('hvac', 'HVAC systems', body, page_break: true)
+      end
+
+      # One labelled HVAC subsection for a building's diagram bundle. `bundle` is
+      # the plain hash from OpenStudioHVAC.model_hvac_diagrams (or nil). A nil
+      # bundle on the reference means there is no reference building on this path
+      # (e.g. the 8.4.4 archetype-EUI path); a nil bundle when the key is absent
+      # (canned/report-only render) is stated as such.
+      def hvac_building_block(heading, bundle, group:, present:, reference: false)
+        out = +"<h3>#{H.esc(heading)}</h3>"
+        if bundle.nil?
+          out << if !present
+                   '<p class="meta">Model geometry not available to this render (report-only mode).</p>'
+                 elsif reference
+                   '<p class="meta">No reference building on this path (e.g. the 8.4.4 archetype-EUI path).</p>'
+                 else
+                   '<p class="meta">Model not available to this render.</p>'
+                 end
+          return out
+        end
+
+        # One entry per loop (+ a final Zone-equipment entry), each with a unique
+        # id, presented as an OpenStudio-App-style <select> chooser: picking a
+        # loop shows just that loop's diagram (inline JS in report.rb; on print
+        # every panel is revealed). The descriptive loop labels come from
+        # openstudio-hvac (air loops name their served zone), so N packaged
+        # single-zone units read "Air loop — Thermal Zone 1", "Air loop —
+        # Thermal Zone 2", … rather than N ambiguous "Air loop" entries.
+        entries = (bundle[:loops] || []).each_with_index.map do |loop, i|
+          ["#{group}-#{i}", loop[:label], loop[:svg]]
+        end
+        entries << ["#{group}-z", 'Zone equipment', bundle[:zone_equipment_svg]] if bundle[:zone_equipment_svg]
+        if entries.empty?
+          out << '<p class="meta">No central HVAC loops (zone-equipment-only or not modelled).</p>'
+          return out
+        end
+        out << hvac_loop_select(group, entries)
+        out
+      end
+
+      # An OpenStudio-App-style per-building loop chooser: a <select> whose
+      # options are the building's loops (+ a Zone-equipment entry), and one
+      # hidden panel per entry. The first option is selected and its panel shown;
+      # inline JS (report.rb) swaps panels on change and reveals all on print.
+      # `entries` = [[id, label, svg], …]; `group` ('p'/'r') keeps the proposed
+      # and reference choosers independent.
+      def hvac_loop_select(group, entries)
+        options = entries.each_with_index.map do |(id, label, _svg), i|
+          %(<option value="#{id}"#{i.zero? ? ' selected' : ''}>#{H.esc(label)}</option>)
+        end.join
+        panels = entries.each_with_index.map do |(id, label, svg), i|
+          %(<div class="loop-panel" id="#{id}"#{i.zero? ? '' : ' hidden'}>) +
+            %(<div class="loop-panel-title">#{H.esc(label)}</div><div class="diagram">#{svg}</div></div>)
+        end.join
+        %(<div class="hvac-select"><label class="loop-select-label">System: ) +
+          %(<select class="loop-select">#{options}</select></label>) +
+          %(<div class="loop-view">#{panels}</div></div>)
       end
 
       # -- 8 -----------------------------------------------------------------

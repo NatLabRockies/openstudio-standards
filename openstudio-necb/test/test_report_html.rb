@@ -27,17 +27,33 @@ class TestReportHTML < Minitest::Test
     assert_includes html, 'UNDETERMINED', 'sizing mode makes no compliance determination'
     assert_includes html, 'NECB 2020 Energy Code Compliance Report'
     assert_includes html, 'Sizing Fixture'
-    # real models flow through ModelQuery: envelope + system schematics render
+    # real models flow through ModelQuery: envelope chart renders
     assert_includes html, 'Area-weighted average U-value', 'envelope chart from the real model'
-    assert_includes html, 'System layout', 'loop schematics from the real model'
-    assert_operator html.scan('<svg').size, :>=, 3, 'charts + proposed/reference schematics'
+    # HVAC diagrams now come from openstudio-hvac's loop-diagram engine: the icon
+    # <defs> are embedded once and both proposed AND reference buildings render.
+    assert_includes html, '<symbol id="icon-', 'openstudio-hvac icon defs embedded'
+    assert_includes html, 'Proposed building systems', 'proposed HVAC diagrams rendered'
+    assert_includes html, 'Reference building systems', 'reference HVAC diagrams rendered'
+    assert_operator html.scan('class="diagram"').size, :>=, 2, 'proposed + reference loop diagrams present'
+    # a boiler-served proposed system embeds and references the boiler icon
+    assert_includes html, '<use href="#icon-', 'diagram cells reference embedded OS App icons'
+    # loops are shown in an OpenStudio-App-style per-building dropdown chooser:
+    # one <select> per building (proposed + reference), one panel per loop, and
+    # air-loop options are zone-labelled ("Air loop — Thermal Zone …").
+    assert_operator html.scan('class="loop-select"').size, :>=, 2, 'proposed + reference loop selects'
+    assert_includes html, 'class="loop-panel"', 'per-loop panels present'
+    assert_match(/<option value="[^"]*">Air loop — /, html, 'air-loop option is zone-labelled')
+    assert_operator html.scan('<svg').size, :>=, 3, 'charts + proposed/reference diagrams + icon defs'
     assert_includes html, 'Full audit trail'
     # anchors resolve; no external references
     hrefs = html.scan(/href="#([^"]+)"/).flatten.uniq
     ids = html.scan(/id="([^"]+)"/).flatten
     assert_empty hrefs - ids, 'every checklist/audit anchor resolves'
     refute_match(%r{(src|href)\s*=\s*"https?://}, html)
-    refute_match(/<script|<link/, html)
+    # the loop chooser uses ONE inline script; still no external stylesheet or
+    # external (src=) script — the single-file guarantee holds.
+    refute_match(/<link\b/i, html)
+    refute_match(/<script[^>]*\bsrc=/i, html)
   ensure
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end

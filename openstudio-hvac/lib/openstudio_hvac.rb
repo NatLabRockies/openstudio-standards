@@ -94,4 +94,25 @@ module OpenStudioHVAC
   def self.catalog_html(path = nil, **opts)
     CatalogReport.to_html(path, **opts)
   end
+
+  # Reusable OpenStudio-App-style HVAC loop diagrams for ANY model, as a plain
+  # hash of inline-SVG strings — so a host report can draw the same diagrams the
+  # catalog draws for its own models. Never raises. The host must also embed
+  # {hvac_icon_defs} ONCE per document and add
+  # OpenStudioHVAC::CatalogReport::DIAGRAM_CSS to its stylesheet so the diagrams'
+  # icon <use> refs resolve and they size correctly. See
+  # CatalogReport.model_diagrams.
+  #
+  # @param model [OpenStudio::Model::Model]
+  # @return [Hash] { loops: [{ kind:, label:, svg: }...], zone_equipment_svg:, empty: }
+  def self.model_hvac_diagrams(model)
+    CatalogReport.model_diagrams(model)
+  end
+
+  # The hidden master <svg><defs> embedding every component icon ONCE. Emit this
+  # ONCE per host HTML document so the diagrams' <use href="#icon-…"> refs
+  # resolve. Self-contained (base64 PNG data-URIs, no external requests).
+  def self.hvac_icon_defs
+    CatalogReport.icon_defs
+  end
 end

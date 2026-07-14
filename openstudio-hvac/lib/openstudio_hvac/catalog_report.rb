@@ -188,6 +188,72 @@ module OpenStudioHVAC
       html
     end
 
+    # ------------------------------------------------- reusable diagram API
+    # A REUSABLE, host-agnostic diagram bundle for ANY model. A consuming report
+    # (e.g. openstudio-necb's AHJ compliance report) drives its own proposed and
+    # reference models through this to get the SAME OpenStudio-App-style loop
+    # diagrams the catalog draws, without depending on catalog internals. Returns
+    # PLAIN hashes (inline-SVG strings + labels) and NEVER raises — on any failure
+    # it returns an empty bundle carrying the error message, so a host render can
+    # degrade gracefully. To resolve the diagrams' <use href="#icon-…"> refs the
+    # host must embed `icon_defs` ONCE per document and add `DIAGRAM_CSS` to its
+    # stylesheet.
+    #
+    # @param model [OpenStudio::Model::Model]
+    # @return [Hash] { loops: [{ kind:, label:, svg: }...],
+    #                  zone_equipment_svg: <svg String or nil>, empty: <bool>,
+    #                  error: <String, only on failure> }
+    def model_diagrams(model)
+      zones = model.getThermalZones.sort_by(&:nameString)
+      topo = extract(model, zones)
+      loops = (topo[:air_loops] + topo[:plant_loops]).map do |loop|
+        { kind: loop[:kind], label: loop_display_label(loop),
+          svg: loop_diagram_svg(loop) }
+      end
+      zeq = topo[:zone_equipment]
+      { loops: loops,
+        zone_equipment_svg: zeq.empty? ? nil : zone_equipment_svg(zeq),
+        empty: loops.empty? && zeq.empty? }
+    rescue StandardError => e
+      { loops: [], zone_equipment_svg: nil, empty: true, error: e.message }
+    end
+
+    # A DESCRIPTIVE label for a loop, so a host's dropdown chooser can tell
+    # loops apart. Plant loops keep their kind label ("Hot water loop",
+    # "Chilled water loop", "Condenser loop"). An AIR loop instead names the
+    # zone(s) it serves — "Air loop — Thermal Zone 1" for a single-zone (PSZ)
+    # air handler, "Air loop (N zones)" for a multi-zone air handler — which
+    # resolves the ambiguous "Air loop / Air loop 2…" problem when several
+    # packaged single-zone units are listed together.
+    def loop_display_label(loop)
+      base = LOOP_LABELS.fetch(loop[:kind], 'Loop')
+      return base unless loop[:kind] == :air
+
+      zones = (loop[:demand] || []).map { |d| d[:zone_name] }.compact.reject { |n| n.to_s.empty? }
+      case zones.size
+      when 1 then "#{base} — #{zones.first}"
+      when 0 then base
+      else "#{base} (#{zones.size} zones)"
+      end
+    end
+
+    # The self-contained CSS subset a HOST document needs so the reused loop/zone
+    # diagrams render correctly outside the catalog page: the scroll container, the
+    # intrinsic-size svg override (so a host's own responsive `svg { width:100% }`
+    # rule does not stretch a diagram), and print break-avoidance. The catalog page
+    # keeps its own full CSS; this is only the diagram-relevant subset. Fully
+    # self-contained — no url()/@import/external references (a host's
+    # no-external-references test must still pass).
+    DIAGRAM_CSS = <<~CSS.freeze
+      .diagram { overflow-x: auto; break-inside: avoid; margin: .4rem 0 1rem; }
+      /* Render diagram SVGs at their intrinsic size (fixed box/gap constants) so a
+         component box is the same physical size in every diagram and wide loops
+         scroll horizontally instead of shrinking; this MUST win over any generic
+         `svg { width: 100% }` rule in the host stylesheet. */
+      .diagram svg { width: auto; height: auto; max-width: none; display: block; }
+      .diagram .note { font-size: .82rem; color: #555; font-style: italic; margin: .3rem 0; }
+    CSS
+
     # -------------------------------------------------------- build & extract
 
     def prepared_base(fixture)

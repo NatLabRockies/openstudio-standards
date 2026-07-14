@@ -6,6 +6,7 @@ class TestReportUnits < Minitest::Test
   H = OpenStudioNECB::Report::H
   Checklist = OpenStudioNECB::Report::Checklist
   Charts = OpenStudioNECB::Report::Charts
+  Sections = OpenStudioNECB::Report::Sections
 
   GOLDEN_DIR = File.expand_path('goldens', __dir__)
 
@@ -188,9 +189,56 @@ class TestReportUnits < Minitest::Test
     ids = html.scan(/id="([^"]+)"/).flatten
     missing = hrefs - ids
     assert_empty missing, "dangling anchors: #{missing.inspect}"
-    # single-file guarantee: no external fetches of any kind
+    # single-file guarantee: no external fetches of any kind. The loop chooser
+    # adds ONE inline <script>, so allow an inline script but forbid an external
+    # one (src=), and keep external stylesheets / @import / url() forbidden.
     refute_match(%r{(src|href)\s*=\s*"https?://}, html)
-    refute_match(/<link|<script|@import|url\(/, html)
+    refute_match(/<link\b/i, html)
+    refute_match(/<script[^>]*\bsrc=/i, html)
+    refute_match(/@import|url\(/, html)
+  end
+
+  # The HVAC section consumes the openstudio-hvac diagram bundles (plain hashes)
+  # that report.rb computes off the SDK models. With nil/absent models it must
+  # render explanatory notes, never crash.
+  def test_hvac_section_handles_nil_and_stub_bundles
+    stub = { loops: [{ kind: :hot_water, label: 'Hot water loop',
+                       svg: '<svg width="10" height="10"><title>stub loop</title></svg>' }],
+             zone_equipment_svg: '<svg width="10" height="10"><title>stub zeq</title></svg>', empty: false }
+    # proposed present (stub), reference nil (e.g. EUI path with no reference building)
+    html = Sections.hvac(proposed_hvac: stub, reference_hvac: nil, audit_entries: [])
+    assert_includes html, 'Proposed building systems'
+    assert_includes html, 'Hot water loop'
+    assert_includes html, 'stub loop'
+    assert_includes html, 'Zone equipment'
+    assert_includes html, 'Reference building systems'
+    assert_includes html, 'No reference building on this path'
+
+    # empty proposed bundle (no loops, no zone equipment) states so
+    empty_html = Sections.hvac(proposed_hvac: { loops: [], zone_equipment_svg: nil, empty: true },
+                               reference_hvac: nil, audit_entries: [])
+    assert_includes empty_html, 'No central HVAC loops'
+
+    # keys entirely absent (report-only render) → notes, no crash
+    absent_html = Sections.hvac(audit_entries: [])
+    assert_includes absent_html, 'HVAC systems'
+    assert_includes absent_html, 'report-only mode'
+  end
+
+  # The canned full render carries the reused diagram plumbing: the icon <defs>
+  # are embedded once, DIAGRAM_CSS is in the stylesheet, and it stays
+  # self-contained (icons are data-URIs, not url()/remote refs).
+  def test_full_render_embeds_hvac_icon_defs_and_diagram_css
+    html = OpenStudioNECB::Report.render(canned_result)
+    assert_includes html, '<symbol id="icon-', 'HVAC icon defs embedded once'
+    assert_includes html, 'data:image/png;base64,', 'icons are self-contained data-URIs'
+    assert_match(/\.diagram\s*\{[^}]*overflow-x:\s*auto/, html, 'diagram scroll CSS present')
+    assert_match(/\.diagram\s+svg\s*\{[^}]*width:\s*auto/, html, 'intrinsic-size svg override present')
+    # still self-contained: allow the one inline chooser <script>, forbid external
+    refute_match(/<link\b/i, html, 'no external stylesheet')
+    refute_match(/<script[^>]*\bsrc=/i, html, 'no external script')
+    refute_match(/@import|url\(/, html, 'no @import/url() references')
+    refute_match(%r{(src|href)\s*=\s*"https?://}, html, 'no remote src/href')
   end
 
   def test_shortened_run_warns_loudly
