@@ -42,7 +42,8 @@ class TestCustomBuildingSpecSchema < Minitest::Test
   end
 
   def test_example_specs_validate
-    example_files = Dir.glob("#{@examples_dir}/*.json")
+    # includes specs in subdirectories, e.g. examples/doe_prototypes
+    example_files = Dir.glob("#{@examples_dir}/**/*.json")
     refute_empty(example_files, 'no example specs found')
     example_files.each do |file|
       example = JSON.parse(File.read(file))

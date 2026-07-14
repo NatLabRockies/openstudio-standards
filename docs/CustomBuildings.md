@@ -84,7 +84,17 @@ The spec is validated **before the model is touched**; on failure the method ret
 }
 ```
 
-More examples live in `lib/openstudio-standards/create_typical/data/examples/`.
+More examples live in `lib/openstudio-standards/create_typical/data/examples/`. The
+`data/examples/doe_prototypes/` subfolder holds a spec for each DOE prototype building type,
+reproduced with typical space types: the space type ratios come from
+`CreateTypical.get_space_types_from_building_type`, the form from
+`Geometry.building_form_defaults`, and the standards space types are converted to typical space
+types (standards space types sharing a typical type are merged). They are regenerated with
+`utilities/create_typical/generate_doe_prototype_specs.rb`, and
+`test/modules/create_typical/test_doe_prototype_specs.rb` checks that the models they produce
+match the equivalent models built from `create_bar_from_building_type_ratios` +
+`create_typical_building_from_model`. The apartment prototypes are omitted, since their
+dwelling-unit space type is outside the typical (commercial) space type vocabulary.
 
 ### The schema
 

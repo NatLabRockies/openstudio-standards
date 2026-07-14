@@ -1,0 +1,28 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "Warehouse (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "Warehouse",
+  "space_type_ratios": [
+    {
+      "space_type": "storage",
+      "ratio": 0.951,
+      "default": true
+    },
+    {
+      "space_type": "office",
+      "ratio": 0.049,
+      "wwr": 0.71,
+      "story_height": 14.0
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 52045.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 2.2,
+    "wwr": 0.0,
+    "floor_height": 28.0,
+    "perim_mult": 1.0
+  }
+}

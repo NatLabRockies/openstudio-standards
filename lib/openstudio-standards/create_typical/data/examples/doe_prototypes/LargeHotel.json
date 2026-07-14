@@ -1,0 +1,55 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "LargeHotel (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "LargeHotel",
+  "space_type_ratios": [
+    {
+      "space_type": "guest room",
+      "ratio": 0.4963,
+      "default": true
+    },
+    {
+      "space_type": "corridor",
+      "ratio": 0.2103,
+      "circ": true
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.1397
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.091
+    },
+    {
+      "space_type": "electrical/mechanical",
+      "ratio": 0.0176
+    },
+    {
+      "space_type": "retail",
+      "ratio": 0.0155
+    },
+    {
+      "space_type": "food preparation",
+      "ratio": 0.011
+    },
+    {
+      "space_type": "storage",
+      "ratio": 0.0102
+    },
+    {
+      "space_type": "laundry/washing",
+      "ratio": 0.0084
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 122120.0,
+    "num_stories_above_grade": 6,
+    "ns_to_ew_ratio": 5.1,
+    "wwr": 0.27,
+    "floor_height": 10.0,
+    "perim_mult": 1.0
+  }
+}
