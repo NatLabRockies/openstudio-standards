@@ -189,15 +189,6 @@ namespace :data do
         destination_parent_dir: standards_dir / 'ashrae_90_1_prm',
         destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019',
         template_remap: { '90.1-2019' => '179d-90.1-2019' }
-      },
-      {
-        spreadsheet_title: 'OpenStudio_Standards-ashrae_90_1(space_types)_ACM2019_space type',
-        base_template: '90.1-2019',
-        template: '179d-90.1-2019',
-        destination_parent_dir: standards_dir / 'ashrae_90_1_prm',
-        destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019',
-        destination_data_dir_name: 'data_space_type',
-        template_remap: { '90.1-2019' => '179d-90.1-2019' }
       }
     ]
 
@@ -227,7 +218,7 @@ namespace :data do
                      standards_parent_dir / base_template_dir_name / template_dir_name
                    end
       FileUtils.mkdir_p(proper_dir)
-      target_data_dir = proper_dir / (config[:destination_data_dir_name] || 'data')
+                  target_data_dir = proper_dir / 'data'
       (temp_dir / 'data').glob('**/*.json').each do |f|
         target_f = target_data_dir / f.relative_path_from(temp_dir / 'data')
         FileUtils.mkdir_p(target_f.parent)
