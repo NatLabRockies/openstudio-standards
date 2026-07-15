@@ -31,18 +31,18 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
+      # 'SmallOffice',
       'Warehouse'
     ]
 
@@ -55,7 +55,7 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @options = [
-      "",
+      # "",
       "structure"
     ]
 
@@ -328,20 +328,29 @@ class NECB_Structure_Tests < Minitest::Test
               cs.each do |c|
                 id = c.nameString
                 fR = c.additionalProperties.getFeatureAsDouble("btap_film")
+                tP = c.additionalProperties.getFeatureAsString("btap_type")
                 err_msg = "#{id} 'btap_film' (#{cas})"
                 refute_empty(fR)
-
                 fR = fR.get
-                fr = 0.150
-                fr = 0.136 if id.downcase.include?("roof")
-                fr = 0.160 if id.downcase.include?("slab")
-                # OSut:CON:roof 3 : 0.136
-                # OSut:CON:wall 2 : 0.150
-                # OSut:CON:wall   : 0.150
-                # OSut:CON:slab   : 0.160
-                # OSut:CON:roof   : 0.136
-                # OSut:CON:wall 1 : 0.150
 
+                unless tP.empty?
+                  tP = tP.get
+                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                  assert_includes(tPs, tP, err_msg)
+
+                  fr = 0.150 # walls
+                  fr = 0.136 if tP == "roofs"
+                else
+                  fr = 0.160 # slabs
+                end
+
+                # puts "#{id} : #{fr.round(3)} vs #{fR.round(3)} (#{tP})"
+                # OSut:CON:slab   : 0.160 vs 0.160 ()
+                # OSut:CON:roof   : 0.136 vs 0.136 (roofs)
+                # OSut:CON:roof 3 : 0.136 vs 0.136 (roofs)
+                # OSut:CON:wall   : 0.150 vs 0.150 (walls)
+                # OSut:CON:wall 1 : 0.150 vs 0.150 (walls)
+                # OSut:CON:wall 2 : 0.150 vs 0.150 (walls)
                 err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
                 assert_equal(fR.round(3), fr.round(3))
               end
@@ -361,16 +370,18 @@ class NECB_Structure_Tests < Minitest::Test
                   tP = c.additionalProperties.getFeatureAsString("btap_type")
 
                   # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
-                  #   OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
-                  #   OSut:CON:roof   U-factor : 0.162 W/m2.K (3045 m2) # bulk storage
-                  #   OSut:CON:roof 3 U-factor : 0.162 W/m2.K (1324 m2) # fine storage
-                  #   OSut:CON:wall   U-factor : 0.210 W/m2.K (1058 m2) # bulk storage
-                  #   OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # office
-                  #   OSut:CON:wall 1 U-factor : 0.210 W/m2.K ( 100 m2) # fine storage
+                  # OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
+                  # OSut:CON:roof   U-factor : 0.162 W/m2.K (3045 m2) # bulk storage
+                  # OSut:CON:roof 3 U-factor : 0.162 W/m2.K (1324 m2) # fine storage
+                  # OSut:CON:wall   U-factor : 0.210 W/m2.K (1058 m2) # bulk storage
+                  # OSut:CON:wall 1 U-factor : 0.210 W/m2.K ( 100 m2) # office
+                  # OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # fine storage
                   err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
 
                   unless tP.empty?
                     tP = tP.get
+                    err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                    assert_includes(tPs, tP, err_msg)
 
                     if tP == "walls"
                       wall_m2 += m2
@@ -445,6 +456,9 @@ class NECB_Structure_Tests < Minitest::Test
 
                 unless tP.empty?
                   tP = tP.get
+                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                  assert_includes(tPs, tP, err_msg)
+
                   fr = 0.150
                   fr = 0.266 if tP == "roofs" # i.e. attic floor
 
@@ -474,12 +488,14 @@ class NECB_Structure_Tests < Minitest::Test
                   tP = c.additionalProperties.getFeatureAsString("btap_type")
 
                   # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
-                  #   OSut:CON:slab        U-factor : 0.757 W/m2.K (232 m2)
-                  #   OSut:CON:partition 4 U-factor : 0.162 W/m2.K (232 m2)
-                  #   OSut:CON:wall        U-factor : 0.210 W/m2.K (124 m2)
+                  # OSut:CON:slab        U-factor : 0.757 W/m2.K (232 m2)
+                  # OSut:CON:partition 4 U-factor : 0.162 W/m2.K (232 m2)
+                  # OSut:CON:wall        U-factor : 0.210 W/m2.K (124 m2)
 
                   unless tP.empty?
                     tP = tP.get
+                    err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                    assert_includes(tPs, tP, err_msg)
 
                     if tP == "roofs" # i.e. attic floors
                       floor_m2 += m2

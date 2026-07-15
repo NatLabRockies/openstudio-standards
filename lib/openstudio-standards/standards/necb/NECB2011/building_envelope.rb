@@ -686,22 +686,16 @@ class NECB2011
     cld = a[:cladding ] ? a[:cladding ] : :light
     fsh = a[:finish   ] ? a[:finish   ] : :light
 
-    # Argument hash to identify BTAP costed assembly.
-    argh            = {}
-    argh[:framing ] = frm
-    argh[:cladding] = cld
-    argh[:finish  ] = fsh
-
     # Filling in the blanks: U-factors.
-    eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall", out, hdd)
+    eWallU  = a[:eWallU ] ? a[:eWallU ] : max_u_necb("wall",        out, hdd)
     eRoofU  = a[:eRoofU ] ? a[:eRoofU ] : max_u_necb("roofceiling", out, hdd)
-    eFloorU = a[:eFloorU] ? a[:eFloorU] : max_u_necb("floor", out, hdd)
-    gWallU  = a[:gWallU ] ? a[:gWallU ] : max_u_necb("wall", gnd, hdd)
-    gFloorU = a[:gFloorU] ? a[:gFloorU] : max_u_necb("floor", gnd, hdd)
+    eFloorU = a[:eFloorU] ? a[:eFloorU] : max_u_necb("floor",       out, hdd)
+    gWallU  = a[:gWallU ] ? a[:gWallU ] : max_u_necb("wall",        gnd, hdd)
+    gFloorU = a[:gFloorU] ? a[:gFloorU] : max_u_necb("floor",       gnd, hdd)
     gRoofU  = a[:gRoofU ] ? a[:gRoofU ] : max_u_necb("roofceiling", gnd, hdd)
-    doorU   = a[:doorU  ] ? a[:doorU  ] : max_u_necb("door", out, hdd)
-    fenU    = a[:fenU   ] ? a[:fenU   ] : max_u_necb("window", out, hdd)
-    skyU    = a[:skyU   ] ? a[:skyU   ] : max_u_necb("skylight", out, hdd)
+    doorU   = a[:doorU  ] ? a[:doorU  ] : max_u_necb("door",        out, hdd)
+    fenU    = a[:fenU   ] ? a[:fenU   ] : max_u_necb("window",      out, hdd)
+    skyU    = a[:skyU   ] ? a[:skyU   ] : max_u_necb("skylight",    out, hdd)
 
     # Filling in the blanks: solar heat gain coefficients.
     fenSHGC  = a[:fenSHGC ] ? a[:fenSHGC ] : 0.60
@@ -729,19 +723,26 @@ class NECB2011
     specs[:clad  ] = :heavy  if ctg == "robust"
     specs[:finish] = :medium if ctg == "robust"
     specs[:finish] = :medium if frm == :cmu
-    argh[:perform] = :lp
-    argh[:stype  ] = :walls
-    eWall          = TBD.genConstruction(model, specs)
+    eWall = TBD.genConstruction(model, specs)
 
     # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eWall)
     TBD.assignUniqueMaterial(eWall, lyr[:index]) if lyr[:index]
-    id  = BTAP::Bridging.costed_assembly(argh)
 
-    unless BTAP::Bridging.costed_uo(id, eWallU)
-      argh[:perform] = :hp
-      id = BTAP::Bridging.costed_assembly(argh)
-    end
+    # Argument hash to identify BTAP costed assembly.
+    argh            = {}
+    argh[:framing ] = frm
+    argh[:cladding] = cld
+    argh[:finish  ] = fsh
+    argh[:perform ] = :lp
+    argh[:stype   ] = :walls
+    argh[:uo      ] = eWallU
+    id = BTAP::Bridging.costed_assembly(argh)
+    #
+    # unless BTAP::Bridging.costed_uo(id, eWallU)
+    #   argh[:perform] = :hp
+    #   id = BTAP::Bridging.costed_assembly(argh)
+    # end
 
     eWall.additionalProperties.setFeature("btap_uo", eWallU)
     eWall.additionalProperties.setFeature("btap_id", id)
@@ -758,44 +759,37 @@ class NECB2011
     specs[:finish] = :medium if ctg == "robust"
     specs[:finish] = :heavy  if ctg == "housing" && stc == :concrete
     specs[:finish] = :heavy  if ctg == "lodging" && stc == :concrete
-    argh[:perform] = :lp
-    argh[:stype  ] = :roofs
-    eRoof          = TBD.genConstruction(model, specs)
+    eRoof = TBD.genConstruction(model, specs)
 
     # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eRoof)
     TBD.assignUniqueMaterial(eRoof, lyr[:index]) if lyr[:index]
-    id  = BTAP::Bridging.costed_assembly(argh)
 
-    unless BTAP::Bridging.costed_uo(id, eRoofU)
-      argh[:perform] = :hp
-      id = BTAP::Bridging.costed_assembly(argh)
-    end
+    argh[:perform] = :lp
+    argh[:stype  ] = :roofs
+    argh[:uo     ] = eRoofU
+    id = BTAP::Bridging.costed_assembly(argh)
 
     eRoof.additionalProperties.setFeature("btap_uo", eRoofU)
     eRoof.additionalProperties.setFeature("btap_id", id)
     eRoof.additionalProperties.setFeature("btap_type", "roofs")
 
     # Outdoor-facing floor.
-    specs          = {}
-    specs[:type  ] = :floor
-    specs[:uo    ] = eFloorU
-    specs[:finish] = :medium unless frm == :wood
-    specs[:finish] = :heavy      if ctg == "housing" && stc == :concrete
-    specs[:finish] = :heavy      if ctg == "lodging" && stc == :concrete
-    argh[:perform] = :lp
-    argh[:stype  ] = :floors
-    eFloor         = TBD.genConstruction(model, specs)
+    specs           = {}
+    specs[:type   ] = :floor
+    specs[:uo     ] = eFloorU
+    specs[:finish ] = :medium unless frm == :wood
+    specs[:finish ] = :heavy      if ctg == "housing" && stc == :concrete
+    specs[:finish ] = :heavy      if ctg == "lodging" && stc == :concrete
+    eFloor = TBD.genConstruction(model, specs)
 
     # Ensure insulating layer uniqueness for each insulated construction.
     lyr = TBD.insulatingLayer(eFloor)
     TBD.assignUniqueMaterial(eFloor, lyr[:index]) if lyr[:index]
-    id  = BTAP::Bridging.costed_assembly(argh)
 
-    unless BTAP::Bridging.costed_uo(id, eFloorU)
-      argh[:perform] = :hp
-      id = BTAP::Bridging.costed_assembly(argh)
-    end
+    argh[:perform ] = :lp
+    argh[:stype   ] = :floors
+    id = BTAP::Bridging.costed_assembly(argh)
 
     eFloor.additionalProperties.setFeature("btap_uo", eFloorU)
     eFloor.additionalProperties.setFeature("btap_id", id)
@@ -1025,21 +1019,23 @@ class NECB2011
       specs[:finish] = :none
       eAtticFloor    = TBD.genConstruction(model, specs)
 
-      specs          = {}
-      specs[:type  ] = :partition
-      specs[:uo    ] = eWallU
-      argh[:perform] = :lp
-      argh[:stype  ] = :walls
-      iAtticWall     = TBD.genConstruction(model, specs)
+      specs           = {}
+      specs[:type   ] = :partition
+      specs[:uo     ] = eWallU
+      iAtticWall = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticWall)
       TBD.assignUniqueMaterial(iAtticWall, lyr[:index]) if lyr[:index]
-      id  = BTAP::Bridging.costed_assembly(argh)
 
-      unless BTAP::Bridging.costed_uo(id, eWallU)
-        argh[:perform] = :hp
-        id = BTAP::Bridging.costed_assembly(argh)
-      end
+      argh[:perform ] = :lp
+      argh[:stype   ] = :walls
+      argh[:uo      ] = eWallU
+      id = BTAP::Bridging.costed_assembly(argh)
+
+      # unless BTAP::Bridging.costed_uo(id, eWallU)
+      #   argh[:perform] = :hp
+      #   id = BTAP::Bridging.costed_assembly(argh)
+      # end
 
       iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)
@@ -1056,18 +1052,14 @@ class NECB2011
       specs[:frame ] = :heavy      if ctg == "robust"
       specs[:clad  ] = :none       if ctg == "robust"
       specs[:finish] = :none       if ctg == "robust"
-      argh[:perform] = :lp
-      argh[:stype  ] = :roofs
-      iAtticFloor    = TBD.genConstruction(model, specs)
+      iAtticFloor = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticFloor)
       TBD.assignUniqueMaterial(iAtticFloor, lyr[:index]) if lyr[:index]
-      id  = BTAP::Bridging.costed_assembly(argh)
 
-      unless BTAP::Bridging.costed_uo(id, eFloorU)
-        argh[:perform] = :hp
-        id = BTAP::Bridging.costed_assembly(argh)
-      end
+      argh[:perform] = :lp
+      argh[:stype  ] = :roofs
+      id = BTAP::Bridging.costed_assembly(argh)
 
       iAtticFloor.additionalProperties.setFeature("btap_uo", eRoofU)
       iAtticFloor.additionalProperties.setFeature("btap_id", id)
@@ -1085,18 +1077,14 @@ class NECB2011
       specs[:frame ] = :heavy      if ctg == "robust"
       specs[:clad  ] = :none       if ctg == "robust"
       specs[:finish] = :none       if ctg == "robust"
-      argh[:perform] = :lp
-      argh[:stype  ] = :floors
-      iAtticRoof     = TBD.genConstruction(model, specs)
+      iAtticRoof = TBD.genConstruction(model, specs)
 
       lyr = TBD.insulatingLayer(iAtticRoof)
       TBD.assignUniqueMaterial(iAtticRoof, lyr[:index]) if lyr[:index]
-      id  = BTAP::Bridging.costed_assembly(argh)
 
-      unless BTAP::Bridging.costed_uo(id, eRoofU)
-        argh[:perform] = :hp
-        id = BTAP::Bridging.costed_assembly(argh)
-      end
+      argh[:perform] = :lp
+      argh[:stype  ] = :floors
+      id = BTAP::Bridging.costed_assembly(argh)
 
       iAtticRoof.additionalProperties.setFeature("btap_uo", eFloorU)
       iAtticRoof.additionalProperties.setFeature("btap_id", id)

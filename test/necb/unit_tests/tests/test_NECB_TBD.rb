@@ -123,11 +123,10 @@ class NECB_TBD_Tests < Minitest::Test
               st = Standard.build(template)
 
               # Customizing STRUCTURE options (similar to the unit test
-              # 'test_necb_structures'. STRUCTURE and/or FRAMING customization
-              # triggers customized thermal bridging PSI factor sets in BTAP. In
-              # this Warehouse example, the building would inherit a steel (or
-              # metal) structure by default. This is overridden here as all 3
-              # spaces are customized:
+              # 'test_necb_structures'. STRUCTURE customization triggers thermal
+              # bridging PSI factor variants in BTAP. In this Warehouse example,
+              # the building would inherit a steel (or metal) structure by
+              # default. This is overridden here as all 3 spaces are customized:
               #   - the office has a user-assigned wood structure
               #   - the fine storage space has user-assigned wood-framing
               #   - the bulk storage area has a user-assigned CMU structure
