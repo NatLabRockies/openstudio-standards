@@ -11941,21 +11941,21 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0034-000000000001},  !- Handle
   ems_sys_1_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_e_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}<23.9 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}>1.7, !- Program Line 1
-  SET {26c372c4-6e49-4394-8e9d-9d52c9387406} = 29.4, !- Program Line 2
-  SET {25f61dab-47a5-405e-b8b9-45bf8f1b9ec3} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}<23.9 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}>1.7, !- Program Line 4
-  SET {26c372c4-6e49-4394-8e9d-9d52c9387406} = 29.4, !- Program Line 5
-  SET {25f61dab-47a5-405e-b8b9-45bf8f1b9ec3} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}<23.9 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}>1.7, !- Program Line 7
-  SET {26c372c4-6e49-4394-8e9d-9d52c9387406} = 29.4, !- Program Line 8
-  SET {25f61dab-47a5-405e-b8b9-45bf8f1b9ec3} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}<23.9 && {0c3a7c1b-81aa-494f-adf4-e8e134500447}>1.7, !- Program Line 10
-  SET {26c372c4-6e49-4394-8e9d-9d52c9387406} = 29.4, !- Program Line 11
-  SET {25f61dab-47a5-405e-b8b9-45bf8f1b9ec3} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {26b800d7-1101-44e1-a975-4467d6cf18cc}<23.9 && {26b800d7-1101-44e1-a975-4467d6cf18cc}>1.7, !- Program Line 1
+  SET {5de62626-7999-45bd-9941-052332e22fd0} = 29.4, !- Program Line 2
+  SET {11c19cef-8b52-46cf-8470-69ad8c9bfd4a} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {26b800d7-1101-44e1-a975-4467d6cf18cc}<23.9 && {26b800d7-1101-44e1-a975-4467d6cf18cc}>1.7, !- Program Line 4
+  SET {5de62626-7999-45bd-9941-052332e22fd0} = 29.4, !- Program Line 5
+  SET {11c19cef-8b52-46cf-8470-69ad8c9bfd4a} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {26b800d7-1101-44e1-a975-4467d6cf18cc}<23.9 && {26b800d7-1101-44e1-a975-4467d6cf18cc}>1.7, !- Program Line 7
+  SET {5de62626-7999-45bd-9941-052332e22fd0} = 29.4, !- Program Line 8
+  SET {11c19cef-8b52-46cf-8470-69ad8c9bfd4a} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {26b800d7-1101-44e1-a975-4467d6cf18cc}<23.9 && {26b800d7-1101-44e1-a975-4467d6cf18cc}>1.7, !- Program Line 10
+  SET {5de62626-7999-45bd-9941-052332e22fd0} = 29.4, !- Program Line 11
+  SET {11c19cef-8b52-46cf-8470-69ad8c9bfd4a} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {26c372c4-6e49-4394-8e9d-9d52c9387406} = NULL, !- Program Line 14
-  SET {25f61dab-47a5-405e-b8b9-45bf8f1b9ec3} = NULL, !- Program Line 15
+  SET {5de62626-7999-45bd-9941-052332e22fd0} = NULL, !- Program Line 14
+  SET {11c19cef-8b52-46cf-8470-69ad8c9bfd4a} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -14953,13 +14953,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0052-000000000001},  !- Handle
-  713gal Electricity Water Heater - 481kBtu/hr 1 Therm Eff Supply Inlet Water Node, !- Name
+  1141gal Electricity Water Heater - 770kBtu/hr 1 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000662},  !- Inlet Port
   {00000000-0000-0000-0016-000000000671};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0052-000000000002},  !- Handle
-  713gal Electricity Water Heater - 481kBtu/hr 1 Therm Eff Supply Outlet Water Node, !- Name
+  1141gal Electricity Water Heater - 770kBtu/hr 1 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000672},  !- Inlet Port
   {00000000-0000-0000-0016-000000000673};  !- Outlet Port
 
@@ -47119,32 +47119,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0099-000000000001},  !- Handle
-  713gal Electricity Water Heater - 481kBtu/hr 1 Therm Eff, !- Name
-  2.69976594229143,                        !- Tank Volume {m3}
+  1141gal Electricity Water Heater - 770kBtu/hr 1 Therm Eff, !- Name
+  4.31962550766629,                        !- Tank Volume {m3}
   {00000000-0000-0000-0066-000000000017},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  141062.770484727,                        !- Heater Maximum Capacity {W}
+  225700.432775564,                        !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   Electricity,                             !- Heater Fuel Type
   1,                                       !- Heater Thermal Efficiency
   ,                                        !- Part Load Factor Curve Name
-  187.832181492263,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  256.950809890866,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   Electricity,                             !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  187.832181492263,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  256.950809890866,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   Electricity,                             !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0066-000000000018},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  0.00868770343129324,                     !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  0.00832267178741542,                     !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  0.00868770343129324,                     !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  0.00832267178741542,                     !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name

@@ -2146,7 +2146,7 @@ class ECMS
            loop_setpoint: 60.0,
            loop_temp_diff: 5.0)
     # set additional parameters for heating heat pump
-    hw_loop_htg_eqpt.setCondenserType('AirSoure')
+    hw_loop_htg_eqpt.setCondenserType('AirSource')
     hw_loop_htg_eqpt.setMinimumSourceInletTemperature(-15.0)
     hw_loop_htg_eqpt.setReferenceCoefficientofPerformance(3.0)
     hw_loop_htg_eqpt.setHeatPumpSizingMethod('CoolingCapacity')

@@ -1721,15 +1721,41 @@ class NECB2011 < Standard
           end
         end
 
-        if daylight_space.spaceType.get.standardsSpaceType.get.to_s == 'Office - enclosed' && daylight_space_area >= 25.0
+        # Match both the NECB2011 name ('Office - enclosed') and the NECB2015+/
+        # NECB2020 names ('Office enclosed <= 25 m2' / 'Office enclosed > 25 m2');
+        # the exact-2011-string comparison meant the >= 25 m2 office exemption
+        # NEVER fired on 2015+ models.
+        if daylight_space.spaceType.get.standardsSpaceType.get.to_s =~ /office\s*-?\s*enclosed/i && daylight_space_area >= 25.0
           offices_larger_25m2 << daylight_space.name.to_s
         end
       end
 
       ##### find daylight_spaces which do not need daylight sensor controls based on the primary_sidelighted_area as per NECB2011: 4.2.2.8.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their primary_sidelighted_area <= 100m2), as per NECB2011: 4.2.2.2.
+      # The exception criteria for sidelighting (4.2.2.8/4.2.2.10) only apply to
+      # spaces WITH exterior windows, and the skylight criteria (4.2.2.4/4.2.2.7)
+      # only to spaces WITH skylights. Previously every criterion was applied to
+      # every space, so a window-only space was ALWAYS excepted (its skylight
+      # area is 0 <= 400 m2) and a skylight-only space likewise — with the
+      # practical result that almost no space ever received a daylighting sensor.
+      spaces_with_windows = []
+      spaces_with_skylights = []
+      daylight_spaces.sort.each do |daylight_space|
+        daylight_space.surfaces.sort.each do |surface|
+          surface.subSurfaces.sort.each do |subsurface|
+            next unless subsurface.outsideBoundaryCondition == 'Outdoors'
+
+            if subsurface.subSurfaceType == 'FixedWindow' || subsurface.subSurfaceType == 'OperableWindow'
+              spaces_with_windows << daylight_space.name.to_s
+            elsif subsurface.subSurfaceType == 'Skylight'
+              spaces_with_skylights << daylight_space.name.to_s
+            end
+          end
+        end
+      end
       daylight_spaces_exception = []
       primary_sidelighted_area_hash.sort.each do |key_daylight_space_name, value_primary_sidelighted_area|
+        next unless spaces_with_windows.include?(key_daylight_space_name)
         if value_primary_sidelighted_area <= 100.0 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1738,6 +1764,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the sidelighting_effective_aperture as per NECB2011: 4.2.2.8.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their sidelighting_effective_aperture <= 10%), as per NECB2011: 4.2.2.2.
       sidelighting_effective_aperture_hash.sort.each do |key_daylight_space_name, value_sidelighting_effective_aperture|
+        next unless spaces_with_windows.include?(key_daylight_space_name)
         if value_sidelighting_effective_aperture <= 0.1 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1746,6 +1773,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the daylighted_area_under_skylights as per NECB2011: 4.2.2.4.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their daylighted_area_under_skylights <= 400m2), as per NECB2011: 4.2.2.2.
       daylighted_area_under_skylights_hash.sort.each do |key_daylight_space_name, value_daylighted_area_under_skylights|
+        next unless spaces_with_skylights.include?(key_daylight_space_name)
         if value_daylighted_area_under_skylights <= 400.0 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1754,6 +1782,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the skylight_effective_aperture criterion as per NECB2011: 4.2.2.4.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their skylight_effective_aperture <= 0.6%), as per NECB2011: 4.2.2.2.
       skylight_effective_aperture_hash.sort.each do |key_daylight_space_name, value_skylight_effective_aperture|
+        next unless spaces_with_skylights.include?(key_daylight_space_name)
         if value_skylight_effective_aperture <= 0.006 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -2131,7 +2160,7 @@ class NECB2011 < Standard
     # Interate through all spaces in model.. not just ones that have space type defined.. Is this right sara?
     space_type.spaces.sort.each do |space|
       # Get only the wall type surfaces and iterate throught them.
-      space.surfaces.sort.select(&:surfaceType == 'Wall').each do |wall_surface|
+      space.surfaces.sort.select { |surface| surface.surfaceType == 'Wall' }.each do |wall_surface|
         # Find the vertex with the max z value.
         vertex_with_max_height = wall_surface.vertices.max_by(&:z)
         # replace max if this surface has something bigger.
@@ -2378,7 +2407,6 @@ class NECB2011 < Standard
                     # if skylight_vertex_0_distance == skylight_vertex_1_distance
                   end
 
-                  daylighted_under_skylight_area += daylighted_under_skylight_length * daylighted_under_skylight_width
                   # if subsurface.subSurfaceType == "FixedWindow" || subsurface.subSurfaceType == "OperableWindow"
                 end
                 # surface.subSurfaces.each do |subsurface|
@@ -2387,6 +2415,11 @@ class NECB2011 < Standard
             end
             # daylight_space.surfaces.each do |surface|
           end
+          # Accumulate ONCE per skylight. Previously the accumulation sat inside
+          # the exterior-window loop above, so (a) spaces with skylights but no
+          # exterior windows always computed ZERO daylighted area, and (b) each
+          # additional exterior window double-counted the whole area.
+          daylighted_under_skylight_area += daylighted_under_skylight_length * daylighted_under_skylight_width
           # if subsurface.subSurfaceType == "Skylight"
         end
         # surface.subSurfaces.each do |subsurface|

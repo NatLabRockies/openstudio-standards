@@ -361,7 +361,11 @@ class NECB2011
     # the hourly shw demand is for the following hour.  It is meant to determine, of the peak hourly shw times, which has
     # the highest shw demand the following hour.  This is used to determine shw capacity and volume.
     weekly_peak_flow.sort.each do |day_peak_sched|
-      day_peak_sched[1].sort.each_with_index do |hour_flow, hour_index|
+      # NOTE: this previously iterated `day_peak_sched[1].sort` — the SORTED
+      # hourly array — while using the (sorted) index against the UNSORTED
+      # arrays below, so the "hour after the peak" was effectively an arbitrary
+      # hour. The hourly array is now iterated in hour order.
+      day_peak_sched[1].each_with_index do |hour_flow, hour_index|
         if hour_flow == peak_flow_sched
           if hour_index == 23
             next_hour_test = 0

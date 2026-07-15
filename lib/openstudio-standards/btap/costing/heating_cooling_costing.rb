@@ -131,7 +131,7 @@ class BTAPCosting
       # 06-Sep-2019 JTB: Added check for no 'Primary' or 'Secondary' label and assume primary.
       #    This boiler prefix name seemed to disappear after the heat pump work was committed.
       numBoilers += 1
-      if boiler[:name] =~ /primary/i || (boiler[:name] !~ /primary/i && boiler[:name] !~ /secondary/ && numBoilers == 1) || (boiler[:fuel_type] == 'wshp') || (boiler[:fuel_type] == 'Airtowaterhp')
+      if boiler[:name] =~ /primary/i || (boiler[:name] !~ /primary/i && boiler[:name] !~ /secondary/ && numBoilers == 1) || (boiler[:fueltype] == 'wshp') || (boiler[:fueltype] == 'Airtowaterhp')
         primaryFuel = boiler[:fueltype]
         primaryCap = boiler[:nominal_capacity]
         matCost, labCost = getHVACCost(boiler[:name], boiler[:fueltype], boiler[:nominal_capacity], false)
@@ -216,11 +216,11 @@ class BTAPCosting
         elsif boiler[:fueltype].to_s.downcase == 'elecboilers' || boiler[:fueltype].to_s.downcase == 'wshp'
           # Electric boilers require only conduit
           utilCost += metalConduitCost * util_dist + elecWireCost * util_dist / 100
-        elsif boiler[:fuel_type].to_s.downcase == 'airtowaterhp'
+        elsif boiler[:fueltype].to_s.downcase == 'airtowaterhp'
           # Add heating buffer tank for awhp
           materialHash = get_cost_info(mat: 'solartank', size: 450)
           matCost, labCost = getCost('solartank', materialHash, multiplier)
-          utilCost = matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
+          utilCost += matCost * regional_material / 100.0 + labCost * regional_installation / 100.0
         end
 
       elsif boiler[:name] =~ /secondary/i || numBoilers > 1
@@ -246,7 +246,7 @@ class BTAPCosting
         flueVentCost = 0.0; flueElbowCost = 0.0; flueTopCost = 0.0
 
         # Check if need a flue header (i.e., there are both primary and secondary/backup boilers)
-        if thisBoilerCost > 0.0 && ( (backupBoiler && primaryFuel != 'ElecBoilers') || (boiler[:fueltype] != 'ElecBoilers') || (boiler[:fueltype] != 'wshp') || (boiler[:fueltype] != 'Airtowaterhp'))
+        if thisBoilerCost > 0.0 && ( (backupBoiler && primaryFuel != 'ElecBoilers') || (boiler[:fueltype] != 'ElecBoilers' && boiler[:fueltype] != 'wshp' && boiler[:fueltype] != 'Airtowaterhp'))
           # 6 inch diameter header (#384)
           materialHash = get_cost_info(mat: 'Venting', size: 6)
           matCost, labCost = getCost('flue header', materialHash, multiplier)
@@ -1151,7 +1151,6 @@ class BTAPCosting
           tz.spaces.sort.each do |tz_space|
             flrArea += tz_space.floorArea.to_f if ( (space_mod.space_cooled?(tz_space)) || (space_mod.space_heated?(tz_space)) )
           end
-          flrArea += tz.floorArea
         end
       else
         flrArea = model.building.get.conditionedFloorArea().get

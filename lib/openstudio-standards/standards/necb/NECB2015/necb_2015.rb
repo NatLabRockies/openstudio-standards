@@ -73,7 +73,8 @@ class NECB2015 < NECB2011
     if standards_space_type.include? 'Atrium' # @todo Note that since none of the archetypes has Atrium, this was tested for 'Dining'. #Atrium
       puts "#{standards_space_type} - has atrium" # space_type.name.to_s
       # puts space_height
-      if get_max_space_height_for_space_type(space_type: space_type) < 12.0
+      space_height = get_max_space_height_for_space_type(space_type: space_type)
+      if space_height < 12.0
         # @todo Regarding the below equations, identify which version of ASHRAE 90.1 was used in NECB2015.
         atrium_lpd_eq_smaller_12_intercept = 0
         atrium_lpd_eq_smaller_12_slope = 1.06
