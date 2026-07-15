@@ -24060,13 +24060,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0056-000000000001},  !- Handle
-  446gal NaturalGas Water Heater - 301kBtu/hr 0.807 Therm Eff Supply Inlet Water Node, !- Name
+  509gal NaturalGas Water Heater - 344kBtu/hr 0.807 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0021-000000001259},  !- Inlet Port
   {00000000-0000-0000-0021-000000001268};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0056-000000000002},  !- Handle
-  446gal NaturalGas Water Heater - 301kBtu/hr 0.807 Therm Eff Supply Outlet Water Node, !- Name
+  509gal NaturalGas Water Heater - 344kBtu/hr 0.807 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0021-000000001269},  !- Inlet Port
   {00000000-0000-0000-0021-000000001270};  !- Outlet Port
 
@@ -34646,7 +34646,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000173},  !- Handle
   Schedule Day 4,                          !- Name
-  {00000000-0000-0000-0072-000000000010},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -34724,7 +34724,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000174},  !- Handle
   Schedule Day 5,                          !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -34802,7 +34802,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000175},  !- Handle
   Schedule Day 6,                          !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -34811,7 +34811,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000176},  !- Handle
   Schedule Day 7,                          !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -34865,7 +34865,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000182},  !- Handle
   satCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0072-000000000010},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -35021,7 +35021,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000184},  !- Handle
   satCW Temp 1,                            !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -35333,7 +35333,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000188},  !- Handle
   sunCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0072-000000000010},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -35489,7 +35489,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000190},  !- Handle
   sunCW Temp 1,                            !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -36038,7 +36038,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000218},  !- Handle
   wkdCHW Temp 1,                           !- Name
-  {00000000-0000-0000-0072-000000000010},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -36194,7 +36194,7 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0069-000000000220},  !- Handle
   wkdCW Temp 1,                            !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
   0,                                       !- Minute 1
@@ -39058,13 +39058,13 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0071-000000000002},  !- Handle
   CHW Temp,                                !- Name
-  {00000000-0000-0000-0072-000000000010},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   {00000000-0000-0000-0069-000000000173};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0071-000000000003},  !- Handle
   CW Temp,                                 !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   {00000000-0000-0000-0069-000000000174};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
@@ -39336,13 +39336,13 @@ OS:Schedule:Ruleset,
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0071-000000000048},  !- Handle
   Schedule Ruleset 1,                      !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   {00000000-0000-0000-0069-000000000175};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0071-000000000049},  !- Handle
   Schedule Ruleset 2,                      !- Name
-  {00000000-0000-0000-0072-000000000009},  !- Schedule Type Limits Name
+  {00000000-0000-0000-0072-000000000008},  !- Schedule Type Limits Name
   {00000000-0000-0000-0069-000000000176};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
@@ -58348,32 +58348,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0103-000000000001},  !- Handle
-  446gal NaturalGas Water Heater - 301kBtu/hr 0.807 Therm Eff, !- Name
-  1.68933701462633,                        !- Tank Volume {m3}
+  509gal NaturalGas Water Heater - 344kBtu/hr 0.807 Therm Eff, !- Name
+  1.92709611193903,                        !- Tank Volume {m3}
   {00000000-0000-0000-0071-000000000050},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  88267.8590142256,                        !- Heater Maximum Capacity {W}
+  100690.771848815,                        !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   NaturalGas,                              !- Heater Fuel Type
-  0.807172407833217,                       !- Heater Thermal Efficiency
+  0.806779111518956,                       !- Heater Thermal Efficiency
   {00000000-0000-0000-0030-000000000078},  !- Part Load Factor Curve Name
-  137.413728855386,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  150.021962718254,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  137.413728855386,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  150.021962718254,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0071-000000000051},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  16.2795364306689,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  17.5524164046744,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  16.2795364306689,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  17.5524164046744,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name

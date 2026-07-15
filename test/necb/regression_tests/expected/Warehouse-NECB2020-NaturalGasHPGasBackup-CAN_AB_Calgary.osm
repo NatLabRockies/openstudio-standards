@@ -2620,15 +2620,15 @@ OS:Curve:Quadratic,
 
 OS:Daylighting:Control,
   {00000000-0000-0000-0026-000000000001},  !- Handle
-  Zone2 Fine Storage daylighting control,  !- Name
-  {00000000-0000-0000-0082-000000000002},  !- Space Name
-  22.8588851907324,                        !- Position X-Coordinate {m}
-  15.2392567938215,                        !- Position Y-Coordinate {m}
+  Zone1 Office daylighting control,        !- Name
+  {00000000-0000-0000-0082-000000000001},  !- Space Name
+  12.9533682747483,                        !- Position X-Coordinate {m}
+  4.57177703814646,                        !- Position Y-Coordinate {m}
   0.8,                                     !- Position Z-Coordinate {m}
   ,                                        !- Psi Rotation Around X-Axis {deg}
   ,                                        !- Theta Rotation Around Y-Axis {deg}
   ,                                        !- Phi Rotation Around Z-Axis {deg}
-  300,                                     !- Illuminance Setpoint {lux}
+  400,                                     !- Illuminance Setpoint {lux}
   Stepped,                                 !- Lighting Control Type
   ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
   ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
@@ -2861,41 +2861,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000001},  !- Handle
   ems_sys_4_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {234d4b0a-00fb-4086-be6a-fca31ede3753}<23.9 && {234d4b0a-00fb-4086-be6a-fca31ede3753}>1.7, !- Program Line 1
-  SET {41ca99ee-ff0a-4eaf-89d0-a9141c3e1a93} = 29.4, !- Program Line 2
-  SET {96be6902-a6a4-4477-b7e2-fa769a364916} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {234d4b0a-00fb-4086-be6a-fca31ede3753}<23.9 && {234d4b0a-00fb-4086-be6a-fca31ede3753}>1.7, !- Program Line 4
-  SET {41ca99ee-ff0a-4eaf-89d0-a9141c3e1a93} = 29.4, !- Program Line 5
-  SET {96be6902-a6a4-4477-b7e2-fa769a364916} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {234d4b0a-00fb-4086-be6a-fca31ede3753}<23.9 && {234d4b0a-00fb-4086-be6a-fca31ede3753}>1.7, !- Program Line 7
-  SET {41ca99ee-ff0a-4eaf-89d0-a9141c3e1a93} = 29.4, !- Program Line 8
-  SET {96be6902-a6a4-4477-b7e2-fa769a364916} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {234d4b0a-00fb-4086-be6a-fca31ede3753}<23.9 && {234d4b0a-00fb-4086-be6a-fca31ede3753}>1.7, !- Program Line 10
-  SET {41ca99ee-ff0a-4eaf-89d0-a9141c3e1a93} = 29.4, !- Program Line 11
-  SET {96be6902-a6a4-4477-b7e2-fa769a364916} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}<23.9 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}>1.7, !- Program Line 1
+  SET {939dab60-e542-4594-91b0-eab30620de30} = 29.4, !- Program Line 2
+  SET {4fe4aac0-6fb0-447c-a426-102d2231cddd} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}<23.9 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}>1.7, !- Program Line 4
+  SET {939dab60-e542-4594-91b0-eab30620de30} = 29.4, !- Program Line 5
+  SET {4fe4aac0-6fb0-447c-a426-102d2231cddd} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}<23.9 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}>1.7, !- Program Line 7
+  SET {939dab60-e542-4594-91b0-eab30620de30} = 29.4, !- Program Line 8
+  SET {4fe4aac0-6fb0-447c-a426-102d2231cddd} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}<23.9 && {838de9f9-7bdc-4e98-9d9c-fd2fe0945067}>1.7, !- Program Line 10
+  SET {939dab60-e542-4594-91b0-eab30620de30} = 29.4, !- Program Line 11
+  SET {4fe4aac0-6fb0-447c-a426-102d2231cddd} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {41ca99ee-ff0a-4eaf-89d0-a9141c3e1a93} = NULL, !- Program Line 14
-  SET {96be6902-a6a4-4477-b7e2-fa769a364916} = NULL, !- Program Line 15
+  SET {939dab60-e542-4594-91b0-eab30620de30} = NULL, !- Program Line 14
+  SET {4fe4aac0-6fb0-447c-a426-102d2231cddd} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000002},  !- Handle
   ems_sys_4_mixed_shr_none_sc_ashp_sh_ashp_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {968cfae4-482f-4632-9ec7-eda67e578d8b}<23.9 && {968cfae4-482f-4632-9ec7-eda67e578d8b}>1.7, !- Program Line 1
-  SET {4adc6dce-9c37-40b0-bf1d-ec7e365ca8f7} = 29.4, !- Program Line 2
-  SET {246c659e-8e7d-43b9-97b3-67677c9db9b5} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {968cfae4-482f-4632-9ec7-eda67e578d8b}<23.9 && {968cfae4-482f-4632-9ec7-eda67e578d8b}>1.7, !- Program Line 4
-  SET {4adc6dce-9c37-40b0-bf1d-ec7e365ca8f7} = 29.4, !- Program Line 5
-  SET {246c659e-8e7d-43b9-97b3-67677c9db9b5} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {968cfae4-482f-4632-9ec7-eda67e578d8b}<23.9 && {968cfae4-482f-4632-9ec7-eda67e578d8b}>1.7, !- Program Line 7
-  SET {4adc6dce-9c37-40b0-bf1d-ec7e365ca8f7} = 29.4, !- Program Line 8
-  SET {246c659e-8e7d-43b9-97b3-67677c9db9b5} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {968cfae4-482f-4632-9ec7-eda67e578d8b}<23.9 && {968cfae4-482f-4632-9ec7-eda67e578d8b}>1.7, !- Program Line 10
-  SET {4adc6dce-9c37-40b0-bf1d-ec7e365ca8f7} = 29.4, !- Program Line 11
-  SET {246c659e-8e7d-43b9-97b3-67677c9db9b5} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}<23.9 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}>1.7, !- Program Line 1
+  SET {a33bec38-a55e-4a3c-8008-5410e258dce0} = 29.4, !- Program Line 2
+  SET {0bb0f1f9-45e9-4aca-a1db-0b487295ad32} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}<23.9 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}>1.7, !- Program Line 4
+  SET {a33bec38-a55e-4a3c-8008-5410e258dce0} = 29.4, !- Program Line 5
+  SET {0bb0f1f9-45e9-4aca-a1db-0b487295ad32} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}<23.9 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}>1.7, !- Program Line 7
+  SET {a33bec38-a55e-4a3c-8008-5410e258dce0} = 29.4, !- Program Line 8
+  SET {0bb0f1f9-45e9-4aca-a1db-0b487295ad32} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}<23.9 && {cdbb953c-dc23-4856-adf0-7bd4d28b33dc}>1.7, !- Program Line 10
+  SET {a33bec38-a55e-4a3c-8008-5410e258dce0} = 29.4, !- Program Line 11
+  SET {0bb0f1f9-45e9-4aca-a1db-0b487295ad32} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {4adc6dce-9c37-40b0-bf1d-ec7e365ca8f7} = NULL, !- Program Line 14
-  SET {246c659e-8e7d-43b9-97b3-67677c9db9b5} = NULL, !- Program Line 15
+  SET {a33bec38-a55e-4a3c-8008-5410e258dce0} = NULL, !- Program Line 14
+  SET {0bb0f1f9-45e9-4aca-a1db-0b487295ad32} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -3534,13 +3534,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0051-000000000001},  !- Handle
-  28gal NaturalGas Water Heater - 19kBtu/hr 0.82 Therm Eff Supply Inlet Water Node, !- Name
+  45gal NaturalGas Water Heater - 30kBtu/hr 0.82 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000110},  !- Inlet Port
   {00000000-0000-0000-0017-000000000119};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0051-000000000002},  !- Handle
-  28gal NaturalGas Water Heater - 19kBtu/hr 0.82 Therm Eff Supply Outlet Water Node, !- Name
+  45gal NaturalGas Water Heater - 30kBtu/hr 0.82 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0017-000000000120},  !- Inlet Port
   {00000000-0000-0000-0017-000000000121};  !- Outlet Port
 
@@ -7508,8 +7508,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0057-000000000002},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0017-000000000004},  !- Zone Air Node Name
   {00000000-0000-0000-0057-000000000003},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000001},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -7554,8 +7554,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0057-000000000005},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0017-000000000005},  !- Zone Air Node Name
   {00000000-0000-0000-0057-000000000006},  !- Zone Return Air Port List
-  {00000000-0000-0000-0026-000000000001},  !- Primary Daylighting Control Name
-  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
+  ,                                        !- Primary Daylighting Control Name
+  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -7645,32 +7645,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0096-000000000001},  !- Handle
-  28gal NaturalGas Water Heater - 19kBtu/hr 0.82 Therm Eff, !- Name
-  0.104332504296502,                       !- Tank Volume {m3}
+  45gal NaturalGas Water Heater - 30kBtu/hr 0.82 Therm Eff, !- Name
+  0.170725916121549,                       !- Tank Volume {m3}
   {00000000-0000-0000-0064-000000000016},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  5451.37334949225,                        !- Heater Maximum Capacity {W}
+  8920.42911735096,                        !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   NaturalGas,                              !- Heater Fuel Type
   0.82,                                    !- Heater Thermal Efficiency
   {00000000-0000-0000-0024-000000000023},  !- Part Load Factor Curve Name
-  21.4700149801027,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  29.8139071145263,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  21.4700149801027,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  29.8139071145263,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0064-000000000017},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  4.24409891583953,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  5.0762307494413,                         !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  4.24409891583953,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  5.0762307494413,                         !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name
