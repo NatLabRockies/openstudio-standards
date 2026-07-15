@@ -187,8 +187,7 @@ namespace :data do
         base_template: '90.1-2019',
         template: '179d-90.1-2019',
         destination_parent_dir: standards_dir / 'ashrae_90_1_prm',
-        destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019',
-        template_remap: { '90.1-2019' => '179d-90.1-2019' }
+        destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019'
       }
     ]
 
@@ -208,8 +207,7 @@ namespace :data do
         [config[:spreadsheet_title]],
         dataset_type: 'os_stds',
         skip_templates: [config[:base_template]],
-        schedules_notes_filter: schedules_notes_filter,
-        template_remap: config[:template_remap]
+        schedules_notes_filter: schedules_notes_filter
       )
 
       proper_dir = if config[:destination_parent_dir]

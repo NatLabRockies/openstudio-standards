@@ -254,11 +254,7 @@ BOOL_COLS = [
 # @param spreadsheet_titles
 # @param dataset_type [String] valid choices are 'os_stds' or 'data_lib'
 #   'os_stds' updates json files in openstudio standards, while 'data_lib' exports 90.1 jsons for the data library
-def export_spreadsheet_to_json(spreadsheet_titles,
-                               dataset_type: 'os_stds',
-                               skip_templates: nil,
-                               schedules_notes_filter: nil,
-                               template_remap: nil)
+def export_spreadsheet_to_json(spreadsheet_titles, dataset_type: 'os_stds', skip_templates: nil, schedules_notes_filter: nil)
   if dataset_type == 'data_lib'
     standards_dir = File.expand_path("#{__dir__}/../../data/standards/export")
     skip_list = exclusion_list['data_lib']
@@ -289,13 +285,7 @@ def export_spreadsheet_to_json(spreadsheet_titles,
   warnings = []
   duplicate_data = []
   spreadsheet_titles.each do |spreadsheet_title|
-    this_warnings, this_duplicate_data = process_spreadsheet(spreadsheet_title,
-                                                             standards_dir,
-                                                             worksheets_to_skip,
-                                                             cols_to_skip,
-                                                             templates_to_skip,
-                                                             schedules_notes_filter,
-                                                             template_remap)
+    this_warnings, this_duplicate_data = process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter)
     warnings += this_warnings
     duplicate_data += this_duplicate_data
   end
@@ -606,26 +596,7 @@ def merge_space_types(standards_data)
   standards_data['space_types'] = space_types.values unless space_types.empty?
 end
 
-def remap_templates(standards_data, template_remap)
-  return if template_remap.nil? || template_remap.empty?
-
-  standards_data.each_value do |objs|
-    objs.each do |obj|
-      next unless obj.has_key?('template')
-      next unless template_remap.has_key?(obj['template'])
-
-      obj['template'] = template_remap[obj['template']]
-    end
-  end
-end
-
-def process_spreadsheet(spreadsheet_title,
-                        standards_dir,
-                        worksheets_to_skip,
-                        cols_to_skip,
-                        templates_to_skip,
-                        schedules_notes_filter = nil,
-                        template_remap = nil)
+def process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, cols_to_skip, templates_to_skip, schedules_notes_filter = nil)
   # Path to the xlsx file
   xlsx_path = Pathname.new("#{__dir__}/#{spreadsheet_title}.xlsx")
 
@@ -636,7 +607,6 @@ def process_spreadsheet(spreadsheet_title,
 
 
   standards_data, warnings = spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip, schedules_notes_filter)
-  remap_templates(standards_data, template_remap)
   duplicate_data = ensure_unicity(standards_data, spreadsheet_title)
   merge_space_types(standards_data)
 
