@@ -79,6 +79,30 @@ module BTAP
       #puts "File #{filename} saved."
     end
 
+    # This method will translate to an E+ IDF format and save the model to an idf file.
+    # @author Phylroy A. Lopez
+    # @param model
+    # @param filename The full path to save to.
+    # @return [OpenStudio::Model::Model] a copy of the OpenStudio model object.
+    def self.save_idf(model,filename)
+      OpenStudio::EnergyPlus::ForwardTranslator.new().translateModel(model).toIdfFile().save(OpenStudio::Path.new(filename),true)
+    end
+
+    # This method will recursively translate all IDFs in a folder to OSMs, and save them to the OSM_-No_Space_Types folder
+    # @author Brendan Coughlin
+    # @param filepath The directory that holds the IDFs - usually DOEArchetypes\Original
+    # @return nil
+    def self.convert_idf_to_osm(filepath)
+      Find.find(filepath) { |file|
+        if file[-4..-1] == ".idf"
+          model = FileIO.load_idf(file)
+          # this is a bit ugly but it works properly when called on a recursive folder structure
+          FileIO.save_osm(model, (File.expand_path("..\\OSM-No_Space_Types\\", filepath) << "\\" << Pathname.new(file).basename.to_s)[0..-5])
+          #puts # empty line break
+        end
+      }
+    end
+
     # This method will return a deep copy of the model.
     # Simply because I don't trust the clone method yet.
     # @author Phylroy A. Lopez
