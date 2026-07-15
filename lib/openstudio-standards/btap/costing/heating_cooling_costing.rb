@@ -1284,7 +1284,6 @@ module BTAP
         material_cost = costing_data['baseCosts']['materialOpCost'].to_f * multiplier * mat_mult
         labour_cost = costing_data['baseCosts']['laborOpCost'].to_f * multiplier * lab_mult
       end
-require 'pry-byebug'; binding.pry; exit;
       return material_cost, labour_cost
     end
 
