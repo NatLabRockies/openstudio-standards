@@ -66,7 +66,7 @@ def write_results(result, test_file, test_name)
   end
 end
 
-class ParallelTests
+class ParallelTestHelper
 
   def run(file_list, test_output_folder, processors = nil)
     processors = ProcessorsUsed if processors.nil?
