@@ -186,8 +186,12 @@ def shorten_sheet_name(sheet_name)
 end
 
 # Determine the directory of the data based on the spreadsheet name
+def spreadsheet_title_directory_key(spreadsheet_title)
+  spreadsheet_title.gsub(/\(\w*\)(?:_[^-]*)?/, '')
+end
+
 def standard_parent_directory_from_spreadsheet_title(spreadsheet_title)
-  data_directory = spreadsheet_title.downcase.gsub('openstudio_standards-', '').gsub(/\(\w*\)/, '').split('-').first
+  data_directory = spreadsheet_title_directory_key(spreadsheet_title).downcase.gsub('openstudio_standards-', '').split('-').first
   # puts "Extracting standard parent directory from spreadsheet title #{spreadsheet_title} = #{data_directory}"
 
   return data_directory
@@ -537,7 +541,7 @@ def spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip
   return standards_data, warnings
 end
 
-def ensure_unicity(standards_data)
+def ensure_unicity(standards_data, spreadsheet_title)
   duplicate_data = []
 
   # Check for duplicate data in space_types_* sheets
@@ -603,7 +607,7 @@ def process_spreadsheet(spreadsheet_title, standards_dir, worksheets_to_skip, co
 
 
   standards_data, warnings = spreadsheet_to_hash_and_metadata(xlsx_path, worksheets_to_skip, cols_to_skip, schedules_notes_filter)
-  duplicate_data = ensure_unicity(standards_data)
+  duplicate_data = ensure_unicity(standards_data, spreadsheet_title)
   merge_space_types(standards_data)
 
   ws = write_standards_hash_to_json(standards_data, spreadsheet_title, standards_dir, templates_to_skip)
@@ -614,7 +618,7 @@ end
 
 def get_template_dirs(spreadsheet_title, standards_dir)
     # Find all the template directories that match the search criteria embedded in the spreadsheet title
-  dirs = spreadsheet_title.gsub('OpenStudio_Standards-', '').gsub(/\(\w*\)/, '').split('-')
+  dirs = spreadsheet_title_directory_key(spreadsheet_title).gsub('OpenStudio_Standards-', '').split('-')
   new_dirs = []
   dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
   glob_string = "#{standards_dir}/#{new_dirs.join('/')}"
