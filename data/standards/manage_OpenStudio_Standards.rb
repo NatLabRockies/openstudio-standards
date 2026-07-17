@@ -620,11 +620,17 @@ def get_template_dirs(spreadsheet_title, standards_dir)
     # Find all the template directories that match the search criteria embedded in the spreadsheet title
   dirs = spreadsheet_title_directory_key(spreadsheet_title).gsub('OpenStudio_Standards-', '').split('-')
   new_dirs = []
-  dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d}*" }
+  dirs.each { |d| d == 'ALL' ? new_dirs << '*' : new_dirs << "*#{d.downcase}*" }
   glob_string = "#{standards_dir}/#{new_dirs.join('/')}"
   puts "--spreadsheet title embedded search criteria: #{glob_string} yields:"
   # template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data') && !f.include?('prm')}
   template_dirs = Dir.glob(glob_string).select { |f| File.directory?(f) && !f.include?('data')}
+  if template_dirs.empty? && dirs.size == 1 && dirs.first.include?('_')
+    nested_dirs = dirs.first.downcase.split('_')
+    nested_glob_string = "#{standards_dir}/#{nested_dirs.map { |d| "*#{d}*" }.join('/')}"
+    puts "--spreadsheet title embedded nested search criteria: #{nested_glob_string} yields:"
+    template_dirs = Dir.glob(nested_glob_string).select { |f| File.directory?(f) && !f.include?('data')}
+  end
   template_dirs.each do |template_dir|
     puts "----#{template_dir}"
   end
@@ -676,6 +682,10 @@ def write_standards_hash_to_json(standards_data, spreadsheet_title, standards_di
         end
         additional_dirs = []
         additional_dirs << child_dir if Dir.exist?(child_dir)
+        template_dirs.each do |template_dir|
+          nested_child_dir = "#{template_dir}/#{template_dir_name}"
+          additional_dirs << nested_child_dir if Dir.exist?(nested_child_dir)
+        end
         possible_template_dirs = template_dirs + additional_dirs
         puts "Additional dir = #{child_dir}"
 

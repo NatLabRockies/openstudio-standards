@@ -183,19 +183,23 @@ namespace :data do
         template: '179d-90.1-2007'
       },
       {
-        spreadsheet_title: 'OpenStudio_Standards-ashrae_90_1(space_types)_ACM2019',
-        base_template: '90.1-2019',
-        template: '179d-90.1-2019',
-        destination_parent_dir: standards_dir / 'ashrae_90_1_prm',
-        destination_dir_name: '179d_ashrae_90_1_2019_ACM_2019'
+        spreadsheet_title: 'OpenStudio_Standards-ACM_2019',
+        template: '179d-ACM-2019',
+        destination_parent_dir: standards_dir / 'acm' / 'acm_2019',
+        destination_dir_name: '179d_acm_2019'
       }
     ]
 
     spreadsheet_configs.each do |config|
       template_dir_name = standard_directory_name_from_template(config[:template])
-      base_template_dir_name = standard_directory_name_from_template(config[:base_template])
-
-      temp_dir = standards_parent_dir / template_dir_name
+      base_template_dir_name = standard_directory_name_from_template(config[:base_template]) if config[:base_template]
+      proper_dir = if config[:destination_parent_dir]
+                     config[:destination_parent_dir] / config[:destination_dir_name]
+                   else
+                     standards_parent_dir / base_template_dir_name / template_dir_name
+                   end
+      FileUtils.mkdir_p(proper_dir)
+      temp_dir = config[:base_template] ? standards_parent_dir / template_dir_name : proper_dir
       FileUtils.mkdir_p(temp_dir)
 
       schedules_notes_filter = [
@@ -206,24 +210,20 @@ namespace :data do
       export_spreadsheet_to_json(
         [config[:spreadsheet_title]],
         dataset_type: 'os_stds',
-        skip_templates: [config[:base_template]],
+        skip_templates: config[:base_template] ? [config[:base_template]] : [],
         schedules_notes_filter: schedules_notes_filter
       )
 
-      proper_dir = if config[:destination_parent_dir]
-                     config[:destination_parent_dir] / config[:destination_dir_name]
-                   else
-                     standards_parent_dir / base_template_dir_name / template_dir_name
-                   end
-      FileUtils.mkdir_p(proper_dir)
-                  target_data_dir = proper_dir / 'data'
-      (temp_dir / 'data').glob('**/*.json').each do |f|
-        target_f = target_data_dir / f.relative_path_from(temp_dir / 'data')
-        FileUtils.mkdir_p(target_f.parent)
-        FileUtils.mv(f, target_f, force: true)
+      unless temp_dir == proper_dir
+        target_data_dir = proper_dir / 'data'
+        (temp_dir / 'data').glob('**/*.json').each do |f|
+          target_f = target_data_dir / f.relative_path_from(temp_dir / 'data')
+          FileUtils.mkdir_p(target_f.parent)
+          FileUtils.mv(f, target_f, force: true)
+        end
+        FileUtils.rm_rf(temp_dir)
       end
-      FileUtils.rm_rf(temp_dir)
-      puts "Moved #{config[:template]} files to #{proper_dir}"
+      puts "Updated #{config[:template]} files in #{proper_dir}"
       puts proper_dir.glob('**/*.json')
     end
   end
