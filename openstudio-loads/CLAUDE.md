@@ -41,6 +41,14 @@ deliberately EXCLUDED** (openstudio-shw owns it) — do not add them back here.
   don't re-mislabel it.
 - SpaceType density getters (`lightingPowerPerFloorArea` etc.) can return
   OptionalDouble depending on SDK version — unwrap before `.round`.
+- **The umbrella's EUI normalization consumes `Apply.apply_people` /
+  `apply_equipment` / `apply_schedule_set` / `apply_thermostat` directly with
+  SYNTHETIC Table 8.4.4.2 records** (openstudio-necb `archetypes.rb`) — the
+  record field names/units (occupancy_per_area per 1000 ft², W/ft², schedule
+  name shapes `NECB-<letter>-…`) are a cross-gem contract; changing them
+  breaks the umbrella's round-trip test.
+- The coverage-emission count is PINNED at 7 in test_apply_loads (5 × 8.4.3.x
+  + 8.4.2.7 slice + 8.4.3.6) — bump consciously.
 - The umbrella's bare-geometry on-ramp (`necb_loads:` option) calls this gem
   first, then lighting → shw → hvac. Space-type TAGS (standardsBuildingType /
   standardsSpaceType) drive every downstream gem — assignment correctness here

@@ -38,6 +38,12 @@ pump and instantaneous water heaters), the reference transform, and costing.
   on-ramp only builds SHW when `shw_fuel:` is passed.
 - Demand needs space-type TAGS (standardsSpaceType) — bare models must go
   through openstudio-loads assignment first.
+- Vintage aliasing is OWNED by openstudio-loads
+  (`OpenStudioLoads::NECB.data_vintage`, called from `necb/demand.rb`) — the
+  2025 rules file deliberately has no `data_vintage_alias` key (deleted as
+  dead config by the orphan-key lint).
+- The water-heater part-load factor curve is probe-verified equivalent to the
+  8.4.6.9 FHeatPLC (≤0.98%; `rake necb:curves`).
 
 ## Facade
 

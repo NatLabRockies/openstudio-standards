@@ -47,6 +47,18 @@ numbering), climate/HDD resolution, and envelope + thermal-bridging costing.
   `uFactor` fallback or you silently skip windows.
 - `setSolarAbsorptance` / `setVisibleAbsorptance` need
   `OpenStudio::OptionalDouble.new(x)`, not a bare Float.
+- The reference air-leakage default clears **ALL THREE infiltration
+  representations** (DesignFlowRate + EffectiveLeakageArea + FlowCoefficient)
+  before applying I_AGW — clearing only DesignFlowRate double-counted
+  infiltration for ELA/FlowCoefficient proposeds (fixed defect; hostile test
+  pins it). Cleared counts land in the audit decision.
+- The 0.7 reference roof absorptance is read from
+  `reference_envelope.roof_absorptance_if_actual_used` in the rules JSON —
+  not hardcoded.
+- The manifest count-pin lints (test_data_integrity / test_reference_envelope)
+  assert **16** articles per vintage — bump them CONSCIOUSLY when adding
+  entries; the vintage-numbering lint checks only the renumbered 8.4.4/8.4.5
+  subsection (8.4.1-8.4.3 are vintage-invariant).
 - Reference transform retargets EXISTING constructions — bare-geometry models
   (from openstudio-geometry wizards/bar) have none; seed a construction set
   first.

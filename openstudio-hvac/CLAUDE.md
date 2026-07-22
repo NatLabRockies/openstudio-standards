@@ -55,6 +55,10 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   economizer = warning only) + 5.2.10.1 ERV trigger (needs
   `building: { winter_design_temp_c: }`).
 - `necb/efficiency.rb` — capacity-binned minimums (`efficiencies_*.json`) +
+  plant staging thresholds (176/352 kW boilers, 2100 kW chillers, 0.25
+  modulating minimum) read from `reference_rules_*.json`
+  `heating_plant`/`cooling_plant` (NOT hardcoded — wired by the orphan-key
+  lint; behaviour fingerprinted bit-identical) +
   Table 8.4.4.17 fan power curves applied POST-SIZING (rows by rated kW;
   c1–c3 = columns A/B/C, min-flow-fraction = D; the VSD row exists but the
   selection sentences never pick it).
@@ -74,6 +78,26 @@ apply_efficiencies / check_part5 / rules`.
 
 ## Traps
 
+- **8.4.6 part-load curves are PROBE-VERIFIED** (`rake necb:curves`,
+  `scripts/necb_8_4_6_curve_probe.rb`): as-applied model curves vs code
+  coefficients under documented transforms (FHeatPLC = PLR/eff, °F→°C
+  surfaces), compared FUNCTIONALLY over sampled envelopes — never
+  coefficient-wise (vendored JSON rounding reads as fake deviation). Every
+  code polynomial self-checks ≈1.0 at its rating point first.
+- DX cooling EIR_FT was regenerated EXACTLY from the code (the 2011-lineage
+  surface deviated 1.95%); the PLF cycling curve is a refit of PLR/EIR_FPLR
+  clamped to [0.7, 1.0] (~2% = structural floor of cubic-on-rational). NECB
+  2020 8.4.5.4 == 2025 8.4.6.4 coefficients, verified identical.
+- **Chiller EIR_FT: the PRINTED code is defective** — NECB 2020 Table
+  8.4.5.5-C == 2025 8.4.6.5-C carry misplaced-decimal coefficients
+  (water-cooled Scroll d, Reciprocating b, air-cooled Screw a); errata filed
+  with NRC 2026-07-22. The probe compares vs `CHILLER_EIR_FT_EC_F_ERRATUM`
+  (labelled "vs proposed erratum"); the vendored legacy curves match the
+  corrected rows on all six coefficients to <4e-6 — do NOT "fix" them toward
+  the printed values.
+- `furnace_staging`/`dx_staging`/`hydronic_pumps` in the rules JSONs are
+  `non_rule_keys`-exempted FUTURE-implementation data backing declared-partial
+  articles — not dead weight, not yet consumed.
 - Base efficiency setters already apply NECB values to CBECS-built DX/fan/pump
   equipment — there is NO "90.1 fallback gap" (a previously-suspected defect
   that turned out to be a false premise).

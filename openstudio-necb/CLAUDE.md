@@ -8,7 +8,13 @@ AuditLog spans everything.
 
 ## Pipeline (`Compliance.performance_compliance`)
 
-clone → weather attach → HDD (explicit → Table C-1 → .stat) → proposed sizing
+clone → on-ramp → **space-type pre-flight** (`validate_space_types!`: every
+floor-area space type must resolve against the NECB catalog; hard
+`ArgumentError` with did-you-mean suggestions — BREAKING for untagged models
+BY DESIGN, since unmatched types silently keep the proposed's lighting/loads
+in the reference clone; the raise lands inside the diagnostics begin so the
+audit still flushes) → weather attach → HDD (explicit → Table C-1 → .stat) →
+proposed sizing
 → reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
 LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
 optional reference_daylighting on ONE clone/audit → reference sizing →
@@ -23,12 +29,21 @@ occupancy/receptacle loads stay identical-by-clone (8.4.3.2); lighting power
 and SHW efficiencies ARE regenerated to code on the reference.
 
 - Modes `simulate: :annual | :sizing | :none` (only `:annual` determines).
-- `path: :eui` (2025 only) — the 8.4.4 archetype-EUI path: BET =
-  Σ(Aᵢ×EUIᵢ)+PL from Table 8.4.4.1; NO reference building. Guards: ≥90%
-  archetype floor coverage, HDD < 9000.
-- `eui_supplement: {archetype_areas:}` on a 2025 REFERENCE-path run also
-  computes the 8.4.4 verdict against the same annual kWh →
-  `report['eui_path']` (one run, both paths).
+- `path: :eui` (2025 only) — the 8.4.4 archetype-EUI path via
+  `archetypes.rb`: `archetypes: {'Office' => :all | [space names]}` (a SPACE
+  mapping — `archetype_areas` is gone); areas COMPUTED from the model per
+  8.4.4.1.(3), unmapped area pro-rata per (4); <90% coverage or HDD ≥ 9000
+  HARD-REFUSE. The proposed is CHECKED against Table 8.4.4.2 (values +
+  hourly schedule profiles) and, when non-conformant, NORMALIZED to it before
+  the annual run (8.4.4.2.(1)) — normalization REPLACES the run, no extra
+  cost. NO reference building.
+- `eui_supplement: {archetypes:, run_normalized:}` on a 2025 REFERENCE-path
+  run: the two paths simulate DIFFERENT proposeds (as-specified vs
+  Table-8.4.4.2-normalized), so the shared-run shortcut is only lawful when
+  the conformance check passes; otherwise `report['eui_path']` is
+  `computed: false` with the mismatch list (default — never silently double
+  E+ cost) unless `run_normalized: true` runs the normalized clone into
+  `proposed_eui_annual/`. The report renders NOT COMPUTED as its own state.
 - `necb_loads:` — bare-geometry on-ramp (loads → lighting → optional shw →
   optional hvac) before the pipeline.
 - Returns `ComplianceResult` Struct
@@ -46,10 +61,19 @@ checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
 ## Modules
 
 - `compliance.rb` — the pipeline + eui path + capacity iteration + costing.
-- `runner.rb` — weather attach, `run_energyplus!`, `energy_results` (End Uses
-  via TabularData GJ rows — SqlFile has NO fuel-agnostic end-use methods),
-  unmet hours, `clean_run?`. District accessors renamed across SDK versions —
-  `respond_to?` probe.
+- `Runner` is an ALIAS of `OpenStudioSimulation::Runner` (the runner was
+  extracted to the openstudio-simulation gem): weather attach,
+  `run_energyplus!`, `energy_results` (End Uses via TabularData GJ rows —
+  SqlFile has NO fuel-agnostic end-use methods), unmet hours, `clean_run?`.
+  District accessors renamed across SDK versions — `respond_to?` probe.
+- `archetypes.rb` — the 8.4.4 machinery: mapping/areas/applicability +
+  Table 8.4.4.2 conformance check + normalization (built THROUGH
+  openstudio-loads' record machinery with synthetic archetype records).
+- `data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
+  `article_coverage` manifests (8.4.1.2 determination, 8.4.2.x methods,
+  8.4.4.x EUI). Declaration-only: the umbrella has NO runtime
+  emit_article_coverage yet, so its partial/not_implemented do NOT warn on
+  runs (unlike domain gems).
 - `tiers.rb` + `data/eui_targets_2025.json` / `ghg_factors_2025.json` —
   Section 10 tiers (≤100/75/50/<40% → 1–4, identical 2020/2025), 8.4.4 BET
   arithmetic, Part 11 GHG levels A–F (provincial factors: ON elec 57.9 g/kWh,
@@ -70,6 +94,13 @@ checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
 - A shortened `run_period:` computes the same arithmetic but flags NOT
   code-compliant (`report['annual'] = false` + warning + report strip).
 - `AuditLog` here is an alias of `OpenStudioHVAC::AuditLog`.
+- **Cloning a SpaceType for load overrides? Clone its DefaultScheduleSet
+  too** — a fresh set severs Lights schedule inheritance and EnergyPlus
+  FATALS on schedule-less Lights (found by the E+ battery, invisible to
+  SDK-only tests).
+- Schedule-PROFILE comparison across models must clone the candidate into the
+  target's model first: differing assumed years shift day-of-week rules
+  (weekday profiles get compared against weekends).
 - SpaceType density getters may return OptionalDouble — unwrap (see
   `ModelQuery.unwrap`).
 - Licensing: `costs_csv:` runtime injection only; the report embeds cost
@@ -79,7 +110,8 @@ checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
 
 ```bash
 cd openstudio-necb
-ruby test/test_compliance.rb          # pipeline modes + capacity iteration
+ruby test/test_compliance.rb          # pipeline modes + capacity iteration + pre-flight
+ruby test/test_archetypes.rb          # 8.4.4 mapping/check/normalize (round-trip pinned)
 ruby test/test_tiers_eui.rb           # tiers, 8.4.4 EUI path, GHG
 ruby test/test_report_units.rb        # SDK-free renderer units + goldens
 ruby test/test_report_model_query.rb  # SDK extraction
