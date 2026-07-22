@@ -5457,6 +5457,34 @@
       ]
     },
     {
+      "name": "ACM2019 WarehouseBulkClgSetpt",
+      "template": "179d-ACM-2019",
+      "category": "Thermostat Setpoint",
+      "units": "C",
+      "day_types": "Default|WntrDsn|SmrDsn",
+      "start_date": "2014-01-01T00:00:00+00:00",
+      "end_date": "2014-12-31T00:00:00+00:00",
+      "type": "Constant",
+      "notes": "Customized schedule to support realistic modeling rather than following ACM schedules. From openstudio-bem-to-surrogate-gem warehouse model (test_spacetype_warehouse) schedule: Warehouse ClgSetp BulkStorage",
+      "values": [
+        50
+      ]
+    },
+    {
+      "name": "ACM2019 WarehouseBulkHtgSetpt",
+      "template": "179d-ACM-2019",
+      "category": "Thermostat Setpoint",
+      "units": "C",
+      "day_types": "Default|WntrDsn|SmrDsn",
+      "start_date": "2014-01-01T00:00:00+00:00",
+      "end_date": "2014-12-31T00:00:00+00:00",
+      "type": "Constant",
+      "notes": "Customized schedule to support realistic modeling rather than following ACM schedules. From openstudio-bem-to-surrogate-gem warehouse model (test_spacetype_warehouse) schedule: Warehouse Bulk Storage Heating Setpoint Schedule",
+      "values": [
+        10
+      ]
+    },
+    {
       "name": "ACM2019 WarehouseClgSetpt",
       "template": "179d-ACM-2019",
       "category": "Thermostat Setpoint",
@@ -5579,6 +5607,34 @@
         29.44444444444444,
         29.44444444444444,
         29.44444444444444
+      ]
+    },
+    {
+      "name": "ACM2019 WarehouseFineClgSetpt",
+      "template": "179d-ACM-2019",
+      "category": "Thermostat Setpoint",
+      "units": "C",
+      "day_types": "Default|WntrDsn|SmrDsn",
+      "start_date": "2014-01-01T00:00:00+00:00",
+      "end_date": "2014-12-31T00:00:00+00:00",
+      "type": "Constant",
+      "notes": "Customized schedule to support realistic modeling rather than following ACM schedules. From openstudio-bem-to-surrogate-gem warehouse model (test_spacetype_warehouse) schedule: Warehouse Fine Storage Cooling Setpoint Schedule",
+      "values": [
+        26.7
+      ]
+    },
+    {
+      "name": "ACM2019 WarehouseFineHtgSetpt",
+      "template": "179d-ACM-2019",
+      "category": "Thermostat Setpoint",
+      "units": "C",
+      "day_types": "Default|WntrDsn|SmrDsn",
+      "start_date": "2014-01-01T00:00:00+00:00",
+      "end_date": "2014-12-31T00:00:00+00:00",
+      "type": "Constant",
+      "notes": "Customized schedule to support realistic modeling rather than following ACM schedules. From openstudio-bem-to-surrogate-gem warehouse model (test_spacetype_warehouse) schedule: Warehouse Fine Storage Heating Setpoint Schedule",
+      "values": [
+        15.56
       ]
     },
     {
