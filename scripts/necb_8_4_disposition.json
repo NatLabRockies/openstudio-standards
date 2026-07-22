@@ -11,18 +11,6 @@
     "generated": "2026-07-22"
   },
   "dispositions": {
-    "8.4.1.1": {
-      "category": "covered_by",
-      "covered_by": [
-        "openstudio-envelope",
-        "openstudio-hvac",
-        "openstudio-lighting",
-        "openstudio-shw"
-      ],
-      "rationale": "Accounting for building components per the prescriptive Sections 3.2/4.2/5.2/6.2 is realized by the reference-building transforms the domain gems declare under 8.4.5.x; this article is the framing for those, not a separate behaviour.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
-      "draft": true
-    },
     "8.4.1.3": {
       "category": "modeller",
       "rationale": "The Part 3-7 Section .4 limitations are applicability conditions on using the performance path at all — a scoping judgement made before any software runs.",
@@ -53,37 +41,9 @@
       "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
       "draft": true
     },
-    "8.4.2.7": {
-      "category": "covered_by",
-      "covered_by": [
-        "openstudio-loads",
-        "openstudio-shw"
-      ],
-      "rationale": "Occupant, receptacle and miscellaneous loads come from openstudio-loads' NECB space-type application; SWH loads from openstudio-shw demand; EnergyPlus computes the sensible/latent split (2) and schedule-driven adjustment (3) from those inputs.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
-      "draft": true
-    },
     "8.4.2.8": {
       "category": "engine",
       "rationale": "Dynamic wall/roof/floor heat transfer with orientation- and absorptance-dependent solar radiation is EnergyPlus's surface heat balance; absorptances themselves are model inputs (see 8.4.3.3 / 8.4.5.3 for who sets them).",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
-      "draft": true
-    },
-    "8.4.2.9": {
-      "category": "covered_by",
-      "covered_by": [
-        "openstudio-envelope"
-      ],
-      "rationale": "The I_AGW operating-pressure conversion of the 75 Pa leakage rate is applied by openstudio-envelope's reference air-leakage transform (which cites this article). Deliberately dispositioned DESPITE the citation so the generator's conflict flag has a live example — resolve by giving envelope a manifest entry for it.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
-      "draft": true
-    },
-    "8.4.2.10": {
-      "category": "covered_by",
-      "covered_by": [
-        "openstudio-hvac"
-      ],
-      "rationale": "Reference HVAC systems are built explicitly from Table 8.4.5.7 topologies by openstudio-hvac — components are constructed, not approximated by thermodynamically-similar substitutes; limited-capability effects (2) are E+ behaviour of the built systems.",
       "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
       "draft": true
     },
@@ -96,15 +56,6 @@
     "8.4.2.12": {
       "category": "modeller",
       "rationale": "Exceptional calculation methods for systems the software cannot model are constructed and justified by the modeller case-by-case.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
-      "draft": true
-    },
-    "8.4.3.6": {
-      "category": "covered_by",
-      "covered_by": [
-        "openstudio-loads"
-      ],
-      "rationale": "Peak outdoor-air ventilation rates enter as DesignSpecification:OutdoorAir from openstudio-loads' NECB space-type data; the reference inherits them by clone (8.4.5.15 pairs with this).",
       "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
       "draft": true
     },
@@ -127,57 +78,73 @@
       "draft": true
     },
     "8.4.6.1": {
-      "category": "gap",
-      "rationale": "Part-load performance curves per Articles 8.4.6.2-8.4.6.9: the hvac efficiency pass sets minimum efficiencies and the 8.4.5.17 VAV fan power curves, but the equipment part-load curve COEFFICIENTS mandated by this Subsection have not been verified as applied to any built reference system. Treat as gap until a probe proves otherwise (see docs/necb_rule_verification.md for the evidence standard).",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac",
+        "openstudio-shw"
+      ],
+      "rationale": "Part-load curves ARE applied by the efficiency passes (boiler/furnace/DX/SWH verified, chiller+others not yet compared) — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). rake necb:curves is the ongoing gate.",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.2": {
-      "category": "gap",
-      "rationale": "Boiler FHeatPLC part-load curve coefficients not verified as applied — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac"
+      ],
+      "rationale": "VERIFIED EQUIVALENT: applied normalized-efficiency curve tracks the Table 8.4.6.2 non-condensing FHeatPLC within 1.88% over PLR 0.25-1.0 — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). The condensing 6-term row is not compared (no condensing boiler in the reference builds).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.3": {
-      "category": "gap",
-      "rationale": "Furnace FHeatPLC part-load curve coefficients not verified as applied (furnaces are represented as gas coils in the reference builds) — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac"
+      ],
+      "rationale": "VERIFIED EQUIVALENT: gas-coil PLF curve tracks the Table 8.4.6.3 atmospheric FHeatPLC within 0.77% — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.4": {
-      "category": "gap",
-      "rationale": "DX cooling CAP_FT/EIR_FPLR/EIR_FT coefficient sets not verified as applied — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac"
+      ],
+      "rationale": "PARTIALLY VERIFIED: CAP_FT is the code surface exactly (0.01%, degF->degC transform); but EIR_FT DEVIATES up to 1.95% off-rating (vendored 2011 surface differs from the 2025 coefficients) and the EIR_FPLR/PLF cycling mapping drifts 3.70% at low PLR (partly structural: E+ PLF model vs the code EIR-ratio form) — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). Open work: regenerate EIR_FT from the 2025 coefficients.",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.5": {
       "category": "gap",
-      "rationale": "Electric chiller part-load coefficient sets not verified as applied — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the electric chiller per-type tables 8.4.6.5-A/-B/-C; vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.6": {
       "category": "gap",
-      "rationale": "Cooling tower FWB capacity adjustment not verified as applied — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the cooling tower FWB adjustment; vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.7": {
       "category": "gap",
-      "rationale": "Air-source heat-pump heating part-load coefficient sets not verified as applied (the -10degC cutoff IS applied, 8.4.5.13; the curves are the open part) — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the air-source heat-pump heating curves (the -10degC cutoff IS applied per 8.4.5.13); vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.8": {
       "category": "gap",
-      "rationale": "Absorption chiller part-load coefficient sets not verified as applied; no absorption chiller appears in the reference system catalog — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the absorption chiller (no absorption chiller exists in the reference catalog); vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.9": {
-      "category": "gap",
-      "rationale": "Fuel-fired SWH FHeatPLC part-load curve not verified as applied — see 8.4.6.1.",
-      "reviewer": "UNREVIEWED — machine-drafted 2026-07-22, requires sign-off",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-shw"
+      ],
+      "rationale": "VERIFIED EQUIVALENT: water-heater part-load factor curve tracks the 8.4.6.9.(2) FHeatPLC within 0.98% — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     }
   }

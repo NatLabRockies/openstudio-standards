@@ -122,7 +122,8 @@ class TestApplyLoads < Minitest::Test
 
     assert(audit.entries.any? { |e| e[:action].include?('plenum space type skipped') })
     coverage = audit.entries.select { |e| e[:step] == :coverage }
-    assert_equal 5, coverage.size, 'all of subsection 8.4.3 accounted'
+    # 5 original 8.4.3.x + 8.4.2.7 (internal loads slice) + 8.4.3.6 outdoor air
+    assert_equal 7, coverage.size, 'all declared articles accounted'
     partial = coverage.find { |e| e[:article] == '8.4.3.2.' }
     assert_equal :warning, partial[:level], 'partial status WARNS (lighting+SHW gaps)'
     assert_match(/openstudio-lighting/, partial[:action])

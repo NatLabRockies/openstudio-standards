@@ -474,7 +474,7 @@
     "articles": [
       {
         "article": "8.4.5.1.",
-        "title": "General \u2014 reference building basis (prescriptive components, all energy uses)",
+        "title": "General — reference building basis (prescriptive components, all energy uses)",
         "status": "host_scope",
         "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems."
       },
@@ -488,19 +488,19 @@
         "article": "8.4.5.3.",
         "title": "Building Envelope Components (solar absorptance)",
         "status": "host_scope",
-        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
+        "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.5.4.",
         "title": "Envelope Thermal Characteristics (lightweight construction)",
         "status": "host_scope",
-        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
+        "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.5.5.",
         "title": "Lighting",
         "status": "host_scope",
-        "how": "Delegated to openstudio-lighting \u2014 reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12)."
+        "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12)."
       },
       {
         "article": "8.4.5.6.",
@@ -547,7 +547,7 @@
         "article": "8.4.5.12.",
         "title": "Cooling with Outside Air (economizers)",
         "status": "partial",
-        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled \u2014 loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
+        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled — loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
         "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA"
       },
       {
@@ -601,7 +601,20 @@
         "article": "8.4.5.20.",
         "title": "Service Water Heating Systems",
         "status": "host_scope",
-        "how": "Delegated to openstudio-shw \u2014 reference_shw re-applies Part 6 minimum efficiencies."
+        "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies."
+      },
+      {
+        "article": "8.4.1.1. (HVAC)",
+        "title": "General — HVAC components accounted",
+        "status": "implemented",
+        "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.5.7.-8.4.5.19.) and the capacity-binned efficiency pass — the realization of 8.4.1.1.(1) for the HVAC slice."
+      },
+      {
+        "article": "8.4.2.10.",
+        "title": "HVAC Systems",
+        "status": "implemented",
+        "how": "Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies — components are constructed, not approximated by thermodynamically-similar substitutes.",
+        "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified."
       }
     ]
   }

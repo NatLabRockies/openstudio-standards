@@ -88,10 +88,10 @@ class TestReferenceEnvelope < Minitest::Test
     assert_operator rate, :>, 0.29
   end
 
-  def test_coverage_emitted_all_14_articles
+  def test_coverage_emitted_all_16_articles
     audit = reference(proposed_model)
     coverage = audit.entries.select { |e| e[:step] == :coverage }
-    assert_equal 14, coverage.size
+    assert_equal 16, coverage.size # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
     ref3 = coverage.find { |e| e[:article] == '8.4.4.3.' }
     assert_equal 'implemented', ref3[:inputs][:status]
     assert_operator ref3[:inputs][:decisions_citing], :>, 0

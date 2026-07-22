@@ -279,6 +279,13 @@ namespace :necb do
                                              system(RbConfig.ruby, 'scripts/generate_necb_8_4_coverage.rb')
   end
 
+  desc 'Verify as-applied part-load curves against NECB 2025 Subsection 8.4.6 coefficients'
+  task :curves do
+    # SDK only, no CLI (components are hard-sized). Compares MODEL curves under
+    # the documented transforms (FHeatPLC = PLR/eff, degF->degC surfaces).
+    abort('necb:curves failed') unless system(RbConfig.ruby, 'scripts/necb_8_4_6_curve_probe.rb')
+  end
+
   desc 'All NECB rule-verification checks (runs every check, then reports)'
   task :verify do
     # Deliberately NOT `task verify: %i[orphan_keys hostile]` — prerequisite
@@ -286,6 +293,7 @@ namespace :necb do
     # list. This is a "what still needs doing" report, so run everything.
     results = {
       'orphan_keys' => system(RbConfig.ruby, 'scripts/necb_orphan_keys.rb'),
+      'curves_8_4_6' => system(RbConfig.ruby, 'scripts/necb_8_4_6_curve_probe.rb'),
       # .map(&:...).all? — NOT .all? { }, which short-circuits on the first
       # failing gem and hides the remaining work.
       'hostile' => Dir.glob('openstudio-*/test/test_necb_hostile_reference.rb').sort.map do |test|

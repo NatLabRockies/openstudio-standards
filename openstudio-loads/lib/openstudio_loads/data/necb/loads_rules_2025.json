@@ -41,7 +41,20 @@
         "article": "8.4.3.5.",
         "title": "Assumed chiller performance for Part 8 calculations (Table 8.4.3.5)",
         "status": "host_scope",
-        "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) \u2014 an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)"
+        "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)"
+      },
+      {
+        "article": "8.4.2.7. (internal loads)",
+        "title": "Internal and Service Water Heating Loads — internal slice",
+        "status": "implemented",
+        "how": "Occupant, receptacle and miscellaneous loads applied from the NECB space-type data; (2) sensible/latent split and (3) schedule-driven adjustment are EnergyPlus behaviour of those inputs."
+      },
+      {
+        "article": "8.4.3.6.",
+        "title": "Outdoor Air",
+        "status": "partial",
+        "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them identically by clone.",
+        "gaps": "(1)(a): the 8.4.4-path (EUI) outdoor-air basis per Article 8.4.4.2. is not implemented (see the umbrella 8.4.4.2. not_implemented declaration)."
       }
     ]
   }

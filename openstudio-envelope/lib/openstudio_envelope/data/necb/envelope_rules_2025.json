@@ -18,7 +18,10 @@
     ],
     "note": "Runtime never contacts the MCP. U-values are EFFECTIVE transmittance per 3.1.1.7."
   },
-  "non_rule_keys": ["u_values_units", "hdd_bins_note"],
+  "non_rule_keys": [
+    "u_values_units",
+    "hdd_bins_note"
+  ],
   "u_values_units": "W/(m2.K) — maximum overall (EFFECTIVE) thermal transmittance",
   "u_values": {
     "outdoors": {
@@ -221,6 +224,18 @@
         "status": "implemented",
         "gaps": "the canonical lightweight layer set of Note A-8.4.5.4.(1) is not machine-retrievable - the massless interpretation should be verified against the printed note",
         "how": "opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone"
+      },
+      {
+        "article": "8.4.1.1. (envelope)",
+        "title": "General — envelope components accounted",
+        "status": "implemented",
+        "how": "Envelope components accounted per the prescriptive Section 3.2 requirements via the reference transform (8.4.5.3./8.4.5.4.: U-values at the building HDD, FDWR/SRR, lightweight construction) — the realization of 8.4.1.1.(1) for the envelope slice."
+      },
+      {
+        "article": "8.4.2.9.",
+        "title": "Air Leakage",
+        "status": "implemented",
+        "how": "The (2) I_AGW operating-pressure conversion of the 75 Pa leakage rate is computed and applied per space in the reference air-leakage default (apply_air_leakage_default, which cites this article); (1) accounting happens through the infiltration objects on both models."
       }
     ]
   }

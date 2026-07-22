@@ -59,7 +59,7 @@ class TestDataIntegrity < Minitest::Test
       assert_equal vintage, prov['edition']
       assert_match(/MCP/, prov['source'])
       coverage = rules['article_coverage']['articles']
-      assert_equal 14, coverage.size
+      assert_equal 16, coverage.size # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
       coverage.each do |art|
         assert_includes valid, art['status'], "#{art['article']}: invalid status"
         assert art['title']
@@ -67,10 +67,12 @@ class TestDataIntegrity < Minitest::Test
           assert art['gaps'], "#{art['article']} is #{art['status']} but declares no gaps"
         end
       end
-      prefix = vintage == '2020' ? '8.4.4' : '8.4.5'
-      perf = coverage.select { |a| a['article'].start_with?('8.4.') }
-      assert perf.all? { |a| a['article'].start_with?(prefix) },
-             "#{vintage}: performance-path articles must use the #{prefix} numbering"
+      # Only the reference-building subsection is renumbered between vintages
+      # (2020 8.4.4 == 2025 8.4.5); 8.4.1-8.4.3 and 8.4.6 are vintage-invariant.
+      wrong = vintage == '2020' ? '8.4.5' : '8.4.4'
+      renumbered = coverage.select { |a| a['article'].start_with?('8.4.4', '8.4.5') }
+      assert renumbered.none? { |a| a['article'].start_with?(wrong) },
+             "#{vintage}: reference-building articles must not use the #{wrong} numbering"
     end
   end
 

@@ -2,8 +2,8 @@
   "provenance": {
     "vintage": "2025",
     "generated": "2026-07-12",
-    "method": "NECB 2025 Table 6.2.2.1 retrieved in full via the building-codes MCP and compared to 2020: every formula this gem implements is IDENTICAL (electric SL formulas, all gas UEF ladder coefficients, Et>=90%+SL large-equipment row, oil rows, solar/pool rows). The ONLY substantive 2025 change is the storage-type heat-pump water heater requirement: EF >= 2.1 -> UEF >= 2.23 (an equipment class this gem does not model \u2014 recorded below). 2025 therefore shares the 2020 algorithm parameters.",
-    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking \u2014 treated as Part 6 minimums (coverage: partial)."
+    "method": "NECB 2025 Table 6.2.2.1 retrieved in full via the building-codes MCP and compared to 2020: every formula this gem implements is IDENTICAL (electric SL formulas, all gas UEF ladder coefficients, Et>=90%+SL large-equipment row, oil rows, solar/pool rows). The ONLY substantive 2025 change is the storage-type heat-pump water heater requirement: EF >= 2.1 -> UEF >= 2.23 (an equipment class this gem does not model — recorded below). 2025 therefore shares the 2020 algorithm parameters.",
+    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking — treated as Part 6 minimums (coverage: partial)."
   },
   "autosize": {
     "supply_temperature_default_c": 60.0,
@@ -152,11 +152,25 @@
         "status": "partial",
         "how": "treated as Part 6 minimums via apply_efficiency on the reference",
         "gaps": "sentence text falls in a PDF-extraction chunk gap; not machine-verified"
+      },
+      {
+        "article": "8.4.1.1. (SWH)",
+        "title": "General — SWH components accounted",
+        "status": "implemented",
+        "how": "Service water heating accounted per the prescriptive Section 6.2 requirements via the reference SHW transform (8.4.5.20.) and heater efficiency application — the realization of 8.4.1.1.(1) for the SWH slice."
+      },
+      {
+        "article": "8.4.2.7. (SWH loads)",
+        "title": "Internal and Service Water Heating Loads — SWH slice",
+        "status": "implemented",
+        "how": "SWH loads accounted from NECB space-use demand data (per-space peak flows + schedules aggregated to the building system); EnergyPlus computes the resulting energy."
       }
     ]
   },
   "data_vintage_alias": "2020",
-  "non_rule_keys": ["changes_vs_2020"],
+  "non_rule_keys": [
+    "changes_vs_2020"
+  ],
   "changes_vs_2020": {
     "heat_pump_storage_water_heater": "EF >= 2.1 (2020) -> UEF >= 2.23 (2025); class not modeled",
     "implemented_formulas": "none changed"

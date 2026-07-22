@@ -2,12 +2,12 @@
   "provenance": {
     "vintage": "2020",
     "generated": "2026-07-12",
-    "method": "2020 interior LPDs live in the openstudio-loads gem's space-type records (lighting_per_area W/ft2, transcribed by legacy from Tables 4.2.1.5/4.2.1.6 \u2014 spot-verified against the codes MCP incl. all three atrium height bins 4.2/5.2/6.5 W/m2). LED alternatives vendored here (led_lighting_2020.json, legacy MERGED table). Occupancy-sensor/personal-control factors (Table 4.3.2.10) live in the space-type keys occ_sense / rel_absence_occ / personal_control. Runtime never contacts the MCP."
+    "method": "2020 interior LPDs live in the openstudio-loads gem's space-type records (lighting_per_area W/ft2, transcribed by legacy from Tables 4.2.1.5/4.2.1.6 — spot-verified against the codes MCP incl. all three atrium height bins 4.2/5.2/6.5 W/m2). LED alternatives vendored here (led_lighting_2020.json, legacy MERGED table). Occupancy-sensor/personal-control factors (Table 4.3.2.10) live in the space-type keys occ_sense / rel_absence_occ / personal_control. Runtime never contacts the MCP."
   },
   "sensor_schedule_lpd_threshold_w_per_ft2": 0.799256505,
   "dwelling_unit_lpd_w_per_m2": 5.0,
   "atrium_led": {
-    "note": "legacy NECB2017-lineage LED atrium LPD equations, W/m2 = intercept + slope x height(m), converted x0.092903 to W/ft2. LEGACY DEFECT: the legacy method references an undefined space_height variable (NameError if ever executed \u2014 no archetype has an atrium); this gem uses the computed height.",
+    "note": "legacy NECB2017-lineage LED atrium LPD equations, W/m2 = intercept + slope x height(m), converted x0.092903 to W/ft2. LEGACY DEFECT: the legacy method references an undefined space_height variable (NameError if ever executed — no archetype has an atrium); this gem uses the computed height.",
     "below_12m": {
       "intercept": 0.0,
       "slope": 1.06
@@ -79,7 +79,7 @@
         "article": "8.4.4.5.(3)",
         "title": "Occupancy/personal control factors in the reference",
         "status": "partial",
-        "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier \u2014 interpretation consistent with legacy NECB2015+",
+        "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+",
         "gaps": "strict reading multiplies installed power by Focc x Fpers"
       },
       {
@@ -94,6 +94,12 @@
         "status": "partial",
         "gaps": "sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation)",
         "how": "reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)"
+      },
+      {
+        "article": "8.4.1.1. (lighting)",
+        "title": "General — lighting accounted",
+        "status": "implemented",
+        "how": "Interior lighting accounted per the prescriptive Section 4.2 requirements via the reference lighting allowance (8.4.4.5.) — the realization of 8.4.1.1.(1) for the lighting slice. Unresolvable space types hard-fail rather than silently keeping the proposed LPD."
       }
     ]
   }
