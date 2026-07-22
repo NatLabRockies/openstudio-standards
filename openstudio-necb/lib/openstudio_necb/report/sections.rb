@@ -64,8 +64,15 @@ module OpenStudioNECB
                             report['compliant'] ? 'pass' : 'fail')
         end
         if (eui = report['eui_path'])
-          badges << H.badge(eui['compliant'] ? 'EUI PATH (8.4.4): PASS' : 'EUI PATH (8.4.4): FAIL',
-                            eui['compliant'] ? 'pass' : 'fail')
+          badges << if eui['computed'] == false
+                      # the as-specified run cannot lawfully serve the 8.4.4 verdict
+                      # (Table 8.4.4.2 non-conformance / applicability) — say so,
+                      # never render a pass/fail that was not determined
+                      H.badge('EUI PATH (8.4.4): NOT COMPUTED', 'warn')
+                    else
+                      H.badge(eui['compliant'] ? 'EUI PATH (8.4.4): PASS' : 'EUI PATH (8.4.4): FAIL',
+                              eui['compliant'] ? 'pass' : 'fail')
+                    end
         end
         if report['reference'] && report['reference']['method'].to_s.include?('archetype') && !report['compliant'].nil?
           badges[0] = H.badge(report['compliant'] ? 'EUI PATH (8.4.4): PASS' : 'EUI PATH (8.4.4): FAIL',
@@ -122,12 +129,18 @@ module OpenStudioNECB
         perf_used = !eui_primary && !report['compliant'].nil?
         rows << [H.raw(perf_used ? '●' : '○'), 'NECB 8.4.1.2 — Building Energy Performance (reference building)',
                  verdict_text(perf_used ? report['compliant'] : nil)]
-        eui_used = eui_primary || !report['eui_path'].nil?
+        eui_not_computed = report.dig('eui_path', 'computed') == false
+        eui_used = eui_primary || (!report['eui_path'].nil? && !eui_not_computed)
         eui_verdict = if eui_primary then report['compliant']
-                      elsif report['eui_path'] then report['eui_path']['compliant']
+                      elsif eui_used then report['eui_path']['compliant']
                       end
+        eui_result = if eui_not_computed
+                       "Not computed — #{report.dig('eui_path', 'reason')}"
+                     else
+                       verdict_text(eui_used ? eui_verdict : nil)
+                     end
         rows << [H.raw(eui_used ? '●' : '○'), 'NECB 8.4.4 — Archetype Energy Use Intensity (2025)',
-                 verdict_text(eui_used ? eui_verdict : nil)]
+                 eui_result]
         rows << [H.raw('○'), 'NECB Parts 3–7 — Prescriptive/trade-off paths',
                  'Not declared by this report (see Part 5 QAQC notes in the HVAC section if run)']
         body = H.table(['Used', 'Compliance path', 'Result'], rows)

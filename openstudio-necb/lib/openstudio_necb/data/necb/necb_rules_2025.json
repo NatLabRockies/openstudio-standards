@@ -49,15 +49,15 @@
       {
         "article": "8.4.4.1.",
         "title": "General (Energy Use Intensity path)",
-        "status": "partial",
-        "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb eui_building_energy_target); applicability guards audit-warn on <90% archetype floor coverage (1) and HDD >= 9000 (Table note); unknown archetype names raise.",
-        "gaps": "(4) proportional distribution of unlisted space functions is the caller's responsibility via archetype_areas (nil = remainder of total floor area); over-assignment beyond the model's floor area is unguarded and inflates the target; (3) areas use getBuilding.floorArea, not filtered to CONDITIONED spaces; the HDD>=9000 inapplicability warns but a verdict is still returned."
+        "status": "implemented",
+        "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve!: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for \"conditioned\"); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage >= 90% and the Table-note HDD < 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise."
       },
       {
         "article": "8.4.4.2.",
         "title": "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path)",
-        "status": "not_implemented",
-        "gaps": "Table 8.4.4.2 archetype operating schedules, occupant densities, receptacle and SWH loads are NOT applied to the proposed model by the EUI path — the data is vendored (eui_targets_2025.json archetype_defaults_table_8_4_4_2) but has no consumer. The proposed is evaluated with its own schedules and loads, which 8.4.4.2.(1) does not permit."
+        "status": "partial",
+        "gaps": "Lighting OPERATION schedules and outdoor air are left as modeled (the OA reading of 8.4.3.6.(1)(a) — follow normalized occupant density via the ventilation standard — is an interpretation pending sign-off); unmapped spaces keep their modeled loads (Table applies \"for the applicable building archetype\"); spaces with no water-use equipment warn rather than gaining a SWH system.",
+        "how": "Implemented check-then-normalize (Archetypes.conformance / Archetypes.normalize!): the proposed is checked against the Table 8.4.4.2 values (occupant density, receptacle W/m2, SWH L/h/occupant; occupancy/equipment/setpoint schedule PROFILES compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. On reference-path runs the eui_supplement verdict is only computed from the as-specified run when the check passes; otherwise not-computed with the mismatch list, or a separate normalized annual run with run_normalized: true. Round-trip pinned by test (normalize! then conformance must agree)."
       }
     ]
   }

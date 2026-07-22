@@ -58,8 +58,12 @@ module OpenStudioNECB
     #   reference-building comparison; :eui = the NECB 2025 8.4.4 archetype-EUI
     #   building energy target (BET = sum(A_i x EUI_i) + PL — no reference
     #   building is generated or simulated)
-    # @param archetype_areas [Hash{String=>Numeric,nil}] :eui path only —
-    #   archetype => floor area m2 (nil = remainder of the model's floor area)
+    # @param archetypes [Hash{String=>:all,Array<String>}] :eui path only —
+    #   archetype => :all (every counted space not claimed elsewhere) or an
+    #   array of space names. Floor areas are COMPUTED from the model per
+    #   8.4.4.1.(3); unmapped space functions distribute pro-rata per
+    #   8.4.4.1.(4). The mapping also drives the Table 8.4.4.2 conformance
+    #   check and (when non-conformant) the normalization of the proposed.
     # @param process_loads_kwh [Numeric] :eui path PL term (8.4.4.1.(2))
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
@@ -68,16 +72,16 @@ module OpenStudioNECB
                                actual_roof_absorptance_used: false,
                                max_capacity_iterations: 3, capacity_step: 1.25,
                                necb_loads: nil, reference_daylighting: false,
-                               path: :reference, archetype_areas: nil,
+                               path: :reference, archetypes: nil,
                                process_loads_kwh: 0.0, eui_supplement: nil,
                                report_html: false, report_options: {}, audit: nil)
       if path == :eui
         raise(ArgumentError, 'the archetype-EUI path is a NECB 2025 feature (vintage: 2025)') unless vintage.to_s == '2025'
-        raise(ArgumentError, ':eui path requires archetype_areas: {archetype => m2 or nil}') if archetype_areas.nil?
+        raise(ArgumentError, ':eui path requires archetypes: {archetype => :all | [space names]}') if archetypes.nil?
 
         return eui_compliance(model, vintage: vintage, weather: weather, hdd: hdd,
                               run_dir: run_dir, simulate: simulate, run_period: run_period,
-                              archetype_areas: archetype_areas, process_loads_kwh: process_loads_kwh,
+                              archetypes: archetypes, process_loads_kwh: process_loads_kwh,
                               costing: costing, city: city, province_state: province_state,
                               costs_csv: costs_csv, necb_loads: necb_loads,
                               report_html: report_html, report_options: report_options, audit: audit)
@@ -199,22 +203,17 @@ module OpenStudioNECB
       cost_models(proposed, reference, report, city: city, province_state: province_state,
                   costs_csv: costs_csv, audit: audit) if costing
 
-      # eui_supplement (2025): the 8.4.4 archetype-EUI verdict computed AGAINST
-      # THE SAME proposed annual result — one run, both compliance paths.
+      # eui_supplement (2025): the 8.4.4 archetype-EUI verdict alongside the
+      # reference-path run. The two paths simulate DIFFERENT proposed
+      # buildings — as-specified (8.4.3.2) vs normalized to Table 8.4.4.2
+      # (8.4.4.2.(1)) — so the reference-path annual result serves the EUI
+      # verdict ONLY when the proposed already conforms to the Table. When it
+      # does not: report not-computed with the mismatch list (default — never
+      # silently double the simulation cost), or, with run_normalized: true,
+      # clone-normalize-rerun and compute the verdict from that run.
       if eui_supplement && vintage.to_s == '2025' && report['proposed']['total_site_kwh']
-        supplement_target = Tiers.eui_building_energy_target(
-          eui_supplement[:archetype_areas] || eui_supplement['archetype_areas'],
-          proposed.getBuilding.floorArea, hdd: hdd,
-          process_loads_kwh: eui_supplement[:process_loads_kwh] || 0.0, audit: audit)
-        proposed_kwh = report['proposed']['total_site_kwh']
-        eui_ok = proposed_kwh <= supplement_target['bet_kwh']
-        audit.decision(:compliance,
-                       eui_ok ? 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)' : 'proposed does NOT meet the archetype-EUI target (8.4.4 path)',
-                       inputs: { proposed_kwh: proposed_kwh, bet_kwh: supplement_target['bet_kwh'] },
-                       article: '8.4.4.1.(2)')
-        report['eui_path'] = { 'bet_kwh' => supplement_target['bet_kwh'],
-                               'compliant' => eui_ok, 'lines' => supplement_target['lines'] }
-                             .merge(Tiers.energy_tier(proposed_kwh, supplement_target['bet_kwh']))
+        report['eui_path'] = eui_supplement_verdict(proposed, eui_supplement, hdd, report, run_dir,
+                                                    run_period, vintage, audit)
       end
 
       report['compliant'] = compliant
@@ -239,10 +238,14 @@ module OpenStudioNECB
 
     # The NECB 2025 8.4.4 archetype-EUI path: the building energy target comes
     # from Table 8.4.4.1 (BET = sum(A_i x EUI_i) + PL) — NO reference building
-    # is generated or simulated. Compliance: proposed annual consumption <= BET;
-    # the Section 10 tier is computed against the same BET.
+    # is generated or simulated. The proposed is CHECKED against the Table
+    # 8.4.4.2 standardized operating inputs and, when it does not already
+    # conform, NORMALIZED to them before the annual run (8.4.4.2.(1)): the EUI
+    # targets were derived assuming those inputs, so an as-modeled comparison
+    # would be apples-to-oranges. Compliance: proposed annual consumption <=
+    # BET; the Section 10 tier is computed against the same BET.
     def eui_compliance(model, vintage:, weather:, hdd:, run_dir:, simulate:, run_period:,
-                       archetype_areas:, process_loads_kwh:, costing:, city:,
+                       archetypes:, process_loads_kwh:, costing:, city:,
                        province_state:, costs_csv:, necb_loads:,
                        report_html: false, report_options: {}, audit: nil)
       audit ||= AuditLog.new
@@ -255,7 +258,7 @@ module OpenStudioNECB
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
       end
       audit.decision(:compliance, 'ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) — no reference building',
-                     inputs: { vintage: vintage, archetypes: archetype_areas.keys },
+                     inputs: { vintage: vintage, archetypes: archetypes.keys },
                      article: '8.4.4.1.')
 
       audit.building = 'proposed building'
@@ -264,11 +267,23 @@ module OpenStudioNECB
         Runner.attach_weather!(proposed, epw: weather[:epw], ddy: weather[:ddy])
       end
       hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
+
+      # Mapping -> model-derived areas -> HARD applicability (refuse outside
+      # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a
+      # determination) -> Table 8.4.4.2 conformance -> normalize if needed.
+      resolved = Archetypes.resolve!(proposed, archetypes, audit: audit)
+      Archetypes.applicability!(resolved, hdd: hdd, audit: audit)
+      check = Archetypes.conformance(proposed, resolved, vintage: vintage, audit: audit)
+      Archetypes.normalize!(proposed, resolved, vintage: vintage, audit: audit) unless check[:conformant]
       audit.building = nil # BET derivation + verdicts are comparisons, not model work
 
       report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
-                 'path' => 'eui', 'proposed' => {}, 'reference' => {} }
-      target = Tiers.eui_building_energy_target(archetype_areas, proposed.getBuilding.floorArea,
+                 'path' => 'eui', 'proposed' => {}, 'reference' => {},
+                 'eui' => { 'conformant_to_8_4_4_2' => check[:conformant],
+                            'normalized' => !check[:conformant],
+                            'mismatches' => check[:mismatches].first(50) } }
+      target = Tiers.eui_building_energy_target(Archetypes.bet_areas(resolved, audit: audit),
+                                                resolved[:total_area_m2],
                                                 hdd: hdd, process_loads_kwh: process_loads_kwh, audit: audit)
       report['reference'] = { 'method' => 'archetype EUI (Table 8.4.4.1)',
                               'building_energy_target_kwh' => target['bet_kwh'],
@@ -587,6 +602,59 @@ module OpenStudioNECB
     rescue StandardError
       # never let a write failure mask the original error
       nil
+    end
+
+    # The 8.4.4 supplement verdict on a reference-path run. Returns the
+    # report['eui_path'] hash. See the call site for the check-first contract.
+    def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period, vintage, audit)
+      opts = options.transform_keys(&:to_sym)
+      mapping = opts[:archetypes] or
+        raise(ArgumentError, 'eui_supplement requires archetypes: {archetype => :all | [space names]}')
+      resolved = Archetypes.resolve!(proposed, mapping, audit: audit)
+      problems = Archetypes.applicability_problems(resolved, hdd: hdd, audit: audit)
+      unless problems.empty?
+        audit.warn(:compliance, 'EUI supplement NOT COMPUTED — outside 8.4.4 applicability', article: '8.4.4.1.(1)')
+        return { 'computed' => false, 'reason' => "outside 8.4.4 applicability: #{problems.join('; ')}" }
+      end
+
+      target = Tiers.eui_building_energy_target(Archetypes.bet_areas(resolved, audit: audit),
+                                                resolved[:total_area_m2], hdd: hdd,
+                                                process_loads_kwh: opts[:process_loads_kwh] || 0.0, audit: audit)
+      check = Archetypes.conformance(proposed, resolved, vintage: vintage, audit: audit)
+      if check[:conformant]
+        proposed_kwh = report['proposed']['total_site_kwh']
+        source = 'as-specified annual run (proposed conforms to Table 8.4.4.2 — one run serves both paths)'
+      elsif opts[:run_normalized]
+        normalized = proposed.clone(true).to_Model
+        audit.with_building('proposed building (EUI-normalized)') do
+          Archetypes.normalize!(normalized, Archetypes.resolve!(normalized, mapping, audit: audit),
+                                vintage: vintage, audit: audit)
+        end
+        eui_results = {}
+        run_annual(normalized, File.join(run_dir, 'proposed_eui_annual'), run_period, eui_results)
+        proposed_kwh = eui_results['total_site_kwh']
+        report['proposed_eui_normalized'] = eui_results
+        source = 'separate annual run of the Table-8.4.4.2-normalized proposed'
+      else
+        audit.warn(:compliance,
+                   'EUI supplement NOT COMPUTED — the proposed does not conform to Table 8.4.4.2, so the ' \
+                   'reference-path annual result cannot lawfully serve the 8.4.4 verdict (pass ' \
+                   'eui_supplement: {run_normalized: true} to run the normalized proposed)',
+                   article: '8.4.4.2.(1)')
+        return { 'computed' => false,
+                 'reason' => 'proposed does not conform to Table 8.4.4.2 (run_normalized not requested)',
+                 'mismatches' => check[:mismatches].first(50) }
+      end
+
+      eui_ok = proposed_kwh <= target['bet_kwh']
+      audit.decision(:compliance,
+                     eui_ok ? 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)' \
+                            : 'proposed does NOT meet the archetype-EUI target (8.4.4 path)',
+                     inputs: { proposed_kwh: proposed_kwh, bet_kwh: target['bet_kwh'], basis: source },
+                     article: '8.4.4.1.(2); 8.4.4.2.(1)')
+      { 'computed' => true, 'bet_kwh' => target['bet_kwh'], 'compliant' => eui_ok,
+        'basis' => source, 'lines' => target['lines'] }
+        .merge(Tiers.energy_tier(proposed_kwh, target['bet_kwh']))
     end
 
     # Pre-flight gate for the reference path: every space that counts toward

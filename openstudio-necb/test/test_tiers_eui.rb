@@ -49,14 +49,18 @@ class TestTiersEUI < Minitest::Test
     dir = Dir.mktmpdir('osnecb-eui-')
     result = OpenStudioNECB.performance_compliance(
       proposed_with_hvac, vintage: '2025', path: :eui,
-      archetype_areas: { 'Office' => nil }, weather: weather, run_dir: dir,
+      archetypes: { 'Office' => :all }, weather: weather, run_dir: dir,
       run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 },
       province_state: 'ONTARIO')
 
     assert_nil result.reference_model, 'no reference building on the EUI path'
     bet = result.report['reference']['building_energy_target_kwh']
     area = result.proposed_model.getBuilding.floorArea
-    assert_in_delta area * 175, bet, 1.0, 'BET from the Office archetype EUI'
+    assert_in_delta area * 175, bet, 1.0, 'BET from the Office archetype EUI (areas computed from the model)'
+    refute result.report['eui']['conformant_to_8_4_4_2'], 'bare fixture does not carry Table 8.4.4.2 inputs'
+    assert result.report['eui']['normalized'], 'proposed normalized to Table 8.4.4.2 before the run'
+    assert(result.audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.2.(1)') },
+           'normalization audited under 8.4.4.2.(1)')
     refute_nil result.compliant, 'determination made against the BET'
     assert result.report.key?('tier'), 'Section 10 tier computed against the BET'
     assert result.report['proposed'].key?('ghg_kg_co2e'), '2025 GHG computed with a province'
@@ -68,8 +72,20 @@ class TestTiersEUI < Minitest::Test
   def test_eui_path_guards
     assert_raises(ArgumentError) do
       OpenStudioNECB.performance_compliance(proposed_with_hvac, vintage: '2020', path: :eui,
-                                            archetype_areas: { 'Office' => nil },
+                                            archetypes: { 'Office' => :all },
                                             run_dir: Dir.mktmpdir('osnecb-x-'))
     end
+  end
+
+  # 8.4.4.1.(1)/Table-note applicability now REFUSES on the pure :eui path — a
+  # verdict outside applicability is not a determination.
+  def test_eui_path_refuses_outside_applicability
+    error = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(
+        proposed_with_hvac, vintage: '2025', path: :eui, simulate: :none, hdd: 9500,
+        archetypes: { 'Office' => :all }, run_dir: Dir.mktmpdir('osnecb-hdd-'))
+    end
+    assert_includes error.message, 'NOT applicable'
+    assert_includes error.message, 'HDD 9500'
   end
 end

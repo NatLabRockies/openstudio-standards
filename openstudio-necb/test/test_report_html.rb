@@ -69,7 +69,7 @@ class TestReportHTML < Minitest::Test
       building: building_for(proposed), run_dir: dir,
       run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 },
       province_state: 'ONTARIO',
-      eui_supplement: { archetype_areas: { 'Office' => nil } },
+      eui_supplement: { archetypes: { 'Office' => :all }, run_normalized: true },
       report_html: true,
       report_options: { project_name: 'E2E Fixture Building', address: 'Toronto, ON',
                         prepared_by: 'openstudio-necb test suite' })
@@ -79,6 +79,10 @@ class TestReportHTML < Minitest::Test
     html = File.read(path)
     assert_match(/PERFORMANCE PATH: (PASS|FAIL)/, html, '8.4.1.2 verdict rendered')
     assert_match(/EUI PATH \(8\.4\.4\): (PASS|FAIL)/, html, '8.4.4 supplement verdict rendered')
+    assert result.report['eui_path']['computed'], 'supplement computed via the normalized run'
+    assert_includes result.report['eui_path']['basis'], 'normalized',
+                    'verdict basis names the Table-8.4.4.2-normalized run'
+    assert result.report.key?('proposed_eui_normalized'), 'the second (normalized) annual result is stored'
     assert_includes html, 'Operational GHG emissions (NECB 2025 Part 11)'
     assert_includes html, 'Table 8.4.4.1', 'BET line table present'
     assert_includes html, 'SHORTENED RUN PERIOD', 'week run flagged loudly'
