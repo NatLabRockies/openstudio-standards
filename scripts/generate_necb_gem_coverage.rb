@@ -13,7 +13,14 @@
 require 'json'
 
 ROOT = File.expand_path('..', __dir__)
-GEMS = %w[openstudio-hvac openstudio-envelope openstudio-loads openstudio-lighting openstudio-shw].freeze
+# openstudio-necb (the umbrella) declares the pipeline-level articles no domain
+# gem can: the 8.4.1.2 determination itself, calculation methods, the 2025 EUI
+# path. CAVEAT: unlike the domain gems, the umbrella has no runtime
+# emit_article_coverage yet, so its partial/not_implemented entries do NOT warn
+# on every run — they are declaration-only until the emitter consolidation
+# lands.
+GEMS = %w[openstudio-hvac openstudio-envelope openstudio-loads openstudio-lighting openstudio-shw
+          openstudio-necb].freeze
 
 STATUS_GROUPS = [
   ['implemented',        'Implemented'],
@@ -23,21 +30,26 @@ STATUS_GROUPS = [
   ['host_scope',         'Host / other-gem scope']
 ].freeze
 
-# 8.4.4.x (2020) and 8.4.5.x (2025) are the same article renumbered — collapse
-# the third path segment so they share a normalized key.
-def normalize(article)
-  article.to_s.sub(/\A8\.4\.[45]\./, '8.4.N.')
+# VINTAGE-DIRECTIONAL renumbering into canonical 2025 numbering.
+#
+# 2020's 8.4.4 (Reference Building) became 2025's 8.4.5; 2025's 8.4.4 is the
+# NEW Energy Use Intensity subsection with no 2020 equivalent. So only refs
+# originating in a 2020 manifest are translated (8.4.4.x -> 8.4.5.x); 2025
+# refs pass through untouched. The previous blind bidirectional collapse
+# (8.4.[45]. -> 8.4.N.) merged reference-building declarations INTO the 2025
+# EUI subsection — wrong content on the one subsection that is genuinely new.
+def canonical(article, vintage)
+  a = article.to_s
+  vintage.to_s == '2020' ? a.sub(/\A8\.4\.4\./, '8.4.5.') : a
 end
 
 def article_sort_key(article)
-  normalize(article).scan(/\d+/).map(&:to_i)
+  article.to_s.scan(/\d+/).map(&:to_i)
 end
 
-# Bidirectional prefix match on normalized articles (trailing '.' guards
-# 8.4.N.2. from matching 8.4.N.20.): '8.4.N.20.' matches '8.4.N.20.(1)'.
-def articles_match?(a, b)
-  na = normalize(a)
-  nb = normalize(b)
+# Bidirectional prefix match on CANONICAL refs (trailing '.' guards 8.4.5.2.
+# from matching 8.4.5.20.): '8.4.5.20.' matches '8.4.5.20.(1)'.
+def canonicals_match?(na, nb)
   na.start_with?(nb) || nb.start_with?(na)
 end
 
@@ -52,6 +64,7 @@ GEMS.each do |gem|
     vintage = File.basename(path)[/(\d{4})\.json\z/, 1] || data.dig('provenance', 'edition') || '?'
     coverage.each do |art|
       records << { gem: gem, vintage: vintage, article: art['article'].to_s,
+                   canonical: canonical(art['article'], vintage),
                    title: art['title'].to_s, status: art['status'].to_s,
                    how: art['how'], gaps: art['gaps'] }
     end
@@ -61,7 +74,7 @@ end
 # ---- merge cross-vintage duplicates (differ only by renumbering) ----------
 merged = {}
 records.each do |r|
-  key = [r[:gem], normalize(r[:article]), r[:title], r[:status], r[:how], r[:gaps]]
+  key = [r[:gem], r[:canonical], r[:title], r[:status], r[:how], r[:gaps]]
   if merged.key?(key)
     merged[key][:vintages] << r[:vintage]
     merged[key][:articles] << r[:article]
@@ -94,19 +107,22 @@ out << '     Regenerate: ruby scripts/generate_necb_gem_coverage.rb -->'
 out << ''
 out << '# NECB coverage across the openstudio-* gem family'
 out << ''
-out << 'Rollup of every domain gem\'s NECB `article_coverage` manifest (both the'
-out << '2020 and 2025 vintages; rows differing only by the 8.4.4<->8.4.5'
-out << 'renumbering are merged and cite both). Statuses: **implemented** /'
+out << 'Rollup of every gem\'s NECB `article_coverage` manifest (both vintages;'
+out << '2020 refs are canonicalized to 2025 numbering — 2020 8.4.4.x -> 8.4.5.x,'
+out << 'the 2025-only 8.4.4 EUI subsection is never merged into). Statuses: **implemented** /'
 out << '**partial** (warns every run) / **not_implemented** (warns every run) /'
 out << '**satisfied_by_clone** / **host_scope** (delegated to the umbrella or a'
 out << 'sibling gem). Each domain gem emits its section of this accounting into'
-out << 'the shared AuditLog on every run, so nothing is silently missed.'
+out << 'the shared AuditLog on every run, so nothing is silently missed —'
+out << 'EXCEPT openstudio-necb (the umbrella), whose entries are declaration-only'
+out << 'until it gains a runtime emitter: its partial/not_implemented rows do NOT'
+out << 'yet warn on every run.'
 out << ''
 
 total = rows.size
 STATUS_GROUPS.each do |status, heading|
   group = rows.select { |r| r[:status] == status }
-           .sort_by { |r| [r[:gem], article_sort_key(r[:article])] }
+           .sort_by { |r| [r[:gem], article_sort_key(r[:canonical])] }
   next if group.empty?
 
   out << "## #{heading} (#{group.size})"
@@ -124,7 +140,7 @@ end
 # the same article number with an implementing status.
 covering = rows.reject { |r| r[:status] == 'host_scope' }
 host = rows.select { |r| r[:status] == 'host_scope' }
-          .sort_by { |r| [r[:gem], article_sort_key(r[:article])] }
+          .sort_by { |r| [r[:gem], article_sort_key(r[:canonical])] }
 
 out << "## Cross-gem delegations (#{host.size})"
 out << ''
@@ -135,7 +151,7 @@ out << ''
 out << '| host_scope in | Article | Covered by |'
 out << '|---|---|---|'
 host.each do |h|
-  matches = covering.select { |c| c[:gem] != h[:gem] && articles_match?(c[:article], h[:article]) }
+  matches = covering.select { |c| c[:gem] != h[:gem] && canonicals_match?(c[:canonical], h[:canonical]) }
                     .map { |c| "#{c[:gem]} #{article_label(c)} (#{c[:status]})" }
                     .uniq.sort
   covered = matches.empty? ? '(none in family — host/modeller scope)' : matches.join('; ')

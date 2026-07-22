@@ -3,15 +3,18 @@
 
 # NECB coverage across the openstudio-* gem family
 
-Rollup of every domain gem's NECB `article_coverage` manifest (both the
-2020 and 2025 vintages; rows differing only by the 8.4.4<->8.4.5
-renumbering are merged and cite both). Statuses: **implemented** /
+Rollup of every gem's NECB `article_coverage` manifest (both vintages;
+2020 refs are canonicalized to 2025 numbering — 2020 8.4.4.x -> 8.4.5.x,
+the 2025-only 8.4.4 EUI subsection is never merged into). Statuses: **implemented** /
 **partial** (warns every run) / **not_implemented** (warns every run) /
 **satisfied_by_clone** / **host_scope** (delegated to the umbrella or a
 sibling gem). Each domain gem emits its section of this accounting into
-the shared AuditLog on every run, so nothing is silently missed.
+the shared AuditLog on every run, so nothing is silently missed —
+EXCEPT openstudio-necb (the umbrella), whose entries are declaration-only
+until it gains a runtime emitter: its partial/not_implemented rows do NOT
+yet warn on every run.
 
-## Implemented (33)
+## Implemented (38)
 
 | Gem | Vintage | Article | Title | Notes |
 |---|---|---|---|---|
@@ -45,11 +48,16 @@ the shared AuditLog on every run, so nothing is silently missed.
 | openstudio-lighting | 2020, 2025 | 8.4.4.5.(1) / 8.4.5.5.(1) | Reference building interior lighting power = Part 4 allowance | apply_lights sets the allowance LPD from the space-type records |
 | openstudio-lighting | 2020, 2025 | 8.4.4.5.(2) / 8.4.5.5.(2) | Dwelling units 5 W/m2 | reference_lighting overrides dwelling space types to 5 W/m2 |
 | openstudio-lighting | 2020, 2025 | 8.4.4.5.(4) / 8.4.5.5.(4) | Radiant/convective/return-air fractions identical to proposed | fractions come from the same space-type records for both models |
+| openstudio-necb | 2020 | 8.4.1.2. | Determination of Compliance | The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb. |
+| openstudio-necb | 2025 | 8.4.1.2. | Determination of Compliance | The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb. |
+| openstudio-necb | 2020 | 8.4.2.1. | General | Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining. |
+| openstudio-necb | 2025 | 8.4.2.1. | General | Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs (simulate: :annual); any other mode is flagged non-determining. The EUI path still requires the annual run of the proposed. |
+| openstudio-necb | 2020, 2025 | 8.4.3.1. | General (Proposed Building) | The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb). |
 | openstudio-shw | 2020, 2025 | 8.4.3.2. (SWH loads) | Service water heating loads representative of the building | per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data) |
 | openstudio-shw | 2020 | 8.4.4.20.(2) | HP-source SWH -> air-source HP in the reference | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction |
 | openstudio-shw | 2025 | 8.4.5.20.(2) | HP-source SWH -> air-source HP in the reference (2025 renumbered performance path) | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction |
 
-## Partial (warns every run) (18)
+## Partial (warns every run) (22)
 
 | Gem | Vintage | Article | Title | Notes |
 |---|---|---|---|---|
@@ -68,24 +76,31 @@ the shared AuditLog on every run, so nothing is silently missed.
 | openstudio-lighting | 2020, 2025 | 8.4.4.5.(5)-(12) / 8.4.5.5.(5)-(12) | Reference daylighting geometry + photocontrols | reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available) — Gaps: sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation) |
 | openstudio-loads | 2020 | 8.4.3.2. | Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature | sentences (1)-(2) via NECB space-type data: occupancy + receptacle (electric/gas equipment) densities and NECB-<letter> schedule sets (occupancy, equipment, fan, heating/cooling setpoints) applied per space type; ventilation OA and space-type infiltration applied from the same records — Gaps: lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules provided by the openstudio-shw gem (apply_shw after apply_loads); illuminance levels are lighting-design data (not modelled); sentence (3) semi-heated set-point-from-specifications not implemented |
 | openstudio-loads | 2025 | 8.4.3.2. | Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature | sentences (1)-(2) via NECB space-type data (2025 values verified identical to 2020; schedule citations renumbered to A-8.4.3.2.(1)(b)): occupancy + receptacle densities and NECB-<letter> schedule sets applied per space type; ventilation OA and space-type infiltration applied from the same records — Gaps: lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules provided by the openstudio-shw gem (apply_shw after apply_loads); illuminance levels are lighting-design data (not modelled); semi-heated set-point-from-specifications not implemented |
+| openstudio-necb | 2020 | 8.4.2.2. | Calculation Methods | (2)/(3) annual 8760-h runs at hourly timestep for both models; a shortened run_period computes the arithmetic but flags NOT code-compliant. (4) software conformance rests on EnergyPlus's ANSI/ASHRAE 140 testing (see 8.4.2.11). — Gaps: (5) redundant/back-up equipment exclusion and (6) exceptional-calculation-method routing are modeller decisions, not automated; (1) end-use accounting covers what the model contains — elevators/escalators (j) are not added by the pipeline. |
+| openstudio-necb | 2025 | 8.4.2.2. | Calculation Methods | (2)/(3) annual 8760-h runs at hourly timestep; a shortened run_period computes the arithmetic but flags NOT code-compliant. (4) software conformance rests on EnergyPlus's ANSI/ASHRAE 140 testing (see 8.4.2.11). — Gaps: (5) redundant/back-up equipment exclusion and (6) exceptional-calculation-method routing are modeller decisions, not automated; (1) end-use accounting covers what the model contains — elevators/escalators (j) are not added by the pipeline. |
+| openstudio-necb | 2020, 2025 | 8.4.2.3. | Climatic Data | Weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution explicit arg -> Table C-1 -> .stat fallback (openstudio-envelope Climate). — Gaps: (2) choice among multiple urban climatic data sets is the modeller's; the pipeline attaches exactly the file it is given. |
+| openstudio-necb | 2025 | 8.4.4.1. | General (Energy Use Intensity path) | BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb eui_building_energy_target); applicability guards audit-warn on <90% archetype floor coverage (1) and HDD >= 9000 (Table note); unknown archetype names raise. — Gaps: (4) proportional distribution of unlisted space functions is the caller's responsibility via archetype_areas (nil = remainder of total floor area); over-assignment beyond the model's floor area is unguarded and inflates the target; (3) areas use getBuilding.floorArea, not filtered to CONDITIONED spaces; the HDD>=9000 inapplicability warns but a verdict is still returned. |
 | openstudio-shw | 2020, 2025 | 6.2.2.1. | Service water heater performance (Table 6.2.2.1) | electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented — Gaps: solar-thermal and pool-heater classes not modeled (legacy scope); HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported) |
 | openstudio-shw | 2020 | 8.4.4.20.(3)-(4) | Remaining reference SWH sentences | treated as Part 6 minimums via apply_efficiency on the reference — Gaps: sentence text falls in a PDF-extraction chunk gap; not machine-verified |
 | openstudio-shw | 2025 | 8.4.5.20.(3)-(4) | Remaining reference SWH sentences (2025 renumbered performance path) | treated as Part 6 minimums via apply_efficiency on the reference — Gaps: sentence text falls in a PDF-extraction chunk gap; not machine-verified |
 
-## Not implemented (warns every run) (3)
+## Not implemented (warns every run) (4)
 
 | Gem | Vintage | Article | Title | Notes |
 |---|---|---|---|---|
 | openstudio-envelope | 2020, 2025 | 3.2.4.1. | Air Leakage | Gaps: air-barrier requirements are not modeled (documented future) |
 | openstudio-hvac | 2020, 2025 | 8.4.4.16. / 8.4.5.16. | Space Temperature Control (radiant workaround, throttling range) | Gaps: Radiant-system +-2 C schedule adjustment (1) and throttling-range matching (2) are not applied (only relevant when the proposed design has radiant systems). |
+| openstudio-necb | 2025 | 8.4.4.2. | Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) | Gaps: Table 8.4.4.2 archetype operating schedules, occupant densities, receptacle and SWH loads are NOT applied to the proposed model by the EUI path — the data is vendored (eui_targets_2025.json archetype_defaults_table_8_4_4_2) but has no consumer. The proposed is evaluated with its own schedules and loads, which 8.4.4.2.(1) does not permit. |
 | openstudio-shw | 2020, 2025 | 6.2.3.-6.2.7. | SWH controls, piping insulation, pools, booster heaters | Gaps: piping insulation, temperature maintenance controls, pool covers etc. not modeled (legacy scope) |
 
-## Satisfied by construction (clone) (4)
+## Satisfied by construction (clone) (6)
 
 | Gem | Vintage | Article | Title | Notes |
 |---|---|---|---|---|
 | openstudio-hvac | 2020, 2025 | 8.4.4.2. / 8.4.5.2. | Operating Schedules, Internal Loads and Service Water Heating Loads | The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required. |
 | openstudio-hvac | 2020, 2025 | 8.4.4.15. / 8.4.5.15. | Outdoor Air | Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1). — Gaps: DCV strategies (2) are not copied onto rebuilt reference systems. |
+| openstudio-necb | 2020 | 8.4.1.5. | Treatment of Process Loads | (2): process loads included in the proposed model are automatically included in the reference — the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision. |
+| openstudio-necb | 2025 | 8.4.1.5. | Treatment of Process Loads | (2): on the reference path, process loads in the proposed are automatically in the reference (clone; no transform touches them). On the EUI path the PL term is the caller-supplied process_loads_kwh added to the BET (8.4.4.1.(2)). (1) exclusion-by-default is the modeller's input decision. |
 | openstudio-shw | 2020 | 8.4.4.20.(1) | Reference SWH identical to proposed (storage, power, energy type) | the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel |
 | openstudio-shw | 2025 | 8.4.5.20.(1) | Reference SWH identical to proposed (storage, power, energy type) (2025 renumbered performance path) | the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel |
 
@@ -122,11 +137,11 @@ genuine open item to watch on a real run.
 | openstudio-hvac | 8.4.4.4. / 8.4.5.4. | openstudio-envelope 8.4.4.4. (implemented); openstudio-envelope 8.4.5.4. (implemented) |
 | openstudio-hvac | 8.4.4.5. / 8.4.5.5. | openstudio-lighting 8.4.4.5.(1) / 8.4.5.5.(1) (implemented); openstudio-lighting 8.4.4.5.(2) / 8.4.5.5.(2) (implemented); openstudio-lighting 8.4.4.5.(3) / 8.4.5.5.(3) (partial); openstudio-lighting 8.4.4.5.(4) / 8.4.5.5.(4) (implemented); openstudio-lighting 8.4.4.5.(5)-(12) / 8.4.5.5.(5)-(12) (partial) |
 | openstudio-hvac | 8.4.4.20. / 8.4.5.20. | openstudio-shw 8.4.4.20.(1) (satisfied_by_clone); openstudio-shw 8.4.4.20.(2) (implemented); openstudio-shw 8.4.4.20.(3)-(4) (partial); openstudio-shw 8.4.5.20.(1) (satisfied_by_clone); openstudio-shw 8.4.5.20.(2) (implemented); openstudio-shw 8.4.5.20.(3)-(4) (partial) |
-| openstudio-loads | 8.4.3.1. | (none in family — host/modeller scope) |
+| openstudio-loads | 8.4.3.1. | openstudio-necb 8.4.3.1. (implemented) |
 | openstudio-loads | 8.4.3.3. | (none in family — host/modeller scope) |
 | openstudio-loads | 8.4.3.3. | (none in family — host/modeller scope) |
 | openstudio-loads | 8.4.3.4. | (none in family — host/modeller scope) |
 | openstudio-loads | 8.4.3.4. | (none in family — host/modeller scope) |
 | openstudio-loads | 8.4.3.5. | (none in family — host/modeller scope) |
 
-_71 coverage entries across 5 gems._
+_83 coverage entries across 6 gems._

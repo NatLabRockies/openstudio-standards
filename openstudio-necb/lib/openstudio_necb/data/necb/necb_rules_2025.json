@@ -1,0 +1,64 @@
+{
+  "provenance": {
+    "code": "NECB",
+    "edition": "2025",
+    "source": "openstudio-necb umbrella pipeline self-declaration — the compliance determination itself (Part 8 Section 8.4). 2025 renumbering: the reference-building subsection is 8.4.5 (2020: 8.4.4); 8.4.4 is the NEW Energy Use Intensity path, which exists only here and only in this gem (tiers.rb).",
+    "generated": "2026-07-22",
+    "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.rb; EUI arithmetic in tiers.rb reads eui_targets_2025.json)."
+  },
+  "article_coverage": {
+    "articles": [
+      {
+        "article": "8.4.1.2.",
+        "title": "Determination of Compliance",
+        "status": "implemented",
+        "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb."
+      },
+      {
+        "article": "8.4.1.5.",
+        "title": "Treatment of Process Loads",
+        "status": "satisfied_by_clone",
+        "how": "(2): on the reference path, process loads in the proposed are automatically in the reference (clone; no transform touches them). On the EUI path the PL term is the caller-supplied process_loads_kwh added to the BET (8.4.4.1.(2)). (1) exclusion-by-default is the modeller's input decision."
+      },
+      {
+        "article": "8.4.2.1.",
+        "title": "General",
+        "status": "implemented",
+        "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs (simulate: :annual); any other mode is flagged non-determining. The EUI path still requires the annual run of the proposed."
+      },
+      {
+        "article": "8.4.2.2.",
+        "title": "Calculation Methods",
+        "status": "partial",
+        "how": "(2)/(3) annual 8760-h runs at hourly timestep; a shortened run_period computes the arithmetic but flags NOT code-compliant. (4) software conformance rests on EnergyPlus's ANSI/ASHRAE 140 testing (see 8.4.2.11).",
+        "gaps": "(5) redundant/back-up equipment exclusion and (6) exceptional-calculation-method routing are modeller decisions, not automated; (1) end-use accounting covers what the model contains — elevators/escalators (j) are not added by the pipeline."
+      },
+      {
+        "article": "8.4.2.3.",
+        "title": "Climatic Data",
+        "status": "partial",
+        "how": "Weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution explicit arg -> Table C-1 -> .stat fallback (openstudio-envelope Climate).",
+        "gaps": "(2) choice among multiple urban climatic data sets is the modeller's; the pipeline attaches exactly the file it is given."
+      },
+      {
+        "article": "8.4.3.1.",
+        "title": "General (Proposed Building)",
+        "status": "implemented",
+        "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb)."
+      },
+      {
+        "article": "8.4.4.1.",
+        "title": "General (Energy Use Intensity path)",
+        "status": "partial",
+        "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb eui_building_energy_target); applicability guards audit-warn on <90% archetype floor coverage (1) and HDD >= 9000 (Table note); unknown archetype names raise.",
+        "gaps": "(4) proportional distribution of unlisted space functions is the caller's responsibility via archetype_areas (nil = remainder of total floor area); over-assignment beyond the model's floor area is unguarded and inflates the target; (3) areas use getBuilding.floorArea, not filtered to CONDITIONED spaces; the HDD>=9000 inapplicability warns but a verdict is still returned."
+      },
+      {
+        "article": "8.4.4.2.",
+        "title": "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path)",
+        "status": "not_implemented",
+        "gaps": "Table 8.4.4.2 archetype operating schedules, occupant densities, receptacle and SWH loads are NOT applied to the proposed model by the EUI path — the data is vendored (eui_targets_2025.json archetype_defaults_table_8_4_4_2) but has no consumer. The proposed is evaluated with its own schedules and loads, which 8.4.4.2.(1) does not permit."
+      }
+    ]
+  }
+}
