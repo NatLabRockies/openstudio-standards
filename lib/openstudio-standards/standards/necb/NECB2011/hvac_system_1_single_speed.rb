@@ -139,30 +139,28 @@ class NECB2011
       # Add the components to the air loop
       # in order from closest to zone to furthest from zone
       supply_inlet_node = mau_air_loop.supplyInletNode
+      mau_fan.addToNode(supply_inlet_node)
+      if necb_reference_hp
+        #create supplemental heating coil based on default regional fuel type
+        if necb_reference_hp_supp_fuel == 'DefaultFuel'
+          epw = OpenStudio::EpwFile.new(model.weatherFile.get.path.get)
+          necb_reference_hp_supp_fuel = @standards_data['regional_fuel_use'].detect { |fuel_sources| fuel_sources['state_province_regions'].include?(epw.stateProvinceRegion) }['fueltype_set']
+        end
+        if necb_reference_hp_supp_fuel == 'NaturalGas' || necb_reference_hp_supp_fuel == 'Gas'
+          supplemental_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
+        elsif necb_reference_hp_supp_fuel == 'Electricity' || necb_reference_hp_supp_fuel == 'Electric' || necb_reference_hp_supp_fuel == 'FuelOilNo2'
+          supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
+        elsif necb_reference_hp_supp_fuel == 'Hot Water' || necb_reference_hp_supp_fuel == "HotWater"
+          supplemental_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
+          hw_loop.addDemandBranchForComponent(supplemental_htg_coil)
+        else
+          raise('Invalid fuel type selected for heat pump supplemental coil')
+        end
+        supplemental_htg_coil.addToNode(supply_inlet_node)
+      end
+      mau_htg_coil.addToNode(supply_inlet_node)
+      mau_clg_coil.addToNode(supply_inlet_node)
 
-      # Reference HP requires slight changes to default MAU heating
-      #if reference_hp
-        # Create supplemental heating coil based on default regional fuel type
-        # epw = OpenStudio::EpwFile.new(model.weatherFile.get.path.get)
-        #primary_heating_fuel = @standards_data['regional_fuel_use'].detect { |fuel_sources| fuel_sources['state_province_regions'].include?(epw.stateProvinceRegion) }['fueltype_set']
-        #if primary_heating_fuel == 'NaturalGas'
-        #  supplemental_htg_coil = OpenStudio::Model::CoilHeatingGas.new(model, always_on)
-        #elsif primary_heating_fuel == 'Electricity' or  primary_heating_fuel == 'FuelOilNo2'
-        #  supplemental_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-        #else #hot water coils is an option in the future
-        #  raise('Invalid fuel type selected for heat pump supplemental coil')
-        #end
-        #air_to_air_heatpump = OpenStudio::Model::AirLoopHVACUnitaryHeatPumpAirToAir.new(model, always_on, mau_fan, mau_htg_coil, mau_clg_coil, supplemental_htg_coil)
-        #air_to_air_heatpump.setName("#{control_zone.name} ASHP")
-        #air_to_air_heatpump.setControllingZone(control_zone)
-        #air_to_air_heatpump.setSupplyAirFanOperatingModeSchedule(always_on)
-        #air_to_air_heatpump.addToNode(supply_inlet_node)
-      #else
-        mau_fan.addToNode(supply_inlet_node)
-        mau_htg_coil.addToNode(supply_inlet_node)
-        mau_clg_coil.addToNode(supply_inlet_node)
-
-      #end
       oa_system.addToNode(supply_inlet_node)
 
       # Add a setpoint manager to control the supply air temperature
