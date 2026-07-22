@@ -52,9 +52,8 @@
       {
         "article": "8.4.3.6.",
         "title": "Outdoor Air",
-        "status": "partial",
-        "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them identically by clone.",
-        "gaps": "(1)(a): the 8.4.4-path (EUI) outdoor-air basis per Article 8.4.4.2. is not implemented (see the umbrella 8.4.4.2. not_implemented declaration)."
+        "status": "implemented",
+        "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone. (1)(a): on the 2025 EUI path the umbrella normalizes OA to the ASHRAE 62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretation 2026-07-22; openstudio-necb Archetypes)."
       }
     ]
   }

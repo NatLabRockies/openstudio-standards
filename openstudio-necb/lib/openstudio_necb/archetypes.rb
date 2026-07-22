@@ -18,14 +18,19 @@ module OpenStudioNECB
   # (the check), the as-specified run legitimately serves both compliance
   # paths and the second simulation is skipped.
   #
-  # Deliberate v1 scope, all audited (manifest: 8.4.4.2 partial):
-  # - lighting POWER is the design being evaluated and is never touched;
-  #   lighting OPERATION schedules are also left as modeled (the loads gem's
-  #   schedule split excludes lighting — openstudio-lighting territory).
-  # - outdoor air is left as modeled: 8.4.3.6.(1)(a)'s "in accordance with
-  #   Article 8.4.4.2" has no OA column in the Table; the reading (OA follows
-  #   normalized occupant density via the ventilation standard) is an
-  #   interpretation pending sign-off.
+  # Scope (manifest: 8.4.4.2 partial), all audited:
+  # - lighting POWER is the design being evaluated and is never touched.
+  #   Lighting OPERATION schedules ARE normalized to the archetype letter
+  #   (interpretation ADOPTED, project decision 2026-07-22): "operating
+  #   schedules" is read broadly, the lettered sets include a lighting
+  #   schedule, and controls credit is unaffected — NECB grants it through the
+  #   4.3.2.10 POWER multipliers on installed LPD (8.4.3.4, modeller-side),
+  #   which normalization never touches.
+  # - outdoor air IS normalized (interpretation ADOPTED, same decision):
+  #   8.4.3.6.(1)(a) "in accordance with Article 8.4.4.2" is read as the
+  #   ventilation-standard rates applied AT the Table's occupant density —
+  #   the only reading that gives (1)(a) meaning (ASHRAE 62.1-2016 Table
+  #   6.2.2.1 rates per archetype, ARCHETYPE_OA_62_1).
   # - unmapped spaces keep their modeled loads: Table 8.4.4.2 applies "for the
   #   applicable building archetype", and unmapped space functions have none —
   #   only their AREA is distributed per 8.4.4.1.(4).
@@ -35,6 +40,15 @@ module OpenStudioNECB
     VALUE_TOL = 0.01          # 1% on densities/powers/flows
     SCHEDULE_TOL = 0.005      # 0.5% absolute on hourly schedule values
     PEOPLE_PER_1000FT2_PER_M2_PER_PERSON = 92.90304 # 1000 ft2 in m2
+    # ASHRAE 62.1-2016 Table 6.2.2.1 rates (retrieved via the codes server
+    # ashrae_outdoor_air_rate 2026-07-22; the classroom row was served from its
+    # fallback set but matches the published table). Applied at the Table
+    # 8.4.4.2 occupant density per the adopted 8.4.3.6.(1)(a) reading.
+    ARCHETYPE_OA_62_1 = {
+      'School (K-12)' => { 'category' => 'classroom (age 9 plus)', 'rp_l_s_person' => 5.0, 'ra_l_s_m2' => 0.6 },
+      'Multi-unit residential building' => { 'category' => 'dwelling unit', 'rp_l_s_person' => 2.5, 'ra_l_s_m2' => 0.3 },
+      'Office' => { 'category' => 'office space', 'rp_l_s_person' => 2.5, 'ra_l_s_m2' => 0.3 }
+    }.freeze
 
     # ---- mapping / areas ---------------------------------------------------
 
@@ -151,7 +165,13 @@ module OpenStudioNECB
     def synthetic_record(archetype)
       d = defaults_for(archetype)
       letter = d.fetch('schedule')
+      oa = ARCHETYPE_OA_62_1.fetch(ARCHETYPE_OA_62_1.keys.find { |k| archetype.start_with?(k) } ||
+                                    (archetype.include?('residential') ? 'Multi-unit residential building' : archetype))
       { 'necb_schedule_type' => letter,
+        'lighting_schedule' => "NECB-#{letter}-Lighting",
+        'oa_category_62_1' => oa['category'],
+        'oa_l_s_per_person' => oa['rp_l_s_person'],
+        'oa_l_s_per_m2' => oa['ra_l_s_m2'],
         'occupancy_per_area' => PEOPLE_PER_1000FT2_PER_M2_PER_PERSON / d.fetch('occupant_density_m2_per_person'),
         'occupancy_schedule' => "NECB-#{letter}-Occupancy",
         'occupancy_activity_schedule' => 'NECB-Activity',
@@ -233,9 +253,18 @@ module OpenStudioNECB
             apply.apply_equipment(st, record, audit)
             apply.apply_schedule_set(model, st, record, vintage, audit)
             apply.apply_thermostat(model, st, record, vintage, audit)
+            # lighting OPERATION follows the letter (adopted interpretation;
+            # POWER untouched — the loads gem's wiring deliberately excludes
+            # lighting, so it is wired here) and per-instance overrides on the
+            # clone's Lights are cleared so the set governs.
+            fresh.setLightingSchedule(OpenStudioLoads::Schedules.add(model, record['lighting_schedule'],
+                                                                     vintage: vintage, audit: audit))
+            st.lights.each(&:resetSchedule)
             st
           end
           space.setSpaceType(clone)
+          space.lights.each(&:resetSchedule) # space-level instances inherit the set too
+          space.setDesignSpecificationOutdoorAir(archetype_dsoa(model, archetype, record))
           normalize_swh!(model, space, record, vintage, audit)
         end
         audit.decision(:eui, "spaces normalized to Table 8.4.4.2 (#{archetype})",
@@ -246,8 +275,9 @@ module OpenStudioNECB
                        article: '8.4.4.2.(1)')
       end
       force_zone_thermostats!(model, resolved, audit)
-      audit.info(:eui, 'lighting POWER (the design under evaluation), lighting OPERATION schedules, outdoor air ' \
-                       'and unmapped spaces are left as modeled — declared gaps of the 8.4.4.2 normalization',
+      audit.info(:eui, 'lighting POWER (the design under evaluation) and unmapped spaces are left as modeled; ' \
+                       'lighting OPERATION follows the archetype letter and outdoor air is set to the ASHRAE ' \
+                       '62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretations, 2026-07-22)',
                  article: '8.4.4.2.(1); 8.4.3.6.(1)(a)')
       model
     end
@@ -286,15 +316,38 @@ module OpenStudioNECB
 
       expect_flow = swh_target_m3s(space, record)
       got_flow = space_swh_flow_m3s(space)
-      return if within?(got_flow, expect_flow, VALUE_TOL)
+      unless within?(got_flow, expect_flow, VALUE_TOL)
+        mismatches << "#{space.nameString} (#{archetype}): SWH peak flow #{fmt(got_flow, 9)} m3/s, requires #{fmt(expect_flow, 9)}"
+      end
 
-      mismatches << "#{space.nameString} (#{archetype}): SWH peak flow #{fmt(got_flow, 9)} m3/s, requires #{fmt(expect_flow, 9)}"
+      check_outdoor_air(space, archetype, record, mismatches)
+    end
+
+    # Adopted 8.4.3.6.(1)(a) reading: DSOA must carry the 62.1 rates (Sum
+    # method) at the Table density. Absent or differing DSOA is a mismatch.
+    def check_outdoor_air(space, archetype, record, mismatches)
+      dsoa = space.designSpecificationOutdoorAir
+      if dsoa.empty?
+        mismatches << "#{space.nameString} (#{archetype}): no DesignSpecificationOutdoorAir (62.1 rates at Table density required)"
+        return
+      end
+      d = dsoa.get
+      expect_pp = record['oa_l_s_per_person'] / 1000.0
+      expect_pa = record['oa_l_s_per_m2'] / 1000.0
+      unless d.outdoorAirMethod.casecmp('sum').zero? &&
+             within?(d.outdoorAirFlowperPerson, expect_pp, VALUE_TOL) &&
+             within?(d.outdoorAirFlowperFloorArea, expect_pa, VALUE_TOL)
+        mismatches << "#{space.nameString} (#{archetype}): OA #{d.outdoorAirMethod} " \
+                      "#{fmt(d.outdoorAirFlowperPerson, 6)}/person + #{fmt(d.outdoorAirFlowperFloorArea, 6)}/m2, " \
+                      "requires Sum #{fmt(expect_pp, 6)} + #{fmt(expect_pa, 6)} (62.1 #{record['oa_category_62_1']})"
+      end
     end
 
     def check_space_schedules(space, archetype, targets, mismatches)
       space_type = space.spaceType.empty? ? nil : space.spaceType.get
       { 'occupancy' => [space_type ? space_type.people : [], :numberofPeopleSchedule],
-        'electric equipment' => [space_type ? space_type.electricEquipment : [], :schedule] }
+        'electric equipment' => [space_type ? space_type.electricEquipment : [], :schedule],
+        'lighting' => [(space_type ? space_type.lights.to_a : []) + space.lights.to_a, :schedule] }
         .each do |label, (instances, getter)|
         target = targets[label]
         next if target.nil?
@@ -343,6 +396,7 @@ module OpenStudioNECB
       case label
       when 'occupancy' then set.get.numberofPeopleSchedule
       when 'electric equipment' then set.get.electricEquipmentSchedule
+      when 'lighting' then set.get.lightingSchedule
       else OpenStudio::OptionalSchedule.new
       end
     end
@@ -350,6 +404,7 @@ module OpenStudioNECB
     def target_schedules(scratch, record, vintage)
       quiet = OpenStudioNECB::AuditLog.new
       { 'occupancy' => OpenStudioLoads::Schedules.add(scratch, record['occupancy_schedule'], vintage: vintage, audit: quiet),
+        'lighting' => OpenStudioLoads::Schedules.add(scratch, record['lighting_schedule'], vintage: vintage, audit: quiet),
         'electric equipment' => OpenStudioLoads::Schedules.add(scratch, record['electric_equipment_schedule'], vintage: vintage, audit: quiet),
         'heating setpoint' => OpenStudioLoads::Schedules.add(scratch, record['heating_setpoint_schedule'], vintage: vintage, audit: quiet),
         'cooling setpoint' => OpenStudioLoads::Schedules.add(scratch, record['cooling_setpoint_schedule'], vintage: vintage, audit: quiet),
@@ -387,6 +442,21 @@ module OpenStudioNECB
       y = ruleset.model.getYearDescription.assumedYear
       ruleset.getDaySchedules(OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, y),
                               OpenStudio::Date.new(OpenStudio::MonthOfYear.new(12), 31, y))
+    end
+
+    # One shared DSOA per archetype: 62.1 rates at the Table density (the
+    # per-person term therefore rides the NORMALIZED occupancy).
+    def archetype_dsoa(model, archetype, record)
+      name = "EUI OA #{archetype} (62.1 #{record['oa_category_62_1']})"
+      existing = model.getDesignSpecificationOutdoorAirs.find { |d| d.nameString == name }
+      return existing if existing
+
+      dsoa = OpenStudio::Model::DesignSpecificationOutdoorAir.new(model)
+      dsoa.setName(name)
+      dsoa.setOutdoorAirMethod('Sum')
+      dsoa.setOutdoorAirFlowperPerson(record['oa_l_s_per_person'] / 1000.0)
+      dsoa.setOutdoorAirFlowperFloorArea(record['oa_l_s_per_m2'] / 1000.0)
+      dsoa
     end
 
     def swh_target_m3s(space, record)
