@@ -110,7 +110,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "PARTIALLY VERIFIED: CAP_FT is the code surface exactly (0.01%, degF->degC transform); but EIR_FT DEVIATES up to 1.95% off-rating (vendored 2011 surface differs from the 2025 coefficients) and the EIR_FPLR/PLF cycling mapping drifts 3.70% at low PLR (partly structural: E+ PLF model vs the code EIR-ratio form) — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). Open work: regenerate EIR_FT from the 2025 coefficients.",
+      "rationale": "VERIFIED EQUIVALENT (fixed 2026-07-22): CAP_FT and EIR_FT are the code surfaces exactly (0.01%/0.00%, exact degF->degC transforms — EIR_FT was regenerated from the code after the probe caught the legacy 2011-derived surface deviating 1.95%); the EIR_FPLR/PLF cycling mapping was refit from the code cubic to its structural floor of ~2.0% (was 3.70%), output clamped to [0.7, 1.0]. NECB 2020 8.4.5.4 and 2025 8.4.6.4 coefficients verified identical. probed by scripts/necb_8_4_6_curve_probe.rb (rake necb:curves).",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },

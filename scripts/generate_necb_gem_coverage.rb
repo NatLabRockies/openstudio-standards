@@ -40,7 +40,12 @@ STATUS_GROUPS = [
 # EUI subsection — wrong content on the one subsection that is genuinely new.
 def canonical(article, vintage)
   a = article.to_s
-  vintage.to_s == '2020' ? a.sub(/\A8\.4\.4\./, '8.4.5.') : a
+  return a unless vintage.to_s == '2020'
+
+  # ONE-SHOT map (2020 -> 2025): 8.4.4 (Reference Building) -> 8.4.5, and
+  # 8.4.5 (Part-Load Curves in 2020 numbering) -> 8.4.6. Sequential subs
+  # would cascade 8.4.4 -> 8.4.5 -> 8.4.6.
+  a.sub(/\A8\.4\.([45])\./) { "8.4.#{Regexp.last_match(1).to_i + 1}." }
 end
 
 def article_sort_key(article)

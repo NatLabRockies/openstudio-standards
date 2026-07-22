@@ -78,7 +78,12 @@ DISPOSITION_META = {
 # collapse previously rendered reference-building prose under the EUI heading.
 def canonical(ref, vintage)
   r = ref.to_s.strip
-  vintage.to_s == '2020' ? r.sub(/\A8\.4\.4\./, '8.4.5.') : r
+  return r unless vintage.to_s == '2020'
+
+  # ONE-SHOT map (2020 -> 2025): 8.4.4 (Reference Building) -> 8.4.5, and
+  # 8.4.5 (Part-Load Curves in 2020 numbering, e.g. DX = 8.4.5.4) -> 8.4.6.
+  # Sequential subs would cascade 8.4.4 -> 8.4.5 -> 8.4.6.
+  r.sub(/\A8\.4\.([45])\./) { "8.4.#{Regexp.last_match(1).to_i + 1}." }
 end
 
 # '8.4.5.5.(1)' -> ['8.4.5.5', 1]; '8.4.1.2.' -> ['8.4.1.2', nil]
