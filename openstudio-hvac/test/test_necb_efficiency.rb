@@ -53,6 +53,13 @@ class TestNecbEfficiency < Minitest::Test
     cop = coil.ratedCOP.respond_to?(:is_initialized) ? coil.ratedCOP.get : coil.ratedCOP
     assert_operator cop, :>, 2.5
     assert_match(/SEER|EER/, coil.nameString)
+    # Exact value, hand-derived the same way as the ASHP heating COP below:
+    # efficiencies_2020.json's unitary_acs table, AirCooled/All Other/Single
+    # Package, 0-65000 Btu/hr bin (15 kW = ~51,182 Btu/hr) declares SEER 15.0;
+    # seer_to_cop_no_fan(seer) = -0.0076*seer^2 + 0.3796*seer (efficiency.rb).
+    assert_in_delta((-0.0076 * 15.0 * 15.0) + (0.3796 * 15.0), cop, 1e-6,
+                    '15.0 SEER (0-65 kBtu/hr AirCooled/All Other/Single Package bin) -> COP 3.984')
+    assert_match(/15\.0SEER/, coil.nameString)
 
     gas = model.getCoilHeatingGass.min_by(&:nameString)
     assert_operator gas.gasBurnerEfficiency, :>=, 0.90 # NECB 2020 furnace >= 0.95 AFUE band

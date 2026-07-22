@@ -143,15 +143,58 @@ module OpenStudioEnvelope
           next if boundary.nil? || surface_class.nil?
           next if surface.construction.empty? || surface.construction.get.to_Construction.empty?
 
-          conductance = surface.construction.get.to_Construction.get.thermalConductance.to_f
+          original = surface.construction.get.to_Construction.get
+          conductance = original.thermalConductance.to_f
           next if conductance <= 0
 
-          key = [surface_class, boundary, conductance.round(5)]
+          # The massless rebuild must CARRY OVER the outer layer's absorptances:
+          # a fresh MasslessOpaqueMaterial defaults to solar 0.7 / thermal 0.9 /
+          # visible 0.7, which silently overwrote the proposed values on EVERY
+          # opaque surface — violating the 8.4.4.3.(2)(a) keep-the-proposed
+          # promise, and making the (2)(b) set-to-0.7 branch "work" only by
+          # coincidence (this transform runs AFTER apply_roof_absorptance, so
+          # whatever that set is preserved here too). The absorptance triple is
+          # part of the cache key: equal-conductance surfaces with different
+          # finishes must not share a rebuilt construction.
+          outer = original.layers.first.to_OpaqueMaterial
+          solar = outer.empty? ? 0.7 : outer.get.solarAbsorptance
+          thermal = outer.empty? ? 0.9 : outer.get.thermalAbsorptance
+          visible = outer.empty? ? 0.7 : outer.get.visibleAbsorptance
+
+          # EnergyPlus's Kiva engine REQUIRES regular (thickness+conductivity)
+          # materials on Foundation-boundary surfaces — a massless layer there
+          # is a hard E+ fatal ("must use only regular material objects...
+          # Kiva: Errors discovered, program terminates"). Found by the
+          # legacy-archetype cross-validation (real slab-on-grade Kiva
+          # geometry no hand-built fixture exercises). Those surfaces get a
+          # LOW-MASS StandardOpaqueMaterial at the identical resistance
+          # (insulation-board-like: 45 kg/m3, cp 1000) — lightweight in the
+          # 8.4.4.4.(1) sense AND Kiva-legal. Everything else stays massless.
+          kiva = surface.outsideBoundaryCondition == 'Foundation'
+          key = [surface_class, boundary, kiva, conductance.round(5),
+                 solar.round(4), thermal.round(4), visible.round(4)]
           cache[key] ||= begin
-            material = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'MediumSmooth', 1.0 / conductance)
-            material.setName("NECB Ref Lightweight #{surface_class} R-#{(1.0 / conductance).round(3)}")
+            material = if kiva
+                         m = OpenStudio::Model::StandardOpaqueMaterial.new(model, 'MediumSmooth',
+                                                                           0.05, 0.05 * conductance, 45.0, 1000.0)
+                         m.setName("NECB Ref Lightweight(Kiva) #{surface_class} R-#{(1.0 / conductance).round(3)}")
+                         m.setSolarAbsorptance(OpenStudio::OptionalDouble.new(solar))
+                         m.setThermalAbsorptance(OpenStudio::OptionalDouble.new(thermal))
+                         m.setVisibleAbsorptance(OpenStudio::OptionalDouble.new(visible))
+                         m
+                       else
+                         m = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'MediumSmooth', 1.0 / conductance)
+                         m.setName("NECB Ref Lightweight #{surface_class} R-#{(1.0 / conductance).round(3)} a#{solar.round(2)}")
+                         # NOTE: MasslessOpaqueMaterial setters take PLAIN
+                         # doubles; StandardOpaqueMaterial's need
+                         # OptionalDouble (the CLAUDE.md trap cuts both ways).
+                         m.setThermalAbsorptance(thermal)
+                         m.setSolarAbsorptance(solar)
+                         m.setVisibleAbsorptance(visible)
+                         m
+                       end
             c = OpenStudio::Model::Construction.new(model)
-            c.setName("NECB Ref Lightweight #{boundary} #{surface_class}:U-#{conductance.round(4)}")
+            c.setName("NECB Ref Lightweight#{kiva ? '(Kiva)' : ''} #{boundary} #{surface_class}:U-#{conductance.round(4)} a#{solar.round(2)}")
             c.setLayers([material])
             c.setInsulation(material)
             c

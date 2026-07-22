@@ -11,7 +11,15 @@ class TestReferenceEnvelope < Minitest::Test
   HDD = 3890
   FDWR_LIMIT = 0.40 # 3.2.1.4.(1): hdd <= 4000 -> flat 0.40 (linear piece starts above 4000)
 
-  # a "proposed" model: oversized windows, skylight, both kinds of shading
+  # a "proposed" model: oversized windows + both kinds of shading.
+  # NOTE (was STALE): this comment used to claim a "skylight" was built here
+  # too, but the method below never created one — the SRR/skylight reference
+  # path (scale_fenestration_to_limits's roof-scaling branch in
+  # necb/reference.rb) had ZERO test coverage in this suite as a result. That
+  # path is now covered separately in test_necb_skylight_srr_reference.rb,
+  # which builds its own hostile-SRR fixture; this proposed_model deliberately
+  # stays skylight-free so the FDWR/shading/absorptance/air-leakage tests below
+  # are unaffected.
   def proposed_model
     model = load_fixture
     walls = model.getSurfaces.select { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
@@ -56,10 +64,59 @@ class TestReferenceEnvelope < Minitest::Test
     assert_equal 1, decision[:inputs][:site_groups_kept]
   end
 
+  def hostile_roof_absorptance!(model, value)
+    model.getSurfaces.select { |s| s.surfaceType == 'RoofCeiling' && s.outsideBoundaryCondition == 'Outdoors' }
+         .each do |s|
+      outer = s.construction.get.to_Construction.get.layers.first.to_OpaqueMaterial.get
+      outer.setSolarAbsorptance(OpenStudio::OptionalDouble.new(value))
+    end
+  end
+
+  # KEEP branch strengthened + DEFECT reproduction.
+  #
+  # The original test only ever checked the 'set' (actual_roof_absorptance_used:
+  # true) branch, and never asserted anything about 'keep' at all — a classic
+  # weak assertion: the KEEP branch could silently misbehave and this test would
+  # still pass.
+  #
+  # Giving 'keep' a HOSTILE pre-set absorptance (0.3, not the fixture's
+  # coincidental 0.7 default) exposes a real defect: apply_lightweight_construction
+  # (reference.rb:137-165) rebuilds EVERY opaque assembly — reached
+  # unconditionally, regardless of actual_roof_absorptance_used — into a fresh
+  # OpenStudio::Model::MasslessOpaqueMaterial without copying solar/thermal/
+  # visible absorptance from the original layer. The SDK's own default
+  # solarAbsorptance for a new MasslessOpaqueMaterial is 0.7 (verified via
+  # `OpenStudio::Model::MasslessOpaqueMaterial.new(...).solarAbsorptance`) —
+  # IDENTICAL to roof_absorptance_if_actual_used in envelope_rules_2020.json —
+  # so the reference roof absorptance ends up at 0.7 EVEN WHEN THE FLAG IS
+  # FALSE, which happens to look correct only because the NECB target and the
+  # SDK default coincide. A hostile 0.3 proves it: 8.4.4.3.(2)(a) says the
+  # reference "keeps" the proposed value when actual_roof_absorptance_used is
+  # false, but the model shows 0.7 instead of 0.3.
+  #
+  # This also means the 'set' assertion below has never actually proven that
+  # apply_roof_absorptance's mutation survives to the end of the pipeline —
+  # only that the rebuild's own default happens to match. That branch is
+  # unaffected (still 0.7, now via a hostile 0.3 precondition instead of the
+  # fixture's stock 0.7), so it is left green.
+  #
+  # EXPECTED TO FAIL until apply_lightweight_construction preserves the
+  # pre-rebuild absorptance. See openstudio-envelope/lib/openstudio_envelope/necb/reference.rb:137.
   def test_roof_absorptance_only_when_actual_used
     keep = proposed_model
-    reference(keep) # default: not flagged
+    hostile_roof_absorptance!(keep, 0.3)
+    reference(keep) # default: actual_roof_absorptance_used false -> must NOT touch absorptance
+    keep_roof = keep.getSurfaces.find { |s| s.surfaceType == 'RoofCeiling' && s.outsideBoundaryCondition == 'Outdoors' }
+    keep_outer = keep_roof.construction.get.to_Construction.get.layers.first.to_OpaqueMaterial.get
+    assert_in_delta 0.3, keep_outer.solarAbsorptance, 1e-6,
+                    'DEFECT: actual_roof_absorptance_used: false must leave the hostile proposed roof ' \
+                    'absorptance untouched (8.4.4.3.(2)(a)), but apply_lightweight_construction rebuilds ' \
+                    'every opaque assembly into a fresh MasslessOpaqueMaterial without copying absorptance — ' \
+                    "the SDK's own default (0.7) silently overwrites it regardless of the flag. " \
+                    'See necb/reference.rb:137 (apply_lightweight_construction).'
+
     set = proposed_model
+    hostile_roof_absorptance!(set, 0.3)
     reference(set, actual_roof_absorptance_used: true)
 
     set_roof = set.getSurfaces.find { |s| s.surfaceType == 'RoofCeiling' && s.outsideBoundaryCondition == 'Outdoors' }

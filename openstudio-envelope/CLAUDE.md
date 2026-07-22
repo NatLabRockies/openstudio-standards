@@ -46,7 +46,13 @@ numbering), climate/HDD resolution, and envelope + thermal-bridging costing.
 - SimpleGlazing constructions return an EMPTY `thermalConductance` — use the
   `uFactor` fallback or you silently skip windows.
 - `setSolarAbsorptance` / `setVisibleAbsorptance` need
-  `OpenStudio::OptionalDouble.new(x)`, not a bare Float.
+  `OpenStudio::OptionalDouble.new(x)` on **StandardOpaqueMaterial** — but
+  **MasslessOpaqueMaterial takes PLAIN doubles** (SWIG TypeError either way
+  round; the trap cuts in both directions).
+- The lightweight rebuild CARRIES OVER the outer layer's solar/thermal/visible
+  absorptances (SDK defaults 0.7/0.9/0.7 silently overwrote every proposed
+  value until the fixture-breadth tests caught it), and the absorptance triple
+  is part of the construction cache key.
 - The reference air-leakage default clears **ALL THREE infiltration
   representations** (DesignFlowRate + EffectiveLeakageArea + FlowCoefficient)
   before applying I_AGW — clearing only DesignFlowRate double-counted
