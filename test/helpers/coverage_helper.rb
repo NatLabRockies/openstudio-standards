@@ -11,7 +11,6 @@ if ENV['ENABLE_SIMPLECOV']
     add_group 'NECB2015',           'lib/openstudio-standards/standards/necb/NECB2015'
     add_group 'NECB2017',           'lib/openstudio-standards/standards/necb/NECB2017'
     add_group 'NECB2020',           'lib/openstudio-standards/standards/necb/NECB2020'
-    add_group 'NECB Common',        'lib/openstudio-standards/standards/necb/common'
     add_group 'NECB ECMS',          'lib/openstudio-standards/standards/necb/ECMS'
     add_group 'NECB BTAP1980-2010', 'lib/openstudio-standards/standards/necb/BTAP1980TO2010'
     add_group 'NECB BTAP Pre-1980', 'lib/openstudio-standards/standards/necb/BTAPPRE1980'
