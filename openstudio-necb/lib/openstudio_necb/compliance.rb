@@ -90,6 +90,16 @@ module OpenStudioNECB
       audit.with_building('input model') do
         proposed = load_model(model)
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+        # PRE-FLIGHT: every floor-area space type must resolve against the NECB
+        # catalog BEFORE any transform runs. The reference is a clone of the
+        # proposed, and the per-space-type transforms (lighting LPD, loads, SHW
+        # demand) silently skip unmatched types — so an unresolvable space type
+        # yields a reference identical to the proposed for exactly that space:
+        # the allowance is waived and the proposed is compared against itself.
+        # You cannot certify a building whose reference silently failed to
+        # build; fail here, loudly, with the full list (the raise lands inside
+        # the begin, so the audit trail is still flushed to run_dir).
+        validate_space_types!(proposed, vintage, audit)
       end
       audit.decision(:compliance, 'performance-path run started',
                      inputs: { vintage: vintage, simulate: simulate, costing: costing },
@@ -577,6 +587,71 @@ module OpenStudioNECB
     rescue StandardError
       # never let a write failure mask the original error
       nil
+    end
+
+    # Pre-flight gate for the reference path: every space that counts toward
+    # floor area (and is not a plenum) must carry standards tags that resolve
+    # against the NECB space-type catalog. Warns per unresolvable type, then
+    # raises with the full list and nearest-name suggestions. Runs BEFORE any
+    # simulation or transform, so a mistagged model fails in milliseconds with
+    # actionable names instead of producing a silently-wrong determination.
+    def validate_space_types!(proposed, vintage, audit)
+      data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
+      problems = {}
+      proposed.getSpaces.sort_by(&:nameString).each do |space|
+        next unless space.partofTotalFloorArea
+
+        space_type = space.spaceType.empty? ? nil : space.spaceType.get
+        name = space_type ? space_type.nameString : '(no space type)'
+        next if name.downcase.include?('plenum')
+
+        bt = space_type&.standardsBuildingType&.then { |o| o.is_initialized ? o.get : nil }
+        st = space_type&.standardsSpaceType&.then { |o| o.is_initialized ? o.get : nil }
+        st = nil if st&.downcase&.include?('plenum')
+        record = bt && st && OpenStudioLoads::NECB::SpaceTypes.find(building_type: bt, space_type: st,
+                                                                    vintage: data_vintage)
+        next unless record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+
+        (problems[[name, bt, st]] ||= []) << space.nameString
+      end
+      return if problems.empty?
+
+      catalog = OpenStudioLoads::NECB.table(data_vintage, 'space_types')
+      lines = problems.map do |(name, bt, st), spaces|
+        audit.warn(:compliance,
+                   "space type '#{name}' [#{bt.inspect}, #{st.inspect}] is UNRESOLVABLE against the NECB " \
+                   "#{data_vintage} catalog — lighting/loads/SHW rules cannot be established for " \
+                   "#{spaces.size} space(s)",
+                   target: spaces.join(', '), article: '8.4.3.1.(2); 4.2.1.6.')
+        hint = if st
+                 suggestions = suggest_space_types(st, catalog)
+                 suggestions.empty? ? '' : " — did you mean: #{suggestions.join(' | ')}?"
+               else
+                 ' — untagged: run the loads on-ramp (necb_loads:/assign_space_types) or set ' \
+                 'standardsBuildingType + standardsSpaceType to NECB catalog names'
+               end
+        "'#{name}' [#{bt.inspect}, #{st.inspect}] (#{spaces.size} space(s))#{hint}"
+      end
+      raise(ArgumentError,
+            "pre-flight FAILED: #{problems.size} space type(s) do not resolve against the NECB #{data_vintage} " \
+            "space-type catalog, so the reference building cannot be generated correctly (unmatched types " \
+            "silently keep the proposed's lighting/loads, waiving the allowances):\n  #{lines.join("\n  ")}")
+    end
+
+    # Deterministic nearest-name hints: token overlap against catalog space
+    # types, best three. Suggestion ONLY — auto-resolution was rejected because
+    # 12 catalog pairs differ solely by a size threshold no string metric can
+    # choose between.
+    def suggest_space_types(name, catalog)
+      tokens = name.downcase.scan(/[a-z0-9]+/) - %w[m2 sch]
+      return [] if tokens.empty?
+
+      catalog.map { |row| row['space_type'].to_s }
+             .uniq
+             .map { |cand| [cand, (tokens & cand.downcase.scan(/[a-z0-9]+/)).size] }
+             .select { |_, score| score.positive? }
+             .max_by(3) { |cand, score| [score, -cand.length] }
+             .map { |cand, _| "'#{cand}'" }
     end
   end
 end

@@ -16,10 +16,21 @@ only by a `how` string, and until these checks existed nothing verified that an
 article declared implemented changed anything in a model. Two real defects
 survived review, tests, and CI inside articles declared `implemented`:
 
-- **(open)** the reference lighting reset silently no-ops for any space type
-  absent from the NECB catalog, so the reference keeps the **proposed's**
-  lighting power — the Part 4 allowance is waived and the proposed is compared
-  against itself;
+- **(fixed)** the reference lighting reset silently no-oped for any space type
+  absent from the NECB catalog, so the reference kept the **proposed's**
+  lighting power — the Part 4 allowance was waived and the proposed compared
+  against itself. Fixed at three layers: `apply_lights` warns per consequential
+  unmatched type and logs `applied` **and** `eligible` counts;
+  `reference_lighting` hard-refuses (raises) when any floor-area space type is
+  unresolvable — the allowance for an unlisted space function is a human
+  judgement (4.2.1.6.(1)(b)), so no fallback value is invented; and the
+  umbrella's `performance_compliance` pre-flights **every** floor-area space
+  type against the catalog before any transform or simulation, failing with
+  the full unmatched list and nearest-catalog-name suggestions (deterministic
+  token overlap — never auto-applied, because 12 catalog pairs differ only by
+  a size threshold no string metric can choose between). This is a breaking
+  change for untagged models, by design: you cannot certify a building whose
+  reference silently failed to build;
 - **(fixed)** the reference air-leakage default cleared only
   `SpaceInfiltrationDesignFlowRate`, so a proposed expressing infiltration as
   `EffectiveLeakageArea` or `FlowCoefficient` kept it **and** gained the NECB
@@ -32,11 +43,12 @@ invisible because the tests that covered these articles asserted on **audit
 strings** rather than model values, and the audit reports success in both
 cases.
 
-The infiltration fix is the pattern to follow: the hostile test was written
-first and failed, the one-line fix made it pass, and the test now stands as the
-regression guard. The lighting defect stays open because "what should the
-reference do for a space type that is not in the catalog" is a code
-interpretation question, not a coding one.
+Both fixes followed the same pattern: the hostile test was written first and
+failed, the fix made it pass, and the test now stands as the regression guard.
+For lighting, the interpretation question ("what should the reference do for a
+space type not in the catalog?") was answered *refuse loudly, suggest, never
+guess* — the pre-flight gate makes a silently-wrong determination impossible
+rather than trying to invent an allowance no one authorized.
 
 ## The checks
 

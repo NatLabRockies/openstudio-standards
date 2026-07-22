@@ -23,32 +23,82 @@ module OpenStudioLighting
         lights_scale = 1.0 if lights_scale.nil? || lights_scale == 'none' || lights_scale == 'NECB_Default'
         lights_scale = lights_scale.to_s.strip.to_f if lights_scale.is_a?(String)
         applied = 0
+        eligible = 0
 
         model.getSpaceTypes.sort_by(&:nameString).each do |space_type|
+          eligible += 1 unless plenum?(space_type)
           applied += 1 if apply_to_space_type(model, space_type, vintage, lights_type, lights_scale, audit)
         end
+        # applied vs eligible: a numerator alone hid a total no-op — 3-of-10 and
+        # 10-of-10 were indistinguishable in the log (how the reference-LPD
+        # defect survived). Unmatched CONSEQUENTIAL types (ones with floor-area
+        # spaces) are warned individually in apply_to_space_type.
         audit.decision(:lighting, "interior lighting applied (#{lights_type}, scale #{lights_scale})",
-                       inputs: { space_types_applied: applied, vintage: vintage },
+                       inputs: { space_types_applied: applied, space_types_eligible: eligible, vintage: vintage },
                        article: '4.2.1.4.; 4.2.1.5.; 4.2.1.6.')
         emit_article_coverage(vintage, audit)
         audit
       end
 
+      def plenum?(space_type)
+        space_type.nameString.downcase.include?('plenum') ||
+          (space_type.standardsSpaceType.is_initialized && space_type.standardsSpaceType.get.downcase.include?('plenum'))
+      end
+
+      # A space type only matters to lighting power if a floor-area space uses
+      # it — the shared fixture carries six orphan space types nothing uses.
+      def consequential?(space_type)
+        space_type.spaces.any?(&:partofTotalFloorArea)
+      end
+
+      # Space types (with their standards tags) that a Part 4 LPD could NOT be
+      # established for, restricted to ones that matter. The reference
+      # transform hard-fails on these: reference LPD == proposed LPD means the
+      # 8.4.5.5.(1) allowance is silently waived.
+      def unmatched_space_types(model, vintage)
+        model.getSpaceTypes.sort_by(&:nameString).filter_map do |space_type|
+          next if plenum?(space_type) || !consequential?(space_type)
+
+          building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
+          standards_type = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
+          record = OpenStudioLoads::NECB::SpaceTypes.find(building_type: building_type,
+                                                          space_type: standards_type,
+                                                          vintage: OpenStudioLoads::NECB.data_vintage(vintage))
+          next unless record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+
+          { name: space_type.nameString, building_type: building_type, space_type: standards_type }
+        end
+      end
+
       def apply_to_space_type(model, space_type, vintage, lights_type, lights_scale, audit)
         name = space_type.nameString
-        return false if name.downcase.include?('plenum') ||
-                        (space_type.standardsSpaceType.is_initialized && space_type.standardsSpaceType.get.downcase.include?('plenum'))
+        return false if plenum?(space_type)
 
         building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
         standards_type = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
         record = OpenStudioLoads::NECB::SpaceTypes.find(building_type: building_type,
                                                         space_type: standards_type,
                                                         vintage: OpenStudioLoads::NECB.data_vintage(vintage))
-        return false if record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+        if record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+          if consequential?(space_type)
+            audit.warn(:lighting,
+                       "space type '#{name}' [#{building_type.inspect}, #{standards_type.inspect}] has no NECB " \
+                       "#{vintage} record — interior lighting power NOT applied; any existing Lights are left " \
+                       'untouched, so a reference built from this model would keep the proposed LPD verbatim',
+                       article: '4.2.1.6.')
+          end
+          return false
+        end
 
         lpd = record['lighting_per_area'].to_f
         per_person = record['lighting_per_person'].to_f
-        return false if lpd.zero? && per_person.zero?
+        if lpd.zero? && per_person.zero?
+          # No real catalog row hits this ('- undefined -' is caught above);
+          # defensive only, but never silent if the data ever grows one.
+          audit.warn(:lighting, "space type '#{name}' catalog record carries zero LPD — no Lights applied",
+                     article: '4.2.1.6.') if consequential?(space_type)
+          return false
+        end
 
         instance = single_lights_instance(space_type, lights_type)
         definition = instance.lightsDefinition

@@ -72,19 +72,38 @@ class TestExteriorAndReference < Minitest::Test
   end
 
   # The shared umbrella fixture (5ZoneNoHVAC) has ASHRAE-named, NECB-untagged
-  # space types. reference_lighting must warn-and-skip loudly on it (never raise),
-  # and emit exactly ONE set of article-coverage entries per call.
-  def test_reference_lighting_untagged_warns_and_single_coverage
+  # space types used by real floor-area spaces. reference_lighting must REFUSE
+  # it: an unresolvable space type would silently keep the proposed's LPD in
+  # the reference (the clone), waiving the 8.4.4.5.(1) allowance. This test
+  # previously asserted warn-and-skip ("never raise") — that WAS the defect.
+  def test_reference_lighting_refuses_untagged_fixture
     model = load_fixture
     audit = OpenStudioLighting::AuditLog.new
-    # reaching past this call at all proves it did not raise on the untagged model
+    error = assert_raises(ArgumentError) do
+      OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
+    end
+    assert_includes error.message, 'SmallOffice', 'refusal names the unresolvable space type'
+    assert(audit.warnings.any? { |w| w[:action].to_s.include?('UNRESOLVABLE') },
+           'refusal also lands in the audit trail')
+  end
+
+  # Tagged with real catalog names, the same fixture passes the gate, warns on
+  # the modelled-gap articles, and emits exactly ONE set of article-coverage
+  # entries per call.
+  def test_reference_lighting_tagged_fixture_single_coverage
+    model = load_fixture
+    model.getSpaceTypes.select { |st| st.spaces.any? }.each do |st|
+      st.setStandardsBuildingType('Space Function')
+      st.setStandardsSpaceType('Office enclosed > 25 m2')
+    end
+    audit = OpenStudioLighting::AuditLog.new
     OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
 
     assert(audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
-           'untagged model still warns loudly (daylighting gaps)')
+           'daylighting gaps still warn loudly')
 
     coverage = audit.entries.select { |e| e[:step] == :coverage }
-    refute_empty coverage, 'lighting article coverage emitted on the untagged path'
+    refute_empty coverage, 'lighting article coverage emitted'
     articles = coverage.map { |e| e[:article] }
     assert_equal articles.size, articles.uniq.size,
                  'exactly one coverage entry per article (no duplicate emission)'

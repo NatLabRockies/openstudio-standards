@@ -17,6 +17,32 @@ module OpenStudioLighting
       def reference_lighting(model, vintage: '2020', audit: nil)
         audit ||= AuditLog.new
         prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+
+        # HARD GATE: apply_lights silently skips space types with no NECB
+        # catalog record, and the reference is a clone — so an unmatched type
+        # keeps the PROPOSED's lighting power verbatim, waiving the Part 4
+        # allowance for exactly the spaces where it matters (an over-lit space
+        # then incurs zero penalty). The allowance for an unlisted space
+        # function is a human judgement (4.2.1.6.(1)(b): "most closely
+        # represents the proposed use"), so no fallback value is invented here:
+        # the transform refuses, loudly, before a wrong reference can exist.
+        unmatched = ApplyLights.unmatched_space_types(model, vintage)
+        unless unmatched.empty?
+          pairs = unmatched.map { |u| "'#{u[:name]}' [#{u[:building_type].inspect}, #{u[:space_type].inspect}]" }
+          unmatched.each do |u|
+            audit.warn(:lighting_reference,
+                       "space type '#{u[:name]}' is UNRESOLVABLE against the NECB catalog — the #{prefix}.5.(1) " \
+                       'reference lighting allowance cannot be established for it',
+                       article: "#{prefix}.5.(1); 4.2.1.6.")
+          end
+          raise(ArgumentError,
+                "reference lighting ABORTED: #{unmatched.size} space type(s) have no NECB #{vintage} catalog " \
+                "record, so the #{prefix}.5.(1) interior lighting allowance cannot be established: " \
+                "#{pairs.join('; ')}. Tag the model with NECB space functions " \
+                '(OpenStudioLoads assign_space_types, or correct standardsBuildingType/standardsSpaceType) — ' \
+                'proceeding would silently keep the proposed lighting power in the reference.')
+        end
+
         ApplyLights.apply_lights(model, vintage: vintage, lights_type: 'NECB_Default', audit: audit)
         audit.decision(:lighting_reference,
                        'reference interior lighting set to the Part 4 allowance (space-type LPDs)',

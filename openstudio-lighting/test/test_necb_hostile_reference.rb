@@ -67,43 +67,53 @@ class TestNECBHostileReferenceLighting < Minitest::Test
                     'reference retained the hostile proposed LPD'
   end
 
-  # DEFECT #1 — reproduction.
-  #
-  # apply_lights.rb:47 returns false when the space type has no catalog record,
-  # without touching the model and without an audit warning. Because the
-  # reference is a clone, it keeps the proposed's LPD verbatim: an arbitrarily
-  # over-lit space incurs ZERO lighting penalty and the building is more likely
-  # to be judged compliant.
-  #
-  # EXPECTED TO FAIL until the miss is handled (raise, or reset to a defensible
-  # allowance). Passing quietly means the allowance is being waived.
-  def test_reference_lighting_does_not_silently_keep_hostile_lpd_for_unknown_space_type
-    model = OpenStudio::Model::Model.new
-    space_type = hostile_lights!(tagged_space_type(model, 'Space Function', UNKNOWN_SPACE_TYPE))
-
-    audit = OpenStudioLighting::AuditLog.new
-    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
-
-    refute_in_delta HOSTILE_W_PER_M2, lpd_of(space_type), 1e-6,
-                    "8.4.4.5.(1) WAIVED: space type '#{UNKNOWN_SPACE_TYPE}' has no catalog record, so the " \
-                    'reference kept the proposed LPD (99 W/m2) verbatim. Reference == proposed means the ' \
-                    'lighting allowance is not enforced for this space and the proposed is compared ' \
-                    'against itself. See apply_lights.rb:47.'
+  # A space type only matters if a floor-area space uses it — attach one so the
+  # gate treats the type as consequential.
+  def with_space(space_type)
+    space = OpenStudio::Model::Space.new(space_type.model)
+    space.setSpaceType(space_type)
+    space_type
   end
 
-  # Independent of how the miss is ultimately resolved, it must not be SILENT —
-  # the family contract is that warnings are never silent. Separate from the
-  # assertion above so the log gap is visible even while the model gap stands.
-  def test_unmatched_space_type_is_reported
+  # DEFECT #1 — fixed: the reference transform now REFUSES, loudly.
+  #
+  # apply_lights silently skips space types with no catalog record, and the
+  # reference is a clone — so before the fix, an unmatched type kept the
+  # proposed's LPD verbatim: the 8.4.4.5.(1) allowance was waived and an
+  # over-lit space incurred zero penalty. The allowance for an unlisted space
+  # function is a human judgement (4.2.1.6.(1)(b)), so no fallback value is
+  # invented: reference_lighting raises before a wrong reference can exist,
+  # naming the type. (The umbrella pre-flight fails even earlier, with
+  # suggestions — this guards direct gem callers.)
+  def test_reference_lighting_refuses_unknown_space_type_instead_of_keeping_hostile_lpd
     model = OpenStudio::Model::Model.new
-    hostile_lights!(tagged_space_type(model, 'Space Function', UNKNOWN_SPACE_TYPE))
+    space_type = with_space(hostile_lights!(tagged_space_type(model, 'Space Function', UNKNOWN_SPACE_TYPE)))
 
     audit = OpenStudioLighting::AuditLog.new
-    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
+    error = assert_raises(ArgumentError) do
+      OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
+    end
 
-    assert(audit.warnings.any? { |w| w[:action].to_s.include?(UNKNOWN_SPACE_TYPE) },
-           "no audit warning names the unmatched space type '#{UNKNOWN_SPACE_TYPE}'; the reference " \
-           'lighting reset was skipped with no record that anything was missed')
+    assert_includes error.message, UNKNOWN_SPACE_TYPE, 'the refusal must name the unresolvable space type'
+    assert_includes error.message, '8.4.4.5.(1)', 'the refusal must cite the waived allowance article'
+    assert_in_delta HOSTILE_W_PER_M2, lpd_of(space_type), 1e-6,
+                    'the model must be left untouched on refusal — no partial transform'
+    assert(audit.warnings.any? { |w| w[:action].to_s.include?(UNKNOWN_SPACE_TYPE) && w[:action].to_s.include?('UNRESOLVABLE') },
+           'the refusal must also land in the audit trail (warnings are never silent)')
+  end
+
+  # An unmatched space type NO floor-area space uses is inconsequential — the
+  # gate must not refuse over the fixture's orphan space types.
+  def test_unused_unknown_space_type_does_not_block_reference_lighting
+    model = OpenStudio::Model::Model.new
+    with_space(tagged_space_type(model, 'Space Function', KNOWN_SPACE_TYPE))
+    tagged_space_type(model, 'Space Function', UNKNOWN_SPACE_TYPE) # orphan: no spaces
+
+    audit = OpenStudioLighting::AuditLog.new
+    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit) # must not raise
+
+    assert(audit.warnings.none? { |w| w[:action].to_s.include?('UNRESOLVABLE') },
+           'orphan space types must not generate unresolvable warnings')
   end
 
   # Plenums are skipped BY DESIGN (apply_lights.rb:39-40). Pinned so that

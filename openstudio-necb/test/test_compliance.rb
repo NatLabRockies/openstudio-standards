@@ -38,6 +38,32 @@ class TestCompliance < Minitest::Test
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
 
+  # Pre-flight gate (defect #1): a space type that does not resolve against the
+  # NECB catalog must abort the run BEFORE any transform — an unresolvable type
+  # silently keeps the proposed's lighting/loads in the reference (the clone),
+  # waiving the allowance. The refusal must be actionable (nearest catalog
+  # names) and must still flush the audit trail.
+  def test_preflight_rejects_unresolvable_space_type_with_suggestions
+    dir = Dir.mktmpdir('osnecb-preflight-')
+    model = proposed_with_hvac
+    model.getSpaceTypes.select { |st| st.spaces.any? }.each do |st|
+      st.setStandardsSpaceType('Office - enclosed') # legacy name, NOT in the catalog
+    end
+    error = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(
+        model, vintage: '2020', simulate: :none, hdd: 3890,
+        building: { storeys: 1, zone_types: zone_types_for(load_fixture), winter_design_temp_c: -20 },
+        run_dir: dir)
+    end
+    assert_includes error.message, 'pre-flight FAILED'
+    assert_includes error.message, 'Office - enclosed', 'names the offending type'
+    assert_includes error.message, 'Office enclosed > 25 m2', 'suggests the nearest real catalog names'
+    audit_txt = File.read(File.join(dir, 'audit.txt'))
+    assert_includes audit_txt, 'UNRESOLVABLE', 'refusal recorded in the flushed audit trail'
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
   def test_none_mode_transforms_without_simulation
     result = OpenStudioNECB.performance_compliance(
       proposed_with_hvac, vintage: '2020', simulate: :none, hdd: 3890,
