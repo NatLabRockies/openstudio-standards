@@ -86,18 +86,25 @@ CHILLER_EIR_FPLR = { # Table 8.4.6.5.-B, Water-cooled rows
   'Scroll' => [0.04411957, 0.64036703, 0.31955532],
   'Reciprocating' => [0.08144133, 0.41927141, 0.49939604]
 }.freeze
-# Table 8.4.6.5.-C (EIR_FT), Water-cooled rows — TRANSCRIBED BUT NOT USED. At the
-# AHRI 550/590 rating point (44F leaving chilled water / 85F entering condenser
-# water) these two rows evaluate to 0.018 (Scroll) and -2.49 (Reciprocating), not
-# ~1.0: they fail self_check! and are never fed to it. (For the record: the
-# 'Screw'/'Centrifugal' rows of the SAME table self-check fine at this point,
-# while 'Screw'/'Centrifugal' FAIL Table 8.4.6.5.-A's self-check — a pattern
-# consistent with a 2-row swap in extraction, but that is a hypothesis about the
-# source, not something confirmed against the original PDF, so per the "never
-# compare against an unverified transcription" rule this curve is NOT COMPARED.)
-CHILLER_EIR_FT_EC_F_SUSPECT = {
-  'Scroll' => [1.00121431, -0.01026981, 0.00016703, -0.0128136, 0.00014613, -0.00021959],
-  'Reciprocating' => [0.46140041, -0.0882156, 0.00008223, 0.00926607, 0.00005722, -0.00011594]
+# Table 8.4.6.5.-C (EIR_FT), Water-cooled rows — the PRINTED CODE IS DEFECTIVE.
+# As printed (verified against the source page image, identical in NECB 2020
+# Table 8.4.5.5-C and NECB 2025 Table 8.4.6.5-C — a publication error carried
+# forward, NOT an extraction defect): Scroll d = -0.0128136 and Reciprocating
+# b = -0.0882156, which evaluate to 0.018 and -2.49 at the AHRI 550/590 rating
+# point where an EIR_FT must be ~1.0 (Reciprocating's negative power ratio is
+# physically impossible). Each is a single misplaced decimal; errata proposed
+# to NRC Codes Canada 2026-07-22.
+#
+# The comparison below targets the ERRATUM-CORRECTED coefficients (10x on the
+# defective term). Independent corroboration, exact: the vendored legacy
+# NECB-2011-lineage curves equal the corrected rows under the degF->degC
+# transform on ALL SIX coefficients to <4e-6 relative (data-file rounding) for
+# BOTH rows — two unrelated sources agreeing digit-for-digit. Until NRC
+# confirms the erratum, the verdict is labelled "vs proposed erratum", never
+# plain conformance-to-the-printed-code.
+CHILLER_EIR_FT_EC_F_ERRATUM = {
+  'Scroll' => [1.00121431, -0.01026981, 0.00016703, -0.00128136, 0.00014613, -0.00021959],
+  'Reciprocating' => [0.46140041, -0.00882156, 0.00008223, 0.00926607, 0.00005722, -0.00011594]
 }.freeze
 CHILLER_RATING_F = [44.0, 85.0].freeze # AHRI 550/590: 44F LChWT / 85F entering condenser water
 
@@ -150,8 +157,7 @@ BOILER_FHEATPLC.merge(FURNACE_FHEATPLC).each { |t, c| self_check!("FHeatPLC #{t}
 self_check!('8.4.6.9 SWH FHeatPLC', poly(SWH_FHEATPLC, 1.0))
 CHILLER_CAP_FT_EC_F.each { |t, c| self_check!("8.4.6.5 CAP_FT #{t}", biquad(c, *CHILLER_RATING_F)) }
 CHILLER_EIR_FPLR.each { |t, c| self_check!("8.4.6.5 EIR_FPLR #{t}", poly(c, 1.0)) }
-# NOTE: CHILLER_EIR_FT_EC_F_SUSPECT is deliberately NOT fed to self_check! — see its
-# definition comment above. Feeding it would abort() the whole probe.
+CHILLER_EIR_FT_EC_F_ERRATUM.each { |t, c| self_check!("8.4.6.5 EIR_FT (erratum) #{t}", biquad(c, *CHILLER_RATING_F)) }
 self_check!('8.4.6.7 CAP_FTEAS', poly(ASHP_CAP_FT_EAS_F, ASHP_RATING_F))
 self_check!('8.4.6.7 EIR_FT', poly(ASHP_EIR_FT_F, ASHP_RATING_F))
 self_check!('8.4.6.7 EIR_FPLR', poly(ASHP_EIR_FPLR, 1.0))
@@ -351,11 +357,12 @@ compare_fheatplc(results, '8.4.6.9', 'SWH FHeatPLC (via part-load factor curve)'
   compare_direct_poly(results, '8.4.6.5', "Chiller EIR_FPLR (#{type}, direct PLR multiplier)",
                       curve_coeffs(chiller.electricInputToCoolingOutputRatioFunctionOfPLR),
                       { type => CHILLER_EIR_FPLR[type] })
-  suspect_value = biquad(CHILLER_EIR_FT_EC_F_SUSPECT[type], *CHILLER_RATING_F)
-  results << { article: '8.4.6.5', label: "Chiller EIR_FT (#{type})", verdict: 'NOT COMPARED',
-               detail: format('Table 8.4.6.5.-C %s row evaluates to %.3f at the AHRI 44F/85F rating point ' \
-                              '(expected ~1.0) — fails self-check, not fed to self_check!; see comment on ' \
-                              'CHILLER_EIR_FT_EC_F_SUSPECT', type, suspect_value) }
+  # Target = the erratum-corrected coefficients (the PRINTED Table -C rows are
+  # defective in both editions — see CHILLER_EIR_FT_EC_F_ERRATUM); label says so.
+  compare_biquad_transform(results, '8.4.6.5', "Chiller EIR_FT (#{type}, vs proposed erratum)",
+                           curve_coeffs(chiller.electricInputToCoolingOutputRatioFunctionOfTemperature),
+                           CHILLER_EIR_FT_EC_F_ERRATUM[type], grid: CHILLER_SURFACE_GRID_F,
+                           axis_labels: %w[chws cws])
 end
 
 # 8.4.6.6 cooling tower — the gem's reference tower is CoolingTowerSingleSpeed

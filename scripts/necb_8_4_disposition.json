@@ -119,7 +119,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "PARTIALLY VERIFIED: CAP_FT and EIR_FPLR are the code curves exactly (0.00%, Scroll + Reciprocating, water-cooled; EIR_FPLR compared as the direct PLR multiplier per 8.4.6.5.(4)). EIR_FT is NOT COMPARED: Table 8.4.6.5.-C's water-cooled Scroll/Reciprocating rows evaluate to 0.018/-2.49 at the AHRI 44F/85F rating point — an upstream MCP extraction defect (pattern consistent with a row swap vs Screw/Centrifugal; reported to the codes-MCP maintainer). Re-compare once the table is fixed. Screw/Centrifugal chiller types not yet probed. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
+      "rationale": "VERIFIED EQUIVALENT (Scroll + Reciprocating, water-cooled): CAP_FT, EIR_FPLR and EIR_FT all match at 0.00%. EIR_FT is compared against ERRATUM-CORRECTED coefficients: the PRINTED Table 8.4.5.5-C (2020) / 8.4.6.5-C (2025) rows carry single misplaced-decimal defects (Scroll d, Reciprocating b; the printed Reciprocating row yields a physically impossible negative power ratio at the AHRI rating point) — a publication error identical in both editions, NOT an extraction defect; errata proposed to NRC Codes Canada 2026-07-22. The corrections are corroborated EXACTLY by the independent legacy NECB-2011-lineage vendored curves (all six coefficients, <4e-6 relative, both rows). Screw/Centrifugal chiller types not yet probed. probed by scripts/necb_8_4_6_curve_probe.rb.",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
