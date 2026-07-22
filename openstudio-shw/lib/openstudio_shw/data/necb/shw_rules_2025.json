@@ -3,7 +3,8 @@
     "vintage": "2025",
     "generated": "2026-07-12",
     "method": "NECB 2025 Table 6.2.2.1 retrieved in full via the building-codes MCP and compared to 2020: every formula this gem implements is IDENTICAL (electric SL formulas, all gas UEF ladder coefficients, Et>=90%+SL large-equipment row, oil rows, solar/pool rows). The ONLY substantive 2025 change is the storage-type heat-pump water heater requirement: EF >= 2.1 -> UEF >= 2.23 (an equipment class this gem does not model — recorded below). 2025 therefore shares the 2020 algorithm parameters.",
-    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking — treated as Part 6 minimums (coverage: partial)."
+    "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) fall in an extraction gap of the source PDF chunking — treated as Part 6 minimums (coverage: partial).",
+    "note": "Vintage aliasing (which vintage's space-use/schedule tables a rules year draws from) is owned by openstudio-loads (OpenStudioLoads::NECB.data_vintage) — this gem calls that directly (necb/demand.rb) rather than vendoring its own data_vintage_alias key."
   },
   "autosize": {
     "supply_temperature_default_c": 60.0,
@@ -167,7 +168,6 @@
       }
     ]
   },
-  "data_vintage_alias": "2020",
   "non_rule_keys": [
     "changes_vs_2020"
   ],

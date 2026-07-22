@@ -40,7 +40,8 @@ module OpenStudioEnvelope
                        inputs: { hdd: hdd }, article: "#{prefix}.1.(2)")
 
         scale_fenestration_to_limits(model, vintage, hdd, prefix, audit)
-        apply_roof_absorptance(model, actual_roof_absorptance_used, prefix, audit)
+        roof_absorptance = NECB.rules(vintage).fetch('reference_envelope').fetch('roof_absorptance_if_actual_used')
+        apply_roof_absorptance(model, actual_roof_absorptance_used, roof_absorptance, prefix, audit)
         strip_shading(model, prefix, audit)
         audit.info(:reference, 'fenestration optics (SHGC/VT) preserved — only U changed by construction of the prescriptive transform',
                    article: "#{prefix}.3.(8)")
@@ -82,7 +83,7 @@ module OpenStudioEnvelope
 
       # 8.4.4.3.(1)/(2): roof solar absorptance 0.7 ONLY when the proposed model used
       # actual absorptance values; otherwise identical to proposed.
-      def apply_roof_absorptance(model, actual_used, prefix, audit)
+      def apply_roof_absorptance(model, actual_used, roof_absorptance, prefix, audit)
         unless actual_used
           audit.info(:reference, 'proposed roof absorptance not flagged as actual — reference keeps the proposed value',
                      article: "#{prefix}.3.(2)(a)")
@@ -97,11 +98,11 @@ module OpenStudioEnvelope
           outer = surface.construction.get.to_Construction.get.layers.first.to_OpaqueMaterial
           next if outer.empty?
 
-          outer.get.setSolarAbsorptance(OpenStudio::OptionalDouble.new(0.7))
+          outer.get.setSolarAbsorptance(OpenStudio::OptionalDouble.new(roof_absorptance))
           changed += 1
         end
-        audit.decision(:reference, 'roof solar absorptance set to 0.7 (proposed used actual values)',
-                       inputs: { roofs_changed: changed }, value: 0.7, article: "#{prefix}.3.(2)(b)")
+        audit.decision(:reference, "roof solar absorptance set to #{roof_absorptance} (proposed used actual values)",
+                       inputs: { roofs_changed: changed }, value: roof_absorptance, article: "#{prefix}.3.(2)(b)")
       end
 
       # 8.4.4.3.(4): remove permanent fenestration shading projections (Space/Building

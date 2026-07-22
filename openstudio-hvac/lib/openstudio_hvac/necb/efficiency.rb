@@ -47,14 +47,22 @@ module OpenStudioHVAC
       # @param vintage [String] e.g. '2020'
       # @param audit [AuditLog, nil]
       def apply(model, vintage: '2020', audit: nil)
+        requested_vintage = vintage.to_s
         vintage, fallback_reason = effective_vintage(vintage)
         if fallback_reason
           audit&.warn(:efficiency, "efficiency tables fall back to NECB #{vintage} values: #{fallback_reason}",
                       article: 'Table 5.2.12.1')
         end
         tables = data(vintage)
-        model.getBoilerHotWaters.sort_by(&:nameString).each { |b| apply_boiler(b, tables, audit) }
-        model.getChillerElectricEIRs.sort_by(&:nameString).each { |c| apply_chiller(c, tables, audit) }
+        # Boiler/chiller staging thresholds (8.4.4.9.(6)/8.4.4.10.(6)) live in the
+        # reference ruleset (heating_plant/cooling_plant), not the efficiencies table —
+        # fetched by the originally requested vintage since reference_rules_<vintage>.json
+        # is vendored for every supported vintage (no efficiency-style fallback needed).
+        plant_rules = NECB.rules(requested_vintage)
+        heating_plant = plant_rules.fetch('heating_plant')
+        cooling_plant = plant_rules.fetch('cooling_plant')
+        model.getBoilerHotWaters.sort_by(&:nameString).each { |b| apply_boiler(b, tables, heating_plant, audit) }
+        model.getChillerElectricEIRs.sort_by(&:nameString).each { |c| apply_chiller(c, tables, cooling_plant, audit) }
         model.getCoilCoolingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_cooling(c, tables, audit) }
         model.getCoilHeatingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating(c, tables, audit) }
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
@@ -259,7 +267,7 @@ module OpenStudioHVAC
       # Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
       # primary/secondary staging (176/352 kW), EFFFPLR curve, AFUE/thermal/combustion ->
       # thermal efficiency, legacy rename.
-      def apply_boiler(boiler, tables, audit)
+      def apply_boiler(boiler, tables, plant, audit)
         fuel = case boiler.fuelType
                when 'Electricity' then 'Electric'
                when 'FuelOilNo1', 'FuelOilNo2' then 'Oil'
@@ -272,14 +280,14 @@ module OpenStudioHVAC
         name = boiler.nameString
         if name.include?('Primary Boiler') || name.include?('Secondary Boiler')
           kw = capacity_w / 1000.0
-          if kw >= 352.0
+          if kw >= plant['two_boiler_max_kw']
             if name.include?('Primary Boiler')
               boiler.setBoilerFlowMode('LeavingSetpointModulated')
-              boiler.setMinimumPartLoadRatio(0.25)
+              boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
             else
               boiler_capacity = 0.001
             end
-          elsif kw >= 176.0
+          elsif kw >= plant['single_boiler_max_kw']
             boiler_capacity = capacity_w / 2
           elsif name.include?('Secondary Boiler')
             boiler_capacity = 0.001
@@ -324,18 +332,18 @@ module OpenStudioHVAC
 
       # Legacy chiller_electric_eir_apply_efficiency_and_curves (NECB2011:648): modulating
       # to 25%, primary/secondary 2100 kW split, curves, kW/ton -> COP, tower sizing.
-      def apply_chiller(chiller, tables, audit)
+      def apply_chiller(chiller, tables, plant, audit)
         name = chiller.nameString
         capacity_w = optional_f(chiller.referenceCapacity) || optional_f(chiller.autosizedReferenceCapacity)
         return audit&.warn(:efficiency, 'chiller capacity unavailable (model not sized?) — not set', target: name) if capacity_w.nil?
 
         chiller.setChillerFlowMode('LeavingSetpointModulated')
-        chiller.setMinimumPartLoadRatio(0.25)
-        chiller.setMinimumUnloadingRatio(0.25)
+        chiller.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+        chiller.setMinimumUnloadingRatio(plant['modulating_min_fraction'])
 
         chiller_capacity = capacity_w
         if name.include?('Primary') || name.include?('Secondary')
-          if capacity_w / 1000.0 < 2100.0
+          if capacity_w / 1000.0 < plant['single_chiller_max_kw']
             chiller_capacity = 0.001 if name.include?('Secondary Chiller')
           else
             chiller_capacity = capacity_w / 2.0
