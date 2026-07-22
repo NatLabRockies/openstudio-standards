@@ -115,26 +115,32 @@
       "draft": true
     },
     "8.4.6.5": {
-      "category": "gap",
-      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the electric chiller per-type tables 8.4.6.5-A/-B/-C; vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac"
+      ],
+      "rationale": "PARTIALLY VERIFIED: CAP_FT and EIR_FPLR are the code curves exactly (0.00%, Scroll + Reciprocating, water-cooled; EIR_FPLR compared as the direct PLR multiplier per 8.4.6.5.(4)). EIR_FT is NOT COMPARED: Table 8.4.6.5.-C's water-cooled Scroll/Reciprocating rows evaluate to 0.018/-2.49 at the AHRI 44F/85F rating point — an upstream MCP extraction defect (pattern consistent with a row swap vs Screw/Centrifugal; reported to the codes-MCP maintainer). Re-compare once the table is fixed. Screw/Centrifugal chiller types not yet probed. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.6": {
       "category": "gap",
-      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the cooling tower FWB adjustment; vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "rationale": "STRUCTURAL: the reference tower is CoolingTowerSingleSpeed, which has NO curve fields — E+ models tower capacity vs wet-bulb physically (effectiveness/UA), not via the code's FWB polynomial, and no FWB curve is vendored. Whether the physical model is an acceptable stand-in for the 8.4.6.6 formulation is an engineering judgement for the reviewer, not a code fix. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.7": {
-      "category": "gap",
-      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the air-source heat-pump heating curves (the -10degC cutoff IS applied per 8.4.5.13); vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "category": "covered_by",
+      "covered_by": [
+        "openstudio-hvac"
+      ],
+      "rationale": "VERIFIED EQUIVALENT: ASHP heating CAP_FTEAS and EIR_FT are the code cubics exactly (0.00%/0.01%, degF->degC univariate transform); EIR_FPLR via the PLF cycling transform within 1.83%. The -10degC cutoff is separately applied per 8.4.5.13. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
     "8.4.6.8": {
       "category": "gap",
-      "rationale": "NOT YET COMPARED: the curve probe does not yet cover the absorption chiller (no absorption chiller exists in the reference catalog); vendored chiller/DXHEAT curve sets exist but equivalence to the 2025 coefficients is unproven — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "rationale": "NOT APPLICABLE today: no absorption chiller exists in the reference catalog, no absorption curves are vendored, and apply_chiller's compressor-type detection never selects absorption — NOTE it would silently fall back to Scroll if an absorption chiller ever appeared (a latent silent-fallback to fix before absorption support is claimed). probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
       "draft": true
     },
