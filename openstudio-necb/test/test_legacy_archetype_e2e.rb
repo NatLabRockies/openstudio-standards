@@ -246,7 +246,9 @@ class TestLegacyArchetypeE2E < Minitest::Test
          "(#{reference.getAirLoopHVACs.map(&:nameString).uniq.first(1)}...)"
     puts "[RAN] THIRD (structural): proposed ERV/HX count=#{proposed.getHeatExchangerAirToAirSensibleAndLatents.size}, " \
          "reference ERV/HX count=#{reference.getHeatExchangerAirToAirSensibleAndLatents.size} " \
-         '(legacy erv_package default vs new Table 8.4.4.19 threshold — a genuine selection-logic difference, not a bug per se)'
+         '(proposed ERVs are the legacy erv_package recipe; the reference 5.2.10.1 Table-trigger determination ' \
+         'is POST-SIZING and therefore skipped under simulate: :none — the annual phase-2 run evaluates it on ' \
+         'sized flows, where the 12.8%-OA continuous loop gains an ERV under Table 5.2.10.1.-B)'
   ensure
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end

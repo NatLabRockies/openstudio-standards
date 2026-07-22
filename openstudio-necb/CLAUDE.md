@@ -18,7 +18,8 @@ proposed sizing
 → reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
 LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
 optional reference_daylighting on ONE clone/audit → reference sizing →
-efficiencies RE-applied on sized capacities → annual runs → 8.4.1.2.(2)–(4)
+efficiencies RE-applied on sized capacities + 5.2.10.1 energy-recovery
+determination on sized flows (Table 5.2.10.1.-A/-B) → annual runs → 8.4.1.2.(2)–(4)
 verdicts → sentence-(5) capacity auto-iteration (sizing-factor bumps, stall
 detection) → Section 10 tier → 2025 Part 11 GHG → optional costing of both
 models → report.json / audit.json / audit.txt → optional compliance_report.html.

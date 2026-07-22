@@ -125,7 +125,8 @@ module OpenStudioNECB
       #    all need capacities; the domain gems never simulate)
       if simulate == :none
         audit.warn(:compliance, 'simulate: :none — proposed is UNSIZED; data-centre kW thresholds ' \
-                                'and capacity-binned efficiencies fall back with warnings')
+                                'and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 ' \
+                                'energy-recovery determination needs sized flows and is SKIPPED')
       else
         Runner.run_energyplus!(proposed, File.join(run_dir, 'proposed_sizing'), sizing_only: true)
         audit.info(:compliance, 'proposed sizing run complete', target: 'proposed')
@@ -164,8 +165,11 @@ module OpenStudioNECB
         audit.with_building('reference building') do
           Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
           OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit)
-          audit.info(:compliance, 'reference sized; efficiencies re-applied on sized capacities',
-                     target: 'reference')
+          # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
+          # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
+          OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: hdd, audit: audit)
+          audit.info(:compliance, 'reference sized; efficiencies re-applied and the 5.2.10.1 energy-recovery ' \
+                                  'determination evaluated on sized flows', target: 'reference')
         end
       end
 

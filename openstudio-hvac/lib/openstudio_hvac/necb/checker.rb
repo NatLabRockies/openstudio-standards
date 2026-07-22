@@ -3,8 +3,9 @@ module OpenStudioHVAC
     # Part 5 prescriptive QAQC checker (first slice) — WARNINGS ONLY, never
     # modifies the model. Checks a PROPOSED design against:
     #   5.2.2.8  air economizer capability on mechanically-cooled air systems
-    #   5.2.10.1 heat/energy recovery where the exhaust heat content exceeds
-    #            150 kW (the same spec-based trigger the reference pass uses)
+    #   5.2.10.1 heat/energy recovery where the Table 5.2.10.1.-A/-B airflow
+    #            thresholds are met (the same table trigger the reference pass
+    #            uses; needs hdd: and SIZED supply/OA flows)
     #   5.2.12   equipment minimum efficiencies — checked by applying the NECB
     #            efficiency pass to a CLONE and diffing: any proposed value
     #            below what the pass would set is below the Table 5.2.12.1
@@ -17,13 +18,15 @@ module OpenStudioHVAC
 
       TOLERANCE = 1e-3
 
-      # @param building [Hash, nil] { winter_design_temp_c: } enables the
-      #   5.2.10.1 heat-recovery check (skipped with an info note otherwise)
+      # @param hdd [Numeric, nil] heating degree-days — enables the 5.2.10.1
+      #   heat-recovery check (skipped with an info note otherwise)
+      # @param building [Hash, nil] unused (kept for call-site compatibility;
+      #   the old 150 kW trigger read winter_design_temp_c from it)
       # @return [AuditLog]
-      def check_part5(model, vintage: '2020', building: nil, audit: nil)
+      def check_part5(model, vintage: '2020', building: nil, hdd: nil, audit: nil)
         audit ||= AuditLog.new
         check_economizers(model, audit)
-        check_heat_recovery(model, vintage, building, audit)
+        check_heat_recovery(model, vintage, hdd, audit)
         check_minimum_efficiencies(model, vintage, audit)
         audit.decision(:check_part5, 'Part 5 prescriptive QAQC complete (economizers, heat recovery, ' \
                                      'minimum efficiencies; duct/pipe insulation, fan power limits and ' \
@@ -56,32 +59,45 @@ module OpenStudioHVAC
         end
       end
 
-      # 5.2.10.1: same spec-based trigger as the reference ERV rule.
-      def check_heat_recovery(model, vintage, building, audit)
-        if building.nil? || building[:winter_design_temp_c].nil?
-          audit.info(:check_part5, '5.2.10.1 heat-recovery check skipped — pass building: ' \
-                                   '{ winter_design_temp_c: } to evaluate the 150 kW exhaust-heat trigger')
+      # 5.2.10.1: same Table 5.2.10.1.-A/-B trigger as the reference ERV rule.
+      def check_heat_recovery(model, vintage, hdd, audit)
+        if hdd.nil?
+          audit.info(:check_part5, '5.2.10.1 heat-recovery check skipped — pass hdd: to evaluate the ' \
+                                   'Table 5.2.10.1.-A/-B airflow thresholds')
           return
         end
 
-        ruleset = NECB.rules(vintage)
-        rule = ruleset['energy_recovery']
+        rule = NECB.rules(vintage)['energy_recovery']
         return if rule.nil?
 
         model.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
           oa_system = air_loop.airLoopHVACOutdoorAirSystem
           next if oa_system.empty?
 
-          ehc = NECB.exhaust_heat_content_kw(air_loop, building, audit)
-          next if ehc.nil? || ehc <= rule['exhaust_heat_content_threshold_kw']
+          supply = NECB.optional_flow(air_loop.designSupplyAirFlowRate) ||
+                   NECB.optional_flow(air_loop.autosizedDesignSupplyAirFlowRate)
+          ctrl = oa_system.get.getControllerOutdoorAir
+          min_oa = NECB.optional_flow(ctrl.minimumOutdoorAirFlowRate) ||
+                   NECB.optional_flow(ctrl.autosizedMinimumOutdoorAirFlowRate)
+          if supply.nil? || min_oa.nil? || supply.zero?
+            audit.info(:check_part5, '5.2.10.1 heat-recovery check needs SIZED supply/OA flows — not evaluated ' \
+                                     '(run sizing first)', target: air_loop.nameString)
+            next
+          end
 
-          has_recovery = !oa_system.get.oaComponents.grep(OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent).empty? ||
-                         oa_system.get.oaComponents.any? { |c| c.iddObjectType.valueName =~ /HeatExchanger/ }
+          oa_pct = 100.0 * min_oa / supply
+          hours = NECB.annual_availability_hours(air_loop)
+          mode = hours.nil? || hours >= rule['continuous_hours_per_year'] ? 'continuous' : 'non_continuous'
+          required, threshold_desc = NECB.erv_threshold_verdict(rule, mode, hdd, oa_pct, supply * 1000.0)
+          next unless required
+
+          has_recovery = oa_system.get.oaComponents.any? { |c| c.iddObjectType.valueName =~ /HeatExchanger/ }
           next if has_recovery
 
           audit.warn(:check_part5,
-                     "exhaust heat content #{ehc.round(1)} kW exceeds the #{rule['exhaust_heat_content_threshold_kw']} kW " \
-                     'trigger but NO heat/energy recovery is present — 5.2.10.1 requires it',
+                     "supply #{(supply * 1000).round} L/s at #{oa_pct.round(1)}% OA (#{mode.tr('_', '-')}) meets the " \
+                     "Table 5.2.10.1 trigger (#{threshold_desc}) but NO heat/energy recovery is present — " \
+                     '5.2.10.1 requires it',
                      target: air_loop.nameString, article: rule['trigger_article'])
         end
       end

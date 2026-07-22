@@ -58,7 +58,7 @@
 <p class="lede">How the <code>openstudio-*</code> gem family covers Section 8.4 of the National Energy Code of
 Canada for Buildings (2025 numbering; 2020's reference-building subsection 8.4.4. is canonicalized to 8.4.5.).
 Every article in the Section renders with its full requirement text, so coverage cannot be overstated by
-omission. Run evidence: annual_demo_run, demo_report_run — articles cited at runtime in those runs carry an &quot;observed in run&quot; badge (the strongest evidence tier here: it proves the citing code executed in at least one real scenario).</p>
+omission. No run evidence supplied (set NECB_AUDIT_JSONS to one or more run directories containing audit.json + report.json) — the &quot;observed in run&quot; tier is absent from this build.</p>
 
 <div class="caveat"><b>How to read the evidence — weakest to strongest.</b>
 <ul>
@@ -150,17 +150,17 @@ building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human 
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.1.2.</td>
   <td>openstudio-necb<br><span class="dim">2020</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 4 decision | demo_report_run (2025): 4 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb.</td>
 </tr>
 <tr>
   <td class="ref">8.4.1.2.</td>
   <td>openstudio-necb<br><span class="dim">2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 4 decision | demo_report_run (2025): 4 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L110" title="openstudio-necb/lib/openstudio_necb/compliance.rb:110">compliance.rb:110</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L381" title="openstudio-necb/lib/openstudio_necb/compliance.rb:381">compliance.rb:381</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L401" title="openstudio-necb/lib/openstudio_necb/compliance.rb:401">compliance.rb:401</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L408" title="openstudio-necb/lib/openstudio_necb/compliance.rb:408">compliance.rb:408</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L414" title="openstudio-necb/lib/openstudio_necb/compliance.rb:414">compliance.rb:414</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L423" title="openstudio-necb/lib/openstudio_necb/compliance.rb:423">compliance.rb:423</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L488" title="openstudio-necb/lib/openstudio_necb/compliance.rb:488">compliance.rb:488</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L509" title="openstudio-necb/lib/openstudio_necb/compliance.rb:509">compliance.rb:509</a> · <span class="dim">+2 more</span></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L110" title="openstudio-necb/lib/openstudio_necb/compliance.rb:110">compliance.rb:110</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L385" title="openstudio-necb/lib/openstudio_necb/compliance.rb:385">compliance.rb:385</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L405" title="openstudio-necb/lib/openstudio_necb/compliance.rb:405">compliance.rb:405</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L412" title="openstudio-necb/lib/openstudio_necb/compliance.rb:412">compliance.rb:412</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L418" title="openstudio-necb/lib/openstudio_necb/compliance.rb:418">compliance.rb:418</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L427" title="openstudio-necb/lib/openstudio_necb/compliance.rb:427">compliance.rb:427</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L492" title="openstudio-necb/lib/openstudio_necb/compliance.rb:492">compliance.rb:492</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L513" title="openstudio-necb/lib/openstudio_necb/compliance.rb:513">compliance.rb:513</a> · <span class="dim">+2 more</span></div>
 <details><summary>Requirement text (5 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> Subject to the limitations stated in Article 8.4.1.3., compliance with this Part shall be determined based on Sentences (2) to (5). </li><li><span class="cid">(2)</span> The annual energy consumption of the proposed building, in kWh per year, as determined in accordance with this Part, shall not exceed the building energy target of the reference building, in kWh per year, as determined in accordance with <ul><li><span class="cid">(a)</span> Subsection 8.4.4., or</li><li><span class="cid">(b)</span> Subsection 8.4.5.</li></ul></li><li><span class="cid">(3)</span> The number of hours during which the heating loads for each thermal block are not met shall not exceed 100 hours in a simulated year for the proposed building and, where applicable, for the reference building. </li><li><span class="cid">(4)</span> The number of hours during which the cooling loads for each thermal block of the proposed building for which mechanical cooling is provided are not met shall <ul><li><span class="cid">(a)</span> not exceed 100 hours in a simulated year for the proposed building when complying with Subsection 8.4.4., or</li><li><span class="cid">(b)</span> not differ by more than +10% or 20 hours, whichever is greater, from the number of hours in a simulated year during which the cooling loads for each thermal block of the reference building are not met when complying with Subsection 8.4.5.</li></ul></li><li><span class="cid">(5)</span> Where the requirements of Sentences (3) and (4) are not met, the capacities of the primary and secondary systems of the proposed building or the reference building, where applicable, shall be incrementally increased until those loads are met. </li></ul></details>
 </td></tr>
@@ -238,7 +238,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
   <td class="how">Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs (simulate: :annual); any other mode is flagged non-determining. The EUI path still requires the annual run of the proposed.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L600" title="openstudio-necb/lib/openstudio_necb/compliance.rb:600">compliance.rb:600</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L604" title="openstudio-necb/lib/openstudio_necb/compliance.rb:604">compliance.rb:604</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span></div>
 <details><summary>Requirement text (1 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> Compliance with this Part shall be assessed through modeling that conforms to specifications detailed in this Part. </li></ul></details>
 </td></tr>
@@ -491,17 +491,17 @@ A_AGW = total area of above-ground walls, in m^2</pre></div></details>
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.3.1.</td>
   <td>openstudio-loads<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">thermal-block/zoning decisions belong to the modeller or the HVAC autozoning layer, not the loads pass</td>
 </tr>
 <tr>
   <td class="ref">8.4.3.1.</td>
   <td>openstudio-necb<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb).</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L693" title="openstudio-necb/lib/openstudio_necb/compliance.rb:693">compliance.rb:693</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L697" title="openstudio-necb/lib/openstudio_necb/compliance.rb:697">compliance.rb:697</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span></div>
 <details><summary>Requirement text (8 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> The annual energy consumption of the proposed building shall be calculated as described in this Subsection. </li><li><span class="cid">(2)</span> Except as stated otherwise in this Subsection, the energy model shall be consistent with the proposed building's specifications including proper accounting of <ul><li><span class="cid">(a)</span> fenestration, doors and opaque building assembly types and areas,</li><li><span class="cid">(b)</span> lighting systems and controls,</li><li><span class="cid">(c)</span> HVAC system types, capacities and controls,</li><li><span class="cid">(d)</span> service water heating system types, capacities and controls, and</li><li><span class="cid">(e)</span> electrical systems.</li></ul></li><li><span class="cid">(3)</span> The energy model calculations shall include <ul><li><span class="cid">(a)</span> all the energy use addressed in Sections 3.2., 4.2., 5.2., 6.2. and 7.2., and</li><li><span class="cid">(b)</span> all spaces within the building.</li></ul></li><li><span class="cid">(4)</span> Each conditioned thermal block in the proposed building shall be modeled as being <ul><li><span class="cid">(a)</span> heated, if only heating systems are provided,</li><li><span class="cid">(b)</span> cooled, if only cooling systems are provided, and</li><li><span class="cid">(c)</span> heated and cooled, if complete heating and cooling systems or only rough-ins are provided.</li></ul></li><li><span class="cid">(5)</span> For the purpose of compliance calculations, where a building system or part of a building system has not been fully specified, it shall be assumed that it complies with the prescriptive requirements. </li><li><span class="cid">(6)</span> Where a building envelope assembly covers less than 5% of the total area of that assembly type, it is permitted to be excluded from the energy model, provided its area is included in an adjacent assembly having a similar U-value and the same orientation. </li><li><span class="cid">(7)</span> The energy model calculations shall not include manually operated fenestration shading devices, such as blinds or shades. </li><li><span class="cid">(8)</span> The energy model calculations shall include permanent fenestration shading devices, such as fins, overhangs, and light shelves. </li></ul></details>
 </td></tr>
@@ -514,23 +514,23 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.3.2.</td>
   <td>openstudio-loads<br><span class="dim">2020</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 12 info, 4 decision, 1 warning | demo_report_run (2025): 2 info">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">sentences (1)-(2) via NECB space-type data: occupancy + receptacle (electric/gas equipment) densities and NECB-&lt;letter&gt; schedule sets (occupancy, equipment, fan, heating/cooling setpoints) applied per space type; ventilation OA and space-type infiltration applied from the same records<div class="gaps"><b>Gaps:</b> lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules provided by the openstudio-shw gem (apply_shw after apply_loads); illuminance levels are lighting-design data (not modelled); sentence (3) semi-heated set-point-from-specifications not implemented</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.3.2.</td>
   <td>openstudio-loads<br><span class="dim">2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 12 info, 4 decision, 1 warning | demo_report_run (2025): 2 info">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">sentences (1)-(2) via NECB space-type data (2025 values verified identical to 2020; schedule citations renumbered to A-8.4.3.2.(1)(b)): occupancy + receptacle densities and NECB-&lt;letter&gt; schedule sets applied per space type; ventilation OA and space-type infiltration applied from the same records<div class="gaps"><b>Gaps:</b> lighting power + lighting schedules provided by the openstudio-lighting gem (apply it after apply_loads); service-water-heating loads + SWH schedules provided by the openstudio-shw gem (apply_shw after apply_loads); illuminance levels are lighting-design data (not modelled); semi-heated set-point-from-specifications not implemented</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.3.2. (SWH loads)</td>
   <td>openstudio-shw<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 12 info, 4 decision, 1 warning | demo_report_run (2025): 2 info">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-&lt;letter&gt; SWH schedules (openstudio-loads data)</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L58" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:58">apply.rb:58</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L115" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:115">apply.rb:115</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L134" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:134">apply.rb:134</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L152" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:152">apply.rb:152</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L209" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:209">apply.rb:209</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L256" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:256">apply.rb:256</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L272" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:272">apply.rb:272</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L159" title="openstudio-necb/lib/openstudio_necb/compliance.rb:159">compliance.rb:159</a> · <span class="dim">+4 more</span></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L58" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:58">apply.rb:58</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L115" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:115">apply.rb:115</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L134" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:134">apply.rb:134</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L152" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:152">apply.rb:152</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L209" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:209">apply.rb:209</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L256" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:256">apply.rb:256</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-loads/lib/openstudio_loads/necb/apply.rb#L272" title="openstudio-loads/lib/openstudio_loads/necb/apply.rb:272">apply.rb:272</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L160" title="openstudio-necb/lib/openstudio_necb/compliance.rb:160">compliance.rb:160</a> · <span class="dim">+4 more</span></div>
 <details><summary>Requirement text (3 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> The operating schedules relating to the presence of occupants and of loads due to the operation of lighting, receptacle equipment, and heating, cooling and service water heating systems shall be set in accordance with <ul><li><span class="cid">(a)</span> Article 8.4.4.2., when complying with Subsection 8.4.4., or</li><li><span class="cid">(b)</span> Sentences (2) and (3), when complying with Subsection 8.4.5. (see Note A-8.4.3.2.(1)(b)).</li></ul></li><li><span class="cid">(2)</span> Internal loads, service water heating loads, and illuminance levels used in the energy compliance calculations shall be representative of the proposed building's type or space functions. (See Note A-8.4.3.2.(2).) </li><li><span class="cid">(3)</span> For semi-heated buildings, as defined in Sentence 1.2.1.2.(2), the set-point temperature of the proposed building shall be that shown in the specifications. </li></ul></details>
 </td></tr>
@@ -543,13 +543,13 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.3.3.</td>
   <td>openstudio-loads<br><span class="dim">2020</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">implemented in the openstudio-envelope gem (8.4.3.3.(3) default air-leakage rule in its reference transform); the loads pass applies only the space-type modelling infiltration, which envelope rules may override</td>
 </tr>
 <tr>
   <td class="ref">8.4.3.3.</td>
   <td>openstudio-loads<br><span class="dim">2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">implemented in the openstudio-envelope gem; the loads pass applies only the space-type modelling infiltration</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -566,13 +566,13 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.3.4.</td>
   <td>openstudio-loads<br><span class="dim">2020</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">fan/system operating schedules ship in the schedule sets (NECB-&lt;letter&gt;-Fan); wiring them to systems is the openstudio-hvac / umbrella layer</td>
 </tr>
 <tr>
   <td class="ref">8.4.3.4.</td>
   <td>openstudio-loads<br><span class="dim">2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">fan/system operating schedules ship in the schedule sets; wiring them to systems is the openstudio-hvac / umbrella layer</td>
 </tr>
 </tbody></table><details><summary>Requirement text (4 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -587,7 +587,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.3.5.</td>
   <td>openstudio-loads<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll &lt; 528 kW: COP 2.802/IPLV 3.664; Screw &gt;= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)</td>
 </tr>
 </tbody></table><details><summary>Requirement text (5 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -669,11 +669,11 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.4.1.</td>
   <td>openstudio-necb<br><span class="dim">2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 2 decision | demo_report_run (2025): 2 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve!: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for &quot;conditioned&quot;); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage &gt;= 90% and the Table-note HDD &lt; 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L101" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:101">archetypes.rb:101</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L116" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:116">archetypes.rb:116</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L141" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:141">archetypes.rb:141</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L146" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:146">archetypes.rb:146</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L262" title="openstudio-necb/lib/openstudio_necb/compliance.rb:262">compliance.rb:262</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L300" title="openstudio-necb/lib/openstudio_necb/compliance.rb:300">compliance.rb:300</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L616" title="openstudio-necb/lib/openstudio_necb/compliance.rb:616">compliance.rb:616</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L654" title="openstudio-necb/lib/openstudio_necb/compliance.rb:654">compliance.rb:654</a> · <span class="dim">+3 more</span></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L101" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:101">archetypes.rb:101</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L116" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:116">archetypes.rb:116</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L141" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:141">archetypes.rb:141</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L146" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:146">archetypes.rb:146</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L266" title="openstudio-necb/lib/openstudio_necb/compliance.rb:266">compliance.rb:266</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L304" title="openstudio-necb/lib/openstudio_necb/compliance.rb:304">compliance.rb:304</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L620" title="openstudio-necb/lib/openstudio_necb/compliance.rb:620">compliance.rb:620</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L658" title="openstudio-necb/lib/openstudio_necb/compliance.rb:658">compliance.rb:658</a> · <span class="dim">+3 more</span></div>
 <details><summary>Requirement text (5 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> This Subsection shall only be used to demonstrate compliance where 90% or more of the sum of the gross interior floor areas for each known space use of the proposed building, as calculated in accordance with Sentence (3), is associated with one of the building archetypes listed in Table 8.4.4.1. (See Note A-8.4.4.1.(1).) </li><li><span class="cid">(2)</span> For the purpose of compliance with this Subsection, the building energy target (BET), in kWh per year, of the reference building shall be calculated as follows: BET = Σ (Aᵢ X EUIᵢ) + PL i=1 where i = identifier of a building archetype listed in Table 8.4.4.1. that is associated with a space use of the building, n = total number of building archetypes listed in Table 8.4.4.1. that are associated with the building, Aᵢ = gross interior floor area of the building archetype i, in m², calculated in accordance with Sentence (3), EUI₁ = energy use intensity, in kWh/m² per year, listed in Table 8.4.4.1. for building archetype i, and PL = annual energy use of the process loads accounted for in the calculation of the annual energy consumption of the proposed building, in excess of the default peak receptacle loads set in Table 8.4.4.2., in kWh per year. Table 8.4.4.1. Energy Use Intensities for Building Archetypes Forming Part of Sentences 8.4.4.1.(1), (2) and (4) Notes to Table 8.4.4.1.: (1) For heating degree-days of building location (HDD) &lt; 9000 Celsius degree-days. (2) See Note A-Table 8.4.4.1. (3) For all heating energy types. </li><li><span class="cid">(3)</span> The gross interior floor area of a building archetype shall be the sum of the interior floor areas of all conditioned spaces that are associated with this building archetype, as modeled in the proposed building, measured from the inside of exterior walls or the middle line of partitions separating a space use represented by this building archetype from a space use represented by another building archetype. (See Note A-8.4.4.1.(3).) </li><li><span class="cid">(4)</span> Space functions not associated with a building archetype listed in Table 8.4.4.1. shall be distributed proportionally among the listed building archetypes so that the sum of the gross interior floor areas used in Sentence (2) is equal to the total floor area defined in the proposed building energy model. </li><li><span class="cid">(5)</span> Where the exterior lighting devices of the proposed building do not comply with the prescriptive requirements of Part 4, their annual energy use shall be accounted for in the calculations, using representative operating schedules, as part of <ul><li><span class="cid">(a)</span> the annual energy consumption of the proposed building, and</li><li><span class="cid">(b)</span> the process loads used in Sentence (2), where the exterior lighting devices are set to comply with the prescriptive requirements of Section 4.2.</li></ul></li></ul></details>
 </td></tr>
@@ -690,7 +690,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
   <td class="how">Implemented check-then-normalize (Archetypes.conformance / Archetypes.normalize!): the proposed is checked against the Table 8.4.4.2 values (occupant density, receptacle W/m2, SWH L/h/occupant; occupancy/equipment/setpoint schedule PROFILES compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. On reference-path runs the eui_supplement verdict is only computed from the as-specified run when the check passes; otherwise not-computed with the mismatch list, or a separate normalized annual run with run_normalized: true. Lighting OPERATION schedules follow the archetype letter and outdoor air is set to the ASHRAE 62.1-2016 Table 6.2.2.1 rates at the Table 8.4.4.2 occupant density — both interpretations ADOPTED by project decision 2026-07-22 (controls credit unaffected: it flows through the 4.3.2.10 power multipliers, 8.4.3.4 modeller-side). Round-trip pinned by test (normalize! then conformance must agree).<div class="gaps"><b>Gaps:</b> Unmapped spaces keep their modeled loads (the Table applies &quot;for the applicable building archetype&quot;); spaces with no water-use equipment warn rather than gaining a SWH system.</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L214" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:214">archetypes.rb:214</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L275" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:275">archetypes.rb:275</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L281" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:281">archetypes.rb:281</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L480" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:480">archetypes.rb:480</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L506" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:506">archetypes.rb:506</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L643" title="openstudio-necb/lib/openstudio_necb/compliance.rb:643">compliance.rb:643</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L654" title="openstudio-necb/lib/openstudio_necb/compliance.rb:654">compliance.rb:654</a></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L214" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:214">archetypes.rb:214</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L275" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:275">archetypes.rb:275</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L281" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:281">archetypes.rb:281</a> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L480" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:480">archetypes.rb:480</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/archetypes.rb#L506" title="openstudio-necb/lib/openstudio_necb/archetypes.rb:506">archetypes.rb:506</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L647" title="openstudio-necb/lib/openstudio_necb/compliance.rb:647">compliance.rb:647</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-necb/lib/openstudio_necb/compliance.rb#L658" title="openstudio-necb/lib/openstudio_necb/compliance.rb:658">compliance.rb:658</a></div>
 <details><summary>Requirement text (2 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> For the purpose of compliance with this Subsection, the proposed building's operating schedules and internal and service water heating loads shall be set to the schedules and values indicated in Table 8.4.4.2. for the applicable building archetype. (See Note A-8.4.4.2.(1).) Table 8.4.4.2. Modeling Inputs for the Proposed Building Forming Part of Sentence 8.4.4.2.(1) Notes to Table 8.4.4.2.: (1) Receptacle loads include loads due to plug-in and other miscellaneous equipment typically present in the building archetype. They include loads due to appliances, elevators and escalators. Other loads can be accounted for as process loads. </li><li><span class="cid">(2)</span> For the purpose of compliance with this Subsection, the peak outdoor air ventilation rates defined in the proposed building model shall be set to the rates indicated in the proposed building's specifications. 8.4.5. Modeled Reference Building [Verified formulas for this article] - BET = sum_i=1^n (A_i × EUI_i) + PL i = identifier of a building archetype listed in Table 8.4.4.1. that is associated with a space use of the building n = total number of building archetypes listed in Table 8.4.4.1. that are associated with the building A_i = gross interior floor area of the building archetype i , in m^2, calculated in accordance with Sentence (3) EUI_i = energy use intensity, in kWh/m^2 per year, listed in Table 8.4.4.1. for building archetype i, and PL = annual energy use of the process loads accounted for in the calculation of the annual energy consumption of the proposed building, in excess of the default peak receptacle loads set in Table 8.4.4.2., in kWh per year - i = identifier of a building archetype listed in Table 8.4.4.1. that is associated with a space use of the building - n = total number of building archetypes listed in Table 8.4.4.1. that are associated with the building - A_i = gross interior floor area of the building archetype i , in m^2 - EUI_1 = energy use intensity, in kWh/m^2 per year, listed in Table 8.4.4.1. for building archetype i - PL = annual energy use of the process loads accounted for in the calculation of the annual energy consumption of the proposed building </li></ul><div class="eqs"><b>Formulas (reference rendering):</b><pre>BET = sum_i=1^n (A_i × EUI_i) + PL
 
@@ -725,19 +725,19 @@ PL = annual energy use of the process loads accounted for in the calculation of 
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.1.<div class="orig">declared as 8.4.4.1.</div></td>
   <td>openstudio-envelope<br><span class="dim">2020</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.4.3.(3) scaling)</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.1.</td>
   <td>openstudio-envelope<br><span class="dim">2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.5.3.(3) scaling)</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.1.<div class="orig">declared as 8.4.4.1. / 8.4.5.1.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -754,13 +754,13 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.2.<div class="orig">declared as 8.4.4.2. / 8.4.5.2.</div></td>
   <td>openstudio-envelope<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 2 info | demo_report_run (2025): 2 info">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">HVAC-side handled by openstudio-hvac reference_hvac (satisfied by clone there)</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.2.<div class="orig">declared as 8.4.4.2. / 8.4.5.2.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill clone">Satisfied by clone</span> <span class="pill ok" title="annual_demo_run (2025): 2 info | demo_report_run (2025): 2 info">observed in run</span></td>
+  <td><span class="pill clone">Satisfied by clone</span> </td>
   <td class="how">The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required.</td>
 </tr>
 </tbody></table><details><summary>Requirement text (3 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -775,13 +775,13 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.3.<div class="orig">declared as 8.4.4.3. / 8.4.5.3.</div></td>
   <td>openstudio-envelope<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 3 decision | demo_report_run (2025): 4 info, 3 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">roof absorptance 0.7 iff proposed used actual values; proportional per-orientation FDWR/SRR scaling of EXISTING fenestration; Space/Building shading + controls removed, Site shading kept; optics (SHGC/VT) preserved; air-leakage default I_AGW = (5/75)^0.6 x 1.50 x S/A_AGW per 8.4.3.3.(3)/8.4.2.9.(2)<div class="gaps"><b>Gaps:</b> sentence (7) partitions are satisfied by the caller-side clone; humidification note n/a</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.5.3.<div class="orig">declared as 8.4.4.3. / 8.4.5.3.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 3 decision | demo_report_run (2025): 4 info, 3 decision">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -798,19 +798,19 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.4.<div class="orig">declared as 8.4.4.4.</div></td>
   <td>openstudio-envelope<br><span class="dim">2020</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone<div class="gaps"><b>Gaps:</b> the canonical lightweight layer set of Note A-8.4.4.4.(1) is not machine-retrievable - the massless interpretation should be verified against the printed note</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.5.4.</td>
   <td>openstudio-envelope<br><span class="dim">2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone<div class="gaps"><b>Gaps:</b> the canonical lightweight layer set of Note A-8.4.5.4.(1) is not machine-retrievable - the massless interpretation should be verified against the printed note</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.5.4.<div class="orig">declared as 8.4.4.4. / 8.4.5.4.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 2 info, 1 decision | demo_report_run (2025): 2 info, 1 decision">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -827,37 +827,37 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.5.<div class="orig">declared as 8.4.4.5. / 8.4.5.5.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12).</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.5.(1)<div class="orig">declared as 8.4.4.5.(1) / 8.4.5.5.(1)</div></td>
   <td>openstudio-lighting<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">apply_lights sets the allowance LPD from the space-type records</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.5.(2)<div class="orig">declared as 8.4.4.5.(2) / 8.4.5.5.(2)</div></td>
   <td>openstudio-lighting<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">reference_lighting overrides dwelling space types to 5 W/m2</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.5.(3)<div class="orig">declared as 8.4.4.5.(3) / 8.4.5.5.(3)</div></td>
   <td>openstudio-lighting<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+<div class="gaps"><b>Gaps:</b> strict reading multiplies installed power by Focc x Fpers</div></td>
 </tr>
 <tr>
   <td class="ref">8.4.5.5.(4)<div class="orig">declared as 8.4.4.5.(4) / 8.4.5.5.(4)</div></td>
   <td>openstudio-lighting<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">fractions come from the same space-type records for both models</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.5.(5)-(12)<div class="orig">declared as 8.4.4.5.(5)-(12) / 8.4.5.5.(5)-(12)</div></td>
   <td>openstudio-lighting<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 9 info, 5 warning, 2 decision | demo_report_run (2025): 6 info, 3 warning, 2 decision">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)<div class="gaps"><b>Gaps:</b> sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation)</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -874,7 +874,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.6.<div class="orig">declared as 8.4.4.6. / 8.4.5.6.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">Purchased HEATING is represented by a gas-fired boiler (energy type = gas, sentence (1)(a)); purchased COOLING forces an air-cooled electric chiller (sentence (2)(a)) via the chw_source config.<div class="gaps"><b>Gaps:</b> Capacity-ratio clauses (1)(b)/(2)(b) are sizing-time and not enforced; purchased SHW (3) is host-scope.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (4 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -889,7 +889,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.7.<div class="orig">declared as 8.4.4.7. / 8.4.5.7.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 10 decision, 1 info | demo_report_run (2025): 10 decision, 1 info">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules, HP redirect per sentence (4).<div class="gaps"><b>Gaps:</b> Sentence (2) 10%-area exclusion is a modeling choice left to the host; Table -B note (3) facade-orientation grouping for &gt;4-storey System 6 is not automated (zone groups follow the proposed grouping).</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -906,7 +906,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.8.<div class="orig">declared as 8.4.4.8. / 8.4.5.8.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 1 decision, 1 info | demo_report_run (2025): 1 decision, 1 info">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded.</td>
 </tr>
 </tbody></table><details><summary>Requirement text (2 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -921,7 +921,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.9.<div class="orig">declared as 8.4.4.9. / 8.4.5.9.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">System per Table -A (1); purchased energy (2); energy type follows proposed (4); boiler plant staging 176/352 kW incl. modulating flow mode + 25% floor and HWST 82/60 reset conventions applied via plant defaults + efficiency pass (6).<div class="gaps"><b>Gaps:</b> Terminal/secondary capacity split (3), multi-energy capacity ratios (5), and furnace multi-stage modeling (7: staged objects) are sizing-time refinements not yet modeled.</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -938,7 +938,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.10.<div class="orig">declared as 8.4.4.10. / 8.4.5.10.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">System per Table -A (1); purchased energy (2); energy type follows proposed (3); chiller plant: 2100 kW split, 7 C CHWST, 25% modulating floor (6) via plant defaults + efficiency pass.<div class="gaps"><b>Gaps:</b> Terminal/secondary capacity split (7) and DX multi-stage modeling (8) are sizing-time refinements not yet modeled.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (9 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -953,7 +953,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.11.<div class="orig">declared as 8.4.4.11. / 8.4.5.11.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">Tower cell count (1750 kW rule) and fan power set from chiller heat rejection in the efficiency pass.<div class="gaps"><b>Gaps:</b> 35/29 C inlet/outlet, 24 C wb rating and condenser pump specifics are not explicitly set (host/sizing refinements).</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (7 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -968,11 +968,11 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.12.<div class="orig">declared as 8.4.4.12. / 8.4.5.12.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 5 decision, 1 warning | demo_report_run (2025): 5 decision, 1 warning">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">air economizers (Table -12 -&gt; 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA<div class="gaps"><b>Gaps:</b> systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled — loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
-article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#L315" title="openstudio-hvac/lib/openstudio_hvac/necb/reference.rb:315">reference.rb:315</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#L332" title="openstudio-hvac/lib/openstudio_hvac/necb/reference.rb:332">reference.rb:332</a></div>
+article — it is not, by itself, evidence the rule is applied):</span> <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#L314" title="openstudio-hvac/lib/openstudio_hvac/necb/reference.rb:314">reference.rb:314</a> <span class="pill bad" title="this citation sits on an audit WARNING — often announcing the rule is NOT applied">warning</span> · <a href="https://github.com/NatLabRockies/openstudio-standards/blob/phylroy_dnd/openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#L331" title="openstudio-hvac/lib/openstudio_hvac/necb/reference.rb:331">reference.rb:331</a></div>
 <details><summary>Requirement text (1 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> Where Article 5.2.2.7. applies to a proposed building's HVAC system, the HVAC systems of the corresponding thermal blocks in the reference building shall be modeled in accordance with that Article and Table 8.4.5.12. Table 8.4.5.12. Applicable Requirements for Cooling with Outside Air According to Type of HVAC System Forming Part of Sentence 8.4.5.12.(1) Notes to Table 8.4.5.12.: (1) See Table 8.4.5.7.-B. (2) See Table 8.4.5.13. </li></ul></details>
 </td></tr>
@@ -985,7 +985,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.13.<div class="orig">declared as 8.4.4.13. / 8.4.5.13.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">Proposed ASHP/WSHP/GSHP redirects the reference to the Table -13 packaged rooftop ASHP; -10 C heating cutoff applied (2)(d).<div class="gaps"><b>Gaps:</b> Capacity rules (2)(b)-(c) (cooling-peak sizing without oversizing, 8.3/-8.3 C capacity profile) and the 33% auxiliary-fuel election (2)(g) are sizing/annual-energy-time and not yet modeled.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (2 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -1000,7 +1000,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.14.<div class="orig">declared as 8.4.4.14. / 8.4.5.14.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">Pumps ride the gem's plant-loop defaults (constant-speed riding the curve).<div class="gaps"><b>Gaps:</b> Pump head/efficiency identical-to-proposed (1), combined-pump consolidation (2) and pump power-vs-flow curves (4) are not yet transferred from the proposed model.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (6 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -1067,7 +1067,7 @@ A, B, C, D, E = coefficients defined in Table 8.4.5.14.</pre></div></details>
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.15.<div class="orig">declared as 8.4.4.15. / 8.4.5.15.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill clone">Satisfied by clone</span> <span class="pill ok" title="annual_demo_run (2025): 1 info | demo_report_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill clone">Satisfied by clone</span> </td>
   <td class="how">Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1).<div class="gaps"><b>Gaps:</b> DCV strategies (2) are not copied onto rebuilt reference systems.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (2 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -1082,7 +1082,7 @@ A, B, C, D, E = coefficients defined in Table 8.4.5.14.</pre></div></details>
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.16.<div class="orig">declared as 8.4.4.16. / 8.4.5.16.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill bad">Not implemented</span> <span class="pill warn" title="annual_demo_run (2025): 1 warning | demo_report_run (2025): 1 warning">observed in run (warnings only)</span></td>
+  <td><span class="pill bad">Not implemented</span> </td>
   <td class="how"><div class="gaps"><b>Gaps:</b> Radiant-system +-2 C schedule adjustment (1) and throttling-range matching (2) are not applied (only relevant when the proposed design has radiant systems).</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (2 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -1135,7 +1135,7 @@ P_partload = power draw at part-load conditions, in kW</pre></div></details>
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.17.<div class="orig">declared as 8.4.4.17. / 8.4.5.17.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 1 info | demo_report_run (2025): 1 info">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">VAV fan power-vs-flow curves from Table -17 applied in the (post-sizing) efficiency pass, row selected by rated power per sentences (3)-(5); the below-D floor is approximated by the E+ minimum-flow-fraction clamp (equals E within table rounding)</td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the
@@ -1152,7 +1152,7 @@ article — it is not, by itself, evidence the rule is applied):</span> <a href=
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.18.<div class="orig">declared as 8.4.4.18. / 8.4.5.18.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 5 decision, 1 warning | demo_report_run (2025): 5 decision, 1 warning">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">Fan specs applied: systems 1-5 supply 640 Pa @ 40% with no return-fan spec; system 6 supply 1000 Pa @ 55% + return 250 Pa @ 30% ((3)-(4)); system 6 13 C SAT via the catalog sizing block.<div class="gaps"><b>Gaps:</b> Supply-airflow determination at 21/11 C deltas ((1)-(2)) is sizing-time; sentences (5)-(6) (identical fan power / 5.2.12.1-included fan energy) are not modeled.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (6 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
@@ -1175,8 +1175,8 @@ A, B, C, D, E = coefficients defined in Table 8.4.5.17.
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.19.<div class="orig">declared as 8.4.4.19. / 8.4.5.19.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 1 info | demo_report_run (2025): 1 info">observed in run</span></td>
-  <td class="how">5.2.10.1 exhaust-heat-content trigger (&gt;150 kW, specification-based) evaluated per reference air loop; rotary HX @ 50% effectiveness with OA-pretreat control added where required.<div class="gaps"><b>Gaps:</b> Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope).</div></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
+  <td class="how">Table 5.2.10.1.-A/-B airflow-threshold trigger (climate row by HDD x %OA band x continuous/non-continuous from the air loop availability schedule, &gt;=8000 h/yr) evaluated POST-SIZING per reference air loop on sized supply/OA flows; rotary HX @ 50% effectiveness with OA-pretreat control added where required. Below-10%-OA systems are outside the Tables (NR).<div class="gaps"><b>Gaps:</b> Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at &gt;=10% OA for HDD &gt;= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs.</div></td>
 </tr>
 </tbody></table><details><summary>Requirement text (3 sentences) — <span class="dim">coverage is declared at ARTICLE level — per-sentence marks would be fabrication</span></summary>
 <ul class="clauses"><li><span class="cid">(1)</span> Where Subsection 5.2.10. applies to a reference building's HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10. and Sentences (2) and (3). </li><li><span class="cid">(2)</span> Energy recovered from an HVAC system's exhaust air shall be used to preheat the outside air supplied by that system. </li><li><span class="cid">(3)</span> Where the proposed building has ice-making loads along with simultaneous heating and/or service water heating loads, the reference building's ice plant shall be modeled with the following characteristics and components: <ul><li><span class="cid">(a)</span> a water-cooled, double-bundle water chiller having 100% heat-recovery capacity, where the energy model calculations do not allow for modeling of the ice plant and/or of heat recovery from the ice plant,</li><li><span class="cid">(b)</span> operation and performance characteristics, such as efficiency, capacity, part-load performance and pumping flow rates, that are identical to those of the proposed building's machine,</li><li><span class="cid">(c)</span> peak load and demand schedules that are identical to those of the proposed building, and</li><li><span class="cid">(d)</span> heat rejection to<ul><li class="sub"><span class="cid">(i)</span> at least one hydronic system for heating or service water heating, where the system has a load, and</li><li class="sub"><span class="cid">(ii)</span> the atmosphere using a cooling tower defined in accordance with Articles 8.4.5.10. and 8.4.5.11., when the heat rejected is greater than the coincident heating load (see Note A-8.4.3.9.(1)).</li></ul></li></ul></li></ul></details>
@@ -1190,25 +1190,25 @@ A, B, C, D, E = coefficients defined in Table 8.4.5.17.
 <tr class="nested"><td colspan="2"><table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody><tr>
   <td class="ref">8.4.5.20.<div class="orig">declared as 8.4.4.20. / 8.4.5.20.</div></td>
   <td>openstudio-hvac<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill host">Delegated</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 1 warning | demo_report_run (2025): 4 info, 1 warning">observed in run</span></td>
+  <td><span class="pill host">Delegated</span> </td>
   <td class="how">Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies.</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.20.(1)<div class="orig">declared as 8.4.4.20.(1) / 8.4.5.20.(1)</div></td>
   <td>openstudio-shw<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill clone">Satisfied by clone</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 1 warning | demo_report_run (2025): 4 info, 1 warning">observed in run</span></td>
+  <td><span class="pill clone">Satisfied by clone</span> </td>
   <td class="how">the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.20.(2)<div class="orig">declared as 8.4.4.20.(2) / 8.4.5.20.(2)</div></td>
   <td>openstudio-shw<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill ok">Implemented (self-declared)</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 1 warning | demo_report_run (2025): 4 info, 1 warning">observed in run</span></td>
+  <td><span class="pill ok">Implemented (self-declared)</span> </td>
   <td class="how">apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction</td>
 </tr>
 <tr>
   <td class="ref">8.4.5.20.(3)-(4)<div class="orig">declared as 8.4.4.20.(3)-(4) / 8.4.5.20.(3)-(4)</div></td>
   <td>openstudio-shw<br><span class="dim">2020, 2025</span></td>
-  <td><span class="pill warn">Partial</span> <span class="pill ok" title="annual_demo_run (2025): 4 info, 1 warning | demo_report_run (2025): 4 info, 1 warning">observed in run</span></td>
+  <td><span class="pill warn">Partial</span> </td>
   <td class="how">treated as Part 6 minimums via apply_efficiency on the reference<div class="gaps"><b>Gaps:</b> sentence text falls in a PDF-extraction chunk gap; not machine-verified</div></td>
 </tr>
 </tbody></table><div class="citerow"><b>Cited at</b> <span class="dim">(a citation proves a log line mentions the

@@ -52,8 +52,14 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   efficiency pass sets performance values.
 - `necb/reference.rb` — Table 8.4.4.7.-A system selection + reference build +
   8.4.4.12 economizers (DifferentialEnthalpy on sys1/3/4/6+HP; sys2/5 water
-  economizer = warning only) + 5.2.10.1 ERV trigger (needs
-  `building: { winter_design_temp_c: }`).
+  economizer = warning only). The 5.2.10.1 ERV trigger is the NECB 2020
+  Table 5.2.10.1.-A/-B airflow thresholds (HDD row x %OA band x
+  continuous/non-continuous, >=8000 h/yr from the loop availability
+  schedule) — `NECB.apply_energy_recovery(model, vintage:, hdd:)`, a
+  POST-SIZING pass the umbrella calls after the reference sizing run
+  (it needs sized supply/OA flows; unsized -> loud warn). NOT the 2011
+  150 kW exhaust-heat formula (wrong vintage, permissive for small
+  high-%OA systems).
 - `necb/efficiency.rb` — capacity-binned minimums (`efficiencies_*.json`) +
   plant staging thresholds (176/352 kW boilers, 2100 kW chillers, 0.25
   modulating minimum) read from `reference_rules_*.json`
@@ -63,7 +69,8 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   c1–c3 = columns A/B/C, min-flow-fraction = D; the VSD row exists but the
   selection sentences never pick it).
 - `necb/checker.rb` — `check_part5`: warnings-only QAQC (economizers 5.2.2.8,
-  HRV trigger, 5.2.12 minimums via clone-and-diff against the efficiency pass).
+  5.2.10.1 table trigger (needs `hdd:` + sized flows), 5.2.12 minimums via
+  clone-and-diff against the efficiency pass).
   Capacity-binned checks need SIZED equipment — hard-size in tests.
 - `costing/*` — quantity takeoff → ledger → report. Costing values come from
   the CSV database at runtime.
@@ -102,7 +109,7 @@ apply_efficiencies / check_part5 / rules`.
   equipment — there is NO "90.1 fallback gap" (a previously-suspected defect
   that turned out to be a false premise).
 - `reference_hvac` clones the proposed; selection needs
-  `building: { storeys:, zone_types: {zone name => NECB space type}, winter_design_temp_c: }`.
+  `building: { storeys:, zone_types: {zone name => NECB space type} }`.
 - Data-centre kW selection thresholds and capacity bins need a sizing run
   first; unsized equipment falls back with warnings, never silently.
 - District heating objects: SDK renamed classes at 3.7 (DistrictHeating →

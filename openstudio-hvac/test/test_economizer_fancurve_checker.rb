@@ -66,16 +66,21 @@ class TestEconomizerFancurveChecker < Minitest::Test
     coil.setRatedTotalCoolingCapacity(10_000.0)
     coil.setRatedAirFlowRate(0.5)
     coil.setRatedCOP(1.5)
-    # strip economizers
+    # strip economizers; hard-size flows at 50% OA so the 5.2.10.1 table
+    # trigger (continuous Always On, HDD >= 3000 -> Table -B "R") fires
     model.getAirLoopHVACs.each do |loop|
       oa = loop.airLoopHVACOutdoorAirSystem
-      oa.get.getControllerOutdoorAir.setEconomizerControlType('NoEconomizer') if oa.is_initialized
+      next unless oa.is_initialized
+
+      oa.get.getControllerOutdoorAir.setEconomizerControlType('NoEconomizer')
+      loop.setDesignSupplyAirFlowRate(0.5)
+      oa.get.getControllerOutdoorAir.setMinimumOutdoorAirFlowRate(0.25)
     end
 
-    audit = OpenStudioHVAC::NECB.check_part5(model, vintage: '2020',
-                                             building: { winter_design_temp_c: -20 })
+    audit = OpenStudioHVAC::NECB.check_part5(model, vintage: '2020', hdd: 3890)
     warnings = audit.warnings.map { |w| w[:action] }
     assert(warnings.any? { |w| w.include?('NO economizer') }, '5.2.2.8 violation flagged')
+    assert(warnings.any? { |w| w.include?('NO heat/energy recovery') }, '5.2.10.1 table-trigger violation flagged')
     assert(warnings.any? { |w| w.include?('BELOW the NECB 2020 minimum') }, '5.2.12 violation flagged (COP 1.5)')
     assert(audit.entries.any? { |e| e[:step] == :check_part5 && e[:level] == :decision })
     refute_empty model.getCoilCoolingDXSingleSpeeds.select { |c| (c.ratedCOP.respond_to?(:get) ? c.ratedCOP.get : c.ratedCOP).round(2) == 1.5 },

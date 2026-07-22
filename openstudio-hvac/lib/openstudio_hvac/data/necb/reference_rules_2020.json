@@ -17,7 +17,11 @@
     "note": "Rule values are transcriptions of the code text. Runtime never contacts the MCP server; regenerate/verify this file against the code text when editions change.",
     "non_rule_keys_note": "furnace_staging, dx_staging, and hydronic_pumps are future-implementation data backing the declared-partial 8.4.4.9./8.4.4.10./8.4.4.14. articles (see article_coverage gaps for each) — vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
   },
-  "non_rule_keys": ["furnace_staging", "dx_staging", "hydronic_pumps"],
+  "non_rule_keys": [
+    "furnace_staging",
+    "dx_staging",
+    "hydronic_pumps"
+  ],
   "selection": {
     "table": "8.4.4.7.-A",
     "article": "8.4.4.7.(1)",
@@ -455,9 +459,7 @@
   },
   "energy_recovery": {
     "article": "8.4.4.19.(1)-(2)",
-    "trigger_article": "5.2.10.1. (exhaust heat content)",
-    "exhaust_heat_content_threshold_kw": 150.0,
-    "exhaust_heat_content_formula": "0.00123 x OA(L/s) x (avg exhaust T - winter design T) [kW]; OA from space DesignSpecificationOutdoorAir (per-floor-area convention), exhaust T from zone heating design-day setpoints, winter design T from the weather .stat file (or building: {winter_design_temp_c:} override)",
+    "trigger_article": "5.2.10.1.(1); Tables 5.2.10.1.-A/-B",
     "effectiveness": 0.5,
     "hx": {
       "type": "Rotary",
@@ -467,7 +469,90 @@
       "initial_defrost_time_fraction": 0.167,
       "rate_of_defrost_increase": 1.44
     },
-    "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system."
+    "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system.",
+    "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), verified identical in 2025; retrieved via codes MCP get_table 2026-07-22. Replaces the NECB 2011 150 kW exhaust-heat-content trigger previously implemented here (wrong vintage — divergent for small high-%OA systems, where 2020 requires and 2011 does not).",
+    "continuous_hours_per_year": 8000,
+    "oa_bands_pct": [
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "thresholds_l_s": {
+      "non_continuous": [
+        {
+          "hdd_max": 3000,
+          "bands": [
+            "NR",
+            "NR",
+            "NR",
+            "NR",
+            "NR",
+            "NR",
+            "NR",
+            "NR"
+          ]
+        },
+        {
+          "hdd_max": 5000,
+          "bands": [
+            12270,
+            7550,
+            2600,
+            2120,
+            1650,
+            940,
+            470,
+            "R"
+          ]
+        },
+        {
+          "hdd_max": 99999,
+          "bands": [
+            2120,
+            1890,
+            1180,
+            470,
+            "R",
+            "R",
+            "R",
+            "R"
+          ]
+        }
+      ],
+      "continuous": [
+        {
+          "hdd_max": 3000,
+          "bands": [
+            "NR",
+            9200,
+            4250,
+            2360,
+            1890,
+            1420,
+            710,
+            "R"
+          ]
+        },
+        {
+          "hdd_max": 99999,
+          "bands": [
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R"
+          ]
+        }
+      ]
+    }
   },
   "article_coverage": {
     "note": "Complete accounting of Subsection 8.4.4 articles and how this gem handles each - emitted into every reference_hvac audit so nothing is silently missed. Statuses: implemented / partial / not_implemented / satisfied_by_clone / host_scope.",
@@ -594,8 +679,8 @@
         "article": "8.4.4.19.",
         "title": "Energy Recovery Systems",
         "status": "implemented",
-        "how": "5.2.10.1 exhaust-heat-content trigger (>150 kW, specification-based) evaluated per reference air loop; rotary HX @ 50% effectiveness with OA-pretreat control added where required.",
-        "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope)."
+        "how": "Table 5.2.10.1.-A/-B airflow-threshold trigger (climate row by HDD x %OA band x continuous/non-continuous from the air loop availability schedule, >=8000 h/yr) evaluated POST-SIZING per reference air loop on sized supply/OA flows; rotary HX @ 50% effectiveness with OA-pretreat control added where required. Below-10%-OA systems are outside the Tables (NR).",
+        "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs."
       },
       {
         "article": "8.4.4.20.",

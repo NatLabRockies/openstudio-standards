@@ -236,7 +236,6 @@ module OpenStudioHVAC
                        article: assignment.articles.compact.uniq.join('; '))
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
-        apply_energy_recovery_rule(result.air_loops, info, ruleset, audit)
         apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
       end
 
@@ -383,100 +382,101 @@ module OpenStudioHVAC
       end
     end
 
-    # 8.4.4.19 (2020) / 8.4.5.19 (2025): where Subsection 5.2.10 applies, the reference
-    # system shall be modeled with energy recovery, used to preheat the outside air.
-    # The 5.2.10.1 trigger is SPECIFICATION-based, not sizing-based: exhaust heat
-    # content [kW] = 0.00123 x OA(L/s) x (avg exhaust T - winter design T), with OA from
-    # the spaces' DesignSpecificationOutdoorAir, exhaust T from the zones' heating
-    # design-day setpoints, and the winter design temperature from the weather .stat
-    # file (or the building: {winter_design_temp_c:} override). Anything unevaluable
-    # warns — never a silent skip.
-    def self.apply_energy_recovery_rule(air_loops, info, ruleset, audit)
-      rule = ruleset['energy_recovery']
-      return if rule.nil?
+    # 8.4.4.19 (2020) / 8.4.5.19 (2025): where Subsection 5.2.10 applies, the
+    # reference system shall be modeled with energy recovery, used to preheat
+    # the outside air — via NECB 2020/2025 Tables 5.2.10.1.-A/-B: the
+    # airflow-threshold trigger, evaluated POST-SIZING (it needs the sized
+    # supply and minimum-OA flows), called by the umbrella after the reference
+    # sizing run. Replaces the NECB 2011 150 kW exhaust-heat-content trigger
+    # previously implemented here — wrong vintage, and divergent exactly where
+    # it matters: a small high-%OA system is "R (required at all flow rates)"
+    # under 2020 while the 2011 formula waves it through (permissive).
+    # Idempotent: loops already carrying an HX are skipped.
+    def self.apply_energy_recovery(model, vintage: '2020', hdd:, audit: nil)
+      audit ||= AuditLog.new
+      rule = NECB.rules(vintage)['energy_recovery']
+      return audit if rule.nil?
 
-      Array(air_loops).each do |air_loop|
+      model.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
         oa_system = air_loop.airLoopHVACOutdoorAirSystem
         next if oa_system.empty? # no OA intake: 5.2.10 does not apply
+        next if oa_system.get.oaComponents.any? { |c| c.to_HeatExchangerAirToAirSensibleAndLatent.is_initialized }
 
-        ehc = exhaust_heat_content_kw(air_loop, info, audit)
-        next if ehc.nil?
-
-        if ehc <= rule['exhaust_heat_content_threshold_kw']
-          audit.decision(:rules, 'energy recovery not required (exhaust heat content below threshold)',
-                         target: air_loop.nameString,
-                         inputs: { exhaust_heat_content_kw: ehc.round(1),
-                                   threshold_kw: rule['exhaust_heat_content_threshold_kw'] },
-                         article: rule['trigger_article'])
+        supply = optional_flow(air_loop.designSupplyAirFlowRate) ||
+                 optional_flow(air_loop.autosizedDesignSupplyAirFlowRate)
+        ctrl = oa_system.get.getControllerOutdoorAir
+        min_oa = optional_flow(ctrl.minimumOutdoorAirFlowRate) ||
+                 optional_flow(ctrl.autosizedMinimumOutdoorAirFlowRate)
+        if supply.nil? || min_oa.nil? || supply.zero?
+          audit.warn(:rules, '5.2.10.1 energy-recovery trigger needs SIZED supply/OA flows — not evaluated ' \
+                             '(run sizing first)', target: air_loop.nameString, article: rule['trigger_article'])
           next
         end
 
-        erv = add_energy_recovery(air_loop, oa_system.get, rule)
-        audit.decision(:rules, 'energy recovery added to reference system',
-                       target: air_loop.nameString,
-                       inputs: { exhaust_heat_content_kw: ehc.round(1),
-                                 threshold_kw: rule['exhaust_heat_content_threshold_kw'] },
-                       value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% effectiveness (#{erv.nameString})",
-                       article: "#{rule['article']}; #{rule['trigger_article']}")
-      end
-    end
-
-    # Legacy exhaust-heat-content calculation (NECB2011 hvac_systems.rb:200-279).
-    def self.exhaust_heat_content_kw(air_loop, info, audit)
-      sum_oa = 0.0
-      sum_oa_t = 0.0
-      air_loop.thermalZones.each do |zone|
-        heat_design_t = zone_heating_design_temp(zone)
-        zone_oa = zone.spaces.sum do |space|
-          spec = space.designSpecificationOutdoorAir
-          spec.is_initialized ? spec.get.outdoorAirFlowperFloorArea * space.floorArea * zone.multiplier : 0.0
+        supply_l_s = supply * 1000.0
+        oa_pct = 100.0 * min_oa / supply
+        hours = annual_availability_hours(air_loop)
+        if hours.nil?
+          audit.warn(:rules, 'fan availability hours not computable — conservatively classified CONTINUOUS',
+                     target: air_loop.nameString, article: rule['trigger_article'])
         end
-        sum_oa += zone_oa
-        sum_oa_t += zone_oa * heat_design_t
-      end
-      if sum_oa.zero?
-        audit.warn(:rules, 'energy-recovery trigger not evaluable: no DesignSpecificationOutdoorAir on served spaces',
-                   target: air_loop.nameString, article: '5.2.10.1.')
-        return nil
-      end
-
-      outdoor_t = winter_design_temp(air_loop.model, info, audit)
-      return nil if outdoor_t.nil?
-
-      avg_exhaust_t = sum_oa_t / sum_oa
-      0.00123 * sum_oa * 1000.0 * (avg_exhaust_t - outdoor_t)
-    end
-
-    def self.zone_heating_design_temp(zone)
-      thermostat = zone.thermostat
-      return 21.0 unless thermostat.is_initialized && thermostat.get.to_ThermostatSetpointDualSetpoint.is_initialized
-
-      schedule = thermostat.get.to_ThermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule
-      return 21.0 unless schedule.is_initialized && schedule.get.to_ScheduleRuleset.is_initialized
-
-      schedule.get.to_ScheduleRuleset.get.winterDesignDaySchedule.values.max || 21.0
-    end
-
-    # Winter (heating) design temperature: explicit override wins; else parse the .stat
-    # file beside the model's weather file (99.6% heating dry-bulb, matching legacy).
-    def self.winter_design_temp(model, info, audit)
-      return info[:winter_design_temp_c].to_f if info[:winter_design_temp_c]
-
-      weather = model.weatherFile
-      if weather.is_initialized && weather.get.path.is_initialized
-        stat_path = weather.get.path.get.to_s.sub(/\.epw\z/i, '.stat')
-        if File.exist?(stat_path)
-          # .stat files carry Latin-1 degree symbols; read tolerantly
-          lines = File.readlines(stat_path, encoding: 'ISO-8859-1').map { |l| l.encode('UTF-8', invalid: :replace, undef: :replace) }
-          line = lines.find { |l| l =~ /^\s*Heating(\s+-?\d)/ }
-          values = line.to_s.scan(/-?\d+(?:\.\d+)?/).map(&:to_f)
-          return values[1] if values.size > 1
+        mode = hours.nil? || hours >= rule['continuous_hours_per_year'] ? 'continuous' : 'non_continuous'
+        required, threshold_desc = erv_threshold_verdict(rule, mode, hdd, oa_pct, supply_l_s)
+        inputs = { supply_l_s: supply_l_s.round, min_oa_l_s: (min_oa * 1000).round,
+                   oa_pct: oa_pct.round(1), operation: mode, annual_hours: hours&.round,
+                   hdd: hdd, threshold: threshold_desc }
+        if required
+          erv = add_energy_recovery(air_loop, oa_system.get, rule)
+          audit.decision(:rules, 'energy recovery added to reference system (Table 5.2.10.1 threshold met)',
+                         target: air_loop.nameString, inputs: inputs,
+                         value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% effectiveness (#{erv.nameString})",
+                         article: "#{rule['article']}; #{rule['trigger_article']}")
+        else
+          audit.decision(:rules, 'energy recovery not required (below the Table 5.2.10.1 threshold)',
+                         target: air_loop.nameString, inputs: inputs, article: rule['trigger_article'])
         end
       end
-      audit.warn(:rules, 'energy-recovery trigger not evaluable: no winter design temperature ' \
-                         '(no .stat file beside the weather file; pass building: {winter_design_temp_c:})',
-                 article: '5.2.10.1.')
-      nil
+      audit
+    end
+
+    # Table row by HDD, band by %OA. Cells: 'R' = required at all flow rates,
+    # 'NR' = never, numeric = required at/above that supply flow (L/s).
+    # Below the smallest band (<10% OA) is outside the Tables entirely -> NR.
+    def self.erv_threshold_verdict(rule, mode, hdd, oa_pct, supply_l_s)
+      bands = rule['oa_bands_pct']
+      return [false, 'below 10% OA (outside Tables 5.2.10.1.-A/-B)'] if oa_pct < bands.first
+
+      row = rule['thresholds_l_s'][mode].find { |r| hdd < r['hdd_max'] }
+      cell = row['bands'][bands.rindex { |b| oa_pct >= b }]
+      case cell
+      when 'R' then [true, 'R (required at all flow rates)']
+      when 'NR' then [false, 'NR (not required at any flow rate)']
+      else [supply_l_s >= cell, ">= #{cell} L/s"]
+      end
+    end
+
+    # Annual fan-availability hours from the air loop's availability schedule
+    # (>= 8000 h/yr = continuously operating per the Table notes). Constant
+    # schedules (incl. the SDK's Always On) count directly; rulesets are summed
+    # hourly across the year; anything else is not computable (nil).
+    def self.annual_availability_hours(air_loop)
+      schedule = air_loop.availabilitySchedule
+      constant = schedule.to_ScheduleConstant
+      return constant.get.value.positive? ? 8760 : 0 if constant.is_initialized
+
+      ruleset = schedule.to_ScheduleRuleset
+      return nil unless ruleset.is_initialized
+
+      y = air_loop.model.getYearDescription.assumedYear
+      days = ruleset.get.getDaySchedules(OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, y),
+                                         OpenStudio::Date.new(OpenStudio::MonthOfYear.new(12), 31, y))
+      days.sum { |d| (1..24).count { |h| d.getValue(OpenStudio::Time.new(0, h, 0, 0)).positive? } }
+    end
+
+    def self.optional_flow(value)
+      return value unless value.respond_to?(:is_initialized)
+
+      value.is_initialized ? value.get : nil
     end
 
     # Legacy air_loop_hvac_apply_energy_recovery_ventilator recipe: rotary HX, 50%

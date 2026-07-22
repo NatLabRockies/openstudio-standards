@@ -75,20 +75,27 @@ class TestNecbE2ERun < Minitest::Test
 
   # The controls gate: a sys6 reference WITH the 8.4.4.19 ERV simulates a January week
   # (VAV + boiler/chiller plants + rotary HX + OA-pretreat SPM all active at runtime).
+  # Mirrors the umbrella flow: sizing run -> apply_energy_recovery on the SIZED
+  # flows (Table 5.2.10.1 trigger) -> week run.
   def test_sys6_reference_with_erv_simulates_a_week
     proposed = attach_weather!(load_fixture)
     zones = proposed.getThermalZones.sort_by(&:nameString)
     OpenStudioHVAC.build_system(proposed, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard', zones)
     proposed.getSpaces.each do |space|
       spec = OpenStudio::Model::DesignSpecificationOutdoorAir.new(proposed)
-      spec.setOutdoorAirFlowperFloorArea(0.02) # forces the 150 kW ERV trigger
+      spec.setOutdoorAirFlowperFloorArea(0.001) # ~10%+ OA once sized; Always On -> continuous -> Table -B "R"
       space.setDesignSpecificationOutdoorAir(spec)
     end
 
     result = OpenStudioHVAC::NECB.reference_hvac(proposed,
                                                  building: { storeys: 3, zone_types: office_types(proposed) })
     assert_equal [6], result.assignments.map(&:reference_system).uniq
+
+    run_energyplus!(result.model, "#{@dir}/sys6_sizing", sizing_only: true)
+    erv_audit = OpenStudioHVAC::NECB.apply_energy_recovery(result.model, hdd: 3890)
     refute_empty result.model.getHeatExchangerAirToAirSensibleAndLatents, 'ERV present'
+    decision = erv_audit.entries.find { |e| e[:action].include?('energy recovery added') }
+    assert_equal 'continuous', decision[:inputs][:operation]
 
     ref_run = run_energyplus!(result.model, "#{@dir}/sys6_week", sizing_only: false)
     assert_clean_energyplus_run(ref_run, 'reference (sys6 + ERV, one-week run)')
