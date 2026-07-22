@@ -184,7 +184,19 @@ module OpenStudioEnvelope
         c = (5.0 / 75.0)**AIR_LEAKAGE_N
         i_agw = c * AIR_LEAKAGE_I75 * envelope_area / wall_area # L/(s.m2 of AG wall)
 
+        # Clear EVERY infiltration representation before adding the default.
+        # OpenStudio models infiltration with three unrelated object types, and
+        # they are additive: clearing only DesignFlowRate leaves a proposed
+        # model that used EffectiveLeakageArea or FlowCoefficient with its
+        # original leakage PLUS the NECB default on top — roughly double
+        # infiltration on the reference, which inflates reference energy and
+        # makes the proposed easier to pass.
+        cleared = { design_flow_rate: model.getSpaceInfiltrationDesignFlowRates.size,
+                    effective_leakage_area: model.getSpaceInfiltrationEffectiveLeakageAreas.size,
+                    flow_coefficient: model.getSpaceInfiltrationFlowCoefficients.size }
         model.getSpaceInfiltrationDesignFlowRates.each(&:remove)
+        model.getSpaceInfiltrationEffectiveLeakageAreas.each(&:remove)
+        model.getSpaceInfiltrationFlowCoefficients.each(&:remove)
         model.getSpaces.sort_by(&:nameString).each do |space|
           infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
           infiltration.setName("#{space.nameString} NECB Ref Infiltration")
@@ -193,7 +205,8 @@ module OpenStudioEnvelope
         end
         audit.decision(:reference, 'air-leakage default applied',
                        inputs: { i75_l_per_s_m2: AIR_LEAKAGE_I75, flow_exponent: AIR_LEAKAGE_N,
-                                 envelope_area_m2: envelope_area.round(1), ag_wall_area_m2: wall_area.round(1) },
+                                 envelope_area_m2: envelope_area.round(1), ag_wall_area_m2: wall_area.round(1),
+                                 proposed_infiltration_objects_cleared: cleared },
                        value: "I_AGW = (5/75)^0.6 x #{AIR_LEAKAGE_I75} x #{envelope_area.round(1)}/#{wall_area.round(1)} " \
                               "= #{i_agw.round(4)} L/(s.m2 AG wall), per space as flow-per-exterior-wall-area",
                        article: "#{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)")
