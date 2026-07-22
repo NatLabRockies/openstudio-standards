@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS11: ASHP + PTHP (Packaged Terminal Heat Pumps)
 # Most common ECM - hotels, apartments, offices
 #

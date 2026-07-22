@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # Test space type assignment and load densities for NECB standards.
 # Phase 2 of new NECB test suite.
 #

@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS16: ASHP + CAWHP + Fan Coils
 # Combination system
 #

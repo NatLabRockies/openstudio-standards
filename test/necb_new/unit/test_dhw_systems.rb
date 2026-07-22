@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # Component Tests for DHW (Domestic Hot Water) Systems
 # Tests the creation, configuration, and integration of DHW systems in NECB models
 #

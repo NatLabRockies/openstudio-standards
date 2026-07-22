@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS13: ASHP + VRF
 # Similar to HS08 with different DOAS configuration
 #

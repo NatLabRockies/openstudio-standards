@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 class TestNECBRemainingHVACSystems < Minitest::Test
   include(NecbHelper)
 

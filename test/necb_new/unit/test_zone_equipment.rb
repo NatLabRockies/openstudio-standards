@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # Test NECB zone equipment configuration and characteristics
 # Tests PTAC, baseboard heaters, and fan coil units without requiring sizing runs
 #

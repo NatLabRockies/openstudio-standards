@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS08: Central Cooling ASHP + VRF
 # DOAS with ASHP + VRF terminal units
 #

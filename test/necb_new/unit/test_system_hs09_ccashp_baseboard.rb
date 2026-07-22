@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS09: Cold-Climate ASHP + Baseboards
 # Critical for NECB Zones 6-8
 #

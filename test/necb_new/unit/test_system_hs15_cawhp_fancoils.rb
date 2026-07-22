@@ -1,5 +1,3 @@
-require_relative '../coverage_helper'
-
 # ECM HS15: CAWHP + Fan Coils
 # Condenser-assisted water heating with air-to-water heat pump
 #
