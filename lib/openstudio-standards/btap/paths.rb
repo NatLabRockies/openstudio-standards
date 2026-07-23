@@ -11,7 +11,7 @@ module BTAP
       attr_accessor :costs_local_factors_path
     end
     btap_common               = Pathname(__dir__) / "common"
-    necb_common               = Pathname(__dir__) / "common"
+    necb_common               = Pathname(__dir__) / "../standards/necb/common"
     @costs_path               = btap_common / "costs.csv"
     @costs_local_factors_path = btap_common / "costs_local_factors.csv"
 
@@ -34,7 +34,8 @@ module BTAP
     MECH_SIZING_PATH          = btap_common / "mech_sizing.json"
     NECB_BUILDING_TYPES_PATH  = btap_common / "necb_building_types.csv"
     NECB_SPACE_TYPES_PATH     = btap_common / "necb_space_types.csv"
-    NEB_PRICES_PATH           = btap_common / "neb_end_use_prices.csv"
+
+    NEB_PRICES_PATH           = necb_common / "neb_end_use_prices.csv"
 
     # (Retrieved March 11, 2025)
     # ECCC's emissions factors for the current and future years for GHG "without
