@@ -1,3 +1,6 @@
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
+
 # ECM HS14: GSHP + Fan Coils
 # Ground-source heat pump with four-pipe fan coils - most complex ECM
 #

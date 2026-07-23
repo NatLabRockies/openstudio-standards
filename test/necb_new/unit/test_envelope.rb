@@ -1,3 +1,6 @@
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
+
 class TestBuildingEnvelope < Minitest::Test
 
   def test_envelope_properties_by_climate_and_template

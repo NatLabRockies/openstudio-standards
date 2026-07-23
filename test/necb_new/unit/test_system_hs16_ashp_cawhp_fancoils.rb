@@ -1,3 +1,6 @@
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
+
 # ECM HS16: ASHP + CAWHP + Fan Coils
 # Combination system
 #

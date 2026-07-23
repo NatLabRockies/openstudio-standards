@@ -1,3 +1,6 @@
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
+
 # Component Tests for DHW (Domestic Hot Water) Systems
 # Tests the creation, configuration, and integration of DHW systems in NECB models
 #
