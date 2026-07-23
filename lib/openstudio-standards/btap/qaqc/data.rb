@@ -30,9 +30,6 @@ module BTAP
       @standards_data = @standard.load_standards_database_new()
       @btap_data = {}
       @btap_results_version = 1.00
-      @neb_prices_csv_file_name = Paths::NEB_PRICES_PATH
-      @eccc_ghg_electricity = File.join(__dir__, 'eccc_electric_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for ECCC's emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions": https://data-donnees.az.ec.gc.ca/data/substances/monitor/canada-s-greenhouse-gas-emissions-projections/Current-Projections-Actuelles/Energy-Energie/AM%20Scenario%20AMS/Grid-O%26G-Intensities-Intensites-Reseau-Delectricite-P%26G?lang=en
-      @nir_ghg_gas = File.join(__dir__, 'nir_gas_grid_intensity_20250311.csv') #REF (Retrieved March 11, 2025) for Year 2022 of "Table A6.1–1 CO2 Emission Factors for Marketable Natural Gas" of National Inventory Report: https://data-donnees.az.ec.gc.ca/api/file?path=%2Fsubstances%2Fmonitor%2Fcanada-s-official-greenhouse-gas-inventory%2FD-Emission-Factors%2FEN_Annex6_Emission_Factors.pdf
 
       # Conditioned floor area is used so much. May as well make it a object variable.
       # setup the queries
@@ -251,7 +248,7 @@ module BTAP
     def net_present_value(npv_start_year: 2022, npv_end_year: 2041, npv_discount_rate: 0.03, npv_discount_rate_carbon: 0.03, oerd_utility_pricing: false, annual_peak_kW_per_m_sq: nil)
 
       # Find end year in the neb data
-      neb_header = CSV.read(@neb_prices_csv_file_name, headers: true).headers
+      neb_header = CSV.read(Paths::NEB_PRICES_PATH, headers: true).headers
       neb_header.delete_if { |item| ["building_type", "province", "fuel_type"].include?(item) } # remove "building_type", "province", "fuel_type" from neb_header in order to have only years in neb_header
       neb_header.delete_if { |item| ["rate_class", "units", "references", "links"].include?(item) } if oerd_utility_pricing # remove additional headers if the OERD data is used
       neb_header.map(&:to_f)  #convert years to float
@@ -293,10 +290,10 @@ module BTAP
       end
 
       # Create a hash of the neb data.
-      neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
+      neb_data = CSV.parse(File.read(Paths::NEB_PRICES_PATH), headers: true, converters: :numeric).map(&:to_h)
 
       # Create a hash of the ECCC's electricity emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions".
-      eccc_ghg_elec_emission_factors = CSV.parse(File.read(@eccc_ghg_electricity), headers: true, converters: :numeric).map(&:to_h)
+      eccc_ghg_elec_emission_factors = CSV.parse(File.read(Paths::ECCC_GHG_ELECTRICITY_PATH), headers: true, converters: :numeric).map(&:to_h)
 
       # Find which province the proposed building is located in
       building_type = 'Commercial'
@@ -516,7 +513,7 @@ module BTAP
 
       #===================================================================================================================
       ### OERD's electricity rates for commercial buildings
-      neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
+      neb_data = CSV.parse(File.read(Paths::NEB_PRICES_PATH), headers: true, converters: :numeric).map(&:to_h)
       #===================================================================================================================
       #===================================================================================================================
       #===================================================================================================================
@@ -665,7 +662,7 @@ module BTAP
       economics_data['cost_utility_neb_total_cost_per_m_sq'] = 0.0
       economics_data['cost_utility_ghg_total_kg_per_m_sq'] = 0.0
       # Create a hash of the neb data.
-      neb_data = CSV.parse(File.read(@neb_prices_csv_file_name), headers: true, converters: :numeric).map(&:to_h)
+      neb_data = CSV.parse(File.read(Paths::NEB_PRICES_PATH), headers: true, converters: :numeric).map(&:to_h)
 
       neb_eplus_fuel_map.each do |neb_fuel, ep_fuel|
         next if neb_fuel.to_s.downcase == 'electricity peak'
@@ -692,7 +689,7 @@ module BTAP
         # Determine cost in GHG kg of CO2
         if neb_fuel.downcase == 'electricity' # Use ECCC data for utility emission factors rather than NEB data.
           # Create a hash of the ECCC's electricity emissions factors for the current and future years for GHG "without Biomass and RNG CO2 emissions".
-          eccc_ghg_elec_emission_factors = CSV.parse(File.read(@eccc_ghg_electricity), headers: true, converters: :numeric).map(&:to_h)
+          eccc_ghg_elec_emission_factors = CSV.parse(File.read(Paths::ECCC_GHG_ELECTRICITY_PATH), headers: true, converters: :numeric).map(&:to_h)
           # Find the appropriate row for electricity GHG emmission factors
           row_emm_factor = eccc_ghg_elec_emission_factors.detect { |data| (data['province'] == province) }
           emm_factor_conv = 3600.0

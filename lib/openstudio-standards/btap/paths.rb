@@ -35,5 +35,11 @@ module BTAP
     NECB_BUILDING_TYPES_PATH  = btap_common / "necb_building_types.csv"
     NECB_SPACE_TYPES_PATH     = btap_common / "necb_space_types.csv"
     NEB_PRICES_PATH           = btap_common / "neb_end_use_prices.csv"
+
+    # (Retrieved March 11, 2025)
+    # ECCC's emissions factors for the current and future years for GHG "without
+    # Biomass and RNG CO2 emissions":
+    # https://data-donnees.az.ec.gc.ca/data/substances/monitor/canada-s-greenhouse-gas-emissions-projections/Current-Projections-Actuelles/Energy-Energie/AM%20Scenario%20AMS/Grid-O%26G-Intensities-Intensites-Reseau-Delectricite-P%26G?lang=en
+    ECCC_GHG_ELECTRICITY_PATH = necb_common / "eccc_electric_grid_intensity_20250311.csv"
   end
 end
