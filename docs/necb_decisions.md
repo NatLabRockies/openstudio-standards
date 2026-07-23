@@ -113,9 +113,28 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 - **Evidence:** `scripts/necb_8_4_6_curve_probe.rb` (tower section, in
   `rake necb:verify`); `scripts/necb_8_4_disposition.json` 8.4.6.6.
 
+## D-08 — Batch sign-off of the remaining 19 article dispositions
+
+- **Decision:** all 19 remaining draft dispositions in
+  `scripts/necb_8_4_disposition.json` signed off in four groups:
+  - **A. Probe-evidenced `covered_by` (7):** 8.4.6.1, 8.4.6.2, 8.4.6.3,
+    8.4.6.4, 8.4.6.5, 8.4.6.7, 8.4.6.9 — each rationale carries its numeric
+    result from `rake necb:curves`, which re-verifies on every run.
+  - **B. Engine physics (4):** 8.4.2.4, 8.4.2.5, 8.4.2.8, 8.4.2.11.
+  - **C. Modeller responsibility (4):** 8.4.1.3, 8.4.1.4, 8.4.2.12, 8.4.3.8.
+  - **D. Acknowledged gaps (4):** 8.4.2.6 (0.35 W/(m²·K) inter-block
+    coefficient), 8.4.3.7 (±1°C default throttling range), 8.4.3.9 (ice
+    plants), 8.4.6.8 (absorption chillers N/A; the latent silent-fallback to
+    Scroll must be fixed before absorption support is ever claimed).
+- **Who/when:** phylroy, 2026-07-23 (group-by-group review).
+- **Why:** a disposition is a claim of *responsibility*, not correctness — the
+  deliberate weaker claim. Group D remains publicly documented as uncovered;
+  implementing any of those articles later is separate, evidence-backed work.
+- **Evidence:** `scripts/necb_8_4_disposition.json` (no `draft` entries
+  remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
+
 ---
 
-*Pending adjudication (not yet decisions): remaining draft dispositions in
-`scripts/necb_8_4_disposition.json`; AHJ-report warning behaviour for
+*Pending adjudication (not yet decisions): AHJ-report warning behaviour for
 partial/not_implemented manifest statuses; pump power 8.4.4.14 and per-object
 oversizing limits; the D-06 fan-availability open item.*
