@@ -219,7 +219,6 @@ module BTAP
 
           post_analysis = nil
           if @options[:enable_costing] or @options[:enable_carbon]
-            @cp = CommonPaths.instance
             post_analysis = BTAP::DatapointAnalysis.new(
               model: model,
               output_folder: @dp_temp_folder,
