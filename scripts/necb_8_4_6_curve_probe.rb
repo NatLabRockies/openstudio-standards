@@ -16,7 +16,7 @@
 #   FHeatPLC(PLR) = PLR / PLF(PLR)         (furnace/SWH part-load-fraction form)
 #   biquadratic degF -> degC by variable substitution t_F = 1.8 t_C + 32
 #
-# Method (per docs/necb_rule_verification.md): build components, hard-size
+# Method (per openstudio-necb/docs/necb_rule_verification.md): build components, hard-size
 # them (capacity-binned rows need capacities; no CLI required), run the real
 # efficiency passes, read the curves BACK OFF THE MODEL, and compare. Expected
 # coefficients are transcribed from the building-codes MCP (necb:2025,
@@ -80,11 +80,22 @@ RATING_F = [67.0, 95.0].freeze # AHRI: 67F entering wet-bulb / 95F outdoor dry-b
 # curve rather than through the PLR/PLF(PLR) transform used for DX/furnace/boiler.
 CHILLER_CAP_FT_EC_F = { # Table 8.4.6.5.-A, Water-cooled rows
   'Scroll' => [0.36131454, 0.01855477, 0.00003011, 0.00093592, -0.00001518, -0.00005481],
-  'Reciprocating' => [0.58531422, 0.01539593, 0.00007296, -0.00212462, -0.00000715, -0.00004597]
+  'Reciprocating' => [0.58531422, 0.01539593, 0.00007296, -0.00212462, -0.00000715, -0.00004597],
+  'Rotary Screw' => [0.332669598, 0.00729116, -0.00049938, 0.01598983, -0.00028254, 0.00052346],
+  'Centrifugal' => [-0.29861975, 0.02996076, -0.00080125, 0.01736268, -0.00032606, 0.00063139]
 }.freeze
+# The printed Screw/Centrifugal CAP_FT rows evaluate to 0.962/0.950 (not ~1.0)
+# at the AHRI 550/590 rating point — NOT a transcription slip: the independent
+# legacy NECB-2011-lineage vendored curves agree with the printed rows
+# digit-for-digit (0.00% over the operating envelope), so the fits genuinely
+# normalize imperfectly. Self-checked against these documented values instead
+# of ~1.0 (D-13).
+CHILLER_CAP_FT_RATING_EXPECTED = { 'Rotary Screw' => 0.9622, 'Centrifugal' => 0.9499 }.freeze
 CHILLER_EIR_FPLR = { # Table 8.4.6.5.-B, Water-cooled rows
   'Scroll' => [0.04411957, 0.64036703, 0.31955532],
-  'Reciprocating' => [0.08144133, 0.41927141, 0.49939604]
+  'Reciprocating' => [0.08144133, 0.41927141, 0.49939604],
+  'Rotary Screw' => [0.33018833, 0.23554291, 0.46070828],
+  'Centrifugal' => [0.17149273, 0.58820208, 0.23737257]
 }.freeze
 # Table 8.4.6.5.-C (EIR_FT), Water-cooled rows — the PRINTED CODE IS DEFECTIVE.
 # As printed (verified against the source page image, identical in NECB 2020
@@ -105,6 +116,12 @@ CHILLER_EIR_FPLR = { # Table 8.4.6.5.-B, Water-cooled rows
 CHILLER_EIR_FT_EC_F_ERRATUM = {
   'Scroll' => [1.00121431, -0.01026981, 0.00016703, -0.00128136, 0.00014613, -0.00021959],
   'Reciprocating' => [0.46140041, -0.00882156, 0.00008223, 0.00926607, 0.00005722, -0.00011594]
+}.freeze
+# Screw/Centrifugal EIR_FT rows are NOT erratum-affected — printed as-is
+# (both ~1.0 at rating: 0.996/0.995), corroborated by the legacy vendored curves.
+CHILLER_EIR_FT_EC_F_PRINTED = {
+  'Rotary Screw' => [0.66625406, 0.00068584, 0.00028496, -0.00341677, 0.00025484, -0.00048195],
+  'Centrifugal' => [0.51777196, -0.00400363, 0.00002026, 0.00698793, 0.0000829, -0.00015467]
 }.freeze
 CHILLER_RATING_F = [44.0, 85.0].freeze # AHRI 550/590: 44F LChWT / 85F entering condenser water
 
@@ -198,9 +215,16 @@ self_check!('8.4.6.4 EIR_FT', biquad(DX_EIR_FT_F, *RATING_F))
 self_check!('8.4.6.4 EIR_FPLR', poly(DX_EIR_FPLR, 1.0))
 BOILER_FHEATPLC.merge(FURNACE_FHEATPLC).each { |t, c| self_check!("FHeatPLC #{t}", poly(c, 1.0)) }
 self_check!('8.4.6.9 SWH FHeatPLC', poly(SWH_FHEATPLC, 1.0))
-CHILLER_CAP_FT_EC_F.each { |t, c| self_check!("8.4.6.5 CAP_FT #{t}", biquad(c, *CHILLER_RATING_F)) }
-CHILLER_EIR_FPLR.each { |t, c| self_check!("8.4.6.5 EIR_FPLR #{t}", poly(c, 1.0)) }
+# Screw CAP_FT/EIR_FPLR and Centrifugal CAP_FT don't normalize to exactly 1.0
+# in print (legacy-corroborated, see D-13) — checked against their documented
+# rating values instead.
+CHILLER_FPLR_RATING_EXPECTED = { 'Rotary Screw' => 1.0264 }.freeze
+CHILLER_CAP_FT_EC_F.each do |t, c|
+  self_check!("8.4.6.5 CAP_FT #{t}", biquad(c, *CHILLER_RATING_F) / CHILLER_CAP_FT_RATING_EXPECTED.fetch(t, 1.0))
+end
+CHILLER_EIR_FPLR.each { |t, c| self_check!("8.4.6.5 EIR_FPLR #{t}", poly(c, 1.0) / CHILLER_FPLR_RATING_EXPECTED.fetch(t, 1.0)) }
 CHILLER_EIR_FT_EC_F_ERRATUM.each { |t, c| self_check!("8.4.6.5 EIR_FT (erratum) #{t}", biquad(c, *CHILLER_RATING_F)) }
+CHILLER_EIR_FT_EC_F_PRINTED.each { |t, c| self_check!("8.4.6.5 EIR_FT (printed) #{t}", biquad(c, *CHILLER_RATING_F)) }
 self_check!('8.4.6.6 Tower FWB', tower_fwb(*TOWER_RATING_F))
 self_check!('8.4.6.7 CAP_FTEAS', poly(ASHP_CAP_FT_EAS_F, ASHP_RATING_F))
 self_check!('8.4.6.7 EIR_FT', poly(ASHP_EIR_FT_F, ASHP_RATING_F))
@@ -233,20 +257,14 @@ dx.setRatedAirFlowRate(1.0)
 # is built via the gem's actual reference-topology builder (chilled water loop +
 # condenser water loop + cooling tower), same as a real reference model gets,
 # rather than faked with a bare unattached component.
-chw_scroll = OpenStudioHVAC::Systems::PlantLoops.chilled_water(model, chiller_type: 'Scroll', reuse: false,
-                                                                       source: 'water_cooled')
-chw_recip = OpenStudioHVAC::Systems::PlantLoops.chilled_water(model, chiller_type: 'Reciprocating', reuse: false,
-                                                                      source: 'water_cooled')
-[chw_scroll, chw_recip].each do |loop_|
+chillers = CHILLER_CAP_FT_EC_F.keys.to_h do |type|
+  loop_ = OpenStudioHVAC::Systems::PlantLoops.chilled_water(model, chiller_type: type, reuse: false,
+                                                                   source: 'water_cooled')
   loop_.supplyComponents.select { |c| c.to_ChillerElectricEIR.is_initialized }
        .each { |c| c.to_ChillerElectricEIR.get.setReferenceCapacity(200_000) } # size Primary + Secondary alike
+  [type, loop_.supplyComponents.find { |c| c.to_ChillerElectricEIR.is_initialized && c.nameString.include?('Primary') }
+              .to_ChillerElectricEIR.get]
 end
-chiller_scroll = chw_scroll.supplyComponents.find do |c|
-  c.to_ChillerElectricEIR.is_initialized && c.nameString.include?('Primary')
-end.to_ChillerElectricEIR.get
-chiller_recip = chw_recip.supplyComponents.find do |c|
-  c.to_ChillerElectricEIR.is_initialized && c.nameString.include?('Primary')
-end.to_ChillerElectricEIR.get
 
 # 8.4.6.7: ASHP heating coil, hard-sized in the HSPF-rated (smallest) capacity bin.
 ashp_heat = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model)
@@ -394,18 +412,21 @@ compare_fheatplc(results, '8.4.6.9', 'SWH FHeatPLC (via part-load factor curve)'
 
 # 8.4.6.5 electric chiller — CAP_FT (biquadratic surface) and EIR_FPLR (direct
 # PLR multiplier), one comparison per compressor type actually attached.
-{ 'Scroll' => chiller_scroll, 'Reciprocating' => chiller_recip }.each do |type, chiller|
+chillers.each do |type, chiller|
   compare_biquad_transform(results, '8.4.6.5', "Chiller CAP_FT (#{type})",
                            curve_coeffs(chiller.coolingCapacityFunctionOfTemperature),
                            CHILLER_CAP_FT_EC_F[type], grid: CHILLER_SURFACE_GRID_F, axis_labels: %w[chws cws])
   compare_direct_poly(results, '8.4.6.5', "Chiller EIR_FPLR (#{type}, direct PLR multiplier)",
                       curve_coeffs(chiller.electricInputToCoolingOutputRatioFunctionOfPLR),
                       { type => CHILLER_EIR_FPLR[type] })
-  # Target = the erratum-corrected coefficients (the PRINTED Table -C rows are
-  # defective in both editions — see CHILLER_EIR_FT_EC_F_ERRATUM); label says so.
-  compare_biquad_transform(results, '8.4.6.5', "Chiller EIR_FT (#{type}, vs proposed erratum)",
+  # EIR_FT target: erratum-corrected coefficients for Scroll/Reciprocating (the
+  # PRINTED Table -C rows are defective in both editions), printed rows as-is
+  # for Screw/Centrifugal (not erratum-affected); the label says which.
+  eir_target = CHILLER_EIR_FT_EC_F_ERRATUM[type] || CHILLER_EIR_FT_EC_F_PRINTED[type]
+  eir_label = CHILLER_EIR_FT_EC_F_ERRATUM.key?(type) ? 'vs proposed erratum' : 'printed rows'
+  compare_biquad_transform(results, '8.4.6.5', "Chiller EIR_FT (#{type}, #{eir_label})",
                            curve_coeffs(chiller.electricInputToCoolingOutputRatioFunctionOfTemperature),
-                           CHILLER_EIR_FT_EC_F_ERRATUM[type], grid: CHILLER_SURFACE_GRID_F,
+                           eir_target, grid: CHILLER_SURFACE_GRID_F,
                            axis_labels: %w[chws cws])
 end
 
@@ -531,8 +552,9 @@ results.each do |r|
   puts format('  %-9s %-48s %-28s %s', r[:article], r[:label], r[:verdict], r[:detail])
 end
 puts
-puts '  NOT YET COMPARED (still honest gaps): Table 8.4.6.2 condensing-boiler 6-term row; ' \
-     '8.4.6.5 Screw/Centrifugal rows. 8.4.6.8 has an explicit NOT APPLICABLE line above, not silence. ' \
+puts '  NOT YET COMPARED (still honest gaps): Table 8.4.6.2 condensing-boiler 6-term row ' \
+     '(bivariate in PLR + water temp; no reference build selects the condensing curve). ' \
+     '8.4.6.8 has an explicit NOT APPLICABLE line above, not silence. ' \
      '8.4.6.6 is a numeric NTU cross-check (no curve field exists), gated on the CTI-anchored slice.'
 puts
 if failures.zero?

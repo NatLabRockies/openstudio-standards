@@ -67,7 +67,14 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   lint; behaviour fingerprinted bit-identical) +
   Table 8.4.4.17 fan power curves applied POST-SIZING (rows by rated kW;
   c1–c3 = columns A/B/C, min-flow-fraction = D; the VSD row exists but the
-  selection sentences never pick it).
+  selection sentences never pick it) +
+  Table 8.4.4.14 hydronic pump rules (D-11): every PumpVariableSpeed gets
+  the riding-curve row (sentence (5)) + below-D min-flow clamp, and — when
+  the SIZED proposed is passed via `apply_efficiencies(..., proposed:)` —
+  reference pump rated power is set from the proposed loop-type's combined
+  peak W/(L/s) intensity × reference flow ((1)-(3); (2) combines by summing
+  power AND flow; sentence (6) is an acknowledged gap). Undeterminable
+  proposed pumps or unsized flows warn loudly.
 - `necb/checker.rb` — `check_part5`: warnings-only QAQC (economizers 5.2.2.8,
   5.2.10.1 table trigger (needs `hdd:` + sized flows), 5.2.12 minimums via
   clone-and-diff against the efficiency pass).

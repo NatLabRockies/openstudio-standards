@@ -155,7 +155,13 @@ class TestNecbEnergyRecovery < Minitest::Test
     # honesty: known gaps are warnings, not buried info lines
     gaps = coverage.select { |e| e[:level] == :warning }
     assert gaps.any? { |e| e[:article] == '8.4.4.12.' }, 'economizer gap (8.4.4.12) must be a warning'
-    assert gaps.any? { |e| e[:article] == '8.4.4.16.' }, 'radiant gap (8.4.4.16) must be a warning'
+    # 8.4.4.16 is re-manifested modeller-scope (D-11): (2) is identical by
+    # construction, (1) binds only when the modeller approximates radiant
+    # convectively — an info scope note, NOT a warning.
+    stc = coverage.find { |e| e[:article] == '8.4.4.16.' }
+    assert_equal :info, stc[:level], '8.4.4.16 is a modeller scope note, not a warning'
+    assert_equal 'modeller', stc[:inputs][:gap_owner]
+    assert_includes stc[:action], 'modeller scope'
     # implemented articles report how many decisions cited them this run
     selection = coverage.find { |e| e[:article] == '8.4.4.7.' }
     assert_operator selection[:inputs][:decisions_citing], :>, 0

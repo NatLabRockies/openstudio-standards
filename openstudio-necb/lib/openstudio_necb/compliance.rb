@@ -164,7 +164,9 @@ module OpenStudioNECB
       if simulate != :none
         audit.with_building('reference building') do
           Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
-          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit)
+          # proposed: enables the 8.4.4.14.(1)-(3) pump power transfer (the
+          # proposed was sized in step 1, so its pump flows/powers are readable)
+          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit, proposed: proposed)
           # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
           # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
           OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: hdd, audit: audit)
@@ -519,7 +521,7 @@ module OpenStudioNECB
               # size on the new factors FIRST so efficiencies re-bin on the new
               # capacities, then run the energy simulation
               Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
-              OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit)
+              OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit, proposed: proposed)
             end
             run_annual(model, dir, run_period, report[label])
           end
@@ -597,7 +599,7 @@ module OpenStudioNECB
     # entries flagged gap_owner: "modeller", whose remaining gaps are wholly the
     # modeller's responsibility: those emit as info scope notes instead, so the
     # AHJ report is not permanently stamped with warnings no model change can
-    # clear (project decision D-09, docs/necb_decisions.md). Emitted at the end
+    # clear (project decision D-09, openstudio-necb/docs/necb_decisions.md). Emitted at the end
     # of the happy path only — a crash flush must not assert coverage.
     def emit_article_coverage(vintage, audit)
       path = File.expand_path("data/necb/necb_rules_#{vintage}.json", __dir__)

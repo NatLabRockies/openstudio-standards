@@ -33,10 +33,12 @@ class TestNecbEfficiency < Minitest::Test
     assert_in_delta 0.25, chiller.minimumPartLoadRatio, 1e-6
     assert_match(/CAPFT/, chiller.coolingCapacityFunctionOfTemperature.nameString)
 
-    # every decision carries a table citation
+    # every decision carries a code citation: Table 5.2.12 minimums, or the
+    # 8.4.4.14/8.4.4.17 pump/fan curve articles the pass also applies
     decisions = audit.entries.select { |e| e[:step] == :efficiency && e[:level] == :decision }
     refute_empty decisions
-    assert decisions.all? { |e| e[:article].to_s.include?('5.2.12') }
+    assert decisions.all? { |e| e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[47]/) },
+           "uncited decision: #{decisions.find { |e| !e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[47]/) }&.dig(:action)}"
   end
 
   def test_dx_and_gas_coil_and_ashp

@@ -15,12 +15,11 @@
       "8.4.4.18"
     ],
     "note": "Rule values are transcriptions of the code text. Runtime never contacts the MCP server; regenerate/verify this file against the code text when editions change.",
-    "non_rule_keys_note": "furnace_staging, dx_staging, and hydronic_pumps are future-implementation data backing the declared-partial 8.4.4.9./8.4.4.10./8.4.4.14. articles (see article_coverage gaps for each) — vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
+    "non_rule_keys_note": "furnace_staging and dx_staging are future-implementation data backing the declared-partial 8.4.4.9./8.4.4.10. articles (see article_coverage gaps for each) — vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
   },
   "non_rule_keys": [
     "furnace_staging",
-    "dx_staging",
-    "hydronic_pumps"
+    "dx_staging"
   ],
   "selection": {
     "table": "8.4.4.7.-A",
@@ -454,8 +453,27 @@
     "aux_energy_type_threshold_fraction": 0.33
   },
   "hydronic_pumps": {
-    "article": "8.4.4.14.(1)-(2)",
-    "text": "head and efficiency identical to the proposed pump; multiple pumps -> one pump with the combined peak shaft power"
+    "article": "8.4.4.14.(1)-(5)",
+    "table_article": "Table 8.4.4.14.",
+    "transfer": "sentences (1)-(3) via one mechanism: combined peak W/(L/s) by plant-loop type from the sized proposed model ((2) combined by summing power AND flow); reference pump rated power = intensity x its own sized flow",
+    "sentence_5": "variable-flow pumps are modeled as a pump riding its curve -> riding-curve coefficients on every reference PumpVariableSpeed",
+    "curves": {
+      "riding pump curve": {
+        "a": 0.227143,
+        "b": 1.178929,
+        "c": -0.41071,
+        "d": 0.47,
+        "e": 0.68
+      },
+      "variable speed drive": {
+        "a": 0.00153028,
+        "b": 0.00520806,
+        "c": 1.0086242,
+        "d": 0.2,
+        "e": 0.04
+      }
+    },
+    "floor_note": "below-D floor (P = E x Prated) approximated by the minimum-flow clamp at D x rated flow; polynomial at D equals E within table rounding (0.691 vs 0.68, 0.043 vs 0.04)"
   },
   "energy_recovery": {
     "article": "8.4.4.19.(1)-(2)",
@@ -645,9 +663,9 @@
       {
         "article": "8.4.4.14.",
         "title": "Hydronic Pumps",
-        "status": "partial",
-        "how": "Pumps ride the gem's plant-loop defaults (constant-speed riding the curve).",
-        "gaps": "Pump head/efficiency identical-to-proposed (1), combined-pump consolidation (2) and pump power-vs-flow curves (4) are not yet transferred from the proposed model."
+        "status": "implemented",
+        "how": "Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly.",
+        "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed."
       },
       {
         "article": "8.4.4.15.",
@@ -659,8 +677,10 @@
       {
         "article": "8.4.4.16.",
         "title": "Space Temperature Control (radiant workaround, throttling range)",
-        "status": "not_implemented",
-        "gaps": "Radiant-system +-2 C schedule adjustment (1) and throttling-range matching (2) are not applied (only relevant when the proposed design has radiant systems)."
+        "status": "partial",
+        "gaps": "(1)'s +-2 C radiant workaround applies ONLY when the tool cannot model radiant effects — EnergyPlus can (ZoneHVAC low-temperature radiant objects); it binds only if the modeller chooses to approximate a radiant proposed design convectively, and applying the adjustment is then the modeller's responsibility.",
+        "gap_owner": "modeller",
+        "how": "(2) throttling range is identical by construction: both buildings use ideal thermostat control on cloned schedules (8.4.3.2) — there is no throttling knob that could differ."
       },
       {
         "article": "8.4.4.17.",

@@ -249,7 +249,7 @@ end
 # --- NECB gem-family rule verification -------------------------------------
 # Checks that declared NECB rules actually DO something, rather than trusting
 # the `article_coverage` manifests' prose. See
-# docs/necb_rule_verification.md for what each check proves.
+# openstudio-necb/docs/necb_rule_verification.md for what each check proves.
 namespace :necb do
   desc 'Lint: every rule key in a NECB ruleset JSON is read by that gem lib/'
   task :orphan_keys do

@@ -10,9 +10,11 @@ module OpenStudioHVAC
     #
     # Covered components: hot-water boilers (incl. NECB primary/secondary staging),
     # electric chillers (incl. 2100 kW split + cooling-tower sizing rules), single-speed
-    # DX cooling and heating coils, and gas heating coils. Fans and pumps are NOT set
-    # here: reference-model fans get their explicit 8.4.4.18 static pressure/efficiency
-    # values in the reference transform, and motor-table application remains host-side.
+    # DX cooling and heating coils, gas heating coils, VAV fan power curves (8.4.4.17)
+    # and hydronic pump power (8.4.4.14: Table curves + proposed W/(L/s) transfer when
+    # a proposed model is supplied). Reference-model fans get their explicit 8.4.4.18
+    # static pressure/efficiency values in the reference transform; motor-table
+    # application remains host-side.
     #
     # Requires a SIZED model (capacities read from hard or autosized values).
     module Efficiency
@@ -46,7 +48,7 @@ module OpenStudioHVAC
       # @param model [OpenStudio::Model::Model] sized model
       # @param vintage [String] e.g. '2020'
       # @param audit [AuditLog, nil]
-      def apply(model, vintage: '2020', audit: nil)
+      def apply(model, vintage: '2020', audit: nil, proposed: nil)
         requested_vintage = vintage.to_s
         vintage, fallback_reason = effective_vintage(vintage)
         if fallback_reason
@@ -67,6 +69,7 @@ module OpenStudioHVAC
         model.getCoilHeatingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating(c, tables, audit) }
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
         model.getFanVariableVolumes.sort_by(&:nameString).each { |f| apply_fan_power_curve(f, vintage, audit) }
+        apply_pump_rules(model, requested_vintage, plant_rules['hydronic_pumps'], audit, proposed: proposed)
         audit&.info(:efficiency, 'NECB efficiency pass complete',
                     inputs: { vintage: vintage,
                               boilers: model.getBoilerHotWaters.size,
@@ -123,6 +126,117 @@ module OpenStudioHVAC
                                   minimum_flow_fraction: row[:d] },
                         value: "below-D floor (E=#{row[:e]}) approximated by the minimum-flow clamp",
                         article: "#{prefix}.17.(2)-(5); Table #{prefix}.17.")
+      end
+
+      # 8.4.4.14 (2025: 8.4.5.14) hydronic pump power. Sentence (5) directs
+      # variable-flow pumps to be modeled as a pump riding its curve, so
+      # reference PumpVariableSpeeds get the Table's riding-curve row (identical
+      # coefficients to the 8.4.4.17 airfoil fan row — same DOE-2 lineage; the
+      # VSD row is vendored for completeness). Coefficients come from the
+      # ruleset's hydronic_pumps.curves (Table 8.4.4.14., both vintages
+      # identical). E+ mapping: A/B/C -> part-load performance coefficients 1-3
+      # (4th = 0); the below-D floor (P = E x Prated) is approximated by the
+      # minimum-flow clamp at D x rated flow — the polynomial at D equals E
+      # within the table's rounding (riding curve 0.691 vs 0.68, VSD 0.043 vs
+      # 0.04).
+      def apply_pump_rules(model, vintage, rule, audit, proposed: nil)
+        return if rule.nil?
+
+        prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+        stats = proposed_pump_stats(proposed)
+        if proposed.nil?
+          audit&.info(:efficiency, "no proposed model supplied — #{prefix}.14.(1)-(3) pump power transfer " \
+                                   "skipped (Table #{prefix}.14. curves still applied)")
+        elsif stats.empty?
+          audit&.warn(:efficiency, 'proposed model has NO pumps with determinable power+flow — ' \
+                                   "#{prefix}.14.(1)-(3) power NOT transferred to any reference pump")
+        end
+        model.getPlantLoops.sort_by(&:nameString).each do |loop_|
+          loop_type = loop_.sizingPlant.loopType
+          loop_.supplyComponents.sort_by(&:nameString).each do |comp|
+            if comp.to_PumpVariableSpeed.is_initialized
+              pump = comp.to_PumpVariableSpeed.get
+              row = rule['curves']['riding pump curve']
+              pump.setCoefficient1ofthePartLoadPerformanceCurve(row['a'])
+              pump.setCoefficient2ofthePartLoadPerformanceCurve(row['b'])
+              pump.setCoefficient3ofthePartLoadPerformanceCurve(row['c'])
+              pump.setCoefficient4ofthePartLoadPerformanceCurve(0.0)
+              flow = optional_f(pump.ratedFlowRate) || optional_f(pump.autosizedRatedFlowRate)
+              pump.setMinimumFlowRate(row['d'] * flow) if flow
+              audit&.decision(:efficiency, 'variable-flow pump modeled riding its curve',
+                              target: pump.nameString,
+                              inputs: { coefficients: [row['a'], row['b'], row['c']],
+                                        minimum_flow_fraction: row['d'], loop: loop_.nameString },
+                              value: flow ? "below-D floor (E=#{row['e']}) via min flow #{(row['d'] * flow).round(5)} m3/s" \
+                                          : 'coefficients set; min-flow clamp deferred (flow not sized)',
+                              article: "#{prefix}.14.(4)-(5); Table #{prefix}.14.")
+              transfer_pump_power(pump, flow, loop_type, stats, prefix, audit) if proposed && !stats.empty?
+            elsif comp.to_PumpConstantSpeed.is_initialized && proposed && !stats.empty?
+              pump = comp.to_PumpConstantSpeed.get
+              flow = optional_f(pump.ratedFlowRate) || optional_f(pump.autosizedRatedFlowRate)
+              transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
+            end
+          end
+        end
+      end
+
+      # Sentences (1)-(3) through one mechanism: the proposed loop-type's pumps'
+      # combined peak power intensity, W/(L/s) — sentence (3)'s own metric, which
+      # equals head/efficiency (sentence (1): P = V x head / eff) and absorbs the
+      # multi-pump combination of sentence (2) by summing power AND flow. The
+      # reference pump's rated power is hard-set to that intensity times its own
+      # sized flow (reference flows legitimately differ from proposed flows, so
+      # the INTENSITY, not the absolute wattage, is what transfers).
+      def transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
+        s = stats[loop_type]
+        if s.nil?
+          audit&.warn(:efficiency, "#{pump.nameString}: proposed has NO #{loop_type}-type loop pumps with known " \
+                                   "power+flow — #{prefix}.14.(1)-(3) power NOT transferred (gem default retained)")
+          return
+        end
+        if flow.nil?
+          audit&.warn(:efficiency, "#{pump.nameString}: reference pump flow not sized — #{prefix}.14.(1)-(3) " \
+                                   'transfer needs the sized flow; run sizing first')
+          return
+        end
+        w_per_l_s = s[:power_w] / s[:flow_l_s]
+        power_w = w_per_l_s * flow * 1000.0
+        pump.setRatedPowerConsumption(power_w)
+        audit&.decision(:efficiency, 'pump power transferred from the proposed building',
+                        target: pump.nameString,
+                        inputs: { proposed_pumps: s[:count], proposed_w_per_l_s: w_per_l_s.round(2),
+                                  reference_flow_l_s: (flow * 1000.0).round(2), loop_type: loop_type },
+                        value: "rated power #{power_w.round(0)} W (combined proposed intensity x reference flow)",
+                        article: "#{prefix}.14.(1)-(3)")
+      end
+
+      # Combined peak power and flow of the PROPOSED building's pumps, grouped
+      # by plant-loop type ('Heating'/'Cooling'/'Condenser') — the loop-type
+      # correspondence sidesteps the pump-to-pump bijection that cannot exist
+      # between different topologies. Pumps whose power or flow cannot be read
+      # (unsized, no sql) are excluded; empty groups are dropped so callers can
+      # warn loudly instead of transferring zeros.
+      def proposed_pump_stats(proposed)
+        return {} if proposed.nil?
+
+        stats = Hash.new { |h, k| h[k] = { power_w: 0.0, flow_l_s: 0.0, count: 0 } }
+        proposed.getPlantLoops.each do |loop_|
+          type = loop_.sizingPlant.loopType
+          loop_.supplyComponents.each do |comp|
+            pump = comp.to_PumpVariableSpeed.is_initialized ? comp.to_PumpVariableSpeed.get : nil
+            pump ||= comp.to_PumpConstantSpeed.is_initialized ? comp.to_PumpConstantSpeed.get : nil
+            next if pump.nil?
+
+            power = optional_f(pump.ratedPowerConsumption) || optional_f(pump.autosizedRatedPowerConsumption)
+            flow = optional_f(pump.ratedFlowRate) || optional_f(pump.autosizedRatedFlowRate)
+            next if power.nil? || flow.nil? || flow.zero?
+
+            stats[type][:power_w] += power
+            stats[type][:flow_l_s] += flow * 1000.0
+            stats[type][:count] += 1
+          end
+        end
+        stats.reject { |_, s| s[:flow_l_s].zero? }
       end
 
       # ---------------- table lookup (legacy model_find_object semantics) ----------------
@@ -569,9 +683,12 @@ module OpenStudioHVAC
       end
     end
 
-    # Facade: apply NECB minimum efficiencies to a sized model.
-    def self.apply_efficiencies(model, vintage: '2020', audit: nil)
-      Efficiency.apply(model, vintage: vintage, audit: audit)
+    # Facade: apply NECB minimum efficiencies to a sized model. Pass the sized
+    # PROPOSED model via proposed: to enable the 8.4.4.14.(1)-(3) pump power
+    # transfer (combined W/(L/s) by loop type); without it the Table 8.4.4.14
+    # curves still apply and the skip is noted in the audit.
+    def self.apply_efficiencies(model, vintage: '2020', audit: nil, proposed: nil)
+      Efficiency.apply(model, vintage: vintage, audit: audit, proposed: proposed)
     end
   end
 end

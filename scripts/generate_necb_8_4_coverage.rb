@@ -429,7 +429,7 @@ html = <<~HTML
     <li><b>Manifest status</b> — the gem's self-declared <code>article_coverage</code>. "Implemented" here means
         the gem <i>asserts</i> it applies the rule; two real defects have been found inside articles declared
         implemented. Independent behavioural verification is <code>rake necb:verify</code>
-        (see <code>docs/necb_rule_verification.md</code>).</li>
+        (see <code>openstudio-necb/docs/necb_rule_verification.md</code>).</li>
     <li><b>"Observed in run"</b> — the article was cited at runtime in a named real pipeline run: the citing code
         demonstrably executed in at least one scenario. Still not proof of correct values.</li>
   </ul>

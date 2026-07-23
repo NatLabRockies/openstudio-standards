@@ -4,7 +4,7 @@ Adjudicated interpretations and product decisions for the `openstudio-*` NECB
 gem family. Machine-checkable coverage lives elsewhere — article dispositions in
 `scripts/necb_8_4_disposition.json`, per-gem `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
-`docs/necb_rule_verification.md`. **This file records the judgement calls**: the
+`openstudio-necb/docs/necb_rule_verification.md`. **This file records the judgement calls**: the
 code-interpretation and design decisions a reviewer cannot re-derive from the
 code alone, who made them, and why. Newest last. Add an entry whenever an
 interpretation of code text is adopted, a deviation is accepted, or a
@@ -155,7 +155,77 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
   `test_compliance.rb` (none-mode assertions) and `test_report_units.rb`
   (`test_coverage_status_modeller_scope_note`).
 
+## D-10 — Remaining adjudications delegated to Claude, with mandatory logging
+
+- **Decision:** phylroy delegated the remaining queue decisions: "make the rest
+  of the decisions on your own.. whatever you recommend.. But always report/log
+  your decisions so I can review and eventually make course corrections later
+  after you have implemented everything." Every subsequent judgement call is
+  made per the best evidence-backed recommendation and logged here as a D-XX
+  entry, self-contained enough to reverse on review.
+- **Who/when:** phylroy, 2026-07-23.
+
+## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
+
+- **Decision:** implement, with these interpretive choices:
+  - Sentences (1)-(3) through **one mechanism**: the proposed loop-type's
+    pumps' combined peak power intensity in W/(L/s) — sentence (3)'s own
+    metric, which equals head/efficiency (P = V·head/eff, sentence (1)) and
+    absorbs sentence (2)'s multi-pump combination by summing power AND flow.
+    Loop-TYPE correspondence (Heating/Cooling/Condenser) — a pump-to-pump
+    bijection cannot exist between different topologies.
+  - Sentence (2) transfers as **intensity × reference flow, not absolute
+    watts** — reference flows legitimately differ from proposed; the intensity
+    is what prevents a consolidation free ride. Documented in the manifest gaps.
+  - Sentences (4)-(5): every reference `PumpVariableSpeed` gets the Table
+    8.4.4.14. **riding-curve** row (sentence (5) directs variable-flow pumps to
+    ride the curve; the VSD row is vendored unused). Below-D floor via the
+    minimum-flow clamp at D — the same documented approximation as the
+    8.4.4.17 fan curves (polynomial at D = 0.691 vs E = 0.68).
+  - Sentence (6) (5.2.12.1 pump-energy-inclusive secondary adjustment) is an
+    acknowledged gap.
+  - The `hydronic_pumps` rules-JSON key graduated from orphan-lint-exempt
+    future data to a consumed rule block carrying the Table coefficients.
+- **Who/when:** phylroy chose "Implement" (2026-07-23); the interpretive
+  sub-choices are Claude's under D-10 delegation.
+- **Evidence:** `Efficiency.apply_pump_rules` / `transfer_pump_power` /
+  `proposed_pump_stats` in `openstudio-hvac/.../necb/efficiency.rb`; umbrella
+  passes `proposed:` post-sizing; `test_necb_pump_rules.rb` (6 runs, incl.
+  combined-intensity arithmetic, warn-never-silent, 2025 renumbering).
+
+## D-12 — 8.4.4.16 Space Temperature Control re-manifested modeller-scope
+
+- **Decision:** status `not_implemented` was factually wrong. Re-manifested
+  `partial` + `gap_owner: "modeller"`: sentence (2) (throttling identical to
+  proposed) is satisfied **by construction** — both buildings use ideal
+  thermostat control on cloned schedules, there is no throttling knob to
+  differ; sentence (1)'s ±2°C radiant workaround applies only "if the energy
+  model calculations do not allow for modeling of radiant effects", which
+  EnergyPlus does — it binds only when the modeller approximates a radiant
+  design convectively, and applying it is then the modeller's responsibility
+  (rendered as an ⓘ scope note per D-09, no longer a permanent warning).
+- **Who/when:** phylroy chose "Re-manifest" (2026-07-23).
+- **Evidence:** manifest entries in both vintage rules JSONs; pin updated in
+  `test_necb_energy_recovery.rb` (asserts info + gap_owner, not warning).
+
+## D-13 — Screw/Centrifugal chiller curves probed; imperfect printed normalization accepted
+
+- **Decision:** the curve probe now compares water-cooled Rotary Screw and
+  Centrifugal (all six curves EXACT, 0.00%, vs the printed Table 8.4.6.5.-A/-B/-C
+  rows — these EIR_FT rows are NOT erratum-affected). The printed Screw CAP_FT
+  (0.962), Centrifugal CAP_FT (0.950) and Screw EIR_FPLR (1.026) do NOT
+  normalize to 1.0 at the AHRI 550/590 rating point; accepted as genuine
+  properties of the printed fits, not transcription errors, because the
+  independent legacy NECB-2011-lineage vendored curves agree with the printed
+  rows digit-for-digit. Self-checks use these documented expected values.
+  The condensing-boiler 6-term row remains honestly uncompared (bivariate in
+  PLR + water temperature; no reference build ever selects the condensing curve).
+- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Evidence:** `scripts/necb_8_4_6_curve_probe.rb` (`CHILLER_CAP_FT_RATING_EXPECTED`,
+  `CHILLER_EIR_FT_EC_F_PRINTED`); `rake necb:curves` green with 24 comparisons.
+
 ---
 
-*Pending adjudication (not yet decisions): pump power 8.4.4.14 and per-object
-oversizing limits; the D-06 fan-availability open item.*
+*Pending under D-10 delegation: the D-06 fan-availability open item (reference
+fan schedules vs Always On — substantial, affects ERV continuous classification
+and reference energy; deferred to its own work session).*
