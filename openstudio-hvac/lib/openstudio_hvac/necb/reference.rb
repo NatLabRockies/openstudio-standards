@@ -473,8 +473,10 @@ module OpenStudioHVAC
           erv = add_energy_recovery(air_loop, oa_system.get, rule)
           audit.decision(:rules, 'energy recovery added to reference system (Table 5.2.10.1 threshold met)',
                          target: air_loop.nameString, inputs: inputs,
-                         value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% effectiveness (#{erv.nameString})",
-                         article: "#{rule['article']}; #{rule['trigger_article']}")
+                         value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% sensible+latent effectiveness " \
+                                "(= #{(rule['effectiveness'] * 100).round}% ENTHALPY effectiveness by identity, " \
+                                "the 5.2.10.1.(4) minimum) with 5.2.10.1.(6) overshoot control (#{erv.nameString})",
+                         article: "#{rule['article']}; #{rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)")
         else
           audit.decision(:rules, 'energy recovery not required (below the Table 5.2.10.1 threshold)',
                          target: air_loop.nameString, inputs: inputs, article: rule['trigger_article'])

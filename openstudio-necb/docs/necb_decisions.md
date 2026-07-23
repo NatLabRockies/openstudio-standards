@@ -245,3 +245,24 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** `Reference.apply_operating_schedules`; `TestNecbOperatingSchedules`
   (inheritance + non-continuous classification + no-air-system note); ERV suite
   and rake necb:verify green.
+
+## D-15 — ERV effectiveness and frost provenance verified against 5.2.10.1 text
+
+- **Decision:** Sentence (4) requires >= 50% ENTHALPY effectiveness (the code
+  equation is enthalpy-ratio based, both editions identical). The builder sets
+  sensible AND latent effectiveness to 0.50 at every rating point, which gives
+  enthalpy effectiveness exactly 0.50 by identity (both components of delta-h
+  transfer at 50%) — minimum-compliant for a reference build; VERIFIED on all
+  eight HX fields by test. Sentence (6) overshoot control is satisfied by
+  supply-air outlet temperature control + the OutdoorAirPretreat setpoint
+  manager. The frost values (-23.3 C ExhaustOnly, defrost fractions) are
+  EnergyPlus modeling assumptions, NOT code values — 5.2.10.1 is silent on
+  frost — now labelled as such in the rules JSONs (modeling_note) so they can
+  no longer be mistaken for code transcriptions. Sentences (5) (test-method
+  certification) and (3) (specialized-exhaust exemption) are modeller/equipment
+  scope.
+- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Evidence:** NECB 2020/2025 5.2.10.1 text via codes MCP; effectiveness_article/
+  overshoot_article/modeling_note in reference_rules_{2020,2025}.json; the
+  extended high-OA test (all 8 fields + (4)/(6) citations); audit decision now
+  cites 5.2.10.1.(4)/(6).

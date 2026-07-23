@@ -62,13 +62,30 @@ class TestNecbEnergyRecovery < Minitest::Test
     refute_empty hxs, '85% OA non-continuous: Table 5.2.10.1.-A says R at any flow'
     hx = hxs.first
     assert_equal 'Rotary', hx.heatExchangerType
-    assert_in_delta 0.5, hx.sensibleEffectivenessat100HeatingAirFlow, 1e-6
-    assert_in_delta(-23.3, hx.thresholdTemperature, 1e-6)
+    # 5.2.10.1.(4): >= 50% ENTHALPY effectiveness. Equal sensible AND latent
+    # effectiveness of 0.50 at every rating point gives enthalpy effectiveness
+    # exactly 0.50 by identity (both components of delta-h transfer at 50%) —
+    # verified on ALL EIGHT fields, not just one.
+    %w[sensibleEffectivenessat100HeatingAirFlow latentEffectivenessat100HeatingAirFlow
+       sensibleEffectivenessat100CoolingAirFlow latentEffectivenessat100CoolingAirFlow
+       sensibleEffectivenessat75HeatingAirFlow latentEffectivenessat75HeatingAirFlow
+       sensibleEffectivenessat75CoolingAirFlow latentEffectivenessat75CoolingAirFlow].each do |field|
+      next unless hx.respond_to?(field)
+
+      assert_in_delta 0.5, hx.send(field), 1e-6, "5.2.10.1.(4): #{field} at the 50% minimum"
+    end
+    # 5.2.10.1.(6): bypass/control against supply setpoint overshoot
+    assert hx.supplyAirOutletTemperatureControl, '5.2.10.1.(6): outlet temperature control enabled'
     refute_empty result.model.getSetpointManagerOutdoorAirPretreats, 'OA pretreat SPM controls the ERV'
+    # frost values are E+ MODELING ASSUMPTIONS, not code values (5.2.10.1 is
+    # silent on frost) — pinned so a change is a conscious decision
+    assert_in_delta(-23.3, hx.thresholdTemperature, 1e-6)
 
     decision = audit.entries.find { |e| e[:action].include?('energy recovery added') }
     assert_match(/8\.4\.4\.19/, decision[:article])
-    assert_match(/5\.2\.10\.1/, decision[:article])
+    assert_match(/5\.2\.10\.1\.\(4\)/, decision[:article])
+    assert_match(/5\.2\.10\.1\.\(6\)/, decision[:article])
+    assert_match(/ENTHALPY effectiveness by identity/, decision[:value].to_s)
     assert_equal 'non_continuous', decision[:inputs][:operation]
     assert_equal 'R (required at all flow rates)', decision[:inputs][:threshold]
     assert_equal 4380, decision[:inputs][:annual_hours], 'ruleset availability hours counted over the year'
