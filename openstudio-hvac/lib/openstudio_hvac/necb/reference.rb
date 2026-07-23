@@ -248,11 +248,55 @@ module OpenStudioHVAC
         apply_operating_schedules(result.air_loops, proposed_availability, audit)
       end
 
+      purge_orphaned_ems(reference, audit)
       apply_oversizing_caps(model, reference, ruleset, audit)
       Efficiency.apply(reference, vintage: vintage, audit: audit)
       emit_article_coverage(ruleset, audit)
 
       ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    # D-16: proposed-model EMS artifacts (optimum-start programs etc.) whose
+    # referenced objects were removed with the proposed HVAC would reach
+    # EnergyPlus as unresolvable {UUID} tokens and FATAL the reference sizing
+    # run (found by the archetype breadth sweep: legacy sys_4 archetypes).
+    # Programs with dangling handle references are removed along with their
+    # calling managers; actuators whose targets are gone likewise. Every
+    # removal is audited — the reference's controls come from the reference
+    # ruleset, never from proposed EMS overrides.
+    def self.purge_orphaned_ems(model, audit)
+      uuid_re = /\{[0-9A-Fa-f]{8}-[0-9A-Fa-f-]{27}\}/
+      dangling = lambda do |text|
+        text.to_s.scan(uuid_re).any? { |u| model.getModelObject(OpenStudio.toUUID(u)).empty? }
+      end
+      removed = []
+      model.getEnergyManagementSystemPrograms.each do |prog|
+        next unless prog.lines.any? { |ln| dangling.call(ln) }
+
+        removed << "program #{prog.nameString}"
+        model.getEnergyManagementSystemProgramCallingManagers.each do |mgr|
+          mgr.programs.each_with_index do |p, i|
+            mgr.eraseProgram(i) if p.handle == prog.handle
+          end
+          next unless mgr.programs.empty?
+
+          removed << "calling manager #{mgr.nameString}"
+          mgr.remove
+        end
+        prog.remove
+      end
+      model.getEnergyManagementSystemActuators.each do |act|
+        next unless act.actuatedComponent.empty?
+
+        removed << "actuator #{act.nameString}"
+        act.remove
+      end
+      return if removed.empty?
+
+      audit.warn(:build, 'proposed EMS artifacts with DANGLING references removed from the reference ' \
+                         "(#{removed.size}): #{removed.first(6).join('; ')}#{removed.size > 6 ? ' …' : ''} — " \
+                         'reference controls come from the reference ruleset, not proposed EMS overrides',
+                 article: '8.4.4.1.')
     end
 
     # D-14: reference air systems inherit the proposed's operating schedule

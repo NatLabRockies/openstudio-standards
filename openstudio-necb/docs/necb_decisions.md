@@ -266,3 +266,20 @@ and reference energy; deferred to its own work session).*
   overshoot_article/modeling_note in reference_rules_{2020,2025}.json; the
   extended high-OA test (all 8 fields + (4)/(6) citations); audit decision now
   cites 5.2.10.1.(4)/(6).
+
+## D-16 — Archetype breadth sweep; orphaned proposed EMS purged from the reference
+
+- **Decision:** `scripts/necb_archetype_sweep.rb` cross-validates the pipeline
+  on real whole buildings (legacy NECB2020 archetypes -> full pipeline, sizing
+  mode). First run: FullServiceRestaurant and HighriseApartment (90 zones,
+  11 ERVs) PASSED; Warehouse/PrimarySchool/RetailStandalone FATALED in the
+  reference sizing run — legacy sys_4 optimum-start EMS programs survive the
+  HVAC strip with dangling handle references that reach EnergyPlus as raw
+  {UUID} tokens. Fix: `Reference.purge_orphaned_ems` removes EMS programs with
+  dangling references (plus emptied calling managers and orphaned actuators)
+  with a loud audit warning — the reference's controls come from the reference
+  ruleset, never proposed EMS overrides. All five archetypes now PASS
+  (six real buildings including SmallOffice).
+- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
+  rake necb:verify green post-fix.
