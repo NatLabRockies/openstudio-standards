@@ -17,46 +17,6 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'json'
 require 'fileutils'
 
-# Test category support for selective test execution
-# Usage: TEST_CATEGORY=pure_unit ruby test/necb/unit_tests/tests/test_*.rb
-module TestCategories
-  # Pure unit tests - no OpenStudio simulations, fast execution
-  def self.pure_unit?
-    ENV['TEST_CATEGORY'] == 'pure_unit' || ENV['TEST_CATEGORY'].nil?
-  end
-
-  # Component unit tests - may use fixtures, but no new sizing runs
-  def self.component_unit?
-    ENV['TEST_CATEGORY'] == 'component_unit' || ENV['TEST_CATEGORY'].nil?
-  end
-
-  # Integration tests - may require sizing runs
-  def self.integration?
-    ENV['TEST_CATEGORY'] == 'integration' || ENV['TEST_CATEGORY'] == 'all'
-  end
-
-  # Regression tests - full building simulations
-  def self.regression?
-    ENV['TEST_CATEGORY'] == 'regression' || ENV['TEST_CATEGORY'] == 'all'
-  end
-
-  # Helper to skip test based on category
-  # Usage in test: skip "Integration test" unless TestCategories.integration?
-  def self.skip_unless(category)
-    case category
-    when :pure_unit
-      return if pure_unit?
-    when :component_unit
-      return if component_unit?
-    when :integration
-      return if integration?
-    when :regression
-      return if regression?
-    end
-    "Skipped - TEST_CATEGORY=#{ENV['TEST_CATEGORY'] || 'default'} does not include #{category}"
-  end
-end
-
 # Require local version instead of installed version for developers
 begin
   require_relative '../../lib/openstudio-standards.rb'
