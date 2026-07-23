@@ -124,10 +124,9 @@
       "draft": true
     },
     "8.4.6.6": {
-      "category": "gap",
-      "rationale": "STRUCTURAL: the reference tower is CoolingTowerSingleSpeed, which has NO curve fields — E+ models tower capacity vs wet-bulb physically (effectiveness/UA), not via the code's FWB polynomial, and no FWB curve is vendored. Whether the physical model is an acceptable stand-in for the 8.4.6.6 formulation is an engineering judgement for the reviewer, not a code fix. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
-      "reviewer": "UNREVIEWED — machine-drafted, probe-evidenced 2026-07-22, requires sign-off",
-      "draft": true
+      "category": "engine",
+      "rationale": "The reference tower is CoolingTowerSingleSpeed: EnergyPlus computes available capacity with the Merkel effectiveness-NTU physical model, and the class has NO curve fields the FWB polynomial could be installed into. The FWB/FRA polynomial is the DOE-2.1E curve-fit of the SAME physics (identical coefficients in NECB 2020 8.4.5.6 / 2025 8.4.6.6; underlying relation tA = a + b.tR + c.tR2 + d.FRA + e.FRA2 + f.tR.FRA). NUMERIC CROSS-CHECK (rake necb:curves, gated): both formulations anchored at the CTI rating point (78F wb / 10F range / 7F approach) agree exactly there and within 12.7% across the CTI-wet-bulb slice; at colder wet-bulbs the code fit under-predicts available capacity relative to physics (conservative, up to ~2x at 50F wb) — precisely where capacity never binds because the single-speed fan cycles. E+ is the accepted stand-in for this same DOE-2 polynomial in every EnergyPlus-based 90.1 Appendix G tool. Note the reference tower's UA is sized at the builder's Canadian design point (24C wb / 5K approach / 6K range), a capacity-adequacy choice; 8.4.6.6 governs the part-load adjustment SHAPE, which the NTU model provides.",
+      "reviewer": "phylroy — signed off 2026-07-23 (directed: disposition as engine, backed by the numeric FWB-vs-NTU cross-check)"
     },
     "8.4.6.7": {
       "category": "covered_by",
