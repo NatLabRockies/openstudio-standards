@@ -446,7 +446,13 @@ module OpenStudioNECB
       # of articles actually implemented in this audit (host_scope delegations
       # are ✓ when a sibling gem covers the article, ▲ when nobody did).
       def coverage_status(entry, covered)
-        status = entry[:inputs].is_a?(Hash) ? entry[:inputs][:status].to_s : ''
+        inputs = entry[:inputs].is_a?(Hash) ? entry[:inputs] : {}
+        status = inputs[:status].to_s
+        # gap_owner: "modeller" — the article's remaining gaps are wholly the
+        # modeller's responsibility (D-09): a scope note, not a warning.
+        return [:info, 'modeller scope'] if inputs[:gap_owner].to_s == 'modeller' &&
+                                            %w[partial not_implemented].include?(status)
+
         case status
         when 'implemented' then [:pass, 'implemented']
         when 'satisfied_by_clone' then [:pass, 'satisfied by clone']

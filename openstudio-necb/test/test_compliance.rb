@@ -85,6 +85,20 @@ class TestCompliance < Minitest::Test
     assert(result.audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') && w[:building] == 'reference building' },
            'untagged fixture: reference_lighting warns loudly (daylighting gaps), no LPD change')
 
+    # The umbrella's OWN manifest is emitted at runtime (D-09): real pipeline
+    # limitations warn; gap_owner "modeller" entries are info scope notes.
+    umbrella_coverage = result.audit.entries.select { |e| e[:step] == :coverage }
+    calc = umbrella_coverage.find { |e| e[:article] == '8.4.2.2.' }
+    refute_nil calc, 'umbrella 8.4.2.2 Calculation Methods coverage emitted'
+    assert_equal :warning, calc[:level], '8.4.2.2 has a real pipeline limitation (elevators) — warns'
+    climate = umbrella_coverage.find { |e| e[:article] == '8.4.2.3.' }
+    refute_nil climate, 'umbrella 8.4.2.3 Climatic Data coverage emitted'
+    assert_equal :info, climate[:level], 'modeller-scope gap is a scope note, NOT a warning'
+    assert_equal 'modeller', climate[:inputs][:gap_owner]
+    assert_includes climate[:action], 'modeller scope'
+    determination = umbrella_coverage.find { |e| e[:article] == '8.4.1.2.' }
+    assert_equal :info, determination&.dig(:level), 'umbrella 8.4.1.2 implemented — info'
+
     report = JSON.parse(File.read(File.join(result.run_dir, 'report.json')))
     assert_nil report['compliant']
     assert File.exist?(File.join(result.run_dir, 'audit.json'))

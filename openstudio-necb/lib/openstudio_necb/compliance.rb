@@ -220,6 +220,7 @@ module OpenStudioNECB
                                                     run_period, vintage, audit)
       end
 
+      emit_article_coverage(vintage, audit)
       report['compliant'] = compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
       write_outputs(run_dir, report, audit)
@@ -329,6 +330,7 @@ module OpenStudioNECB
         end
       end
 
+      emit_article_coverage(vintage, audit)
       report['compliant'] = compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
       write_outputs(run_dir, report, audit)
@@ -587,6 +589,44 @@ module OpenStudioNECB
                      inputs: { proposed_total: report['proposed'].dig('cost', 'total'),
                                reference_total: report['reference'].dig('cost', 'total') },
                      value: "incremental (proposed - reference) $#{delta.round(2)}")
+    end
+
+    # Completeness accounting for the umbrella's OWN manifest (same contract as
+    # the five domain gems' emit_article_coverage): every declared article lands
+    # in the audit with its status. partial/not_implemented warn — EXCEPT
+    # entries flagged gap_owner: "modeller", whose remaining gaps are wholly the
+    # modeller's responsibility: those emit as info scope notes instead, so the
+    # AHJ report is not permanently stamped with warnings no model change can
+    # clear (project decision D-09, docs/necb_decisions.md). Emitted at the end
+    # of the happy path only — a crash flush must not assert coverage.
+    def emit_article_coverage(vintage, audit)
+      path = File.expand_path("data/necb/necb_rules_#{vintage}.json", __dir__)
+      return unless File.exist?(path)
+
+      coverage = JSON.parse(File.read(path))['article_coverage']
+      return if coverage.nil?
+
+      cited = Hash.new(0)
+      audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
+      coverage['articles'].each do |art|
+        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\.\z/, '').sub(/\(\d+\).*/, '')) }.values.sum
+        inputs = { status: art['status'], decisions_citing: applied }
+        inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
+        if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
+          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}#{art['how'] ? ": #{art['how']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        elsif art['gap_owner'] == 'modeller'
+          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}, modeller scope" \
+                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
+                                "#{art['gaps'] ? ". Modeller's responsibility: #{art['gaps']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        else
+          audit.warn(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}" \
+                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
+                                "#{art['gaps'] ? ". Gaps: #{art['gaps']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        end
+      end
     end
 
     def write_outputs(run_dir, report, audit)

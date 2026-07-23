@@ -133,8 +133,29 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 - **Evidence:** `scripts/necb_8_4_disposition.json` (no `draft` entries
   remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
 
+## D-09 — Umbrella manifest emits at runtime; warnings split from modeller scope notes
+
+- **Decision:** the umbrella (`openstudio-necb`) now emits its own
+  `article_coverage` manifest into the audit at the end of every successful
+  pipeline run, same contract as the five domain gems — with one new uniform
+  semantic across ALL six emitters: a `partial`/`not_implemented` entry flagged
+  `"gap_owner": "modeller"` emits as an **info scope note** ("modeller scope")
+  instead of a warning, and the AHJ report renders it with the ⓘ glyph, off the
+  checklist.
+- **Who/when:** phylroy, 2026-07-23 (chose the split over uniform-warn and
+  declaration-only).
+- **Why:** a warning that no model change can ever clear (e.g. "choice among
+  urban climatic datasets is the modeller's") is a check-engine-light-always-on:
+  it trains readers to ignore ▲. Real pipeline limitations still warn — the
+  umbrella's 8.4.2.2 (elevators/escalators never added to end-use accounting)
+  warns on every run; 8.4.2.3 Climatic Data is flagged modeller-scope. The flag
+  is inert on implemented-family statuses and only `"modeller"` softens.
+- **Evidence:** `Compliance.emit_article_coverage`, the `gap_owner` branches in
+  all six emitters, `coverage_status` in `report/sections.rb`; tests in
+  `test_compliance.rb` (none-mode assertions) and `test_report_units.rb`
+  (`test_coverage_status_modeller_scope_note`).
+
 ---
 
-*Pending adjudication (not yet decisions): AHJ-report warning behaviour for
-partial/not_implemented manifest statuses; pump power 8.4.4.14 and per-object
+*Pending adjudication (not yet decisions): pump power 8.4.4.14 and per-object
 oversizing limits; the D-06 fan-availability open item.*

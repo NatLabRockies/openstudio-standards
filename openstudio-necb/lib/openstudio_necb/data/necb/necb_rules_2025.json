@@ -37,6 +37,7 @@
         "article": "8.4.2.3.",
         "title": "Climatic Data",
         "status": "partial",
+        "gap_owner": "modeller",
         "how": "Weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution explicit arg -> Table C-1 -> .stat fallback (openstudio-envelope Climate).",
         "gaps": "(2) choice among multiple urban climatic data sets is the modeller's; the pipeline attaches exactly the file it is given."
       },

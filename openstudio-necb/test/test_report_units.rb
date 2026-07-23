@@ -125,6 +125,26 @@ class TestReportUnits < Minitest::Test
     assert_includes html, 'NOT covered in this run'
   end
 
+  # D-09: a partial/not_implemented coverage entry flagged gap_owner "modeller"
+  # renders as an info scope note, never a warning — and never reaches the
+  # checklist. The flag must not soften anything else.
+  def test_coverage_status_modeller_scope_note
+    entry = { step: :coverage, level: :info, article: '8.4.2.3.',
+              action: 'Climatic Data — partial, modeller scope',
+              inputs: { status: 'partial', gap_owner: 'modeller', decisions_citing: 2 } }
+    glyph, text = Sections.coverage_status(entry, Set.new)
+    assert_equal :info, glyph
+    assert_equal 'modeller scope', text
+    assert_empty Checklist.rows([entry]), 'scope note stays off the checklist'
+
+    glyph, = Sections.coverage_status({ inputs: { status: 'partial' } }, Set.new)
+    assert_equal :warning, glyph, 'unflagged partial still warns'
+    glyph, = Sections.coverage_status({ inputs: { status: 'not_implemented', gap_owner: 'engine' } }, Set.new)
+    assert_equal :fail, glyph, 'only gap_owner "modeller" softens'
+    glyph, = Sections.coverage_status({ inputs: { status: 'implemented', gap_owner: 'modeller' } }, Set.new)
+    assert_equal :pass, glyph, 'flag is inert on implemented statuses'
+  end
+
   def test_building_stamp_traces_issues_to_their_model
     audit = canned_audit
     ref_warn = audit.entries.find { |e| e[:step] == :efficiency }

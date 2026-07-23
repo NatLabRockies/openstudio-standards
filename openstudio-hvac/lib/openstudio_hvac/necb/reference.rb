@@ -262,9 +262,14 @@ module OpenStudioHVAC
       coverage['articles'].each do |art|
         applied = cited.select { |a, _| a.start_with?(art['article']) }.values.sum
         inputs = { status: art['status'], decisions_citing: applied }
-        case art['status']
-        when 'implemented', 'satisfied_by_clone', 'host_scope'
+        inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
+        if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
           audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}#{art['how'] ? ": #{art['how']}" : ''}",
+                     inputs: inputs, article: art['article'])
+        elsif art['gap_owner'] == 'modeller' # scope note, not a warning (D-09)
+          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}, modeller scope" \
+                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
+                                "#{art['gaps'] ? ". Modeller's responsibility: #{art['gaps']}" : ''}",
                      inputs: inputs, article: art['article'])
         else # partial / not_implemented
           audit.warn(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}" \

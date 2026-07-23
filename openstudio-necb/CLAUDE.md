@@ -72,9 +72,13 @@ checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
   openstudio-loads' record machinery with synthetic archetype records).
 - `data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
   `article_coverage` manifests (8.4.1.2 determination, 8.4.2.x methods,
-  8.4.4.x EUI). Declaration-only: the umbrella has NO runtime
-  emit_article_coverage yet, so its partial/not_implemented do NOT warn on
-  runs (unlike domain gems).
+  8.4.4.x EUI). Emitted at runtime by `Compliance.emit_article_coverage` at
+  the end of every successful run (happy path only — never on crash flush).
+  Split semantics (D-09, all six gems' emitters): partial/not_implemented
+  warn, EXCEPT entries flagged `"gap_owner": "modeller"` (gaps wholly the
+  modeller's responsibility) which emit as info scope notes — rendered ⓘ
+  "modeller scope" in the report, off the checklist. 8.4.2.2 warns (real
+  elevator/escalator limitation); 8.4.2.3 is modeller-scope.
 - `tiers.rb` + `data/eui_targets_2025.json` / `ghg_factors_2025.json` —
   Section 10 tiers (≤100/75/50/<40% → 1–4, identical 2020/2025), 8.4.4 BET
   arithmetic, Part 11 GHG levels A–F (provincial factors: ON elec 57.9 g/kWh,

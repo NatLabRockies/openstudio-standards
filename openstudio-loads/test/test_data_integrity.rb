@@ -99,7 +99,9 @@ class TestDataIntegrity < Minitest::Test
   def test_coverage_manifest_lint
     %w[2020 2025].each do |vintage|
       coverage = OpenStudioLoads::NECB.rules(vintage)['article_coverage']['articles']
-      assert_equal 5, coverage.size, "#{vintage}: subsection 8.4.3 accounted"
+      # 5 core 8.4.3 entries + 8.4.2.7. internal loads (ffb58bc38) + 8.4.3.6.
+      # outdoor air (f42f19533) — bump this pin when the manifest grows.
+      assert_equal 7, coverage.size, "#{vintage}: subsection 8.4.3 + shared entries accounted"
       article = coverage.find { |a| a['article'] == '8.4.3.2.' }
       assert_equal 'partial', article['status'], 'honest: lighting + SHW excluded'
       assert_match(/openstudio-lighting/, article['gaps'])
