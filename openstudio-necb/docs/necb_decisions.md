@@ -229,3 +229,19 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 *Pending under D-10 delegation: the D-06 fan-availability open item (reference
 fan schedules vs Always On — substantial, affects ERV continuous classification
 and reference energy; deferred to its own work session).*
+
+## D-14 — Reference air systems inherit the proposed operating schedule (resolves D-06)
+
+- **Decision:** `reference_hvac` captures each zone's proposed air-system
+  availability schedule before the strip and applies it to the reference loop
+  serving those zones, per 8.4.3.2.(1) (operating schedules identical in both
+  buildings). No proposed air system → builder default (Always On) retained
+  with an info note; conflicting schedules on one loop → most-zones schedule
+  wins with a loud warning. This feeds the 5.2.10.1 continuous/non-continuous
+  ERV classification: a proposed on a 12 h schedule now classifies
+  non-continuous (Table -A) instead of defaulting continuous. Proposed models
+  whose loops are Always On (the common default) are unchanged.
+- **Who/when:** Claude under D-10 delegation, 2026-07-23.
+- **Evidence:** `Reference.apply_operating_schedules`; `TestNecbOperatingSchedules`
+  (inheritance + non-continuous classification + no-air-system note); ERV suite
+  and rake necb:verify green.

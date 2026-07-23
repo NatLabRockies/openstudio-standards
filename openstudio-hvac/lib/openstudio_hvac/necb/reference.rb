@@ -219,6 +219,14 @@ module OpenStudioHVAC
 
       ruleset = rules(vintage)
       zones_by_name = reference.getThermalZones.to_h { |z| [z.nameString, z] }
+      # 8.4.3.2.(1): operating schedules identical in both buildings — capture
+      # each zone's PROPOSED air-system availability schedule now, while the
+      # clone still carries the proposed HVAC (D-14; feeds the reference fan
+      # operation AND the 5.2.10.1 continuous/non-continuous classification).
+      proposed_availability = {}
+      reference.getAirLoopHVACs.each do |loop_|
+        loop_.thermalZones.each { |z| proposed_availability[z.nameString] = loop_.availabilitySchedule }
+      end
       assignments.each do |assignment|
         if assignment.action == :copy_proposed
           audit.info(:build, 'proposed system retained in reference (residential rule)',
@@ -237,6 +245,7 @@ module OpenStudioHVAC
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
         apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
+        apply_operating_schedules(result.air_loops, proposed_availability, audit)
       end
 
       apply_oversizing_caps(model, reference, ruleset, audit)
@@ -244,6 +253,36 @@ module OpenStudioHVAC
       emit_article_coverage(ruleset, audit)
 
       ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    # D-14: reference air systems inherit the proposed's operating schedule
+    # (8.4.3.2.(1) — operating schedules identical in both buildings). One
+    # schedule among the loop's zones -> applied; none (proposed had no air
+    # system there, e.g. baseboards) -> builder default retained with an info
+    # note; several -> the schedule serving the most zones wins, with a loud
+    # warning. Schedules survive replace_system (removing a loop never deletes
+    # shared schedules).
+    def self.apply_operating_schedules(air_loops, proposed_availability, audit)
+      air_loops.each do |loop_|
+        schedules = loop_.thermalZones.filter_map { |z| proposed_availability[z.nameString] }
+        if schedules.empty?
+          audit.info(:build, 'no proposed air-system operating schedule to inherit — builder default retained',
+                     target: loop_.nameString, article: '8.4.3.2.(1)')
+          next
+        end
+        tally = schedules.group_by(&:nameString)
+        chosen = tally.max_by { |_, v| v.size }[1].first
+        loop_.setAvailabilitySchedule(chosen)
+        if tally.size > 1
+          audit.warn(:build, "zones carried #{tally.size} DIFFERENT proposed operating schedules — " \
+                             "'#{chosen.nameString}' (most zones) applied to the whole reference loop",
+                     target: loop_.nameString, article: '8.4.3.2.(1)')
+        else
+          audit.decision(:build, 'reference system operates on the proposed operating schedule',
+                         target: loop_.nameString, inputs: { schedule: chosen.nameString },
+                         value: chosen.nameString, article: '8.4.3.2.(1)')
+        end
+      end
     end
 
     # Completeness accounting: every article of the reference subsection is written to

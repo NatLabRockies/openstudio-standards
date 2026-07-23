@@ -109,3 +109,42 @@ class TestNecbPumpRules < Minitest::Test
            '2025 cites the renumbered article')
   end
 end
+
+# D-14 (8.4.3.2.(1)): reference air systems inherit the PROPOSED operating
+# schedule; zones with no proposed air system keep the builder default.
+class TestNecbOperatingSchedules < Minitest::Test
+  include FixtureHelper
+
+  def test_reference_inherits_proposed_availability_schedule
+    proposed = load_fixture
+    zones = proposed.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(proposed, 'PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard', zones)
+    sched = OpenStudio::Model::ScheduleRuleset.new(proposed)
+    sched.setName('Office Operation 6-18')
+    sched.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 6), 0.0)
+    sched.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 18), 1.0)
+    sched.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24), 0.0)
+    proposed.getAirLoopHVACs.each { |l| l.setAvailabilitySchedule(sched) }
+
+    result = OpenStudioHVAC::NECB.reference_hvac(
+      proposed, vintage: '2020',
+      building: { storeys: 1, zone_types: proposed.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] } })
+    ref_loops = result.model.getAirLoopHVACs
+    refute_empty ref_loops
+    ref_loops.each { |l| assert_equal 'Office Operation 6-18', l.availabilitySchedule.nameString }
+    assert(result.audit.entries.any? { |e| e[:article] == '8.4.3.2.(1)' && e[:level] == :decision })
+    # the 5.2.10.1 classification now sees the inherited schedule
+    hours = OpenStudioHVAC::NECB.annual_availability_hours(ref_loops.first)
+    assert_operator hours, :<, 8000, 'inherited 12h schedule classifies non-continuous'
+  end
+
+  def test_no_proposed_air_system_keeps_default_with_note
+    proposed = load_fixture
+    zones = proposed.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(proposed, 'Baseboard gas boiler', zones) # no air loops
+    result = OpenStudioHVAC::NECB.reference_hvac(
+      proposed, vintage: '2020',
+      building: { storeys: 1, zone_types: proposed.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] } })
+    assert(result.audit.entries.any? { |e| e[:article] == '8.4.3.2.(1)' && e[:action].include?('default retained') })
+  end
+end
