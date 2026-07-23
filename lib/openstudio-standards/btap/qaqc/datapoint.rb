@@ -194,7 +194,7 @@ module BTAP
           @standard.model_run_simulation_and_log_errors(model, @run_dir)
           raise("No SQL file found.") if model.sqlFile.empty?
           # Create qaqc file and save it.
-          @qaqc = BTAPDatapoint.build_qaqc(model, @standard, @options[:datapoint_id], @options[:analysis_id])
+          @qaqc = BTAP::Datapoint.build_qaqc(model, @standard, @options[:datapoint_id], @options[:analysis_id])
 
           # Load the SQL file into model.
           sql_path = OpenStudio::Path.new(File.join(@run_dir, 'run/eplusout.sql'))
@@ -240,7 +240,7 @@ module BTAP
           end
 
           @qaqc[:options] = @options # Command-line options
-          @btap_data = BTAPData.new(model: model,
+          @btap_data = BTAP::Data.new(model: model,
                                     runner: nil,
                                     cost_result: @cost_result,
                                     carbon_result: @carbon_result,
