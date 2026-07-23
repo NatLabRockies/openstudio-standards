@@ -28,8 +28,8 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   satisfied_by_clone / host_scope); partial + not_implemented warn on every
   run. `host_scope` = the article is real NECB but owned by the umbrella or a
   sibling gem — the `how` string names the delegate (e.g. "Delegated to
-  openstudio-shw"). `NECB_GEM_COVERAGE.md` at repo root is the rollup —
-  regenerate with `ruby scripts/generate_necb_gem_coverage.rb` (it also emits a
+  openstudio-shw"). `openstudio-necb/docs/NECB_GEM_COVERAGE.md` is the rollup —
+  regenerate with `rake necb:coverage_doc` (it also emits a
   Cross-gem delegations table reconciling each host_scope article against the
   sibling entry that covers it). The report reconciles the same way at render
   time: a host_scope article with no covering entry in the run becomes a ▲
@@ -93,7 +93,7 @@ apply_efficiencies / check_part5 / rules`.
 ## Traps
 
 - **8.4.6 part-load curves are PROBE-VERIFIED** (`rake necb:curves`,
-  `scripts/necb_8_4_6_curve_probe.rb`): as-applied model curves vs code
+  `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb`): as-applied model curves vs code
   coefficients under documented transforms (FHeatPLC = PLR/eff, °F→°C
   surfaces), compared FUNCTIONALLY over sampled envelopes — never
   coefficient-wise (vendored JSON rounding reads as fake deviation). Every
@@ -109,9 +109,9 @@ apply_efficiencies / check_part5 / rules`.
   (labelled "vs proposed erratum"); the vendored legacy curves match the
   corrected rows on all six coefficients to <4e-6 — do NOT "fix" them toward
   the printed values.
-- `furnace_staging`/`dx_staging`/`hydronic_pumps` in the rules JSONs are
+- `furnace_staging`/`dx_staging` in the rules JSONs are
   `non_rule_keys`-exempted FUTURE-implementation data backing declared-partial
-  articles — not dead weight, not yet consumed.
+  articles — not dead weight, not yet consumed (`hydronic_pumps` graduated to a consumed rule block in D-11).
 - Base efficiency setters already apply NECB values to CBECS-built DX/fan/pump
   equipment — there is NO "90.1 fallback gap" (a previously-suspected defect
   that turned out to be a false premise).

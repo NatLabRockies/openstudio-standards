@@ -2,7 +2,7 @@
 
 Adjudicated interpretations and product decisions for the `openstudio-*` NECB
 gem family. Machine-checkable coverage lives elsewhere — article dispositions in
-`scripts/necb_8_4_disposition.json`, per-gem `article_coverage` manifests, the
+`openstudio-necb/scripts/necb_8_4_disposition.json`, per-gem `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
 `openstudio-necb/docs/necb_rule_verification.md`. **This file records the judgement calls**: the
 code-interpretation and design decisions a reviewer cannot re-derive from the
@@ -48,7 +48,7 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
   blocker"), 2026-07-22. Errata filed with NRC Codes Canada 2026-07-22.
 - **Why:** corrections corroborated exactly (<4e-6, all six coefficients, both
   rows) by the independent legacy NECB-2011-lineage vendored curves.
-- **Evidence:** `scripts/necb_8_4_6_curve_probe.rb`
+- **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb`
   (`CHILLER_EIR_FT_EC_F_ERRATUM`); commit `00da55675`.
 
 ## D-04 — EUI path (2025 8.4.4): two-run design with check-then-normalize
@@ -110,13 +110,13 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
   physics (conservative, up to ~2× at 50°F wb) — where capacity never binds
   because the single-speed fan cycles. Applies to the **performance path only**
   (8.4.6.1 scopes curves to the reference building; the EUI path has none).
-- **Evidence:** `scripts/necb_8_4_6_curve_probe.rb` (tower section, in
-  `rake necb:verify`); `scripts/necb_8_4_disposition.json` 8.4.6.6.
+- **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` (tower section, in
+  `rake necb:verify`); `openstudio-necb/scripts/necb_8_4_disposition.json` 8.4.6.6.
 
 ## D-08 — Batch sign-off of the remaining 19 article dispositions
 
 - **Decision:** all 19 remaining draft dispositions in
-  `scripts/necb_8_4_disposition.json` signed off in four groups:
+  `openstudio-necb/scripts/necb_8_4_disposition.json` signed off in four groups:
   - **A. Probe-evidenced `covered_by` (7):** 8.4.6.1, 8.4.6.2, 8.4.6.3,
     8.4.6.4, 8.4.6.5, 8.4.6.7, 8.4.6.9 — each rationale carries its numeric
     result from `rake necb:curves`, which re-verifies on every run.
@@ -130,7 +130,7 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
 - **Why:** a disposition is a claim of *responsibility*, not correctness — the
   deliberate weaker claim. Group D remains publicly documented as uncovered;
   implementing any of those articles later is separate, evidence-backed work.
-- **Evidence:** `scripts/necb_8_4_disposition.json` (no `draft` entries
+- **Evidence:** `openstudio-necb/scripts/necb_8_4_disposition.json` (no `draft` entries
   remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
 
 ## D-09 — Umbrella manifest emits at runtime; warnings split from modeller scope notes
@@ -221,7 +221,7 @@ Format per entry: **what was decided / who / when / why / evidence & commit**.
   The condensing-boiler 6-term row remains honestly uncompared (bivariate in
   PLR + water temperature; no reference build ever selects the condensing curve).
 - **Who/when:** Claude under D-10 delegation, 2026-07-23.
-- **Evidence:** `scripts/necb_8_4_6_curve_probe.rb` (`CHILLER_CAP_FT_RATING_EXPECTED`,
+- **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` (`CHILLER_CAP_FT_RATING_EXPECTED`,
   `CHILLER_EIR_FT_EC_F_PRINTED`); `rake necb:curves` green with 24 comparisons.
 
 ---
@@ -269,7 +269,7 @@ and reference energy; deferred to its own work session).*
 
 ## D-16 — Archetype breadth sweep; orphaned proposed EMS purged from the reference
 
-- **Decision:** `scripts/necb_archetype_sweep.rb` cross-validates the pipeline
+- **Decision:** `openstudio-necb/scripts/necb_archetype_sweep.rb` cross-validates the pipeline
   on real whole buildings (legacy NECB2020 archetypes -> full pipeline, sizing
   mode). First run: FullServiceRestaurant and HighriseApartment (90 zones,
   11 ERVs) PASSED; Warehouse/PrimarySchool/RetailStandalone FATALED in the

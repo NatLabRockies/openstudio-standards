@@ -24,8 +24,8 @@ require 'uri'
 require 'date'
 require 'fileutils'
 
-ROOT = File.expand_path('..', __dir__)
-OUT = File.join(ROOT, 'data', 'necb', 'necb_8_4_articles_2025.json')
+ROOT = File.expand_path('../..', __dir__)
+OUT = File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
 
 ARTICLES = [
   *(1..5).map { |i| "8.4.1.#{i}" },

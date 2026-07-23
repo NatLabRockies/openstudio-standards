@@ -15,12 +15,12 @@
 #
 # Pure Ruby: no OpenStudio SDK, no gems. Safe to run anywhere.
 #
-#   ruby scripts/necb_orphan_keys.rb          # report + exit 1 on findings
-#   ruby scripts/necb_orphan_keys.rb --quiet  # exit code only
+#   ruby openstudio-necb/scripts/necb_orphan_keys.rb          # report + exit 1 on findings
+#   ruby openstudio-necb/scripts/necb_orphan_keys.rb --quiet  # exit code only
 
 require 'json'
 
-ROOT = File.expand_path('..', __dir__)
+ROOT = File.expand_path('../..', __dir__)
 META_KEYS = %w[provenance article_coverage non_rule_keys].freeze
 
 # Read the article_coverage manifest so the remedy can reflect what the gem

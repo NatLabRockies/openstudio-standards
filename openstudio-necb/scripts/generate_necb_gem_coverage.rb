@@ -12,7 +12,7 @@
 
 require 'json'
 
-ROOT = File.expand_path('..', __dir__)
+ROOT = File.expand_path('../..', __dir__)
 # openstudio-necb (the umbrella) declares the pipeline-level articles no domain
 # gem can: the 8.4.1.2 determination itself, calculation methods, the 2025 EUI
 # path. CAVEAT: unlike the domain gems, the umbrella has no runtime
@@ -166,5 +166,5 @@ out << ''
 out << "_#{total} coverage entries across #{GEMS.size} gems._"
 out << ''
 
-File.write(File.join(ROOT, 'NECB_GEM_COVERAGE.md'), out.join("\n"))
+File.write(File.expand_path('../docs/NECB_GEM_COVERAGE.md', __dir__), out.join("\n"))
 puts "wrote NECB_GEM_COVERAGE.md — #{total} merged rows (#{records.size} raw entries)"

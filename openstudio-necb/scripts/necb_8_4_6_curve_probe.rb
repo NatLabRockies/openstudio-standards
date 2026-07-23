@@ -30,8 +30,8 @@
 # silence is never coverage.
 
 require 'openstudio'
-require_relative '../openstudio-hvac/lib/openstudio_hvac'
-require_relative '../openstudio-shw/lib/openstudio_shw'
+require_relative '../../openstudio-hvac/lib/openstudio_hvac'
+require_relative '../../openstudio-shw/lib/openstudio_shw'
 
 TOL_SAMPLED = 0.03   # 3% max relative deviation on sampled PLR comparisons
 TOL_SURFACE = 0.005  # 0.5% on sampled temperature surfaces (coefficient-wise

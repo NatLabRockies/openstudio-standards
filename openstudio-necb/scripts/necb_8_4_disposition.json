@@ -1,6 +1,6 @@
 {
   "provenance": {
-    "purpose": "Curated disposition for NECB 2025 Section 8.4 articles that no gem manifest declares: who or what satisfies each one. Consumed by scripts/generate_necb_8_4_coverage.rb.",
+    "purpose": "Curated disposition for NECB 2025 Section 8.4 articles that no gem manifest declares: who or what satisfies each one. Consumed by openstudio-necb/scripts/generate_necb_8_4_coverage.rb.",
     "categories": {
       "engine": "satisfied by EnergyPlus itself (physics the simulation engine performs)",
       "modeller": "the modeller's or AHJ's responsibility — a scoping or input decision, not software",
@@ -72,7 +72,7 @@
         "openstudio-hvac",
         "openstudio-shw"
       ],
-      "rationale": "Part-load curves ARE applied by the efficiency passes (boiler/furnace/DX/SWH verified, chiller+others not yet compared) — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). rake necb:curves is the ongoing gate.",
+      "rationale": "Part-load curves ARE applied by the efficiency passes (boiler/furnace/DX/SWH verified, chiller+others not yet compared) — probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). rake necb:curves is the ongoing gate.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.2": {
@@ -80,7 +80,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: applied normalized-efficiency curve tracks the Table 8.4.6.2 non-condensing FHeatPLC within 1.88% over PLR 0.25-1.0 — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). The condensing 6-term row is not compared (no condensing boiler in the reference builds).",
+      "rationale": "VERIFIED EQUIVALENT: applied normalized-efficiency curve tracks the Table 8.4.6.2 non-condensing FHeatPLC within 1.88% over PLR 0.25-1.0 — probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients). The condensing 6-term row is not compared (no condensing boiler in the reference builds).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.3": {
@@ -88,7 +88,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: gas-coil PLF curve tracks the Table 8.4.6.3 atmospheric FHeatPLC within 0.77% — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "rationale": "VERIFIED EQUIVALENT: gas-coil PLF curve tracks the Table 8.4.6.3 atmospheric FHeatPLC within 0.77% — probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.4": {
@@ -96,7 +96,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT (fixed 2026-07-22): CAP_FT and EIR_FT are the code surfaces exactly (0.01%/0.00%, exact degF->degC transforms — EIR_FT was regenerated from the code after the probe caught the legacy 2011-derived surface deviating 1.95%); the EIR_FPLR/PLF cycling mapping was refit from the code cubic to its structural floor of ~2.0% (was 3.70%), output clamped to [0.7, 1.0]. NECB 2020 8.4.5.4 and 2025 8.4.6.4 coefficients verified identical. probed by scripts/necb_8_4_6_curve_probe.rb (rake necb:curves).",
+      "rationale": "VERIFIED EQUIVALENT (fixed 2026-07-22): CAP_FT and EIR_FT are the code surfaces exactly (0.01%/0.00%, exact degF->degC transforms — EIR_FT was regenerated from the code after the probe caught the legacy 2011-derived surface deviating 1.95%); the EIR_FPLR/PLF cycling mapping was refit from the code cubic to its structural floor of ~2.0% (was 3.70%), output clamped to [0.7, 1.0]. NECB 2020 8.4.5.4 and 2025 8.4.6.4 coefficients verified identical. probed by openstudio-necb/scripts/necb_8_4_6_curve_probe.rb (rake necb:curves).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.5": {
@@ -104,7 +104,7 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT (Scroll + Reciprocating, water-cooled): CAP_FT, EIR_FPLR and EIR_FT all match at 0.00%. EIR_FT is compared against ERRATUM-CORRECTED coefficients: the PRINTED Table 8.4.5.5-C (2020) / 8.4.6.5-C (2025) rows carry single misplaced-decimal defects (Scroll d, Reciprocating b; the printed Reciprocating row yields a physically impossible negative power ratio at the AHRI rating point) — a publication error identical in both editions, NOT an extraction defect; errata proposed to NRC Codes Canada 2026-07-22. The corrections are corroborated EXACTLY by the independent legacy NECB-2011-lineage vendored curves (all six coefficients, <4e-6 relative, both rows). Screw/Centrifugal probed 2026-07-23 (D-13): all six curves EXACT vs the printed rows (not erratum-affected; their imperfect rating-point normalization is legacy-corroborated). probed by scripts/necb_8_4_6_curve_probe.rb.",
+      "rationale": "VERIFIED EQUIVALENT (Scroll + Reciprocating, water-cooled): CAP_FT, EIR_FPLR and EIR_FT all match at 0.00%. EIR_FT is compared against ERRATUM-CORRECTED coefficients: the PRINTED Table 8.4.5.5-C (2020) / 8.4.6.5-C (2025) rows carry single misplaced-decimal defects (Scroll d, Reciprocating b; the printed Reciprocating row yields a physically impossible negative power ratio at the AHRI rating point) — a publication error identical in both editions, NOT an extraction defect; errata proposed to NRC Codes Canada 2026-07-22. The corrections are corroborated EXACTLY by the independent legacy NECB-2011-lineage vendored curves (all six coefficients, <4e-6 relative, both rows). Screw/Centrifugal probed 2026-07-23 (D-13): all six curves EXACT vs the printed rows (not erratum-affected; their imperfect rating-point normalization is legacy-corroborated). probed by openstudio-necb/scripts/necb_8_4_6_curve_probe.rb.",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.6": {
@@ -117,12 +117,12 @@
       "covered_by": [
         "openstudio-hvac"
       ],
-      "rationale": "VERIFIED EQUIVALENT: ASHP heating CAP_FTEAS and EIR_FT are the code cubics exactly (0.00%/0.01%, degF->degC univariate transform); EIR_FPLR via the PLF cycling transform within 1.83%. The -10degC cutoff is separately applied per 8.4.5.13. probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
+      "rationale": "VERIFIED EQUIVALENT: ASHP heating CAP_FTEAS and EIR_FT are the code cubics exactly (0.00%/0.01%, degF->degC univariate transform); EIR_FPLR via the PLF cycling transform within 1.83%. The -10degC cutoff is separately applied per 8.4.5.13. probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.8": {
       "category": "gap",
-      "rationale": "NOT APPLICABLE today: no absorption chiller exists in the reference catalog, no absorption curves are vendored, and apply_chiller's compressor-type detection never selects absorption — NOTE it would silently fall back to Scroll if an absorption chiller ever appeared (a latent silent-fallback to fix before absorption support is claimed). probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb).",
+      "rationale": "NOT APPLICABLE today: no absorption chiller exists in the reference catalog, no absorption curves are vendored, and apply_chiller's compressor-type detection never selects absorption — NOTE it would silently fall back to Scroll if an absorption chiller ever appeared (a latent silent-fallback to fix before absorption support is claimed). probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     },
     "8.4.6.9": {
@@ -130,7 +130,7 @@
       "covered_by": [
         "openstudio-shw"
       ],
-      "rationale": "VERIFIED EQUIVALENT: water-heater part-load factor curve tracks the 8.4.6.9.(2) FHeatPLC within 0.98% — probed 2026-07-22 (scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
+      "rationale": "VERIFIED EQUIVALENT: water-heater part-load factor curve tracks the 8.4.6.9.(2) FHeatPLC within 0.98% — probed 2026-07-22 (openstudio-necb/scripts/necb_8_4_6_curve_probe.rb, as-applied model curves vs NECB 2025 coefficients).",
       "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, openstudio-necb/docs/necb_decisions.md D-08)"
     }
   }
