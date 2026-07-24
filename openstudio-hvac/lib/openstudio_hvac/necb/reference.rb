@@ -402,6 +402,19 @@ module OpenStudioHVAC
                            'hydronic economizers are not modeled (gap)', article: "#{prefix}.12.")
         return
       end
+      # D-20: NO economizer on System 1 (100%-outdoor-air makeup air). An air
+      # economizer cannot increase OA above a system that is already all
+      # outdoor air, and its winter signal (outdoor enthalpy < return) LOCKS
+      # OUT the 5.2.10.1 energy-recovery wheel through the HX economizer
+      # lockout — disabling mandated heat recovery for the entire heating
+      # season (found by the MURB fixed-point audit: the reference MAU heated
+      # -20 C air unassisted all January; legacy correctly uses NoEconomizer).
+      if reference_system == 1
+        audit.info(:build, 'System 1 (100% OA makeup air): economizer not applicable — an all-outdoor-air ' \
+                           'system cannot economize, and the economizer signal would lock out the 5.2.10.1 ' \
+                           'energy-recovery wheel all winter', article: "#{prefix}.12.")
+        return
+      end
 
       Array(air_loops).each do |air_loop|
         oa_system = air_loop.airLoopHVACOutdoorAirSystem

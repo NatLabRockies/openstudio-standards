@@ -407,3 +407,50 @@ elsewhere. Next suspect (dwelling side, where the gain-summary excess sits):
 the MAU / PTAC / baseboard interaction on reference dwelling zones — PTAC fan
 and cycling behaviour, MAU operating schedule, and zone-equipment control
 order — via a zone-level differential audit of one representative suite.
+
+### D-20 CLOSED (2026-07-24): economizer on the 100%-OA MAU was locking out heat recovery all winter
+
+Root cause, convicted by direct model comparison ("compare the systems" —
+phylroy's suggestion): the 8.4.4.12 economizer pass put DifferentialEnthalpy
+on EVERY reference air system including the System 1 makeup-air unit (100%
+outdoor air, 80 of 90 zones). An air economizer cannot increase OA on an
+all-outdoor-air system, but its winter signal (outdoor enthalpy < return —
+true every heating hour) engages the HX economizer LOCKOUT and bypasses the
+5.2.10.1 energy-recovery wheel for the entire heating season. The legacy
+archetype correctly models the MAU with NoEconomizer. Confirming evidence:
+reference Heat Recovery end-use was 0.00 GJ vs proposed 1.37; the corridor
+loops were symmetric (both lineages lock out there, both DifferentialEnthalpy).
+
+FIX: apply_economizers exempts System 1 with an audited info note. VERIFIED
+on the MURB January week: reference heating 31.9 -> 12.9 GJ (proposed 13.3 —
+heating rows now MATCH); reference total 23528 -> 18358 kWh wk; fixed point
+converged to 102% of target. The compliance flip (was 78%, now marginal
+non-compliant at 102%) is the CORRECT outcome of a fixed-point test — an
+essentially-reference building should land AT the boundary, not enjoy a 22%
+cushion granted by disabled mandated heat recovery. Cumulative D-19+D-20
+effect on the MURB reference: 24131 -> 18358 kWh wk (-24%): the reference
+generator was PERMISSIVE by nearly a quarter on this building class before
+the fixed-point audit.
+
+Residual ledger for the MURB (~2%): infiltration normalization remainder
+(0.135 vs 0.142 ACH), DX COP bins (summer-side), pump/fan rule differences —
+all individually documented above.
+
+### D-19+D-20 fleet effect (first full annual sweep since both fixes)
+
+| Building | ref before | ref after | % of target before -> after |
+|---|---|---|---|
+| Warehouse | 15339 | 12186 | 83% -> 104% (marginal fail) |
+| FullServiceRestaurant | 5114 | 4122 | 56% -> 69% |
+| HighriseApartment | 24131 | 18358 | 78% -> 102% (marginal fail) |
+| PrimarySchool | 36275 | 26433 | 60% -> 83% |
+| RetailStandalone | 10864 | 7694 | 64% -> 90% |
+
+The reference generator was 20-29% permissive fleet-wide, dominated by the
+D-19 infiltration-convention asymmetry (every building) plus D-20's MAU
+heat-recovery lockout (System-1 buildings). Post-fix the archetypes cluster
+near 100% of target — the fixed-point expectation for code-minimum
+buildings. The two marginal fails (102%/104%) and the Restaurant's 69% are
+within the documented residual ledger (legacy over-equipped ERVs per
+upstream #2123, DX COP bins, infiltration normalization remainder). All
+gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
