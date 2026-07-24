@@ -1,4 +1,5 @@
-require_relative '../coverage_helper'
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
 
 # Test NECB plant loop creation and configuration
 # Tests hot water loops, chilled water loops, condenser loops with their components

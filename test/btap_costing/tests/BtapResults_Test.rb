@@ -1,10 +1,5 @@
-require_relative '../../../lib/openstudio-standards'
+require_relative '../../helpers/minitest_helper'
 require_relative '../../helpers/btap_results_helper'
-require 'minitest/autorun'
-require 'optparse'
-require 'fileutils'
-require 'minitest/unit'
-require 'optparse'
 
 class BTAP::Results_Test < Minitest::Test
   def test_results_btap()

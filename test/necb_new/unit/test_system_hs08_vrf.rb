@@ -1,4 +1,5 @@
-require_relative '../coverage_helper'
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
 
 # ECM HS08: Central Cooling ASHP + VRF
 # DOAS with ASHP + VRF terminal units

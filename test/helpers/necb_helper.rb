@@ -410,6 +410,68 @@ module NecbHelper
     BTAP::FileIO.save_osm(model, "#{output_dir}/post-sizing.osm") if save_model_versions
   end
 
+  # Expand a hash of arrays into a cartesian product of case hashes.
+  #
+  # @param headers [Hash] Hash of parameters to calculate the combinations of.
+  def self.test_case_matrix(headers)
+    keys = headers.keys
+    values = headers.values
+    values[0].product(*values[1..-1]).map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+  end
+
+  # Build test name tokens matching existing NECB system test naming.
+  #
+  # @param value [String]
+  def self.hvac_case_token(value)
+    map = {
+      'FuelOilNo2' => 'fuel_oil2',
+      'NaturalGas' => 'natural_gas',
+      'Hot Water' => 'hot_water',
+      'Rotary Screw' => 'rotary_screw',
+      'AF_or_BI_rdg_fancurve' => 'af_or_bi_rdg_fancurve'
+    }
+    return map[value] if map.key?(value)
+
+    value.to_s.downcase.gsub(' ', '_')
+  end
+
+  # Shared sizing + standards application used by NECB HVAC system tests.
+  #
+  # @param model      [OpenStudio::Model::Model]
+  # @param standard   [Standard]
+  # @param sizing_dir [String]
+  def run_necb_hvac_measure(model:, standard:, sizing_dir:)
+    building_type = 'FullServiceRestaurant'
+    climate_zone = 'NECB HDD Method'
+
+    FileUtils.mkdir_p(sizing_dir) unless Dir.exist?(sizing_dir)
+
+    if standard.model_run_sizing_run(model, "#{sizing_dir}/SizingRun1") == false
+      raise("could not find sizing run #{sizing_dir}/SizingRun1")
+    end
+
+    standard.model_apply_prototype_hvac_assumptions(model, building_type, climate_zone)
+    standard.model_apply_hvac_efficiency_standard(model, climate_zone)
+    return true
+  end
+
+  # Check simulation SQL for severe/fatal messages.
+  #
+  # @param model [OpenStudio::Model::Model]
+  def necb_hvac_simulation_clean?(model)
+    fatal = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='2' ").get
+    severe = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='1' ").get
+
+    if severe.size > 0 || fatal.size > 0
+      puts "Errors:"
+      puts severe
+      puts fatal
+      return false
+    end
+
+    return true
+  end
+
   # @note Helper method to return the part load curve data.
   # @param curve [OS::ChillerElectricEIR.<curve>] an openstudio curve.
   # @return the efficiency curve name [String], curve type [String] and the curve coefficients [Hash] (curve type dependent).
