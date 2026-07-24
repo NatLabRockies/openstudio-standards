@@ -141,7 +141,14 @@ module OpenstudioStandards
 
   # BTAP (Natural Resources Canada)
   require_relative 'openstudio-standards/btap/btap'
-  require_relative 'openstudio-standards/btap/common_paths'
+
+  # BTAP QAQC
+  require_relative "openstudio-standards/btap/qaqc/analysis.rb"
+  require_relative "openstudio-standards/btap/qaqc/data.rb"
+  require_relative "openstudio-standards/btap/qaqc/datapoint.rb"
+
+  # BTAP Costing
+  require_relative 'openstudio-standards/btap/costing/database'
   require_relative 'openstudio-standards/btap/costing/btap_costing'
   require_relative 'openstudio-standards/btap/carbon/btap_carbon'
   require_relative 'openstudio-standards/btap/costing/ventilation_costing'
@@ -216,9 +223,6 @@ module OpenstudioStandards
   # NECB QAQC
   require_relative "#{stds}/necb/NECB2011/qaqc/necb_qaqc.rb"
   require_relative "#{stds}/necb/NECB2015/qaqc/necb_2015_qaqc.rb"
-  require_relative "#{stds}/necb/common/btap_analysis.rb"
-  require_relative "#{stds}/necb/common/btap_data.rb"
-  require_relative "#{stds}/necb/common/btap_datapoint.rb"
 
   # ECM development
   require_relative "#{stds}/necb/ECMS/ecms.rb"

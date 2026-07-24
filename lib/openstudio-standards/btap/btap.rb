@@ -20,8 +20,11 @@
 
 require 'fileutils'
 require 'singleton'
-require 'find'
-require 'date'
+require 'json'
+require 'csv'
+require 'tbd'
+require_relative 'deprecated'
+require_relative 'paths'
 require_relative 'attributes'
 require_relative 'fileio'
 require_relative 'activity'
@@ -31,12 +34,11 @@ require_relative 'geometry'
 require_relative 'envelope'
 require_relative 'bridging'
 require_relative 'schedules'
-require_relative 'btap_result'
 require_relative 'linear_regression'
 
 class String
-  #This method converts to Boolean.
-  #@author phylroy.lopez@nrcan.gc.ca
+  # This method converts to Boolean.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_bool
     return true if self == true || self =~ (/^(true|t|yes|y|1)$/i)
     return false if self == false  || self =~ (/^(false|f|no|n|0)$/i)
@@ -46,8 +48,8 @@ end
 
 
 class Integer
-  #This method converts to Boolean.
-  #@author phylroy.lopez@nrcan.gc.ca
+  # This method converts to Boolean.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_bool
     return true if self == 1
     return false if self == 0
@@ -56,57 +58,53 @@ class Integer
 end
 
 class TrueClass
-  #This method converts to i.
-  #@author phylroy.lopez@nrcan.gc.ca
+  # This method converts to i.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_i; 1; end
-  #This method converts to Boolean.
-  #@author phylroy.lopez@nrcan.gc.ca
+
+  # This method converts to Boolean.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_bool; self; end
 end
 
 class FalseClass
-  #This method converts to i.
-  #@author phylroy.lopez@nrcan.gc.ca
+  # This method converts to i.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_i; 0; end
-  #This method converts to Boolean.
-  #@author phylroy.lopez@nrcan.gc.ca
+
+  # This method converts to Boolean.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_bool; self; end
 end
 
 class NilClass
-  #This method converts to Boolean.
-  #@author phylroy.lopez@nrcan.gc.ca
+  # This method converts to Boolean.
+  # @author phylroy.lopez@nrcan.gc.ca
   def to_bool; false; end
 end
 
 
 # A set of methods developed by NRCan to simplify building model creation and
-# analysis. These methods are meant to compliment the OpenStudio classes and methods
-# For full access to the OpenStudio API please refer to the OpenStudio Website.
-# http://openstudio.nrel.gov/latest-c-sdk-documentation/model
+# analysis. These methods are meant to compliment the OpenStudio classes and
+# methods. For full access to the OpenStudio SDK please refer to the OpenStudio
+# website: https://openstudio-sdk-documentation.s3.amazonaws.com/index.html
 module BTAP
-  #EnergyPlus version
-  ENERGY_PLUS_MAJOR_VERSION = 8
-  ENERGY_PLUS_MINOR_VERSION = 3
 
-  #Path constants
-  OS_RUBY_PATH = File.expand_path("..\\..\\..", __FILE__)
-  TESTING_FOLDER = "C:\\test"
-
-  #  A wrapper for outputing feedback to users and developers.
-  #  BTAP::runner_register("InitialCondition",   "Your Information Message Here", runner)
-  #  BTAP::runner_register("Info",    "Your Information Message Here", runner)
-  #  BTAP::runner_register("Warning", "Your Information Message Here", runner)
-  #  BTAP::runner_register("Error",   "Your Information Message Here", runner)
-  #  BTAP::runner_register("Debug",   "Your Information Message Here", runner)
+  #  A wrapper for outputing feedback to users and developers. Examples:
+  #  BTAP::runner_register("InitialCondition", "Your Information Message Here", runner)
+  #  BTAP::runner_register("Info",             "Your Information Message Here", runner)
+  #  BTAP::runner_register("Warning",          "Your Information Message Here", runner)
+  #  BTAP::runner_register("Error",            "Your Information Message Here", runner)
+  #  BTAP::runner_register("Debug",            "Your Information Message Here", runner)
   #  BTAP::runner_register("FinalCondition",   "Your Information Message Here", runner)
   #  @params type [String]
   #  @params runner [OpenStudio::Ruleset::OSRunner] # or a nil.
-  def self.runner_register(type,text,runner = nil)
+  def self.runner_register(type, text, runner = nil)
 
-    #dump to console.
+    # Dump to console.
     puts "#{type.upcase}: #{text}"
-    #dump to runner.
+
+    # Dump to runner.
     if runner.is_a?(OpenStudio::Ruleset::OSRunner)
       case type.downcase
       when "info"
@@ -129,120 +127,17 @@ module BTAP
     end
   end
 
-  def self.runner_register_value(name,value,runner = nil)
-    if runner.is_a?(OpenStudio::Ruleset::OSRunner)
-      runner.registerValue( name,value.to_s)
-      BTAP::runner_register("Info", "#{name} = #{value} has been registered in the runner", runner)
-    end
-  end
-
-  def self.gut_building(model)
-    #clean up any remaining items that we don't need for NECB.
-    puts "Removing casual loads."
-    BTAP::Resources::SpaceLoads::remove_all_casual_loads(model)
-    puts "Removing space loads."
-    BTAP::Resources::SpaceLoads::remove_all_SpaceLoads(model)
-    puts "Removing OA loads."
-    BTAP::Resources::SpaceLoads::remove_all_DesignSpecificationOutdoorAir(model)
-    puts "Removing Envelope"
-    BTAP::Resources::Envelope::remove_all_envelope_information(model)
-    puts "Removing Infiltration"
-    BTAP::Resources::SpaceLoads::remove_all_SpaceInfiltrationDesignFlowRate(model)
-    puts "Removing all Schedules"
-    BTAP::Resources::Schedules::remove_all_schedules( model )
-    puts "Removing HVAC"
-    BTAP::Resources::HVAC.clear_all_hvac_from_model( model )
-  end
-
-
-  class OpenStudioLibrary
-    include Singleton
-    attr_accessor :library
-    #This method initializes the library.
-    #@author phylroy.lopez@nrcan.gc.ca
-    def initialize()
-      #path to openstudio library
-      @lib_path = "C:\\Program Files (x86)\\OpenStudio 1.2.0\\share\\openstudio\\OSApp\\hvaclibrary\\hvac_library.osm"
-      @library = BTAP::FileIO::load_osm(@lib_path, "OpenStudio_Library")
-    end
-  end
-  module SimulationSettings
-    #This sets the simulation period for the model. All arguments are integers.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object {http://openstudio.nrel.gov/latest-c-sdk-documentation/model}
-    #@param start_month [Integer] a list of output variables that you wish to report from the simulation.
-    #@param start_day [Integer] a list of output variables that you wish to report from the simulation.
-    #@param end_month [Integer] a list of output variables that you wish to report from the simulation.
-    #@param end_day [Integer] a list of output variables that you wish to report from the simulation.
-    #@param repeat [Integer = 1] Number of times the simulation period is run. 1 is default.
-    #@return [OpenStudio::Model::Model] the OpenStudio model object (self reference).
-    def self.set_run_period(model,start_month,start_day,end_month,end_day, repeat = 1)
-      raise("Run Period is invalid") unless Date.valid_civil?(2001, start_month , start_day) and Date.valid_civil?(2001, end_month , end_day) and repeat > 0
-      run_period = model.getRunPeriod
-      run_period.setBeginMonth(start_month)
-      run_period.setBeginDayOfMonth(start_day)
-      run_period.setEndMonth(end_month)
-      run_period.setEndDayOfMonth(end_day)
-      run_period.setNumTimePeriodRepeats(repeat)
-      return model
-    end
-  end
   module Reports
-    #This method clears all the output variables to make simulations run faster or to
-    #start fresh.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object {http://openstudio.nrel.gov/latest-c-sdk-documentation/model}
-    #@return [OpenStudio::Model::Model] the OpenStudio model object (self reference).
-    def self.clear_output_variables(model)
-      #remove existing outputs
-      model.getOutputVariables.sort.each do |object|
-        object.remove
-      end
-      return model
-    end
 
-    #This turns all output on. Warning: Long runtimes will result.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object
-    #@param frequency [Fixnum]
-    #@return [OpenStudio::Model::Model] a copy of the OpenStudio model object (self reference).
-    def self.all_output_variables(model,frequency)
-      BTAP::Reports::set_output_variables(model, frequency, BTAP::Reports::get_possible_output_variables(model))
-      return model
-    end
-
-    #This method returns a vector of the results that are available in the current
-    #model.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object
-    #@return [Array<String>] a list of all the possible output variables.
-    def self.get_possible_output_variables( model )
-      #Run simulation
-      copy = BTAP::FileIO::deep_copy(model)
-      copy.building.get.setName("rdd_run")
-      BTAP::SimulationSettings::set_run_period(copy, 1, 1, 1, 1)
-      BTAP::SimManager::run_simulation(copy,"C:\\temp\\rdd_maker")
-      rdd_file_path = ""
-      Find.find("C:\\temp\\rdd_maker") do |path|
-        rdd_file_path = path if path =~ /.*\.rdd$/
-      end
-      contents = File.read(rdd_file_path)
-      output_variables = Array.new()
-      contents.each do |line|
-        match = line.match /^\s*Output:Variable,\*,(.*),(.*);(.*)/
-        if match
-          output_variables.push(match[1])
-        end
-      end
-      return output_variables
-    end
-
-    #This method sets up some predetermined output variables. May take a while to run with these settings.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object
-    #@param frequency [Fixnum]
-    #@param output_variable_array [Array<String>] a list of output variables that you wish to report from the simulation.
-    #@return [OpenStudio::Model::Model] the OpenStudio model object (self reference).
+    # This method sets up some predetermined output variables. May take a while
+    # to run with these settings.
+    # @author Phylroy A. Lopez
+    # @param model [OpenStudio::Model::Model]
+    # @param frequency [Fixnum]
+    # @param output_variable_array [Array<String>] A list of output variables
+    # that you wish to report from the simulation.
+    # @return [OpenStudio::Model::Model] The OpenStudio model object (self
+    # reference).
     def self.set_output_variables(model,frequency, output_variable_array)
       raise("Frequency is not valid. Must by \"Hourly\" or \"Timestep\" but got #{frequency}.") unless ["Hourly","Timestep"].include?(frequency)
       output_variable_array.each do |variable|
@@ -252,20 +147,19 @@ module BTAP
       end
       return model
     end
-
-
   end
-  # This contains methods for creation and querying object that deal with Envelope, SpaceLoads,Schedules, and HVAC.
 
+  # This contains methods for creation and querying object that deal with
+  # Envelope, SpaceLoads,Schedules, and HVAC.
   module Common
-    #This model checks to see if the obj_array passed is
-    #the object we require, or if a string is given to search for a object of that strings name.
-    #@author Phylroy A. Lopez
-    #@param model [OpenStudio::Model::Model] A model object
-    #@param obj_array <Object>
-    #@param object_type [Object]
-    def self.validate_array(model,obj_array,object_type)
 
+    # This model checks to see if the obj_array passed is the object we require,
+    # or if a string is given to search for a object of that strings name.
+    # @author Phylroy A. Lopez
+    # @param model [OpenStudio::Model::Model] A model object
+    # @param obj_array <Object>
+    # @param object_type [Object]
+    def self.validate_array(model,obj_array,object_type)
       command =
         %Q^#make copy of argument to avoid side effect.
         object_array = obj_array
@@ -307,20 +201,20 @@ module BTAP
       eval(command)
     end
 
-    #This method gets a date from a string.
-    #@author phylroy.lopez@nrcan.gc.ca
-    #@param datestring [String] a date string
+    # This method gets a date from a string.
+    # @author phylroy.lopez@nrcan.gc.ca
+    # @param datestring [String] a date string
     def self.get_date_from_string(datestring)
       month = datestring.split("-")[0].to_s
       day   = datestring.split("-")[1].to_i
-      month_list = ["Jan","Feb","Mar","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+      month_list = ["Jan", "Feb", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
       raise ("Month given #{month} is not in format required please enter month with following 3 letter format#{month_list}.") unless month_list.include?(month)
       OpenStudio::Date.new(OpenStudio::MonthOfYear.new(month),day)
     end
 
-    #This method gets a time from a string.
-    #@author phylroy.lopez@nrcan.gc.ca
-    #@param timestring [String] a time string
+    # This method gets a time from a string.
+    # @author phylroy.lopez@nrcan.gc.ca
+    # @param timestring [String] a time string
     def self.get_time_from_string(timestring)
       #ensure that it is in 0-24 hour format.
       hour = timestring.split(":")[0].to_i
@@ -330,4 +224,3 @@ module BTAP
     end
   end
 end
-#module BTAP

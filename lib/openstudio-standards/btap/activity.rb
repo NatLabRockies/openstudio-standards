@@ -17,8 +17,6 @@
 # *  Foundation Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 # **************************************************************************** /
 
-require "csv"
-
 module BTAP
   module ActivityData
     ##
@@ -52,9 +50,8 @@ module BTAP
     # scale) "housing". See lib/openstudio-standards/btap/structure.rb.
     @@data = {bldg: {}, space: {}}
 
-    # Hard setting path for both files (temporary @todo).
-    @@data[:bldg ][:file      ] = File.join(__dir__, "NECB_building_types.csv")
-    @@data[:space][:file      ] = File.join(__dir__, "NECB_space_types.csv")
+    @@data[:bldg ][:file      ] = Paths::NECB_BUILDING_TYPES_PATH
+    @@data[:space][:file      ] = Paths::NECB_SPACE_TYPES_PATH
     @@data[:bldg ][:table     ] = nil
     @@data[:space][:table     ] = nil
     @@data[:bldg ][:activity  ] = {}

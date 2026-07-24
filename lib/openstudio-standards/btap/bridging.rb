@@ -17,9 +17,6 @@
 # *  Foundation Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 # **************************************************************************** /
 
-require 'tbd'
-require 'json'
-
 module BTAP
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- #
   module BridgingData
@@ -479,8 +476,7 @@ module BTAP
     # @param edge_tallies [Hash] Wall references mapped to costs.
     # @return [Hash] IDs mapped to their quantities in feet.
     def self.get_material_quantities_for_edges(edge_tallies)
-      cp                  = CommonPaths.instance
-      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+      csv                 = CSV.read(Paths::THERMAL_BRIDGING_PATH, headers: true)
       material_quantities = {}
 
       edge_tallies.each do |edge_type, value|

@@ -300,7 +300,7 @@ class NECB2011
         1 => province,
         2 => neb_fuel
       }
-      row = look_up_csv_data(neb_prices_csv_file_name, search_info)
+      row = BTAP::Data.look_up_csv_data(neb_prices_csv_file_name, search_info)
       neb_fuel_cost = row['2020']
       fuel_consumption_gj = 0.0
       if neb_fuel == 'Electricity' || neb_fuel == 'Natural Gas'
@@ -325,7 +325,7 @@ class NECB2011
     # Fuel cost based local utility rates
     costing_rownames = model.sqlFile.get.execAndReturnVectorOfString("SELECT RowName FROM TabularDataWithStrings WHERE ReportName='LEEDsummary' AND ReportForString='Entire Facility' AND TableName='EAp2-7. Energy Cost Summary' AND ColumnName='Total Energy Cost'")
     #==> ["Electricity", "Natural Gas", "Additional", "Total"]
-    costing_rownames = validate_optional(costing_rownames, model, 'N/A')
+    costing_rownames = BTAP::Data.validate_optional(costing_rownames, model, 'N/A')
     if costing_rownames != 'N/A'
       costing_rownames.each do |rowname|
         case rowname
@@ -418,22 +418,22 @@ class NECB2011
     qaqc[:service_water_heating] = {}
     qaqc[:service_water_heating][:total_nominal_occupancy] = -1
     # qaqc[:service_water_heating][:total_nominal_occupancy]=model.sqlFile().get().execAndReturnVectorOfDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='OutdoorAirSummary' AND ReportForString='Entire Facility' AND TableName='Average Outdoor Air During Occupied Hours' AND ColumnName='Nominal Number of Occupants'").get.inject(0, :+)
-    qaqc[:service_water_heating][:total_nominal_occupancy] = get_total_nominal_capacity(model)
+    qaqc[:service_water_heating][:total_nominal_occupancy] = BTAP::Data.get_total_nominal_capacity(model)
 
     qaqc[:service_water_heating][:electricity_per_year] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='AnnualBuildingUtilityPerformanceSummary' AND ReportForString='Entire Facility' AND TableName='End Uses' AND ColumnName='Electricity' AND RowName='Water Systems'")
-    qaqc[:service_water_heating][:electricity_per_year] = validate_optional(qaqc[:service_water_heating][:electricity_per_year], model, -1)
+    qaqc[:service_water_heating][:electricity_per_year] = BTAP::Data.validate_optional(qaqc[:service_water_heating][:electricity_per_year], model, -1)
 
     qaqc[:service_water_heating][:electricity_per_day] = qaqc[:service_water_heating][:electricity_per_year] / 365.5
     qaqc[:service_water_heating][:electricity_per_day_per_occupant] = qaqc[:service_water_heating][:electricity_per_day] / qaqc[:service_water_heating][:total_nominal_occupancy]
 
     qaqc[:service_water_heating][:natural_gas_per_year] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='AnnualBuildingUtilityPerformanceSummary' AND ReportForString='Entire Facility' AND TableName='End Uses' AND ColumnName='Natural Gas' AND RowName='Water Systems'")
-    qaqc[:service_water_heating][:natural_gas_per_year] = validate_optional(qaqc[:service_water_heating][:natural_gas_per_year], model, -1)
+    qaqc[:service_water_heating][:natural_gas_per_year] = BTAP::Data.validate_optional(qaqc[:service_water_heating][:natural_gas_per_year], model, -1)
 
     qaqc[:service_water_heating][:additional_fuel_per_year] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='AnnualBuildingUtilityPerformanceSummary' AND ReportForString='Entire Facility' AND TableName='End Uses' AND ColumnName='Additional Fuel' AND RowName='Water Systems'")
-    qaqc[:service_water_heating][:additional_fuel_per_year] = validate_optional(qaqc[:service_water_heating][:additional_fuel_per_year], model, -1)
+    qaqc[:service_water_heating][:additional_fuel_per_year] = BTAP::Data.validate_optional(qaqc[:service_water_heating][:additional_fuel_per_year], model, -1)
 
     qaqc[:service_water_heating][:water_m3_per_year] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='AnnualBuildingUtilityPerformanceSummary' AND ReportForString='Entire Facility' AND TableName='End Uses' AND ColumnName='Water' AND RowName='Water Systems'")
-    qaqc[:service_water_heating][:water_m3_per_year] = validate_optional(qaqc[:service_water_heating][:water_m3_per_year], model, -1)
+    qaqc[:service_water_heating][:water_m3_per_year] = BTAP::Data.validate_optional(qaqc[:service_water_heating][:water_m3_per_year], model, -1)
 
     qaqc[:service_water_heating][:water_m3_per_day] = qaqc[:service_water_heating][:water_m3_per_year] / 365.5
     qaqc[:service_water_heating][:water_m3_per_day_per_occupant] = qaqc[:service_water_heating][:water_m3_per_day] / qaqc[:service_water_heating][:total_nominal_occupancy]
@@ -636,7 +636,7 @@ class NECB2011
           error_warning << "space.spaceType.get.lights[0] is nil for Space:[#{space.name.get}] Space Type:[#{spaceinfo[:space_type_name]}]"
         else
           spaceinfo[:lighting_w_per_m2] = space.spaceType.get.lights[0].lightsDefinition.wattsperSpaceFloorArea # .get.round(3) unless space.spaceType.get.lights[0].nil?
-          spaceinfo[:lighting_w_per_m2] = validate_optional(spaceinfo[:lighting_w_per_m2], model, -1.0)
+          spaceinfo[:lighting_w_per_m2] = BTAP::Data.validate_optional(spaceinfo[:lighting_w_per_m2], model, -1.0)
           unless spaceinfo[:lighting_w_per_m2].nil?
             spaceinfo[:lighting_w_per_m2] = spaceinfo[:lighting_w_per_m2].round(3)
           end
@@ -655,7 +655,7 @@ class NECB2011
           spaceinfo[:waterUseEquipment] << waterUseEquipment_info
           waterUseEquipment_info[:peak_flow_rate] = space.waterUseEquipment[0].waterUseEquipmentDefinition.peakFlowRate
           waterUseEquipment_info[:peak_flow_rate_per_area] = waterUseEquipment_info[:peak_flow_rate] / space.floorArea
-          area_per_occ = space.spaceType.get.people[0].nil? ? 0.0 : validate_optional(space.spaceType.get.people[0].spaceFloorAreaPerPerson, model, -1.0)
+          area_per_occ = space.spaceType.get.people[0].nil? ? 0.0 : BTAP::Data.validate_optional(space.spaceType.get.people[0].spaceFloorAreaPerPerson, model, -1.0)
           #                             Watt per person =             m3/s/m3                * 1000W/kW * (specific heat * dT) * m2/person
           waterUseEquipment_info[:shw_watts_per_person] = waterUseEquipment_info[:peak_flow_rate_per_area] * 1000 * (4.19 * 44.4) * 1000 * area_per_occ
           # puts waterUseEquipment_info[:shw_watts_per_ponce the erson]
@@ -727,12 +727,12 @@ class NECB2011
       air_loop.thermalZones.sort.each do |zone|
         air_loop_info[:thermal_zones] << zone.name.get
         vbz = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='Standard62.1Summary' AND ReportForString='Entire Facility' AND TableName='Zone Ventilation Parameters' AND ColumnName='Breathing Zone Outdoor Airflow - Vbz' AND Units='m3/s' AND RowName='#{zone.name.get.to_s.upcase}' ")
-        vbz = validate_optional(vbz, model, 0)
+        vbz = BTAP::Data.validate_optional(vbz, model, 0)
         air_loop_info[:total_breathing_zone_outdoor_airflow_vbz] += vbz
         air_loop_info[:total_floor_area_served] += zone.floorArea * zone.multiplier.to_f
       end
       air_loop_info[:area_outdoor_air_rate_m3_per_s_m2] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='Standard62.1Summary' AND ReportForString='Entire Facility' AND TableName='System Ventilation Parameters' AND ColumnName='Area Outdoor Air Rate - Ra' AND Units='m3/s-m2' AND RowName='#{air_loop_info[:name].to_s.upcase}' ")
-      air_loop_info[:area_outdoor_air_rate_m3_per_s_m2] = validate_optional(air_loop_info[:area_outdoor_air_rate_m3_per_s_m2], model, -1.0)
+      air_loop_info[:area_outdoor_air_rate_m3_per_s_m2] = BTAP::Data.validate_optional(air_loop_info[:area_outdoor_air_rate_m3_per_s_m2], model, -1.0)
 
       air_loop_info[:outdoor_air_L_per_s] = -1.0
       unless air_loop_info[:area_outdoor_air_rate_m3_per_s_m2] == -1.0
@@ -757,7 +757,7 @@ class NECB2011
         air_loop_info[:supply_fan][:max_air_flow_rate_m3_per_s] = -1.0
 
         max_air_flow_info = model.sqlFile.get.execAndReturnVectorOfString("SELECT RowName FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND ColumnName='Max Air Flow Rate' AND Units='m3/s' ")
-        max_air_flow_info = validate_optional(max_air_flow_info, model, 'N/A')
+        max_air_flow_info = BTAP::Data.validate_optional(max_air_flow_info, model, 'N/A')
         if max_air_flow_info == 'N/A'
           error_warning << "max_air_flow_info is nil because the following sql statement returned nil: RowName FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND ColumnName='Max Air Flow Rate' AND Units='m3/s' "
         else
@@ -804,7 +804,7 @@ class NECB2011
           coil[:efficency] = gas.gasBurnerEfficiency
           # coil[:nominal_capacity]= gas.nominalCapacity()
           coil[:nominal_capacity] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].to_s.upcase}'")
-          coil[:nominal_capacity] = validate_optional(coil[:nominal_capacity], model, -1.0)
+          coil[:nominal_capacity] = BTAP::Data.validate_optional(coil[:nominal_capacity], model, -1.0)
         end
         if supply_comp.to_CoilHeatingElectric.is_initialized
           coil = {}
@@ -813,7 +813,7 @@ class NECB2011
           coil[:name] = electric.name.get
           coil[:type] = 'Electric'
           coil[:nominal_capacity] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].to_s.upcase}'")
-          coil[:nominal_capacity] = validate_optional(coil[:nominal_capacity], model, -1.0)
+          coil[:nominal_capacity] = BTAP::Data.validate_optional(coil[:nominal_capacity], model, -1.0)
         end
         if supply_comp.to_CoilHeatingWater.is_initialized
           coil = {}
@@ -822,7 +822,7 @@ class NECB2011
           coil[:name] = water.name.get
           coil[:type] = 'Water'
           coil[:nominal_capacity] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].to_s.upcase}'")
-          coil[:nominal_capacity] = validate_optional(coil[:nominal_capacity], model, -1.0)
+          coil[:nominal_capacity] = BTAP::Data.validate_optional(coil[:nominal_capacity], model, -1.0)
         end
         if supply_comp.to_HeatExchangerAirToAirSensibleAndLatent.is_initialized
           heatExchanger = supply_comp.to_HeatExchangerAirToAirSensibleAndLatent.get
@@ -841,7 +841,7 @@ class NECB2011
           coil[:name] = single_speed.name.get
           coil[:cop] = single_speed.ratedCOP.to_f
           coil[:nominal_total_capacity_w] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Cooling Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].upcase}' ")
-          coil[:nominal_total_capacity_w] = validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
+          coil[:nominal_total_capacity_w] = BTAP::Data.validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
         end
         if supply_comp.to_CoilCoolingDXTwoSpeed.is_initialized
           coil = {}
@@ -851,7 +851,7 @@ class NECB2011
           coil[:cop_low] = two_speed.ratedLowSpeedCOP.to_f
           coil[:cop_high] = two_speed.ratedHighSpeedCOP.to_f
           coil[:nominal_total_capacity_w] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Cooling Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].upcase}' ")
-          coil[:nominal_total_capacity_w] = validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
+          coil[:nominal_total_capacity_w] = BTAP::Data.validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
         end
         if supply_comp.to_CoilCoolingWater.is_initialized
           coil = {}
@@ -859,9 +859,9 @@ class NECB2011
           coil_cooling_water = supply_comp.to_CoilCoolingWater.get
           coil[:name] = coil_cooling_water.name.get
           coil[:nominal_total_capacity_w] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Cooling Coils' AND ColumnName='Nominal Total Capacity' AND RowName='#{coil[:name].upcase}' ")
-          coil[:nominal_total_capacity_w] = validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
+          coil[:nominal_total_capacity_w] = BTAP::Data.validate_optional(coil[:nominal_total_capacity_w], model, -1.0)
           coil[:nominal_sensible_heat_ratio] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Cooling Coils' AND ColumnName='Nominal Sensible Heat Ratio' AND RowName='#{coil[:name].upcase}' ")
-          coil[:nominal_sensible_heat_ratio] = validate_optional(coil[:nominal_sensible_heat_ratio], model, -1.0)
+          coil[:nominal_sensible_heat_ratio] = BTAP::Data.validate_optional(coil[:nominal_sensible_heat_ratio], model, -1.0)
         end
       end
       qaqc[:air_loops] << air_loop_info
@@ -892,11 +892,11 @@ class NECB2011
           pump_info[:name] = pump.name.get
           pump_info[:type] = 'Pump:ConstantSpeed'
           pump_info[:head_pa] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Head' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:head_pa] = validate_optional(pump_info[:head_pa], model, -1.0)
+          pump_info[:head_pa] = BTAP::Data.validate_optional(pump_info[:head_pa], model, -1.0)
           pump_info[:water_flow_m3_per_s] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Water Flow' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:water_flow_m3_per_s] = validate_optional(pump_info[:water_flow_m3_per_s], model, -1.0)
+          pump_info[:water_flow_m3_per_s] = BTAP::Data.validate_optional(pump_info[:water_flow_m3_per_s], model, -1.0)
           pump_info[:electric_power_w] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Electric Power' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:electric_power_w] = validate_optional(pump_info[:electric_power_w], model, -1.0)
+          pump_info[:electric_power_w] = BTAP::Data.validate_optional(pump_info[:electric_power_w], model, -1.0)
           pump_info[:motor_efficency] = pump.motorEfficiency
         end
 
@@ -908,11 +908,11 @@ class NECB2011
           pump_info[:name] = pump.name.get
           pump_info[:type] = 'Pump:VariableSpeed'
           pump_info[:head_pa] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Head' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:head_pa] = validate_optional(pump_info[:head_pa], model, -1.0)
+          pump_info[:head_pa] = BTAP::Data.validate_optional(pump_info[:head_pa], model, -1.0)
           pump_info[:water_flow_m3_per_s] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Water Flow' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:water_flow_m3_per_s] = validate_optional(pump_info[:water_flow_m3_per_s], model, -1.0)
+          pump_info[:water_flow_m3_per_s] = BTAP::Data.validate_optional(pump_info[:water_flow_m3_per_s], model, -1.0)
           pump_info[:electric_power_w] = model.sqlFile.get.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND ColumnName='Electric Power' AND RowName='#{pump_info[:name].upcase}' ")
-          pump_info[:electric_power_w] = validate_optional(pump_info[:electric_power_w], model, -1.0)
+          pump_info[:electric_power_w] = BTAP::Data.validate_optional(pump_info[:electric_power_w], model, -1.0)
           pump_info[:motor_efficency] = pump.motorEfficiency
         end
 
@@ -925,7 +925,7 @@ class NECB2011
           boiler_info[:type] = 'Boiler:HotWater'
           boiler_info[:fueltype] = boiler.fuelType
           boiler_info[:nominal_capacity] = boiler.nominalCapacity
-          boiler_info[:nominal_capacity] = validate_optional(boiler_info[:nominal_capacity], model, -1.0)
+          boiler_info[:nominal_capacity] = BTAP::Data.validate_optional(boiler_info[:nominal_capacity], model, -1.0)
         end
 
         # Collect ChillerElectricEIR
@@ -935,7 +935,7 @@ class NECB2011
           plant_loop_info[:chiller_electric_eir] << chiller_info
           chiller_info[:name] = chiller.name.get
           chiller_info[:type] = 'Chiller:Electric:EIR'
-          chiller_info[:reference_capacity] = validate_optional(chiller.referenceCapacity, model, -1.0)
+          chiller_info[:reference_capacity] = BTAP::Data.validate_optional(chiller.referenceCapacity, model, -1.0)
           chiller_info[:reference_leaving_chilled_water_temperature] = chiller.referenceLeavingChilledWaterTemperature
         end
 
@@ -946,7 +946,7 @@ class NECB2011
           plant_loop_info[:cooling_tower_single_speed] << coolingTower_info
           coolingTower_info[:name] = coolingTower.name.get
           coolingTower_info[:type] = 'CoolingTower:SingleSpeed'
-          coolingTower_info[:fan_power_at_design_air_flow_rate] = validate_optional(coolingTower.fanPoweratDesignAirFlowRate, model, -1.0)
+          coolingTower_info[:fan_power_at_design_air_flow_rate] = BTAP::Data.validate_optional(coolingTower.fanPoweratDesignAirFlowRate, model, -1.0)
 
         end
 
@@ -964,7 +964,7 @@ class NECB2011
 
       qaqc[:eplusout_err] = {}
       warnings = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='0' ")
-      warnings = validate_optional(warnings, model, 'N/A')
+      warnings = BTAP::Data.validate_optional(warnings, model, 'N/A')
       unless warnings == 'N/A'
         qaqc[:eplusout_err][:warnings] = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='0' ").get
         qaqc[:eplusout_err][:fatal] = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='2' ").get
@@ -1667,7 +1667,7 @@ class NECB2011
           spaces = zone.spaces()
           spaces.each do |z_space|
             spacetype = z_space.spaceType
-            spacetype = validate_optional(spacetype, model, nil)
+            spacetype = BTAP::Data.validate_optional(spacetype, model, nil)
             if spacetype.nil?
               qaqc[:warnings] << "[necb_murb_hrv_compliance] Space [#{z_space.name}] does not have a SpaceType"
             else
@@ -1910,38 +1910,5 @@ class NECB2011
     return false if value.empty? || value =~ /^(false|f|no|n|0)$/i
 
     raise ArgumentError, "invalid value for #{varname}: #{value}"
-  end
-
-  def look_up_csv_data(csv_fname, search_criteria)
-    options = { headers: :first_row,
-                converters: [:numeric] }
-    unless File.exist?(csv_fname)
-      raise "File: [#{csv_fname}] Does not exist"
-    end
-
-    # we'll save the matches here
-    matches = nil
-    # save a copy of the headers
-    headers = nil
-    CSV.open(csv_fname, 'r', **options) do |csv|
-      # Since CSV includes Enumerable we can use 'find_all'
-      # which will return all the elements of the Enumerble for
-      # which the block returns true
-
-      matches = csv.find_all do |row|
-        match = true
-        search_criteria.keys.each do |key|
-          match &&= (row[key].strip == search_criteria[key].strip)
-        end
-        match
-      end
-      headers = csv.headers
-    end
-    # puts matches
-    raise('More than one match') if matches.size > 1
-
-    puts "Zero matches found for [#{search_criteria}]" if matches.empty?
-    # return matches[0]
-    return matches[0]
   end
 end

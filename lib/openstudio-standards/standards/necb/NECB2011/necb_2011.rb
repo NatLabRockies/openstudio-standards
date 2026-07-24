@@ -1302,10 +1302,8 @@ class NECB2011 < Standard
   end
 
   def apply_loop_pump_power(model:, sizing_run_dir:)
-    # Remove duplicate materials and constructions
-    # Note For NECB2015 This is the 2nd time this method is bieng run.
-    # First time it ran in the super() within model_apply_standard() method
-    # model = return BTAP::FileIO::remove_duplicate_materials_and_constructions(model)
+    # Note For NECB2015 This is the 2nd time this method is being run.
+    # First time it ran in the super() within model_apply_standard() method.
     return model
   end
 

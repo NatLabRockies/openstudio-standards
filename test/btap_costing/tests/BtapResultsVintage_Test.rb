@@ -1,12 +1,12 @@
-require_relative '../../../lib/openstudio-standards.rb'
-require_relative '../../../lib/openstudio-standards/btap/btap_test_helper.rb'
+require_relative '../../../lib/openstudio-standards'
+require_relative '../../helpers/btap_results_helper'
 require 'minitest/autorun'
 require 'optparse'
 require 'fileutils'
 require 'minitest/unit'
 require 'optparse'
 
-class BTAPResults_Vintage_Test < Minitest::Test
+class BTAP::Results_Vintage_Test < Minitest::Test
   def test_results_vintage()
     #building_type = 'Outpatient'
     building_type = 'LargeHotel'
@@ -50,7 +50,7 @@ class BTAPResults_Vintage_Test < Minitest::Test
                                                    lights_type: lights_type,
                                                    lights_scale: lights_scale,
                                                    baseline_system_zones_map_option: baseline_system_zones_map_option,
-                                                   cached: BTAPResultsHelper.cached)
+                                                   cached: BTAP::ResultsHelper.cached)
   end
 
   def create_model_simulate_and_qaqc_regression_test(epw_file:,
@@ -66,7 +66,7 @@ class BTAPResults_Vintage_Test < Minitest::Test
     model_name = "#{building_type}-#{template}-DefaultFuel-#{File.basename(epw_file, '.epw')}"
     test_dir   = "#{File.dirname(__FILE__)}/output"
     run_dir    = "#{test_dir}/#{model_name}"
-    helper     = BTAPResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
+    helper     = BTAP::ResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
 
     Dir.mkdir(test_dir) unless Dir.exist?(test_dir)
     Dir.mkdir(run_dir) unless Dir.exist?(run_dir)
@@ -129,30 +129,6 @@ class BTAPResults_Vintage_Test < Minitest::Test
         output_meters: nil,
         airloop_economizer_type: nil,
         baseline_system_zones_map_option: baseline_system_zones_map_option)
-      # standard.clean_and_scale_model(model: model, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil)
-      # standard.apply_weather_data(model: model, epw_file: epw_file)
-      # standard.apply_loads(model: model, lights_type: lights_type, lights_scale: lights_scale)  #Sara
-      # standard.apply_envelope( model: model)
-      # standard.apply_fdwr_srr_daylighting(model: model)
-      # standard.apply_auto_zoning(model: model, sizing_run_dir: run_dir)
-      # standard.apply_systems_and_efficiencies(model: model,
-      #                                         primary_heating_fuel: 'DefaultFuel', #NOTE: primary_heating_fuel" has been set to "DefaultFuel" instead of 'FuelOilNo2' and its associated "model_name" has been changed in a way to use an expected result file that already exits on github.
-      #                                         sizing_run_dir: run_dir,
-      #                                         dcv_type: 'NECB_Default',
-      #                                         ecm_system_name: 'NECB_Default',
-      #                                         erv_package: 'NECB_Default',
-      #                                         boiler_eff: nil,
-      #                                         furnace_eff: nil,
-      #                                         shw_eff: nil,
-      #                                         daylighting_type: 'NECB_Default',
-      #                                         pv_ground_type: nil,  #Sara
-      #                                         pv_ground_total_area_pv_panels_m2: nil,
-      #                                         pv_ground_tilt_angle: nil,
-      #                                         pv_ground_azimuth_angle: nil,
-      #                                         pv_ground_module_description: nil,
-      #                                         shw_scale: 'NECB_Default',
-      #                                         baseline_system_zones_map_option: baseline_system_zones_map_option)
-      # model = standard.apply_loop_pump_power(model: model, sizing_run_dir: run_dir)
 
       standard.model_run_simulation_and_log_errors(model, run_dir)
 

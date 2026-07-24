@@ -189,7 +189,7 @@ module BTAP
     # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- #
     # To simplify data management, building TYPES (e.g. those listed in Table
     # A-8.4.3.2.(2)-A of the NECB 2020) are proposed to fall into more general
-    # building CATEGORIES (see activity.rb & NECB_building_types.csv):
+    # building CATEGORIES (see activity.rb & necb_building_types.csv):
     #
     #      CATEGORY   examples
     # _____________  __________________________________________________________
@@ -496,7 +496,7 @@ module BTAP
       # item, live load is not considered when tallying embodied carbon.
       #
       # Within BTAP, non-occupant live load estimates are stored in the
-      # "NECB_building_types.csv" file, parsed/stored in a BTAP::Activity
+      # "necb_building_types.csv" file, parsed/stored in a BTAP::Activity
       # instance (1x per building activity). These estimates are initially based
       # on NBC Part 4 minimum live load requirements (kPa), as well as data from
       # established structural engineering resources. Minimum live load kPa (or
