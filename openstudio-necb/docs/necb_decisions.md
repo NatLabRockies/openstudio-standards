@@ -283,3 +283,21 @@ and reference energy; deferred to its own work session).*
 - **Who/when:** Claude under D-10 delegation, 2026-07-23.
 - **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
   rake necb:verify green post-fix.
+
+## D-17 — Legacy ERV diagnosis filed upstream (issue #2123)
+
+- **Decision:** the legacy NECB2020/2025 ERV determination defect was diagnosed
+  to file/line and reported upstream: NECB2020 has no override, so it inherits
+  NECB2017's data-driven formula (`NECB2017/data/formulas.json`
+  `heat_recovery_requirement_formula`) — a faithful transcription of the
+  CONTINUOUS Table 5.2.10.1.-B only. Missing vs the 2020/2025 text: (1) the
+  non-continuous Table -A path (operating hours never consulted), (2) the
+  <10% OA exemption (`hdd >= 3000 -> true` has no OA floor). Legacy therefore
+  OVER-equips ERVs at HDD >= 3000 — observed on SmallOffice (5 ERVs, loops at
+  3.8-12.8% OA) and Warehouse (3 ERVs, all <10% OA). NOT the 150 kW EHC
+  method (that is NECB2011/2015 only) — corrects this record's earlier
+  shorthand. Issue includes a full solution draft (both tables + availability-
+  schedule hours classifier) and five regression tests; PR offered.
+- **Who/when:** filed by phylroy (drafted under D-10 delegation), 2026-07-24.
+- **Evidence:** https://github.com/NatLabRockies/openstudio-standards/issues/2123
+  (the former NREL repo — renamed/transferred; GitHub redirects the NREL URL).
