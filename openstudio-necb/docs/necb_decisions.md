@@ -454,3 +454,31 @@ buildings. The two marginal fails (102%/104%) and the Restaurant's 69% are
 within the documented residual ledger (legacy over-equipped ERVs per
 upstream #2123, DX COP bins, infiltration normalization remainder). All
 gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
+
+## D-21 — Residual infiltration asymmetry on low-rise buildings (OPEN, two new findings)
+
+The 19-29% reference drops on Restaurant/PrimarySchool/Retail are fully
+attributed: D-20 fired ZERO times outside the MURB (audit-verified), so they
+are pure D-19 coefficient inheritance. But the post-fix symmetry check
+exposed two new items:
+
+1. **Legacy over-installs proposed infiltration on roof-dominated low-rise
+   buildings**: proposed installed totals are 160% (Restaurant, 401 vs 250
+   L/s) and 166% (Retail, 1703 vs 1025) of the 8.4.3.3.(3) code default —
+   the legacy wall+ROOF area basis inflates exactly where roofs dominate.
+   The MURB tower (negligible roof) masked this: its total was 100.0% exact.
+   ABOVE-default proposed infiltration is the CONSERVATIVE direction
+   (proposed pays extra heating), but it is still non-conformant modeling —
+   upstream-issue material alongside #2123.
+2. **Our 8.4.3.3.(3) deviation warning failed to fire** on 60-66% deviations
+   — a warning-coverage defect. Prime suspect: the proposed-total computation
+   is skipped when ELA/FlowCoefficient objects exist, or an ordering issue;
+   to be fixed with a hostile test that PINS the warning on a deviating model.
+3. Delivered-ACH asymmetry (Restaurant 0.095 vs 0.292 mean zone ACH) also
+   reflects per-space DISTRIBUTION (legacy spreads flow over exterior
+   surfaces incl. the huge attic volume; our wall-area basis concentrates it
+   in perimeter zones) — totals AND distribution both matter for zone-level
+   comparisons; building totals are the code-meaningful quantity.
+
+Who/when: Claude under D-10 delegation, 2026-07-24; [RAN] evidence from
+sweep audits + model totals probes.
