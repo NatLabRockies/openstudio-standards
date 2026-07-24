@@ -585,6 +585,10 @@ module BTAP
         @framing   = csp[:framing]
         @cladding  = csp[:cladding]
         @finish    = csp[:finish]
+        bldg.additionalProperties.setFeature("btap_structure", @structure.to_s)
+        bldg.additionalProperties.setFeature("btap_framing", @framing.to_s)
+        bldg.additionalProperties.setFeature("btap_cladding", @cladding.to_s)
+        bldg.additionalProperties.setFeature("btap_finish", @finish.to_s)
 
         cspaces.each { |space| @spaces.delete(space.nameString) }
       end
