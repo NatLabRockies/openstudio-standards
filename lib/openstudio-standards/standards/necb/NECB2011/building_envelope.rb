@@ -641,22 +641,23 @@ class NECB2011
   # @option a [Numeric] :skySHGC skylight solar heat gain coefficient
   #
   # @return [Boolean] whether default constructions were successfully added.
-  def add_construction_sets(spaces = [], bldg, hdd, a)
-    bldg = true unless [true, false].include?(bldg)
-    hdd  = true unless [true, false].include?(hdd)
+  def add_construction_sets(spaces = [], bldg = true, hdd = true, a = {})
+    bldg = true unless bldg == false
+    hdd  = true unless hdd  == false
     tag  = "space_conditioning_category"
     out  = "outdoors"
     gnd  = "ground"
+    return false unless a.is_a?(Hash)
 
     # Accept a single 'OpenStudio::Model::Space' (vs an array of spaces).
     if spaces.respond_to?(:spaceType) || spaces.respond_to?(:to_a)
-      spaces = spaces.respond_to?(:to_a) ? spaces.to_a : [spaces]
+      spaces = [spaces] if spaces.respond_to?(:spaceType)
       return false if spaces.empty?
     else
       return false
     end
 
-    return false unless a.is_a?(Hash)
+    spaces.each { |sp| return false unless sp.respond_to?(:spaceType) }
 
     # Rudimentary parameter validation.
     a.each do |k, v|
@@ -673,11 +674,9 @@ class NECB2011
       end
     end
 
+    # Fetch OpenStudio model & site/climate HDD.
     model = spaces.first.model
     hdd   = get_necb_hdd18(model: model, necb_hdd: hdd)
-
-    # Reset constructions.
-    spaces.each { |space| space.surfaces.sort.each(&:resetConstruction) }
 
     # Filling in the blanks: STRUCTURE-based parameters.
     ctg = a[:category ] ? a[:category ] : "commercial"
@@ -738,11 +737,6 @@ class NECB2011
     argh[:stype   ] = :walls
     argh[:uo      ] = eWallU
     id = BTAP::Bridging.costed_assembly(argh)
-    #
-    # unless BTAP::Bridging.costed_uo(id, eWallU)
-    #   argh[:perform] = :hp
-    #   id = BTAP::Bridging.costed_assembly(argh)
-    # end
 
     eWall.additionalProperties.setFeature("btap_uo", eWallU)
     eWall.additionalProperties.setFeature("btap_id", id)
@@ -1031,11 +1025,6 @@ class NECB2011
       argh[:stype   ] = :walls
       argh[:uo      ] = eWallU
       id = BTAP::Bridging.costed_assembly(argh)
-
-      # unless BTAP::Bridging.costed_uo(id, eWallU)
-      #   argh[:perform] = :hp
-      #   id = BTAP::Bridging.costed_assembly(argh)
-      # end
 
       iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)

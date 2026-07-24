@@ -982,9 +982,13 @@ class NECB2011 < Standard
   end
 
   ##
-  # Assign surface area-weighted air film resistances to insulated layered
-  # constructions. Applied only if constructions have valid AdditionalProperties
-  # "btap_uo" (currently limited to construction option "structure").
+  # Assign surface area-weighted air film resistances (in m2.K/W) to insulated
+  # layered constructions (as AdditionalProperty "btap_film"). The solution
+  # initially targets constructions having a valid AdditionalProperty "btap_uo"
+  # (auto-generated with option "structure"). If no constructions are tagged
+  # with "btap_uo" in the model, the fallback is to instead target all outdoor-
+  # facing, above-grade layered constructions. In case of latter scenario,
+  # AdditionalProperties "btap_id" & "btap_type" are also added (if missing).
   #
   # @author: denis@rd2.ca
   #
@@ -994,19 +998,65 @@ class NECB2011 < Standard
   def set_construction_air_film_resistances(model: nil)
     return false unless model.is_a?(OpenStudio::Model::Model)
 
-    model.getConstructions.each do |lc|
-      next if lc.additionalProperties.getFeatureAsDouble("btap_uo").empty?
-      next unless lc.getNetArea > 0
+    ok  = false
+    hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
-      unless lc.is_a?(OpenStudio::Model::LayeredConstruction)
-        lc = lc.to_LayeredConstruction
+    model.getConstructions.each do |lc|
+      lc = lc.to_LayeredConstruction
+      next if lc.empty?
+
+      lc = lc.get
+      next unless lc.additionalProperties.hasFeature("btap_uo")
+
+      ok = true
+      lc.additionalProperties.setFeature("btap_film", filmR(lc))
+    end
+
+    # No "btap_uo" AdditionalProperty?
+    unless ok
+      model.getSurfaces.each do |surface|
+        lc = surface.construction
+        tp = surface.surfaceType.downcase
+        bc = surface.outsideBoundaryCondition.downcase
+        next unless tp == "outdoors"
+
+        uo = max_u_necb(tp, bc, hdd)
+        ty = case tp
+             when "wall"  then :walls
+             when "floor" then :floors
+             else              :roofs
+             end
+
+        next if lc.empty?
+        next if lc.additionalProperties.hasFeature("btap_film")
+
+        lc = lc.get.to_LayeredConstruction
         next if lc.empty?
 
         lc = lc.get
-      end
+        lc.additionalProperties.setFeature("btap_film", filmR(lc))
 
-      fR = filmR(lc)
-      lc.additionalProperties.setFeature("btap_film", fR) if fR > 0
+        unless lc.additionalProperties.hasFeature("btap_type")
+          lc.additionalProperties.setFeature("btap_type", ty.to_s)
+        end
+
+        unless lc.additionalProperties.hasFeature("btap_uo")
+          lc.additionalProperties.setFeature("btap_uo", uo)
+        end
+
+        unless lc.additionalProperties.hasFeature("btap_ut")
+          lc.additionalProperties.setFeature("btap_ut", uo)
+        end
+
+        unless lc.additionalProperties.hasFeature("btap_id")
+          argh           = {}
+          argh[:perform] = :lp
+          argh[:stype  ] = ty
+          argh[:uo     ] = uo
+          id = BTAP::Bridging.costed_assembly(argh)
+          lc.additionalProperties.setFeature("btap_id", id)
+        end
+      end
     end
 
     true
@@ -1312,14 +1362,14 @@ class NECB2011 < Standard
   def apply_thermal_bridging(model: nil,
                              necb_hdd: true,
                              structure: nil,
-                             option: 'none',
+                             option: "none",
                              interpolate: false,
                              wallU: nil,
                              floorU: nil,
                              roofU: nil)
     necb_hdd = true unless [true, false].include?(necb_hdd)
     return true unless option.respond_to?(:to_sym)
-    return true if option.to_s.downcase == 'none'
+    return true if option.to_s.downcase == "none"
 
     hdd    = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
     wallU  = wallU  ? wallU  : max_u_necb("wall", "outdoors", hdd)
@@ -1332,19 +1382,19 @@ class NECB2011 < Standard
     argh[:floors   ] = { uo: floorU }
     argh[:roofs    ] = { uo: roofU  }
 
-    case option.downcase
-    when 'uprate'
-      argh[:walls  ][:ut] = wallU
-      argh[:floors ][:ut] = floorU
-      argh[:roofs  ][:ut] = roofU
-    when 'good'
+    case option.to_s.downcase
+    when "uprate"
+      argh[:walls ][:ut] = wallU
+      argh[:floors][:ut] = floorU
+      argh[:roofs ][:ut] = roofU
+    when "good"
       argh[:quality] = :good
     else
       argh[:quality] = :bad
     end
 
     argh[:interpolate] = interpolate
-    argh[:interpolate] = false unless [true, false].include?(interpolate)
+    argh[:interpolate] = false unless argh[:interpolate] == true
 
     @tbd = BTAP::Bridging.new(model, argh)
 

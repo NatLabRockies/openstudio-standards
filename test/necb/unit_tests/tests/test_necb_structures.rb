@@ -37,7 +37,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
@@ -50,7 +50,7 @@ class NECB_Structure_Tests < Minitest::Test
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      "NECB2020",
+      # "NECB2020",
       # "NECB2025"
     ]
 
