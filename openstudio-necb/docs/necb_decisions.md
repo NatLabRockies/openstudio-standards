@@ -393,3 +393,17 @@ heating remains 30.0 GJ vs proposed 13.3 GJ for the January week. Next
 suspects, untested: reference VAV terminal minimum-flow reheat on the corridor
 system; MAU supply-air tempering setpoint vs legacy's; PTAC sizing/control on
 reference dwelling zones. To be investigated next session.
+
+### D-20 progress (2026-07-24): SAT hypothesis TESTED AND REFUTED
+
+The corridor sys-6 SAT control asymmetry (our constant 13 C deck vs legacy
+SingleZoneReheat 13-43 C) was implemented as a Warmest 13-43 C reset and
+measured: reference WORSENED 23069 -> 23528 kWh wk (heating 30.0 -> 31.9 GJ).
+Cause of the refutation: the sys-6 terminals carry REHEAT COILS, so the 13 C
+deck was never cold-dumping — it is standard VAV-with-reheat practice; the
+Warmest variant merely over-delivers at minimum flow. Change REVERTED. SAT
+control moves the picture by ~+-2 GJ; the dominant ~17 GJ residual is
+elsewhere. Next suspect (dwelling side, where the gain-summary excess sits):
+the MAU / PTAC / baseboard interaction on reference dwelling zones — PTAC fan
+and cycling behaviour, MAU operating schedule, and zone-equipment control
+order — via a zone-level differential audit of one representative suite.
