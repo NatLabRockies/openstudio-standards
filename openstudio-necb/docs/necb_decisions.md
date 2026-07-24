@@ -482,3 +482,22 @@ exposed two new items:
 
 Who/when: Claude under D-10 delegation, 2026-07-24; [RAN] evidence from
 sweep audits + model totals probes.
+
+### D-21 correction (same day): the warning is NOT defective; finding 1 retracted as stated
+
+Direct repro on the Restaurant model: ELA/FC guard not involved (0/0), and
+the warning correctly did NOT fire — the transform computes code_total from
+its envelope_area = 1356 m2 (Outdoors+Ground surfaces INCLUDING the attic
+roof) giving 400.6 L/s, which matches the legacy proposed's 401 L/s within
+0.1%. The "160% over-install" figure in finding 1 came from this
+investigator's scratchpad probe using a NARROWER S (846 m2, effectively
+excluding the attic roof) — the two lineages actually AGREE with each other
+on roof-inclusive S. Finding 1 is therefore retracted as stated; what
+remains open is the real question underneath: does 3.2.4.2.(1)'s "total
+area of building envelope" mean the attic ROOF or the CEILING below an
+unconditioned attic? That decides the correct default total for every
+attic building and affects BOTH lineages identically — a code-text
+verification for next session, not a lineage divergence. Finding 3
+(distribution: legacy floods the huge attic volume with infiltration, our
+wall-basis concentrates it in perimeter zones) stands, and is now the whole
+explanation for the Restaurant delivered-ACH asymmetry.
