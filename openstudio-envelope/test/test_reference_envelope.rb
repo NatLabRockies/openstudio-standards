@@ -173,6 +173,43 @@ class TestReferenceEnvelope < Minitest::Test
            'below-default proposed infiltration warns (permissive direction)')
   end
 
+  # D-21 / 3.2.4.2.(1)(c): S is the enclosure of the CONDITIONED volume. A
+  # 10x10x3 conditioned box under a 10x10x2 unconditioned attic: S = walls
+  # (120) + ground slab (100) + ceiling-to-attic (100) = 320 m2; the attic
+  # roof (100) and gables (80) are NOT envelope. A_AGW = 120 (conditioned
+  # walls only). Installed total must equal (5/75)^0.6 x 1.5 x S, and the
+  # attic must receive NO infiltration object (its exterior walls sit outside
+  # A_AGW — giving it flow-per-wall-area would re-inflate the total).
+  def test_air_leakage_envelope_area_excludes_attic_per_3_2_4_2
+    model = OpenStudio::Model::Model.new
+    print_at = lambda do |z|
+      pts = OpenStudio::Point3dVector.new
+      [[0, 0], [0, 10], [10, 10], [10, 0]].each { |x, y| pts << OpenStudio::Point3d.new(x, y, z) }
+      pts
+    end
+    cond = OpenStudio::Model::Space.fromFloorPrint(print_at.call(0.0), 3.0, model).get
+    attic = OpenStudio::Model::Space.fromFloorPrint(print_at.call(3.0), 2.0, model).get
+    spaces = OpenStudio::Model::SpaceVector.new
+    [cond, attic].each { |s| spaces << s }
+    OpenStudio::Model.matchSurfaces(spaces) # pairs ceiling <-> attic floor
+    attic.setPartofTotalFloorArea(false)
+    [cond, attic].each { |s| s.setThermalZone(OpenStudio::Model::ThermalZone.new(model)) }
+
+    audit = OpenStudioEnvelope::AuditLog.new
+    OpenStudioEnvelope::NECB::Reference.apply_air_leakage_default(model, '8.4.4', audit)
+
+    decision = audit.entries.find { |e| e[:action] == 'air-leakage default applied' }
+    assert_in_delta 320.0, decision[:inputs][:envelope_area_m2], 0.5, 'attic roof/gables excluded; ceiling included'
+    assert_in_delta 120.0, decision[:inputs][:ag_wall_area_m2], 0.5, 'conditioned walls only'
+
+    infiltration = model.getSpaceInfiltrationDesignFlowRates
+    assert_equal 1, infiltration.size, 'attic receives NO infiltration object'
+    assert_equal cond.handle, infiltration.first.space.get.handle
+    installed_l_s = infiltration.first.flowperExteriorWallArea.get * cond.exteriorWallArea * 1000.0
+    expected_l_s = ((5.0 / 75.0)**0.6) * 1.5 * 320.0
+    assert_in_delta expected_l_s, installed_l_s, 0.2, 'installed total = code default over the (1)(c) enclosure'
+  end
+
   def test_coverage_emitted_all_16_articles
     audit = reference(proposed_model)
     coverage = audit.entries.select { |e| e[:step] == :coverage }

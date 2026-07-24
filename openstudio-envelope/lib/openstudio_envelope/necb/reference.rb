@@ -211,14 +211,39 @@ module OpenStudioEnvelope
       # I_AGW = (5/75)^0.6 x I75 x S / A_AGW, applied per space as flow per exterior
       # above-ground wall area.
       def apply_air_leakage_default(model, prefix, audit)
+        # S per 3.2.4.2.(1)(c) (D-21): the enclosure of the CONDITIONED volume —
+        # Outdoors and ground-contact surfaces of conditioned spaces PLUS
+        # interzone surfaces separating conditioned from unconditioned spaces
+        # (attic ceilings, plenum boundaries). Surfaces of unconditioned spaces
+        # themselves (attic roofs/gables) bound no conditioned space and are
+        # NOT envelope. Ground contact stays IN S: it is enclosure area used to
+        # NORMALIZE the tested/assumed rate, not a claim of slab leakage — the
+        # S/A_AGW term moves the whole total onto above-ground walls.
+        # Unconditioned = not part of total floor area (the OS attic/plenum
+        # marker). Space multipliers honoured.
         envelope_area = 0.0
         wall_area = 0.0
-        model.getSurfaces.each do |surface|
-          boundary = Prescriptive.boundary_of(surface)
-          next if boundary.nil?
+        model.getSpaces.each do |space|
+          mult = space.multiplier.to_f
+          conditioned = space.partofTotalFloorArea
+          space.surfaces.each do |surface|
+            case surface.outsideBoundaryCondition
+            when 'Outdoors'
+              next unless conditioned
 
-          envelope_area += surface.grossArea
-          wall_area += surface.grossArea if surface.surfaceType == 'Wall' && boundary == 'outdoors'
+              envelope_area += surface.grossArea * mult
+              wall_area += surface.grossArea * mult if surface.surfaceType == 'Wall'
+            when /Ground|Foundation/i
+              envelope_area += surface.grossArea * mult if conditioned
+            when 'Surface'
+              next unless conditioned
+
+              adj = surface.adjacentSurface
+              next if adj.empty? || adj.get.space.empty?
+
+              envelope_area += surface.grossArea * mult unless adj.get.space.get.partofTotalFloorArea
+            end
+          end
         end
         if wall_area < 0.1
           audit.warn(:reference, 'no above-ground walls — air-leakage default not applied', article: "#{prefix}.3.(6)")
@@ -276,6 +301,12 @@ module OpenStudioEnvelope
         model.getSpaceInfiltrationEffectiveLeakageAreas.each(&:remove)
         model.getSpaceInfiltrationFlowCoefficients.each(&:remove)
         model.getSpaces.sort_by(&:nameString).each do |space|
+          # unconditioned spaces (attics/plenums) receive NO infiltration
+          # object: their exterior walls are outside A_AGW, and giving them
+          # flow-per-wall-area would silently re-inflate the installed total
+          # beyond the S-based default
+          next unless space.partofTotalFloorArea
+
           infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
           infiltration.setName("#{space.nameString} NECB Ref Infiltration")
           infiltration.setFlowperExteriorWallArea(i_agw / 1000.0) # m3/s per m2

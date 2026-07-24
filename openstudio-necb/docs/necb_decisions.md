@@ -521,3 +521,19 @@ heuristic), include interzone surfaces between conditioned and unconditioned
 spaces; pin with an attic-fixture test. Legacy side: same S issue, one more
 item for the upstream set. Impact: attic-building default totals drop
 (Restaurant ~1356 -> ~850-900 m2 basis); tower/MURB unaffected.
+
+### D-21 CLOSED (2026-07-24): S computed per 3.2.4.2.(1)(c), attic-pinned
+
+apply_air_leakage_default now builds S as the enclosure of the CONDITIONED
+volume: Outdoors + ground-contact surfaces of conditioned spaces plus
+interzone surfaces to unconditioned spaces (attic ceilings/plenums);
+unconditioned spaces' own surfaces are excluded and receive NO infiltration
+object (their exterior walls sit outside A_AGW). Ground contact stays in S
+as normalization area — no slab leakage is modeled; the S/A_AGW term puts
+the whole total on above-ground walls (phylroy's ground-leakage challenge,
+answered from the (1)(c) text). Multiplier-aware. Pinned by an attic
+fixture test: 10x10x3 conditioned + 10x10x2 attic -> S=320 (not 500),
+A_AGW=120, installed total = 0.2954 x S, attic object-free. Attic-building
+reference defaults will drop at the next sweep (Restaurant basis 1356 ->
+~320-scale per its geometry); the legacy side's roof-inclusive S remains
+upstream-issue material.
