@@ -501,3 +501,23 @@ verification for next session, not a lineage divergence. Finding 3
 (distribution: legacy floods the huge attic volume with infiltration, our
 wall-basis concentrates it in perimeter zones) stands, and is now the whole
 explanation for the Restaurant delivered-ACH asymmetry.
+
+### D-21 verdict (2026-07-24): 3.2.4.2.(1)(c) settles the envelope-area question
+
+Code text, verbatim: the air leakage area "shall include all the surfaces
+separating conditioned space from unconditioned space" (3.2.4.2.(1)(c),
+referenced by 8.4.2.9.(2)'s S). For an unconditioned attic: the attic ROOF
+does NOT bound conditioned space and is NOT in S; the CEILING below the
+attic IS. BOTH lineages currently compute roof-inclusive S, so both
+over-install the default on attic buildings — a SHARED conservative bias
+(symmetric between proposed and reference, so comparisons stay fair; the
+absolute default totals are high). My scratchpad probe's narrower S was
+closer to the code's intent; the mutual 401-vs-400.6 agreement was two
+implementations sharing the same S mistake.
+
+QUEUED FIX (ours): envelope_area/S per (c) — exclude Outdoors surfaces of
+unconditioned spaces (attics/plenums; partofTotalFloorArea/zone-conditioning
+heuristic), include interzone surfaces between conditioned and unconditioned
+spaces; pin with an attic-fixture test. Legacy side: same S issue, one more
+item for the upstream set. Impact: attic-building default totals drop
+(Restaurant ~1356 -> ~850-900 m2 basis); tower/MURB unaffected.
