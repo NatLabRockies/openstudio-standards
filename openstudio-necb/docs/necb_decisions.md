@@ -322,3 +322,31 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** vav_reheat.rb zone_groups; NECB 2020 8.4.4.7 text (Note (3))
   retrieved via codes MCP; MURB re-sweep topology (corridors collapse 10 -> 1
   system, reference converges toward the legacy 2-loop layout).
+
+## D-19 — Infiltration lineage reconciliation (OPEN: arithmetic differs, both claim the same code default)
+
+- **Facts pinned (2026-07-24):** 8.4.4.3.(6) sets reference air leakage equal to
+  the DEFAULT of 8.4.3.3.(3); 8.4.3.3.(3) = 1.50 L/(s.m2) at 75 Pa, adjusted per
+  8.4.2.9.(2) (I_AGW = (5/75)^0.6 x 1.50 x S/A_AGW, applied to above-ground
+  wall area). For an UNTESTED building, proposed and reference must therefore
+  carry IDENTICAL infiltration — the observed MURB difference (proposed 0.142
+  vs reference 0.247 mean ACH; the entire 2.5x heating gap) is NOT
+  code-intended. My earlier "code-intended asymmetry" call was WRONG and is
+  retracted. Our transform implements the code arithmetic textually
+  (AIR_LEAKAGE_I75 = 1.50, exponent 0.60, S/A_AGW, per-wall-area). Legacy
+  NECB2020 vendors the CORRECT constant (0.0015 @75 Pa, ref PCF 1414, note
+  claims code conversion) but no NECB2020 override of the 2011
+  space_apply_infiltration_rate (total = constant x wall+roof+subsurface,
+  spread over all exterior area, no visible (5/75)^0.6 or S/A_AGW step) was
+  found in building_envelope.rb.
+- **Open items:** (1) locate where (if anywhere) legacy applies the pressure
+  conversion for 2020; (2) reconcile DELIVERED ACH — the E+ tabular values are
+  confounded by infiltration coefficient models (constant/wind terms may
+  differ between lineages); compare design flow totals and coefficients
+  directly from both OSMs; (3) our pipeline should WARN when an untested
+  proposed's infiltration deviates from the 8.4.3.3.(3) default (today it is
+  cloned untouched — deviation below default is PERMISSIVE); (4) if legacy
+  skips the pressure conversion, that is a third wrong-vintage/AS-IS defect
+  for the upstream issue set.
+- **Who/when:** Claude under D-10 delegation, 2026-07-24. Findings [READ] from
+  code text (codes MCP) and both lineages' source; not yet numerically closed.
