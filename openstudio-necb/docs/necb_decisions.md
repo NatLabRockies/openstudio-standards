@@ -350,3 +350,21 @@ and reference energy; deferred to its own work session).*
   for the upstream issue set.
 - **Who/when:** Claude under D-10 delegation, 2026-07-24. Findings [READ] from
   code text (codes MCP) and both lineages' source; not yet numerically closed.
+
+### D-19 amendment (same day): legacy override FOUND — divergence narrowed to area accounting
+
+Correction: legacy NECB2020 DOES override space_apply_infiltration_rate
+(necb_2020.rb:67, missed on first look — it lives in necb_2020.rb, not
+building_envelope.rb) and applies the SAME formula as our transform:
+1.5e-3 x (5/75)^0.6 x S/A_AGW. Both lineages implement 8.4.3.3.(3) /
+8.4.2.9.(2). The remaining divergence is in the AREAS and application basis:
+legacy's "A_AGW" accumulates ALL Outdoors surfaces (walls + roofs + exposed
+floors; code says above-ground WALLS only — minor for a highrise, large for
+a 1-storey warehouse), legacy uses space multipliers, and the two lineages
+apply the per-m2 rate over different E+ fields (flow-per-exterior-surface vs
+flow-per-exterior-wall). The observed 0.142-vs-0.247 delivered-ACH gap is
+the product of these area/application choices plus possibly differing E+
+coefficient terms — still to be numerically reconciled surface-by-surface
+on the MURB before declaring which lineage (or both) deviates and by how
+much. The proposed-side default-conformance warning (open item 3) remains
+to implement.
