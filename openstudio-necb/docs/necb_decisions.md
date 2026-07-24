@@ -368,3 +368,28 @@ coefficient terms — still to be numerically reconciled surface-by-surface
 on the MURB before declaring which lineage (or both) deviates and by how
 much. The proposed-side default-conformance warning (open item 3) remains
 to implement.
+
+### D-19 resolution (2026-07-24): infiltration FIXED and verified; residual MURB heating gap reopened as D-20
+
+Step-0 arithmetic exonerated BOTH lineages on design flow: legacy proposed and
+our reference each install EXACTLY the code total (1601.8 L/s = 0.1969 x 1.5 x
+S on the MURB, 100.0% both sides; legacy 2020's area quirks net out here). The
+real defect was OURS and temporal: the reference wrote the constant convention
+(A=1) while the cloned proposed carried DOE-2 wind-driven (A=0, C=0.224) —
+identical design totals, ~1.7x different delivered ACH. FIX: the reference now
+inherits the proposed's modifier coefficients + schedule (constant fallback
+when the proposed has none), and an untested proposed whose installed total
+deviates >10% from the 8.4.3.3.(3) default draws a loud warning (below-default
+is the permissive direction). VERIFIED: reference delivered infiltration
+0.247 -> 0.135 ACH (proposed 0.142); reference energy 24128 -> 23069 kWh wk
+(78% -> 81% of target); envelope suite green incl. new inheritance +
+deviation-warning tests.
+
+## D-20 — MURB residual heating gap (OPEN)
+
+With ventilation, infiltration, lighting, equipment, SHW, pumps and ERV count/
+effectiveness (both lineages 0.5) now symmetric or ruled out, reference
+heating remains 30.0 GJ vs proposed 13.3 GJ for the January week. Next
+suspects, untested: reference VAV terminal minimum-flow reheat on the corridor
+system; MAU supply-air tempering setpoint vs legacy's; PTAC sizing/control on
+reference dwelling zones. To be investigated next session.

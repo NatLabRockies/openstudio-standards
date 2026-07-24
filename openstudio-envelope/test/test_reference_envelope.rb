@@ -143,6 +143,34 @@ class TestReferenceEnvelope < Minitest::Test
     # rate sanity: (5/75)^0.6 = 0.1974; x1.5 = 0.296; xS/A_AGW > 0.296
     rate = infiltration.first.flowperExteriorWallArea.get * 1000.0
     assert_operator rate, :>, 0.29
+    # D-19: no proposed infiltration -> constant convention (A=1)
+    assert_in_delta 1.0, infiltration.first.constantTermCoefficient, 1e-9
+  end
+
+  # D-19: the reference inherits the PROPOSED's infiltration modulation
+  # (E+ modifier coefficients + schedule) — identical design totals with
+  # asymmetric conventions change delivered infiltration ~2x. A proposed
+  # whose total deviates from the untested 8.4.3.3.(3) default warns.
+  def test_air_leakage_inherits_proposed_convention_and_checks_total
+    model = proposed_model
+    sched = model.alwaysOnDiscreteSchedule
+    model.getSpaceInfiltrationDesignFlowRates.each(&:remove) # fixture defaults would win the donor pick
+    model.getSpaces.each do |space|
+      i = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+      i.setFlowperExteriorSurfaceArea(0.00001) # far below the default -> warn
+      i.setConstantTermCoefficient(0.0)
+      i.setVelocityTermCoefficient(0.224) # DOE-2 wind-driven convention
+      i.setSchedule(sched)
+      i.setSpace(space)
+    end
+    audit = reference(model)
+    i = model.getSpaceInfiltrationDesignFlowRates.min_by(&:nameString)
+    assert_match(/NECB Ref Infiltration/, i.nameString, 'proposed objects replaced')
+    assert_in_delta 0.0, i.constantTermCoefficient, 1e-9, 'wind-driven convention inherited'
+    assert_in_delta 0.224, i.velocityTermCoefficient, 1e-9
+    assert_equal sched.nameString, i.schedule.get.nameString
+    assert(audit.warnings.any? { |w| w[:action] =~ /DEVIATES from the untested 8\.4\.3\.3\.\(3\) default/ },
+           'below-default proposed infiltration warns (permissive direction)')
   end
 
   def test_coverage_emitted_all_16_articles

@@ -238,6 +238,40 @@ module OpenStudioEnvelope
         cleared = { design_flow_rate: model.getSpaceInfiltrationDesignFlowRates.size,
                     effective_leakage_area: model.getSpaceInfiltrationEffectiveLeakageAreas.size,
                     flow_coefficient: model.getSpaceInfiltrationFlowCoefficients.size }
+        # D-19: the reference must model the SAME default the proposed carries
+        # (8.4.4.3.(6) -> 8.4.3.3.(3)) — including its TEMPORAL modulation. The
+        # E+ modifier coefficients (constant/temperature/wind terms) change
+        # delivered infiltration by ~2x between the constant convention (A=1)
+        # and the DOE-2 wind-driven convention (A=0, C=0.224) even at identical
+        # design totals, and an asymmetric pair breaks the comparison. Inherit
+        # the proposed's dominant coefficient set + schedule; fall back to
+        # constant (A=1) when the proposed has no DesignFlowRate infiltration.
+        # Proposed installed total (DesignFlowRate representations only — the
+        # other object types cannot be totalled without weather) for the
+        # 8.4.3.3.(3) default-conformance check below.
+        proposed_total_l_s = nil
+        if model.getSpaceInfiltrationEffectiveLeakageAreas.empty? && model.getSpaceInfiltrationFlowCoefficients.empty?
+          proposed_total_l_s = model.getSpaceInfiltrationDesignFlowRates.sum do |i|
+            next 0.0 if i.space.empty?
+
+            sp = i.space.get
+            mult = sp.multiplier
+            if i.flowperExteriorSurfaceArea.is_initialized then i.flowperExteriorSurfaceArea.get * sp.exteriorArea * mult * 1000.0
+            elsif i.flowperExteriorWallArea.is_initialized then i.flowperExteriorWallArea.get * sp.exteriorWallArea * mult * 1000.0
+            elsif i.designFlowRate.is_initialized then i.designFlowRate.get * mult * 1000.0
+            elsif i.flowperSpaceFloorArea.is_initialized then i.flowperSpaceFloorArea.get * sp.floorArea * mult * 1000.0
+            else 0.0
+            end
+          end
+        end
+        donor = model.getSpaceInfiltrationDesignFlowRates.min_by(&:nameString)
+        coeffs = if donor
+                   { a: donor.constantTermCoefficient, b: donor.temperatureTermCoefficient,
+                     c: donor.velocityTermCoefficient, d: donor.velocitySquaredTermCoefficient,
+                     schedule: (donor.schedule.get if donor.schedule.is_initialized) }
+                 else
+                   { a: 1.0, b: 0.0, c: 0.0, d: 0.0, schedule: nil }
+                 end
         model.getSpaceInfiltrationDesignFlowRates.each(&:remove)
         model.getSpaceInfiltrationEffectiveLeakageAreas.each(&:remove)
         model.getSpaceInfiltrationFlowCoefficients.each(&:remove)
@@ -245,12 +279,30 @@ module OpenStudioEnvelope
           infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
           infiltration.setName("#{space.nameString} NECB Ref Infiltration")
           infiltration.setFlowperExteriorWallArea(i_agw / 1000.0) # m3/s per m2
+          infiltration.setConstantTermCoefficient(coeffs[:a])
+          infiltration.setTemperatureTermCoefficient(coeffs[:b])
+          infiltration.setVelocityTermCoefficient(coeffs[:c])
+          infiltration.setVelocitySquaredTermCoefficient(coeffs[:d])
+          infiltration.setSchedule(coeffs[:schedule]) if coeffs[:schedule]
           infiltration.setSpace(space)
+        end
+        # 8.4.3.3.(3)/(4): an UNTESTED proposed carries this same default. Warn
+        # when the proposed's installed total deviates — below-default proposed
+        # infiltration is a free heating credit (permissive direction).
+        code_total_l_s = c * AIR_LEAKAGE_I75 * envelope_area
+        if proposed_total_l_s && (proposed_total_l_s - code_total_l_s).abs > 0.10 * code_total_l_s
+          audit.warn(:reference, format('proposed infiltration total %.0f L/s DEVIATES from the untested 8.4.3.3.(3) ' \
+                                        'default %.0f L/s by %+.0f%% — only a 3.2.4.2 airtightness test justifies ' \
+                                        'a different value', proposed_total_l_s, code_total_l_s,
+                                        100 * (proposed_total_l_s / code_total_l_s - 1)),
+                     article: '8.4.3.3.(3)-(4)')
         end
         audit.decision(:reference, 'air-leakage default applied',
                        inputs: { i75_l_per_s_m2: AIR_LEAKAGE_I75, flow_exponent: AIR_LEAKAGE_N,
                                  envelope_area_m2: envelope_area.round(1), ag_wall_area_m2: wall_area.round(1),
-                                 proposed_infiltration_objects_cleared: cleared },
+                                 proposed_infiltration_objects_cleared: cleared,
+                                 inherited_coefficients: { a: coeffs[:a], b: coeffs[:b], c: coeffs[:c], d: coeffs[:d],
+                                                           schedule: coeffs[:schedule]&.nameString } },
                        value: "I_AGW = (5/75)^0.6 x #{AIR_LEAKAGE_I75} x #{envelope_area.round(1)}/#{wall_area.round(1)} " \
                               "= #{i_agw.round(4)} L/(s.m2 AG wall), per space as flow-per-exterior-wall-area",
                        article: "#{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)")
