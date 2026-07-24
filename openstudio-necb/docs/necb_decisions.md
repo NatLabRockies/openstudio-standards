@@ -301,3 +301,24 @@ and reference energy; deferred to its own work session).*
 - **Who/when:** filed by phylroy (drafted under D-10 delegation), 2026-07-24.
 - **Evidence:** https://github.com/NatLabRockies/openstudio-standards/issues/2123
   (the former NREL repo — renamed/transferred; GitHub redirects the NREL URL).
+
+## D-18 — Sys-6 zone grouping rewritten to Note (3) of Table 8.4.4.7.-B
+
+- **Decision:** the builder's one-air-handler-per-storey convention (comment
+  claimed "the NECB sys6 convention") has NO code basis and was caught by the
+  archetype fixed-point comparison (our MURB reference built 10 corridor
+  systems where legacy built 1; the code text vindicates legacy). zone_groups
+  now implements Note (3) verbatim: <= 4 above-ground storeys -> ONE system
+  for all storeys; > 4 storeys -> external thermal blocks grouped by facade
+  orientation (N/E/S/W, 45-degree-centred bins), internal blocks one group;
+  underground blocks always one independent group. **Corner blocks** (exterior
+  walls on several facades) bin by LARGEST exterior-wall area among
+  orientations, ties resolving N > E > S > W — deterministic and
+  area-faithful. External/internal/underground classification from surface
+  boundary conditions (Outdoors walls; Ground/Foundation walls with no
+  Outdoors walls = underground).
+- **Who/when:** phylroy directed the fix incl. corner-block handling,
+  2026-07-24; grouping details Claude under D-10.
+- **Evidence:** vav_reheat.rb zone_groups; NECB 2020 8.4.4.7 text (Note (3))
+  retrieved via codes MCP; MURB re-sweep topology (corridors collapse 10 -> 1
+  system, reference converges toward the legacy 2-loop layout).

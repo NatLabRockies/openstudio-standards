@@ -36,24 +36,67 @@ module OpenStudioHVAC
 
       private
 
-      # One air handler per building story (the NECB sys6 convention); zones not assigned
-      # to any story form one additional group.
-      def zone_groups(model, zones)
-        groups = []
-        grouped = []
-        model.getBuildingStorys.sort_by(&:nameString).each do |story|
-          story_zones = story.spaces
-                             .map { |space| space.thermalZone }
-                             .select(&:is_initialized).map(&:get).uniq
-          group = story_zones & zones
-          next if group.empty?
+      # System grouping per NECB Note (3) to Table 8.4.4.7.-B (D-18; the former
+      # one-air-handler-per-storey convention had NO code basis and was caught
+      # by the archetype fixed-point comparison):
+      #   <= 4 above-ground storeys: ONE system serves the thermal blocks of
+      #     all storeys.
+      #   > 4 storeys: EXTERNAL thermal blocks group by facade orientation
+      #     (N/E/S/W, 45-degree-centred bins), INTERNAL blocks form one group,
+      #     each grouping served by a single system.
+      #   UNDERGROUND thermal blocks always form one independent group.
+      # Corner blocks (exterior walls on several facades) bin by the LARGEST
+      # exterior-wall area among orientations; ties resolve N > E > S > W.
+      COMPASS = %w[N E S W].freeze
 
-          groups << group
-          grouped |= group
+      def zone_groups(model, zones)
+        underground, above = zones.partition { |z| underground_zone?(z) }
+        groups = []
+        if OpenStudioHVAC::Costing::Geometry.above_ground_storeys(model) <= 4
+          groups << above unless above.empty?
+        else
+          external, internal = above.partition { |z| facade_wall_areas(z).values.sum > 0.0 }
+          COMPASS.each do |dir|
+            face = external.select { |z| dominant_orientation(z) == dir }
+            groups << face unless face.empty?
+          end
+          groups << internal unless internal.empty?
         end
-        leftovers = zones - grouped
-        groups << leftovers unless leftovers.empty?
+        groups << underground unless underground.empty?
         groups
+      end
+
+      # Below grade: ground-contact walls and no walls to Outdoors.
+      def underground_zone?(zone)
+        walls = zone.spaces.flat_map { |s| s.surfaces.select { |srf| srf.surfaceType == 'Wall' } }
+        walls.none? { |w| w.outsideBoundaryCondition == 'Outdoors' } &&
+          walls.any? { |w| w.outsideBoundaryCondition =~ /Ground|Foundation/i }
+      end
+
+      # Exterior wall area per compass bin (azimuth from outward normal).
+      def facade_wall_areas(zone)
+        areas = Hash.new(0.0)
+        zone.spaces.each do |space|
+          space.surfaces.each do |srf|
+            next unless srf.surfaceType == 'Wall' && srf.outsideBoundaryCondition == 'Outdoors'
+
+            az = (OpenStudio.radToDeg(srf.azimuth) + space.directionofRelativeNorth +
+                  space.model.getBuilding.northAxis) % 360.0
+            dir = case az
+                  when 45...135 then 'E'
+                  when 135...225 then 'S'
+                  when 225...315 then 'W'
+                  else 'N'
+                  end
+            areas[dir] += srf.grossArea
+          end
+        end
+        areas
+      end
+
+      def dominant_orientation(zone)
+        areas = facade_wall_areas(zone)
+        COMPASS.max_by { |d| [areas[d], -COMPASS.index(d)] }
       end
 
       def build_air_loop(model, group, heating_coil_type:, baseboard_type:, hw_loop:, chw_loop:, namer:)
