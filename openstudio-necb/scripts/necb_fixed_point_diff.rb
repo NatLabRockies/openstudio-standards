@@ -26,13 +26,19 @@ end
 def opt(v) = v.respond_to?(:is_initialized) ? (v.is_initialized ? v.get : nil) : v
 
 def surface_u(model)
+  # Ground/Foundation surfaces INCLUDED — the Outdoors-only version had a
+  # blind spot that hid the Warehouse slab divergence for three diff passes
+  # (D-32: 4,598 m2 of it).
   us = Hash.new { |h, k| h[k] = [] }
   model.getSurfaces.each do |s|
-    next unless s.outsideBoundaryCondition == 'Outdoors'
-
+    prefix = case s.outsideBoundaryCondition
+             when 'Outdoors' then ''
+             when 'Ground', 'Foundation', 'GroundFCfactorMethod', 'GroundSlabPreprocessorAverage' then 'ground '
+             else next
+             end
     c = opt(s.construction) or next
     u = c.thermalConductance
-    us["#{s.surfaceType.downcase} U"] << u.get.round(3) if u.is_initialized
+    us["#{prefix}#{s.surfaceType.downcase} U"] << u.get.round(3) if u.is_initialized
   end
   us.transform_values { |v| v.tally.max_by { |_, n| n }[0] } # dominant value
 end
