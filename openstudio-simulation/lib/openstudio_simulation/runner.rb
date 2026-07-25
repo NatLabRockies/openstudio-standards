@@ -19,13 +19,31 @@ module OpenStudioSimulation
     end
 
     # Attach an EPW + its design days (required before any sizing run).
+    #
+    # Design days are REPLACED, not appended (a model that already carries
+    # design days — every legacy archetype does — would otherwise size on
+    # duplicates), and filtered to the 99.6% heating / 0.4% cooling extremes,
+    # the same convention as legacy model_add_design_days_and_weather_file.
+    # A full DDY carries ~40 entries including monthly and shoulder-season
+    # cooling days; sizing plant equipment on those breaks E+'s cooling-tower
+    # UA autosizing ("Bad starting values for UA" — found by the LargeOffice
+    # archetype, the only proposed with a tower).
     def attach_weather!(model, epw:, ddy:)
       epw_file = OpenStudio::EpwFile.new(OpenStudio::Path.new(epw))
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       workspace = OpenStudio::EnergyPlus.loadAndTranslateIdf(ddy)
       raise(ArgumentError, "could not parse design days from #{ddy}") if workspace.empty?
 
-      workspace.get.getDesignDays.each { |dd| model.addObject(dd.clone) }
+      model.getDesignDays.each(&:remove)
+      # legacy model_set_design_days default list — NOT a bare /.4%/, which
+      # would also pull the MONTHLY .4% days (a January cooling day's ~2C
+      # wet-bulb is what actually breaks the tower UA solve)
+      keep = [/Htg 99.6. Condns DB/, /Clg .4% Condns DB=>MWB/, /Clg 0.4% Condns DB=>MCWB/, /Clg .4. Condns WB=>MDB/]
+      extremes = workspace.get.getDesignDays.select { |dd| keep.any? { |re| dd.nameString =~ re } }
+      extremes = workspace.get.getDesignDays if extremes.empty? # odd DDY: keep everything rather than none
+      extremes.each { |dd| model.addObject(dd.clone) }
+      raise(ArgumentError, "no design days found in #{ddy}") if model.getDesignDays.empty?
+
       model
     end
 

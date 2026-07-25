@@ -45,6 +45,18 @@ module OpenStudioEnvelope
       end
     end
 
+    # Both faces of an assembly separating conditioned from enclosed
+    # unconditioned space see INTERIOR films (attic ceilings, walls to
+    # unheated storage, floors over crawlspaces).
+    def film_r_interzone(surface)
+      case surface.to_s
+      when 'wall' then 2 * FILM_R_SI[:int_vertical]
+      when 'roofceiling' then 2 * FILM_R_SI[:int_up]
+      when 'floor' then 2 * FILM_R_SI[:int_down]
+      else 0.0
+      end
+    end
+
     # Clone the construction AND every layer material (a bare Construction#clone
     # shares material objects, so solving one construction's insulation would mutate
     # every other construction using the same material — port of the legacy

@@ -6,8 +6,11 @@
 # reference pipeline should approximately reproduce it. Every difference is
 # one of: (a) a logged interpretation divergence (D-XX), (b) a reference-only
 # rule the archetype doesn't carry, or (c) a genuine defect in one lineage.
-# Compares the legacy input OSM vs the pipeline's reference model
-# (sweep_run_<type>/reference_sizing/in.osm from necb_archetype_sweep.rb).
+# Compares the legacy input OSM vs the pipeline's FINAL reference model
+# (sweep_run_<type>/reference_annual/in.osm — post-sizing efficiencies, ERV
+# determination and pump transfer applied; falls back to reference_sizing
+# when the sweep ran in sizing-only mode). Object-level and fast: no
+# simulation, just model loads.
 # Usage: ruby scripts/necb_fixed_point_diff.rb [types...]
 
 require 'openstudio'
@@ -42,6 +45,9 @@ def lpd_by_space_type(model)
 end
 
 def hvac_signature(model)
+  fans = (model.getFanConstantVolumes + model.getFanVariableVolumes + model.getFanOnOffs)
+  pumps = model.getPumpConstantSpeeds + model.getPumpVariableSpeeds
+  spms = model.getSetpointManagers
   {
     'air loops' => model.getAirLoopHVACs.size,
     'coil types' => (model.getAirLoopHVACs.flat_map do |l|
@@ -49,20 +55,36 @@ def hvac_signature(model)
                         .grep(/Coil|Fan|HeatExchanger/)
     end).tally.sort.to_h,
     'plant loops' => model.getPlantLoops.size,
-    'boiler eff' => model.getBoilerHotWaters.map { |b| b.nominalThermalEfficiency.round(3) }.uniq,
-    'chiller COP' => model.getChillerElectricEIRs.map { |c| c.referenceCOP.round(2) }.uniq,
-    'DX cool COP' => model.getCoilCoolingDXSingleSpeeds.map { |c| opt(c.ratedCOP)&.round(2) }.uniq,
+    'boiler eff' => model.getBoilerHotWaters.map { |b| b.nominalThermalEfficiency.round(3) }.uniq.sort,
+    'chiller COP' => model.getChillerElectricEIRs.map { |c| c.referenceCOP.round(2) }.uniq.sort,
+    'DX cool COP' => model.getCoilCoolingDXSingleSpeeds.map { |c| opt(c.ratedCOP)&.round(2) }.uniq.sort,
+    'DX heat COP' => model.getCoilHeatingDXSingleSpeeds.map { |c| c.ratedCOP.round(2) }.uniq.sort,
+    'fan Pa (rise)' => fans.map { |f| f.pressureRise.round(0) }.tally.sort.to_h,
+    'fan total eff' => fans.map { |f| f.fanTotalEfficiency.round(3) }.uniq.sort,
+    'pump W (hard)' => pumps.filter_map { |p| opt(p.ratedPowerConsumption)&.round(0) }.uniq.sort,
+    'pump head Pa' => pumps.filter_map { |p| opt(p.ratedPumpHead)&.round(0) }.uniq.sort,
+    'tower fan W' => model.getCoolingTowerSingleSpeeds.filter_map { |t| opt(t.fanPoweratDesignAirFlowRate)&.round(0) },
+    'tower count' => model.getCoolingTowerSingleSpeeds.size,
+    'SPM types' => spms.map { |s| s.iddObjectType.valueName.sub('OS_SetpointManager_', '') }.tally.sort.to_h,
+    'economizer' => model.getControllerOutdoorAirs.map(&:getEconomizerControlType).tally.sort.to_h,
     'ERVs' => model.getHeatExchangerAirToAirSensibleAndLatents.size,
+    'ERV sens eff @100% heat' => model.getHeatExchangerAirToAirSensibleAndLatents.map { |e| opt(e.sensibleEffectivenessat100HeatingAirFlow)&.round(2) }.uniq.sort,
+    'terminal min flow m3/s' => model.getAirTerminalSingleDuctVAVReheats.filter_map { |t| opt(t.fixedMinimumAirFlowRate)&.round(3) }.uniq.sort.first(6),
+    'terminal reheat frac' => model.getAirTerminalSingleDuctVAVReheats.map { |t| opt(t.maximumFlowFractionDuringReheat)&.round(2) }.uniq.sort_by(&:to_f),
     'zone equipment' => model.getThermalZones.flat_map { |z| z.equipment.map { |e| e.iddObjectType.valueName.sub('OS_', '').sub('ZoneHVAC_', '') } }.tally.sort.to_h,
     'baseboards' => model.getZoneHVACBaseboardConvectiveWaters.size + model.getZoneHVACBaseboardConvectiveElectrics.size,
-    'infiltration flow/ext area' => model.getSpaceInfiltrationDesignFlowRates.filter_map { |i| opt(i.flowperExteriorSurfaceArea)&.round(5) }.uniq,
-    'SWH heater eff' => model.getWaterHeaterMixeds.map { |w| opt(w.heaterThermalEfficiency)&.round(3) }.uniq
+    'infiltration flow/ext area' => model.getSpaceInfiltrationDesignFlowRates.filter_map { |i| opt(i.flowperExteriorSurfaceArea)&.round(5) }.uniq.sort,
+    'infiltration objects' => model.getSpaceInfiltrationDesignFlowRates.size,
+    'SWH heater eff' => model.getWaterHeaterMixeds.map { |w| opt(w.heaterThermalEfficiency)&.round(3) }.uniq.sort,
+    'SWH tank m3' => model.getWaterHeaterMixeds.map { |w| opt(w.tankVolume)&.round(3) }.uniq.sort_by(&:to_f)
   }
 end
 
 TYPES.each do |type|
   legacy_path = File.join(CACHE, "sweep_necb2020_#{type.downcase}.osm")
-  ref_path = File.join(CACHE, "sweep_run_#{type.downcase}", 'reference_sizing', 'in.osm')
+  ref_path = %w[reference_annual reference_sizing]
+             .map { |d| File.join(CACHE, "sweep_run_#{type.downcase}", d, 'in.osm') }
+             .find { |p| File.exist?(p) }.to_s
   unless File.exist?(legacy_path) && File.exist?(ref_path)
     puts "#{type}: MISSING (#{legacy_path} / #{ref_path})"
     next

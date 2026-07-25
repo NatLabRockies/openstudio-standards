@@ -562,3 +562,115 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 (A1-A5) remain with phylroy.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-23 — Film convention: table U is OVERALL transmittance (default flipped)
+
+The object-level fixed-point diff (phylroy's "compare the OSM objects"
+approach) showed every legacy archetype wall at construction conductance
+0.276 vs our reference 0.265. Decoded exactly: legacy NECB2020 prototypes
+build constructions via OSut TBD.genConstruction, whose uo is documented
+"desired Uo factor (WITH air film resistance)" (wall film 0.150, roof
+0.140) -> construction-only 1/(1/0.265-0.150)=0.276, 1/(1/0.156-0.140)=
+0.159. The NECB 1.4.1.2 definition settles who is right: overall thermal
+transmittance "reflects ... air films on both faces of above-ground
+components" [READ, MCP]. Our include_films: false default (comment claimed
+it "matches legacy BTAP" — true of the OLD BTAP path, not of what NECB2020
+prototypes actually run) was ~4% OVER-stringent on walls.
+
+Decision: include_films now defaults TRUE (module + facade). Exemptions:
+SimpleGlazing fenestration takes the table value directly (its uFactor IS
+the with-films value; legacy agrees — archetype windows carry 1.9/2.69
+verbatim). Mechanism-parity test passes include_films: false explicitly
+(it gates the BTAP mechanism, not the convention). film_r values match
+OSut within rounding (wall 0.1497/0.150, roof 0.1374/0.140, floor
+0.192/0.190). Pins updated: wall 0.27595, roof 0.15942, ground floor
+0.86283.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-24 — Envelope scope: unconditioned spaces out, interzone assemblies in
+
+Second object-diff finding: the Restaurant reference carried an attic DECK
+at U 0.156 while legacy leaves it uninsulated (4.461) and insulates the
+ceiling. Both our prescriptive AND reference transforms iterated ALL
+Outdoors/Ground surfaces and skipped ALL interzone surfaces — backwards on
+both counts per the 1.4.1.2 "building envelope" definition (separates
+CONDITIONED space from unconditioned/exterior/ground).
+
+Decision (implemented in Prescriptive.apply, shared by the reference
+transform):
+- surfaces of unconditioned spaces (inside_envelope? = partofTotalFloorArea,
+  with the legacy space_conditioning_category tag honoured so tagged plenums
+  count as inside) are LEFT UNTOUCHED (audited info, 1.4.1.2.);
+- assemblies separating conditioned from enclosed unconditioned space are
+  envelope: Table 3.2.2.2 row by INCLINATION (3.1.1.7.(6) — surfaceType
+  encodes it), the enclosure credited at U 6.25 per 3.1.1.7.(4), interior
+  films both faces. Attic ceiling target: 1/(1/0.156-0.16-0.215)=0.16569.
+  Paired surface gets the same construction.
+- the same inside_envelope? predicate now drives the 8.4.3.3 air-leakage S
+  and the lightweight rebuild (attic decks keep real constructions).
+
+DIVERGENCE from legacy, logged not adopted: legacy OSut applies the
+exposed-FLOOR row (0.175) to attic ceilings ("iAtticFloor" with
+uo=eFloorU). 3.1.1.7.(6) classifies horizontal top-of-conditioned-space
+assemblies as ROOF assemblies; the floor-row reading is more lenient with
+no inclination-rule basis. Ours: roof row + enclosure credit -> overall
+0.1602 effective vs legacy's 0.175-equivalent. Candidate legacy ledger row
+(attic ceiling row choice) — filed as L-18.
+
+Pinned by test_attic_scope_deck_untouched_ceiling_retargeted (deck
+construction unchanged; ceiling at 0.16569; pair shares the construction).
+Fleet impact: reference walls ~4% less insulated (reference energy UP
+slightly, % of target DOWN) — full-fleet re-sweep queued behind the
+17-archetype run.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-25 — Runner design-day attach: replace + filter to annual extremes
+
+LargeOffice (the only archetype whose PROPOSED carries a cooling tower)
+crashed E+ sizing: "Bad starting values for UA". Root cause chain: (1)
+Runner.attach_weather! APPENDED the full DDY onto models that already carry
+design days -> 81 SizingPeriod:DesignDay objects with duplicates; (2) a
+first-cut filter regex (/.4%/) still matched the MONTHLY .4% design days —
+a January cooling day's ~2C wet-bulb makes the tower UA regula-falsi
+bracket infeasible. Legacy sizing runs use 3 design days (verified in the
+generation's SR2 in.idf).
+
+Fix: attach_weather! now REMOVES existing design days and imports only the
+legacy model_set_design_days default list (Htg 99.6% DB, Clg .4% DB=>MWB /
+0.4% DB=>MCWB, Clg .4% WB=>MDB), falling back to the full set only when a
+DDY matches nothing. NOTE: every earlier sweep sized on the duplicated
+81-DD set; the magnitude of that effect on prior fleet numbers is
+UNVERIFIED until the post-D-23/D-24 re-sweep (which uses the corrected
+attach throughout) lands.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-26 — Tower fan sums the condenser loop; sized tower hydraulics hardened
+
+Two-part follow-up to T2, exposed by LargeOffice (the first two-chiller +
+tower fleet member):
+
+1. apply_tower_rules computed rejection from the PRIMARY chiller argument
+   alone. A two-chiller plant (8.4.4.10.(6) split) halves per-chiller
+   capacity, so the tower fan came out at half the code value. Now a
+   dedicated pass AFTER all chiller capacities are final: rejection = SUM of
+   sized capacities x (1+1/COP) over the loop's chillers (parked 0.001 W
+   secondaries contribute ~0 — correct). Pinned by
+   test_tower_fan_power_sums_chillers_on_loop.
+
+2. Even with the correct fan, re-running sizing with a HARD code fan crashes
+   E+ ("Bad starting values for UA"): E+ derives autosized tower air flow
+   FROM fan power, then solves UA by regula falsi — empirically the solve
+   fails for THIS plant at hard fans of 17-30 kW while the 15.9 kW autosize
+   and 39.3 kW both pass [RAN, standalone E+ bisect]. Legacy sets the same
+   0.013 kW/kW pre-sizing and merely happens to sit outside the band
+   (proposed air/load 0.0348 passes; ours 0.0341 failed). Fix: when the
+   post-sizing pass sets the Table 5.2.12.2 fan, it FIRST hardens the sizing
+   run's solved water flow / air flow / UA / free-convection values on the
+   tower — later runs have nothing to re-solve; the code fan is a parasitic
+   override on E+'s self-consistent heat-transfer sizing. The code governs
+   fan POWER, not UA, so this is faithful.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.

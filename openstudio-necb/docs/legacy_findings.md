@@ -37,3 +37,10 @@ theme completes (L-3/L-4/L-5 are one infiltration-areas issue).
 | L-15 | hvac_system_4: control-zone cooling design SAT difference set twice (second call passes the heating 21 K value); heating input method never set | UNFILED | beh-audit #15 |
 | L-16 | Unlisted space types hard-raise instead of the 8.4.4.7.(3) closest-type fallback | UNFILED (works only because JSONs pre-map all types) | sel-audit #5 |
 | L-17 | No 8.4.4.14 pump part-load coefficients anywhere (VS pumps keep OS default linear) | UNFILED | plant-audit #11 |
+
+## Added 2026-07-25 (object-level fixed-point diff, D-23/D-24)
+
+| # | Finding | Status | Evidence |
+|---|---|---|---|
+| L-18 | Attic ceiling U row: OSut construction sets apply the exposed-FLOOR row (uo=eFloorU, 0.175 at HDD 3890) to the ceiling below an attic; 3.1.1.7.(6) classifies horizontal top-of-conditioned-space assemblies as ROOF assemblies (0.156 + 3.1.1.7.(4) enclosure credit). Lenient by ~9% on the attic boundary | DIFFERENCE — ours follows the inclination rule (D-24) | D-24 |
+| L-19 | Two coexisting legacy construction paths disagree on the film convention by ~4%: OSut/TBD.genConstruction (NECB2020 prototypes) treats table U as OVERALL transmittance incl. films (code-literal per 1.4.1.2); BTAP apply_standard_construction_properties/customize_opaque_construction sets table U as construction-only conductance (over-stringent). Same table, two answers, path-dependent | UNFILED | D-23 |

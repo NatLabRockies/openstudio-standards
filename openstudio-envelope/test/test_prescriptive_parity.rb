@@ -65,9 +65,13 @@ class TestPrescriptiveParity < Minitest::Test
     legacy_c = surface_conductances(legacy_model)
 
     gem_model = attach_weather!(load_fixture)
-    # same starting constructions as the legacy path so base assemblies match
+    # same starting constructions as the legacy path so base assemblies match.
+    # include_films: false — this is a MECHANISM-parity gate against legacy
+    # apply_standard_construction_properties (BTAP, construction-only
+    # conductance); the gem's default is include_films: true (code-literal,
+    # matching the OSut path the NECB2020 prototypes actually use).
     std.model_add_constructions(gem_model)
-    OpenStudioEnvelope::NECB.apply_prescriptive(gem_model, vintage: '2020')
+    OpenStudioEnvelope::NECB.apply_prescriptive(gem_model, vintage: '2020', include_films: false)
     gem_c = surface_conductances(gem_model)
 
     mismatches = legacy_c.keys.filter_map do |name|

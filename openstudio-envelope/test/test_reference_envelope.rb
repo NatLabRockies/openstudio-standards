@@ -133,7 +133,8 @@ class TestReferenceEnvelope < Minitest::Test
     assert_match(/Lightweight/, c.nameString)
     assert_equal 1, c.layers.size
     assert c.layers.first.to_MasslessOpaqueMaterial.is_initialized, 'zero thermal mass'
-    assert_in_delta 0.265, c.thermalConductance.to_f, 1e-3, 'Ut unchanged by the lightweight rebuild'
+    # 0.27595 = 1/(1/0.265 - wall films): table U incl. films (default convention)
+    assert_in_delta 0.27595, c.thermalConductance.to_f, 1e-3, 'Ut unchanged by the lightweight rebuild'
 
     infiltration = model.getSpaceInfiltrationDesignFlowRates
     assert_equal model.getSpaces.size, infiltration.size

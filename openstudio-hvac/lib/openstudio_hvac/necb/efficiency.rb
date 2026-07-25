@@ -65,6 +65,7 @@ module OpenStudioHVAC
         cooling_plant = plant_rules.fetch('cooling_plant')
         model.getBoilerHotWaters.sort_by(&:nameString).each { |b| apply_boiler(b, tables, heating_plant, audit) }
         model.getChillerElectricEIRs.sort_by(&:nameString).each { |c| apply_chiller(c, tables, cooling_plant, audit) }
+        apply_tower_rules(model, audit) # after ALL chiller capacities are final — the tower sees the loop SUM
         model.getCoilCoolingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_cooling(c, tables, audit) }
         model.getCoilHeatingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating(c, tables, audit) }
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
@@ -521,7 +522,6 @@ module OpenStudioHVAC
 
         cop = kw_per_ton_to_cop(kw_per_ton)
         chiller.setReferenceCOP(cop)
-        apply_tower_rules(chiller, capacity_w, audit) if name.include?('Primary Chiller')
         chiller.setName("#{name} #{tons.round}tons #{kw_per_ton.round(1)}kW/ton")
         audit&.decision(:efficiency, 'chiller efficiency applied', target: name,
                         inputs: { cooling_type: cooling_type, compressor: compressor, tons: tons.round(1) },
@@ -529,36 +529,72 @@ module OpenStudioHVAC
                         article: 'NECB 2020 Table 5.2.12.1 (chillers)')
       end
 
-      # Legacy tower rules: cells per 1750 kW of heat rejection; fan power 1.5% of
-      # rejection when above the 13 kW EnergyPlus small-tower threshold.
-      def apply_tower_rules(chiller, capacity_w, audit)
-        loop = chiller.condenserWaterLoop
-        return unless loop.is_initialized
+      # Legacy tower rules: cells per 1750 kW of heat rejection; fan at the
+      # Table 5.2.12.2 maximum. Runs as its OWN pass after every chiller
+      # capacity is final: the tower rejects heat for EVERY chiller on its
+      # condenser loop, and a two-chiller plant (8.4.4.10.(6) split) halves
+      # the per-chiller capacity — sizing the fan from the Primary alone
+      # starves E+'s fan-power-derived autosized air flow until the tower UA
+      # solve fails ("Bad starting values for UA"; found by the LargeOffice
+      # archetype, the first two-chiller+tower fleet member).
+      def apply_tower_rules(model, audit)
+        model.getPlantLoops.sort_by(&:nameString).each do |loop|
+          towers = loop.supplyComponents
+                       .select { |c| c.to_CoolingTowerSingleSpeed.is_initialized }
+                       .map { |c| c.to_CoolingTowerSingleSpeed.get }
+          next if towers.empty?
 
-        towers = loop.get.supplyComponents
-                     .select { |c| c.to_CoolingTowerSingleSpeed.is_initialized }
-                     .map { |c| c.to_CoolingTowerSingleSpeed.get }
-        return if towers.empty?
+          chillers = loop.demandComponents
+                         .select { |c| c.to_ChillerElectricEIR.is_initialized }
+                         .map { |c| c.to_ChillerElectricEIR.get }
+          tower_cap = chillers.sum do |ch|
+            cap = optional_f(ch.referenceCapacity) || optional_f(ch.autosizedReferenceCapacity)
+            cap.nil? ? 0.0 : cap * (1.0 + 1.0 / ch.referenceCOP)
+          end
+          if tower_cap <= 0.0
+            audit&.warn(:efficiency, 'condenser loop has a tower but no readable chiller capacity — tower rules not applied',
+                        target: towers[0].nameString)
+            next
+          end
 
-        tower_cap = capacity_w * (1.0 + 1.0 / chiller.referenceCOP)
-        # 8.4.4.11.(2)-(3): one cell up to 1750 kW; above, capacity/1750 rounded UP
-        cells = tower_cap / 1000.0 <= 1750 ? 1 : (tower_cap / (1000.0 * 1750)).ceil
-        towers[0].setNumberofCells(cells)
-        # Table 5.2.12.2 (NECB 2015+ incl. 2020/2025): axial direct-contact tower
-        # fan <= 0.013 kW/kW rejection — NOT the 2011 value 0.015 (T2, audit
-        # 2026-07-25; legacy NECB2015 override uses 0.013). Below the 13 kW
-        # small-tower threshold the E+ default fan sizing stands.
-        fan_w = 0.013 * tower_cap
-        towers[0].setFanPoweratDesignAirFlowRate(fan_w) if fan_w > 13_000.0
-        audit&.decision(:efficiency, 'cooling tower cells set from heat rejection',
-                        target: towers[0].nameString,
-                        inputs: { tower_cap_kw: (tower_cap / 1000.0).round(1) },
-                        value: "#{cells} cell(s)", article: '8.4.4.11.(2)-(3)')
-        if fan_w > 13_000.0
-          audit&.decision(:efficiency, 'cooling tower fan power set at the Table 5.2.12.2 maximum',
+          # 8.4.4.11.(2)-(3): one cell up to 1750 kW; above, capacity/1750 rounded UP
+          cells = tower_cap / 1000.0 <= 1750 ? 1 : (tower_cap / (1000.0 * 1750)).ceil
+          towers[0].setNumberofCells(cells)
+          # Table 5.2.12.2 (NECB 2015+ incl. 2020/2025): axial direct-contact tower
+          # fan <= 0.013 kW/kW rejection — NOT the 2011 value 0.015 (T2, audit
+          # 2026-07-25; legacy NECB2015 override uses 0.013). Below the 13 kW
+          # small-tower threshold the E+ default fan sizing stands.
+          fan_w = 0.013 * tower_cap
+          if fan_w > 13_000.0
+            # Harden the sizing run's tower hydraulics BEFORE overriding the fan:
+            # E+ derives autosized tower air flow FROM fan power and then solves
+            # UA by regula falsi — re-running sizing with a hard code fan lands
+            # in an infeasible solver band ("Bad starting values for UA";
+            # LargeOffice fails at 17-30 kW while its 15.9 kW autosize and
+            # 39.3 kW both pass — legacy clears the band by luck). Pinning
+            # water/air/UA at their solved values leaves nothing to re-solve;
+            # Table 5.2.12.2 governs fan POWER only, so the code fan rides on
+            # E+'s self-consistent heat-transfer sizing.
+            { autosizedDesignWaterFlowRate: :setDesignWaterFlowRate,
+              autosizedDesignAirFlowRate: :setDesignAirFlowRate,
+              autosizedUFactorTimesAreaValueatDesignAirFlowRate: :setUFactorTimesAreaValueatDesignAirFlowRate,
+              autosizedAirFlowRateinFreeConvectionRegime: :setAirFlowRateinFreeConvectionRegime,
+              autosizedUFactorTimesAreaValueatFreeConvectionAirFlowRate: :setUFactorTimesAreaValueatFreeConvectionAirFlowRate }.each do |getter, setter|
+              v = towers[0].public_send(getter)
+              towers[0].public_send(setter, v.get) if v.respond_to?(:is_initialized) && v.is_initialized
+            end
+            towers[0].setFanPoweratDesignAirFlowRate(fan_w)
+          end
+          audit&.decision(:efficiency, 'cooling tower cells set from heat rejection',
                           target: towers[0].nameString,
-                          inputs: { kw_per_kw: 0.013, tower_cap_kw: (tower_cap / 1000.0).round(1) },
-                          value: "fan #{(fan_w / 1000.0).round(1)} kW", article: 'Table 5.2.12.2')
+                          inputs: { tower_cap_kw: (tower_cap / 1000.0).round(1), chillers_on_loop: chillers.size },
+                          value: "#{cells} cell(s)", article: '8.4.4.11.(2)-(3)')
+          if fan_w > 13_000.0
+            audit&.decision(:efficiency, 'cooling tower fan power set at the Table 5.2.12.2 maximum',
+                            target: towers[0].nameString,
+                            inputs: { kw_per_kw: 0.013, tower_cap_kw: (tower_cap / 1000.0).round(1) },
+                            value: "fan #{(fan_w / 1000.0).round(1)} kW", article: 'Table 5.2.12.2')
+          end
         end
       end
 

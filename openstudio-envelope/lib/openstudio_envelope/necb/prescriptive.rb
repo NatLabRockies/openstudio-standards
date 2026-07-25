@@ -9,9 +9,21 @@ module OpenStudioEnvelope
     # default construction sets are left untouched; parity with the legacy
     # default-set path is by resulting per-surface conductance.
     #
-    # include_films: false (default) matches legacy BTAP (construction-only
-    # conductance); true treats the table value as overall transmittance and solves
-    # the construction to 1/(1/U - R_films). The choice is always audited.
+    # include_films: true (default) treats the table value as OVERALL thermal
+    # transmittance and solves the construction to 1/(1/U - R_films) — the
+    # 1.4.1.2 definition says U "reflects ... air films on both faces of
+    # above-ground components", and the legacy OSut construction path
+    # (TBD.genConstruction, NECB2020 prototypes) does the same. false applies
+    # the table value as construction-only conductance (the OLD legacy BTAP
+    # apply_standard_construction_properties convention, ~4% more stringent
+    # on walls — kept for mechanism-parity tests). The choice is always audited.
+    #
+    # Scope follows the 1.4.1.2 "building envelope" definition: surfaces of
+    # unconditioned spaces (attics, crawlspaces) are NOT envelope and keep
+    # their constructions; assemblies separating conditioned space from
+    # enclosed unconditioned space ARE envelope — they get the Table 3.2.2.2
+    # row for their inclination (3.1.1.7.(6)) with the unconditioned
+    # enclosure credited at U 6.25 per 3.1.1.7.(4).
     module Prescriptive
       module_function
 
@@ -23,25 +35,42 @@ module OpenStudioEnvelope
 
       SURFACE_CLASS = { 'Wall' => 'wall', 'RoofCeiling' => 'roofceiling', 'Floor' => 'floor' }.freeze
 
+      # 3.1.1.7.(4): an enclosed unconditioned space protecting an envelope
+      # component may be considered to have an overall U of 6.25 W/(m2.K).
+      ENCLOSURE_R = 1.0 / 6.25
+
       def apply(model, vintage:, hdd: nil, apply_fdwr: false, apply_srr: false,
-                include_films: false, thermal_bridging: nil, audit: nil)
+                include_films: true, thermal_bridging: nil, audit: nil)
         audit ||= AuditLog.new
         hdd = Climate.hdd18(model, hdd: hdd, audit: audit)
         raise(ArgumentError, 'HDD unresolvable: pass hdd: explicitly or set a weather file') if hdd.nil?
 
         audit.info(:prescriptive, 'film convention',
-                   value: include_films ? 'code-literal: table U treated as overall transmittance (films subtracted)' \
-                                        : 'legacy-compatible: table U applied as construction-only conductance',
-                   article: '3.1.1.7 note')
+                   value: include_films ? 'code-literal: table U treated as overall transmittance incl. air films (1.4.1.2 definition; films subtracted from construction)' \
+                                        : 'legacy-BTAP-compatible: table U applied as construction-only conductance',
+                   article: '1.4.1.2.')
 
         cache = {}
         window_construction = nil
         skylight_construction = nil
 
+        outside_envelope = 0
         model.getSurfaces.sort_by(&:nameString).each do |surface|
-          boundary = boundary_of(surface)
           surface_class = SURFACE_CLASS[surface.surfaceType]
-          next if boundary.nil? || surface_class.nil?
+          next if surface_class.nil?
+
+          # 1.4.1.2: surfaces of unconditioned spaces are not building envelope.
+          space = surface.space
+          if space.is_initialized && !inside_envelope?(space.get)
+            outside_envelope += 1 unless boundary_of(surface).nil?
+            next
+          end
+
+          boundary = boundary_of(surface)
+          if boundary.nil?
+            assign_interzone_envelope(model, surface, surface_class, vintage, hdd, include_films, cache, audit)
+            next
+          end
 
           assign_surface(model, surface, surface_class, boundary, vintage, hdd, include_films, cache, audit)
           surface.subSurfaces.sort_by(&:nameString).each do |sub|
@@ -57,6 +86,12 @@ module OpenStudioEnvelope
             window_construction ||= construction if sub_class == 'window'
             skylight_construction ||= construction if sub_class == 'skylight'
           end
+        end
+
+        if outside_envelope.positive?
+          audit.info(:prescriptive,
+                     'exterior/ground surfaces of unconditioned spaces left untouched — not part of the building envelope',
+                     inputs: { surfaces: outside_envelope }, article: '1.4.1.2.')
         end
 
         if apply_fdwr
@@ -90,6 +125,65 @@ module OpenStudioEnvelope
         when 'Outdoors' then 'outdoors'
         when 'Ground', 'Foundation', 'GroundFCfactorMethod', 'GroundSlabPreprocessorAverage' then 'ground'
         end
+      end
+
+      # Inside the building envelope = conditioned or indirectly conditioned.
+      # partofTotalFloorArea is the primary signal (same predicate as the
+      # 8.4.3.3 air-leakage transform); spaces tagged with the legacy
+      # space_conditioning_category property count as inside unless tagged
+      # 'unconditioned' (legacy tags plenums 'nonresconditioned' — indirectly
+      # conditioned, thermal block (c) of the 1.4.1.2 definition).
+      def inside_envelope?(space)
+        return true if space.partofTotalFloorArea
+
+        tag = space.additionalProperties.getFeatureAsString('space_conditioning_category')
+        tag.is_initialized && tag.get.casecmp('unconditioned') != 0
+      end
+
+      # Assemblies separating conditioned space from ENCLOSED UNCONDITIONED
+      # space (attic ceilings, walls to unheated storage, floors over
+      # crawlspaces) are building envelope per 1.4.1.2 and must meet the
+      # Table 3.2.2.2 row for their inclination (3.1.1.7.(6) — surfaceType
+      # already encodes it). The unconditioned enclosure is credited at
+      # U 6.25 per 3.1.1.7.(4); both faces see interior air films. The
+      # paired surface gets the same construction so the pair stays
+      # consistent. (Legacy OSut instead applies the exposed-FLOOR row to
+      # attic ceilings — floor 0.175 vs roof 0.156 at HDD 3890 — a more
+      # lenient reading with no inclination-rule basis; divergence logged.)
+      def assign_interzone_envelope(model, surface, surface_class, vintage, hdd, include_films, cache, audit)
+        return unless surface.outsideBoundaryCondition == 'Surface'
+
+        adj = surface.adjacentSurface
+        return if adj.empty?
+
+        adj_space = adj.get.space
+        return if adj_space.empty? || inside_envelope?(adj_space.get)
+
+        construction = surface.construction
+        if construction.empty? || construction.get.to_Construction.empty?
+          audit.warn(:prescriptive, 'envelope surface to unconditioned space has no layered construction — skipped',
+                     target: surface.nameString)
+          return
+        end
+
+        u = NECB.max_u(vintage: vintage, surface: surface_class, boundary: 'outdoors', hdd: hdd)
+        r = (1.0 / u) - ENCLOSURE_R
+        r -= Constructions.film_r_interzone(surface_class) if include_films
+        target = 1.0 / r
+        key = [construction.get.handle.to_s, surface_class, 'interzone', target]
+        cache[key] ||= begin
+          c = Constructions.opaque_at_conductance(model, construction.get.to_Construction.get, target)
+          audit.decision(:prescriptive,
+                         "envelope #{surface_class} to enclosed unconditioned space set to maximum U " \
+                         '(row by inclination; enclosure credited at U 6.25)',
+                         target: c.nameString,
+                         inputs: { hdd: hdd, table_u: u.round(4), target_u_construction: target.round(4) },
+                         value: "conductance #{c.thermalConductance.to_f.round(4)} W/m2K",
+                         article: 'Table 3.2.2.2.; 3.1.1.7.(4)')
+          c
+        end
+        surface.setConstruction(cache[key])
+        adj.get.setConstruction(cache[key])
       end
 
       def target_conductance(vintage, surface_class, boundary, hdd, include_films, audit)
@@ -129,10 +223,13 @@ module OpenStudioEnvelope
         end
 
         base = construction.get.to_Construction.get
-        target = target_conductance(vintage, sub_class, 'outdoors', hdd, include_films, audit)
+        # SimpleGlazing's uFactor IS the overall (with-films) value — films are
+        # E+'s job there; only opaque doors get the construction-only solve.
+        opaque_door = sub_class == 'door' && base.isOpaque
+        target = target_conductance(vintage, sub_class, 'outdoors', hdd, include_films && opaque_door, audit)
         key = [base.handle.to_s, sub_class, target]
         cache[key] ||= begin
-          c = if sub_class == 'door' && base.isOpaque
+          c = if opaque_door
                 Constructions.opaque_at_conductance(model, base, target)
               else
                 Constructions.fenestration_at_conductance(model, base, target)
@@ -140,7 +237,7 @@ module OpenStudioEnvelope
           audit.decision(:prescriptive, "#{sub_class} construction set to maximum U",
                          target: c.nameString,
                          inputs: { hdd: hdd, target_u: target.round(4) },
-                         value: sub_class == 'door' && base.isOpaque ? "conductance #{c.thermalConductance.to_f.round(4)}" : "SimpleGlazing U #{target.round(4)} (SHGC/VT preserved)",
+                         value: opaque_door ? "conductance #{c.thermalConductance.to_f.round(4)}" : "SimpleGlazing U #{target.round(4)} (SHGC/VT preserved)",
                          article: 'Table 3.2.2.3.')
           c
         end
@@ -151,8 +248,9 @@ module OpenStudioEnvelope
       # A window/skylight construction at the prescriptive U when the model has no
       # existing subsurface of that class to derive one from (needed by the FDWR/SRR
       # rebuild on windowless models).
-      def subsurface_target_construction(model, sub_class, vintage, hdd, include_films, cache, audit)
-        target = target_conductance(vintage, sub_class, 'outdoors', hdd, include_films, audit)
+      def subsurface_target_construction(model, sub_class, vintage, hdd, _include_films, cache, audit)
+        # always SimpleGlazing here — its uFactor is the with-films value
+        target = target_conductance(vintage, sub_class, 'outdoors', hdd, false, audit)
         stub = OpenStudio::Model::Construction.new(model)
         stub.setName("NECB #{sub_class} base")
         glazing = OpenStudio::Model::SimpleGlazing.new(model)
@@ -169,7 +267,7 @@ module OpenStudioEnvelope
 
     # Facade
     def self.apply_prescriptive(model, vintage:, hdd: nil, apply_fdwr: false,
-                                apply_srr: false, include_films: false,
+                                apply_srr: false, include_films: true,
                                 thermal_bridging: nil, audit: nil)
       Prescriptive.apply(model, vintage: vintage, hdd: hdd, apply_fdwr: apply_fdwr,
                          apply_srr: apply_srr, include_films: include_films,

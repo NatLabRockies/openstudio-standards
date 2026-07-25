@@ -142,6 +142,10 @@ module OpenStudioEnvelope
           surface_class = Prescriptive::SURFACE_CLASS[surface.surfaceType]
           next if boundary.nil? || surface_class.nil?
           next if surface.construction.empty? || surface.construction.get.to_Construction.empty?
+          # 8.4.4.4.(1) covers the building envelope; exterior surfaces of
+          # unconditioned spaces (attic decks/gables) are not envelope and
+          # keep the proposed's real construction.
+          next if surface.space.is_initialized && !Prescriptive.inside_envelope?(surface.space.get)
 
           original = surface.construction.get.to_Construction.get
           conductance = original.thermalConductance.to_f
@@ -219,13 +223,14 @@ module OpenStudioEnvelope
         # NOT envelope. Ground contact stays IN S: it is enclosure area used to
         # NORMALIZE the tested/assumed rate, not a claim of slab leakage — the
         # S/A_AGW term moves the whole total onto above-ground walls.
-        # Unconditioned = not part of total floor area (the OS attic/plenum
-        # marker). Space multipliers honoured.
+        # Conditioned-or-indirectly-conditioned per Prescriptive.inside_envelope?
+        # (partofTotalFloorArea, with the legacy space_conditioning_category tag
+        # honoured so tagged plenums count as inside). Space multipliers honoured.
         envelope_area = 0.0
         wall_area = 0.0
         model.getSpaces.each do |space|
           mult = space.multiplier.to_f
-          conditioned = space.partofTotalFloorArea
+          conditioned = Prescriptive.inside_envelope?(space)
           space.surfaces.each do |surface|
             case surface.outsideBoundaryCondition
             when 'Outdoors'
@@ -241,7 +246,7 @@ module OpenStudioEnvelope
               adj = surface.adjacentSurface
               next if adj.empty? || adj.get.space.empty?
 
-              envelope_area += surface.grossArea * mult unless adj.get.space.get.partofTotalFloorArea
+              envelope_area += surface.grossArea * mult unless Prescriptive.inside_envelope?(adj.get.space.get)
             end
           end
         end
@@ -305,7 +310,7 @@ module OpenStudioEnvelope
           # object: their exterior walls are outside A_AGW, and giving them
           # flow-per-wall-area would silently re-inflate the installed total
           # beyond the S-based default
-          next unless space.partofTotalFloorArea
+          next unless Prescriptive.inside_envelope?(space)
 
           infiltration = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
           infiltration.setName("#{space.nameString} NECB Ref Infiltration")

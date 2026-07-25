@@ -65,6 +65,34 @@ class TestAuditFixes < Minitest::Test
     assert kept, 'economizer retained above 1500 L/s'
   end
 
+  # T2 follow-up (D-26): the tower fan is sized from the SUM of chiller
+  # capacities on its condenser loop — a two-chiller plant sized from the
+  # Primary alone gets half the fan and E+'s tower UA autosizing fails
+  # ("Bad starting values for UA", LargeOffice archetype).
+  def test_tower_fan_power_sums_chillers_on_loop
+    model = load_fixture
+    zones = model.getThermalZones.sort_by(&:nameString)
+    OpenStudioHVAC.build_system(model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard', zones)
+    model.getBoilerHotWaters.each { |b| b.setNominalCapacity(100_000.0) }
+    # above the 2100 kW single-chiller max -> two-chiller split (2 x 1.25 MW)
+    model.getChillerElectricEIRs.each { |c| c.setReferenceCapacity(2_500_000.0) }
+    skip 'fixture system has no condenser loop/tower' if model.getCoolingTowerSingleSpeeds.empty?
+
+    audit = OpenStudioHVAC::NECB::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020', audit: audit)
+
+    tower = model.getCoolingTowerSingleSpeeds.first
+    total_rejection = model.getChillerElectricEIRs.sum do |c|
+      c.referenceCapacity.get * (1.0 + 1.0 / c.referenceCOP)
+    end
+    assert_operator total_rejection, :>, 2_500_000.0, 'both chillers contribute'
+    assert tower.fanPoweratDesignAirFlowRate.is_initialized
+    assert_in_delta 0.013 * total_rejection, tower.fanPoweratDesignAirFlowRate.get, 1.0,
+                    'fan = 0.013 x SUM of loop chiller rejection, not the Primary alone'
+    decision = audit.entries.find { |e| e[:action] == 'cooling tower cells set from heat rejection' }
+    assert_equal 2, decision[:inputs][:chillers_on_loop]
+  end
+
   # T4: paired DX HP heating capacity pinned to cooling capacity post-sizing.
   def test_hp_heating_capacity_pinned_to_cooling
     model = load_fixture
