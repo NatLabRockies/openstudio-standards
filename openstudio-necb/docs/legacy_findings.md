@@ -23,3 +23,17 @@ UNRESOLVED (needs root-cause before filing).
 Maintenance rule: every new legacy finding gets a row HERE at discovery time,
 plus its D-XX narrative; UNFILED rows get bundled into upstream issues when a
 theme completes (L-3/L-4/L-5 are one infiltration-areas issue).
+
+## Added 2026-07-25 (reference-systems three-way audit)
+
+| # | Finding | Status | Evidence |
+|---|---|---|---|
+| L-9 | Table 8.4.4.17 fan part-load curves: 2011-era CUBICS deviate up to ~0.5xPrated from the printed 2020 quadratics, AND FanPowerMinimumFlowFraction is set to column E (power floor) instead of D (flow threshold) — reference VAV never drops below 68% flow. Inherited into NECB2020 unchanged | UNFILED — **high** | audit F-9 |
+| L-10 | 8.4.4.18 fan COMBINED efficiencies (40%/55%/30%) replaced by motor-table lookups (~0.55-0.85) at the code pressures — reference fan power runs 30-50% low | UNFILED | audit F-10/F-11 |
+| L-11 | Table 8.4.4.7.-A Residential row still implements the 2011 text: no identical-to-proposed branch, no through-the-wall branch | UNFILED | sel-audit #7 |
+| L-12 | 8.4.4.6 Purchased Energy entirely unimplemented | UNFILED | sel-audit #21 |
+| L-13 | model_enable_demand_controlled_ventilation guard tests the misspelling 'NECB_Defualt' (dead code, currently harmless) | UNFILED (trivial) | air-audit F-6 |
+| L-14 | Economizer trigger: flow branch fires without mechanical cooling; dwelling/hotel exemption of 5.2.2.7.(1) absent | UNFILED | air-audit F-1 |
+| L-15 | hvac_system_4: control-zone cooling design SAT difference set twice (second call passes the heating 21 K value); heating input method never set | UNFILED | beh-audit #15 |
+| L-16 | Unlisted space types hard-raise instead of the 8.4.4.7.(3) closest-type fallback | UNFILED (works only because JSONs pre-map all types) | sel-audit #5 |
+| L-17 | No 8.4.4.14 pump part-load coefficients anywhere (VS pumps keep OS default linear) | UNFILED | plant-audit #11 |
