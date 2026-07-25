@@ -246,6 +246,36 @@ module OpenStudioHVAC
         audit.warn(:build, "proposed model has #{humidifiers} humidifier(s) — reference humidification with the "                            'same energy source is NOT rebuilt (Table 8.4.4.7.-B note (1)) — modeller attention',
                    article: '8.4.4.7.')
       end
+      # D-28 (LargeOffice end-use isolation): Note (3) to Table 8.4.4.7.-B
+      # scopes a MULTIZONE reference system to the thermal blocks of ALL
+      # storeys — one system at <=4 above-ground storeys, per-facade splits
+      # (inside the builder's zone_groups) above. The proposed archetypes
+      # partition their zones per STOREY, and building one reference system
+      # per selection group leaked that partition into the reference: the
+      # 12-storey LargeOffice got 3 storey-groups x (4 facades + internal)
+      # = 17 systems instead of ~6, multiplying fans and dodging the
+      # per-loop 5.2.10.1/5.2.2.7 flow thresholds. Merge same-catalog
+      # multizone (sys 2/5/6) build assignments; single-zone families
+      # (1/3/4/hp) keep their selection grouping.
+      merged = []
+      assignments.each do |a|
+        key = a.action == :build && [2, 5, 6].include?(a.reference_system) ? [a.catalog_name, a.config] : nil
+        existing = key && merged.find { |m| m.first == key }
+        if existing
+          existing.last.zones.concat(a.zones - existing.last.zones)
+          existing.last.articles.concat(a.articles)
+        else
+          merged << [key, a]
+        end
+      end
+      if merged.size < assignments.size
+        audit.decision(:build, 'multizone selection groups merged into whole-building systems',
+                       inputs: { selection_groups: assignments.size, merged_groups: merged.size },
+                       value: 'one multizone system spans the thermal blocks of all storeys; facade/internal/underground split applied inside the builder',
+                       article: 'Table 8.4.4.7.-B Note (3)')
+      end
+      assignments = merged.map(&:last)
+
       assignments.each do |assignment|
         if assignment.action == :copy_proposed
           audit.info(:build, 'proposed system retained in reference (residential rule)',

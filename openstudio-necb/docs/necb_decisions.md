@@ -701,3 +701,58 @@ Pinned by test_swh_loop_excluded_from_pump_rules_and_stats and
 test_transfer_reconciles_unphysical_inherited_head.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-28 — Multizone selection groups merge into whole-building systems
+
+LargeOffice end-use isolation (the +7-12% fleet outlier): the proposed
+archetype partitions zones per STOREY (5 air loops), and building one
+reference system per selection group leaked that partition into the
+reference — the 12-effective-storey LargeOffice (mid floor x10 multiplier;
+above_ground_storeys=12 is CORRECT) got 3 storey-groups x (4 facades +
+internal) = 17 systems instead of the ~6 Note (3) to Table 8.4.4.7.-B
+prescribes. Fragmentation consequences, all confirmed by end uses: 6 of 17
+loops fell below the 1500 L/s economizer trigger (NoEconomizer -> January
+mechanical cooling 2.1 GJ + 10.4 GJ of condenser/CHW pumping while legacy
+free-cools at 0.1 GJ), small per-loop flows dodged Table 5.2.10.1 (1 ERV
+vs a consolidated 2), and 17 fan pairs.
+
+Decision: same-catalog multizone (sys 2/5/6) :build assignments merge
+before building — one system spans the thermal blocks of all storeys; the
+facade/internal/underground split happens INSIDE the builder (D-18
+zone_groups). Single-zone families (1/3/4/hp) keep their selection
+grouping (sys-3 school/retail loop counts stay at legacy parity). Audited
+as 'multizone selection groups merged into whole-building systems'.
+
+Effect: LargeOffice 17 -> 6 loops, cooling 2.1 -> 0.2 GJ, pumps 10.4 ->
+6.6 GJ; MediumOffice 3 -> 1 loop. Both references DROPPED (better), moving
+% of target 107 -> 110 / 103 -> 110 — the residual is the FAN gap (legacy
+51.4 vs ours 23.1 GJ at similar design flows/pressures/schedules), under
+investigation via the legacy-curve transplant experiment.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
+
+### D-28 verdict (2026-07-25): the residual office gap is legacy fan energy
+
+Transplant experiments on the LargeOffice reference (post-merge, January
+week) [RAN, standalone E+; note: energyplus -D silently gives an all-zero
+ABUPS — drop it for weather runs]:
+
+| configuration | Fans GJ | Heating GJ |
+|---|---|---|
+| our reference (code Table 8.4.4.17 curves, D=0.35) | 23.1 | 57.9 |
+| + LEGACY fan curves/floor (0.68 cubic, L-9 config) | 33.1 | 57.9 |
+| + night OA open (undo T5 damper schedule) | 33.1 | 60.8 |
+| legacy archetype (target) | 51.4 | 65.2 |
+
+Accounting: L-9 curve/floor ~10 GJ; design flow (-14%, 274 vs 234 m3/s)
+~5 GJ; night-OA ~3 GJ of heating; the remaining ~18 GJ of fan energy is
+the archetype's own prototype fan operation at legacy's higher flows —
+a PROPOSED-side characteristic. Everything reference-side is
+probe-verified against the printed code (curves, floors, pressures,
+efficiencies identical-or-code). Verdict: the office +10% is dominated
+by the legacy archetype NOT being code-minimum on fan energy — the
+fixed-point premise partially breaks for VAV offices, from the legacy
+side. Strengthens the L-9/L-10 upstream case with a measured whole-
+building effect (~2.2x reference fan energy on LargeOffice).
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
