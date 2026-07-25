@@ -537,3 +537,28 @@ A_AGW=120, installed total = 0.2954 x S, attic object-free. Attic-building
 reference defaults will drop at the next sweep (Restaurant basis 1356 ->
 ~320-scale per its geometry); the legacy side's roof-inclusive S remains
 upstream-issue material.
+
+## D-22 — Audit T-list implemented (T1-T13); fleet converges to 90-105%
+
+All thirteen ours-side findings from the 2026-07-25 reference-systems audit
+fixed in one batch (see audit_2026-07-25_reference_systems.md for the list):
+oversizing caps now BIND (generic zone factors cleared, HP 1.0 preserved);
+tower fan at Table 5.2.12.2 0.013; post-sizing 5.2.2.7 economizer trigger
+(strip below 1500 L/s & 20 kW); HP heating capacity pinned to cooling
+(8.4.4.13.(2)(c)); night-cycle + min-OA-follows-schedule; ERV wheel
+parasitic power + OA-flow bypass; 8.4.4.15 -> partial + hard-set-OA warning;
+humidification + mixed-group warnings; zone-equipment fans to the
+8.4.4.18.(3) spec; VAV reheat flow cap 0.5; strict staging boundaries +
+ceil cells; stale notes fixed. Four new pin tests (test_audit_fixes.rb) +
+widened citation pin. Gates: full hvac scan clean, necb:verify green,
+umbrella battery 8/118, sweep 5/5.
+
+Fleet effect (January week, % of target): Warehouse 104->105, Restaurant
+69->98, HighriseApartment 102->99, PrimarySchool 83->96, Retail 90->90.
+The dominant movers were T5 (unoccupied OA shutoff + night cycle — the
+Restaurant and School references stopped heating 24/7 ventilation) and the
+counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
+90-105% of target, the tightest fixed-point clustering yet. A-list items
+(A1-A5) remain with phylroy.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.

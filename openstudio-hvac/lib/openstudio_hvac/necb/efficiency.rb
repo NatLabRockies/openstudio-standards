@@ -70,6 +70,7 @@ module OpenStudioHVAC
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
         model.getFanVariableVolumes.sort_by(&:nameString).each { |f| apply_fan_power_curve(f, vintage, audit) }
         apply_pump_rules(model, requested_vintage, plant_rules['hydronic_pumps'], audit, proposed: proposed)
+        align_heat_pump_heating_capacity(model, audit)
         audit&.info(:efficiency, 'NECB efficiency pass complete',
                     inputs: { vintage: vintage,
                               boilers: model.getBoilerHotWaters.size,
@@ -239,6 +240,33 @@ module OpenStudioHVAC
         stats.reject { |_, s| s[:flow_l_s].zero? }
       end
 
+      # T4 (audit 2026-07-25) 8.4.4.13.(2)(c): "the heat pump's heating capacity
+      # at an outdoor air temperature of 8.3 C shall be identical to its cooling
+      # capacity". The vendored CAP_FT cubic evaluates ~1.0 at 8.3 C, so pinning
+      # the RATED heating capacity to the rated cooling capacity realizes the
+      # sentence (the -8.3 C 50% point comes from the same curve). Post-sizing:
+      # both capacities must be readable; paired coils only (same air loop).
+      def align_heat_pump_heating_capacity(model, audit)
+        model.getAirLoopHVACs.sort_by(&:nameString).each do |loop_|
+          heat = loop_.supplyComponents.find { |c| c.to_CoilHeatingDXSingleSpeed.is_initialized }
+          cool = loop_.supplyComponents.find { |c| c.to_CoilCoolingDXSingleSpeed.is_initialized }
+          next if heat.nil? || cool.nil?
+
+          heat = heat.to_CoilHeatingDXSingleSpeed.get
+          cool = cool.to_CoilCoolingDXSingleSpeed.get
+          cool_w = optional_f(cool.ratedTotalCoolingCapacity) || optional_f(cool.autosizedRatedTotalCoolingCapacity)
+          if cool_w.nil?
+            audit&.warn(:efficiency, "#{heat.nameString}: cooling capacity unavailable — 8.4.4.13.(2)(c) heating="                                      'cooling alignment skipped (run sizing first)')
+            next
+          end
+          heat.setRatedTotalHeatingCapacity(cool_w)
+          audit&.decision(:efficiency, 'heat pump heating capacity pinned to cooling capacity',
+                          target: heat.nameString, inputs: { cooling_kw: (cool_w / 1000.0).round(1) },
+                          value: "rated heating capacity = #{(cool_w / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
+                          article: '8.4.4.13.(2)(c)')
+        end
+      end
+
       # ---------------- table lookup (legacy model_find_object semantics) ----------------
 
       # Rows match when every criteria key PRESENT in the row equals the wanted value (a
@@ -394,14 +422,14 @@ module OpenStudioHVAC
         name = boiler.nameString
         if name.include?('Primary Boiler') || name.include?('Secondary Boiler')
           kw = capacity_w / 1000.0
-          if kw >= plant['two_boiler_max_kw']
+          if kw > plant['two_boiler_max_kw'] # 8.4.4.9.(6)(d): 'exceeds 352 kW' (strict)
             if name.include?('Primary Boiler')
               boiler.setBoilerFlowMode('LeavingSetpointModulated')
               boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
             else
               boiler_capacity = 0.001
             end
-          elsif kw >= plant['single_boiler_max_kw']
+          elsif kw > plant['single_boiler_max_kw'] # (6)(c): 'greater than 176' (strict)
             boiler_capacity = capacity_w / 2
           elsif name.include?('Secondary Boiler')
             boiler_capacity = 0.001
@@ -457,7 +485,7 @@ module OpenStudioHVAC
 
         chiller_capacity = capacity_w
         if name.include?('Primary') || name.include?('Secondary')
-          if capacity_w / 1000.0 < plant['single_chiller_max_kw']
+          if capacity_w / 1000.0 <= plant['single_chiller_max_kw'] # 8.4.4.10.(6)(b): 'not greater than 2100'
             chiller_capacity = 0.001 if name.include?('Secondary Chiller')
           else
             chiller_capacity = capacity_w / 2.0
@@ -513,14 +541,25 @@ module OpenStudioHVAC
         return if towers.empty?
 
         tower_cap = capacity_w * (1.0 + 1.0 / chiller.referenceCOP)
-        cells = tower_cap / 1000.0 < 1750 ? 1 : (tower_cap / (1000 * 1750) + 0.5).round
+        # 8.4.4.11.(2)-(3): one cell up to 1750 kW; above, capacity/1750 rounded UP
+        cells = tower_cap / 1000.0 <= 1750 ? 1 : (tower_cap / (1000.0 * 1750)).ceil
         towers[0].setNumberofCells(cells)
-        towers[0].setFanPoweratDesignAirFlowRate(0.015 * tower_cap) if tower_cap * 0.015 > 13_000.0
-        audit&.decision(:efficiency, 'cooling tower sized from chiller heat rejection',
+        # Table 5.2.12.2 (NECB 2015+ incl. 2020/2025): axial direct-contact tower
+        # fan <= 0.013 kW/kW rejection — NOT the 2011 value 0.015 (T2, audit
+        # 2026-07-25; legacy NECB2015 override uses 0.013). Below the 13 kW
+        # small-tower threshold the E+ default fan sizing stands.
+        fan_w = 0.013 * tower_cap
+        towers[0].setFanPoweratDesignAirFlowRate(fan_w) if fan_w > 13_000.0
+        audit&.decision(:efficiency, 'cooling tower cells set from heat rejection',
                         target: towers[0].nameString,
                         inputs: { tower_cap_kw: (tower_cap / 1000.0).round(1) },
-                        value: "#{cells} cell(s)#{tower_cap * 0.015 > 13_000.0 ? ", fan #{(0.015 * tower_cap / 1000.0).round(1)} kW" : ''}",
-                        article: 'NECB heat rejection rules (5.2.12.2)')
+                        value: "#{cells} cell(s)", article: '8.4.4.11.(2)-(3)')
+        if fan_w > 13_000.0
+          audit&.decision(:efficiency, 'cooling tower fan power set at the Table 5.2.12.2 maximum',
+                          target: towers[0].nameString,
+                          inputs: { kw_per_kw: 0.013, tower_cap_kw: (tower_cap / 1000.0).round(1) },
+                          value: "fan #{(fan_w / 1000.0).round(1)} kW", article: 'Table 5.2.12.2')
+        end
       end
 
       # Legacy coil_cooling_dx_single_speed_apply_efficiency_and_curves via NECB

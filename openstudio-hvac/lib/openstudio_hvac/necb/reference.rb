@@ -59,6 +59,10 @@ module OpenStudioHVAC
         votes[row ? row['category'] : nil] += 1
       end
       category, = votes.max_by { |cat, count| [count, cat.nil? ? 0 : 1] }
+      if votes.keys.compact.size > 1
+        audit&.warn(:selection, '8.4.4.7.(1) assigns systems PER THERMAL BLOCK, but this zone group mixes '                                 "categories #{votes.keys.compact.join(' / ')} — majority (#{category}) applied "                                 'to the whole group', target: group[:air_loop] || group[:zones].first,
+                    article: '8.4.4.7.(1)')
+      end
       if category.nil?
         category = selection['default_category']
         audit&.warn(:selection, 'space type not listed in Table 8.4.4.7.-A — closest-corresponding category assumed',
@@ -227,6 +231,21 @@ module OpenStudioHVAC
       reference.getAirLoopHVACs.each do |loop_|
         loop_.thermalZones.each { |z| proposed_availability[z.nameString] = loop_.availabilitySchedule }
       end
+      # T7 (8.4.4.15.(1)): OA identity rests on cloned DesignSpecification:OutdoorAir;
+      # a hard-set proposed minimum-OA controller value would silently diverge.
+      reference.getControllerOutdoorAirs.each do |c|
+        next unless c.minimumOutdoorAirFlowRate.is_initialized
+
+        audit.warn(:build, "proposed OA controller '#{c.nameString}' carries a HARD-SET minimum OA "                            "(#{(c.minimumOutdoorAirFlowRate.get * 1000).round(0)} L/s) — the rebuilt reference "                            'autosizes OA from the space DSOA; verify 8.4.4.15.(1) identity',
+                   article: '8.4.4.15.(1)')
+      end
+      # T8 (Table 8.4.4.7.-B note (1)): humidifiers on replaced loops vanish with
+      # the loop; the reference would silently lose humidification.
+      humidifiers = reference.getHumidifierSteamElectrics.size + reference.getHumidifierSteamGass.size
+      if humidifiers.positive?
+        audit.warn(:build, "proposed model has #{humidifiers} humidifier(s) — reference humidification with the "                            'same energy source is NOT rebuilt (Table 8.4.4.7.-B note (1)) — modeller attention',
+                   article: '8.4.4.7.')
+      end
       assignments.each do |assignment|
         if assignment.action == :copy_proposed
           audit.info(:build, 'proposed system retained in reference (residential rule)',
@@ -243,6 +262,7 @@ module OpenStudioHVAC
                        value: assignment.catalog_name,
                        article: assignment.articles.compact.uniq.join('; '))
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
+        apply_zone_fan_rules(zones, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
         apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
         apply_operating_schedules(result.air_loops, proposed_availability, audit)
@@ -254,6 +274,88 @@ module OpenStudioHVAC
       emit_article_coverage(ruleset, audit)
 
       ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    # T10 (audit 2026-07-25): 8.4.4.18.(3) fan spec (640 Pa / 40% combined)
+    # covers HVAC systems 1-5 — including their ZONE-equipment supply fans
+    # (fan coils, PTAC/PTHP OnOff fans), which previously kept SDK defaults.
+    def self.apply_zone_fan_rules(zones, reference_system, ruleset, audit)
+      return if reference_system == 6
+
+      spec = ruleset.dig('fans', 'systems_1_3_4_5', 'supply') || {}
+      pressure = spec['pressure_rise_pa'] || 640.0
+      eff = spec['total_efficiency'] || 0.40
+      touched = 0
+      zones.each do |zone|
+        zone.equipment.each do |eq|
+          [eq.to_ZoneHVACFourPipeFanCoil, eq.to_ZoneHVACPackagedTerminalAirConditioner,
+           eq.to_ZoneHVACPackagedTerminalHeatPump].each do |opt|
+            next if opt.empty?
+
+            fan = opt.get.supplyAirFan
+            [fan.to_FanOnOff, fan.to_FanConstantVolume, fan.to_FanVariableVolume].each do |f|
+              next if f.empty?
+
+              f.get.setPressureRise(pressure)
+              f.get.setFanTotalEfficiency(eff)
+              touched += 1
+            end
+          end
+        end
+      end
+      return if touched.zero?
+
+      audit.decision(:build, 'zone-equipment supply fans set to the systems 1-5 spec',
+                     inputs: { fans: touched, pressure_pa: pressure, total_efficiency: eff },
+                     value: "#{touched} zone fan(s) at #{pressure} Pa / #{(eff * 100).round}%",
+                     article: '8.4.4.18.(3)')
+    end
+
+    # T3 (audit 2026-07-25): 8.4.4.12 economizers apply only where Article
+    # 5.2.2.7 applies to the proposed system — mechanical cooling AND (sized
+    # supply > 1500 L/s OR cooling capacity > 20 kW); dwelling-only/hotel
+    # systems exempt (approximated: System 1 already exempt per D-20; zone
+    # types are not re-derivable here). POST-SIZING pass, umbrella-called
+    # alongside apply_energy_recovery: strips economizers from loops below
+    # the trigger, loudly.
+    def self.apply_economizer_thresholds(model, audit: nil)
+      audit ||= AuditLog.new
+      model.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
+        oa = air_loop.airLoopHVACOutdoorAirSystem
+        next if oa.empty?
+
+        ctrl = oa.get.getControllerOutdoorAir
+        next if ctrl.getEconomizerControlType == 'NoEconomizer'
+
+        supply = optional_flow(air_loop.designSupplyAirFlowRate) || optional_flow(air_loop.autosizedDesignSupplyAirFlowRate)
+        cooling_w = air_loop.supplyComponents.sum do |c|
+          coil = c.to_CoilCoolingDXSingleSpeed
+          next 0.0 if coil.empty?
+
+          optional_flow(coil.get.ratedTotalCoolingCapacity) || optional_flow(coil.get.autosizedRatedTotalCoolingCapacity) || 0.0
+        end
+        chw = air_loop.supplyComponents.any? { |c| c.to_CoilCoolingWater.is_initialized }
+        if supply.nil?
+          audit.warn(:rules, "#{air_loop.nameString}: supply flow not sized — 5.2.2.7 economizer trigger "                              'not evaluated (economizer retained)', article: '5.2.2.7.(1)')
+          next
+        end
+        # chilled-water systems (sys 2/5/6) are large by construction; the kW
+        # branch is only decidable for DX. Trigger: >1500 L/s or >20 kW.
+        triggered = supply * 1000.0 > 1500.0 || cooling_w > 20_000.0 || (chw && supply * 1000.0 > 1500.0)
+        if triggered
+          audit.decision(:rules, 'economizer retained (5.2.2.7 trigger met)',
+                         target: air_loop.nameString,
+                         inputs: { supply_l_s: (supply * 1000).round(0), cooling_kw: (cooling_w / 1000.0).round(1) },
+                         value: ctrl.getEconomizerControlType, article: '8.4.4.12.; 5.2.2.7.(1)')
+        else
+          ctrl.setEconomizerControlType('NoEconomizer')
+          audit.decision(:rules, 'economizer REMOVED — below the 5.2.2.7 trigger (<=1500 L/s and <=20 kW)',
+                         target: air_loop.nameString,
+                         inputs: { supply_l_s: (supply * 1000).round(0), cooling_kw: (cooling_w / 1000.0).round(1) },
+                         value: 'NoEconomizer', article: '8.4.4.12.; 5.2.2.7.(1)')
+        end
+      end
+      audit
     end
 
     # D-16: proposed-model EMS artifacts (optimum-start programs etc.) whose
@@ -310,6 +412,7 @@ module OpenStudioHVAC
       air_loops.each do |loop_|
         schedules = loop_.thermalZones.filter_map { |z| proposed_availability[z.nameString] }
         if schedules.empty?
+          loop_.setNightCycleControlType('CycleOnAny') # T5: harmless with Always On, correct once scheduled
           audit.info(:build, 'no proposed air-system operating schedule to inherit — builder default retained',
                      target: loop_.nameString, article: '8.4.3.2.(1)')
           next
@@ -317,6 +420,13 @@ module OpenStudioHVAC
         tally = schedules.group_by(&:nameString)
         chosen = tally.max_by { |_, v| v.size }[1].first
         loop_.setAvailabilitySchedule(chosen)
+        # T5 (audit 2026-07-25, legacy parity): night-cycle pickup during the
+        # off-schedule hours, and the motorized-OA-damper behaviour — minimum
+        # OA follows the operating schedule so the reference does not
+        # ventilate 24/7 through a scheduled-off system.
+        loop_.setNightCycleControlType('CycleOnAny')
+        oa = loop_.airLoopHVACOutdoorAirSystem
+        oa.get.getControllerOutdoorAir.setMinimumOutdoorAirSchedule(chosen) if oa.is_initialized
         if tally.size > 1
           audit.warn(:build, "zones carried #{tally.size} DIFFERENT proposed operating schedules — " \
                              "'#{chosen.nameString}' (most zones) applied to the whole reference loop",
@@ -610,6 +720,18 @@ module OpenStudioHVAC
       erv.setRateofDefrostTimeFractionIncrease(hx['rate_of_defrost_increase'])
       erv.addToNode(oa_system.outboardOANode.get)
 
+      # T6 (audit 2026-07-25): the wheel is not free — PNNL-20405 surrogate
+      # for rotary-HX fan/motor parasitics (legacy parity), computed from the
+      # sized min OA; and the OA controller must bypass the wheel when OA
+      # exceeds minimum (economizer-compatible behaviour on mixed systems).
+      ctrl = oa_system.getControllerOutdoorAir
+      oa_flow = ctrl.minimumOutdoorAirFlowRate.is_initialized ? ctrl.minimumOutdoorAirFlowRate.get : nil
+      oa_flow ||= ctrl.autosizedMinimumOutdoorAirFlowRate.is_initialized ? ctrl.autosizedMinimumOutdoorAirFlowRate.get : nil
+      if oa_flow
+        erv.setNominalElectricPower((oa_flow * 212.5 / 0.5) + (oa_flow * 0.9 * 162.5 / 0.5) + 50.0)
+      end
+      ctrl.setHeatRecoveryBypassControlType('BypassWhenOAFlowGreaterThanMinimum')
+
       spm = OpenStudio::Model::SetpointManagerOutdoorAirPretreat.new(model)
       spm.setMinimumSetpointTemperature(-99.0)
       spm.setMaximumSetpointTemperature(99.0)
@@ -636,8 +758,28 @@ module OpenStudioHVAC
       ref_sizing = reference.getSizingParameters
       ref_sizing.setHeatingSizingFactor(heat_ref)
       ref_sizing.setCoolingSizingFactor(cool_ref)
+      # T1 (audit 2026-07-25): zone-level sizing factors OVERRIDE the global
+      # Sizing:Parameters in EnergyPlus, so the builders' generic 1.3/1.1 zone
+      # stamps silently defeated this cap. Reset the GENERIC zone factors so
+      # the capped globals govern; PRESERVE any non-generic factor (the HP
+      # zone cooling factor 1.0 required by 8.4.4.13.(2)(b) "without
+      # oversizing").
+      cleared = 0
+      reference.getSizingZones.each do |sz|
+        if (sz.zoneHeatingSizingFactor.get - 1.3).abs < 1e-9
+          sz.resetZoneHeatingSizingFactor
+          cleared += 1
+        end
+        if (sz.zoneCoolingSizingFactor.get - 1.1).abs < 1e-9
+          sz.resetZoneCoolingSizingFactor
+          cleared += 1
+        end
+      rescue StandardError
+        next # OptionalDouble empty on some SDK versions — nothing stamped, nothing to clear
+      end
       audit.decision(:rules, 'equipment oversizing capped',
-                     inputs: { proposed_heating: heat_prop, proposed_cooling: cool_prop },
+                     inputs: { proposed_heating: heat_prop, proposed_cooling: cool_prop,
+                               generic_zone_factors_cleared: cleared },
                      value: "heating sizing factor #{heat_ref.round(3)} = min(proposed #{heat_prop.round(3)}, cap #{(1.0 + caps['heating_max_fraction']).round(2)}); " \
                             "cooling #{cool_ref.round(3)} = min(proposed #{cool_prop.round(3)}, cap #{(1.0 + caps['cooling_max_fraction']).round(2)})",
                      article: caps['article'])

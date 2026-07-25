@@ -148,6 +148,7 @@ module OpenStudioHVAC
           end
           terminal.setMaximumReheatAirTemperature(sizing['zone_vav_max_reheat_temp']) if sizing['zone_vav_max_reheat_temp']
           terminal.setDamperHeatingAction(sizing['zone_vav_damper_action']) if sizing['zone_vav_damper_action']
+          terminal.setMaximumFlowFractionDuringReheat(0.5) # T11: legacy parity (heating-mode airflow cap)
         end
 
         # NOTE parts order: sys6 legacy emits sys_htg BEFORE sys_clg (insertion order).

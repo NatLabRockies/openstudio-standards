@@ -34,11 +34,11 @@ class TestNecbEfficiency < Minitest::Test
     assert_match(/CAPFT/, chiller.coolingCapacityFunctionOfTemperature.nameString)
 
     # every decision carries a code citation: Table 5.2.12 minimums, or the
-    # 8.4.4.14/8.4.4.17 pump/fan curve articles the pass also applies
+    # 8.4.4.11/13/14/17 plant/pump/fan articles the pass also applies
     decisions = audit.entries.select { |e| e[:step] == :efficiency && e[:level] == :decision }
     refute_empty decisions
-    assert decisions.all? { |e| e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[47]/) },
-           "uncited decision: #{decisions.find { |e| !e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[47]/) }&.dig(:action)}"
+    assert decisions.all? { |e| e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[1-9]/) },
+           "uncited decision: #{decisions.find { |e| !e[:article].to_s.match?(/5\.2\.12|8\.4\.[45]\.1[1-9]/) }&.dig(:action)}"
   end
 
   def test_dx_and_gas_coil_and_ashp

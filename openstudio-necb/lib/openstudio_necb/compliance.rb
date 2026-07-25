@@ -170,6 +170,8 @@ module OpenStudioNECB
           # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
           # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
           OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: hdd, audit: audit)
+          # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
+          OpenStudioHVAC::NECB.apply_economizer_thresholds(reference, audit: audit)
           audit.info(:compliance, 'reference sized; efficiencies re-applied and the 5.2.10.1 energy-recovery ' \
                                   'determination evaluated on sized flows', target: 'reference')
         end
