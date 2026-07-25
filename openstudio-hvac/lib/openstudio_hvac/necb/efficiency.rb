@@ -154,6 +154,18 @@ module OpenStudioHVAC
                                    "#{prefix}.14.(1)-(3) power NOT transferred to any reference pump")
         end
         model.getPlantLoops.sort_by(&:nameString).each do |loop_|
+          # 8.4.4.14 scopes HVAC hydronic pumping; a service-water loop's
+          # circulator is Part 6 territory and stays as built. Transferring the
+          # space-heating W/(L/s) intensity onto an SWH circulator (8 W against
+          # the proposed's 1.9 MPa head) implies a 724% pump efficiency and is
+          # an E+ FATAL — found by the gas-fuel variant sweep; the electric
+          # fleet passed the same code path only by arithmetic luck.
+          if swh_loop?(loop_)
+            audit&.info(:efficiency, 'service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built',
+                        target: loop_.nameString)
+            next
+          end
+
           loop_type = loop_.sizingPlant.loopType
           loop_.supplyComponents.sort_by(&:nameString).each do |comp|
             if comp.to_PumpVariableSpeed.is_initialized
@@ -182,6 +194,14 @@ module OpenStudioHVAC
         end
       end
 
+      # A service-water-heating loop: a water heater on supply or water-use
+      # connections on demand. Outside the 8.4.4.14 hydronic-pump scope.
+      def swh_loop?(loop_)
+        loop_.supplyComponents.any? do |c|
+          c.to_WaterHeaterMixed.is_initialized || c.to_WaterHeaterStratified.is_initialized
+        end || loop_.demandComponents.any? { |c| c.to_WaterUseConnections.is_initialized }
+      end
+
       # Sentences (1)-(3) through one mechanism: the proposed loop-type's pumps'
       # combined peak power intensity, W/(L/s) — sentence (3)'s own metric, which
       # equals head/efficiency (sentence (1): P = V x head / eff) and absorbs the
@@ -203,6 +223,19 @@ module OpenStudioHVAC
         end
         w_per_l_s = s[:power_w] / s[:flow_l_s]
         power_w = w_per_l_s * flow * 1000.0
+        # E+ hard-rejects power/head/flow triples implying pump efficiency
+        # above motor efficiency ("Calculated Pump Efficiency > 100%" fatal).
+        # The transferred power is authoritative (it IS the article's number);
+        # reconcile the inherited head to a physical 65% total efficiency.
+        head = pump.ratedPumpHead
+        motor_eff = pump.motorEfficiency
+        if power_w > 0.0 && (flow * head / power_w) > motor_eff
+          new_head = 0.65 * power_w / flow
+          audit&.warn(:efficiency, "#{pump.nameString}: inherited rated head #{head.round} Pa implies pump efficiency " \
+                                   "above motor efficiency with the transferred #{power_w.round} W — head reduced to " \
+                                   "#{new_head.round} Pa (65% total efficiency) to stay physical")
+          pump.setRatedPumpHead(new_head)
+        end
         pump.setRatedPowerConsumption(power_w)
         audit&.decision(:efficiency, 'pump power transferred from the proposed building',
                         target: pump.nameString,
@@ -223,6 +256,8 @@ module OpenStudioHVAC
 
         stats = Hash.new { |h, k| h[k] = { power_w: 0.0, flow_l_s: 0.0, count: 0 } }
         proposed.getPlantLoops.each do |loop_|
+          next if swh_loop?(loop_) # SWH circulators must not pollute the Heating-loop intensity
+
           type = loop_.sizingPlant.loopType
           loop_.supplyComponents.each do |comp|
             pump = comp.to_PumpVariableSpeed.is_initialized ? comp.to_PumpVariableSpeed.get : nil

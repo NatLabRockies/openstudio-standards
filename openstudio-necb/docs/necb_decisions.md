@@ -674,3 +674,30 @@ tower fleet member):
    fan POWER, not UA, so this is faithful.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-27 — SWH circulators are outside 8.4.4.14; transfer head reconciled
+
+First finding from the reference-system VARIANT matrix (gas fuel column —
+run at phylroy's direction after the coverage analysis showed the electric
+archetype fleet exercises only 4 of 14 catalog variants): all four gas
+buildings crashed E+ in reference_annual with "Errors found in Pump input"
+— the D-11 pump transfer had put the space-heating W/(L/s) intensity onto
+the SERVICE WATER LOOP circulator (8 W) while it kept the proposed's 1.9 MPa
+head, implying a 724% pump efficiency (E+ fatal). The electric fleet ran
+the same code path and passed only by arithmetic luck (76 W -> 66%).
+
+Decision:
+- Loops with a water heater on supply or water-use connections on demand
+  are OUTSIDE the 8.4.4.14 hydronic-pump scope: no riding curve, no
+  transfer, audited info. They are also EXCLUDED from the proposed
+  intensity stats (an SWH circulator must not pollute the Heating-loop
+  W/(L/s)).
+- Physicality guard on every transfer: if flow x inherited_head /
+  transferred_power exceeds motor efficiency, the head is reconciled to a
+  65% total efficiency (power is the article's number and stays
+  authoritative); loud warning.
+
+Pinned by test_swh_loop_excluded_from_pump_rules_and_stats and
+test_transfer_reconciles_unphysical_inherited_head.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.

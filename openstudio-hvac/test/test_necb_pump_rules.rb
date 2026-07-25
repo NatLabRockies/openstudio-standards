@@ -108,6 +108,49 @@ class TestNecbPumpRules < Minitest::Test
     assert(audit.entries.any? { |e| e[:article].to_s.include?('8.4.5.14.(4)-(5)') },
            '2025 cites the renumbered article')
   end
+  # Gas-variant sweep finding (D-27): the SWH circulator is OUTSIDE 8.4.4.14 —
+  # transferring the space-heating intensity onto it (8 W vs a 1.9 MPa head)
+  # implies >100% pump efficiency and is an E+ FATAL.
+  def test_swh_loop_excluded_from_pump_rules_and_stats
+    proposed = OpenStudio::Model::Model.new
+    loop_with_vsd_pump(proposed, type: 'Heating', flow: 0.010, power: 800.0)
+    # a proposed SWH loop whose extreme intensity would poison the Heating stats
+    swh_p, = loop_with_vsd_pump(proposed, type: 'Heating', flow: 0.00002, power: 500.0)
+    OpenStudio::Model::WaterHeaterMixed.new(proposed).addToNode(swh_p.supplyOutletNode)
+
+    reference = OpenStudio::Model::Model.new
+    _, ref_pump = loop_with_vsd_pump(reference, type: 'Heating', flow: 0.020)
+    ref_swh, ref_swh_pump = loop_with_vsd_pump(reference, type: 'Heating', flow: 0.00002)
+    OpenStudio::Model::WaterHeaterMixed.new(reference).addToNode(ref_swh.supplyOutletNode)
+    audit = OpenStudioHVAC::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: '2020', audit: audit, proposed: proposed)
+
+    # reference SWH pump untouched: no hard power, no riding-curve coefficients
+    assert ref_swh_pump.ratedPowerConsumption.empty?, 'SWH circulator gets NO transferred power'
+    assert_in_delta 0.0, ref_swh_pump.coefficient1ofthePartLoadPerformanceCurve, 1e-6
+    assert(audit.entries.any? { |e| e[:level] == :info && e[:action].include?('service water heating loop') })
+    # heating intensity clean of the SWH pump: 800 W / 10 L/s = 80 W/(L/s) x 20 L/s
+    assert_in_delta 1600.0, ref_pump.ratedPowerConsumption.get, 0.1,
+                    'Heating intensity excludes the proposed SWH circulator'
+  end
+
+  def test_transfer_reconciles_unphysical_inherited_head
+    proposed = OpenStudio::Model::Model.new
+    loop_with_vsd_pump(proposed, type: 'Heating', flow: 0.010, power: 100.0) # weak: 10 W/(L/s)
+
+    reference = OpenStudio::Model::Model.new
+    _, ref_pump = loop_with_vsd_pump(reference, type: 'Heating', flow: 0.001) # -> 10 W transferred
+    ref_pump.setRatedPumpHead(1_927_540.0) # legacy SWH-scale head: flow x head / power >> motor eff
+    audit = OpenStudioHVAC::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: '2020', audit: audit, proposed: proposed)
+
+    power = ref_pump.ratedPowerConsumption.get
+    assert_in_delta 10.0, power, 0.1, 'transferred power is authoritative'
+    implied = 0.001 * ref_pump.ratedPumpHead / power
+    assert_operator implied, :<=, ref_pump.motorEfficiency + 1e-6,
+                    'head reconciled so implied efficiency stays physical (E+ fatal otherwise)'
+    assert(audit.warnings.any? { |e| e[:action].include?('head reduced') })
+  end
 end
 
 # D-14 (8.4.3.2.(1)): reference air systems inherit the PROPOSED operating
@@ -147,4 +190,5 @@ class TestNecbOperatingSchedules < Minitest::Test
       building: { storeys: 1, zone_types: proposed.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] } })
     assert(result.audit.entries.any? { |e| e[:article] == '8.4.3.2.(1)' && e[:action].include?('default retained') })
   end
+
 end
