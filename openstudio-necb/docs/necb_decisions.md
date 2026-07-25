@@ -756,3 +756,16 @@ side. Strengthens the L-9/L-10 upstream case with a measured whole-
 building effect (~2.2x reference fan energy on LargeOffice).
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-29 — Upstream issues carry explicit Claude authorship (phylroy's direction)
+
+"file the L-9/L-10 fan issue upstream as you not me" + "state in
+#2123/#2126 and future issue that you wrote it": L-9+L-10 filed together
+as #2127 with an authorship note naming Claude as the author (submitted
+from phylroy's account for access; AI authorship stated in the body), and
+the same note was prepended retroactively to #2123 and #2126. STANDING
+RULE for future upstream filings: always include the authorship note.
+Supersedes the earlier no-Claude-attribution convention from the #2123
+filing.
+
+- Who/when: phylroy directed, Claude executed, 2026-07-25.

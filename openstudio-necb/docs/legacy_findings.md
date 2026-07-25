@@ -28,8 +28,8 @@ theme completes (L-3/L-4/L-5 are one infiltration-areas issue).
 
 | # | Finding | Status | Evidence |
 |---|---|---|---|
-| L-9 | Table 8.4.4.17 fan part-load curves: 2011-era CUBICS deviate up to ~0.5xPrated from the printed 2020 quadratics, AND FanPowerMinimumFlowFraction is set to column E (power floor) instead of D (flow threshold) — reference VAV never drops below 68% flow. Inherited into NECB2020 unchanged. QUANTIFIED from the proposed side by the LargeOffice fixed-point transplant: curve/floor config alone is ~10 GJ/wk of the 28 GJ fan gap; archetype fan energy runs ~2.2x the code reference | UNFILED — **high** | audit F-9; D-28 |
-| L-10 | 8.4.4.18 fan COMBINED efficiencies (40%/55%/30%) replaced by motor-table lookups (~0.55-0.85) at the code pressures — reference fan power runs 30-50% low | UNFILED | audit F-10/F-11 |
+| L-9 | Table 8.4.4.17 fan part-load curves: 2011-era CUBICS deviate up to ~0.5xPrated from the printed 2020 quadratics, AND FanPowerMinimumFlowFraction is set to column E (power floor) instead of D (flow threshold) — reference VAV never drops below 68% flow. Inherited into NECB2020 unchanged. QUANTIFIED from the proposed side by the LargeOffice fixed-point transplant: curve/floor config alone is ~10 GJ/wk of the 28 GJ fan gap; archetype fan energy runs ~2.2x the code reference | **FILED** [#2127](https://github.com/NatLabRockies/openstudio-standards/issues/2127) | audit F-9; D-28 |
+| L-10 | 8.4.4.18 fan COMBINED efficiencies (40%/55%/30%) replaced by motor-table lookups (~0.55-0.85) at the code pressures — reference fan power runs 30-50% low | **FILED** [#2127](https://github.com/NatLabRockies/openstudio-standards/issues/2127) | audit F-10/F-11 |
 | L-11 | Table 8.4.4.7.-A Residential row still implements the 2011 text: no identical-to-proposed branch, no through-the-wall branch | UNFILED | sel-audit #7 |
 | L-12 | 8.4.4.6 Purchased Energy entirely unimplemented | UNFILED | sel-audit #21 |
 | L-13 | model_enable_demand_controlled_ventilation guard tests the misspelling 'NECB_Defualt' (dead code, currently harmless) | UNFILED (trivial) | air-audit F-6 |
