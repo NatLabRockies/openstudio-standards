@@ -30,17 +30,17 @@ theme completes (L-3/L-4/L-5 are one infiltration-areas issue).
 |---|---|---|---|
 | L-9 | Table 8.4.4.17 fan part-load curves: 2011-era CUBICS deviate up to ~0.5xPrated from the printed 2020 quadratics, AND FanPowerMinimumFlowFraction is set to column E (power floor) instead of D (flow threshold) — reference VAV never drops below 68% flow. Inherited into NECB2020 unchanged. QUANTIFIED from the proposed side by the LargeOffice fixed-point transplant: curve/floor config alone is ~10 GJ/wk of the 28 GJ fan gap; archetype fan energy runs ~2.2x the code reference | **FILED** [#2127](https://github.com/NatLabRockies/openstudio-standards/issues/2127) | audit F-9; D-28 |
 | L-10 | 8.4.4.18 fan COMBINED efficiencies (40%/55%/30%) replaced by motor-table lookups (~0.55-0.85) at the code pressures — reference fan power runs 30-50% low | **FILED** [#2127](https://github.com/NatLabRockies/openstudio-standards/issues/2127) | audit F-10/F-11 |
-| L-11 | Table 8.4.4.7.-A Residential row still implements the 2011 text: no identical-to-proposed branch, no through-the-wall branch | UNFILED | sel-audit #7 |
-| L-12 | 8.4.4.6 Purchased Energy entirely unimplemented | UNFILED | sel-audit #21 |
-| L-13 | model_enable_demand_controlled_ventilation guard tests the misspelling 'NECB_Defualt' (dead code, currently harmless) | UNFILED (trivial) | air-audit F-6 |
-| L-14 | Economizer trigger: flow branch fires without mechanical cooling; dwelling/hotel exemption of 5.2.2.7.(1) absent | UNFILED | air-audit F-1 |
-| L-15 | hvac_system_4: control-zone cooling design SAT difference set twice (second call passes the heating 21 K value); heating input method never set | UNFILED | beh-audit #15 |
-| L-16 | Unlisted space types hard-raise instead of the 8.4.4.7.(3) closest-type fallback | UNFILED (works only because JSONs pre-map all types) | sel-audit #5 |
-| L-17 | No 8.4.4.14 pump part-load coefficients anywhere (VS pumps keep OS default linear) | UNFILED | plant-audit #11 |
+| L-11 | Table 8.4.4.7.-A Residential row still implements the 2011 text: no identical-to-proposed branch, no through-the-wall branch | **FILED** [#2128](https://github.com/NatLabRockies/openstudio-standards/issues/2128) | sel-audit #7 |
+| L-12 | 8.4.4.6 Purchased Energy entirely unimplemented | **FILED** [#2129](https://github.com/NatLabRockies/openstudio-standards/issues/2129) | sel-audit #21 |
+| L-13 | model_enable_demand_controlled_ventilation guard tests the misspelling 'NECB_Defualt' (dead code, currently harmless) | **FILED** [#2129](https://github.com/NatLabRockies/openstudio-standards/issues/2129) | air-audit F-6 |
+| L-14 | Economizer trigger: flow branch fires without mechanical cooling; dwelling/hotel exemption of 5.2.2.7.(1) absent | **FILED** [#2129](https://github.com/NatLabRockies/openstudio-standards/issues/2129) | air-audit F-1 |
+| L-15 | hvac_system_4: control-zone cooling design SAT difference set twice (second call passes the heating 21 K value); heating input method never set | **FILED** [#2129](https://github.com/NatLabRockies/openstudio-standards/issues/2129) | beh-audit #15 |
+| L-16 | Unlisted space types hard-raise instead of the 8.4.4.7.(3) closest-type fallback (works only because JSONs pre-map all types) | **FILED** [#2128](https://github.com/NatLabRockies/openstudio-standards/issues/2128) | sel-audit #5 |
+| L-17 | No 8.4.4.14 pump part-load coefficients anywhere (VS pumps keep OS default linear) | **FILED** [#2129](https://github.com/NatLabRockies/openstudio-standards/issues/2129) | plant-audit #11 |
 
 ## Added 2026-07-25 (object-level fixed-point diff, D-23/D-24)
 
 | # | Finding | Status | Evidence |
 |---|---|---|---|
 | L-18 | Attic ceiling U row: OSut construction sets apply the exposed-FLOOR row (uo=eFloorU, 0.175 at HDD 3890) to the ceiling below an attic; 3.1.1.7.(6) classifies horizontal top-of-conditioned-space assemblies as ROOF assemblies (0.156 + 3.1.1.7.(4) enclosure credit). Lenient by ~9% on the attic boundary | DIFFERENCE — ours follows the inclination rule (D-24) | D-24 |
-| L-19 | Two coexisting legacy construction paths disagree on the film convention by ~4%: OSut/TBD.genConstruction (NECB2020 prototypes) treats table U as OVERALL transmittance incl. films (code-literal per 1.4.1.2); BTAP apply_standard_construction_properties/customize_opaque_construction sets table U as construction-only conductance (over-stringent). Same table, two answers, path-dependent | UNFILED | D-23 |
+| L-19 | Two coexisting legacy construction paths disagree on the film convention by ~4%: OSut/TBD.genConstruction (NECB2020 prototypes) treats table U as OVERALL transmittance incl. films (code-literal per 1.4.1.2); BTAP apply_standard_construction_properties/customize_opaque_construction sets table U as construction-only conductance (over-stringent). Same table, two answers, path-dependent | **FILED** [#2130](https://github.com/NatLabRockies/openstudio-standards/issues/2130) | D-23 |

@@ -769,3 +769,24 @@ Supersedes the earlier no-Claude-attribution convention from the #2123
 filing.
 
 - Who/when: phylroy directed, Claude executed, 2026-07-25.
+
+## D-30 — Ledger cleared: L-11..L-17 and L-19 filed upstream as #2128/#2129/#2130
+
+Per the D-29 authorship rule (all Claude-authored, stated in each body):
+- #2128 — Table 8.4.4.7.-A selection: L-11 (residential row still 2011
+  text) + L-16 (unlisted space types hard-raise vs the 8.4.4.7.(3)
+  closest-correspondence fallback).
+- #2129 — reference modeling rules: L-15 (hvac_system_4.rb:76 control-zone
+  cooling ΔT overwritten with the heating 21 K value — verified at the
+  line), L-14 (5.2.2.7 flow branch without mechanical cooling + missing
+  dwelling/hotel exemption), L-17 (no Table 8.4.4.14 pump coefficients),
+  L-12 (8.4.4.6 purchased energy unimplemented), L-13 ('NECB_Defualt'
+  dead guard).
+- #2130 — L-19 film-convention disagreement between the OSut and BTAP
+  construction paths (~4% on the same Table 3.2.2.2 values).
+
+Ledger now has NO unfiled rows; open remainder is UNRESOLVED-only (L-6 DX
+COP convention, L-7 NECB2015 ERV vintage question). Coverage docs
+regenerated post-D-23..D-28 (57/57, no conflicts, no fallbacks).
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
