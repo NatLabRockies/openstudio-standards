@@ -29,6 +29,17 @@ module OpenStudioEnvelope
       value
     end
 
+    # Ground-floor insulation extent (Table 3.2.3.1 floors row): zone 8
+    # requires the table U over the full slab area; zones 4-7B require it only
+    # within a perimeter strip (3.2.3.3.(3)) — the slab field carries no
+    # prescriptive maximum there.
+    def ground_floor_extent(vintage:, hdd:)
+      ext = NECB.rules(vintage)['ground_floor_extent']
+      return { extent: :full_area } if ext.nil? || hdd >= ext.fetch('full_area_min_hdd')
+
+      { extent: :perimeter_strip, width_m: ext.fetch('strip_width_m') }
+    end
+
     # Maximum fenestration-and-door-to-gross-wall ratio (3.2.1.4.(1)).
     def max_fdwr(vintage:, hdd:, audit: nil)
       fdwr = NECB.rules(vintage).fetch('fdwr')

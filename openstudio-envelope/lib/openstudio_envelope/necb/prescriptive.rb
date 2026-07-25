@@ -72,7 +72,11 @@ module OpenStudioEnvelope
             next
           end
 
-          assign_surface(model, surface, surface_class, boundary, vintage, hdd, include_films, cache, audit)
+          if boundary == 'ground' && surface_class == 'floor'
+            assign_ground_floor(model, surface, vintage, hdd, include_films, cache, audit)
+          else
+            assign_surface(model, surface, surface_class, boundary, vintage, hdd, include_films, cache, audit)
+          end
           surface.subSurfaces.sort_by(&:nameString).each do |sub|
             sub_class = SUBSURFACE_CLASS[sub.subSurfaceType]
             if sub_class.nil?
@@ -213,6 +217,71 @@ module OpenStudioEnvelope
           c
         end
         surface.setConstruction(cache[key])
+      end
+
+      # Table 3.2.3.1 floors row is zone-conditional: zone 8 prescribes the
+      # table U over the FULL slab area; zones 4-7B prescribe it only within a
+      # 1.2 m perimeter strip (3.2.3.3.(3)) and leave the slab field without a
+      # maximum. Full-area zones retarget the construction like any other
+      # surface; strip zones keep the modeled slab and represent the strip
+      # with the Kiva foundation's interior horizontal insulation. (Legacy
+      # OSut archetypes model the bare slab and OMIT the strip; the old BTAP
+      # path applied the strip U over the full area — both simplifications
+      # diverge from the printed table, see D-32.)
+      def assign_ground_floor(model, surface, vintage, hdd, include_films, cache, audit)
+        extent = NECB.ground_floor_extent(vintage: vintage, hdd: hdd)
+        if extent[:extent] == :full_area
+          assign_surface(model, surface, 'floor', 'ground', vintage, hdd, include_films, cache, audit)
+          return
+        end
+
+        apply_ground_strip(model, surface, vintage, hdd, include_films, extent[:width_m], cache, audit)
+      end
+
+      def apply_ground_strip(model, surface, vintage, hdd, include_films, width_m, cache, audit)
+        kiva = surface.adjacentFoundation
+        if kiva.empty?
+          audit.warn(:prescriptive,
+                     'ground floor without a Kiva foundation in a perimeter-strip zone — the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled',
+                     target: surface.nameString, article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+          return
+        end
+
+        u = NECB.max_u(vintage: vintage, surface: 'floor', boundary: 'ground', hdd: hdd)
+        target = include_films ? 1.0 / ((1.0 / u) - Constructions.film_r('floor', 'ground')) : u
+        slab_r = 0.0
+        construction = surface.construction
+        if construction.is_initialized && construction.get.to_Construction.is_initialized
+          conductance = construction.get.to_Construction.get.thermalConductance
+          slab_r = 1.0 / conductance.get if conductance.is_initialized && conductance.get.positive?
+        end
+        r_add = (1.0 / target) - slab_r
+
+        key = ['kiva-strip', kiva.get.handle.to_s]
+        cache[key] ||= begin
+          if r_add.positive?
+            k = kiva.get
+            # XPS-like board sized so the strip assembly meets the table U
+            mat = OpenStudio::Model::StandardOpaqueMaterial.new(model, 'MediumSmooth', 0.029 * r_add, 0.029, 29.0, 1210.0)
+            mat.setName("NECB 3.2.3.3 strip insulation R-#{r_add.round(3)}")
+            k.setInteriorHorizontalInsulationMaterial(mat)
+            k.setInteriorHorizontalInsulationDepth(0.0)
+            k.setInteriorHorizontalInsulationWidth(width_m)
+            audit.decision(:prescriptive,
+                           'ground floor: slab field left as modeled (no full-area maximum below zone 8); perimeter strip insulated via Kiva interior horizontal insulation',
+                           target: k.nameString,
+                           inputs: { hdd: hdd, table_u: u.round(4), strip_target_u_construction: target.round(4),
+                                     slab_r: slab_r.round(4), strip_insulation_r: r_add.round(4), width_m: width_m },
+                           value: "insulation R #{r_add.round(3)} m2K/W x #{width_m} m from perimeter",
+                           article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+          else
+            audit.info(:prescriptive, 'slab construction already meets the perimeter-strip U — no strip insulation added',
+                       target: surface.nameString,
+                       inputs: { hdd: hdd, strip_target_u_construction: target.round(4), slab_r: slab_r.round(4) },
+                       article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+          end
+          true
+        end
       end
 
       def assign_subsurface(model, sub, sub_class, vintage, hdd, include_films, cache, audit)

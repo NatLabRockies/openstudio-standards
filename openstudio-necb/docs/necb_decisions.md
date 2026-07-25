@@ -820,3 +820,51 @@ stated in the ledger row.
 Ledger status after D-31: no UNFILED and no UNRESOLVED rows remain.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-32 — Warehouse residual root-caused: ground-floor Table 3.2.3.1 extent was misread (our defect, fixed)
+
+End-use isolation on all four Warehouse variants showed the +2..+6% residual
+was ENTIRELY heating (fans at parity, unlike the offices); the heat-balance
+decomposition put 9.6 GJ/wk of it in opaque conduction; the object diff (its
+envelope check only compared Outdoors surfaces — ground was a blind spot,
+now understood) pinned it to the 4,598 m2 slab: legacy models it BARE
+(U 7.39) in zones 4-7B while our reference insulated it FULL-AREA to the
+Table 3.2.3.1 value (0.757 -> 0.863 construction-only).
+
+The printed table [READ, MCP, 2020 and 2025 identical] is zone-conditional:
+floors row reads "0.757 for 1.2 m" in zones 4-7B — a PERIMETER STRIP per
+3.2.3.3.(3), the slab field carries NO prescriptive maximum — vs "0.379 for
+full area" in zone 8. Confirmation from the fleet: at Yellowknife (zone 8)
+legacy insulates full-area at U 0.403 = 0.379 with the interior film
+stripped, agreeing with our 0.404 to three digits. Our full-area application
+below zone 8 was the defect (8.4.4.1.(2): the reference must MEET 3.2, and
+3.2 prescribes only the strip).
+
+Decision: openstudio-envelope Prescriptive now implements the printed rule —
+zone 8 keeps the full-area retarget; zones 4-7B keep the modeled slab field
+and get the strip via the Kiva foundation's interior horizontal insulation
+(R sized so the strip assembly meets the table U, width from the rules JSON;
+plain-Ground floors without Kiva get an audited warning that the strip is
+not representable). The extent metadata lives OUTSIDE u_values (which is
+structurally pinned to the legacy JSON by test_data_integrity). Mechanism-
+parity test excludes ground floors (legacy old-BTAP applies full-area — one
+of the two mutually inconsistent legacy paths, see L-20).
+
+Measured effect (January week, % of target): Toronto electric 106 -> 104
+(heating delta +2.72 -> +1.28 GJ), Toronto gas 102 -> 106 (the reference's
+gas-coil AFUE bin flipped across the 66 kW boundary as loads resized — the
+new run is internally consistent at blended eff ~0.84), Edmonton 99 -> 101
+(the load change legitimately tipped one ERV determination), Yellowknife
+unchanged by construction (zone-8 path untouched). Remaining residual is
+attributed to LEGACY-side divergences: the missing 1.2 m strip in the
+archetypes (~6.7 GJ/wk of opaque loss on this slab, L-20 — Kiva 2D: the
+strip recovers ~70% of full-slab insulation's benefit), ERV wheels running
+in all climates from the wrong-vintage trigger (#2123 family, +0.19 GJ
+parasitic), and CV fan character (+0.31 GJ, #2127 family). The fixed-point
+premise again breaks from the legacy side, as with the D-28 offices.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
+- Evidence: [RAN] ABUPS end-use + SensibleHeatGainSummary decomposition on
+  cached sweep SQL (4 variants); [RAN] object survey incl. Foundation
+  surfaces; [READ, MCP] NECB 2020/2025 3.2.3.1/3.2.3.3/8.4.4.1; [RAN]
+  envelope test battery + parity gate green; [RAN] 4-variant re-runs.

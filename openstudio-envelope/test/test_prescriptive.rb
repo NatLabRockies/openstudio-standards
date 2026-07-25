@@ -31,14 +31,74 @@ class TestPrescriptive < Minitest::Test
         assert_in_delta 0.15942, c.thermalConductance.to_f, 1e-4, surface.nameString
       end
     end
+    # Table 3.2.3.1 floors row below zone 8 prescribes only a 1.2 m perimeter
+    # strip (3.2.3.3.(3)) — the slab field carries NO maximum (D-32). The
+    # fixture's plain-Ground floors can't carry a Kiva strip: constructions
+    # stay untouched and the gap is warned.
     ground = model.getSurfaces.select { |s| s.isGroundSurface && s.surfaceType == 'Floor' }
     refute_empty ground
+    before = load_fixture.getSurfaces.select { |s| s.isGroundSurface && s.surfaceType == 'Floor' }
+                         .to_h { |s| [s.nameString, s.construction.get.nameString] }
     ground.each do |surface|
-      c = surface.construction.get.to_Construction.get
-      assert_in_delta 0.86283, c.thermalConductance.to_f, 1e-4, surface.nameString
+      assert_equal before[surface.nameString], surface.construction.get.nameString,
+                   "#{surface.nameString}: strip-zone slab field left as modeled"
     end
+    assert(audit.warnings.any? { |w| w[:article].to_s.include?('3.2.3.3') },
+           'no-Kiva strip zone warns that the strip is not representable')
     assert audit.entries.any? { |e| e[:step] == :prescriptive && e[:article].to_s.include?('3.2.2.2') }
     assert audit.entries.any? { |e| e[:article].to_s.include?('3.2.3.1') }
+  end
+
+  # D-32: Table 3.2.3.1 floors row is zone-conditional — zones 4-7B keep the
+  # slab field and get a 1.2 m Kiva perimeter strip sized to the 0.757 target;
+  # zone 8 retargets the full area to 0.379 (both as overall U incl. film).
+  def test_ground_floor_strip_vs_full_area
+    build = lambda do
+      model = OpenStudio::Model::Model.new
+      pts = OpenStudio::Point3dVector.new
+      [[0, 0], [0, 10], [10, 10], [10, 0]].each { |x, y| pts << OpenStudio::Point3d.new(x, y, 0.0) }
+      space = OpenStudio::Model::Space.fromFloorPrint(pts, 3.0, model).get
+      slab_mat = OpenStudio::Model::StandardOpaqueMaterial.new(model, 'MediumRough', 0.1, 1.8, 2300, 900)
+      slab = OpenStudio::Model::Construction.new(model)
+      slab.setLayers([slab_mat])
+      seed_mat = OpenStudio::Model::StandardOpaqueMaterial.new(model, 'MediumSmooth', 0.05, 0.05, 100, 1000)
+      seed = OpenStudio::Model::Construction.new(model)
+      seed.setLayers([seed_mat])
+      kiva = OpenStudio::Model::FoundationKiva.new(model)
+      floor = nil
+      space.surfaces.each do |s|
+        if s.surfaceType == 'Floor'
+          s.setConstruction(slab)
+          s.setAdjacentFoundation(kiva)
+          floor = s
+        else
+          s.setConstruction(seed)
+        end
+      end
+      [model, kiva, floor]
+    end
+
+    model, kiva, floor = build.call
+    slab_before = floor.construction.get.nameString
+    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD) # zone 5 -> strip
+    assert_equal slab_before, floor.construction.get.nameString, 'strip zone: slab field construction untouched'
+    ins = kiva.interiorHorizontalInsulationMaterial
+    assert ins.is_initialized, 'strip zone: Kiva interior horizontal insulation set'
+    assert_in_delta 1.2, kiva.interiorHorizontalInsulationWidth.get, 1e-9
+    mat = ins.get.to_StandardOpaqueMaterial.get
+    strip_target = 1.0 / ((1.0 / 0.757) - OpenStudioEnvelope::Constructions.film_r('floor', 'ground'))
+    expected_r = (1.0 / strip_target) - (0.1 / 1.8)
+    assert_in_delta expected_r, mat.thickness / mat.thermalConductivity, 1e-3,
+                    'strip insulation R brings the strip assembly to the table U'
+    assert(audit.entries.any? { |e| e[:article].to_s.include?('3.2.3.3') })
+
+    model8, kiva8, floor8 = build.call
+    OpenStudioEnvelope::NECB.apply_prescriptive(model8, vintage: '2020', hdd: 8170) # zone 8 -> full area
+    full_target = 1.0 / ((1.0 / 0.379) - OpenStudioEnvelope::Constructions.film_r('floor', 'ground'))
+    assert_in_delta full_target, floor8.construction.get.to_Construction.get.thermalConductance.to_f, 1e-4,
+                    'zone 8: slab retargeted full-area to the 0.379 overall U'
+    assert kiva8.interiorHorizontalInsulationMaterial.empty?, 'zone 8: no strip — full-area requirement instead'
+    _ = model8
   end
 
   def test_legacy_naming_and_reuse_conventions

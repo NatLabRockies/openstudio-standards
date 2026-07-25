@@ -49,6 +49,11 @@ class TestPrescriptiveParity < Minitest::Test
   def surface_conductances(model)
     model.getSurfaces.sort_by(&:nameString).filter_map do |s|
       next unless %w[Outdoors Ground Foundation].include?(s.outsideBoundaryCondition)
+      # D-32: ground FLOORS excluded — legacy BTAP retargets them to the Table
+      # 3.2.3.1 strip value over the FULL area; the gem implements the printed
+      # zone-conditional rule (perimeter strip only below zone 8), an
+      # intentional divergence verified against the code text via MCP.
+      next if s.isGroundSurface && s.surfaceType == 'Floor'
       next if s.construction.empty? || s.construction.get.to_Construction.empty?
 
       [s.nameString, s.construction.get.to_Construction.get.thermalConductance.to_f.round(4)]
@@ -80,7 +85,7 @@ class TestPrescriptiveParity < Minitest::Test
       "#{name}: legacy #{l} vs gem #{g}" if g.nil? || (l - g).abs > 1e-3
     end
     assert_empty mismatches, mismatches.join("\n")
-    assert_operator legacy_c.size, :>, 10, 'meaningful surface count compared'
+    assert_operator legacy_c.size, :>, 8, 'meaningful surface count compared (ground floors excluded per D-32)'
   end
 
   def test_fdwr_area_parity
