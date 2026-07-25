@@ -790,3 +790,33 @@ COP convention, L-7 NECB2015 ERV vintage question). Coverage docs
 regenerated post-D-23..D-28 (57/57, no conflicts, no fallbacks).
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+## D-31 — L-6 and L-7 root-caused: both close with NO legacy defect
+
+L-6 (DX COP "mismatch") was a FALSE PREMISE — the fourth of this effort:
+archetype coil names carry their ratings (53kBtu/hr 15.0SEER, 328/722
+kBtu/hr 10.0EER) and those ARE the printed Table 5.2.12.1.-A minimums
+[READ, MCP]: <19 kW single-package "others" -> SEER 15; 70-223 kW
+electric-resistance-heat row -> EER 10.0 (722 kBtu/hr = 211.6 kW sits
+below the 223 kW boundary, so 10.0 not 9.7). The observed COPs are those
+ratings through the standard fan-stripping conversions — SEER: -0.0076s^2
++0.3796s; EER: ((EER/3.412)+0.12)/(1-0.12), Thornton r=0.12 — and the
+formulas are byte-identical in the gem (efficiency.rb) and legacy
+(hvac/conversions.rb). The "3.0 bins" expectation was naive EER/3.413.
+Convention now PINNED: rated SEER/EER are fan-inclusive; E+ coil COP is
+coil-only; both lineages strip the fan the same way.
+
+L-7 (NECB2015 ERV vintage): legacy NECB2015 has NO override of
+air_loop_hvac_energy_recovery_ventilator_required? (runs the 2011 150 kW
+trigger; the override chain starts at NECB2017) [READ]. Secondary sources
+converge that this is VINTAGE-CORRECT: the national NECB 2015 kept the
+150 kW sensible-exhaust-heat trigger (Quebec's NECB-2015-Qc amendment cut
+it to 50 kW — an amendment presupposing the 150 kW national base; change
+summaries put the flow-rate/OA-based rewrite at NECB 2017). Primary 2015
+text is not machine-accessible (codes MCP: 2020/2025 only) — flagged for
+re-verification if 2015 is ever ingested. UNVERIFIED-against-primary is
+stated in the ledger row.
+
+Ledger status after D-31: no UNFILED and no UNRESOLVED rows remain.
+
+- Who/when: Claude under D-10 delegation, 2026-07-25.
