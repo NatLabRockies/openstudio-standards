@@ -31,6 +31,7 @@ delegation) / ADJUDICATE (needs phylroy) / LEDGERED (legacy → legacy_findings.
 | A3 | 5.2.6.3.(1) loop pump power caps (NECB2015+, W/kW: 4.5 htg /14 clg /12 rej /22 WSHP): legacy applies to the reference; interaction with our 8.4.4.14 proposed-intensity transfer needs a ruling (which basis wins when they conflict?). |
 | A4 | Table -B System 5 heating "None": both lineages build seasonal hydronic heating anyway (deliberate legacy parity). Keep or honour the table? |
 | A5 | Reheat-coil hard-size workaround (legacy caps at 1.2x min-flow ΔT30): adopt, or trust autosizing (our e2e conditioning asserts pass today)? |
+| A6 | 'Museum general exhibition area' selects Assembly Area via the 'exhibit' keyword, not Historical Collections via 'museum' (keyword-order collision, found by the D-33 mockups). Which Table 8.4.4.7.-A row should museum exhibition galleries use? |
 
 ## LEDGERED (legacy — see legacy_findings.md L-9..L-15)
 Fan-curve cubics functionally wrong + D/E column conflation (HIGH); 8.4.4.18
