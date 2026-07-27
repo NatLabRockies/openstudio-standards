@@ -868,3 +868,46 @@ premise again breaks from the legacy side, as with the D-28 offices.
   cached sweep SQL (4 variants); [RAN] object survey incl. Foundation
   surfaces; [READ, MCP] NECB 2020/2025 3.2.3.1/3.2.3.3/8.4.4.1; [RAN]
   envelope test battery + parity gate green; [RAN] 4-variant re-runs.
+
+## D-33 — Variant mockup set: the never-fleet-exercised reference routes now run the full pipeline
+
+Coverage audit of the reference-system routes (sweep audits x 22 runs +
+gem test greps): the archetype fleet only ever selects/builds Systems
+1/3/4/6 (electric + gas). Gem-level topology tests already covered sys 2,
+hp, copy_proposed, through_the_wall and sys 1 — but System 5 had NEVER
+been built anywhere (selector-level only), the kitchen-hood ROUTE never
+fired, the 8.4.4.6 purchased-energy representations had no build test,
+and none of the non-fleet routes had ever been through the umbrella
+pipeline (proposed+reference sizing runs, post-sizing efficiencies, ERV
+determination).
+
+Decision: seven synthetic mockups (5ZoneNoHVAC geometry + NECB catalog
+space types + catalog loads baked in via openstudio-loads; conditions the
+OSM cannot express carried as building: overrides in manifest.json — the
+same mechanism a real modeller uses):
+sys2_museum (Historical Collections -> FPFC+chiller), sys5_refrigerated
+(FIRST-EVER TPFC build; A4 heating adjudication pending), hp_office
+(Table 8.4.4.13 ASHP override), res_copy (compatible cooling -> identical
+reference), res_ttw (incompatible central CHW -> through-the-wall),
+kitchen_hood (hood route -> System 4 + article), purchased_energy
+(district heating/cooling -> gas-boiler + air-cooled-chiller
+representations on a storeys-3 sys 6). Generator:
+scripts/generate_variant_mockups.rb -> test/fixtures/variant_mockups/;
+gate: test/test_variant_mockups.rb (8 runs, sizing mode with the CLI,
+:none fallback without). All green including E+ sizing on every mockup.
+
+Finding logged en passant: 'Museum general exhibition area' selects
+Assembly Area via the 'exhibit' keyword, not Historical Collections via
+'museum' (category order + keyword collision). Ambiguous against the
+printed Table 8.4.4.7.-A wording — the mockup uses 'Museum restoration
+room' to avoid the collision; flagged for the A-list review if museum
+exhibition galleries should be Historical Collections (A6 candidate).
+
+Still unreachable by any fixture: nothing at the route level. Remaining
+depth gaps are the A-list adjudications themselves (A1/A2 residential+HP
+precedence and water-loop boundary, A4 System 5 heating source) — the
+mockups exercise CURRENT behavior and will pin whatever phylroy decides.
+
+- Who/when: Claude under D-10 delegation, 2026-07-27.
+- Evidence: [RAN] sweep-audit scan (22 runs -> sys 1/3/4/6 only); [RAN]
+  gem-test grep; [RAN] generator + 8/8 test battery with sizing runs.

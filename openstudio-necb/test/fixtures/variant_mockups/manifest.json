@@ -1,0 +1,97 @@
+{
+  "sys2_museum": {
+    "osm": "sys2_museum.osm",
+    "space_type": "Museum restoration room",
+    "proposed": "Baseboard electric",
+    "note": "Historical Collections Area -> System 2 (unconditional row). NOTE: \"Museum general exhibition area\" instead lands in Assembly Area via the \"exhibit\" keyword — ambiguous vs the printed table; the chosen type avoids the collision",
+    "building": null,
+    "expect": {
+      "selected": "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
+      "built": "FPFC MAU Chilled Water Coils with Scroll Chiller"
+    }
+  },
+  "sys5_refrigerated": {
+    "osm": "sys5_refrigerated.osm",
+    "space_type": "Warehouse storage area medium to bulky palletized items",
+    "proposed": "Baseboard electric",
+    "note": "Warehouse Area + refrigerated condition -> System 5 (first-ever build of TPFC reference; A4 \"System 5 heating\" adjudication pending)",
+    "building": {
+      "refrigerated_zones": [
+        "Thermal Zone 1",
+        "Thermal Zone 2",
+        "Thermal Zone 3",
+        "Thermal Zone 4",
+        "Thermal Zone 5"
+      ]
+    },
+    "expect": {
+      "selected": "System 5 -> 'TPFC MAU Chilled Water Coils with Scroll Chiller'",
+      "built": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+      "article": "refrigerated space -> System 5"
+    }
+  },
+  "hp_office": {
+    "osm": "hp_office.osm",
+    "space_type": "Office enclosed <= 25 m2",
+    "proposed": "PTHP",
+    "note": "proposed heat pump -> Table 8.4.4.13 ASHP reference override",
+    "building": null,
+    "expect": {
+      "selected": "System hp -> 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard'",
+      "built": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard"
+    }
+  },
+  "res_copy": {
+    "osm": "res_copy.osm",
+    "space_type": "Dwelling units general",
+    "proposed": "PTHP",
+    "note": "residential + compatible cooling -> reference identical to proposed (copy rule) through the full pipeline",
+    "building": null,
+    "expect": {
+      "decision": "residential with compatible cooling -> reference identical to proposed"
+    }
+  },
+  "res_ttw": {
+    "osm": "res_ttw.osm",
+    "space_type": "Dwelling units general",
+    "proposed": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+    "note": "residential + INCOMPATIBLE (central chilled-water) cooling -> through-the-wall systems",
+    "building": null,
+    "expect": {
+      "decision": "residential otherwise -> through-the-wall systems"
+    }
+  },
+  "kitchen_hood": {
+    "osm": "kitchen_hood.osm",
+    "space_type": "Food preparation area",
+    "proposed": "Baseboard electric",
+    "note": "Supermarket/Food Service + kitchen-hood condition -> System 4 (the hood ROUTE; sys 4 itself is fleet-covered)",
+    "building": {
+      "kitchen_hood_zones": [
+        "Thermal Zone 1",
+        "Thermal Zone 2",
+        "Thermal Zone 3",
+        "Thermal Zone 4",
+        "Thermal Zone 5"
+      ]
+    },
+    "expect": {
+      "selected": "System 4 -> 'PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard'",
+      "article": "food preparation with kitchen hood"
+    }
+  },
+  "purchased_energy": {
+    "osm": "purchased_energy.osm",
+    "space_type": "Office open plan",
+    "proposed": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+    "note": "8.4.4.6 purchased heating/cooling -> gas-boiler + air-cooled-chiller representations (storeys override -> sys 6 so the chiller representation is exercised)",
+    "building": {
+      "storeys": 3
+    },
+    "expect": {
+      "decision": "purchased heating energy -> represented by gas-fired modulating boiler",
+      "decision2": "purchased cooling energy -> represented by air-cooled electric chiller",
+      "selected": "System 6 -> 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'"
+    }
+  }
+}
