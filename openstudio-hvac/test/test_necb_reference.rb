@@ -53,13 +53,27 @@ class TestNecbReference < Minitest::Test
     end
   end
 
-  # residential PTHP -> reference identical to proposed (copy rule): nothing rebuilt
-  def test_residential_pthp_copies_proposed
+  # D-34 (A1 ruled follow-legacy): residential PTHP is a HEAT PUMP -> the
+  # 8.4.4.7.(4) ASHP redirect wins over the Table -A "(or heat pumps)"
+  # identical-to-proposed parenthetical.
+  def test_residential_pthp_redirects_to_ashp_reference
     model = proposed('PTHP')
     result = OpenStudioHVAC::NECB.reference_hvac(model, building: { storeys: 1, zone_types: types(model, 'Multi-unit residential') })
 
+    assert_equal ['hp'], result.assignments.map(&:reference_system).uniq
+    assert_equal [:build], result.assignments.map(&:action).uniq
+    assert_empty result.model.getZoneHVACPackagedTerminalHeatPumps, 'proposed PTHPs replaced by the ASHP reference'
+    refute_empty result.model.getAirLoopHVACs, 'ASHP RTU reference built'
+  end
+
+  # residential PTAC (compatible NON-heat-pump cooling) -> reference identical
+  # to proposed (copy rule): nothing rebuilt
+  def test_residential_ptac_copies_proposed
+    model = proposed('PTAC with baseboard electric')
+    result = OpenStudioHVAC::NECB.reference_hvac(model, building: { storeys: 1, zone_types: types(model, 'Multi-unit residential') })
+
     assert_equal [:copy_proposed], result.assignments.map(&:action).uniq
-    refute_empty result.model.getZoneHVACPackagedTerminalHeatPumps, 'PTHPs retained'
+    refute_empty result.model.getZoneHVACPackagedTerminalAirConditioners, 'PTACs retained'
     assert_empty result.model.getAirLoopHVACs
   end
 

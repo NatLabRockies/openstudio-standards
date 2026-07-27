@@ -1,6 +1,6 @@
 
 OS:Version,
-  {412b4298-97b5-4a4c-93fd-30b215256af2}, !- Handle
+  {9baf742d-ae26-4caf-8ac9-a0e003667a96}, !- Handle
   3.11.0;                                 !- Version Identifier
 
 OS:Schedule:Constant,
@@ -10052,7 +10052,7 @@ OS:BuildingStory,
 OS:Space,
   {e5436363-6456-4d83-8faa-953f42baf153}, !- Handle
   Story 1 West Perimeter Space,           !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space Type Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   -0,                                     !- Direction of Relative North {deg}
@@ -10169,7 +10169,7 @@ OS:Surface,
 OS:Space,
   {17d5dcca-6b5b-4972-8388-632ba2fc5060}, !- Handle
   Story 1 North Perimeter Space,          !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space Type Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   -0,                                     !- Direction of Relative North {deg}
@@ -10286,7 +10286,7 @@ OS:Surface,
 OS:Space,
   {c22c9c43-ec92-418b-898b-3df603e0b131}, !- Handle
   Story 1 East Perimeter Space,           !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space Type Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   -0,                                     !- Direction of Relative North {deg}
@@ -10403,7 +10403,7 @@ OS:Surface,
 OS:Space,
   {2ae8cd36-e949-4a01-a3d5-6f9c554f1c07}, !- Handle
   Story 1 South Perimeter Space,          !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space Type Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   -0,                                     !- Direction of Relative North {deg}
@@ -10520,7 +10520,7 @@ OS:Surface,
 OS:Space,
   {18d522ef-9c97-4ca8-9c8e-6770a6e56f08}, !- Handle
   Story 1 Core Space,                     !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space Type Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   -0,                                     !- Direction of Relative North {deg}
@@ -10718,7 +10718,7 @@ OS:ThermalZone,
   {9d0178aa-f728-40ae-95d6-3ef974ee366b}, !- Zone Air Inlet Port List
   {5da2681e-8743-44da-97b9-136b4591c7e2}, !- Zone Air Exhaust Port List
   {5f2990a3-5e80-4215-8966-62e49bc830e6}, !- Zone Air Node Name
-  {8e4821d5-516b-44b8-b1fb-a7e3a7f46b31}, !- Zone Return Air Port List
+  {2b0d4b09-1c4c-45c2-ba62-3926a8be9613}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -10729,7 +10729,7 @@ OS:ThermalZone,
   No;                                     !- Use Ideal Air Loads
 
 OS:PortList,
-  {8e4821d5-516b-44b8-b1fb-a7e3a7f46b31}, !- Handle
+  {2b0d4b09-1c4c-45c2-ba62-3926a8be9613}, !- Handle
   {1a18f482-9322-4b26-909b-3771a680984f}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -10803,7 +10803,7 @@ OS:ZoneHVAC:EquipmentList,
   Zone HVAC Equipment List 1,             !- Name
   {1a18f482-9322-4b26-909b-3771a680984f}, !- Thermal Zone
   ,                                       !- Load Distribution Scheme
-  {684c42cf-99e1-4662-821c-4eea543cf070}, !- Zone Equipment 1
+  {466d8181-a799-47c0-a0d6-d9dccf0b1011}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
   ,                                       !- Zone Equipment Sequential Cooling Fraction Schedule Name 1
@@ -10829,7 +10829,7 @@ OS:ThermalZone,
   {24e0f9c9-b6af-4042-a1e6-d73c56ffc71a}, !- Zone Air Inlet Port List
   {18f5b9aa-359f-4975-8fca-a49e691589bc}, !- Zone Air Exhaust Port List
   {eba1a781-fb3a-4be0-bfb4-1efe2b1654cd}, !- Zone Air Node Name
-  {7dbf53c8-c7b6-46aa-b6c7-bed664eeab61}, !- Zone Return Air Port List
+  {0dff09f5-e54a-49ac-bfef-d79285835838}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -10840,7 +10840,7 @@ OS:ThermalZone,
   No;                                     !- Use Ideal Air Loads
 
 OS:PortList,
-  {7dbf53c8-c7b6-46aa-b6c7-bed664eeab61}, !- Handle
+  {0dff09f5-e54a-49ac-bfef-d79285835838}, !- Handle
   {786b3063-5ade-40ed-95e0-cc9adbe324c5}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -10914,7 +10914,7 @@ OS:ZoneHVAC:EquipmentList,
   Zone HVAC Equipment List 2,             !- Name
   {786b3063-5ade-40ed-95e0-cc9adbe324c5}, !- Thermal Zone
   ,                                       !- Load Distribution Scheme
-  {4fe36ea2-e6de-4ef6-8184-f0c701c57cfc}, !- Zone Equipment 1
+  {423b0e94-76bf-45fb-b283-a85a76205207}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
   ,                                       !- Zone Equipment Sequential Cooling Fraction Schedule Name 1
@@ -10940,7 +10940,7 @@ OS:ThermalZone,
   {d61bd3a0-6c9d-4172-a748-5571cc2b1806}, !- Zone Air Inlet Port List
   {eef34145-3b9a-40d6-913d-fb359563df94}, !- Zone Air Exhaust Port List
   {35fde64d-999f-4d04-b03c-cd0276504b1a}, !- Zone Air Node Name
-  {69e4719a-7e4d-4899-8836-290a5d3e0cda}, !- Zone Return Air Port List
+  {8b2d11da-ea0c-4c76-934f-d987a51b765c}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -10951,7 +10951,7 @@ OS:ThermalZone,
   No;                                     !- Use Ideal Air Loads
 
 OS:PortList,
-  {69e4719a-7e4d-4899-8836-290a5d3e0cda}, !- Handle
+  {8b2d11da-ea0c-4c76-934f-d987a51b765c}, !- Handle
   {bf347082-b158-40c7-afea-384a770aa02a}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -11025,7 +11025,7 @@ OS:ZoneHVAC:EquipmentList,
   Zone HVAC Equipment List 3,             !- Name
   {bf347082-b158-40c7-afea-384a770aa02a}, !- Thermal Zone
   ,                                       !- Load Distribution Scheme
-  {609cc8d8-dad1-4369-b767-078e91b24a67}, !- Zone Equipment 1
+  {f35dd9f5-bc8a-4acc-a171-80710eeac38b}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
   ,                                       !- Zone Equipment Sequential Cooling Fraction Schedule Name 1
@@ -11051,7 +11051,7 @@ OS:ThermalZone,
   {93ac757a-f20e-4c2a-8596-8b58893c8c33}, !- Zone Air Inlet Port List
   {8223c7cd-b6e9-444b-8176-bbbdaf3bd775}, !- Zone Air Exhaust Port List
   {ea52c8d6-7cf9-4f4d-8490-ade394152a03}, !- Zone Air Node Name
-  {f90c677a-77b2-4e1a-bccd-ac0574496141}, !- Zone Return Air Port List
+  {71ac9497-e23c-4519-a3e2-893de4c8a509}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -11062,7 +11062,7 @@ OS:ThermalZone,
   No;                                     !- Use Ideal Air Loads
 
 OS:PortList,
-  {f90c677a-77b2-4e1a-bccd-ac0574496141}, !- Handle
+  {71ac9497-e23c-4519-a3e2-893de4c8a509}, !- Handle
   {520c6106-2486-4b24-9fb0-9efdc71eeeff}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -11136,7 +11136,7 @@ OS:ZoneHVAC:EquipmentList,
   Zone HVAC Equipment List 4,             !- Name
   {520c6106-2486-4b24-9fb0-9efdc71eeeff}, !- Thermal Zone
   ,                                       !- Load Distribution Scheme
-  {35daa364-ae8f-42d6-9be4-c5461de7abee}, !- Zone Equipment 1
+  {a502f19e-047b-4552-be67-fd5bd3dcb9f6}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
   ,                                       !- Zone Equipment Sequential Cooling Fraction Schedule Name 1
@@ -11162,7 +11162,7 @@ OS:ThermalZone,
   {d19bd555-dd63-43ae-b394-d3354e97c502}, !- Zone Air Inlet Port List
   {2bfd7c1d-a833-4520-9d16-8238d8b132f7}, !- Zone Air Exhaust Port List
   {692e5aaa-4a04-41fd-8ae3-df3b60d9e421}, !- Zone Air Node Name
-  {588e0ace-2fc9-42ae-a97c-b48acac6af37}, !- Zone Return Air Port List
+  {1229face-2a6f-4df9-aacc-6645f81b79a7}, !- Zone Return Air Port List
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -11173,7 +11173,7 @@ OS:ThermalZone,
   No;                                     !- Use Ideal Air Loads
 
 OS:PortList,
-  {588e0ace-2fc9-42ae-a97c-b48acac6af37}, !- Handle
+  {1229face-2a6f-4df9-aacc-6645f81b79a7}, !- Handle
   {07abe0b2-8661-4381-90d4-685f5047d22f}, !- HVAC Component
   ;                                       !- Port 1
 
@@ -11247,7 +11247,7 @@ OS:ZoneHVAC:EquipmentList,
   Zone HVAC Equipment List 5,             !- Name
   {07abe0b2-8661-4381-90d4-685f5047d22f}, !- Thermal Zone
   ,                                       !- Load Distribution Scheme
-  {a6642bc6-fd6a-41b3-bea2-9a5c62117387}, !- Zone Equipment 1
+  {78737567-4d80-49ba-a0d4-0a336ef8277b}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
   ,                                       !- Zone Equipment Sequential Cooling Fraction Schedule Name 1
@@ -13584,18 +13584,18 @@ OS:StandardsInformation:Construction,
   {fed678a4-65fc-42d6-8a3d-5298af0c87cc}; !- Construction Name
 
 OS:SpaceType,
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Handle
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items, !- Name
   ,                                       !- Default Construction Set Name
-  {a640a64b-da9b-46ef-8957-75e925919f4c}, !- Default Schedule Set Name
+  {2b2b0a63-ff98-4b99-ac97-02de9f6b47a8}, !- Default Schedule Set Name
   ,                                       !- Group Rendering Name
-  {4b31d679-6a29-4459-9732-2a365d37312e}, !- Design Specification Outdoor Air Object Name
+  {738c508e-4342-435d-a48f-051439b262f4}, !- Design Specification Outdoor Air Object Name
   ,                                       !- Standards Template
   Space Function,                         !- Standards Building Type
   Warehouse storage area medium to bulky palletized items; !- Standards Space Type
 
 OS:People:Definition,
-  {df5c1364-dffa-48f5-83e0-dd7d689d555e}, !- Handle
+  {8ae7dac8-0f78-4a92-820e-9fc194ba99b9}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items People Definition, !- Name
   People/Area,                            !- Number of People Calculation Method
   ,                                       !- Number of People {people}
@@ -13604,41 +13604,41 @@ OS:People:Definition,
   0.3;                                    !- Fraction Radiant
 
 OS:People,
-  {c11c4385-b920-4d82-8082-b956cadb6263}, !- Handle
+  {f1cddf6a-ebf4-4135-9735-02f0c1fe0fed}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items People, !- Name
-  {df5c1364-dffa-48f5-83e0-dd7d689d555e}, !- People Definition Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space or SpaceType Name
+  {8ae7dac8-0f78-4a92-820e-9fc194ba99b9}, !- People Definition Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space or SpaceType Name
   ,                                       !- Number of People Schedule Name
   ,                                       !- Activity Level Schedule Name
   ,                                       !- Surface Name/Angle Factor List Name
-  {ef192c67-4ed2-4518-babf-d271f10a9668}, !- Work Efficiency Schedule Name
+  {957b9e5d-30bf-4da4-a6af-af5c776c494c}, !- Work Efficiency Schedule Name
   ClothingInsulationSchedule,             !- Clothing Insulation Calculation Method
   ,                                       !- Clothing Insulation Calculation Method Schedule Name
-  {bd6d6dbf-3af2-496c-8279-42d6c01d6672}, !- Clothing Insulation Schedule Name
-  {1069d099-f873-4b6e-9845-ed3c53c61ee7}, !- Air Velocity Schedule Name
+  {8e113c6b-958f-4196-afbe-660a94843846}, !- Clothing Insulation Schedule Name
+  {3c63c1c1-7677-4c68-8624-ca22e8245ec4}, !- Air Velocity Schedule Name
   1;                                      !- Multiplier
 
 OS:Schedule:Ruleset,
-  {bd6d6dbf-3af2-496c-8279-42d6c01d6672}, !- Handle
+  {8e113c6b-958f-4196-afbe-660a94843846}, !- Handle
   Clothing Schedule,                      !- Name
-  {4690a04b-a8db-4482-adf8-31c4bd791c59}, !- Schedule Type Limits Name
-  {9abe3672-27f5-4ae0-a32e-600738c80341}; !- Default Day Schedule Name
+  {14f41118-551d-4d32-9d88-842ae9d44c7c}, !- Schedule Type Limits Name
+  {c6396c70-67bf-44b5-82c5-cbc7d925c2b3}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {9abe3672-27f5-4ae0-a32e-600738c80341}, !- Handle
+  {c6396c70-67bf-44b5-82c5-cbc7d925c2b3}, !- Handle
   Clothing Schedule Default Winter Clothes, !- Name
-  {4690a04b-a8db-4482-adf8-31c4bd791c59}, !- Schedule Type Limits Name
+  {14f41118-551d-4d32-9d88-842ae9d44c7c}, !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
   24,                                     !- Hour 1
   0,                                      !- Minute 1
   1;                                      !- Value Until Time 1
 
 OS:Schedule:Rule,
-  {af1e32d4-4f54-4501-9ee2-ac235d8240c9}, !- Handle
+  {1bb77c62-ba8c-4994-96ae-c4f32508b8ec}, !- Handle
   Schedule Rule 1,                        !- Name
-  {bd6d6dbf-3af2-496c-8279-42d6c01d6672}, !- Schedule Ruleset Name
+  {8e113c6b-958f-4196-afbe-660a94843846}, !- Schedule Ruleset Name
   0,                                      !- Rule Order
-  {0727fb75-4797-4f67-92a3-e4b5c527323d}, !- Day Schedule Name
+  {e52353bb-0457-4271-b315-f335105edddc}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -13653,16 +13653,16 @@ OS:Schedule:Rule,
   30;                                     !- End Day
 
 OS:Schedule:Day,
-  {0727fb75-4797-4f67-92a3-e4b5c527323d}, !- Handle
+  {e52353bb-0457-4271-b315-f335105edddc}, !- Handle
   Clothing Schedule Summer Clothes,       !- Name
-  {4690a04b-a8db-4482-adf8-31c4bd791c59}, !- Schedule Type Limits Name
+  {14f41118-551d-4d32-9d88-842ae9d44c7c}, !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
   24,                                     !- Hour 1
   0,                                      !- Minute 1
   0.5;                                    !- Value Until Time 1
 
 OS:ScheduleTypeLimits,
-  {4690a04b-a8db-4482-adf8-31c4bd791c59}, !- Handle
+  {14f41118-551d-4d32-9d88-842ae9d44c7c}, !- Handle
   ClothingInsulation,                     !- Name
   0,                                      !- Lower Limit Value
   ,                                       !- Upper Limit Value
@@ -13670,22 +13670,22 @@ OS:ScheduleTypeLimits,
   ClothingInsulation;                     !- Unit Type
 
 OS:Schedule:Ruleset,
-  {1069d099-f873-4b6e-9845-ed3c53c61ee7}, !- Handle
+  {3c63c1c1-7677-4c68-8624-ca22e8245ec4}, !- Handle
   Air Velocity Schedule,                  !- Name
-  {15f64c63-cf82-414c-9a9a-0c55225edf09}, !- Schedule Type Limits Name
-  {8ac6b98c-8d84-401f-ab1a-ca980ef78d0f}; !- Default Day Schedule Name
+  {af2f03f8-3738-406c-8e41-0d3dec5f47bb}, !- Schedule Type Limits Name
+  {59c6d3dd-3be2-4773-986e-3fd12261cb99}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {8ac6b98c-8d84-401f-ab1a-ca980ef78d0f}, !- Handle
+  {59c6d3dd-3be2-4773-986e-3fd12261cb99}, !- Handle
   Air Velocity Schedule Default,          !- Name
-  {15f64c63-cf82-414c-9a9a-0c55225edf09}, !- Schedule Type Limits Name
+  {af2f03f8-3738-406c-8e41-0d3dec5f47bb}, !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
   24,                                     !- Hour 1
   0,                                      !- Minute 1
   0.2;                                    !- Value Until Time 1
 
 OS:ScheduleTypeLimits,
-  {15f64c63-cf82-414c-9a9a-0c55225edf09}, !- Handle
+  {af2f03f8-3738-406c-8e41-0d3dec5f47bb}, !- Handle
   Velocity,                               !- Name
   0,                                      !- Lower Limit Value
   ,                                       !- Upper Limit Value
@@ -13693,13 +13693,13 @@ OS:ScheduleTypeLimits,
   Velocity;                               !- Unit Type
 
 OS:Schedule:Ruleset,
-  {ef192c67-4ed2-4518-babf-d271f10a9668}, !- Handle
+  {957b9e5d-30bf-4da4-a6af-af5c776c494c}, !- Handle
   Work Efficiency Schedule,               !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
-  {fb847641-bec1-4cb8-87ba-2d17d4d179f5}; !- Default Day Schedule Name
+  {db780249-720e-4dd7-8684-58bfc46cb774}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {fb847641-bec1-4cb8-87ba-2d17d4d179f5}, !- Handle
+  {db780249-720e-4dd7-8684-58bfc46cb774}, !- Handle
   Work Efficiency Schedule Default,       !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
@@ -13708,7 +13708,7 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:ElectricEquipment:Definition,
-  {58e20010-72fd-4274-a48a-6bd29429ea75}, !- Handle
+  {e2276f81-e875-4284-a5c9-eebf974453fa}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Elec Equip Definition, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Design Level {W}
@@ -13718,16 +13718,16 @@ OS:ElectricEquipment:Definition,
   0.5;                                    !- Fraction Radiant
 
 OS:ElectricEquipment,
-  {92212af3-087a-41bd-8395-e926dd542752}, !- Handle
+  {ca04f4a5-bf1b-4a21-b7f3-980c625ab097}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Elec Equip, !- Name
-  {58e20010-72fd-4274-a48a-6bd29429ea75}, !- Electric Equipment Definition Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space or SpaceType Name
+  {e2276f81-e875-4284-a5c9-eebf974453fa}, !- Electric Equipment Definition Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space or SpaceType Name
   ,                                       !- Schedule Name
   ,                                       !- Multiplier
   General;                                !- End-Use Subcategory
 
 OS:DesignSpecification:OutdoorAir,
-  {4b31d679-6a29-4459-9732-2a365d37312e}, !- Handle
+  {738c508e-4342-435d-a48f-051439b262f4}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Ventilation, !- Name
   Sum,                                    !- Outdoor Air Method
   0,                                      !- Outdoor Air Flow per Person {m3/s-person}
@@ -13737,8 +13737,8 @@ OS:DesignSpecification:OutdoorAir,
   ;                                       !- Outdoor Air Flow Rate Fraction Schedule Name
 
 OS:AdditionalProperties,
-  {57b5fcc6-9fcb-4f68-9912-d191573f894b}, !- Handle
-  {4b31d679-6a29-4459-9732-2a365d37312e}, !- Object Name
+  {a022bbb9-8cda-42fd-91aa-6de8e8064ace}, !- Handle
+  {738c508e-4342-435d-a48f-051439b262f4}, !- Object Name
   Ref OA per area,                        !- Feature Name 1
   Double,                                 !- Feature Data Type 1
   0.059999999999999998,                   !- Feature Value 1
@@ -13759,9 +13759,9 @@ OS:AdditionalProperties,
   Warehouses;                             !- Feature Value 6
 
 OS:SpaceInfiltration:DesignFlowRate,
-  {ada8748f-9e3f-4f71-b28f-42c7ab4dffb3}, !- Handle
+  {9bd70f25-70f9-4273-99fd-8a718e012109}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Infiltration, !- Name
-  {887baf38-3490-4216-97a9-656270f2fd44}, !- Space or SpaceType Name
+  {8d01c915-873e-458b-bbd5-4fe0c0102169}, !- Space or SpaceType Name
   {c4b41fbe-a465-4952-9165-991f522eb156}, !- Schedule Name
   Flow/ExteriorArea,                      !- Design Flow Rate Calculation Method
   ,                                       !- Design Flow Rate {m3/s}
@@ -13775,13 +13775,13 @@ OS:SpaceInfiltration:DesignFlowRate,
   Outdoor;                                !- Density Basis
 
 OS:DefaultScheduleSet,
-  {a640a64b-da9b-46ef-8957-75e925919f4c}, !- Handle
+  {2b2b0a63-ff98-4b99-ac97-02de9f6b47a8}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Schedule Set, !- Name
   ,                                       !- Hours of Operation Schedule Name
-  {c3836edc-7afe-4375-ab23-2ba32eab03e6}, !- Number of People Schedule Name
-  {1afaf1bb-af47-4f51-bf32-8bbe5751a74f}, !- People Activity Level Schedule Name
+  {6bcc3543-ef63-43f3-b862-f8e5e2c7d6b7}, !- Number of People Schedule Name
+  {93194448-6628-44bb-ba1f-6cce4b3807cd}, !- People Activity Level Schedule Name
   ,                                       !- Lighting Schedule Name
-  {372f8461-0f3e-4634-aa09-8c3ef02dd48f}, !- Electric Equipment Schedule Name
+  {71d5be8c-c302-445d-88cb-d728b1168a8b}, !- Electric Equipment Schedule Name
   ,                                       !- Gas Equipment Schedule Name
   ,                                       !- Hot Water Equipment Schedule Name
   ,                                       !- Infiltration Schedule Name
@@ -13789,13 +13789,13 @@ OS:DefaultScheduleSet,
   ;                                       !- Other Equipment Schedule Name
 
 OS:Schedule:Ruleset,
-  {c3836edc-7afe-4375-ab23-2ba32eab03e6}, !- Handle
+  {6bcc3543-ef63-43f3-b862-f8e5e2c7d6b7}, !- Handle
   NECB-A-Occupancy,                       !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
-  {1c5ca141-b326-498f-a6c7-000ea1a80348}; !- Default Day Schedule Name
+  {17d0fba0-d98b-498c-91dd-10defa53bf2a}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {1c5ca141-b326-498f-a6c7-000ea1a80348}, !- Handle
+  {17d0fba0-d98b-498c-91dd-10defa53bf2a}, !- Handle
   NECB-A-Occupancy Default,               !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13831,11 +13831,11 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 10
 
 OS:Schedule:Rule,
-  {f45cb9a8-cc61-4e27-a2f3-35deba4ba0ca}, !- Handle
+  {864d3a1d-b828-48c6-9dae-ae4b35d6cc39}, !- Handle
   Schedule Rule 2,                        !- Name
-  {c3836edc-7afe-4375-ab23-2ba32eab03e6}, !- Schedule Ruleset Name
+  {6bcc3543-ef63-43f3-b862-f8e5e2c7d6b7}, !- Schedule Ruleset Name
   2,                                      !- Rule Order
-  {6df6c629-114f-42fa-90af-1345a716f8ff}, !- Day Schedule Name
+  {52281eb6-ca61-49f1-a2f4-2cf9ba107025}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   Yes,                                    !- Apply Monday
   Yes,                                    !- Apply Tuesday
@@ -13850,7 +13850,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {6df6c629-114f-42fa-90af-1345a716f8ff}, !- Handle
+  {52281eb6-ca61-49f1-a2f4-2cf9ba107025}, !- Handle
   NECB-A-Occupancy Default|Wkdy Day,      !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13886,11 +13886,11 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 10
 
 OS:Schedule:Rule,
-  {52c83bb0-1a3a-4a1d-a17d-8ba0107388e6}, !- Handle
+  {726a1e4b-617a-4ff5-b101-5450c0a0060e}, !- Handle
   Schedule Rule 3,                        !- Name
-  {c3836edc-7afe-4375-ab23-2ba32eab03e6}, !- Schedule Ruleset Name
+  {6bcc3543-ef63-43f3-b862-f8e5e2c7d6b7}, !- Schedule Ruleset Name
   1,                                      !- Rule Order
-  {4ed5a7fa-4f2b-43a0-a5fa-dde4192403cd}, !- Day Schedule Name
+  {8ff0a64e-acea-446c-96bd-0798c592051b}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -13905,7 +13905,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {4ed5a7fa-4f2b-43a0-a5fa-dde4192403cd}, !- Handle
+  {8ff0a64e-acea-446c-96bd-0798c592051b}, !- Handle
   NECB-A-Occupancy Sat Day,               !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13914,11 +13914,11 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:Schedule:Rule,
-  {387d234b-0cd6-4ea4-9246-d33b391d010e}, !- Handle
+  {ac9a714d-7ed0-4905-ac6c-b8d9a25c41b6}, !- Handle
   Schedule Rule 4,                        !- Name
-  {c3836edc-7afe-4375-ab23-2ba32eab03e6}, !- Schedule Ruleset Name
+  {6bcc3543-ef63-43f3-b862-f8e5e2c7d6b7}, !- Schedule Ruleset Name
   0,                                      !- Rule Order
-  {72cc92dc-a1db-4108-a14f-b16e1d1408f8}, !- Day Schedule Name
+  {1059858c-fed8-42d0-9d65-d52702cd017c}, !- Day Schedule Name
   Yes,                                    !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -13933,7 +13933,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {72cc92dc-a1db-4108-a14f-b16e1d1408f8}, !- Handle
+  {1059858c-fed8-42d0-9d65-d52702cd017c}, !- Handle
   NECB-A-Occupancy Sun|Hol Day,           !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13942,15 +13942,15 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:Schedule:Ruleset,
-  {1afaf1bb-af47-4f51-bf32-8bbe5751a74f}, !- Handle
+  {93194448-6628-44bb-ba1f-6cce4b3807cd}, !- Handle
   NECB-Activity,                          !- Name
   {f75ecae9-d883-43f9-acfd-97e9cdfc8b24}, !- Schedule Type Limits Name
-  {98d1eb06-17de-46e4-8e71-1745013f2b76}, !- Default Day Schedule Name
-  {c1ec0e41-5ae9-47ad-98e9-186cfdd5fee2}, !- Summer Design Day Schedule Name
-  {7b37ebda-c7e9-4567-a2a5-9274b9409415}; !- Winter Design Day Schedule Name
+  {c77f0284-37e2-4aed-bd7e-1d0acf947ef5}, !- Default Day Schedule Name
+  {76315f1c-80e2-415f-947e-514c99f5da49}, !- Summer Design Day Schedule Name
+  {0d7f747b-7cc0-4771-9a8d-ead85efde679}; !- Winter Design Day Schedule Name
 
 OS:Schedule:Day,
-  {98d1eb06-17de-46e4-8e71-1745013f2b76}, !- Handle
+  {c77f0284-37e2-4aed-bd7e-1d0acf947ef5}, !- Handle
   NECB-Activity Default,                  !- Name
   {f75ecae9-d883-43f9-acfd-97e9cdfc8b24}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13959,7 +13959,7 @@ OS:Schedule:Day,
   130;                                    !- Value Until Time 1
 
 OS:Schedule:Day,
-  {9934fc5d-6004-41de-a09f-410fd909b4ee}, !- Handle
+  {6fe3acc2-9b49-450a-ba10-2dcc4859e37a}, !- Handle
   Schedule Day 1,                         !- Name
   ,                                       !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
@@ -13968,7 +13968,7 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {7b37ebda-c7e9-4567-a2a5-9274b9409415}, !- Handle
+  {0d7f747b-7cc0-4771-9a8d-ead85efde679}, !- Handle
   NECB-Activity Winter Design Day,        !- Name
   {f75ecae9-d883-43f9-acfd-97e9cdfc8b24}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13977,7 +13977,7 @@ OS:Schedule:Day,
   130;                                    !- Value Until Time 1
 
 OS:Schedule:Day,
-  {7abc4bd7-fed4-45cd-9659-04725fb854e9}, !- Handle
+  {b3ae0dc8-b77a-494a-a4fe-d60def682a3b}, !- Handle
   Schedule Day 2,                         !- Name
   ,                                       !- Schedule Type Limits Name
   ,                                       !- Interpolate to Timestep
@@ -13986,7 +13986,7 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {c1ec0e41-5ae9-47ad-98e9-186cfdd5fee2}, !- Handle
+  {76315f1c-80e2-415f-947e-514c99f5da49}, !- Handle
   NECB-Activity Summer Design Day,        !- Name
   {f75ecae9-d883-43f9-acfd-97e9cdfc8b24}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -13995,13 +13995,13 @@ OS:Schedule:Day,
   130;                                    !- Value Until Time 1
 
 OS:Schedule:Ruleset,
-  {372f8461-0f3e-4634-aa09-8c3ef02dd48f}, !- Handle
+  {71d5be8c-c302-445d-88cb-d728b1168a8b}, !- Handle
   NECB-A-Electric-Equipment,              !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
-  {3250d25c-1af4-4889-862d-00a99e6d5a87}; !- Default Day Schedule Name
+  {f719ded7-5bcb-4a2e-b34a-aa815cc82da3}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {3250d25c-1af4-4889-862d-00a99e6d5a87}, !- Handle
+  {f719ded7-5bcb-4a2e-b34a-aa815cc82da3}, !- Handle
   NECB-A-Electric-Equipment Default,      !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14028,11 +14028,11 @@ OS:Schedule:Day,
   0.2;                                    !- Value Until Time 7
 
 OS:Schedule:Rule,
-  {3dd3d9e9-d6e1-4777-b541-e03807fa1acd}, !- Handle
+  {6a63453e-fe41-4106-98d1-3755d11818b3}, !- Handle
   Schedule Rule 5,                        !- Name
-  {372f8461-0f3e-4634-aa09-8c3ef02dd48f}, !- Schedule Ruleset Name
+  {71d5be8c-c302-445d-88cb-d728b1168a8b}, !- Schedule Ruleset Name
   2,                                      !- Rule Order
-  {03dccba3-e6e0-4612-a9d0-b2da45d865df}, !- Day Schedule Name
+  {899981dd-3bbd-40e5-b621-93cfe303a8db}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   Yes,                                    !- Apply Monday
   Yes,                                    !- Apply Tuesday
@@ -14047,7 +14047,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {03dccba3-e6e0-4612-a9d0-b2da45d865df}, !- Handle
+  {899981dd-3bbd-40e5-b621-93cfe303a8db}, !- Handle
   NECB-A-Electric-Equipment Default|Wkdy Day, !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14074,11 +14074,11 @@ OS:Schedule:Day,
   0.2;                                    !- Value Until Time 7
 
 OS:Schedule:Rule,
-  {aa12ff60-1e5c-44da-8fc5-2baa7e9a948e}, !- Handle
+  {2c77520f-5f2e-42c8-bb01-d3e28f2cdf58}, !- Handle
   Schedule Rule 6,                        !- Name
-  {372f8461-0f3e-4634-aa09-8c3ef02dd48f}, !- Schedule Ruleset Name
+  {71d5be8c-c302-445d-88cb-d728b1168a8b}, !- Schedule Ruleset Name
   1,                                      !- Rule Order
-  {d571664a-21c5-4b32-8752-9658860d1e57}, !- Day Schedule Name
+  {c94b563a-a739-4989-91b7-8492eaa151fd}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14093,7 +14093,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {d571664a-21c5-4b32-8752-9658860d1e57}, !- Handle
+  {c94b563a-a739-4989-91b7-8492eaa151fd}, !- Handle
   NECB-A-Electric-Equipment Sat Day,      !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14102,11 +14102,11 @@ OS:Schedule:Day,
   0.2;                                    !- Value Until Time 1
 
 OS:Schedule:Rule,
-  {591c6c9b-d495-466d-bd2f-666718865378}, !- Handle
+  {8fb86e8f-64a0-4863-8d72-1eac0a434771}, !- Handle
   Schedule Rule 7,                        !- Name
-  {372f8461-0f3e-4634-aa09-8c3ef02dd48f}, !- Schedule Ruleset Name
+  {71d5be8c-c302-445d-88cb-d728b1168a8b}, !- Schedule Ruleset Name
   0,                                      !- Rule Order
-  {b59d4449-7c59-4d0c-b4e7-dd2e64e1a83b}, !- Day Schedule Name
+  {0c1cfe28-0cbf-4637-a914-c15a8af921bb}, !- Day Schedule Name
   Yes,                                    !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14121,7 +14121,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {b59d4449-7c59-4d0c-b4e7-dd2e64e1a83b}, !- Handle
+  {0c1cfe28-0cbf-4637-a914-c15a8af921bb}, !- Handle
   NECB-A-Electric-Equipment Sun|Hol Day,  !- Name
   {91ef7d06-aab8-462f-b6ad-0f7842529479}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14130,19 +14130,19 @@ OS:Schedule:Day,
   0.2;                                    !- Value Until Time 1
 
 OS:ThermostatSetpoint:DualSetpoint,
-  {e4288e60-149f-461d-9fea-930115999436}, !- Handle
+  {b5f679a1-3928-4810-8ed5-7a5654611f02}, !- Handle
   Space Function Warehouse storage area medium to bulky palletized items Thermostat, !- Name
-  {41446ddf-188a-4677-89f5-be01960451a5}, !- Heating Setpoint Temperature Schedule Name
-  {5a79bd49-bd27-4938-967b-ed3596b575ad}; !- Cooling Setpoint Temperature Schedule Name
+  {5cb7d6c1-e19a-415e-bdab-6ead9fed9e2d}, !- Heating Setpoint Temperature Schedule Name
+  {4248975d-47cf-4573-b448-bf4a26952fe9}; !- Cooling Setpoint Temperature Schedule Name
 
 OS:Schedule:Ruleset,
-  {41446ddf-188a-4677-89f5-be01960451a5}, !- Handle
+  {5cb7d6c1-e19a-415e-bdab-6ead9fed9e2d}, !- Handle
   NECB-A-Thermostat Setpoint-Heating,     !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  {01dc80c7-3654-48dd-87cd-68530d5a9965}; !- Default Day Schedule Name
+  {81ace5cf-22a5-4b71-afcd-8cc0571366e5}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {01dc80c7-3654-48dd-87cd-68530d5a9965}, !- Handle
+  {81ace5cf-22a5-4b71-afcd-8cc0571366e5}, !- Handle
   NECB-A-Thermostat Setpoint-Heating Default, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14160,11 +14160,11 @@ OS:Schedule:Day,
   18;                                     !- Value Until Time 4
 
 OS:Schedule:Rule,
-  {2f683b4a-b36d-4eb7-a8c3-755e45b68e27}, !- Handle
+  {f380baf9-0586-4b95-8df0-29098846b3de}, !- Handle
   Schedule Rule 8,                        !- Name
-  {41446ddf-188a-4677-89f5-be01960451a5}, !- Schedule Ruleset Name
+  {5cb7d6c1-e19a-415e-bdab-6ead9fed9e2d}, !- Schedule Ruleset Name
   2,                                      !- Rule Order
-  {9a39c4c9-4d27-4b45-86cf-ae3562ce7a6d}, !- Day Schedule Name
+  {b85bbc4c-2c3e-4d5b-8782-ea00cb519d46}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   Yes,                                    !- Apply Monday
   Yes,                                    !- Apply Tuesday
@@ -14179,7 +14179,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {9a39c4c9-4d27-4b45-86cf-ae3562ce7a6d}, !- Handle
+  {b85bbc4c-2c3e-4d5b-8782-ea00cb519d46}, !- Handle
   NECB-A-Thermostat Setpoint-Heating Default|Wkdy Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14197,11 +14197,11 @@ OS:Schedule:Day,
   18;                                     !- Value Until Time 4
 
 OS:Schedule:Rule,
-  {d1cf73b7-b76c-4442-8533-22dfff032cea}, !- Handle
+  {721047e8-ecdd-4813-9fec-0bc11b851200}, !- Handle
   Schedule Rule 9,                        !- Name
-  {41446ddf-188a-4677-89f5-be01960451a5}, !- Schedule Ruleset Name
+  {5cb7d6c1-e19a-415e-bdab-6ead9fed9e2d}, !- Schedule Ruleset Name
   1,                                      !- Rule Order
-  {69b052f9-dd2d-4229-8863-ecb8a0aae8c3}, !- Day Schedule Name
+  {52677998-3d97-4092-8123-94c0ed43d5ce}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14216,7 +14216,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {69b052f9-dd2d-4229-8863-ecb8a0aae8c3}, !- Handle
+  {52677998-3d97-4092-8123-94c0ed43d5ce}, !- Handle
   NECB-A-Thermostat Setpoint-Heating Sat Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14225,11 +14225,11 @@ OS:Schedule:Day,
   18;                                     !- Value Until Time 1
 
 OS:Schedule:Rule,
-  {d54eab4f-dccd-4718-93cd-e295d1b78234}, !- Handle
+  {39430c58-099b-4cb3-be9d-26477b13f64b}, !- Handle
   Schedule Rule 10,                       !- Name
-  {41446ddf-188a-4677-89f5-be01960451a5}, !- Schedule Ruleset Name
+  {5cb7d6c1-e19a-415e-bdab-6ead9fed9e2d}, !- Schedule Ruleset Name
   0,                                      !- Rule Order
-  {638b89be-8d18-4677-9740-8f3bb22cd90e}, !- Day Schedule Name
+  {e0c1dd02-8901-4873-9518-8e57d8b7ff39}, !- Day Schedule Name
   Yes,                                    !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14244,7 +14244,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {638b89be-8d18-4677-9740-8f3bb22cd90e}, !- Handle
+  {e0c1dd02-8901-4873-9518-8e57d8b7ff39}, !- Handle
   NECB-A-Thermostat Setpoint-Heating Sun|Hol Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14253,13 +14253,13 @@ OS:Schedule:Day,
   18;                                     !- Value Until Time 1
 
 OS:Schedule:Ruleset,
-  {5a79bd49-bd27-4938-967b-ed3596b575ad}, !- Handle
+  {4248975d-47cf-4573-b448-bf4a26952fe9}, !- Handle
   NECB-A-Thermostat Setpoint-Cooling,     !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
-  {69cda2a4-258d-40c3-837b-4f58ad1ab51e}; !- Default Day Schedule Name
+  {5e8e1e7e-87cd-40b3-bdbe-7384306de223}; !- Default Day Schedule Name
 
 OS:Schedule:Day,
-  {69cda2a4-258d-40c3-837b-4f58ad1ab51e}, !- Handle
+  {5e8e1e7e-87cd-40b3-bdbe-7384306de223}, !- Handle
   NECB-A-Thermostat Setpoint-Cooling Default, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14274,11 +14274,11 @@ OS:Schedule:Day,
   35;                                     !- Value Until Time 3
 
 OS:Schedule:Rule,
-  {7cfaf7b8-06f7-414a-ba09-6a5f06898c4b}, !- Handle
+  {cac8f443-adab-4218-bd33-a0fa7eca5086}, !- Handle
   Schedule Rule 11,                       !- Name
-  {5a79bd49-bd27-4938-967b-ed3596b575ad}, !- Schedule Ruleset Name
+  {4248975d-47cf-4573-b448-bf4a26952fe9}, !- Schedule Ruleset Name
   2,                                      !- Rule Order
-  {2c319d55-00e6-4fae-ada7-1d0a5c71d67b}, !- Day Schedule Name
+  {9d68d03a-05f4-41cd-943d-e9e1eed9bf7b}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   Yes,                                    !- Apply Monday
   Yes,                                    !- Apply Tuesday
@@ -14293,7 +14293,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {2c319d55-00e6-4fae-ada7-1d0a5c71d67b}, !- Handle
+  {9d68d03a-05f4-41cd-943d-e9e1eed9bf7b}, !- Handle
   NECB-A-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14308,11 +14308,11 @@ OS:Schedule:Day,
   35;                                     !- Value Until Time 3
 
 OS:Schedule:Rule,
-  {c1980a5a-62e0-42db-82d4-e98a06cf230a}, !- Handle
+  {d58676dc-1409-4d90-92de-3633cc6ba7a3}, !- Handle
   Schedule Rule 12,                       !- Name
-  {5a79bd49-bd27-4938-967b-ed3596b575ad}, !- Schedule Ruleset Name
+  {4248975d-47cf-4573-b448-bf4a26952fe9}, !- Schedule Ruleset Name
   1,                                      !- Rule Order
-  {757096c6-6ad7-4be7-87ea-e183c1602492}, !- Day Schedule Name
+  {4777c9ac-5cfb-4fb8-b11f-7ec0d92878e3}, !- Day Schedule Name
   ,                                       !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14327,7 +14327,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {757096c6-6ad7-4be7-87ea-e183c1602492}, !- Handle
+  {4777c9ac-5cfb-4fb8-b11f-7ec0d92878e3}, !- Handle
   NECB-A-Thermostat Setpoint-Cooling Sat Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14336,11 +14336,11 @@ OS:Schedule:Day,
   35;                                     !- Value Until Time 1
 
 OS:Schedule:Rule,
-  {0d46e1f3-193c-45c0-8d36-3682dc1c65a0}, !- Handle
+  {31023603-089c-4815-b0c5-f8c35359fc40}, !- Handle
   Schedule Rule 13,                       !- Name
-  {5a79bd49-bd27-4938-967b-ed3596b575ad}, !- Schedule Ruleset Name
+  {4248975d-47cf-4573-b448-bf4a26952fe9}, !- Schedule Ruleset Name
   0,                                      !- Rule Order
-  {d0de0dac-a664-4ed3-a654-808e39f1bae5}, !- Day Schedule Name
+  {fc4eb5e0-59d4-4da8-91e0-4fbc50954a01}, !- Day Schedule Name
   Yes,                                    !- Apply Sunday
   ,                                       !- Apply Monday
   ,                                       !- Apply Tuesday
@@ -14355,7 +14355,7 @@ OS:Schedule:Rule,
   31;                                     !- End Day
 
 OS:Schedule:Day,
-  {d0de0dac-a664-4ed3-a654-808e39f1bae5}, !- Handle
+  {fc4eb5e0-59d4-4da8-91e0-4fbc50954a01}, !- Handle
   NECB-A-Thermostat Setpoint-Cooling Sun|Hol Day, !- Name
   {7a6489b3-273f-4a4f-94f0-b2c29396d6c4}, !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
@@ -14364,35 +14364,35 @@ OS:Schedule:Day,
   35;                                     !- Value Until Time 1
 
 OS:ZoneHVAC:Baseboard:Convective:Electric,
-  {684c42cf-99e1-4662-821c-4eea543cf070}, !- Handle
+  {466d8181-a799-47c0-a0d6-d9dccf0b1011}, !- Handle
   Zone HVAC Baseboard Convective Electric 1, !- Name
   {cbae3349-f243-4796-a1cb-45c1100f2d2d}, !- Availability Schedule
   autosize,                               !- Nominal Capacity {W}
   1;                                      !- Efficiency
 
 OS:ZoneHVAC:Baseboard:Convective:Electric,
-  {4fe36ea2-e6de-4ef6-8184-f0c701c57cfc}, !- Handle
+  {423b0e94-76bf-45fb-b283-a85a76205207}, !- Handle
   Zone HVAC Baseboard Convective Electric 2, !- Name
   {cbae3349-f243-4796-a1cb-45c1100f2d2d}, !- Availability Schedule
   autosize,                               !- Nominal Capacity {W}
   1;                                      !- Efficiency
 
 OS:ZoneHVAC:Baseboard:Convective:Electric,
-  {609cc8d8-dad1-4369-b767-078e91b24a67}, !- Handle
+  {f35dd9f5-bc8a-4acc-a171-80710eeac38b}, !- Handle
   Zone HVAC Baseboard Convective Electric 3, !- Name
   {cbae3349-f243-4796-a1cb-45c1100f2d2d}, !- Availability Schedule
   autosize,                               !- Nominal Capacity {W}
   1;                                      !- Efficiency
 
 OS:ZoneHVAC:Baseboard:Convective:Electric,
-  {35daa364-ae8f-42d6-9be4-c5461de7abee}, !- Handle
+  {a502f19e-047b-4552-be67-fd5bd3dcb9f6}, !- Handle
   Zone HVAC Baseboard Convective Electric 4, !- Name
   {cbae3349-f243-4796-a1cb-45c1100f2d2d}, !- Availability Schedule
   autosize,                               !- Nominal Capacity {W}
   1;                                      !- Efficiency
 
 OS:ZoneHVAC:Baseboard:Convective:Electric,
-  {a6642bc6-fd6a-41b3-bea2-9a5c62117387}, !- Handle
+  {78737567-4d80-49ba-a0d4-0a336ef8277b}, !- Handle
   Zone HVAC Baseboard Convective Electric 5, !- Name
   {cbae3349-f243-4796-a1cb-45c1100f2d2d}, !- Availability Schedule
   autosize,                               !- Nominal Capacity {W}

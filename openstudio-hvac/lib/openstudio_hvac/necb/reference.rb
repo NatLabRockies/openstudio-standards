@@ -120,6 +120,18 @@ module OpenStudioHVAC
     def self.residential_assignment(group, category, selection, articles, audit)
       res = selection['special_rules']['residential']
       articles = articles + [res['article']]
+      # D-34 (A1, phylroy 2026-07-27): follow legacy — a residential block whose
+      # proposed system includes a heat pump takes the 8.4.4.7.(4) ASHP redirect,
+      # NOT the Table -A "(or heat pumps)" identical-to-proposed parenthetical.
+      # (Legacy's necb_reference_hp flag builds the reference-hp variant for every
+      # family, residential included; it has no copy branch at all — L-11.) The
+      # System-1 assignment below is flipped to 'hp' by finalize's override.
+      if group[:heat_pump]
+        audit&.decision(:selection, 'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
+                        target: group[:zones].join(','), article: '8.4.4.7.(4)')
+        return Assignment.new(zones: group[:zones], category: category, reference_system: 1,
+                              action: :build, articles: articles + ['8.4.4.7.(4)'])
+      end
       if group[:heated] && !group[:cooled]
         audit&.decision(:selection, 'residential heated-only -> System 1',
                         target: group[:zones].join(','), article: res['article'])
@@ -138,9 +150,10 @@ module OpenStudioHVAC
       end
     end
 
-    # 'air-cooled unitary, packaged terminal or room air conditioner (or heat pumps), or fan coils'
+    # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
+    # (the "(or heat pumps)" parenthetical is superseded by the 8.4.4.7.(4)
+    # redirect per D-34 — heat-pump groups never reach this check)
     def self.residential_compatible_cooling?(group)
-      return true if group[:heat_pump]
       return true if %i[zonal_heat_cool packaged_single_zone].include?(group[:family_guess])
 
       %w[psz mau_ptac zone_terminal fan_coils wshp vrf].include?(group[:family])

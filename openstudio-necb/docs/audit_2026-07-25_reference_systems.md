@@ -26,8 +26,8 @@ delegation) / ADJUDICATE (needs phylroy) / LEDGERED (legacy → legacy_findings.
 | T13 | Stale 8.4.4.11 manifest gaps note (temps ARE set). | DOC |
 
 ## ADJUDICATE (phylroy)
-| A1 | Residential blocks WITH heat pumps: Table -A row says identical-to-proposed; 8.4.4.7.(4) redirects to ASHP. Ours=copy, legacy=redirect. Genuinely ambiguous. |
-| A2 | Water-LOOP vs water-SOURCE HP boundary (8.4.4.13.(1) keeps WLHP on Table -A; sentence (2) redirects W-SOURCE). Our single hp flag redirects both; Note A-8.4.4.13 unavailable via MCP. Touches the WSHP e2e test premise. |
+| A1 | ~~Residential blocks WITH heat pumps~~ **RESOLVED (D-34, phylroy 2026-07-27): follow legacy — 8.4.4.7.(4) ASHP redirect wins over the Table -A parenthetical. Implemented + pinned (selector/reference/res_hp mockup).** |
+| A2 | Water-LOOP vs water-SOURCE HP boundary (8.4.4.13.(1) keeps WLHP on Table -A; sentence (2) redirects W-SOURCE). Our single hp flag redirects both; Note A-8.4.4.13 unavailable via MCP. Touches the WSHP e2e test premise. **Legacy checked (2026-07-27): legacy is SILENT — necb_reference_hp is a global generation-input boolean, no per-block HP detection, no WLHP/WSHP distinction anywhere; 'follow legacy' is not an available option here.** |
 | A3 | 5.2.6.3.(1) loop pump power caps (NECB2015+, W/kW: 4.5 htg /14 clg /12 rej /22 WSHP): legacy applies to the reference; interaction with our 8.4.4.14 proposed-intensity transfer needs a ruling (which basis wins when they conflict?). |
 | A4 | Table -B System 5 heating "None": both lineages build seasonal hydronic heating anyway (deliberate legacy parity). Keep or honour the table? |
 | A5 | Reheat-coil hard-size workaround (legacy caps at 1.2x min-flow ΔT30): adopt, or trust autosizing (our e2e conditioning asserts pass today)? |

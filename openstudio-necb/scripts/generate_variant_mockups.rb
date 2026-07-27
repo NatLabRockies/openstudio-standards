@@ -94,10 +94,18 @@ MOCKUPS = {
   },
   'res_copy' => {
     space_type: 'Dwelling units general',
-    proposed: 'PTHP',
-    note: 'residential + compatible cooling -> reference identical to proposed (copy rule) through the full pipeline',
+    proposed: 'PTAC with baseboard electric',
+    note: 'residential + compatible NON-heat-pump cooling -> reference identical to proposed (copy rule) through the full pipeline',
     building: nil,
     expect: { decision: 'residential with compatible cooling -> reference identical to proposed' }
+  },
+  'res_hp' => {
+    space_type: 'Dwelling units general',
+    proposed: 'PTHP',
+    note: 'D-34 (A1 ruled follow-legacy): residential + heat pump -> 8.4.4.7.(4) ASHP redirect, NOT the Table -A copy parenthetical',
+    building: nil,
+    expect: { decision: 'residential with heat pump -> ASHP reference redirect',
+              built: 'PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard' }
   },
   'res_ttw' => {
     space_type: 'Dwelling units general',

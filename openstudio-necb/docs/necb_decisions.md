@@ -911,3 +911,32 @@ mockups exercise CURRENT behavior and will pin whatever phylroy decides.
 - Who/when: Claude under D-10 delegation, 2026-07-27.
 - Evidence: [RAN] sweep-audit scan (22 runs -> sys 1/3/4/6 only); [RAN]
   gem-test grep; [RAN] generator + 8/8 test battery with sizing runs.
+
+## D-34 — A1 adjudicated (phylroy): residential heat-pump blocks follow legacy — ASHP redirect
+
+phylroy's ruling (2026-07-27): "A1 follow legacy." A residential/
+accommodation block whose proposed system includes a heat pump takes the
+8.4.4.7.(4) ASHP redirect (Table 8.4.4.13 reference), NOT the Table
+8.4.4.7.-A "(or heat pumps)" identical-to-proposed parenthetical.
+
+Legacy context [READ]: legacy has no per-block HP detection at all — its
+necb_reference_hp is a GLOBAL boolean on the fuel-type set (a generation
+input); when true every family, residential included, builds its
+reference-hp ASHP variant, and there is no copy branch (that absence is
+L-11/#2128). "Follow legacy" therefore means: HP presence always
+redirects.
+
+Implementation: residential_assignment checks group[:heat_pump] FIRST
+(before heated-only/compatible/otherwise) and returns a System-1 :build
+assignment that finalize's hp override flips to 'hp'; the "(or heat
+pumps)" line is removed from residential_compatible_cooling? (heat-pump
+groups never reach it). Pins: selector test
+(test_residential_heat_pump_redirects_not_copies), reference build test
+(PTHP residential -> ASHP RTU, PTHPs replaced), new res_hp mockup through
+the full pipeline with sizing; res_copy mockup switched to PTAC so the
+copy rule keeps its own end-to-end pin. All green (selector 18, reference
+7, ttw, murb, mockups 9/9).
+
+- Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10.
+- Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
+  :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.

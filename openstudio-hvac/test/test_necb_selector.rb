@@ -104,6 +104,16 @@ class TestNecbSelector < Minitest::Test
     assert_nil a.catalog_name
   end
 
+  # D-34 (A1 ruled follow-legacy): a residential group WITH a heat pump takes
+  # the 8.4.4.7.(4) ASHP redirect — never the copy rule, even though its
+  # cooling family would otherwise qualify as compatible.
+  def test_residential_heat_pump_redirects_not_copies
+    a = select([group(heat_pump: true, family: 'zone_terminal')],
+               zone_types: { 'Z1' => 'Multi-unit residential' }).first
+    assert_equal :build, a.action
+    assert_equal 'hp', a.reference_system
+  end
+
   # "otherwise, the reference building or space shall use through-the-wall systems."
   def test_residential_otherwise_through_the_wall
     a = select([group(family: 'vav_reheat', family_guess: :multizone_vav)],
