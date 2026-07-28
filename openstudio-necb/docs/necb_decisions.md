@@ -1206,3 +1206,48 @@ Findings:
 - Evidence: [RAN] 15 full-annual pipeline runs (30 annual E+ simulations
   + sizing runs, all PASS); report.json capacity_iterations/unmet blocks;
   week-run baselines from the cached fleet.
+
+## D-43 — 8.4.1.2.(5) capacity iteration made per-thermal-block, secant-targeted from run history
+
+- Decision: the sentence-(5) capacity auto-iteration no longer bumps only the
+  failing building's GLOBAL SizingParameters factors. Each round now reads the
+  previous annual run's PER-ZONE 'Time Setpoint Not Met During Occupied' hours
+  (SystemSummary — new `Runner.zone_unmet_occupied_hours`, openstudio-simulation)
+  and raises Sizing:Zone heating/cooling factors on the failing thermal blocks
+  only: heating on zones > 100 h in a building whose sentence-(3) gate failed;
+  cooling (proposed only) on zones exceeding the SAME zone of the reference
+  clone plus the vintage allowance (+10%; 2025: max(+10%, 20 h)). The first
+  bump per zone/metric is geometric (`capacity_step`); later bumps are SECANT
+  extrapolations from that zone's own (factor, unmet-hours) history, aimed at
+  0.9x the applicable limit and clamped to max(step, 2)x growth per round so
+  the increase stays "incremental" as the sentence is worded.
+- Why: (a) sentences (3)/(4) are written "for each thermal block" — per-zone
+  targeting is the code-literal resolution, and the global bump over-grew every
+  system in the building to fix one zone; (b) the previous run already contains
+  the attribution and the slope, so informed steps converge in fewer full-annual
+  E+ runs (the expensive unit); requested by phylroy 2026-07-28 after the D-42
+  discussion ("could the previous run inform the next run on the sizing scaling
+  required per thermoblock?").
+- Fallbacks (both audited with `mode` in the decision inputs): 'global' when
+  per-zone data is absent entirely; 'mixed' when a failing gate has NO single
+  failing zone — facility unmet hours are a UNION over zones, not a sum, so a
+  building can fail sentence (3) with every zone under 100 h; that gate gets
+  the global bump alongside the zonal ones. Zone factors OVERRIDE the global
+  factor (E+ semantics), so the modes compose without double-scaling.
+- Unchanged: reference cooling is still never bumped (enlarging reference
+  cooling shrinks the sentence-(4) allowance — cannot be what (5) intends,
+  per D-42); stall detection still stops the loop when a bump yields < 1 h
+  improvement (hard-sized equipment responds to neither zonal nor global
+  factors — the L-23 characteristic is unaffected).
+- Evidence: [RAN] SizingZone per-zone factor API probe; [RAN] unit tests
+  (secant/clamp/fallback arithmetic; zonal/global/mixed targeting on in-memory
+  models); [RAN] test_capacity_iteration_converges_undersized_building — the
+  undersized 4-week fixture now converges through 'zonal' mode with Sizing:Zone
+  factors set on the failing zones and the global factor untouched.
+- Files: openstudio-simulation runner.rb (+ test_local_run.rb per-zone
+  assertions), openstudio-necb compliance.rb (iterate_capacities,
+  bump_capacities, failing_zone_targets, next_sizing_factor; run_annual stores
+  zone_unmet_occupied_hours), test_compliance.rb, necb_rules_{2020,2025}.json
+  8.4.1.2 how-text, umbrella CLAUDE.md.
+- Who/when: Claude under D-10 delegation, 2026-07-28 (implementation requested
+  by phylroy: "implement it — per-zone targeting plus the secant step").

@@ -10,8 +10,11 @@ module OpenStudioNECB
   #       proposed <= 100 h; 8.4.5 path: within +10% or 20 h, whichever is greater)
   #   (5) where (3)/(4) fail, capacities of the primary and secondary systems
   #       shall be incrementally increased until the loads are met — implemented
-  #       as an iteration loop on the failing building's global sizing factors
-  #       (SizingParameters), bounded by max_capacity_iterations; a still-failing
+  #       per THERMAL BLOCK (the resolution sentences (3)/(4) are written at):
+  #       each failing zone's Sizing:Zone factors are raised, secant-targeted
+  #       from that zone's own (factor, unmet-hours) history, with a global
+  #       SizingParameters fallback when per-zone data cannot attribute the
+  #       failure; bounded by max_capacity_iterations; a still-failing
   #       result after the cap is a loud warning + non-compliance.
   #
   # One clone, one audit: reference_hvac (openstudio-hvac), reference_envelope
@@ -45,8 +48,9 @@ module OpenStudioNECB
     # @return [ComplianceResult]
     # @param max_capacity_iterations [Integer] 8.4.1.2.(5) bound: how many times a
     #   failing building's capacities may be incrementally increased (0 disables)
-    # @param capacity_step [Float] multiplier applied to the failing building's
-    #   heating/cooling sizing factor per iteration
+    # @param capacity_step [Float] multiplier for a zone's (or, on fallback, the
+    #   building's) first sizing-factor bump — and for any later bump where the
+    #   zone's own history cannot support a secant extrapolation
     # @param necb_loads [Hash, nil] bare-geometry on-ramp: apply the NECB space-use
     #   gems to the proposed clone BEFORE anything else. Keys:
     #   space_type_map: {space name => [building_type, space_type]} (required),
@@ -373,6 +377,7 @@ module OpenStudioNECB
       section['clean_run'] = Runner.clean_run?(run_dir)
       section.merge!(Runner.energy_results(model))
       section['unmet_occupied_hours'] = Runner.unmet_occupied_hours(model)
+      section['zone_unmet_occupied_hours'] = Runner.zone_unmet_occupied_hours(model)
       section['run_dir'] = run_dir
     end
 
@@ -447,8 +452,8 @@ module OpenStudioNECB
 
       allowance = cool_r.to_f * 0.10
       allowance = [allowance, 20.0].max if vintage.to_s == '2025'
-      heating_p_ok = !heat_p.nil? && heat_p <= 100.0
-      heating_r_ok = !heat_r.nil? && heat_r <= 100.0
+      heating_p_ok = !heat_p.nil? && heat_p <= HEATING_UNMET_LIMIT_H
+      heating_r_ok = !heat_r.nil? && heat_r <= HEATING_UNMET_LIMIT_H
 
       # Sentence (4) applies to thermal blocks "for which mechanical cooling is
       # provided" (explicit in the 2025 wording; applied consistently for 2020) —
@@ -476,18 +481,33 @@ module OpenStudioNECB
 
     # 8.4.1.2.(5): "the capacities of the primary and secondary systems of the
     # proposed building or the reference building, where applicable, shall be
-    # incrementally increased until those loads are met." Each failing building's
-    # global sizing factor (heating and/or cooling, whichever gate fails) is
-    # multiplied by `step` and the building re-sized and re-run; the reference
-    # additionally gets its capacity-binned efficiencies re-applied on the new
-    # sizes before its energy run. Bounded by max_iterations; every bump is an
-    # audited decision and the history lands in report['capacity_iterations'].
+    # incrementally increased until those loads are met." Sentences (3)/(4) are
+    # written per THERMAL BLOCK, so the increase is targeted: each failing
+    # building's failing ZONES (per-zone SystemSummary unmet hours from the
+    # previous run) get their Sizing:Zone heating/cooling sizing factors
+    # raised — the first bump by `step`, later bumps by secant extrapolation
+    # from that zone's own (factor, unmet-hours) history, clamped per round so
+    # the increase stays incremental. Zone factors override the global
+    # SizingParameters factor and propagate into central equipment through the
+    # coincident zone sums. When per-zone data is unavailable — or the building
+    # gate fails without any single zone failing (facility hours are a union
+    # over zones, not a sum) — the bump falls back to the global sizing
+    # factors. The reference additionally gets its capacity-binned efficiencies
+    # re-applied on the new sizes before its energy run. Bounded by
+    # max_iterations; every bump is an audited decision and the history lands
+    # in report['capacity_iterations'].
+    HEATING_UNMET_LIMIT_H = 100.0    # 8.4.1.2.(3)
+    SECANT_TARGET_FRACTION = 0.9     # aim below the limit so noise can't strand the last hour
+    SECANT_MAX_STEP = 2.0            # per-round growth cap (never below the configured `step`)
+    SECANT_MIN_IMPROVEMENT_H = 1.0   # observations closer than this can't support a slope
+
     def iterate_capacities(proposed, reference, report, vintage:, run_dir:, run_period:,
                            max_iterations:, step:, audit:)
       history = []
       report['capacity_iterations'] = history
       return if max_iterations.to_i <= 0
 
+      zone_trace = {} # [label, zone, metric] => [[factor, unmet_hours], ...] across rounds
       max_iterations.times do |index|
         status = unmet_status(report, vintage)
         break if status[:all_ok]
@@ -510,13 +530,30 @@ module OpenStudioNECB
           next unless bump[:heating] || bump[:cooling]
 
           audit.with_building("#{label} building") do
-            factors = bump_sizing_factors(model, step, heating: bump[:heating], cooling: bump[:cooling])
+            factors = bump_capacities(model, label, report, bump, vintage, step: step, trace: zone_trace)
             record['bumped'][label] = factors
-            audit.decision(:compliance,
-                           "capacity increase #{iteration}: #{label} #{bump.select { |_, v| v }.keys.join('+')} " \
-                           'sizing factor(s) raised — building re-sized and re-run',
-                           inputs: { building: label, step: step, iteration: iteration }.merge(factors),
-                           article: '8.4.1.2.(5)')
+            summary = case factors['mode']
+                      when 'zonal'
+                        "capacity increase #{iteration}: #{label} — sizing factor(s) raised on " \
+                        "#{factors['zones'].size} failing thermal block(s), secant-targeted from the " \
+                        'previous run(s) — building re-sized and re-run'
+                      when 'mixed'
+                        "capacity increase #{iteration}: #{label} — sizing factor(s) raised on " \
+                        "#{factors['zones'].size} failing thermal block(s), plus a global bump for the " \
+                        'gate no single zone explains — building re-sized and re-run'
+                      else
+                        "capacity increase #{iteration}: #{label} #{bump.select { |_, v| v }.keys.join('+')} " \
+                        'GLOBAL sizing factor(s) raised (per-zone attribution unavailable) — ' \
+                        'building re-sized and re-run'
+                      end
+            inputs = { building: label, step: step, iteration: iteration, mode: factors['mode'] }
+                     .merge(factors.slice('heating_sizing_factor', 'cooling_sizing_factor'))
+            if factors['zones']
+              inputs[:zones_bumped] = factors['zones'].size
+              inputs[:zones] = factors['zones'].first(8).to_h
+            end
+            inputs[:global] = factors['global'] if factors['global']
+            audit.decision(:compliance, summary, inputs: inputs, article: '8.4.1.2.(5)')
 
             dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
             if label == 'reference'
@@ -557,6 +594,112 @@ module OpenStudioNECB
       audit.info(:compliance,
                  "capacity iteration converged after #{history.size} increase(s) — unmet-hours loads are met",
                  inputs: { iterations: history.size }, article: '8.4.1.2.(5)')
+    end
+
+    # One building's sentence-(5) increase for one round: per-zone Sizing:Zone
+    # factors on the failing thermal blocks when the previous run's per-zone
+    # unmet hours can attribute the failure, global SizingParameters otherwise.
+    # Returns the history record ('mode', headline factors, per-zone factors).
+    def bump_capacities(model, label, report, bump, vintage, step:, trace:)
+      targets = failing_zone_targets(label, report, bump, vintage)
+      zone_hours = report[label]['zone_unmet_occupied_hours'] || {}
+      sizing = model.getSizingParameters
+      by_name = model.getThermalZones.to_h { |z| [z.nameString.upcase, z] }
+
+      zones_record = {}
+      targets.each do |zone_key, metrics|
+        zone = by_name[zone_key.upcase]
+        next unless zone
+
+        sizing_zone = zone.sizingZone
+        metrics.each do |metric, target_h|
+          existing = metric == :heating ? sizing_zone.zoneHeatingSizingFactor : sizing_zone.zoneCoolingSizingFactor
+          global = metric == :heating ? sizing.heatingSizingFactor : sizing.coolingSizingFactor
+          current_f = existing.is_initialized ? existing.get : global
+          current_h = zone_hours.dig(zone_key, metric.to_s).to_f
+          key = [label, zone_key, metric]
+          new_f = next_sizing_factor(trace[key] ||= [], current_f, current_h, target_h, step)
+          trace[key] << [current_f, current_h]
+          if metric == :heating
+            sizing_zone.setZoneHeatingSizingFactor(new_f)
+          else
+            sizing_zone.setZoneCoolingSizingFactor(new_f)
+          end
+          (zones_record[zone_key] ||= {})["#{metric}_sizing_factor"] = new_f.round(3)
+        end
+      end
+
+      if zones_record.empty?
+        return bump_sizing_factors(model, step, heating: bump[:heating], cooling: bump[:cooling])
+               .merge('mode' => 'global')
+      end
+
+      result = { 'mode' => 'zonal', 'zones' => zones_record }
+      %w[heating cooling].each do |metric|
+        max = zones_record.values.filter_map { |v| v["#{metric}_sizing_factor"] }.max
+        result["#{metric}_sizing_factor"] = max if max
+      end
+
+      # A gate can fail with no single zone failing (facility hours are a union
+      # over zones) — that gate still needs its increase, globally. Zone factors
+      # OVERRIDE the global one, so already-bumped zones are unaffected.
+      covered = zones_record.values.flat_map(&:keys)
+      global_heating = bump[:heating] && !covered.include?('heating_sizing_factor')
+      global_cooling = bump[:cooling] && !covered.include?('cooling_sizing_factor')
+      if global_heating || global_cooling
+        result['mode'] = 'mixed'
+        result['global'] = bump_sizing_factors(model, step, heating: global_heating, cooling: global_cooling)
+      end
+      result
+    end
+
+    # Which zones does the previous run blame, and what unmet-hours value should
+    # the next run steer each one toward? Heating (sentence (3)): any zone over
+    # 100 h in a building whose heating gate failed. Cooling (sentence (4),
+    # proposed only): any zone whose unmet cooling exceeds the SAME zone of the
+    # reference (a clone — zone names match) plus the vintage allowance.
+    # Targets sit at SECANT_TARGET_FRACTION of the applicable limit so the
+    # extrapolation lands safely inside it, not on its edge.
+    def failing_zone_targets(label, report, bump, vintage)
+      zones = report[label]['zone_unmet_occupied_hours'] || {}
+      return {} if zones.empty?
+
+      ref_zones = report['reference']['zone_unmet_occupied_hours'] || {}
+      targets = {}
+      zones.each do |zone, hours|
+        if bump[:heating] && hours['heating'].to_f > HEATING_UNMET_LIMIT_H
+          (targets[zone] ||= {})[:heating] = HEATING_UNMET_LIMIT_H * SECANT_TARGET_FRACTION
+        end
+        next unless bump[:cooling]
+
+        ref_h = ref_zones.dig(zone, 'cooling').to_f
+        allowance = ref_h * 0.10
+        allowance = [allowance, 20.0].max if vintage.to_s == '2025'
+        if hours['cooling'].to_f > ref_h + allowance
+          (targets[zone] ||= {})[:cooling] = (ref_h + allowance) * SECANT_TARGET_FRACTION
+        end
+      end
+      targets
+    end
+
+    # Secant step on this zone/metric's own (factor, unmet-hours) history: once
+    # a previous observation with a real slope exists, extrapolate the factor
+    # that lands the hours on the target; otherwise (first bump, or a flat /
+    # perverse slope) fall back to the geometric `step`. The result is clamped
+    # per round — growth capped at max(step, SECANT_MAX_STEP)x — so the
+    # increase stays incremental, as sentence (5) is worded.
+    def next_sizing_factor(history, current_f, current_h, target_h, step)
+      previous = history.reverse_each.find do |f, h|
+        (current_f - f).abs > 1e-6 && (h - current_h).abs >= SECANT_MIN_IMPROVEMENT_H
+      end
+      if previous
+        slope = (current_h - previous[1]) / (current_f - previous[0])
+        if slope.negative?
+          candidate = current_f + (target_h - current_h) / slope
+          return candidate.clamp(current_f, current_f * [step, SECANT_MAX_STEP].max)
+        end
+      end
+      current_f * step
     end
 
     def bump_sizing_factors(model, step, heating:, cooling:)

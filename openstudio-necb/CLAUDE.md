@@ -21,7 +21,8 @@ optional reference_daylighting on ONE clone/audit → reference sizing →
 efficiencies RE-applied on sized capacities (with `proposed:` for the
 8.4.4.14 pump W/(L/s) transfer) + 5.2.10.1 energy-recovery
 determination on sized flows (Table 5.2.10.1.-A/-B) → annual runs → 8.4.1.2.(2)–(4)
-verdicts → sentence-(5) capacity auto-iteration (sizing-factor bumps, stall
+verdicts → sentence-(5) capacity auto-iteration (per-thermal-block
+Sizing:Zone factor bumps, secant-targeted; global fallback; stall
 detection) → Section 10 tier → 2025 Part 11 GHG → optional costing of both
 models → report.json / audit.json / audit.txt → optional compliance_report.html.
 
@@ -95,8 +96,15 @@ checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
 
 - Sentence (4) unmet cooling is VACUOUS when the proposed has no mechanical
   cooling (passive overheating ≠ capacity shortfall) — audited determination.
-- Capacity iteration bumps global SizingParameters; hard-sized equipment does
-  not respond → stall detection stops the loop with a loud warning.
+- Capacity iteration (D-43) is per THERMAL BLOCK: failing zones (per-zone
+  SystemSummary unmet hours) get Sizing:Zone factor bumps — first by
+  `capacity_step`, then secant-extrapolated from that zone's own
+  (factor, hours) history, growth clamped at max(step, 2)× per round. Zone
+  factors OVERRIDE the global SizingParameters factor. Fallback to global
+  bumps when per-zone data is missing or a gate fails with no single zone
+  failing (facility hours are a union over zones, not a sum → 'mixed' mode).
+  Hard-sized equipment responds to neither → stall detection stops the loop
+  with a loud warning.
 - A shortened `run_period:` computes the same arithmetic but flags NOT
   code-compliant (`report['annual'] = false` + warning + report strip).
 - `AuditLog` here is an alias of `OpenStudioHVAC::AuditLog`.

@@ -141,6 +141,35 @@ module OpenStudioSimulation
         'cooling' => query.call('During Occupied Cooling') }
     end
 
+    # Per-zone 'Time Setpoint Not Met During Occupied' hours (SystemSummary) —
+    # the per-thermal-block resolution behind NECB 8.4.1.2.(3)/(4), which are
+    # written "for each thermal block". Row names are EnergyPlus upper-cased
+    # zone names; callers matching against model zones should compare
+    # case-insensitively. Empty hash when no SQL is attached.
+    # @return [Hash{String=>Hash}] { 'ZONE NAME' => { 'heating' => Float, 'cooling' => Float } }
+    def zone_unmet_occupied_hours(model)
+      sql = model.sqlFile
+      return {} if sql.empty?
+
+      sql = sql.get
+      zones = {}
+      { 'heating' => 'During Occupied Heating', 'cooling' => 'During Occupied Cooling' }.each do |metric, column|
+        rows = sql.execAndReturnVectorOfString(
+          "SELECT RowName || '|' || Value FROM TabularDataWithStrings WHERE ReportName='SystemSummary' " \
+          "AND TableName='Time Setpoint Not Met' AND ColumnName='#{column}' AND RowName <> 'Facility'"
+        )
+        next unless rows.is_initialized
+
+        rows.get.each do |line|
+          name, _, value = line.rpartition('|')
+          next if name.empty?
+
+          (zones[name] ||= {})[metric] = value.to_f
+        end
+      end
+      zones
+    end
+
     def optional(value)
       value.is_initialized ? value.get : nil
     end

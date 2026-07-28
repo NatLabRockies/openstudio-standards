@@ -77,5 +77,17 @@ class TestLocalRun < Minitest::Test
     assert_instance_of Hash, unmet
     assert unmet.key?('heating')
     assert unmet.key?('cooling')
+
+    zones = OpenStudioSimulation::Runner.zone_unmet_occupied_hours(model)
+    assert_instance_of Hash, zones
+    refute_empty zones, 'per-zone unmet hours parsed from SystemSummary'
+    zones.each_value do |hours|
+      assert hours.key?('heating'), 'each zone row carries heating hours'
+      assert hours.key?('cooling'), 'each zone row carries cooling hours'
+    end
+    facility_heating = unmet['heating']
+    max_zone_heating = zones.values.map { |h| h['heating'] }.max
+    assert_operator max_zone_heating, :<=, facility_heating + 1e-6,
+                    'facility hours are a union over zones — no zone can exceed them'
   end
 end

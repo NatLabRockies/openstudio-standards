@@ -12,7 +12,7 @@
         "article": "8.4.1.2.",
         "title": "Determination of Compliance",
         "status": "implemented",
-        "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration (global sizing-factor bumps with hard-sized-equipment stall detection) — compliance.rb; asserted by test_compliance.rb."
+        "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb."
       },
       {
         "article": "8.4.1.5.",

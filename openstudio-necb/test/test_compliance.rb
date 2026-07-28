@@ -174,6 +174,115 @@ class TestCompliance < Minitest::Test
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
 
+  # 8.4.1.2.(5) unit mechanics (no EnergyPlus): the secant step extrapolates the
+  # next sizing factor from a zone's own (factor, unmet-hours) history, clamped
+  # to stay incremental; without a usable slope it falls back to the geometric
+  # step.
+  def test_next_sizing_factor_secant_and_fallback
+    call = ->(history, f, h, target, step) do
+      OpenStudioNECB::Compliance.send(:next_sizing_factor, history, f, h, target, step)
+    end
+
+    # First bump: no history -> geometric step.
+    assert_in_delta 1.25, call.call([], 1.0, 400.0, 90.0, 1.25), 1e-9
+
+    # Two observations with a real slope -> secant lands the hours on target:
+    # (1.0, 400 h) then (3.0, 150 h); slope -125 h/factor; target 90 h -> 3.48.
+    assert_in_delta 3.48, call.call([[1.0, 400.0]], 3.0, 150.0, 90.0, 1.25), 1e-6
+
+    # A wild extrapolation is clamped to max(step, 2.0)x the current factor.
+    clamped = call.call([[1.0, 400.0]], 1.1, 399.0, 90.0, 1.25)
+    assert_in_delta 1.1 * 2.0, clamped, 1e-9, 'per-round growth capped'
+    clamped_step = call.call([[1.0, 400.0]], 1.1, 399.0, 90.0, 3.0)
+    assert_in_delta 1.1 * 3.0, clamped_step, 1e-9, 'cap never undercuts the configured step'
+
+    # Perverse slope (hours went UP as the factor rose) -> geometric fallback.
+    assert_in_delta 2.0 * 1.25, call.call([[1.0, 100.0]], 2.0, 300.0, 90.0, 1.25), 1e-9
+
+    # Flat history (no >= 1 h difference) cannot support a slope -> fallback.
+    assert_in_delta 2.0 * 1.25, call.call([[1.0, 300.4]], 2.0, 300.0, 90.0, 1.25), 1e-9
+  end
+
+  # 8.4.1.2.(5) targeting (no EnergyPlus): with per-zone unmet hours available,
+  # only the failing thermal blocks get Sizing:Zone factor bumps; without them
+  # the bump falls back to the global SizingParameters; a gate no single zone
+  # explains gets the global fallback ALONGSIDE the zonal bumps (mixed).
+  def test_bump_capacities_targets_failing_zones
+    model = OpenStudio::Model::Model.new
+    z_bad = OpenStudio::Model::ThermalZone.new(model)
+    z_bad.setName('Zone Bad')
+    z_ok = OpenStudio::Model::ThermalZone.new(model)
+    z_ok.setName('Zone Ok')
+
+    report = {
+      'proposed' => { 'zone_unmet_occupied_hours' => {
+        'ZONE BAD' => { 'heating' => 400.0, 'cooling' => 300.0 },
+        'ZONE OK' => { 'heating' => 50.0, 'cooling' => 100.0 }
+      } },
+      'reference' => { 'zone_unmet_occupied_hours' => {
+        'ZONE BAD' => { 'heating' => 10.0, 'cooling' => 100.0 },
+        'ZONE OK' => { 'heating' => 10.0, 'cooling' => 100.0 }
+      } }
+    }
+    global_heating = model.getSizingParameters.heatingSizingFactor
+    global_cooling = model.getSizingParameters.coolingSizingFactor
+    trace = {}
+    factors = OpenStudioNECB::Compliance.send(
+      :bump_capacities, model, 'proposed', report,
+      { heating: true, cooling: true }, '2020', step: 1.4, trace: trace)
+
+    assert_equal 'zonal', factors['mode']
+    assert_equal ['ZONE BAD'], factors['zones'].keys,
+                 'only the failing thermal block is bumped (heating > 100 h; cooling > reference +10%)'
+    sz_bad = z_bad.sizingZone
+    assert sz_bad.zoneHeatingSizingFactor.is_initialized, 'failing zone got a heating factor'
+    assert_in_delta global_heating * 1.4, sz_bad.zoneHeatingSizingFactor.get, 1e-6,
+                    'first bump = the effective (global) factor x step'
+    assert sz_bad.zoneCoolingSizingFactor.is_initialized, 'failing zone got a cooling factor'
+    assert_in_delta global_cooling * 1.4, sz_bad.zoneCoolingSizingFactor.get, 1e-6
+    refute z_ok.sizingZone.zoneHeatingSizingFactor.is_initialized, 'passing zone untouched'
+    refute z_ok.sizingZone.zoneCoolingSizingFactor.is_initialized
+    assert_in_delta global_heating, model.getSizingParameters.heatingSizingFactor, 1e-6, 'global factor untouched'
+    assert_equal [['proposed', 'ZONE BAD', :heating]], trace.keys.select { |k| k[2] == :heating },
+                 'history recorded per zone/metric for the next round secant'
+
+    # No per-zone data at all -> global fallback, flagged as such.
+    bare = OpenStudio::Model::Model.new
+    OpenStudio::Model::ThermalZone.new(bare)
+    bare_global = bare.getSizingParameters.heatingSizingFactor
+    factors = OpenStudioNECB::Compliance.send(
+      :bump_capacities, bare, 'proposed',
+      { 'proposed' => {}, 'reference' => {} },
+      { heating: true, cooling: false }, '2020', step: 1.4, trace: {})
+    assert_equal 'global', factors['mode']
+    assert_in_delta bare_global * 1.4, bare.getSizingParameters.heatingSizingFactor, 1e-6
+
+    # Heating attributable to a zone, cooling gate failing with NO zone over its
+    # per-zone allowance (facility union) -> mixed: zonal heating + global cooling.
+    mixed_model = OpenStudio::Model::Model.new
+    mz = OpenStudio::Model::ThermalZone.new(mixed_model)
+    mz.setName('Zone Bad')
+    mixed_report = {
+      'proposed' => { 'zone_unmet_occupied_hours' => {
+        'ZONE BAD' => { 'heating' => 400.0, 'cooling' => 105.0 }
+      } },
+      'reference' => { 'zone_unmet_occupied_hours' => {
+        'ZONE BAD' => { 'heating' => 10.0, 'cooling' => 100.0 }
+      } }
+    }
+    mixed_gc = mixed_model.getSizingParameters.coolingSizingFactor
+    mixed_gh = mixed_model.getSizingParameters.heatingSizingFactor
+    factors = OpenStudioNECB::Compliance.send(
+      :bump_capacities, mixed_model, 'proposed', mixed_report,
+      { heating: true, cooling: true }, '2020', step: 1.4, trace: {})
+    assert_equal 'mixed', factors['mode']
+    assert factors['zones'].key?('ZONE BAD')
+    assert_in_delta mixed_gc * 1.4, factors['global']['cooling_sizing_factor'], 1e-3
+    assert_in_delta mixed_gc * 1.4, mixed_model.getSizingParameters.coolingSizingFactor, 1e-6
+    assert_in_delta mixed_gh, mixed_model.getSizingParameters.heatingSizingFactor, 1e-6,
+                    'heating stays zonal — global heating untouched'
+  end
+
   # 8.4.1.2.(5): a deliberately UNDERSIZED proposed building (global heating
   # sizing factor 0.25 — the reference inherits it through the min(proposed, 1.3)
   # oversizing rule, so BOTH buildings fail sentence (3) initially) must converge
@@ -196,6 +305,11 @@ class TestCompliance < Minitest::Test
     first = history.first
     assert first['bumped'].key?('proposed'), 'proposed heating capacity was increased'
     assert_operator first['bumped']['proposed']['heating_sizing_factor'], :>, 0.25
+    assert_equal 'zonal', first['bumped']['proposed']['mode'],
+                 'per-zone unmet hours attributed the failure to specific thermal blocks'
+    refute_empty first['bumped']['proposed']['zones'], 'the failing zones are named in the history'
+    assert(result.proposed_model.getThermalZones.any? { |z| z.sizingZone.zoneHeatingSizingFactor.is_initialized },
+           'Sizing:Zone heating factors set on the failing zones of the model')
 
     final = result.report['proposed']['unmet_occupied_hours']['heating']
     assert_operator final, :<=, 100.0, "converged: #{final} unmet heating hours after iteration"
