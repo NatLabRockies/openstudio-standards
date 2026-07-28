@@ -1028,3 +1028,38 @@ redirect, no-evidence redirect, and residential-WLHP copy.
   (selector 23, reference 8, classify, e2e 3 incl. the cold-week ASHP
   conditioning run, efficiency/ERV/2025/pump/CBECS suites), umbrella
   mockups 9/9.
+
+## D-38 — A3 adjudicated (phylroy): 5.2.6.3 pump-power caps applied min-wins over the 8.4.4.14 transfer
+
+phylroy's ruling (2026-07-28): "do it and record the decision" on the
+min-wins recommendation. The reference building's hydronic pump power is
+set by the 8.4.4.14.(1)-(3) proposed-intensity transfer AND then clamped
+at the Table 5.2.6.3 maximum — 8.4.4.1.(2) makes Part 5 prescriptive a
+CEILING the reference may never pierce. min-wins is the only reading
+satisfying both articles simultaneously, and it closes the perverse
+incentive where wasteful proposed pumping inflates its own target.
+
+Values verified against the printed 2020 AND 2025 tables [READ, MCP,
+identical]: Heating 4.5 / Cooling 14 / Heat rejection 12 / Water-source
+heat pump 22 W_motorpower per kW_thermalpeak (combined pump motors per
+hydronic system, vs the loop's peak thermal demand at design).
+
+Implementation (openstudio-hvac efficiency pass): after the per-pump
+transfer, apply_pump_power_cap clamps each loop's COMBINED pump power;
+thermal peak by loop role — Heating from boiler capacities, Cooling from
+chiller reference capacities, Heat rejection from the served chillers'
+cap x (1+1/COP) (same arithmetic as the D-26 tower rule), WSHP row when
+the loop hosts water-to-air HP coils (from their rated cooling
+capacities). Clamps keep the flow/head/power triple physical (the D-27
+guard) so E+ never sees >100% pump efficiency. Unsized thermal peak or
+pump power -> audited 'not evaluable' info, never a silent skip; within-
+cap loops audit their compliance. Caps vendored in reference_rules_
+{2020,2025}.json under hydronic_pumps.power_caps_w_per_kw. Applies with
+or without a proposed model — the ceiling binds the reference regardless.
+Note: legacy applies ONLY the 5.2.6.3 caps and lacks 8.4.4.14 (L-17,
+#2129); we now implement both, reconciled.
+
+- Who/when: ruling phylroy 2026-07-28; implementation Claude under D-10.
+- Evidence: [READ, MCP] 5.2.6.3 + Table (2020/2025); [RAN] pump-rules
+  12/12 (clamp + min-wins pins), efficiency suite, necb:verify orphan-key
+  lint OK, gas Warehouse annual sweep with the cap live.

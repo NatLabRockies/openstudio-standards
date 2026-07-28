@@ -151,6 +151,51 @@ class TestNecbPumpRules < Minitest::Test
                     'head reconciled so implied efficiency stays physical (E+ fatal otherwise)'
     assert(audit.warnings.any? { |e| e[:action].include?('head reduced') })
   end
+
+  def add_boiler(loop_, kw)
+    boiler = OpenStudio::Model::BoilerHotWater.new(loop_.model)
+    boiler.setNominalCapacity(kw * 1000.0)
+    loop_.addSupplyBranchForComponent(boiler)
+    boiler
+  end
+
+  # D-38 (A3 ruled min-wins): a transferred intensity ABOVE the Table 5.2.6.3
+  # cap is clamped to cap x the loop's peak thermal demand (heating: 4.5 W/kW),
+  # with the head kept physical; the clamp is audited citing both articles.
+  def test_pump_power_cap_clamps_transfer_above_cap
+    proposed = OpenStudio::Model::Model.new
+    loop_with_vsd_pump(proposed, type: 'Heating', flow: 0.004, power: 800.0) # 200 W/(L/s)
+
+    reference = OpenStudio::Model::Model.new
+    ref_loop, ref_pump = loop_with_vsd_pump(reference, type: 'Heating', flow: 0.020) # transfer -> 4000 W
+    add_boiler(ref_loop, 100.0) # cap = 4.5 x 100 = 450 W
+    audit = OpenStudioHVAC::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: '2020', audit: audit, proposed: proposed)
+
+    power = ref_pump.ratedPowerConsumption.get
+    assert_in_delta 450.0, power, 0.5, 'combined power clamped to 4.5 W/kW x 100 kW'
+    implied = 0.020 * ref_pump.ratedPumpHead / power
+    assert_operator implied, :<=, ref_pump.motorEfficiency + 1e-6, 'clamped triple stays physical'
+    decision = audit.entries.find { |e| e[:article].to_s == '5.2.6.3.(1); 8.4.4.1.(2)' }
+    refute_nil decision, 'clamp decision audited with both articles'
+    assert_equal 'Heating', decision[:inputs][:system_type]
+    assert_in_delta 4000.0, decision[:inputs][:before_w], 1.0
+  end
+
+  def test_pump_power_cap_leaves_compliant_transfer_untouched
+    proposed = OpenStudio::Model::Model.new
+    loop_with_vsd_pump(proposed, type: 'Heating', flow: 0.010, power: 400.0) # 40 W/(L/s)
+
+    reference = OpenStudio::Model::Model.new
+    ref_loop, ref_pump = loop_with_vsd_pump(reference, type: 'Heating', flow: 0.020) # transfer -> 800 W
+    add_boiler(ref_loop, 300.0) # cap = 1350 W > 800 W
+    audit = OpenStudioHVAC::AuditLog.new
+    OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: '2020', audit: audit, proposed: proposed)
+
+    assert_in_delta 800.0, ref_pump.ratedPowerConsumption.get, 0.1, 'below-cap transfer untouched (min-wins)'
+    assert(audit.entries.any? { |e| e[:level] == :info && e[:action].include?('within the Table 5.2.6.3 maximum') },
+           'compliance is stated, never silent')
+  end
 end
 
 # D-14 (8.4.3.2.(1)): reference air systems inherit the PROPOSED operating

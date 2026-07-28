@@ -191,6 +191,121 @@ module OpenStudioHVAC
               transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
             end
           end
+          apply_pump_power_cap(loop_, loop_type, rule['power_caps_w_per_kw'], prefix, audit)
+        end
+      end
+
+      # D-38 (A3 ruled min-wins, phylroy 2026-07-28): 8.4.4.1.(2) makes the
+      # Part 5 prescriptive articles a CEILING for the reference, so after the
+      # 8.4.4.14 intensity transfer the loop's COMBINED pump motor power is
+      # clamped at the Table 5.2.6.3 W/kW of the loop's peak thermal demand at
+      # design. min-wins: a proposed intensity below the cap transfers
+      # untouched; one above it is cut to the cap (audited). Applies with or
+      # without a proposed model (the cap binds the reference regardless).
+      def apply_pump_power_cap(loop_, loop_type, caps, prefix, audit)
+        return if caps.nil?
+
+        row, thermal_kw = pump_cap_basis(loop_, loop_type)
+        rate = row && caps[row]
+        return if rate.nil?
+
+        if thermal_kw.nil? || thermal_kw <= 0.0
+          audit&.info(:efficiency, "5.2.6.3 pump-power cap not evaluable — loop's peak thermal demand unsized",
+                      target: loop_.nameString, article: '5.2.6.3.(1)')
+          return
+        end
+        pumps = loop_.supplyComponents.filter_map do |c|
+          c.to_PumpVariableSpeed.is_initialized ? c.to_PumpVariableSpeed.get : c.to_PumpConstantSpeed.is_initialized ? c.to_PumpConstantSpeed.get : nil
+        end
+        powers = pumps.map { |p| optional_f(p.ratedPowerConsumption) || optional_f(p.autosizedRatedPowerConsumption) }
+        if pumps.empty? || powers.any?(&:nil?)
+          audit&.info(:efficiency, '5.2.6.3 pump-power cap not evaluable — pump power unsized',
+                      target: loop_.nameString, article: '5.2.6.3.(1)')
+          return
+        end
+        combined = powers.sum
+        cap_w = rate * thermal_kw
+        if combined <= cap_w
+          audit&.info(:efficiency, 'combined pump power within the Table 5.2.6.3 maximum',
+                      target: loop_.nameString,
+                      inputs: { combined_w: combined.round, cap_w: cap_w.round, w_per_kw: rate,
+                                thermal_kw: thermal_kw.round(1), system_type: row },
+                      article: '5.2.6.3.(1)')
+          return
+        end
+
+        factor = cap_w / combined
+        pumps.zip(powers).each do |pump, power|
+          new_power = power * factor
+          flow = optional_f(pump.ratedFlowRate) || optional_f(pump.autosizedRatedFlowRate)
+          # keep the flow/head/power triple physical (same guard as the transfer)
+          if flow&.positive? && new_power.positive? && (flow * pump.ratedPumpHead / new_power) > pump.motorEfficiency
+            pump.setRatedPumpHead(0.65 * new_power / flow)
+          end
+          pump.setRatedPowerConsumption(new_power)
+        end
+        audit&.decision(:efficiency, 'combined pump power exceeds Table 5.2.6.3 — clamped to the maximum (min-wins over the pump-power transfer)',
+                        target: loop_.nameString,
+                        inputs: { before_w: combined.round, cap_w: cap_w.round, w_per_kw: rate,
+                                  thermal_kw: thermal_kw.round(1), system_type: row, scale: factor.round(3) },
+                        value: "#{combined.round} W -> #{cap_w.round} W",
+                        article: "5.2.6.3.(1); #{prefix}.1.(2)")
+      end
+
+      # Table 5.2.6.3 row + the loop's peak thermal demand (kW). A loop hosting
+      # water-to-air heat pump coils takes the WSHP row regardless of its
+      # sizing type; otherwise the row follows the Sizing:Plant loop type
+      # ('Condenser' = heat rejection, demand from the chillers it serves).
+      def pump_cap_basis(loop_, loop_type)
+        wta = loop_.demandComponents.select do |c|
+          c.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized ||
+            c.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
+        end
+        unless wta.empty?
+          kw = wta.sum do |c|
+            coil = c.to_CoilCoolingWaterToAirHeatPumpEquationFit
+            next 0.0 if coil.empty?
+
+            coil = coil.get
+            (optional_f(coil.ratedTotalCoolingCapacity) || optional_f(coil.autosizedRatedTotalCoolingCapacity) || 0.0) / 1000.0
+          end
+          return ['Water-source heat pump', kw.positive? ? kw : nil]
+        end
+
+        case loop_type
+        when 'Heating'
+          kw = loop_.supplyComponents.sum do |c|
+            if c.to_BoilerHotWater.is_initialized
+              b = c.to_BoilerHotWater.get
+              (optional_f(b.nominalCapacity) || optional_f(b.autosizedNominalCapacity) || 0.0) / 1000.0
+            else
+              0.0
+            end
+          end
+          ['Heating', kw.positive? ? kw : nil]
+        when 'Cooling'
+          kw = loop_.supplyComponents.sum do |c|
+            if c.to_ChillerElectricEIR.is_initialized
+              ch = c.to_ChillerElectricEIR.get
+              (optional_f(ch.referenceCapacity) || optional_f(ch.autosizedReferenceCapacity) || 0.0) / 1000.0
+            else
+              0.0
+            end
+          end
+          ['Cooling', kw.positive? ? kw : nil]
+        when 'Condenser'
+          kw = loop_.demandComponents.sum do |c|
+            if c.to_ChillerElectricEIR.is_initialized
+              ch = c.to_ChillerElectricEIR.get
+              cap = optional_f(ch.referenceCapacity) || optional_f(ch.autosizedReferenceCapacity)
+              cap.nil? ? 0.0 : cap * (1.0 + 1.0 / ch.referenceCOP) / 1000.0
+            else
+              0.0
+            end
+          end
+          ['Heat rejection', kw.positive? ? kw : nil]
+        else
+          [nil, nil]
         end
       end
 

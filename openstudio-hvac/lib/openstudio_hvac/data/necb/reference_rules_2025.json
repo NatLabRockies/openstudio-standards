@@ -16,7 +16,7 @@
     ],
     "note": "NECB 2025 renumbered the performance path: reference-building HVAC rules moved from Subsection 8.4.4 (2020) to 8.4.5; part-load curves moved to 8.4.6. All rule VALUES verified identical to 2020 via MCP retrieval and edition diff (selection tables byte-identical; oversizing 30%/10%; fan specs 640Pa/40% and 1000Pa/55%+250Pa/30%; boiler staging 176/352 kW; furnace/DX staging 66 kW; chiller plant 2100 kW/7C/6C; tower 1750 kW cells; HP -10C cutoff). Wording change: the supply-fan rule now reads *HVAC systems 1 to 5* (2020: *1, 3, 4 and 5*) - same effective coverage.",
     "efficiency_note": "Efficiency values ship in efficiencies_2025.json (transcribed/verified from NECB 2025 Tables 5.2.12.1.-K/-N/-O/-A via MCP; see its provenance.verification block for the per-table diff results). The 2020 fallback has been lifted.",
-    "non_rule_keys_note": "furnace_staging and dx_staging are future-implementation data backing the declared-partial 8.4.5.9./8.4.5.10. articles (see article_coverage gaps for each) \u2014 vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
+    "non_rule_keys_note": "furnace_staging and dx_staging are future-implementation data backing the declared-partial 8.4.5.9./8.4.5.10. articles (see article_coverage gaps for each) — vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
   },
   "non_rule_keys": [
     "furnace_staging",
@@ -457,6 +457,14 @@
   "hydronic_pumps": {
     "article": "8.4.5.14.(1)-(5)",
     "table_article": "Table 8.4.5.14.",
+    "power_caps_w_per_kw": {
+      "article": "5.2.6.3.(1); Table 5.2.6.3.",
+      "note": "D-38 (A3 ruled min-wins, phylroy 2026-07-28): the reference must also MEET Part 5 prescriptive (8.4.4.1.(2)) - after the pump-power transfer, each hydronic loop's COMBINED pump motor power is clamped at these W per kW of the loop's peak thermal demand at design. Values verified against the printed 2020 AND 2025 tables via MCP (identical).",
+      "Heating": 4.5,
+      "Cooling": 14.0,
+      "Heat rejection": 12.0,
+      "Water-source heat pump": 22.0
+    },
     "transfer": "sentences (1)-(3) via one mechanism: combined peak W/(L/s) by plant-loop type from the sized proposed model ((2) combined by summing power AND flow); reference pump rated power = intensity x its own sized flow",
     "sentence_5": "variable-flow pumps are modeled as a pump riding its curve -> riding-curve coefficients on every reference PumpVariableSpeed",
     "curves": {
@@ -488,10 +496,10 @@
       "threshold_temperature_c": -23.3,
       "initial_defrost_time_fraction": 0.167,
       "rate_of_defrost_increase": 1.44,
-      "modeling_note": "frost_control/threshold_temperature_c/defrost fractions are EnergyPlus equipment-modeling assumptions (E+ defaults; -23.3 C = -10 F), NOT NECB values \u2014 5.2.10.1 is silent on frost control. Sentence (5) test-method certification and the sentence (3) specialized-exhaust exemption are modeller/equipment scope."
+      "modeling_note": "frost_control/threshold_temperature_c/defrost fractions are EnergyPlus equipment-modeling assumptions (E+ defaults; -23.3 C = -10 F), NOT NECB values — 5.2.10.1 is silent on frost control. Sentence (5) test-method certification and the sentence (3) specialized-exhaust exemption are modeller/equipment scope."
     },
     "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system.",
-    "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), verified identical in 2025; retrieved via codes MCP get_table 2026-07-22. Replaces the NECB 2011 150 kW exhaust-heat-content trigger previously implemented here (wrong vintage \u2014 divergent for small high-%OA systems, where 2020 requires and 2011 does not).",
+    "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), verified identical in 2025; retrieved via codes MCP get_table 2026-07-22. Replaces the NECB 2011 150 kW exhaust-heat-content trigger previously implemented here (wrong vintage — divergent for small high-%OA systems, where 2020 requires and 2011 does not).",
     "continuous_hours_per_year": 8000,
     "oa_bands_pct": [
       10,
@@ -574,15 +582,15 @@
         }
       ]
     },
-    "effectiveness_article": "5.2.10.1.(4) \u2014 >= 50% ENTHALPY effectiveness at design conditions; setting sensible AND latent effectiveness to 0.50 at every rating point gives enthalpy effectiveness exactly 0.50 by identity (both components of delta-h transfer at 50%) \u2014 minimum-compliant for the reference",
-    "overshoot_article": "5.2.10.1.(6) \u2014 supply-air outlet temperature control + OutdoorAirPretreat setpoint manager are the required bypass/control against setpoint overshoot"
+    "effectiveness_article": "5.2.10.1.(4) — >= 50% ENTHALPY effectiveness at design conditions; setting sensible AND latent effectiveness to 0.50 at every rating point gives enthalpy effectiveness exactly 0.50 by identity (both components of delta-h transfer at 50%) — minimum-compliant for the reference",
+    "overshoot_article": "5.2.10.1.(6) — supply-air outlet temperature control + OutdoorAirPretreat setpoint manager are the required bypass/control against setpoint overshoot"
   },
   "article_coverage": {
     "note": "Complete accounting of Subsection 8.4.5 articles and how this gem handles each - emitted into every reference_hvac audit so nothing is silently missed. Statuses: implemented / partial / not_implemented / satisfied_by_clone / host_scope.",
     "articles": [
       {
         "article": "8.4.5.1.",
-        "title": "General \u2014 reference building basis (prescriptive components, all energy uses)",
+        "title": "General — reference building basis (prescriptive components, all energy uses)",
         "status": "host_scope",
         "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems."
       },
@@ -596,19 +604,19 @@
         "article": "8.4.5.3.",
         "title": "Building Envelope Components (solar absorptance)",
         "status": "host_scope",
-        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
+        "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.5.4.",
         "title": "Envelope Thermal Characteristics (lightweight construction)",
         "status": "host_scope",
-        "how": "Delegated to openstudio-envelope \u2014 reference_envelope applies this when composed by the umbrella."
+        "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
       },
       {
         "article": "8.4.5.5.",
         "title": "Lighting",
         "status": "host_scope",
-        "how": "Delegated to openstudio-lighting \u2014 reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12)."
+        "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (opt-in) covers sentences (5)-(12)."
       },
       {
         "article": "8.4.5.6.",
@@ -655,7 +663,7 @@
         "article": "8.4.5.12.",
         "title": "Cooling with Outside Air (economizers)",
         "status": "partial",
-        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled \u2014 loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
+        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled — loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
         "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA"
       },
       {
@@ -669,23 +677,23 @@
         "article": "8.4.5.14.",
         "title": "Hydronic Pumps",
         "status": "implemented",
-        "how": "Table 8.4.5.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) \u2014 unknown proposed pumps or unsized flows warn loudly.",
-        "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts \u2014 reference flows legitimately differ from proposed."
+        "how": "Table 8.4.5.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly.",
+        "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed."
       },
       {
         "article": "8.4.5.15.",
         "title": "Outdoor Air",
         "status": "partial",
         "how": "Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1).",
-        "gaps": "DCV strategies (2) are not copied onto rebuilt reference systems; OA identity (1) holds only for DSOA-driven proposeds \u2014 hard-set proposed minimum-OA controller values draw a runtime warning (T7)."
+        "gaps": "DCV strategies (2) are not copied onto rebuilt reference systems; OA identity (1) holds only for DSOA-driven proposeds — hard-set proposed minimum-OA controller values draw a runtime warning (T7)."
       },
       {
         "article": "8.4.5.16.",
         "title": "Space Temperature Control (radiant workaround, throttling range)",
         "status": "partial",
-        "gaps": "(1)'s +-2 C radiant workaround applies ONLY when the tool cannot model radiant effects \u2014 EnergyPlus can (ZoneHVAC low-temperature radiant objects); it binds only if the modeller chooses to approximate a radiant proposed design convectively, and applying the adjustment is then the modeller's responsibility.",
+        "gaps": "(1)'s +-2 C radiant workaround applies ONLY when the tool cannot model radiant effects — EnergyPlus can (ZoneHVAC low-temperature radiant objects); it binds only if the modeller chooses to approximate a radiant proposed design convectively, and applying the adjustment is then the modeller's responsibility.",
         "gap_owner": "modeller",
-        "how": "(2) throttling range is identical by construction: both buildings use ideal thermostat control on cloned schedules (8.4.3.2) \u2014 there is no throttling knob that could differ."
+        "how": "(2) throttling range is identical by construction: both buildings use ideal thermostat control on cloned schedules (8.4.3.2) — there is no throttling knob that could differ."
       },
       {
         "article": "8.4.5.17.",
@@ -705,25 +713,25 @@
         "title": "Energy Recovery Systems",
         "status": "implemented",
         "how": "Table 5.2.10.1.-A/-B airflow-threshold trigger (climate row by HDD x %OA band x continuous/non-continuous from the air loop availability schedule, >=8000 h/yr) evaluated POST-SIZING per reference air loop on sized supply/OA flows; rotary HX @ 50% effectiveness with OA-pretreat control added where required. Below-10%-OA systems are outside the Tables (NR).",
-        "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) \u2014 wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs."
+        "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs."
       },
       {
         "article": "8.4.5.20.",
         "title": "Service Water Heating Systems",
         "status": "host_scope",
-        "how": "Delegated to openstudio-shw \u2014 reference_shw re-applies Part 6 minimum efficiencies."
+        "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies."
       },
       {
         "article": "8.4.1.1. (HVAC)",
-        "title": "General \u2014 HVAC components accounted",
+        "title": "General — HVAC components accounted",
         "status": "implemented",
-        "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.5.7.-8.4.5.19.) and the capacity-binned efficiency pass \u2014 the realization of 8.4.1.1.(1) for the HVAC slice."
+        "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.5.7.-8.4.5.19.) and the capacity-binned efficiency pass — the realization of 8.4.1.1.(1) for the HVAC slice."
       },
       {
         "article": "8.4.2.10.",
         "title": "HVAC Systems",
         "status": "implemented",
-        "how": "Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies \u2014 components are constructed, not approximated by thermodynamically-similar substitutes.",
+        "how": "Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies — components are constructed, not approximated by thermodynamically-similar substitutes.",
         "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified."
       }
     ]
