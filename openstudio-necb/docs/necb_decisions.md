@@ -1151,3 +1151,58 @@ refinements queued behind the staged-heating work in the completion list.
 - Who/when: Claude under D-10 delegation, 2026-07-28.
 - Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] shw
   reference.rb (no pump/part-load handling — confirming the refined gaps).
+
+## D-42 — First FULL-ANNUAL fleet sweep (8760 h): reference generation validated; verdicts expose a proposed-side archetype character
+
+First code-compliant-duration sweep (SWEEP_MODE=full, 15 archetypes,
+Toronto/electric, D-32..D-41 all in effect). Energy fixed point
+(% of target = proposed/reference):
+
+| building | week% | annual% | shift | compliant |
+|---|---|---|---|---|
+| QuickServiceRestaurant | 92 | 89 | -3 | no |
+| SmallOffice | 88 | 89 | +1 | no |
+| FullServiceRestaurant | 95 | 91 | -4 | no |
+| SmallHotel | 92 | 91 | -1 | no |
+| LargeHotel | 90 | 92 | +2 | YES |
+| PrimarySchool | 95 | 94 | -1 | YES |
+| RetailStripmall | 89 | 97 | +8 | YES |
+| Warehouse | 103 | 97 | -6 | no |
+| HighriseApartment | 99 | 98 | -1 | no |
+| LowriseApartment | 96 | 98 | +2 | no |
+| RetailStandalone | 101 | 98 | -3 | no |
+| SecondarySchool | 97 | 98 | +1 | YES |
+| MidriseApartment | 97 | 99 | +2 | no |
+| MediumOffice | 110 | 111 | +1 | no |
+| LargeOffice | 110 | 113 | +3 | no |
+
+Findings:
+1. **Energy: 13/15 within 89-99%; median ~97-98.** The heating-dominated
+   week-run residuals compressed as predicted (Warehouse 103->97,
+   Stripmall 89->97); the office fan gap persisted year-round (111/113 —
+   consistent with the #2127 legacy-fan attribution, fans run all year).
+   SmallOffice did NOT compress (88->89): its ~11% gap is structural, not
+   seasonal — the remaining unexplained tail item. Restaurant/hotel gaps
+   deepened slightly with summer in scope (89-91).
+2. **Reference conditioning is sound through a full year: unmet HEATING
+   ~0 h fleet-wide** (max 85.75 h reference SmallHotel, under the 100 h
+   limit everywhere else ~0).
+3. **The compliant=false wave is 8.4.1.2.(4) unmet COOLING, proposed
+   side.** The reference consistently right-sizes cooling (fewer unmet
+   hours); the legacy proposed's HARD-SIZED cooling runs 1.2-5x the
+   reference's unmet hours (e.g. SmallOffice 261 vs 217, LowriseApt 528
+   vs 95, SmallHotel 2756 vs 691), violating the within-+10% criterion.
+   Sentence (5) iteration fired, bumped the proposed cooling sizing
+   factor, and STALLED — hard-sized legacy equipment ignores sizing
+   factors (the documented trap, detected loudly). 4/15 archetypes pass
+   outright. Verdict: the reference pipeline behaved correctly end to
+   end; the non-compliances are a measured CHARACTERISTIC of the legacy
+   archetypes under full-annual scrutiny — ledgered as L-23.
+4. Offices additionally fail sentence (2) on energy (111/113% > 100%),
+   as the fan attribution predicts.
+
+- Who/when: Claude under D-10 delegation, 2026-07-28 (sweep requested by
+  phylroy: "do a full annual sweep").
+- Evidence: [RAN] 15 full-annual pipeline runs (30 annual E+ simulations
+  + sizing runs, all PASS); report.json capacity_iterations/unmet blocks;
+  week-run baselines from the cached fleet.
