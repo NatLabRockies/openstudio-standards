@@ -1099,3 +1099,35 @@ reference 10 all green.
 
 - Who/when: ruling phylroy 2026-07-28; implementation Claude under D-10.
 - Evidence: [READ, MCP] Table 8.4.4.7.-B System 5 row; [RAN] batteries.
+
+## D-40 — A5 adjudicated (phylroy): reheat-coil autosizing trusted; legacy hard-size workaround rejected
+
+phylroy's ruling (2026-07-28, after reviewing the measurement): no-change
+— reference VAV reheat coils stay AUTOSIZED. The legacy workaround
+(hvac_systems.rb:2446: cap = 1.2 x 1000 x min_flow_fraction x
+max_air_flow x (43-13), hard-set on electric and hot-water reheat coils)
+is NOT adopted.
+
+Evidence [RAN — sized LargeOffice reference, 20 terminals]: autosized
+capacities range 0.11x to 3.15x the legacy formula — it misses in BOTH
+directions because it is geometry-based and load-blind. The premise
+mismatch is structural: legacy's cap assumes reheat at MINIMUM airflow
+(coherent with legacy's own L-9 68%-floor config); our terminals carry
+the D-22 maximumFlowFractionDuringReheat=0.5, so coils the formula calls
+2-3x oversized are correctly sized for the 50%-flow reheat they actually
+deliver (term 12: 17.4 kW vs a 31.7 kW deliverable ceiling). Adopting
+would undersize those (unmet-hours risk), inflate the load-sized ones
+3-9x (feeding boiler plant sizing and loosening the D-38 pump cap
+basis), disable 8.4.1.2.(5) capacity auto-iteration on reheat
+(hard-sized equipment ignores sizing factors), and rests on no code
+text. The legacy 1000 J/(m3.K) constant is also ~17% under the physical
+rho.cp (~1206), making the nominal 1.2 margin ~1.0 net.
+
+Regression net: the sys-6 E+ e2e conditioning asserts (January-week
+zones-conditioned checks) stand as the guard; if a sys-6 fixed-point
+residual ever traces to reheat sizing, reopen with data via the ledger.
+
+- Who/when: ruling phylroy 2026-07-28; analysis Claude under D-10.
+- Evidence: [READ] legacy hvac_systems.rb:2442-2456; [RAN] ComponentSizes
+  join on the sized LargeOffice reference (table in the conversation
+  record); no code change.
