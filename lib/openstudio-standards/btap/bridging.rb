@@ -634,9 +634,7 @@ module BTAP
       complies = false
 
       # TBD's own argument hash.
-      args           = {}
-      args[:option ] = ""
-      args[:io_path] = inputs( argh[:quality] )
+      args = {option: "", io_path: inputs( argh[:quality] )}
 
       # Uprating? Add surface type inputs to TBD argument hash.
       @model[:stypes].each do |stypes|
@@ -655,85 +653,119 @@ module BTAP
       end
 
       # Uprating? First run TBD on cloned OpenStudio model.
-      # if model[:uprating]
-      #   TBD.clean!
-      #   mdl = OpenStudio::Model::Model.new
-      #   mdl.addObjects(model.toIdfFile.objects)
-      #   res = TBD.process(mdl, args)
-      #
-      #   complies = true
-        # Check if uprating is successful: TBD args hash holds (new)
-        # uprated Uo keys/values for :walls, :floors and/or :roofs if uprating
-        # is successful. In most cases, uprating tends to fail for wall
-        # constructions rather than roof or floor constructions, due to the
-        # typically larger density of linear thermal bridging per surface area.
-        # Yet even if all constructions were successfully uprated by TBD, one
-        # must then determine if BTAP holds admissible (i.e. costed) assembly
-        # variants with corresponding Uo factors. If TBD-uprated Uo factors are
-        # lower than any of these admissible BTAP Uo factors, then no
-        # commercially available solution can been identified. In such cases,
-        # BTAP/TBD defaults to the lowest Uo factors in the costing database -
-        # see lowest_uo().
+      if @model[:uprating]
+        TBD.clean!
+        mdl = OpenStudio::Model::Model.new
+        mdl.addObjects(model.toIdfFile.objects)
+        res = TBD.process(mdl, args)
 
-        # @model[:stypes].each do |stypes|
-        #   next unless comply.key?(stypes) # true only if uprating
-        #
-        #   stype_uo = "#{stypes.to_s.chop}_uo".to_sym
-        #   target   = args.key?(stype_uo) ? args[stype_uo] : nil
-        #
-        #   unless target
-        #   end
+        complies = true
+        # Check if uprating is successful: TBD 'args' hash holds (new) uprated
+        # Uo keys/values for :walls, :floors and/or :roofs if uprating was
+        # successful. In most cases, uprating tends to fail for walls rather
+        # than roofs or floors, due to the typically larger density of linear
+        # thermal bridging per surface area. Yet even if all constructions were
+        # successfully uprated by TBD, one must then determine if BTAP holds
+        # admissible (i.e. costed) assembly variants with matching Uo factors.
+        # If TBD-uprated Uo factors are lower than any of these admissible BTAP
+        # Uo factors, then no commercially available solution would be
+        # identified. In such cases, BTAP/TBD defaults to the lowest Uo factors
+        # in the costing database - see lowest_uo().
 
-          # opt            = {}
-          # opt[:stype   ] = stypes
-          # opt[:perform ] = perform
-          # opt[:framing ] = argh[:structure].framing
-          # opt[:cladding] = argh[:structure].cladding
-          # opt[:finish  ] = argh[:structure].finish
-          #
-          # # NONONO rely on btap_id   = lc.additionalProperties.getFeatureAsString("btap_id")
-          #
-          # assembly = costed_assembly(opt)
+        @model[:stypes].each do |stypes|
+          next unless comply.key?(stypes) # true only if uprating
 
+          comply[stypes] = true
 
-          # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
-      #     uo = target ? costed_uo(assembly, target) : nil
-      #
-      #     if uo
-      #       uo = target if argh[:interpolate]
-      #       comply[stypes] = true
-      #     else
-      #       uo = lowest_uo(assembly)
-      #       comply[stypes] = false
-      #     end
-      #
-      #     # Repeat for custom spaces.
-      #     argh[:structure].spaces.each do |id, space|
-      #       opt[:framing ] = space[:framing]
-      #       opt[:cladding] = space[:cladding]
-      #       opt[:finish  ] = space[:finish]
-      #
-      #       assembly = costed_assembly(opt)
-      #       uo = target ? costed_uo(assembly, target) : nil
-      #
-      #       if uo
-      #         uo = target if argh[:interpolate]
-      #       else
-      #         uo = lowest_uo(assembly)
-      #         comply[stypes] = false
-      #       end
-      #     end
-      #
-      #     @model[:constructions].values.each do |v|
-      #       next unless v[:stypes] == stypes
-      #
-      #       v[:uo] = uo
-      #       v[:compliant] = comply[stypes]
-      #     end
-      #
-      #     complies = false unless comply[stypes]
-      #   end
-      # end
+          # TBD successful?
+          stype_uo = "#{stypes.to_s.chop}_uo".to_sym
+          target   = args.key?(stype_uo) ? args[stype_uo] : nil
+
+          if target
+            # 1. Check/reset building PSI set.
+            opts         = {}
+            opts[:id   ] = @model[:building][stypes][:id]
+            opts[:stype] = stypes
+            opts[:uo   ] = target
+            id = costed_assembly(opts)
+
+            @model[:building][stypes][:id] = id
+            uo = costed_uo(id, target)
+
+            if uo
+              uo = target if argh[:interpolate]
+
+              @model[:building][:quality   ] = argh[:quality]
+              @model[:building][stypes][:uo] = uo
+            else
+              uo = lowest_uo(id)
+              comply[stypes] = false
+
+              @model[:building][:quality   ] = :good
+              @model[:building][stypes][:uo] = uo
+            end
+
+            # 2. Check/reset attic PSI set (if applicable).
+            # unless @model[:attic][stypes].empty?
+            #   opts         = {}
+            #   opts[:id   ] = @model[:attic][stypes][:id]
+            #   opts[:stype] = stypes
+            #   opts[:uo   ] = target
+            #   id = costed_assembly(opts)
+            #
+            #   @model[:attic][stypes][:id] = id
+            #   uo = costed_uo(id, target)
+            #
+            #   if uo
+            #     uo = target if argh[:interpolate]
+            #
+            #     @model[:attic][:quality   ] = argh[:quality]
+            #     @model[:attic][stypes][:uo] = uo
+            #   else
+            #     uo = lowest_uo(id)
+            #     comply[stypes] = false
+            #
+            #     @model[:attic][:quality   ] = :good
+            #     @model[:attic][stypes][:uo] = uo
+            #   end
+            # end
+
+            # 3. Check/reset custom space PSI set (if applicable).
+            @model[:spaces].values.each do |sp|
+              opts         = {}
+              opts[:id   ] = sp[stypes][:id]
+              opts[:stype] = stypes
+              opts[:uo   ] = target
+              id = costed_assembly(opts)
+
+              sp[stypes][:id] = id
+              uo = costed_uo(id, target)
+
+              if uo
+                uo = target if argh[:interpolate]
+
+                sp[:quality   ] = argh[:quality]
+                sp[stypes][:uo] = uo
+              else
+                uo = lowest_uo(id)
+                comply[stypes] = false
+
+                sp[:quality   ] = :good
+                sp[stypes][:uo] = uo
+              end
+            end
+          else
+            @model[:building][:quality] = :good
+            # @model[:attic   ][:quality] = :good
+
+            @model[:spaces].values.each { |sp| sp[:quality] = :good }
+
+            comply[stypes] = false
+          end
+
+          puts "#{stypes} : #{comply[stypes]} : #{uo}"
+        end
+      end
 
 
       # loop do
@@ -923,24 +955,22 @@ module BTAP
         edge.each.with_index(1) do |(pID, m), i|
           next if m < 0.025
 
-          # puts "#{type} : #{pID} (#{m.round(2)} m)"
-          # fenestration : BTAP-ExteriorWall-Mass-2 bad       (772.80 m)
-          # fenestration : BTAP-ExteriorWall-WoodFramed-5 bad ( 75.60 m)
-          # grade        : BTAP-ExteriorWall-WoodFramed-5 bad ( 35.05 m)
-          # grade        : BTAP-ExteriorWall-Mass-2 bad       (257.54 m)
-          # rimjoist     : BTAP-ExteriorWall-WoodFramed-5 bad ( 35.05 m)
-          # parapet      : BTAP-ExteriorWall-Mass-2 bad       (292.59 m)
-          # corner       : BTAP-ExteriorWall-WoodFramed-5 bad (  4.27 m)
-          # corner       : BTAP-ExteriorWall-Mass-2 bad       ( 29.87 m)
-
           tag = type.to_s + i.to_s
           val = "#{pID} #{m.round(2)}"
           model.getBuilding.additionalProperties.setFeature(tag, val)
-          puts "#{tag} : #{model.getBuilding.additionalProperties.getFeatureAsString(tag).get}"
+          # puts "#{tag} : #{model.getBuilding.additionalProperties.getFeatureAsString(tag).get}"
+          #   fenestration1 : BTAP-ExteriorWall-Mass-2       bad 772.80
+          #   fenestration2 : BTAP-ExteriorWall-WoodFramed-5 bad  75.60
+          #   grade1        : BTAP-ExteriorWall-WoodFramed-5 bad  35.05
+          #   grade2        : BTAP-ExteriorWall-Mass-2       bad 257.54
+          #   rimjoist1     : BTAP-ExteriorWall-WoodFramed-5 bad  35.05
+          #   parapet1      : BTAP-ExteriorWall-Mass-2       bad 292.59
+          #   corner1       : BTAP-ExteriorWall-WoodFramed-5 bad   4.27
+          #   corner2       : BTAP-ExteriorWall-Mass-2       bad  29.87
         end
       end
 
-      puts model.getBuilding.additionalProperties
+      # puts model.getBuilding.additionalProperties
 
       puts
 
@@ -1142,7 +1172,7 @@ module BTAP
         fID = BTAP::Bridging.costed_assembly(argh)
       end
 
-      # Re/set AdditionalProperties to BUILDING exterior constructions.
+      # Re/set AdditionalProperties to BUILDING exterior wall constructions.
       addprop(bldg,   "btap_ut", wUt)
       addprop(bldg,   "btap_uo", wUo)
       addprop(bldg,   "btap_id", wID)
@@ -1437,41 +1467,28 @@ module BTAP
         return false
       end
 
-      # Track edges.
-      # puts args[:io][:edges]
-
-      # TBD.process(model, argh)
-      # expect(TBD.status).to be_zero
-      # expect(TBD.logs).to be_empty
-      # expect(argh).to have_key(:surfaces)
-      # expect(argh).to have_key(:io)
-      #
-      # expect(argh[:io]).to be_a(Hash)
-      # expect(argh[:io]).to have_key(:edges)
-      # expect(argh[:io][:edges].size).to eq(300)
-
       # Process surfaces deemed 'deratable' by TBD. Link PSI factor sets to:
       #   - building (1x)
       #   - attics/crawlspaces (1x)
       #   - each custom space (if unique)
-      # res[:surfaces].each do |identifier, surface|
-      #   next unless surface.key?(:type)      # :wall, :ceiling or :floor
-      #   next unless surface.key?(:net)       # surface net area
-      #   next unless surface.key?(:index)     # deratable layer index
-      #   next unless surface.key?(:r)         # deratable layer RSi
-      #   next unless surface.key?(:deratable) # true or false
-      #   next unless surface[:deratable]
-      #   next unless surface[:index]
-      #
-      #   stype = case surface[:type]
-      #           when :wall    then :walls
-      #           when :floor   then :floors
-      #           when :ceiling then :roofs
-      #           else next
-      #           end
-      #
-      #   # Track deratable surface types, e.g. any exposed :floors?
-      #   @model[:stypes] << stype unless @model[:stypes].include?(stype)
+      args[:surfaces].each do |identifier, surface|
+        next unless surface.key?(:type)      # :wall, :ceiling or :floor
+        next unless surface.key?(:net)       # surface net area
+        next unless surface.key?(:index)     # deratable layer index
+        next unless surface.key?(:r)         # deratable layer RSi
+        next unless surface.key?(:deratable) # true or false
+        next unless surface[:deratable]
+        next unless surface[:index]
+
+        stype = case surface[:type]
+                when :wall    then :walls
+                when :floor   then :floors
+                when :ceiling then :roofs
+                else next
+                end
+
+        # Track deratable surface types, e.g. any exposed :floors?
+        @model[:stypes] << stype unless @model[:stypes].include?(stype)
       #
       #   # Track TBD-targeted constructions for uprating/derating.
       #   srf = model.getSurfaceByName(identifier)
@@ -1597,9 +1614,9 @@ module BTAP
       #   @model[:constructions][id][:stypes  ] << stype
       #   @model[:constructions][id][:surfaces] << identifier
       #   @model[:constructions][id][:spaces  ] << spID
-      # end
+      end
 
-      # nb = 0 # number of deratable walls in the model
+      nb = 0 # number of deratable walls in the model
 
       # Loop through all tracked deratable constructions. Ensure a single
       # surface type per construction. Ensure at least one wall construction.
@@ -1718,7 +1735,6 @@ module BTAP
     def inputs(quality = :good)
       argh = @model[:argh]
       mdl  = @model[:osm]
-      # stc  = @model[:structure]
 
       # PSI set quality?
       quality = :good unless quality == :bad
@@ -1729,8 +1745,9 @@ module BTAP
       spaces = {} # custom space-specific PSI references
 
       # A single, default PSI-factor set for the building.
-      bID = @model[:building][:walls][:id]
-      bPSI = set(bID, quality)
+      bldg = @model[:building]
+      bID  = bldg[:walls][:id]
+      bPSI = bldg.key?(:quality) ? set(bID, bldg[:quality]) : set(bID, quality)
       psis[ bPSI[:id] ] = bPSI
 
       # Repeat for customized spaces, e.g.
@@ -1740,7 +1757,7 @@ module BTAP
         next if cID == bID
 
         # Fetch BTAP PSI factor set identifier, e.g. STEL1_GOOD
-        cPSI = set(cID, quality)
+        cPSI = sp.key?(:quality) ? set(cID, sp[:quality]) : set(cID, quality)
         next if psis.key?( cPSI[:id] )
 
         # Append customized PSI-factor set.

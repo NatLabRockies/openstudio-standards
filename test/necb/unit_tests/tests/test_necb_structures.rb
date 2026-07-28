@@ -37,7 +37,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
@@ -322,6 +322,8 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "# insulated constructions (#{cas})"
               assert_equal(cs.size, 6, err_msg)
 
+              puts
+
               # Insulated (layered) constructions (i.e. part of the building
               # envelope) inherit area-weighted air film resistances, if relying
               # on the 'structure' option.
@@ -354,6 +356,8 @@ class NECB_Structure_Tests < Minitest::Test
                 err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
                 assert_equal(fR.round(3), fr.round(3))
               end
+
+              puts
 
               # NECB2015: No uprating (Uo == NECB prescriptive requirements).
               if template == "NECB2015"
@@ -444,10 +448,15 @@ class NECB_Structure_Tests < Minitest::Test
               # Insulated (layered) constructions (i.e. part of the building
               # envelope) inherit area-weighted air film resistances, if relying
               # on the 'structure' option.
-              cs.each do |c|
-                id = c.nameString
-                tP = c.additionalProperties.getFeatureAsString("btap_type")
-                fR = c.additionalProperties.getFeatureAsDouble("btap_film")
+              cs.each do |lc|
+                id = lc.nameString
+                lc = lc.to_LayeredConstruction
+                err_msg = "#{id} non-layered constuction (#{cas})"
+                refute_empty(lc)
+
+                lc = lc.get
+                tP = lc.additionalProperties.getFeatureAsString("btap_type")
+                fR = lc.additionalProperties.getFeatureAsDouble("btap_film")
 
                 err_msg = "#{id} 'btap_film' (#{cas})"
                 refute_empty(fR)

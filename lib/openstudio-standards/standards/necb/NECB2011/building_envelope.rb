@@ -739,8 +739,17 @@ class NECB2011
     id = BTAP::Bridging.costed_assembly(argh)
 
     eWall.additionalProperties.setFeature("btap_uo", eWallU)
+    eWall.additionalProperties.setFeature("btap_ut", eWallU)
     eWall.additionalProperties.setFeature("btap_id", id)
     eWall.additionalProperties.setFeature("btap_type", "walls")
+
+    # Also assign default exterior wall construction properties to building.
+    if bldg
+      model.getBuilding.additionalProperties.setFeature("btap_uo", eWallU)
+      model.getBuilding.additionalProperties.setFeature("btap_ut", eWallU)
+      model.getBuilding.additionalProperties.setFeature("btap_id", id)
+      model.getBuilding.additionalProperties.setFeature("btap_type", "walls")
+    end
 
     # Outdoor-facing roof.
     specs          = {}
@@ -765,6 +774,7 @@ class NECB2011
     id = BTAP::Bridging.costed_assembly(argh)
 
     eRoof.additionalProperties.setFeature("btap_uo", eRoofU)
+    eRoof.additionalProperties.setFeature("btap_ut", eRoofU)
     eRoof.additionalProperties.setFeature("btap_id", id)
     eRoof.additionalProperties.setFeature("btap_type", "roofs")
 
@@ -786,6 +796,7 @@ class NECB2011
     id = BTAP::Bridging.costed_assembly(argh)
 
     eFloor.additionalProperties.setFeature("btap_uo", eFloorU)
+    eFloor.additionalProperties.setFeature("btap_ut", eFloorU)
     eFloor.additionalProperties.setFeature("btap_id", id)
     eFloor.additionalProperties.setFeature("btap_type", "floors")
 
@@ -1027,6 +1038,7 @@ class NECB2011
       id = BTAP::Bridging.costed_assembly(argh)
 
       iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
+      iAtticWall.additionalProperties.setFeature("btap_ut", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)
       iAtticWall.additionalProperties.setFeature("btap_type", "walls")
 
@@ -1051,6 +1063,7 @@ class NECB2011
       id = BTAP::Bridging.costed_assembly(argh)
 
       iAtticFloor.additionalProperties.setFeature("btap_uo", eRoofU)
+      iAtticFloor.additionalProperties.setFeature("btap_ut", eRoofU)
       iAtticFloor.additionalProperties.setFeature("btap_id", id)
       iAtticFloor.additionalProperties.setFeature("btap_type", "roofs")
 
@@ -1076,6 +1089,7 @@ class NECB2011
       id = BTAP::Bridging.costed_assembly(argh)
 
       iAtticRoof.additionalProperties.setFeature("btap_uo", eFloorU)
+      iAtticRoof.additionalProperties.setFeature("btap_ut", eFloorU)
       iAtticRoof.additionalProperties.setFeature("btap_id", id)
       iAtticRoof.additionalProperties.setFeature("btap_type", "floors")
 

@@ -988,7 +988,9 @@ class NECB2011 < Standard
   # (auto-generated with option "structure"). If no constructions are tagged
   # with "btap_uo" in the model, the fallback is to instead target all outdoor-
   # facing, above-grade layered constructions. In case of latter scenario,
-  # AdditionalProperties "btap_id" & "btap_type" are also added (if missing).
+  # AdditionalProperties "btap_uo", "btap_ut", "btap_id" & "btap_type" are
+  # added. All constructions having (or inherting) a "btap_uo" property are
+  # adjusted to match the specified Uo (factoring in "btap_film").
   #
   # @author: denis@rd2.ca
   #
@@ -1013,49 +1015,97 @@ class NECB2011 < Standard
     end
 
     # No "btap_uo" AdditionalProperty?
-    unless ok
-      model.getSurfaces.each do |surface|
-        lc = surface.construction
-        tp = surface.surfaceType.downcase
-        bc = surface.outsideBoundaryCondition.downcase
-        next unless tp == "outdoors"
+    model.getSurfaces.each do |surface|
+      break if ok
 
-        uo = max_u_necb(tp, bc, hdd)
-        ty = case tp
-             when "wall"  then :walls
-             when "floor" then :floors
-             else              :roofs
-             end
+      lc = surface.construction
+      tp = surface.surfaceType.downcase
+      bc = surface.outsideBoundaryCondition.downcase
+      next unless tp == "outdoors"
 
-        next if lc.empty?
-        next if lc.additionalProperties.hasFeature("btap_film")
+      uo = max_u_necb(tp, bc, hdd)
+      ty = case tp
+           when "wall"  then :walls
+           when "floor" then :floors
+           else              :roofs
+           end
 
-        lc = lc.get.to_LayeredConstruction
-        next if lc.empty?
+      next if lc.empty?
+      next if lc.additionalProperties.hasFeature("btap_film")
 
-        lc = lc.get
-        lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      lc = lc.get.to_LayeredConstruction
+      next if lc.empty?
 
-        unless lc.additionalProperties.hasFeature("btap_type")
-          lc.additionalProperties.setFeature("btap_type", ty.to_s)
-        end
+      lc = lc.get
+      lc.additionalProperties.setFeature("btap_film", filmR(lc))
 
-        unless lc.additionalProperties.hasFeature("btap_uo")
-          lc.additionalProperties.setFeature("btap_uo", uo)
-        end
+      unless lc.additionalProperties.hasFeature("btap_type")
+        lc.additionalProperties.setFeature("btap_type", ty.to_s)
+      end
 
-        unless lc.additionalProperties.hasFeature("btap_ut")
-          lc.additionalProperties.setFeature("btap_ut", uo)
-        end
+      unless lc.additionalProperties.hasFeature("btap_uo")
+        lc.additionalProperties.setFeature("btap_uo", uo)
+      end
 
-        unless lc.additionalProperties.hasFeature("btap_id")
-          argh           = {}
-          argh[:perform] = :lp
-          argh[:stype  ] = ty
-          argh[:uo     ] = uo
-          id = BTAP::Bridging.costed_assembly(argh)
-          lc.additionalProperties.setFeature("btap_id", id)
-        end
+      unless lc.additionalProperties.hasFeature("btap_ut")
+        lc.additionalProperties.setFeature("btap_ut", uo)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_id")
+        argh           = {}
+        argh[:perform] = :lp
+        argh[:stype  ] = ty
+        argh[:uo     ] = uo
+        id = BTAP::Bridging.costed_assembly(argh)
+        lc.additionalProperties.setFeature("btap_id", id)
+      end
+    end
+
+    # Isolate building default exterior wall construction.
+    wlc = nil
+    set = model.getBuilding.defaultConstructionSet
+
+    unless set.empty?
+      ext = set.get.defaultExteriorSurfaceConstructions
+
+      unless ext.empty?
+        wlc = ext.get.wallConstruction
+        wlc = wlc.empty? ? nil : wlc.get
+      end
+    end
+
+    # Adjust tagged insulated constructions.
+    model.getLayeredConstructions.each do |lc|
+      id = lc.additionalProperties.getFeatureAsString("btap_id")
+      uo = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+      ut = lc.additionalProperties.getFeatureAsDouble("btap_ut")
+      fr = lc.additionalProperties.getFeatureAsDouble("btap_film")
+      ty = lc.additionalProperties.getFeatureAsString("btap_type")
+      next if id.empty?
+      next if uo.empty?
+      next if ut.empty?
+      next if fr.empty?
+      next if ty.empty?
+
+      id = id.get
+      uo = uo.get
+      ut = ut.get
+      fr = fr.get
+      ty = ty.get
+      il = TBD.insulatingLayer(lc)
+      next unless il[:index]
+
+      TBD.resetUo(lc, fr, il[:index], uo)
+
+      # Add default exterior wall construction tags to building.
+      if lc == wlc
+        next unless ty == "walls"
+
+        model.getBuilding.additionalProperties.setFeature("btap_id", id)
+        model.getBuilding.additionalProperties.setFeature("btap_uo", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_ut", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_film", fr)
+        model.getBuilding.additionalProperties.setFeature("btap_type", ty)
       end
     end
 
