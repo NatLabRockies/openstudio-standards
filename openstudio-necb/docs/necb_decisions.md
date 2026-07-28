@@ -1063,3 +1063,39 @@ Note: legacy applies ONLY the 5.2.6.3 caps and lacks 8.4.4.14 (L-17,
 - Evidence: [READ, MCP] 5.2.6.3 + Table (2020/2025); [RAN] pump-rules
   12/12 (clamp + min-wins pins), efficiency suite, necb:verify orphan-key
   lint OK, gas Warehouse annual sweep with the cap live.
+
+## D-39 — A4 adjudicated (phylroy): System 5 heating "None" honoured conditionally per 8.4.4.1.(5)
+
+phylroy's ruling (2026-07-28): "do 3 and document it" — the conditional
+reconciliation. Table 8.4.4.7.-B lists System 5 (two-pipe fan-coil,
+water-cooled chiller) with heating "None" [READ, MCP — row re-verified];
+8.4.4.1.(5) requires heating PRESENCE per thermal block to be identical
+to the proposed. Reconciliation (same shape as D-38's min-wins): the
+table's "None" governs the default composition — a COOLED-BUT-UNHEATED
+proposed block (the refrigerated-space case System 5 exists for) gets a
+cooling-only TPFC reference; when the proposed block IS heated, sentence
+(5) overrides presence and the existing two-pipe changeover heating is
+kept (no baseboard variant invented — the table describes none). Both
+branches audited with both articles. A block with NO conditioning at all
+gets no reference system (existing 8.4.4.1.(5) behavior — that case is
+absence, not "None").
+
+Implementation: FanCoils builder gains config 'heating' => 'none'
+(no hot-water loop, no MAU heating coil, zone fan coils carry a
+zero-capacity always-off placeholder electric coil — the FourPipeFanCoil
+object requires one); finalize merges that config for System 5
+assignments whose group is unheated. The prior always-heat behavior was
+deliberate legacy parity (legacy builds sys 5 with the sys 2 machinery,
+heating included) — that parity is now intentionally broken for the
+unheated case, in the code-literal direction.
+
+Pins: selector (unheated -> 'heating'='none' config; heated -> override
+audited), reference build (cooling-only: no boiler, no hydronic heating
+coils, placeholder at 0 W; heated: boiler present), and two pipeline
+mockups — sys5_refrigerated (heated fixture, presence-override decision)
++ NEW sys5_unheated (hand-built DX-only proposed; cooling-only TPFC
+through E+ sizing). 10/10 mockups, fan-coils suite, selector 25,
+reference 10 all green.
+
+- Who/when: ruling phylroy 2026-07-28; implementation Claude under D-10.
+- Evidence: [READ, MCP] Table 8.4.4.7.-B System 5 row; [RAN] batteries.

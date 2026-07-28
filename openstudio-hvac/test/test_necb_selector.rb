@@ -151,6 +151,28 @@ class TestNecbSelector < Minitest::Test
     assert_equal :copy_proposed, a.action
   end
 
+  # D-39 (A4 ruled conditional): Table -B System 5 heating "None" governs when
+  # the proposed block is UNHEATED (cooling-only TPFC config); 8.4.4.1.(5)
+  # overrides presence when the proposed block IS heated.
+  def test_system5_unheated_proposed_builds_cooling_only
+    a = select([group(heated: false)],
+               zone_types: { 'Z1' => 'Warehouse - refrigerated' },
+               refrigerated_zones: ['Z1']).first
+    assert_equal 5, a.reference_system
+    assert_equal 'none', a.config['heating'], 'Table -B "None" honoured'
+    assert_equal false, a.config['needs_boiler']
+  end
+
+  def test_system5_heated_proposed_keeps_heating
+    audit = OpenStudioHVAC::AuditLog.new
+    a = select([group(heated: true)],
+               zone_types: { 'Z1' => 'Warehouse - refrigerated' },
+               refrigerated_zones: ['Z1'], audit: audit).first
+    assert_equal 5, a.reference_system
+    refute_equal 'none', a.config.to_h['heating'], '8.4.4.1.(5) presence override'
+    assert(audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.1.(5)') })
+  end
+
   # "otherwise, the reference building or space shall use through-the-wall systems."
   def test_residential_otherwise_through_the_wall
     a = select([group(family: 'vav_reheat', family_guess: :multizone_vav)],

@@ -14,7 +14,7 @@
     "osm": "sys5_refrigerated.osm",
     "space_type": "Warehouse storage area medium to bulky palletized items",
     "proposed": "Baseboard electric",
-    "note": "Warehouse Area + refrigerated condition -> System 5 (first-ever build of TPFC reference; A4 \"System 5 heating\" adjudication pending)",
+    "note": "Warehouse Area + refrigerated condition -> System 5; proposed block HEATED so the changeover heating is kept per 8.4.4.1.(5) (D-39)",
     "building": {
       "refrigerated_zones": [
         "Thermal Zone 1",
@@ -27,7 +27,27 @@
     "expect": {
       "selected": "System 5 -> 'TPFC MAU Chilled Water Coils with Scroll Chiller'",
       "built": "TPFC MAU Chilled Water Coils with Scroll Chiller",
-      "article": "refrigerated space -> System 5"
+      "article": "refrigerated space -> System 5",
+      "decision": "8.4.4.1.(5) presence override"
+    }
+  },
+  "sys5_unheated": {
+    "osm": "sys5_unheated.osm",
+    "space_type": "Warehouse storage area medium to bulky palletized items",
+    "proposed": null,
+    "note": "D-39 (A4 ruled conditional): refrigerated + cooled-but-UNHEATED proposed block -> Table 8.4.4.7.-B heating \"None\" honoured — cooling-only TPFC reference",
+    "building": {
+      "refrigerated_zones": [
+        "Thermal Zone 1",
+        "Thermal Zone 2",
+        "Thermal Zone 3",
+        "Thermal Zone 4",
+        "Thermal Zone 5"
+      ]
+    },
+    "expect": {
+      "selected": "System 5 -> 'TPFC MAU Chilled Water Coils with Scroll Chiller'",
+      "decision": "System 5 reference built COOLING-ONLY"
     }
   },
   "hp_office": {

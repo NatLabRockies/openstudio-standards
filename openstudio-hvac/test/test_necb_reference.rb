@@ -96,6 +96,49 @@ class TestNecbReference < Minitest::Test
                  'ground HX on the source loop = ground-source HP -> ASHP redirect'
   end
 
+  # D-39 (A4 ruled conditional): an UNHEATED refrigerated proposed block gets
+  # the Table -B literal — a cooling-only TPFC reference (no boiler, no MAU
+  # heating coil, zone heating a zero-capacity always-off placeholder); a
+  # HEATED one keeps the two-pipe changeover per 8.4.4.1.(5).
+  def test_system5_cooling_only_when_proposed_unheated
+    model = load_fixture
+    zones = model.getThermalZones.sort_by(&:nameString)
+    # cooling-only proposed: DX + fan air loop, no heating coil anywhere
+    loop_ = OpenStudio::Model::AirLoopHVAC.new(model)
+    OpenStudio::Model::FanConstantVolume.new(model, model.alwaysOnDiscreteSchedule).addToNode(loop_.supplyInletNode)
+    OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model).addToNode(loop_.supplyInletNode)
+    zones.each do |z|
+      loop_.addBranchForZone(z, OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(
+        model, model.alwaysOnDiscreteSchedule
+      ).to_StraightComponent)
+    end
+
+    result = OpenStudioHVAC::NECB.reference_hvac(
+      model, building: { storeys: 1, zone_types: types(model, 'Warehouse - refrigerated'),
+                         refrigerated_zones: zones.map(&:nameString) }
+    )
+    assert_equal [5], result.assignments.map(&:reference_system).uniq
+    ref = result.model
+    assert_empty ref.getBoilerHotWaters, 'Table -B "None": no heating plant'
+    refute_empty ref.getChillerElectricEIRs, 'chilled-water cooling present'
+    refute_empty ref.getZoneHVACFourPipeFanCoils
+    assert_empty ref.getCoilHeatingWaters, 'no hydronic heating coils anywhere'
+    ref.getCoilHeatingElectrics.each do |c|
+      assert_in_delta 0.0, c.nominalCapacity.get, 1e-9, 'placeholder zone heating coil at zero capacity'
+    end
+  end
+
+  def test_system5_keeps_heating_when_proposed_heated
+    model = proposed('Baseboard electric')
+    zones = model.getThermalZones.sort_by(&:nameString)
+    result = OpenStudioHVAC::NECB.reference_hvac(
+      model, building: { storeys: 1, zone_types: types(model, 'Warehouse - refrigerated'),
+                         refrigerated_zones: zones.map(&:nameString) }
+    )
+    assert_equal [5], result.assignments.map(&:reference_system).uniq
+    refute_empty result.model.getBoilerHotWaters, '8.4.4.1.(5): proposed heated -> reference heats (changeover kept)'
+  end
+
   # residential PTAC (compatible NON-heat-pump cooling) -> reference identical
   # to proposed (copy rule): nothing rebuilt
   def test_residential_ptac_copies_proposed

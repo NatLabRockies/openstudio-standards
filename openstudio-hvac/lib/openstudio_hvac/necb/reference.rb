@@ -206,6 +206,28 @@ module OpenStudioHVAC
       assignment.catalog_name = variant.fetch('name')
       assignment.config = variant['config']
 
+      # D-39 (A4 ruled conditional, phylroy 2026-07-28): Table 8.4.4.7.-B lists
+      # System 5's heating as "None", but 8.4.4.1.(5) requires the presence or
+      # absence of heating per thermal block to be IDENTICAL to the proposed.
+      # Reconciliation: the table's "None" governs the default composition
+      # (cooling-only TPFC when the proposed block is unheated); sentence (5)
+      # overrides presence when the proposed block IS heated (the existing
+      # two-pipe changeover heating is kept — no system invented).
+      if assignment.reference_system == 5
+        if group[:heated]
+          audit&.decision(:selection, 'System 5 reference keeps its heating — proposed block is heated, 8.4.4.1.(5) presence override of the Table -B "None" heating column',
+                          target: group[:zones].join(','),
+                          article: '8.4.4.1.(5); Table 8.4.4.7.-B')
+        else
+          assignment.config = (assignment.config || {}).merge(
+            'heating' => 'none', 'needs_boiler' => false, 'mau_heating_coil_type' => 'None'
+          )
+          audit&.decision(:selection, 'System 5 reference built COOLING-ONLY — Table 8.4.4.7.-B heating "None" honoured (proposed block is unheated)',
+                          target: group[:zones].join(','),
+                          article: 'Table 8.4.4.7.-B; 8.4.4.1.(5)')
+        end
+      end
+
       # 8.4.4.6.(2)/8.4.5.6.(2): purchased cooling is represented by an air-cooled
       # electric chiller.
       if facts.dig(:purchased_energy, :cooling) || group[:cooling_energy_types].include?('Purchased')

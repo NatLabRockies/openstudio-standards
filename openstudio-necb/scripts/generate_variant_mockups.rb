@@ -78,11 +78,21 @@ MOCKUPS = {
   'sys5_refrigerated' => {
     space_type: 'Warehouse storage area medium to bulky palletized items',
     proposed: 'Baseboard electric',
-    note: 'Warehouse Area + refrigerated condition -> System 5 (first-ever build of TPFC reference; A4 "System 5 heating" adjudication pending)',
+    note: 'Warehouse Area + refrigerated condition -> System 5; proposed block HEATED so the changeover heating is kept per 8.4.4.1.(5) (D-39)',
     building: { refrigerated_zones: :all_zones },
     expect: { selected: "System 5 -> 'TPFC MAU Chilled Water Coils with Scroll Chiller'",
               built: 'TPFC MAU Chilled Water Coils with Scroll Chiller',
-              article: 'refrigerated space -> System 5' }
+              article: 'refrigerated space -> System 5',
+              decision: '8.4.4.1.(5) presence override' }
+  },
+  'sys5_unheated' => {
+    space_type: 'Warehouse storage area medium to bulky palletized items',
+    proposed: nil,
+    custom: :cooling_only_dx, # cooled-but-unheated block (a no-HVAC block would be unconditioned -> no reference system at all)
+    note: 'D-39 (A4 ruled conditional): refrigerated + cooled-but-UNHEATED proposed block -> Table 8.4.4.7.-B heating "None" honoured — cooling-only TPFC reference',
+    building: { refrigerated_zones: :all_zones },
+    expect: { selected: "System 5 -> 'TPFC MAU Chilled Water Coils with Scroll Chiller'",
+              decision: 'System 5 reference built COOLING-ONLY' }
   },
   'hp_office' => {
     space_type: 'Office enclosed <= 25 m2',
@@ -134,9 +144,29 @@ MOCKUPS = {
   }
 }.freeze
 
+# A cooled-but-unheated proposed (refrigerated-style): DX + fan air loop with
+# uncontrolled diffusers, no heating coil anywhere.
+def add_cooling_only_dx!(model)
+  loop_ = OpenStudio::Model::AirLoopHVAC.new(model)
+  OpenStudio::Model::FanConstantVolume.new(model, model.alwaysOnDiscreteSchedule).addToNode(loop_.supplyInletNode)
+  OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model).addToNode(loop_.supplyInletNode)
+  zones = model.getThermalZones.sort_by(&:nameString)
+  zones.each do |zone|
+    loop_.addBranchForZone(zone, OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(
+      model, model.alwaysOnDiscreteSchedule
+    ).to_StraightComponent)
+  end
+  spm = OpenStudio::Model::SetpointManagerSingleZoneReheat.new(model)
+  spm.setControlZone(zones.first)
+  spm.addToNode(loop_.supplyOutletNode)
+  model
+end
+
 manifest = {}
 MOCKUPS.each do |name, spec|
-  model = with_proposed(base_model(spec[:space_type]), spec[:proposed])
+  model = base_model(spec[:space_type])
+  model = with_proposed(model, spec[:proposed]) if spec[:proposed] # nil = no catalog proposed
+  add_cooling_only_dx!(model) if spec[:custom] == :cooling_only_dx
   districtify!(model) if spec[:districtify]
   osm = File.join(OUT, "#{name}.osm")
   model.save(OpenStudio::Path.new(osm), true)

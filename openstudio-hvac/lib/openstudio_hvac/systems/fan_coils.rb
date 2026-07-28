@@ -21,13 +21,18 @@ module OpenStudioHVAC
       # @param chw_loop [OpenStudio::Model::PlantLoop] fan-coil cooling
       # @return [Array<OpenStudio::Model::AirLoopHVAC>]
       def build(model, zones, control_zone: nil, namer: :default, hw_loop: nil, chw_loop: nil)
-        raise(ArgumentError, 'FanCoils requires a hot water loop (needs_boiler)') if hw_loop.nil?
+        # D-39 (A4): config 'heating' => 'none' builds the COOLING-ONLY variant
+        # (Table 8.4.4.7.-B System 5 heating "None") — no hot-water loop, no MAU
+        # heating coil, zone fan coils with a zero-capacity always-off
+        # placeholder heating coil (the FourPipeFanCoil object requires one).
+        heating_none = config['heating'].to_s == 'none'
+        raise(ArgumentError, 'FanCoils requires a hot water loop (needs_boiler)') if hw_loop.nil? && !heating_none
         raise(ArgumentError, 'FanCoils requires a chilled water loop (needs_chiller)') if chw_loop.nil?
 
         always_on = model.alwaysOnDiscreteSchedule
         fan_coil_type = config.fetch('fan_coil_type', 'FPFC')
         mau_cooling_type = config.fetch('mau_cooling_type', 'DX')
-        mau_heating_coil_type = config.fetch('mau_heating_coil_type', 'Gas')
+        mau_heating_coil_type = heating_none ? 'None' : config.fetch('mau_heating_coil_type', 'Gas')
         with_mau = config.fetch('mau', true)
 
         clg_avail_sch, htg_avail_sch = Schedules.seasonal_availability(model)
@@ -50,7 +55,7 @@ module OpenStudioHVAC
         fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
         fan.setName("#{config['sys_abbr']} MAU Supply Fan")
 
-        htg_coil = Coils.heating_coil(model, mau_heating_coil_type, always_on, hw_loop: hw_loop)
+        htg_coil = mau_heating_coil_type == 'None' ? nil : Coils.heating_coil(model, mau_heating_coil_type, always_on, hw_loop: hw_loop)
 
         clg_coil =
           case mau_cooling_type
@@ -68,7 +73,7 @@ module OpenStudioHVAC
 
         supply_inlet_node = air_loop.supplyInletNode
         fan.addToNode(supply_inlet_node)
-        htg_coil.addToNode(supply_inlet_node)
+        htg_coil&.addToNode(supply_inlet_node)
         clg_coil.addToNode(supply_inlet_node)
         oa_system.addToNode(supply_inlet_node)
 
@@ -113,14 +118,18 @@ module OpenStudioHVAC
 
       def add_zone_fan_coil(model, zone, fan_coil_type, always_on, htg_avail_sch, clg_avail_sch, hw_loop:, chw_loop:)
         fc_fan = OpenStudio::Model::FanConstantVolume.new(model, always_on)
-        if fan_coil_type == 'TPFC'
+        if hw_loop.nil? # D-39 cooling-only: zero-capacity always-off placeholder
+          fc_htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule)
+          fc_htg_coil.setNominalCapacity(0.0)
+          fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, fan_coil_type == 'TPFC' ? clg_avail_sch : always_on)
+        elsif fan_coil_type == 'TPFC'
           fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, htg_avail_sch)
           fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, clg_avail_sch)
         else # FPFC
           fc_htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, always_on)
           fc_clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, always_on)
         end
-        hw_loop.addDemandBranchForComponent(fc_htg_coil)
+        hw_loop&.addDemandBranchForComponent(fc_htg_coil)
         chw_loop.addDemandBranchForComponent(fc_clg_coil)
 
         fan_coil = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, always_on, fc_fan, fc_clg_coil, fc_htg_coil)
@@ -133,6 +142,7 @@ module OpenStudioHVAC
         case mau_heating_coil_type
         when 'Gas', 'NaturalGas' then 'g'
         when 'Electric', 'Electricity', 'FuelOilNo2' then 'e'
+        when 'None' then 'none'
         else mau_heating_coil_type
         end
       end
