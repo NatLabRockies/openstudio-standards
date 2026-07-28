@@ -627,8 +627,8 @@
         "article": "8.4.4.7.",
         "title": "HVAC System Selection (Tables -A/-B)",
         "status": "implemented",
-        "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules, HP redirect per sentence (4).",
-        "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host; Table -B note (3) facade-orientation grouping for >4-storey System 6 is not automated (zone groups follow the proposed grouping). Table -B note (1) humidification is NOT rebuilt (runtime warning when the proposed has humidifiers, T8); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names (e.g. hotel dining)."
+        "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.4.1.(5) presence override keeps the changeover heating when the proposed block heats).",
+        "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification is NOT rebuilt (runtime warning when the proposed has humidifiers, T8); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication)."
       },
       {
         "article": "8.4.4.8.",
@@ -668,14 +668,14 @@
         "article": "8.4.4.13.",
         "title": "Heat Pumps",
         "status": "partial",
-        "how": "Proposed ASHP/WSHP/GSHP redirects the reference to the Table -13 packaged rooftop ASHP; -10 C heating cutoff applied (2)(d).",
+        "how": "D-37 (Note A-8.4.4.13, retrieved via MCP): the printed split — water-LOOP heat pumps (internal loop, aux boiler/tower allowed) KEEP their Table -A selection per sentence (1); air-, water- and ground-SOURCE heat pumps redirect to the Table -13 packaged rooftop ASHP per sentence (2), with the source classified from the HP's source plant loop (ground HX / district / temperature-source => external) and no-evidence detections keeping the conservative redirect; -10 C heating cutoff applied (2)(d).",
         "gaps": "Capacity rules (2)(b)-(c) (cooling-peak sizing without oversizing, 8.3/-8.3 C capacity profile) and the 33% auxiliary-fuel election (2)(g) are sizing/annual-energy-time and not yet modeled."
       },
       {
         "article": "8.4.4.14.",
         "title": "Hydronic Pumps",
         "status": "implemented",
-        "how": "Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly.",
+        "how": "Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.4.1.(2) makes Part 5 a ceiling for the reference).",
         "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed."
       },
       {

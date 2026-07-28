@@ -129,3 +129,29 @@ apply_efficiencies / check_part5 / rules`.
 family — do not duplicate them. E+-dependent tests skip without the
 `openstudio` CLI. Parity tests against legacy openstudio-standards need
 `BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby ...`.
+
+## A-list rulings (D-34..D-40, 2026-07-28) — behavior pins
+
+- **Residential + heat pump** (D-34): the 8.4.4.7.(4) ASHP redirect wins over
+  the Table -A "(or heat pumps)" copy parenthetical — redirect BEFORE the
+  compatible-cooling check.
+- **WLHP vs WSHP** (D-37, Note A-8.4.4.13): `Classify` records per-group
+  `heat_pump_sources` (:air | :water_loop | :external) by inspecting
+  water-to-air HPs' SOURCE plant loop (ground HX/district/temp-source =>
+  external). `heat_pump_redirects?` gates the redirect: all-water-loop stays
+  on Table -A; empty sources = conservative redirect. The catalog 'Water
+  source heat pumps' system is a water-LOOP system by the note (internal
+  boiler + fluid cooler) — do NOT use it to test the ASHP redirect; use PTHP.
+- **5.2.6.3 pump caps** (D-38): after the 8.4.4.14 transfer, each loop's
+  COMBINED pump power is clamped min-wins at Table 5.2.6.3 W/kW of peak
+  thermal demand (`apply_pump_power_cap`; caps vendored under
+  `hydronic_pumps.power_caps_w_per_kw`). Clamp reuses the head-reconciliation
+  guard — never hard-set pump power without keeping flow/head/power physical.
+- **System 5 heating** (D-39): FanCoils config `'heating' => 'none'` builds
+  cooling-only TPFC (no HW loop; zero-capacity always-off placeholder coil —
+  FourPipeFanCoil requires one). finalize merges it when the sys-5 group is
+  unheated; heated groups keep the changeover per 8.4.4.1.(5).
+- **Reheat sizing** (D-40): reference VAV reheat coils stay AUTOSIZED — the
+  legacy 1.2x1000xmin-flow hard-size is rejected (load-blind, incompatible
+  with our 0.5 reheat-flow cap, and hard-sized coils break capacity
+  auto-iteration). Don't "fix" sys-6 parity by importing it.
