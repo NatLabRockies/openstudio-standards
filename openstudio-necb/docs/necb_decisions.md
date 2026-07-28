@@ -940,3 +940,38 @@ copy rule keeps its own end-to-end pin. All green (selector 18, reference
 - Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10.
 - Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
   :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.
+
+## D-35 — Appendix A ingested (hbix#67 fixed): four notes fetched; lightweight rebuild corrected to light-frame mass
+
+The hbix maintainer ingested Appendix A within a day of #67. The four
+load-bearing notes were retrieved [READ, MCP 2026-07-28] and dispositioned:
+
+1. **A-8.4.4.4.(1) (Thermal Mass) — our interpretation CORRECTED.**
+   "Lightweight" is not zero-mass: the note prescribes following the
+   proposed's layer structure with insulation varied to the Part 3 U-value,
+   and its example assemblies are light FRAME constructions — wood-frame
+   40.8 kg/m2 / 45.5 kJ/(m2.K), steel-frame 33.9 / 35.3. The reference
+   rebuild now uses one StandardOpaqueMaterial calibrated to the wood-frame
+   example (0.15 m; density and cp derived; conductivity from the target
+   resistance) instead of a MasslessOpaqueMaterial. Bonus: one material now
+   serves every boundary — the Kiva special case collapses (regular
+   materials are Kiva-legal). Test pin updated to assert the note's mass
+   and heat capacity. The single-calibrated-layer stands in for the note's
+   layer-structure guidance (approximation stated in the manifest).
+2. **A-3.2.3.3 (Floors in contact with the ground) — D-32 VERIFIED.**
+   Whole-floor-or-perimeter is a binary per-floor determination measured
+   once from grade; crawl-space floors count even unconstructed. Nothing
+   contradicts the Kiva-strip implementation.
+3. **A-Table 3.2.2.2 — no film content.** The note is about climate-zone
+   derivation (90.1 minus moist/dry/marine, 7 split into 7A/7B). D-23's
+   film convention continues to rest on the normative 1.4.1.2 definition.
+4. **A-8.4.4.13 (Heat Pump Definitions) — A2 evidence complete.** See the
+   A-list: water-loop = internal loop (aux boiler/tower allowed);
+   water-source = external water (surface/ground water or external waste
+   heat, directly or via HX); ground-source = ground HX. Presented to
+   phylroy for the A2 ruling; not implemented pending that ruling.
+
+- Who/when: Claude under D-10 delegation, 2026-07-28.
+- Evidence: [READ, MCP] all four notes; [RAN] envelope battery green
+  (reference/hostile/skylight/data-integrity/prescriptive); [RAN] Warehouse
+  annual e2e with the light-frame reference (Kiva-legality + energy effect).

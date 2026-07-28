@@ -132,7 +132,14 @@ class TestReferenceEnvelope < Minitest::Test
     c = wall.construction.get.to_Construction.get
     assert_match(/Lightweight/, c.nameString)
     assert_equal 1, c.layers.size
-    assert c.layers.first.to_MasslessOpaqueMaterial.is_initialized, 'zero thermal mass'
+    # D-35 / Note A-8.4.4.4.(1): "lightweight" = light FRAME, not zero-mass —
+    # the note's wood-frame example is 40.8 kg/m2 with 45.5 kJ/(m2.K) heat
+    # capacity; the rebuilt layer is calibrated to exactly that.
+    m = c.layers.first.to_StandardOpaqueMaterial
+    assert m.is_initialized, 'light-frame rebuild is a regular (massy) material'
+    m = m.get
+    assert_in_delta 40.8, m.thickness * m.density, 0.01, 'Note A wood-frame areal mass'
+    assert_in_delta 45_500.0, m.thickness * m.density * m.specificHeat, 50.0, 'Note A heat capacity'
     # 0.27595 = 1/(1/0.265 - wall films): table U incl. films (default convention)
     assert_in_delta 0.27595, c.thermalConductance.to_f, 1e-3, 'Ut unchanged by the lightweight rebuild'
 

@@ -26,6 +26,14 @@ module OpenStudioEnvelope
       AIR_LEAKAGE_I75 = 1.50   # L/(s.m2) @ 75 Pa, 8.4.3.3.(3)
       AIR_LEAKAGE_N = 0.60     # flow exponent, 8.4.2.9.(2)
 
+      # Note A-8.4.4.4.(1) wood-frame example assembly (Figure/Table 1-1):
+      # 40.8 kg/m2 areal mass, 45.5 kJ/(m2.K) heat capacity. The rebuilt
+      # lightweight layer is calibrated to these at a fixed 0.15 m thickness
+      # (density and cp derived; conductivity from the target resistance).
+      LIGHTWEIGHT_MASS_KG_M2 = 40.8
+      LIGHTWEIGHT_HEAT_CAPACITY_J_M2K = 45_500.0
+      LIGHTWEIGHT_THICKNESS_M = 0.15
+
       def apply(model, vintage:, hdd: nil, actual_roof_absorptance_used: false,
                 thermal_bridging: nil, audit: nil)
         audit ||= AuditLog.new
@@ -165,50 +173,46 @@ module OpenStudioEnvelope
           thermal = outer.empty? ? 0.9 : outer.get.thermalAbsorptance
           visible = outer.empty? ? 0.7 : outer.get.visibleAbsorptance
 
-          # EnergyPlus's Kiva engine REQUIRES regular (thickness+conductivity)
-          # materials on Foundation-boundary surfaces — a massless layer there
-          # is a hard E+ fatal ("must use only regular material objects...
-          # Kiva: Errors discovered, program terminates"). Found by the
-          # legacy-archetype cross-validation (real slab-on-grade Kiva
-          # geometry no hand-built fixture exercises). Those surfaces get a
-          # LOW-MASS StandardOpaqueMaterial at the identical resistance
-          # (insulation-board-like: 45 kg/m3, cp 1000) — lightweight in the
-          # 8.4.4.4.(1) sense AND Kiva-legal. Everything else stays massless.
+          # Note A-8.4.4.4.(1) [READ, MCP 2026-07-28]: "lightweight" is NOT
+          # zero-mass — the note's example assemblies are light FRAME
+          # constructions (wood-frame example: 40.8 kg/m2 areal mass, heat
+          # capacity 45.5 kJ/(m2.K); steel-frame 33.9 / 35.3), with the layer
+          # structure following the proposed and insulation varied to hit the
+          # Part 3 U-value. Rebuild = one StandardOpaqueMaterial calibrated to
+          # the wood-frame example's mass and heat capacity at the identical
+          # (already-prescriptive) resistance. (The earlier zero-mass reading
+          # predates the appendix being retrievable — corrected under D-35.)
+          # A regular material is also what EnergyPlus's Kiva engine REQUIRES
+          # on Foundation-boundary surfaces (massless there is a hard E+
+          # fatal), so ONE material now serves every boundary.
           kiva = surface.outsideBoundaryCondition == 'Foundation'
-          key = [surface_class, boundary, kiva, conductance.round(5),
+          key = [surface_class, boundary, conductance.round(5),
                  solar.round(4), thermal.round(4), visible.round(4)]
           cache[key] ||= begin
-            material = if kiva
-                         m = OpenStudio::Model::StandardOpaqueMaterial.new(model, 'MediumSmooth',
-                                                                           0.05, 0.05 * conductance, 45.0, 1000.0)
-                         m.setName("NECB Ref Lightweight(Kiva) #{surface_class} R-#{(1.0 / conductance).round(3)}")
-                         m.setSolarAbsorptance(OpenStudio::OptionalDouble.new(solar))
-                         m.setThermalAbsorptance(OpenStudio::OptionalDouble.new(thermal))
-                         m.setVisibleAbsorptance(OpenStudio::OptionalDouble.new(visible))
-                         m
-                       else
-                         m = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'MediumSmooth', 1.0 / conductance)
-                         m.setName("NECB Ref Lightweight #{surface_class} R-#{(1.0 / conductance).round(3)} a#{solar.round(2)}")
-                         # NOTE: MasslessOpaqueMaterial setters take PLAIN
-                         # doubles; StandardOpaqueMaterial's need
-                         # OptionalDouble (the CLAUDE.md trap cuts both ways).
-                         m.setThermalAbsorptance(thermal)
-                         m.setSolarAbsorptance(solar)
-                         m.setVisibleAbsorptance(visible)
-                         m
-                       end
+            t = LIGHTWEIGHT_THICKNESS_M
+            m = OpenStudio::Model::StandardOpaqueMaterial.new(
+              model, 'MediumSmooth', t, t * conductance,
+              LIGHTWEIGHT_MASS_KG_M2 / t, LIGHTWEIGHT_HEAT_CAPACITY_J_M2K / LIGHTWEIGHT_MASS_KG_M2
+            )
+            m.setName("NECB Ref Lightweight #{surface_class} R-#{(1.0 / conductance).round(3)} a#{solar.round(2)}")
+            # StandardOpaqueMaterial setters need OptionalDouble (CLAUDE.md trap)
+            m.setSolarAbsorptance(OpenStudio::OptionalDouble.new(solar))
+            m.setThermalAbsorptance(OpenStudio::OptionalDouble.new(thermal))
+            m.setVisibleAbsorptance(OpenStudio::OptionalDouble.new(visible))
             c = OpenStudio::Model::Construction.new(model)
             c.setName("NECB Ref Lightweight#{kiva ? '(Kiva)' : ''} #{boundary} #{surface_class}:U-#{conductance.round(4)} a#{solar.round(2)}")
-            c.setLayers([material])
-            c.setInsulation(material)
+            c.setLayers([m])
+            c.setInsulation(m)
             c
           end
           surface.setConstruction(cache[key])
           rebuilt += 1
         end
-        audit.decision(:reference, 'opaque assemblies rebuilt as lightweight (massless) at unchanged Ut',
-                       inputs: { surfaces: rebuilt, unique_assemblies: cache.size },
-                       article: "#{prefix}.4.(1) (Note A interpretation: zero-mass layer at identical resistance)")
+        audit.decision(:reference, 'opaque assemblies rebuilt as lightweight light-frame at unchanged Ut',
+                       inputs: { surfaces: rebuilt, unique_assemblies: cache.size,
+                                 areal_mass_kg_m2: LIGHTWEIGHT_MASS_KG_M2,
+                                 heat_capacity_kj_m2k: LIGHTWEIGHT_HEAT_CAPACITY_J_M2K / 1000.0 },
+                       article: "#{prefix}.4.(1) (Note A-8.4.4.4.(1): light-frame example mass/heat capacity)")
       end
 
       # 8.4.4.3.(6) via 8.4.3.3.(3) + 8.4.2.9.(2):
