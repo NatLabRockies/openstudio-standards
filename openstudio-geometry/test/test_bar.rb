@@ -81,7 +81,9 @@ class TestBar < Minitest::Test
     refute_empty model.getWaterUseEquipments.to_a, 'SHW live'
     assert_operator model.getPlantLoops.size, :>=, 2, 'heating + SHW plants'
     wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
-    assert_match(/:U-0\.265/, wall.construction.get.nameString, 'prescriptive envelope applied')
+    # D-23: table 0.265 is OVERALL U (incl. films) — constructions are named by
+    # the construction-only conductance 1/(1/0.265 - R_films) = 0.2759.
+    assert_match(/:U-0\.2759/, wall.construction.get.nameString, 'prescriptive envelope applied')
     steps = audit.entries.map { |e| e[:step] }.uniq
     %i[loads lighting shw prescriptive].each { |s| assert_includes steps, s }
     assert_operator JSON.parse(audit.to_json).size, :>, 40,

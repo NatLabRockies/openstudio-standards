@@ -52,3 +52,22 @@ envelope.
 
 `cd openstudio-geometry && ruby test/test_wizards.rb test/test_bar.rb`.
 Fixtures shared from `../openstudio-hvac/test/fixtures`.
+
+## 3D renderer (campus port)
+
+- `render.rb` + `render_worker.rb` — port of canmet-energy/campus
+  `src/buildings/reports/geometry_view.py`: SDK `GltfForwardTranslator` →
+  glTF → Google `<model-viewer>` HTML, geometry embedded as a base64 data
+  URI. Facade: `OpenStudioGeometry.render(model_or_path, path:, height:)`.
+- **Every export runs in a child process** (`render_worker.rb` via
+  `Process.spawn`) because the C++ translator can SEGFAULT on
+  un-triangulatable surfaces — never call `modelToGLTF` in-process on
+  untrusted geometry.
+- Fallback ladder (campus-verbatim): full → sub-surfaces removed (massing
+  shell) → binary-search crashing base surfaces (MAX_REMOVE 12 / MAX_PROBES
+  80). `export_repaired` takes an injectable `exporter:` for deterministic
+  ladder tests.
+- Trade-off carried from campus: the <model-viewer> SCRIPT loads from the
+  Google CDN at view time (caption says so); the geometry itself is fully
+  embedded. A CSP that blocks external hosts (e.g. Artifacts) will not run
+  this viewer.

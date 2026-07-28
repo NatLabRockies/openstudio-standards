@@ -975,3 +975,22 @@ load-bearing notes were retrieved [READ, MCP 2026-07-28] and dispositioned:
 - Evidence: [READ, MCP] all four notes; [RAN] envelope battery green
   (reference/hostile/skylight/data-integrity/prescriptive); [RAN] Warehouse
   annual e2e with the light-frame reference (Kiva-legality + energy effect).
+
+## D-36 — Campus 3D renderer ported into openstudio-geometry
+
+phylroy's request (2026-07-27): bring the campus repo's OSM 3D renderer
+into the gem family. Port of canmet-energy/campus geometry_view.py,
+design carried verbatim: crash-isolated subprocess glTF export (the C++
+GltfForwardTranslator can segfault), the three-step repair ladder
+(full -> massing shell -> bisect out crashing surfaces), campus material
+palette, base64-embedded glTF in Google's <model-viewer>. Facade:
+OpenStudioGeometry.render(model_or_path, path:). Kept the campus CDN
+trade-off for the viewer script (captioned; geometry itself embedded).
+5 tests incl. deterministic ladder/bisection via injectable exporter and
+a real subprocess worker round-trip. Also fixed a stale D-23-era pin in
+test_bar.rb (0.265 overall -> 0.2759 construction-only naming).
+
+- Who/when: requested phylroy 2026-07-27; implementation Claude under
+  D-10, 2026-07-28.
+- Evidence: [RAN] test_render.rb 5/5, wizards/bar green; [RAN] Warehouse
+  reference archetype rendered end-to-end (146 KB self-contained page).

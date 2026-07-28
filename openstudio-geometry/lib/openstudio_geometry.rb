@@ -4,6 +4,7 @@ require_relative 'openstudio_geometry/version'
 require_relative 'openstudio_geometry/audit_log'
 require_relative 'openstudio_geometry/wizards'
 require_relative 'openstudio_geometry/bar'
+require_relative 'openstudio_geometry/render'
 
 # OpenStudioGeometry creates parametric building geometry — the authoring
 # on-ramp for the gem family (and the future MCP surface): footprint wizards
@@ -150,6 +151,24 @@ module OpenStudioGeometry
                              space_types: space_type_ratios.keys.map { |bt, st| "#{bt}|#{st}" },
                              spaces: model.getSpaces.size })
     model
+  end
+
+  # 3D viewer facade (campus-repo renderer port): Model or .osm path in,
+  # self-contained HTML fragment out (glTF embedded as a base64 data URI,
+  # crash-isolated export with the campus fallback ladder). Writes a complete
+  # standalone page to `path:` when given; returns the fragment either way
+  # ('' when the model is unrenderable — audited, never raises).
+  #
+  #   OpenStudioGeometry.render(model, path: 'building_3d.html')
+  def self.render(model_or_path, path: nil, height: 480, work_dir: nil, audit: nil)
+    audit ||= AuditLog.new
+    fragment = Render.geometry_viewer(model_or_path, height: height, work_dir: work_dir, audit: audit)
+    if path && !fragment.empty?
+      File.write(path, "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" \
+                       '<title>Building geometry</title></head><body ' \
+                       "style=\"font-family:system-ui,sans-serif;margin:24px\">#{fragment}</body></html>")
+    end
+    fragment
   end
 
   # Positional-argument adapter: the wizards keep their upstream positional
