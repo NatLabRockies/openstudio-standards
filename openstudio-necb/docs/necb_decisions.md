@@ -1131,3 +1131,23 @@ residual ever traces to reheat sizing, reopen with data via the ledger.
 - Evidence: [READ] legacy hvac_systems.rb:2442-2456; [RAN] ComponentSizes
   join on the sized LargeOffice reference (table in the conversation
   record); no code change.
+
+## D-41 — 8.4.4.20.(3)-(4) machine-verified (appendix-era ingestion); SWH reference gap refined
+
+The SHW manifest's oldest caveat — "sentence text falls in a PDF-extraction
+chunk gap; not machine-verified" — is closed: the full 8.4.4.20 article
+(sentences (1)-(9)) and Note A-8.4.4.20.(4)(a) now retrieve cleanly via
+the MCP [READ, 2026-07-28]. Verification outcome: the umbrella's
+clone-based treatment SATISFIES (3) (boiler-fed immersion coil keeps the
+boiler's energy type), (4) (identical capacities/schedules trivially
+match the ratio + operational requirements; the note only describes how
+to determine the ratio), and (6)/(7)/(8). The manifest gap is REFINED to
+the two genuinely unimplemented sentences: (5) 8.4.5 part-load curves on
+reference SWH equipment, and (9) consolidation of multiple proposed
+circulation pumps into one constant-speed pump (clone keeps identical
+W/(L/s) — energy-equivalent, topology differs). No code change; both
+refinements queued behind the staged-heating work in the completion list.
+
+- Who/when: Claude under D-10 delegation, 2026-07-28.
+- Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] shw
+  reference.rb (no pump/part-load handling — confirming the refined gaps).

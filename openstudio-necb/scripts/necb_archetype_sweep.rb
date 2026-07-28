@@ -76,14 +76,19 @@ def sweep_one(type)
   osm = generate!(type)
   return { type: type, verdict: 'GEN-FAIL', detail: "see #{CACHE_DIR}/gen_#{type}.err" } if osm.nil?
 
-  annual = ENV['SWEEP_MODE'] == 'annual'
-  run_dir = File.join(CACHE_DIR, "sweep_run_#{type.downcase}#{SUFFIX}")
+  # SWEEP_MODE: 'sizing' (default) | 'annual' (January-week shortcut — fast,
+  # flagged not-code-compliant by the pipeline) | 'full' (true 8760 h annual —
+  # the code-compliant 8.4.1.2 determination). Full mode keeps its own run
+  # dirs/result files so week-run artifacts survive side by side.
+  mode = ENV.fetch('SWEEP_MODE', 'sizing')
+  annual = %w[annual full].include?(mode)
+  run_dir = File.join(CACHE_DIR, "sweep_run#{mode == 'full' ? '_full' : ''}_#{type.downcase}#{SUFFIX}")
   FileUtils.rm_rf(run_dir)
   FileUtils.mkdir_p(run_dir)
   result = OpenStudioNECB.performance_compliance(
     osm, vintage: '2020', simulate: annual ? :annual : :sizing, hdd: HDD,
     weather: { epw: EPW, ddy: DDY }, run_dir: run_dir,
-    run_period: annual ? { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 } : nil)
+    run_period: mode == 'annual' ? { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 } : nil)
   ref = result.reference_model
   detail = "zones=#{ref.getThermalZones.size} air_loops=#{ref.getAirLoopHVACs.size} " \
            "plant_loops=#{ref.getPlantLoops.size} ervs=#{ref.getHeatExchangerAirToAirSensibleAndLatents.size} " \
@@ -105,17 +110,19 @@ rescue StandardError => e
   { type: type, verdict: 'ERROR', detail: "#{e.class}: #{e.message[0, 200]}" }
 end
 
+RESULT_TAG = ENV.fetch('SWEEP_MODE', 'sizing') == 'full' ? "_full#{SUFFIX}" : SUFFIX
 pids = TYPES.to_h do |type|
   [Process.fork do
     result = sweep_one(type)
-    File.write(File.join(CACHE_DIR, "result_#{type}#{SUFFIX}.json"), JSON.generate(result))
+    File.write(File.join(CACHE_DIR, "result_#{type}#{RESULT_TAG}.json"), JSON.generate(result))
     exit!(result[:verdict] == 'PASS' ? 0 : 1)
   end, type]
 end
 pids.each_key { |pid| Process.wait(pid) }
-results = TYPES.map { |t| JSON.parse(File.read(File.join(CACHE_DIR, "result_#{t}#{SUFFIX}.json")), symbolize_names: true) }
+results = TYPES.map { |t| JSON.parse(File.read(File.join(CACHE_DIR, "result_#{t}#{RESULT_TAG}.json")), symbolize_names: true) }
 
 puts
-puts "necb_archetype_sweep results (#{ENV['SWEEP_MODE'] == 'annual' ? 'annual/week-run' : 'sizing'} mode, fuel=#{FUEL}, loc=#{LOC}, #{TYPES.size} parallel):"
+mode_label = { 'annual' => 'annual/week-run', 'full' => 'FULL ANNUAL (8760 h)' }.fetch(ENV.fetch('SWEEP_MODE', 'sizing'), 'sizing')
+puts "necb_archetype_sweep results (#{mode_label} mode, fuel=#{FUEL}, loc=#{LOC}, #{TYPES.size} parallel):"
 results.each { |r| puts format('  %-22s %-18s %s', r[:type], r[:verdict], r[:detail]) }
 exit(results.all? { |r| r[:verdict] == 'PASS' } ? 0 : 1)
