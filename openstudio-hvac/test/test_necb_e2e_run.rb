@@ -50,13 +50,17 @@ class TestNecbE2ERun < Minitest::Test
     assert_in_delta 0.90, boiler.nominalThermalEfficiency, 1e-6
   end
 
-  # WSHP proposed -> Table 8.4.4.13 ASHP reference: a January week in Toronto forces
-  # operation BELOW the -10 C compressor cutoff, so unmet hours prove the supplemental
-  # heat + baseboards actually carry the load when the heat pump locks out.
+  # Air-source HP proposed -> Table 8.4.4.13 ASHP reference: a January week in
+  # Toronto forces operation BELOW the -10 C compressor cutoff, so unmet hours
+  # prove the supplemental heat + baseboards actually carry the load when the
+  # heat pump locks out. (D-37: the proposed is a PTHP — air-source, which
+  # REDIRECTS; the old 'Water source heat pumps' proposed here is by Note
+  # A-8.4.4.13 a water-LOOP system whose internal boiler+fluid-cooler loop now
+  # correctly KEEPS its Table -A selection — see test_necb_reference.rb.)
   def test_ashp_reference_conditions_through_a_cold_week
     proposed = attach_weather!(load_fixture)
     zones = proposed.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(proposed, 'Water source heat pumps', zones)
+    OpenStudioHVAC.build_system(proposed, 'PTHP', zones)
 
     result = OpenStudioHVAC::NECB.reference_hvac(proposed,
                                                  building: { storeys: 1, zone_types: office_types(proposed) })

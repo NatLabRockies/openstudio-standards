@@ -994,3 +994,37 @@ test_bar.rb (0.265 overall -> 0.2759 construction-only naming).
   D-10, 2026-07-28.
 - Evidence: [RAN] test_render.rb 5/5, wizards/bar green; [RAN] Warehouse
   reference archetype rendered end-to-end (146 KB self-contained page).
+
+## D-37 — A2 adjudicated (phylroy): the printed 8.4.4.13 split, boundary per Note A-8.4.4.13
+
+phylroy's ruling (2026-07-28): "implement the printed split per your
+recommendation." Water-LOOP heat pumps (Note A-8.4.4.13: HP on an INTERNAL
+water loop — aux boiler and/or heat-rejection device explicitly allowed)
+KEEP their Table 8.4.4.7.-A selection per 8.4.4.13.(1); air-, water- and
+ground-SOURCE heat pumps redirect to the Table 8.4.4.13 ASHP reference per
+sentence (2).
+
+Implementation: Classify now records per-group heat_pump_sources
+(:air | :water_loop | :external) — DX/PTHP/VRF are :air; water-to-air
+coils/units are classified by their SOURCE loop (ground HX, district, or
+temperature-source component => :external; otherwise :water_loop).
+Reference gains heat_pump_redirects?(group): redirect unless every source
+is :water_loop; a detected HP with NO source evidence keeps the redirect
+(conservative pre-D-37 behavior). finalize audits the WLHP retention
+('8.4.4.13.(1); Note A-8.4.4.13'); the D-34 residential branch narrows to
+REDIRECTING heat pumps, so a residential WLHP falls to the Table -A
+residential rules ('wshp' is compatible cooling -> copy).
+
+Consequence faced squarely: the catalog 'Water source heat pumps' system
+(internal boiler + evaporative fluid cooler loop) is by the note's
+definitions a water-LOOP system — the two tests that used it to prove the
+ASHP redirect now use PTHP (genuinely air-source), and a new build test
+pins both directions (WLHP stays -> System 3 with the note cited;
+ground-HX swap -> 'hp'). Selector: five new pins incl. mixed-sources
+redirect, no-evidence redirect, and residential-WLHP copy.
+
+- Who/when: ruling phylroy 2026-07-28; implementation Claude under D-10.
+- Evidence: [READ, MCP] Note A-8.4.4.13; [RAN] hvac battery green
+  (selector 23, reference 8, classify, e2e 3 incl. the cold-week ASHP
+  conditioning run, efficiency/ERV/2025/pump/CBECS suites), umbrella
+  mockups 9/9.

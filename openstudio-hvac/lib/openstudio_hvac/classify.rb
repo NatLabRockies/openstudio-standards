@@ -16,7 +16,8 @@ module OpenStudioHVAC
   #         family: 'psz'|nil, catalog_name: 'PSZ RTU ...'|nil, family_guess: :multizone_vav|...,
   #         heated: true, cooled: false,
   #         heating_energy_types: ['NaturalGas'], cooling_energy_types: ['Electricity'],
-  #         heat_pump: false, terminal_type: :vav_reheat|:cv_reheat|:cv|:none,
+  #         heat_pump: false, heat_pump_sources: [:air|:water_loop|:external],
+  #         terminal_type: :vav_reheat|:cv_reheat|:cv|:none,
   #         design_cooling_kw: 42.0|nil } ],
   #     plants: [ { name:, type: :hot_water|:chilled_water|:condenser|:service_water|:other,
   #                 fuels: ['NaturalGas'], purchased: false, heat_pump: false } ],
@@ -190,41 +191,72 @@ module OpenStudioHVAC
         family: nil, catalog_name: nil, family_guess: nil,
         heated: false, cooled: false,
         heating_energy_types: [], cooling_energy_types: [],
-        heat_pump: false, terminal_type: :none,
+        heat_pump: false, heat_pump_sources: [], terminal_type: :none,
         design_cooling_kw: 0.0, cooling_capacity_complete: true,
         evidence: [] }
     end
 
     HEATING_COILS = [
       [:to_CoilHeatingGas, ->(_c, _p) { 'NaturalGas' }, false],
-      [:to_CoilHeatingElectric, ->(_c, _p) { 'Electricity' }, false],
-      [:to_CoilHeatingWater, ->(c, p) { hydronic_fuels(c, p) }, false],
-      [:to_CoilHeatingDXSingleSpeed, ->(_c, _p) { 'Electricity' }, true],
-      [:to_CoilHeatingDXVariableSpeed, ->(_c, _p) { 'Electricity' }, true],
-      [:to_CoilHeatingWaterBaseboard, ->(c, p) { hydronic_fuels(c, p) }, false],
-      [:to_CoilHeatingWaterToAirHeatPumpEquationFit, ->(_c, _p) { 'Electricity' }, true],
-      [:to_CoilHeatingDXVariableRefrigerantFlow, ->(_c, _p) { 'Electricity' }, true]
+      [:to_CoilHeatingElectric, ->(_c, _p) { 'Electricity' }, nil],
+      [:to_CoilHeatingWater, ->(c, p) { hydronic_fuels(c, p) }, nil],
+      [:to_CoilHeatingDXSingleSpeed, ->(_c, _p) { 'Electricity' }, :air],
+      [:to_CoilHeatingDXVariableSpeed, ->(_c, _p) { 'Electricity' }, :air],
+      [:to_CoilHeatingWaterBaseboard, ->(c, p) { hydronic_fuels(c, p) }, nil],
+      [:to_CoilHeatingWaterToAirHeatPumpEquationFit, ->(_c, _p) { 'Electricity' }, :water_to_air],
+      [:to_CoilHeatingDXVariableRefrigerantFlow, ->(_c, _p) { 'Electricity' }, :air]
     ].freeze
 
     def self.scan_heating_component(group, comp, plant_by_name, evidence)
-      HEATING_COILS.each do |cast, fuel_of, hp|
+      HEATING_COILS.each do |cast, fuel_of, hp_kind|
         optional = comp.respond_to?(cast) ? comp.send(cast) : nil
         next unless optional&.is_initialized
 
         coil = optional.get
         group[:heated] = true
         group[:heating_energy_types] |= Array(fuel_of.call(coil, plant_by_name))
-        group[:heat_pump] ||= hp
+        record_heat_pump(group, hp_kind, coil)
         group[:evidence] << "heated: #{evidence}"
         return true
       end
       false
     end
 
+    # D-37 (Note A-8.4.4.13): heat-pump SOURCE matters for the 8.4.4.13
+    # reference redirect — water-LOOP (internal loop, aux boiler/tower
+    # allowed) stays on Table -A; air/water/ground-SOURCE redirects.
+    def self.record_heat_pump(group, hp_kind, unit)
+      return unless hp_kind
+
+      group[:heat_pump] = true
+      group[:heat_pump_sources] |= [hp_kind == :water_to_air ? water_to_air_hp_source(unit) : :air]
+    end
+
+    GROUND_HX_CASTS = %i[to_GroundHeatExchangerVertical to_GroundHeatExchangerHorizontalTrench].freeze
+
+    # Classify a water-to-air heat pump by its SOURCE loop per Note
+    # A-8.4.4.13: ground HX / district / temperature-source components mean
+    # the loop is fed by EXTERNAL water or ground (water-/ground-source ->
+    # :external); otherwise it is an internal water loop (:water_loop —
+    # an aux boiler and/or heat-rejection device is explicitly allowed).
+    def self.water_to_air_hp_source(coil)
+      loop = coil.respond_to?(:plantLoop) ? coil.plantLoop : nil
+      return :water_loop if loop.nil? || loop.empty?
+
+      external = loop.get.supplyComponents.any? do |c|
+        GROUND_HX_CASTS.any? { |cast| c.respond_to?(cast) && c.send(cast).is_initialized } ||
+          c.to_DistrictHeating.is_initialized || c.to_DistrictCooling.is_initialized ||
+          defined_district_heating_water?(c) ||
+          (c.respond_to?(:to_PlantComponentTemperatureSource) && c.to_PlantComponentTemperatureSource.is_initialized)
+      end
+      external ? :external : :water_loop
+    end
+
     def self.scan_cooling_component(group, comp, plant_by_name, evidence)
       kw = nil
       fuels = nil
-      hp = false
+      hp = nil
+      hp_unit = nil
       if comp.to_CoilCoolingDXSingleSpeed.is_initialized
         c = comp.to_CoilCoolingDXSingleSpeed.get
         fuels = 'Electricity'
@@ -245,12 +277,13 @@ module OpenStudioHVAC
       elsif comp.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         c = comp.to_CoilCoolingWaterToAirHeatPumpEquationFit.get
         fuels = 'Electricity'
-        hp = true
+        hp = :water_to_air
+        hp_unit = c
         kw = optional_kw(c.ratedTotalCoolingCapacity, c.autosizedRatedTotalCoolingCapacity)
       elsif comp.to_CoilCoolingDXVariableRefrigerantFlow.is_initialized
         c = comp.to_CoilCoolingDXVariableRefrigerantFlow.get
         fuels = 'Electricity'
-        hp = true
+        hp = :air
         kw = optional_kw(c.ratedTotalCoolingCapacity, c.autosizedRatedTotalCoolingCapacity)
       elsif comp.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
         fuels = 'Electricity'
@@ -261,7 +294,7 @@ module OpenStudioHVAC
 
       group[:cooled] = true
       group[:cooling_energy_types] |= Array(fuels)
-      group[:heat_pump] ||= hp
+      record_heat_pump(group, hp, hp_unit)
       group[:evidence] << "cooled: #{evidence}"
       if kw.nil?
         group[:cooling_capacity_complete] = false
@@ -349,7 +382,7 @@ module OpenStudioHVAC
             group[:evidence] << "cooled: #{evidence}"
             add_zonal_cooling_capacity(group, unit)
           end
-          group[:heat_pump] ||= roles[:hp] || false
+          record_heat_pump(group, roles[:hp] && zonal_hp_kind(unit), zonal_hp_coil(unit))
           break
         end
       end
@@ -358,6 +391,31 @@ module OpenStudioHVAC
 
     def self.terminal_like?(eq)
       TERMINALS.keys.any? { |cast| eq.respond_to?(cast) && eq.send(cast).is_initialized }
+    end
+
+    # PTHP/VRF terminals are air-source; ZoneHVAC WSHP units are water-to-air
+    # (their SOURCE loop decides :water_loop vs :external — see
+    # water_to_air_hp_source).
+    def self.zonal_hp_kind(unit)
+      unit.to_ZoneHVACWaterToAirHeatPump.is_initialized ? :water_to_air : :air
+    end
+
+    WTA_COIL_CASTS = %i[to_CoilCoolingWaterToAirHeatPumpEquationFit
+                        to_CoilHeatingWaterToAirHeatPumpEquationFit
+                        to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit
+                        to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit].freeze
+
+    def self.zonal_hp_coil(unit)
+      wshp = unit.to_ZoneHVACWaterToAirHeatPump
+      return nil if wshp.empty?
+
+      [wshp.get.coolingCoil, wshp.get.heatingCoil].each do |coil|
+        WTA_COIL_CASTS.each do |cast|
+          optional = coil.respond_to?(cast) ? coil.send(cast) : nil
+          return optional.get if optional&.is_initialized
+        end
+      end
+      nil
     end
 
     def self.zonal_fuels(unit, role, side, plant_by_name)

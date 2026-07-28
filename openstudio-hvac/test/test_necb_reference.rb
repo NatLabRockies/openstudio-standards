@@ -66,6 +66,36 @@ class TestNecbReference < Minitest::Test
     refute_empty result.model.getAirLoopHVACs, 'ASHP RTU reference built'
   end
 
+  # D-37 (A2 ruled: printed 8.4.4.13 split per Note A-8.4.4.13): the catalog
+  # 'Water source heat pumps' system is by the note's definitions a
+  # water-LOOP HP — internal loop with aux boiler + evaporative fluid cooler —
+  # so it KEEPS its Table -A selection (office 1-storey -> System 3), with the
+  # retention audited. Swapping the loop's internal sources for a ground HX
+  # makes it ground-SOURCE -> the 8.4.4.13.(2) ASHP redirect fires.
+  def test_water_loop_hp_keeps_selection_ground_source_redirects
+    model = proposed('Water source heat pumps')
+    audit = OpenStudioHVAC::AuditLog.new
+    result = OpenStudioHVAC::NECB.reference_hvac(model, audit: audit,
+                                                 building: { storeys: 1, zone_types: types(model, 'Office - enclosed') })
+    assert_equal [3], result.assignments.map(&:reference_system).uniq,
+                 'internal boiler+fluid-cooler loop = water-loop HP -> Table -A selection retained'
+    assert(audit.entries.any? { |e| e[:article].to_s.include?('Note A-8.4.4.13') },
+           'retention decision cites the note')
+
+    ground = proposed('Water source heat pumps')
+    loop_ = ground.getPlantLoops.find { |l| l.nameString =~ /Heat Pump/i }
+    loop_.supplyComponents.each do |c|
+      c.to_BoilerHotWater.get.remove if c.to_BoilerHotWater.is_initialized
+      c.to_EvaporativeFluidCoolerSingleSpeed.get.remove if c.to_EvaporativeFluidCoolerSingleSpeed.is_initialized
+    end
+    ghx = OpenStudio::Model::GroundHeatExchangerVertical.new(ground)
+    loop_.addSupplyBranchForComponent(ghx)
+    result = OpenStudioHVAC::NECB.reference_hvac(ground,
+                                                 building: { storeys: 1, zone_types: types(ground, 'Office - enclosed') })
+    assert_equal ['hp'], result.assignments.map(&:reference_system).uniq,
+                 'ground HX on the source loop = ground-source HP -> ASHP redirect'
+  end
+
   # residential PTAC (compatible NON-heat-pump cooling) -> reference identical
   # to proposed (copy rule): nothing rebuilt
   def test_residential_ptac_copies_proposed
@@ -89,9 +119,12 @@ class TestNecbReference < Minitest::Test
     refute_empty result.model.getChillerElectricEIRs
   end
 
-  # proposed heat pumps -> Table 8.4.4.13 ASHP reference with the -10 degC heating cutoff
+  # proposed AIR-SOURCE heat pumps -> Table 8.4.4.13 ASHP reference with the
+  # -10 degC heating cutoff. (D-37: was 'Water source heat pumps', which is by
+  # Note A-8.4.4.13 a water-LOOP system that now correctly keeps Table -A —
+  # see test_water_loop_hp_keeps_selection_ground_source_redirects.)
   def test_heat_pump_proposed_to_ashp_reference
-    model = proposed('Water source heat pumps')
+    model = proposed('PTHP')
     result = OpenStudioHVAC::NECB.reference_hvac(model, building: { storeys: 1, zone_types: types(model, 'Office - enclosed') })
 
     assert_equal ['hp'], result.assignments.map(&:reference_system).uniq

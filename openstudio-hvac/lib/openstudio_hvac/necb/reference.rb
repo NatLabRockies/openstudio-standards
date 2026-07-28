@@ -126,7 +126,10 @@ module OpenStudioHVAC
       # (Legacy's necb_reference_hp flag builds the reference-hp variant for every
       # family, residential included; it has no copy branch at all — L-11.) The
       # System-1 assignment below is flipped to 'hp' by finalize's override.
-      if group[:heat_pump]
+      # D-37 narrows this to REDIRECTING heat pumps: a residential water-loop HP
+      # stays on the Table -A residential rules (8.4.4.13.(1)) — its 'wshp'
+      # family lands in the compatible-cooling copy branch.
+      if heat_pump_redirects?(group)
         audit&.decision(:selection, 'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
                         target: group[:zones].join(','), article: '8.4.4.7.(4)')
         return Assignment.new(zones: group[:zones], category: category, reference_system: 1,
@@ -150,9 +153,26 @@ module OpenStudioHVAC
       end
     end
 
+    # D-37 (A2 ruled, phylroy 2026-07-28): the printed 8.4.4.13 split, with the
+    # boundary from Note A-8.4.4.13 — a water-LOOP heat pump (internal loop;
+    # aux boiler and/or cooling tower explicitly allowed) KEEPS its Table -A
+    # selection per sentence (1); air-, water- and ground-SOURCE heat pumps
+    # redirect to the ASHP reference per sentence (2). A detected heat pump
+    # with no source evidence keeps the redirect (pre-D-37 behavior — the
+    # conservative reading when the source loop is unclassifiable).
+    def self.heat_pump_redirects?(group)
+      return false unless group[:heat_pump]
+
+      sources = group[:heat_pump_sources] || []
+      return true if sources.empty?
+
+      sources.any? { |s| s != :water_loop }
+    end
+
     # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
     # (the "(or heat pumps)" parenthetical is superseded by the 8.4.4.7.(4)
-    # redirect per D-34 — heat-pump groups never reach this check)
+    # redirect per D-34 — REDIRECTING heat-pump groups never reach this check;
+    # water-loop HPs do per D-37 and 'wshp' is in the allowlist)
     def self.residential_compatible_cooling?(group)
       return true if %i[zonal_heat_cool packaged_single_zone].include?(group[:family_guess])
 
@@ -165,13 +185,19 @@ module OpenStudioHVAC
       return assignment if assignment.action == :copy_proposed
 
       hp_rule = selection['special_rules']['heat_pump']
-      if group[:heat_pump] && hp_rule['applies_to_systems'].include?(assignment.reference_system)
+      if heat_pump_redirects?(group) && hp_rule['applies_to_systems'].include?(assignment.reference_system)
         audit&.decision(:selection, 'proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)',
                         target: group[:zones].join(','),
-                        inputs: { selected_system: assignment.reference_system },
+                        inputs: { selected_system: assignment.reference_system,
+                                  heat_pump_sources: group[:heat_pump_sources] },
                         value: 'hp', article: hp_rule['article'])
         assignment.reference_system = 'hp'
         assignment.articles << hp_rule['article']
+      elsif group[:heat_pump] && !heat_pump_redirects?(group)
+        audit&.decision(:selection, 'water-loop heat pump — Table 8.4.4.7.-A selection retained (no ASHP redirect)',
+                        target: group[:zones].join(','),
+                        inputs: { selected_system: assignment.reference_system },
+                        article: '8.4.4.13.(1); Note A-8.4.4.13')
       end
 
       assignment.energy_type = reference_energy_type(group, selection, facts, audit)

@@ -4,11 +4,12 @@ require_relative 'test_helper'
 # the code text it implements. Pure logic — synthetic facts, no OpenStudio model needed.
 class TestNecbSelector < Minitest::Test
   def group(zones: ['Z1'], heated: true, cooled: true, heat_fuels: ['NaturalGas'],
-            heat_pump: false, cooling_kw: 10.0, family: nil, family_guess: nil)
+            heat_pump: false, heat_pump_sources: [], cooling_kw: 10.0, family: nil, family_guess: nil)
     { zones: zones, air_loop: 'L1', family: family, catalog_name: nil,
       family_guess: family_guess, heated: heated, cooled: cooled,
       heating_energy_types: heat_fuels, cooling_energy_types: cooled ? ['Electricity'] : [],
-      heat_pump: heat_pump, terminal_type: :none, design_cooling_kw: cooling_kw, evidence: [] }
+      heat_pump: heat_pump, heat_pump_sources: heat_pump_sources,
+      terminal_type: :none, design_cooling_kw: cooling_kw, evidence: [] }
   end
 
   def facts_for(*groups)
@@ -112,6 +113,42 @@ class TestNecbSelector < Minitest::Test
                zone_types: { 'Z1' => 'Multi-unit residential' }).first
     assert_equal :build, a.action
     assert_equal 'hp', a.reference_system
+  end
+
+  # D-37 (A2 ruled: printed split per Note A-8.4.4.13): a water-LOOP heat pump
+  # (internal loop, aux boiler/tower allowed) KEEPS its Table -A selection —
+  # 8.4.4.13.(1). Only air/water/ground-SOURCE heat pumps redirect ((2)).
+  def test_water_loop_heat_pump_keeps_table_a_selection
+    a = select([group(heat_pump: true, heat_pump_sources: [:water_loop], family: 'wshp')],
+               zone_types: { 'Z1' => 'Office - enclosed' }).first
+    assert_equal 3, a.reference_system, 'WLHP office stays on the General Area row'
+  end
+
+  def test_external_source_heat_pump_redirects
+    a = select([group(heat_pump: true, heat_pump_sources: [:external], family: 'wshp')],
+               zone_types: { 'Z1' => 'Office - enclosed' }).first
+    assert_equal 'hp', a.reference_system, 'ground/water-source HP takes the 8.4.4.13.(2) redirect'
+  end
+
+  def test_mixed_hp_sources_redirect
+    a = select([group(heat_pump: true, heat_pump_sources: %i[water_loop air])],
+               zone_types: { 'Z1' => 'Office - enclosed' }).first
+    assert_equal 'hp', a.reference_system, 'any non-water-loop HP in the group triggers the redirect'
+  end
+
+  def test_hp_without_source_evidence_still_redirects
+    a = select([group(heat_pump: true, heat_pump_sources: [])],
+               zone_types: { 'Z1' => 'Office - enclosed' }).first
+    assert_equal 'hp', a.reference_system, 'unclassifiable source keeps the conservative redirect'
+  end
+
+  # D-37 + D-34 composition: a residential WATER-LOOP HP is not a redirecting
+  # heat pump, so it falls to the Table -A residential rules — and 'wshp' is
+  # compatible cooling -> reference identical to proposed.
+  def test_residential_water_loop_hp_copies_proposed
+    a = select([group(heat_pump: true, heat_pump_sources: [:water_loop], family: 'wshp')],
+               zone_types: { 'Z1' => 'Multi-unit residential' }).first
+    assert_equal :copy_proposed, a.action
   end
 
   # "otherwise, the reference building or space shall use through-the-wall systems."
