@@ -70,7 +70,32 @@ module OpenStudioHVAC
                     inputs: { zone_types: group[:zones].map { |z| (building[:zone_types] || {})[z] }.compact.uniq },
                     value: category, article: '8.4.4.7.(3)')
       end
+      audit_museum_row(group, building, category, audit)
       category
+    end
+
+    # D-45: a museum space can read as two Table 8.4.4.7.-A rows — Assembly Area
+    # lists "exhibit space", Historical Collections Area lists "archival
+    # library, museum and gallery archives". The ruling reads the latter as the
+    # ARCHIVES of museums and galleries (the row is a COLLECTIONS row, and
+    # System 2's close control suits stored collections), so a museum's public
+    # exhibition gallery is an exhibit space -> Assembly Area, while its
+    # archives and restoration/conservation rooms -> Historical Collections.
+    # Recorded whenever a museum space is elected so the reader sees which row
+    # was taken and why, rather than having to infer it from the system number.
+    def self.audit_museum_row(group, building, category, audit)
+      return if audit.nil?
+
+      types = group[:zones].filter_map { |z| (building[:zone_types] || {})[z] }
+                           .select { |t| t.to_s.downcase.include?('museum') }.uniq
+      return if types.empty?
+
+      audit.info(:selection, "museum space classified as #{category} — the Table 8.4.4.7.-A collections row " \
+                             'covers museum and gallery ARCHIVES; a public exhibition gallery is an exhibit ' \
+                             'space and takes the assembly row',
+                 target: group[:air_loop] || group[:zones].first,
+                 inputs: { space_types: types, category: category },
+                 article: '8.4.4.7.(1)', ruling: 'D-45')
     end
 
     # ---- rule application per category ----

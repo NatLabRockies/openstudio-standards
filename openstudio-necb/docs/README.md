@@ -18,7 +18,7 @@ Two registers are **retired**:
 - **A (adjudicate) and T (to-fix)** were the working queues of the 2026-07-25
   reference-systems audit (`audit_2026-07-25_reference_systems.md`). Both are
   drained — T1-T13 became D-22, A1-A5 became D-34/D-37/D-38/D-39/D-40, and A6
-  became D-45 (still open, tracked as a decision). That file is kept as
+  became D-45 (ruled 2026-07-29). That file is kept as
   **archived evidence** for the reasoning behind those decisions; nothing new
   goes into it.
 

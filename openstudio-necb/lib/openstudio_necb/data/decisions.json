@@ -328,10 +328,10 @@
     },
     {
       "id": "D-45",
-      "title": "Museum exhibition galleries: which selection-table row? (open)",
-      "kind": "runtime_unwired",
+      "title": "Museum exhibition galleries take the assembly row; museum archives and restoration rooms take the collections row",
+      "kind": "runtime",
       "articles": ["Table 8.4.4.7.-A"],
-      "summary": "A space named for a museum's general exhibition area currently matches the assembly-area category on an 'exhibit' keyword before it can match the historical-collections category on 'museum' — a keyword-ordering collision that can change which reference system the block receives. The printed row wording supports either reading, since a gallery is both an assembly space and a collections space, so this is an interpretation call rather than a defect. It is open pending adjudication and current behaviour is unchanged."
+      "summary": "A museum space can match two rows of the reference-system selection table, and the matcher takes the first keyword hit, so the answer depended on the order the categories sat in the data file. The collections row names the archives of museums and galleries rather than museums generally, and the assembly row explicitly lists exhibit space, so a public exhibition gallery takes the assembly row while archives and restoration rooms take the collections row. The over-broad museum keyword was narrowed so each space matches on intent rather than scan position."
     },
     {
       "id": "D-46",

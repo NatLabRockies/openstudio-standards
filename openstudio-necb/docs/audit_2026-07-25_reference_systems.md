@@ -2,7 +2,7 @@
 
 > **ARCHIVED EVIDENCE — not a live queue (D-44, 2026-07-28).** Every row below
 > is resolved: T1-T13 → D-22, A1-A5 → D-34/D-37/D-38/D-39/D-40, A6 → **D-45**
-> (still open, now tracked there), LEDGERED rows → `legacy_findings.md`. The A
+> (ruled 2026-07-29), LEDGERED rows → `legacy_findings.md`. The A
 > and T registers are retired; the live registers are **D** (decisions,
 > `necb_decisions.md`, mirrored in `decisions.json` and surfaced at runtime via
 > `ruling:` tags) and **L** (legacy findings). Kept for the reasoning and
@@ -39,7 +39,7 @@ delegation) / ADJUDICATE (needs phylroy) / LEDGERED (legacy → legacy_findings.
 | A3 | ~~5.2.6.3.(1) pump caps vs 8.4.4.14 transfer~~ **RESOLVED (D-38, phylroy 2026-07-28): min-wins — transfer the proposed intensity per 8.4.4.14, then clamp the loop's combined pump power at the Table 5.2.6.3 W/kW of peak thermal demand (4.5 htg / 14 clg / 12 rej / 22 WSHP, values MCP-verified both vintages); clamp keeps the head physical and audits both articles.** |
 | A4 | ~~Table -B System 5 heating "None"~~ **RESOLVED (D-39, phylroy 2026-07-28): conditional — cooled-but-unheated proposed blocks get the table-literal cooling-only TPFC; heated blocks keep the changeover heating per the 8.4.4.1.(5) presence override; both branches audited. Legacy always-heat parity intentionally broken for the unheated case.** |
 | A5 | ~~Reheat-coil hard-size workaround~~ **RESOLVED (D-40, phylroy 2026-07-28): NO-CHANGE — autosizing trusted. Measured on the sized LargeOffice reference: the legacy formula misses 0.11x-3.15x in both directions (min-flow basis incompatible with our 0.5 reheat-flow cap; load-blind), would disable capacity auto-iteration, and has no code basis. E+ e2e conditioning asserts are the regression net.** |
-| A6 | ~~'Museum general exhibition area' selects Assembly Area via the 'exhibit' keyword, not Historical Collections via 'museum'~~ **MOVED to D-45 (2026-07-28, D-44 register flattening): still OPEN and awaiting phylroy, but tracked in `necb_decisions.md` with the other live decisions instead of on this retired A-list.** |
+| A6 | ~~'Museum general exhibition area' selects Assembly Area via the 'exhibit' keyword, not Historical Collections via 'museum'~~ **RESOLVED (D-45, 2026-07-29): the collections row names museum and gallery ARCHIVES, so an exhibition gallery is the assembly row's "exhibit space" — existing behaviour ratified; the over-broad 'museum' keyword was narrowed so the answer no longer depends on category order.** |
 
 ## LEDGERED (legacy — see legacy_findings.md L-9..L-15)
 Fan-curve cubics functionally wrong + D/E column conflation (HIGH); 8.4.4.18

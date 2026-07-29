@@ -248,4 +248,41 @@ class TestNecbSelector < Minitest::Test
       end
     end
   end
+  # D-45 (Table 8.4.4.7.-A): "Historical Collections Area: archival library,
+  # museum and gallery archives" is a COLLECTIONS row — the archives OF museums
+  # and galleries. A museum's public exhibition gallery is the "exhibit space"
+  # of the Assembly Area row. Both directions pinned, and pinned so they do NOT
+  # depend on the order the categories happen to sit in the ruleset.
+  def test_museum_exhibition_is_assembly_and_restoration_is_collections
+    audit = OpenStudioHVAC::AuditLog.new
+    gallery = select([group(zones: ['Z1'])],
+                     zone_types: { 'Z1' => 'Museum general exhibition area' }, audit: audit)
+    assert_equal 'Assembly Area', gallery.first.category
+    assert_equal 3, gallery.first.reference_system, 'exhibit space, <= 4 storeys -> System 3'
+
+    restoration = select([group(zones: ['Z1'])],
+                         zone_types: { 'Z1' => 'Museum restoration room' }, audit: audit)
+    assert_equal 'Historical Collections Area', restoration.first.category
+    assert_equal 2, restoration.first.reference_system, 'collections space -> System 2'
+
+    # A convention exhibit hall is an exhibit space too, with no museum wording.
+    convention = select([group(zones: ['Z1'])],
+                        zone_types: { 'Z1' => 'Convention centre exhibit space' })
+    assert_equal 'Assembly Area', convention.first.category
+
+    # Order-independence: the gallery must NOT rely on Assembly Area being
+    # scanned before Historical Collections. Reverse the category list and the
+    # answers must not move (the bare 'museum' keyword used to decide this).
+    ruleset = Marshal.load(Marshal.dump(OpenStudioHVAC::NECB.rules('2020')))
+    ruleset['selection']['categories'].reverse!
+    reversed = ruleset['selection']['categories'].find do |cat|
+      cat['keywords'].any? { |kw| 'museum general exhibition area'.include?(kw.downcase) }
+    end
+    assert_equal 'Assembly Area', reversed['category'],
+                 'gallery still elects Assembly Area with the category list reversed'
+
+    museum_notes = audit.entries.select { |e| e[:ruling] == 'D-45' }
+    assert_equal 2, museum_notes.size, 'each museum election records which row it took'
+    assert(museum_notes.all? { |e| e[:article] == '8.4.4.7.(1)' })
+  end
 end

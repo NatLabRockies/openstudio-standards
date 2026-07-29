@@ -1350,27 +1350,49 @@ Findings:
   `test_compliance.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-28.
 
-## D-45 — Museum exhibition galleries: which Table 8.4.4.7.-A row? (OPEN — pending phylroy ruling)
+## D-45 — Museum exhibition galleries take the Assembly row; museum ARCHIVES and restoration rooms take the Collections row
 
 - **The question (was A6 on the 2026-07-25 audit list, moved here by D-44):**
-  a space named for a museum's general exhibition area selects the Assembly
-  Area category via the 'exhibit' keyword rather than Historical Collections
-  via 'museum' — a keyword-ORDER collision in the category matcher, found by
-  the D-33 variant mockups. Which Table 8.4.4.7.-A row should museum
-  exhibition galleries take?
-- **Why it is genuinely ambiguous:** the printed row wording supports either
-  reading — a gallery is both an assembly space and a collections space, and
-  the two rows can select different reference systems. This is an
-  interpretation call, not a defect.
-- **Current behaviour (unchanged, untagged):** first keyword wins, so
-  'exhibit' -> Assembly Area. The D-33 mockup sidesteps it by using a
-  'Museum restoration room' space type, so no test depends on the collision
-  either way.
-- **Status:** OPEN, awaiting phylroy. Registered `runtime_unwired` — when it
-  is ruled, tag the selection call site with `ruling: 'D-45'` and flip the
-  registry entry to `runtime`.
-- **Who/when:** raised Claude under D-10 (2026-07-27, D-33); re-filed here
-  2026-07-28 under D-44's register flattening.
+  a museum space can match two Table 8.4.4.7.-A rows, and the category matcher
+  takes the first keyword hit — so the answer depended on the order the
+  categories happen to sit in the ruleset. Assembly Area (System 3 / 6) and
+  Historical Collections Area (System 2) set materially different targets.
+
+- **Ruling (2026-07-29): read the collections row as ARCHIVES.** The printed
+  rows are less ambiguous than first characterised:
+  - *"Assembly Area: **exhibit space**, conference/meeting/multi-purpose room,
+    ..."*
+  - *"Historical Collections Area: archival library, **museum and gallery
+    archives**"*
+  "museum and gallery archives" names the archives OF museums and galleries,
+  not museums generally: the row is a COLLECTIONS row, and System 2's close
+  control suits stored collections. A museum's public exhibition gallery is
+  precisely the "exhibit space" the assembly row lists. So exhibition galleries
+  -> Assembly Area; archives and restoration/conservation rooms -> Historical
+  Collections Area. No appendix note exists for 8.4.4.7 (checked).
+
+- **This RATIFIES existing behaviour** — no fleet number moves. Only three of
+  the 308 catalogued space types can reach the collision, and all three were
+  already landing correctly: 'Convention centre exhibit space' and 'Museum
+  general exhibition area' on Assembly (via 'exhibit'), 'Museum restoration
+  room' on Collections (via 'museum').
+
+- **What was actually defective was the fragility, not the answer.** The right
+  result for the exhibition gallery depended on Assembly Area preceding
+  Historical Collections in the JSON; reordering that list during a data
+  refresh would have flipped museum galleries from System 3 to System 2 with
+  no test failing. Fixed by narrowing the over-broad bare `'museum'` keyword
+  to `'museum restoration'` + `'museum archive'` in both vintages, so each
+  museum space matches on intent rather than scan position. `audit_museum_row`
+  records which row was taken whenever a museum space is elected.
+
+- **Pinned by** test_museum_exhibition_is_assembly_and_restoration_is_collections,
+  which asserts both directions AND that reversing the category list does not
+  change the gallery's answer.
+
+- **Who/when:** raised Claude under D-10 (2026-07-27, D-33); ruled 2026-07-29
+  on phylroy's instruction after the printed rows and the reachable space-type
+  domain were laid out.
 
 ## D-46 — Staged heating and cooling built as unitary multispeed coils; stage COUNT set post-sizing, capacities left autosized
 

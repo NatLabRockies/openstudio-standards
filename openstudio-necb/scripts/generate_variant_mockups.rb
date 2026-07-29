@@ -70,7 +70,7 @@ MOCKUPS = {
   'sys2_museum' => {
     space_type: 'Museum restoration room',
     proposed: 'Baseboard electric',
-    note: 'Historical Collections Area -> System 2 (unconditional row). NOTE: "Museum general exhibition area" instead lands in Assembly Area via the "exhibit" keyword — ambiguous vs the printed table; the chosen type avoids the collision',
+    note: 'Historical Collections Area -> System 2 (unconditional row). NOTE: "Museum general exhibition area" instead lands in Assembly Area — per D-45 that is CORRECT (the collections row covers museum ARCHIVES; a gallery is an "exhibit space")',
     building: nil,
     expect: { selected: "System 2 -> 'FPFC MAU Chilled Water Coils with Scroll Chiller'",
               built: 'FPFC MAU Chilled Water Coils with Scroll Chiller' }
