@@ -143,25 +143,68 @@ module OpenStudioHVAC
     # ratio k/N, per mode, so E+ autosizes stage k to k/N of the top stage
     # (the equal capacity increments of 8.4.4.9.(7)/8.4.4.10.(8)).
     #
+    # The airflow MUST track the staged capacity: the EnergyPlus IDD requires
+    # each speed's rated air flow to be 0.00004027-0.00006041 m3/s per watt OF
+    # THAT SPEED's capacity, so a stage carrying half the capacity at full flow
+    # sits at twice the legal ratio. Staged DX is inherently a multi-speed-fan
+    # machine; Table 8.4.4.7.-B's "Constant-volume" describes the DISTRIBUTION
+    # (no VAV terminals), not a fan locked to one speed.
+    #
+    # +min_ratio+ floors every stage's ratio — pass the minimum-outdoor-air
+    # fraction of design supply flow so a low stage still delivers the required
+    # ventilation air (the same protection the legacy implementation applies by
+    # overriding low-speed flow to the minimum OA rate). Below that floor the
+    # unit would stage down past its own ventilation requirement.
+    #
     # Heating and cooling stage counts are independent — the SDK writes each
     # mode's speed count from its own coil, and the shorter mode's trailing
     # ratios are pinned at 1.0. Single-stage (or absent) coils count as 1.
     #
     # @param unitary [OpenStudio::Model::AirLoopHVACUnitarySystem]
+    # @param min_ratio [Float] lower bound on every stage ratio (0.0 = no floor)
     # @return [Integer, nil] number of ratio fields written, nil without a performance object
-    def self.set_stage_flow_ratios(unitary)
+    def self.set_stage_flow_ratios(unitary, min_ratio: 0.0)
       performance = unitary.designSpecificationMultispeedObject
       return nil if performance.empty?
 
       performance = performance.get
       heating = stage_count(unitary.heatingCoil)
       cooling = stage_count(unitary.coolingCoil)
+      floor = min_ratio.to_f.clamp(0.0, 1.0)
       fields = (1..[heating, cooling].max).map do |k|
-        OpenStudio::Model::SupplyAirflowRatioField.new([k.to_f / heating, 1.0].min,
-                                                       [k.to_f / cooling, 1.0].min)
+        OpenStudio::Model::SupplyAirflowRatioField.new(
+          [[k.to_f / heating, floor].max, 1.0].min,
+          [[k.to_f / cooling, floor].max, 1.0].min
+        )
       end
       performance.setSupplyAirflowRatioFields(fields)
       fields.size
+    end
+
+    # Minimum outdoor air flow as a fraction of design supply flow, from the
+    # SIZED air loop the unitary sits on — the floor a staged unit's low speed
+    # must not drop below without starving ventilation.
+    # @return [Float] 0.0 when either flow is unavailable (no floor applied)
+    def self.outdoor_air_fraction(air_loop)
+      return 0.0 if air_loop.nil?
+
+      supply = optional_value(air_loop.designSupplyAirFlowRate) ||
+               optional_value(air_loop.autosizedDesignSupplyAirFlowRate)
+      return 0.0 unless supply&.positive?
+
+      oa_system = air_loop.airLoopHVACOutdoorAirSystem
+      return 0.0 if oa_system.empty?
+
+      controller = oa_system.get.getControllerOutdoorAir
+      min_oa = optional_value(controller.minimumOutdoorAirFlowRate) ||
+               optional_value(controller.autosizedMinimumOutdoorAirFlowRate)
+      return 0.0 unless min_oa&.positive?
+
+      (min_oa / supply).clamp(0.0, 1.0)
+    end
+
+    def self.optional_value(value)
+      value.respond_to?(:is_initialized) ? (value.is_initialized ? value.get : nil) : value
     end
 
     # @return [Integer] stage count of a (possibly absent) multispeed coil; 1 otherwise

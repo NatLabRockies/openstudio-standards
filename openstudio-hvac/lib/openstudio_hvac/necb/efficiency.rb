@@ -123,10 +123,31 @@ module OpenStudioHVAC
           stage_multispeed_coil(unitary.heatingCoil, rules['furnace_staging'],
                                 "#{prefix}.9.(7)", 'furnace', audit, totals)
           audit_electric_resistance_heating(unitary, prefix, audit)
-          Coils.set_stage_flow_ratios(unitary)
+          apply_stage_flow_ratios(unitary, prefix, audit)
         end
         audit_staging_skips(model, prefix, audit)
         totals
+      end
+
+      # Stage supply-airflow ratios, floored at the unit's minimum-outdoor-air
+      # fraction. A staged unit's low speed reduces supply flow with capacity
+      # (the E+ multispeed coil requires flow to track per-stage capacity), but
+      # it must not stage down below the ventilation air the system is there to
+      # deliver — the same protection the legacy multi-speed implementation
+      # applies by pinning low-speed flow to the minimum OA rate.
+      def apply_stage_flow_ratios(unitary, prefix, audit)
+        air_loop = unitary.airLoopHVAC
+        oaf = Coils.outdoor_air_fraction(air_loop.is_initialized ? air_loop.get : nil)
+        stages = [Coils.stage_count(unitary.heatingCoil), Coils.stage_count(unitary.coolingCoil)].max
+        Coils.set_stage_flow_ratios(unitary, min_ratio: oaf)
+        return unless audit && stages > 1 && oaf > 1.0 / stages
+
+        audit.info(:efficiency, 'staged supply airflow FLOORED at the minimum outdoor-air fraction — the lower ' \
+                                'stage(s) would otherwise deliver less air than the ventilation requirement',
+                   target: unitary.nameString,
+                   inputs: { outdoor_air_fraction: oaf.round(3), stages: stages,
+                             unfloored_stage_1_ratio: (1.0 / stages).round(3) },
+                   article: "#{prefix}.10.(8); #{prefix}.9.(7)", ruling: 'D-46')
       end
 
       # @return [Integer, nil] the stage count applied, nil when the coil is not staged

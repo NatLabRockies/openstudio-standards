@@ -290,4 +290,33 @@ class TestNecbStaging < Minitest::Test
     refute_empty split, 'the terminal/secondary split is audited'
     assert(split.all? { |e| e[:article] =~ /8\.4\.4\.9\.\(3\)/ })
   end
+  # A staged unit reduces supply flow with capacity (the E+ multispeed coil
+  # requires flow to track per-stage capacity), but must not stage below the
+  # ventilation air it exists to deliver.
+  def test_stage_flow_ratios_are_floored_at_the_outdoor_air_fraction
+    model = OpenStudio::Model::Model.new
+    unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
+    coil = OpenStudioHVAC::Coils.dx_cooling_multi_speed(model, model.alwaysOnDiscreteSchedule)
+    unitary.setCoolingCoil(coil)
+    performance = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
+    unitary.setDesignSpecificationMultispeedObject(performance)
+
+    # Two stages, no floor: stage 1 rides at half flow.
+    OpenStudioHVAC::Coils.set_stage_flow_ratios(unitary)
+    ratios = performance.supplyAirflowRatioFields.map { |f| f.coolingRatio.get }
+    assert_in_delta 0.5, ratios.first, 1e-6
+    assert_in_delta 1.0, ratios.last, 1e-6
+
+    # A 70% outdoor-air unit cannot drop to 50% flow — the floor binds.
+    OpenStudioHVAC::Coils.set_stage_flow_ratios(unitary, min_ratio: 0.7)
+    floored = performance.supplyAirflowRatioFields.map { |f| f.coolingRatio.get }
+    assert_in_delta 0.7, floored.first, 1e-6, 'low stage floored at the ventilation fraction'
+    assert_in_delta 1.0, floored.last, 1e-6, 'top stage still full flow'
+
+    # A floor below the natural ratio changes nothing, and no ratio exceeds 1.
+    OpenStudioHVAC::Coils.set_stage_flow_ratios(unitary, min_ratio: 0.2)
+    assert_in_delta 0.5, performance.supplyAirflowRatioFields.first.coolingRatio.get, 1e-6
+    OpenStudioHVAC::Coils.set_stage_flow_ratios(unitary, min_ratio: 1.5)
+    assert(performance.supplyAirflowRatioFields.all? { |f| f.coolingRatio.get <= 1.0 + 1e-9 })
+  end
 end

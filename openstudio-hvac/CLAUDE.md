@@ -122,6 +122,15 @@ its `AuditLog` is the canonical copy the umbrella aliases.
     stage. The unitary sizes its heating coil ~2.2x the bare air-loop coil
     (full-flow mixed-air-to-43 degC vs the heating-day ideal-loads peak) —
     measured in D-46.
+  - **Staged airflow is NOT optional, and is not a "constant-volume"
+    violation.** The E+ IDD requires each speed's rated air flow to be
+    0.00004027-0.00006041 m3/s per watt OF THAT SPEED's capacity, so flow must
+    track staged capacity; constant flow at staged capacity is unmodelable.
+    Legacy does the same. Table 8.4.4.7.-B's "Constant-volume" describes the
+    DISTRIBUTION (no VAV terminals). This was called a defect once and
+    retracted — check the IDD before re-litigating. What IS required: floor the
+    ratios at the minimum-OA fraction (`set_stage_flow_ratios(min_ratio:)`), or
+    a low stage delivers less air than the ventilation requirement.
   - **A container re-homes every schedule that used to reach the equipment.**
     The loop's availability does NOT govern a fan INSIDE a unitary: the unitary
     has its own availability, and its fan-operating-mode schedule picks
