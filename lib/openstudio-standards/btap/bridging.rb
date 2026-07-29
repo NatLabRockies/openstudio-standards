@@ -633,8 +633,8 @@ module BTAP
       # TRUE if TBD successfully uprates all surface types.
       complies = false
 
-      # TBD's own argument hash.
-      args = {option: "", io_path: inputs( argh[:quality] )}
+      # Initialize TBD's own argument hash.
+      args = {option: "", io_path: inputs( @model[:quality] )}
 
       # Uprating? Add surface type inputs to TBD argument hash.
       @model[:stypes].each do |stypes|
@@ -652,85 +652,94 @@ module BTAP
         comply[stypes] = false
       end
 
-      # Uprating? First run TBD on cloned OpenStudio model.
-      if @model[:uprating]
+      # Uprating? Possibly 2x trial runs to identify candidate Uo for each
+      # deratable construction. Trial runs on cloned OpenStudio model.
+      2.times do |i|
+        break unless @model[:uprating]
+        break if complies
+        break if @model[:quality] == :good && i > 0
+
+        @model[:quality] == :good if i > 0
+
         TBD.clean!
         mdl = OpenStudio::Model::Model.new
         mdl.addObjects(model.toIdfFile.objects)
         res = TBD.process(mdl, args)
 
+        # If uprating is successful, TBD 'args' hash holds (new) uprated Uo
+        # keys/values for :walls, :floors and/or :roofs. In most cases, uprating
+        # tends to fail for walls rather than roofs or floors, due to the
+        # typically larger density of linear thermal bridging per surface area.
+        # Yet even if all constructions were successfully uprated by TBD, one
+        # must then determine if BTAP holds admissible (i.e. costed) assembly
+        # variants that match required Uo factors. If TBD-uprated Uo factors are
+        # lower than any of these admissible BTAP Uo factors, then no
+        # commercially available solution can be identified. In such cases,
+        # BTAP/TBD defaults to the lowest Uo factors in the costing database.
         complies = true
-        # Check if uprating is successful: TBD 'args' hash holds (new) uprated
-        # Uo keys/values for :walls, :floors and/or :roofs if uprating was
-        # successful. In most cases, uprating tends to fail for walls rather
-        # than roofs or floors, due to the typically larger density of linear
-        # thermal bridging per surface area. Yet even if all constructions were
-        # successfully uprated by TBD, one must then determine if BTAP holds
-        # admissible (i.e. costed) assembly variants with matching Uo factors.
-        # If TBD-uprated Uo factors are lower than any of these admissible BTAP
-        # Uo factors, then no commercially available solution would be
-        # identified. In such cases, BTAP/TBD defaults to the lowest Uo factors
-        # in the costing database - see lowest_uo().
 
         @model[:stypes].each do |stypes|
-          next unless comply.key?(stypes) # true only if uprating
+          next unless comply.key?(stypes)
 
           comply[stypes] = true
+
+          # Track building, attic & custom space IDs & Uo, regardless if successful or not.
+          # There should always be a retreived Uo. Then retry if FAIL.
 
           # TBD successful?
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
 
           if target
-            # 1. Check/reset building PSI set.
+            # Check/reset building PSI set and/or uprated Uo.
             opts         = {}
             opts[:id   ] = @model[:building][stypes][:id]
             opts[:stype] = stypes
             opts[:uo   ] = target
-            id = costed_assembly(opts)
+            bID = costed_assembly(opts)
 
-            @model[:building][stypes][:id] = id
-            uo = costed_uo(id, target)
+            @model[:building][stypes][:id] = bID
+            bUo = costed_uo(bID, target)
 
-            if uo
-              uo = target if argh[:interpolate]
+            if bUo
+              bUo = target if @model[:interpolate]
 
-              @model[:building][:quality   ] = argh[:quality]
-              @model[:building][stypes][:uo] = uo
+              @model[:building][:quality   ] = @model[:quality]
+              @model[:building][stypes][:uo] = bUo
             else
-              uo = lowest_uo(id)
+              bUo = lowest_uo(bID)
               comply[stypes] = false
 
               @model[:building][:quality   ] = :good
-              @model[:building][stypes][:uo] = uo
+              @model[:building][stypes][:uo] = bUo
             end
 
-            # 2. Check/reset attic PSI set (if applicable).
-            # unless @model[:attic][stypes].empty?
-            #   opts         = {}
-            #   opts[:id   ] = @model[:attic][stypes][:id]
-            #   opts[:stype] = stypes
-            #   opts[:uo   ] = target
-            #   id = costed_assembly(opts)
-            #
-            #   @model[:attic][stypes][:id] = id
-            #   uo = costed_uo(id, target)
-            #
-            #   if uo
-            #     uo = target if argh[:interpolate]
-            #
-            #     @model[:attic][:quality   ] = argh[:quality]
-            #     @model[:attic][stypes][:uo] = uo
-            #   else
-            #     uo = lowest_uo(id)
-            #     comply[stypes] = false
-            #
-            #     @model[:attic][:quality   ] = :good
-            #     @model[:attic][stypes][:uo] = uo
-            #   end
-            # end
+            # Repeat for attics.
+            unless @model[:attic][stypes].empty?
+              opts         = {}
+              opts[:id   ] = @model[:attic][stypes][:id]
+              opts[:stype] = stypes
+              opts[:uo   ] = target
+              aID = costed_assembly(opts)
 
-            # 3. Check/reset custom space PSI set (if applicable).
+              @model[:attic][stypes][:id] = aID
+              aUo = costed_uo(aID, target)
+            end
+
+            if aUo
+              aUo = target if @model[:interpolate]
+
+              @model[:attic][:quality   ] = @model[:quality]
+              @model[:attic][stypes][:uo] = aUo
+            else
+              aUo = lowest_uo(aID)
+              comply[stypes] = false
+
+              @model[:attic][:quality   ] = :good
+              @model[:attic][stypes][:uo] = aUo
+            end
+
+            # Repeat for customized spaces.
             @model[:spaces].values.each do |sp|
               opts         = {}
               opts[:id   ] = sp[stypes][:id]
@@ -742,9 +751,9 @@ module BTAP
               uo = costed_uo(id, target)
 
               if uo
-                uo = target if argh[:interpolate]
+                uo = target if @model[:interpolate]
 
-                sp[:quality   ] = argh[:quality]
+                sp[:quality   ] = @model[:quality]
                 sp[stypes][:uo] = uo
               else
                 uo = lowest_uo(id)
@@ -755,109 +764,31 @@ module BTAP
               end
             end
           else
+            comply[stypes] = false
             @model[:building][:quality] = :good
-            # @model[:attic   ][:quality] = :good
+            @model[:attic   ][:quality] = :good
 
             @model[:spaces].values.each { |sp| sp[:quality] = :good }
-
-            comply[stypes] = false
           end
 
-          puts "#{stypes} : #{comply[stypes]} : #{uo}"
+          complies = false unless comply[stypes]
         end
       end
 
+      @model[:quality] = :good unless complies
 
-      # loop do
-        # if initial
-        #   initial = false
-        # else
-        #   break if argh[:quality] == :good
-        #
-        #   # All subsequent loop iterations strictly reset uprating parameters.
-        #   argh[:quality] = :good
-        #   args[:io_path] = inputs(model, argh[:structure], argh[:quality) # TODO
-        #
-        #   # Purge TBD-generated args Uo factors.
-        #   @model[:stypes].each do |stypes|
-        #     next unless comply.key?(stypes)
-        #
-        #     uo = "#{stypes.to_s.chop}_uo".to_sym
-        #     args.delete(uo) if args.key?(uo)
-        #   end
-        # end
-
-      #   @model[:stypes].each do |stypes|
-      #     next unless comply.key?(stypes) # true only if uprating
-      #
-      #     opt            = {}
-      #     opt[:stype   ] = stypes
-      #     opt[:perform ] = perform
-      #     opt[:framing ] = argh[:structure].framing
-      #     opt[:cladding] = argh[:structure].cladding
-      #     opt[:finish  ] = argh[:structure].finish
-      #
-      #     # NONONO rely on btap_id   = lc.additionalProperties.getFeatureAsString("btap_id")
-      #
-      #     assembly = costed_assembly(opt)
-      #     stype_uo = "#{stypes.to_s.chop}_uo".to_sym
-      #     target   = args.key?(stype_uo) ? args[stype_uo] : nil
-      #
-      #     # TBD-estimated Uo target to meet NECB-required Ut - nil if invalid.
-      #     uo = target ? costed_uo(assembly, target) : nil
-      #
-      #     if uo
-      #       uo = target if argh[:interpolate]
-      #       comply[stypes] = true
-      #     else
-      #       uo = lowest_uo(assembly)
-      #       comply[stypes] = false
-      #     end
-      #
-      #     # Repeat for custom spaces.
-      #     argh[:structure].spaces.each do |id, space|
-      #       opt[:framing ] = space[:framing]
-      #       opt[:cladding] = space[:cladding]
-      #       opt[:finish  ] = space[:finish]
-      #
-      #       assembly = costed_assembly(opt)
-      #       uo = target ? costed_uo(assembly, target) : nil
-      #
-      #       if uo
-      #         uo = target if argh[:interpolate]
-      #       else
-      #         uo = lowest_uo(assembly)
-      #         comply[stypes] = false
-      #       end
-      #     end
-      #
-      #     @model[:constructions].values.each do |v|
-      #       next unless v[:stypes] == stypes
-      #
-      #       v[:uo] = uo
-      #       v[:compliant] = comply[stypes]
-      #     end
-      #
-      #     complies = false unless comply[stypes]
-      #   end
-      #
-      #   # Exit if successful or if final BTAP uprating option.
-      #   break if combo == :hp_good
-      #   break if complies
-      # end
-      #
       # Post-loop steps (if uprating).
-      # @model[:stypes].each do |stypes|
-      #   next unless comply.key?(stypes) # true only if uprating
-      #
-      #   # Cancel uprating request before final derating.
-      #   stype  = stypes.to_s.chop
-      #   uprate = "uprate_#{stypes.to_s}".to_sym
-      #   option = "#{stype}_option".to_sym
-      #   ut     = "#{stype}_ut".to_sym
-      #   args.delete(uprate)
-      #   args.delete(option)
-      #   args.delete(ut)
+      @model[:stypes].each do |stypes|
+        next unless comply.key?(stypes) # true only if uprating
+
+        # Cancel uprating request before final derating.
+        stype  = stypes.to_s.chop
+        uprate = "uprate_#{stypes.to_s}".to_sym
+        option = "#{stype}_option".to_sym
+        ut     = "#{stype}_ut".to_sym
+        args.delete(uprate)
+        args.delete(option)
+        args.delete(ut)
       #
       #   # Reset uprated Uo factor for each 'deratable' construction.
       #   @model[:constructions].each do |id, v|
@@ -893,14 +824,11 @@ module BTAP
       #   end
       # end
       #
-      # @model[:comply  ] = comply   # true/false, specific to surface type
-      # @model[:complies] = complies # true/false for entire model
-      # @model[:perform ] = perform  # no longer aplpicable @todo
-      # @model[:quality ] = quality  # no longer applicable @todo
-      # @model[:combo   ] = combo    # no longer required @todo
-      #
-      # # Run "process" TBD one last time, on "model" (not cloned "mdl").
-      args = {option: "", io_path: inputs( argh[:quality] )}
+      @model[:comply  ] = comply   # true/false, specific to surface type
+      @model[:complies] = complies # true/false for entire model
+
+      # Run "process" TBD one last time, on "model" (not cloned "mdl").
+      args = {option: "", io_path: inputs( @model[:quality] )}
       TBD.clean!
       TBD.process(model, args)
 
@@ -949,8 +877,6 @@ module BTAP
         @model[:edges][type][pID] += e[:length]
       end
 
-      puts
-
       @model[:edges].each do |type, edge|
         edge.each.with_index(1) do |(pID, m), i|
           next if m < 0.025
@@ -958,27 +884,13 @@ module BTAP
           tag = type.to_s + i.to_s
           val = "#{pID} #{m.round(2)}"
           model.getBuilding.additionalProperties.setFeature(tag, val)
-          # puts "#{tag} : #{model.getBuilding.additionalProperties.getFeatureAsString(tag).get}"
-          #   fenestration1 : BTAP-ExteriorWall-Mass-2       bad 772.80
-          #   fenestration2 : BTAP-ExteriorWall-WoodFramed-5 bad  75.60
-          #   grade1        : BTAP-ExteriorWall-WoodFramed-5 bad  35.05
-          #   grade2        : BTAP-ExteriorWall-Mass-2       bad 257.54
-          #   rimjoist1     : BTAP-ExteriorWall-WoodFramed-5 bad  35.05
-          #   parapet1      : BTAP-ExteriorWall-Mass-2       bad 292.59
-          #   corner1       : BTAP-ExteriorWall-WoodFramed-5 bad   4.27
-          #   corner2       : BTAP-ExteriorWall-Mass-2       bad  29.87
         end
       end
 
-      # puts model.getBuilding.additionalProperties
+      @model[:io      ] = args[:io      ] # TBD outputs (i.e. "tbd.out.json")
+      @model[:surfaces] = args[:surfaces] # TBD derated surface data
+      @model[:args    ] = args            # last TBD inputs (i.e. "tbd.json")
 
-      puts
-
-      # @model[:io      ] = res[:io      ] # TBD outputs (i.e. "tbd.out.json")
-      # @model[:surfaces] = res[:surfaces] # TBD derated surface data
-      # @model[:argh    ] = argh           # method argument hash
-      # @model[:args    ] = args           # last TBD inputs (i.e. "tbd.json")
-      #
       # gen_tallies  # tallies for BTAP costing
       # gen_feedback # log success messages for BTAP
     end
@@ -1024,7 +936,7 @@ module BTAP
         return false
       end
 
-      # Uprating?
+      # Uprating? Initialize.
       @model[:uprating] = false
 
       # All 3 surface types initiated?
@@ -1067,6 +979,9 @@ module BTAP
       #   - iteratively reset when uprating
       argh[:quality] = :bad unless argh.key?(:quality)
       argh[:quality] = :bad unless argh[:quality] == :good
+
+      @model[:interpolate] = argh[:interpolate]
+      @model[:quality    ] = argh[:quality]
 
       # NECB 2011-2015 Uo targets.
       wUo = argh[:walls ][:uo]
@@ -1446,7 +1361,7 @@ module BTAP
       mdl = OpenStudio::Model::Model.new
       mdl.addObjects(model.toIdfFile.objects)
 
-      args = {option: "", io_path: inputs( argh[:quality] )}
+      args = {option: "", io_path: inputs( @model[:quality] )}
       TBD.clean!
       TBD.process(mdl, args)
 
@@ -1467,10 +1382,7 @@ module BTAP
         return false
       end
 
-      # Process surfaces deemed 'deratable' by TBD. Link PSI factor sets to:
-      #   - building (1x)
-      #   - attics/crawlspaces (1x)
-      #   - each custom space (if unique)
+      # Process surfaces deemed 'deratable' by TBD.
       args[:surfaces].each do |identifier, surface|
         next unless surface.key?(:type)      # :wall, :ceiling or :floor
         next unless surface.key?(:net)       # surface net area
@@ -1489,177 +1401,7 @@ module BTAP
 
         # Track deratable surface types, e.g. any exposed :floors?
         @model[:stypes] << stype unless @model[:stypes].include?(stype)
-      #
-      #   # Track TBD-targeted constructions for uprating/derating.
-      #   srf = model.getSurfaceByName(identifier)
-      #
-      #   if srf.empty?
-      #     lgs << "Mismatched surface: #{identifier} (#{mth})?"
-      #     return false
-      #   end
-      #
-      #   srf   = srf.get
-      #   space = srf.space
-      #
-      #   if space.empty?
-      #     lgs << "Missing space: #{id} (#{mth})?"
-      #     return false
-      #   end
-      #
-      #   space = space.get
-      #   spID  = space.nameString
-      #   lc    = srf.construction
-      #
-      #   if lc.empty?
-      #     lgs << "Mismatched construction: #{id} (#{mth})?"
-      #     return false
-      #   end
-      #
-      #   lc = lc.get.to_LayeredConstruction
-      #
-      #   if lc.empty?
-      #     lgs << "Mismatched layered construction: #{id} (#{mth})?"
-      #     return false
-      #   end
-      #
-      #   lc = lc.get
-      #   id = lc.nameString
-      #
-      #   # Deratable constructions may have previously inherited the following
-      #   # AdditionalProperties, if constructions were generated based on
-      #   # 'structural' options or customized (see BTAP::Structure):
-      #   #   - "btap_type" : TBD surface type ("walls", "roofs" or "floors")
-      #   #   - "btap_film" : area-weighted surface air film resistances
-      #   #   - "btap_uo"   : NECB-prescribed U-factor (clear-field OR total)
-      #   #   - "btap_id"   : BTAP costed construction ID (e.g. MASS2)
-      #   btap_type = lc.additionalProperties.getFeatureAsString("btap_type")
-      #   btap_film = lc.additionalProperties.getFeatureAsDouble("btap_film")
-      #   btap_uo   = lc.additionalProperties.getFeatureAsDouble("btap_uo")
-      #   btap_id   = lc.additionalProperties.getFeatureAsString("btap_id")
-      #
-      #   # AdditionalProperty construction type - reset if needed.
-      #   if btap_type.empty?
-      #     btap_type = stype
-      #     lc.additionalProperties.setFeature("btap_type", btap_type)
-      #   else
-      #     btap_type = btap_type.get.downcase.to_sym
-      #
-      #     unless [:walls, :floors, :roofs].include?(btap_type)
-      #       btap_type = stype
-      #       lc.additionalProperties.setFeature("btap_type", btap_type)
-      #     end
-      #   end
-      #
-      #   # AdditionalProperty area-weighted surface air film - reset if needed.
-      #   if btap_film.empty?
-      #     btap_film = filmR(lc)
-      #     lc.additionalProperties.setFeature("btap_film", btap_film)
-      #   else
-      #     btap_film = btap_film.get
-      #   end
-      #
-      #   # AdditionalProperty Uo factor - reset if needed.
-      #   if btap_uo.empty?
-      #     btap_uo = argh[btap_type][:uo]
-      #     lc.additionalProperties.setFeature("btap_uo", btap_uo)
-      #   else
-      #     btap_uo = btap_uo.get
-      #   end
-      #
-      #   # Tag construction with NECB Ut target if uprating.
-      #   if argh[btap_type].key?(:ut)
-      #     lc.additionalProperties.setFeature("btap_ut", btap_ut)
-      #   end
-      #
-      #   # AdditionalProperty costed construction ID - reset if needed.
-      #   btap_id = btap_id.empty? ? "" : btap_id.get
-      #
-      #   # Unknown costed construction ID? Rely on STRUCTURE parameters.
-      #   unless data.key?(btap_id)
-      #     opts           = {}
-      #     opts[:stype  ] = btap_type
-      #     opts[:perform] = :lp
-      #     opts[:uo     ] = btap_uo
-      #
-      #     # Backup: rely on customized space (or building) STRUCTURE properties.
-      #     if stc[:spaces].key?(spID)
-      #       opts[:framing ] = stc[:spaces][spID][:framing]
-      #       opts[:cladding] = stc[:spaces][spID][:cladding]
-      #       opts[:finish  ] = stc[:spaces][spID][:finish]
-      #     else
-      #       opts[:framing ] = stc.framing
-      #       opts[:cladding] = stc.cladding
-      #       opts[:finish  ] = stc.finish
-      #     end
-      #
-      #     btap_id = costed_assembly(opts)
-      #     lc.additionalProperties.setFeature("btap_id", btap_id)
-      #   end
-      #
-      #   unless @model[:constructions].key?(id)
-      #     @model[:constructions][id]             = {}
-      #     @model[:constructions][id][:index    ] = surface[:index] # material
-      #     @model[:constructions][id][:r        ] = surface[:r]     # material
-      #     @model[:constructions][id][:uo       ] = btap_uo         # assembly
-      #     @model[:constructions][id][:compliant] = nil             # assembly
-      #     @model[:constructions][id][:btap_id  ] = btap_id         # assembly
-      #     @model[:constructions][id][:m2       ] = 0               # cumulative
-      #     @model[:constructions][id][:btap_film] = btap_film       # weighted
-      #     @model[:constructions][id][:stypes   ] = []
-      #     @model[:constructions][id][:surfaces ] = []
-      #     @model[:constructions][id][:spaces   ] = []
-      #   end
-      #
-      #   @model[:constructions][id][:m2      ] += surface[:net]
-      #   @model[:constructions][id][:stypes  ] << stype
-      #   @model[:constructions][id][:surfaces] << identifier
-      #   @model[:constructions][id][:spaces  ] << spID
       end
-
-      nb = 0 # number of deratable walls in the model
-
-      # Loop through all tracked deratable constructions. Ensure a single
-      # surface type per construction. Ensure at least one wall construction.
-      # @model[:constructions].values.each { |v| v[:stypes].uniq! }
-      # @model[:constructions].values.each { |v| v[:spaces].uniq! }
-
-      # Halt if multiple surface types per construction. In the future, consider
-      # cloning constructions as needed to ensure surface type uniqueness.
-      # @model[:constructions].each do |id, v|
-      #   if v[:stypes].size != 1
-      #     lgs << "Multiple surface types rely on #{id} (#{mth})?"
-      #     return false
-      #   else
-      #     v[:stypes] = v[:stypes].first
-      #   end
-      #
-      #   nb += 1 if v[:stypes] == :walls
-      # end
-
-      # Track reported linear thermal bridge lengths (per thermal bridge type).
-      # Link each thermal bridge set to insulated wall constructions:
-      #   - outdoor-facing walls in most cases
-      #   - alternatively, attic interzone walls
-      # @model[:constructions].each do |id, v|
-      #   lc = model.getConstructionByName(id)
-      #   next if lc.empty?
-      #
-      #   lc = lc.get.to_LayeredConstruction
-      #   next if lc.empty?
-      #
-      #   lc = lc.get
-      #
-      #   # Hard-set construction to each deratable surface.
-      #   v[:surfaces].each do |name|
-      #     surface = model.getSurfaceByName(name)
-      #     surface.get.setConstruction(lc) unless surface.empty?
-      #   end
-      # end
-
-      # if nb < 1
-      #   lgs << "No deratable walls (#{mth})?"
-      #   return false
-      # end
 
       true
     end
@@ -1946,7 +1688,6 @@ module BTAP
       @model.keys.filter { |value| value != :perform }.each do |value|
         @model.delete(value)
       end
-      @tally.delete(:constructions)
     end
   end
 end
