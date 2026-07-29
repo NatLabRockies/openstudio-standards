@@ -52,17 +52,22 @@ proposed annual run ahead of the reference build) and should be scoped fresh.
 - [x] ~~Fix a malformed `ruling:` literal~~ **DONE by the Phase 7 implementer**
       — the ternaries and the `ruling: article['ruling']` passthrough are gone;
       the registry's literal lint passes, which is the authoritative check.
-- [ ] **Candidate hbix issue, demonstrable this time.** `get_table('necb',
-      '4.2.1.6')` returns the right 12 headers (including the two
-      daylight-responsive-control columns) and 103 rows, but the extraction is
-      partly corrupted: `Space Category`/`Space Type` are misaligned on some
-      rows and several cells carry header fragments as data
-      (`'of Lighting Control(1)'`, `'Space Types'`, `'be the same as'`,
-      `'See Article 4.2.2.2.'`). Phase 7 was told to vendor only confidently
-      mappable rows and to hand back the unmappable list with a count — use
-      that list as the issue body. NB: an earlier "missing articles
-      4.2.2.7-4.2.2.10" issue was NOT filed because those articles do not
-      exist; do not resurrect it.
+- [x] ~~Candidate hbix issue~~ **FILED 2026-07-29: canmet-energy/hbix#88**
+      "codes: NECB Table 4.2.1.6 extraction — dropped control marks,
+      header/footnote text in data cells, cross-edition conflicts". Evidence
+      independently recomputed from the tool responses before filing (not
+      relayed from the implementing agent): header/footnote text in data cells
+      (9 distinct in 2020, 8 in 2025); `Manual` marked on only 57/103 rows in
+      2020 vs 85/105 in 2025 where 4.2.2.1.(3) makes it apply to every listed
+      type; the two daylight columns disagree on 35 of 95 cross-edition
+      alignable rows, one-directionally (2020 blank where 2025 X); category/type
+      misalignment; and an OCR error (`class il facility` for "Class II").
+      **When it is fixed, revisit the 9 unmappable space types and the
+      conservative `required` defaults** — especially the classroom/lecture-hall
+      toplighting conflict, which affects 37 school spaces.
+      NB: an earlier "missing articles 4.2.2.7-4.2.2.10" issue was NOT filed
+      because those articles do not exist — that was my error; do not resurrect
+      it.
 
 ### Cross-cutting (apply to EVERY phase)
 
