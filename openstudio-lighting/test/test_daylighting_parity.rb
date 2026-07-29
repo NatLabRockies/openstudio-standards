@@ -133,8 +133,12 @@ class TestDaylightingParity < Minitest::Test
 
     std.model_add_daylighting_controls(model: legacy_model, daylighting_type: 'NECB_Default')
     audit = OpenStudioLighting::AuditLog.new
+    # placement: :necb2011 names the legacy rule explicitly — the DEFAULT is now
+    # the NECB 2020/2025 rule (4.2.2.1.(10)-(15), D-57), which is not what legacy
+    # does. This gate exists to prove the 2011 port is still faithful.
     created = OpenStudioLighting.add_daylighting_controls(gem_model, vintage: '2020',
-                                                          option: 'NECB_Default', audit: audit)
+                                                          option: 'NECB_Default',
+                                                          placement: :necb2011, audit: audit)
 
     assert_equal legacy_model.getDaylightingControls.size, gem_model.getDaylightingControls.size,
                  'same control count (both zero: the any-single-criterion exception defect)'

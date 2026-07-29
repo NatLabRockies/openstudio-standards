@@ -2208,3 +2208,297 @@ cooled fluid to economize with and are warned rather than silently skipped.
   `openstudio-hvac/test/test_helper.rb` (`run_energyplus!` gained an optional
   `run_period:` — shoulder weather is where this control acts).
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-57 — Reference daylighting follows NECB 2020/2025 4.2.2.1.(10)-(15), not the 2011 port
+
+**What.** The reference building's photocontrol placement is now decided by the
+**NECB 2020/2025** rule. `OpenStudioLighting::NECB.reference_daylighting`
+defaults to `placement: :necb2020`, which evaluates Article 4.2.2.1., sentences
+(10) through (15):
+
+- the space type's **Table 4.2.1.6.** column gates each of sidelighting and
+  toplighting;
+- **(10)** requires sidelighting photocontrols where the general-lighting input
+  power completely or partially within the **primary** sidelighted areas is
+  >= 150 W, **or** within primary **and secondary** is >= 300 W;
+- **(13)** requires toplighting photocontrols where that power within the
+  daylighted areas under skylights is >= 150 W;
+- **(10) and (13) are INDEPENDENT** — a space qualifies on either alone;
+- exceptions honoured: **(12)(a)** obstruction ratio >= 2, **(12)(b)** total
+  glazing < 2 m², **(12)(c)** retail; **(15)(b)** skylight VT < 0.4, **(15)(c)**
+  above 55°N with < 200 W.
+
+The legacy NECB 2011 rule stays reachable as `placement: :necb2011` (and its old
+name `:necb_default` aliases to it) so `test_daylighting_parity.rb` still proves
+the 2011 port faithful. Choosing it now emits a SHOUTED warning that the target
+it produces is looser than the code writes.
+
+**Why.** D-51 flipped reference daylighting ON by default and found the flip
+**inert on ten of seventeen archetypes**. The cause was L-26: the placement rule
+was a verbatim port of the NECB 2011 criteria — primary sidelighted area
+> 100 m², under-skylight area > 400 m², skylight effective aperture > 0.006,
+office >= 25 m² — **ANDed**. A window-only space has zero skylight area, so it
+failed the conjunction and got no photocontrols, ever. NECB 2020 rewrote the
+article completely: the tests are on input POWER, they are per-space-type gated
+by Table 4.2.1.6., and sidelighting and toplighting are separate requirements.
+Applying 2011 criteria on the 2020/2025 path made the reference carry fewer
+photocontrols than the code requires, which over-states reference lighting
+energy and hands the proposed building a target more lenient than NECB sets.
+
+**Ruled by phylroy 2026-07-29** (plan Phase 7); implemented by Claude under the
+D-10 delegation.
+
+### The power test is exact here, not an approximation
+
+Sentences (10) and (13) test input power *inside* a daylighted area, which in
+general needs a luminaire layout. It does not here. This gem applies a single
+uniform lighting power density per space (the 4.2.1.6. allowance, W/m² over the
+whole space floor area), so the general lighting is uniformly distributed **by
+construction** and
+
+    input power within a daylighted area = LPD_general x daylighted_area
+
+**exactly**. No luminaire placement is needed or possible. "General" excludes the
+4.2.1.6. specialty/decorative additional allowance, which the gem models as a
+separately named `Additional Lights` instance and which (10)/(13) do not cover.
+
+### But only once the AREAS are right — new geometry
+
+`openstudio-lighting/lib/openstudio_lighting/necb/daylighted_areas.rb` is an
+adaptation of openstudio-standards' `Standard#space_daylighted_areas`
+(`lib/openstudio-standards/standards/Standards.Space.rb`), not new geometry: one
+polygon per aperture, every polygon flattened to z = 0, each set **joined** into
+a union, then **subtracted** in precedence order and intersected with the floor.
+Polygon booleans are OpenStudio's own (`joinAll` / `subtract` / `within` /
+`intersects` / `getArea`) — no new dependency. `tbd` and `topolys` were assessed
+and rejected in the plan and were not needed.
+
+Three NECB-specific deviations from the 90.1 original:
+
+- side extension is **½ the window head height** (4.2.2.3.(3)(a)/(7)(a)); the
+  original's width hook returns `'none'` by default.
+- **PRECEDENCE IS INVERTED.** 4.2.2.5.(2)(b) caps each skylight extension at
+  "the distance to any primary sidelighted area", so the **toplit** area stops at
+  the primary band and the primary is never reduced by a skylight; 4.2.2.3.(9)
+  kills secondary area beyond either. NECB is **primary > toplit > secondary**.
+  The openstudio-standards original subtracts toplit *from* primary — right for
+  ASHRAE 90.1, wrong for NECB. This was caught by a numeric probe before the
+  tests were written, and is pinned by
+  `test_necb_precedence_primary_beats_toplit_and_secondary_loses_to_both`.
+- a **secondary** sidelighted area is computed at all. The legacy port computes
+  none, which is why (10)(b)'s 300 W test could not previously be expressed.
+
+**Union validated numerically [RAN]** (`test_daylighting_necb2020.rb`):
+
+| case | expected | got |
+|---|---|---|
+| one 4 m window, head 2.5 m | 6.5 m x 2.5 m = 16.25 m² primary, 16.25 m² secondary | 16.25 / 16.25 |
+| two 2 m windows 0.5 m apart (bands OVERLAP) | union 7.0 m x 2.5 m = 17.50 m²; a per-window SUM would give 22.50 m² | 17.50 |
+| the same two windows moved apart (no overlap) | 8.75 m x 2.5 m = 21.88 m² (clipped at the x = 10 wall) | 21.88 |
+| window hard against the end wall | band clipped 5.75..10.0 = 4.25 m x 2.5 m | 10.63 |
+| **skylight only**, 2 x 2, 3 m ceiling | 6.2 m x 6.2 m = 38.44 m² — the LEGACY port returns **0.00** here | 38.44 / legacy 0.00 |
+| window + overlapping skylight | primary 16.25 m² intact, toplit reduced 41.31 -> 25.06 m², secondary 0.00 | 16.25 / 25.06 / 0.00 |
+
+In every case `primary + secondary + toplit <= floor`, so nothing is
+double-counted. Across all 17 cached NECB2020 archetypes (619 daylighted spaces)
+**zero** polygon-union failures were logged — the `joinAll` inner-loop retry
+carried over from the original absorbed every complaint EnergyPlus's geometry
+utilities raised.
+
+**A derived property worth recording.** Each secondary band is a pure translate
+of its primary band and loses every overlap, so total secondary <= total primary
+always, hence combined <= 2 x primary, hence **(10)(b)'s 300 W can never be met
+unless (10)(a)'s 150 W already is**. (10)(b) is implemented and correct but is
+never independently decisive under this geometry. It would become decisive if
+4.2.2.3.(4)(b)'s vertical-obstruction bound were modelled, since an obstruction
+can shorten the primary depth without shortening the secondary. Pinned by
+`test_secondary_never_exceeds_primary_so_the_300_w_test_is_never_decisive_alone`.
+
+### Table 4.2.1.6. was NOT vendored blind — both MCP extractions are corrupt
+
+The plan's premise was that the two control columns could be read off the
+extraction with `'X'` = required and `''`/`'-'` = not required. **That premise is
+wrong**, and the correction is the largest piece of work in this phase.
+
+- The **2020** extraction's `Space Category` column *lags* the row it belongs to
+  (a row reads `Classroom/lecture hall/training room | Computer/Server room`),
+  and it drops whole rows' worth of control marks: `Manual` = X on only **57 of
+  103** rows, where 4.2.2.1.(3) makes that column apply to *every* space type the
+  table lists. 40 X in each daylight column.
+- The **2025** extraction keeps `Space Category` correct per row and carries
+  `Manual` = X on **85 of 105** rows. 67 sidelighting / 64 toplighting X.
+- Aligned by leaf name + LPD, **the two disagree on 38 of 91 matched rows.**
+
+So an empty cell is **not** evidence of "not required". 2025 is the primary
+source; 2020 corroborates but may never negate — an X in 2020 where 2025 is
+blank is a **CONFLICT**, recorded as `unknown`.
+
+`daylighting_controls_4_2_1_6.json` is keyed by the **105 NECB space-function
+catalog names** (`openstudio-loads` `space_types_2020.json`, `-sch-A..K`
+suffixes stripped), each mapped **by hand** to a table row, five states per
+column:
+
+| state | meaning | side | top |
+|---|---|---|---|
+| `required` | the column carries X | 72 | 69 |
+| `not_required` | blank/dash in BOTH extractions | 25 | 27 |
+| `not_applicable` | the table refers the type to a different article — 4.2.2.2. for interior storage garages (which has its OWN daylight rule in Sentence (4)), 4.2.2.6.(2) for guest rooms | 2 | 2 |
+| `not_listed` | no table row at all (dwelling units) | 2 | 2 |
+| `unknown` | extractions CONFLICT, or the cell holds header/footnote text | 5 | 6 |
+
+**Mapping validated independently:** for each of the 102 hard mappings the
+catalog's `lighting_per_area` (W/ft² x 10.7639) was compared against the mapped
+row's LPD (W/m²) — **102 of 102 agree** within 0.06 W/m² / 1%. The two soft
+mappings (`Stairway/Stairwell` -> the Stairwell row; `medical supply room` ->
+the Storage Room rows the table cross-references) are annotated in the file.
+
+`unknown` never decides silently: it WARNS (once per space type per run) and
+takes a documented conservative default of **`required`**, because photocontrols
+in the *reference* lower the reference's lighting energy and therefore TIGHTEN
+the target, which cannot hand a non-conforming building a pass.
+`unknown_control_requirement: :not_required` flips it, still warning.
+
+### `not_listed` — read from the code text, not guessed
+
+Dwelling units were initially swept into `unknown`, whose conservative default
+photocontrolled **122 apartment spaces**. That is wrong, and the code text says
+so: (10) and (13) reach only spaces "requiring [the control] **in accordance
+with Table 4.2.1.6.**", and 4.2.2.1.(2) ties the control requirement to that
+table's space-by-space types. Dwelling units have no row (their LPD comes from
+8.4.4.5.(2)/8.4.5.5.(2)), so the sentences do not reach them. State
+`not_listed`, logged with the reasoning, distinct from `unknown`.
+
+### Sensor configuration also changed
+
+- **Stepped x3, not x2.** 4.2.2.1.(11)(a)(i)/(14)(a)(i) want one intermediate
+  level at 50-70% of design power, another at 20-40%, and a control point that
+  turns the lighting off. EnergyPlus 3-step control is exactly 67% / 33% / off.
+  The legacy 2 steps is the NECB **2011** minimum and satisfies neither
+  (a)(i) nor (a)(ii); it is kept on the legacy paths for parity.
+- **Zone fraction = the daylighted share of the zone floor area, not 1.0.**
+  (10)/(13) control the general lighting *in the daylighted areas*. The legacy
+  paths wire `1.0`, i.e. the whole room, which over-credits the reference. The
+  legacy paths keep 1.0; only `:necb2020` uses the area fraction.
+
+### Fleet placement count [RAN] — the ten inert archetypes move
+
+SDK-only, on the 17 cached NECB2020 archetype OSMs, no simulation, **not** a
+sweep (`scratchpad/d57_placement.rb`). Spaces selected for photocontrols:
+
+| archetype | daylighted | 2011 rule | **2020 rule** | via (10) | via (13) |
+|---|---|---|---|---|---|
+| FullServiceRestaurant | 2 | 0 | **2** | 2 | 0 |
+| HighriseApartment | 90 | 0 | 0 | 0 | 0 |
+| Hospital | 153 | 8 | **39** | 39 | 11 |
+| LargeHotel | 65 | 0 | **9** | 7 | 7 |
+| LargeOffice | 12 | 0 | **12** | 12 | 0 |
+| LowriseApartment | 21 | 0 | 0 | 0 | 0 |
+| MediumOffice | 12 | 0 | **12** | 12 | 0 |
+| MidriseApartment | 27 | 0 | 0 | 0 | 0 |
+| Outpatient | 76 | 4 | **14** | 12 | 3 |
+| PrimarySchool | 25 | 1 | **23** | 18 | 23 |
+| QuickServiceRestaurant | 2 | 0 | **2** | 2 | 0 |
+| RetailStandalone | 5 | 0 | **3** | **0** | 3 |
+| RetailStripmall | 10 | 0 | **10** | **0** | 10 |
+| SecondarySchool | 45 | 2 | **39** | 34 | 22 |
+| SmallHotel | 67 | 1 | **2** | 1 | 1 |
+| SmallOffice | 4 | 4 | **4** | 4 | 0 |
+| Warehouse | 3 | 1 | **3** | 3 | 1 |
+| **total** | **619** | **21** | **174** | | |
+
+Read the table for the mechanisms, not just the totals:
+
+- **21 -> 174 spaces.** Seven of D-51's ten inert archetypes now move
+  (FullServiceRestaurant, LargeHotel, LargeOffice, MediumOffice,
+  QuickServiceRestaurant, RetailStandalone, RetailStripmall).
+- The two **Retail** archetypes get toplighting only — **(12)(c) excepts retail
+  from sidelighting**, and the exception is doing exactly that.
+- The two **Schools** are toplighting-heavy (23 of 23, 22 of 39): classroom
+  skylights, which the legacy port computed as **zero** area whenever a space
+  had no exterior window.
+- The three **Apartments** stay at 0, and that is now a *reasoned* zero rather
+  than an artifact. Their daylighted spaces are dwelling units (`not_listed`,
+  80/24/18 of them) plus 10/3/3 corridors, which ARE gated `required` by Table
+  4.2.1.6. and then fail the power test on the numbers: 4.4 W/m² over a 6.8 m²
+  primary band = **30 W** against 150 W, and 60 W against 300 W. The one
+  top-floor corridor with a skylight reaches 80 W in 18.1 m² — still short.
+
+**Energy attribution across the fleet is NOT claimed here.** No sweep was run:
+the plan defers it and this entry does not pre-empt it. The D-46 table remains
+the last validated fleet baseline. See the `pending_review.md` item below.
+
+### Citation hygiene (the other half of L-26)
+
+Subsection 4.2.2 of NECB 2020/2025 **ends at Article 4.2.2.6.** ("Special
+Applications" — verified: its text runs straight into "4.2.3. Exterior Lighting
+Power"). Every reference to 4.2.2.7. through 4.2.2.12. in this gem was a NECB
+2011 leftover, and 4.2.2.2. is "Lighting Controls in Storage Garages", not
+occupancy controls. Fixed:
+
+- the docstrings on the legacy geometry methods now name the 2011 numbers *as*
+  2011 numbers and point at the live 4.2.2.1./4.2.2.3./4.2.2.4./4.2.2.5.;
+- the legacy selector's audit entry cites `NECB 2011 4.2.2.4./4.2.2.7./4.2.2.8./
+  4.2.2.10. (articles that DO NOT EXIST in NECB 2020/2025 ...)` and is now a
+  WARNING rather than an info;
+- the coverage manifests replace `4.2.2.3.-4.2.2.12.` with
+  `4.2.2.1.(10)-(15); 4.2.2.3.; 4.2.2.4.; 4.2.2.5.`, move the occupancy entry to
+  `4.2.2.1.(16)-(23)`, and add a real `4.2.2.2.` (storage garages) entry as
+  `not_implemented` — a gap that was previously hidden behind the wrong number.
+
+### Declared gaps (each WARNS or is stated every run)
+
+- **4.2.2.1.(15)(a)** (> 1 500 h/yr of blocked direct sun, 8 a.m.-4 p.m.) needs
+  an annual solar-obstruction study; an SDK-only gem that never simulates cannot
+  do it. Not applying an exception is the STRICT direction, so no target is
+  loosened. WARNS every run.
+- **4.2.2.4. roof monitors** are not a distinguishable object in an OpenStudio
+  model (they are ordinary wall glazing on a high space), so toplighted area
+  covers skylights only. Stated every run.
+- **Vertical obstructions** (4.2.2.3.(3)(b)/(4)(b)/(8)(b), 4.2.2.5.(2)(c)) are
+  honoured at the space enclosure — every band is clipped to the floor — but
+  obstructions *inside* a space are not in a thermal model, so areas are an upper
+  bound within each space. Stated every run.
+- **4.2.2.1.(11)(b)** (secondary band controlled independently of the primary)
+  is modelled as ONE zone control over the combined daylighted fraction, not two.
+- **(12)(a)** obstruction ratio is measured against `ShadingSurface`s, per window
+  head, taking the largest ratio ("any adjacent structure"), with the horizontal
+  run measured to shading *edges* rather than vertices. When a model has no
+  shading surfaces the exception has nothing to apply to, and that is logged as a
+  fact rather than assumed.
+
+**Verification [RAN].** Full `openstudio-lighting` suite:
+
+| file | result |
+|---|---|
+| `test_daylighting_necb2020.rb` (new) | 24 runs, 518 assertions, 0 failures |
+| `test_apply_lights.rb` | 4 runs, 42 assertions, 0 failures |
+| `test_costing.rb` | 5 runs, 29 assertions, 0 failures, 1 skip (legacy coster absent) |
+| `test_data_integrity.rb` | 5 runs, 81 assertions, 0 failures |
+| `test_exterior_and_reference.rb` | 8 runs, 29 assertions, 0 failures |
+| `test_necb_hostile_reference.rb` | 4 runs, 12 assertions, 0 failures |
+| `test_reference_daylighting.rb` | 3 runs, 23 assertions, 0 failures (incl. the E+ comparative gate) |
+| `test_e2e_run.rb` | 2 runs, 21 assertions, 0 failures |
+| `test_daylighting_parity.rb` (repo bundle) | 3 runs, 17 assertions, 0 failures |
+| `test_lights_parity.rb` (repo bundle) | 2 runs, 4 assertions, 0 failures |
+
+`openstudio-necb/test/test_compliance.rb` — 10 runs, 168 assertions, **1
+failure**: `test_annual_mode_week_run_full_determination` at line 199,
+`audited ruling D-57 resolves in the registry` — i.e. the registry entry below is
+not merged yet. `test_decisions_registry.rb` — 12 runs, 1 failure:
+`code cites unregistered decision id(s): D-57`. Both clear when (2) lands.
+
+- **Files (all in `openstudio-lighting/`):**
+  `lib/openstudio_lighting/necb/daylighted_areas.rb` (new);
+  `lib/openstudio_lighting/necb/daylight_control_requirement.rb` (new);
+  `lib/openstudio_lighting/data/necb/daylighting_controls_4_2_1_6.json` (new);
+  `lib/openstudio_lighting/necb/daylighting.rb`;
+  `lib/openstudio_lighting/necb/reference_daylighting.rb`;
+  `lib/openstudio_lighting/necb/apply_lights.rb` (coverage emitter);
+  `lib/openstudio_lighting.rb`;
+  `lib/openstudio_lighting/data/necb/lighting_rules_{2020,2025}.json`;
+  `lib/openstudio_lighting/data/necb/README.md`; `CLAUDE.md`;
+  `test/test_daylighting_necb2020.rb` (new);
+  `test/test_daylighting_parity.rb` (names `placement: :necb2011` explicitly).
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+---

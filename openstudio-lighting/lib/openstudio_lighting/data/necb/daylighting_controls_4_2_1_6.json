@@ -1,0 +1,823 @@
+{
+ "provenance": {
+  "source": "NECB 2020 and NECB 2025 Division B Table 4.2.1.6, columns \"Automatic Daylight Responsive Controls for Sidelighting [see 4.2.2.1.(10)]\" and \"... for Toplighting [see 4.2.2.1.(13)]\", retrieved via the building-codes MCP (get_table necb 4.2.1.6, editions 2020 and 2025).",
+  "generated": "2026-07-29",
+  "ruling": "D-57",
+  "method": "BOTH MCP extractions of Table 4.2.1.6 are partly corrupted, and they are corrupted DIFFERENTLY, so neither was vendored blind. The 2020 extraction is the worse of the two: its Space Category column lags the row it belongs to (a row reads 'Classroom/lecture hall/training room | Computer/Server room'), and it drops whole rows' worth of control marks - it carries 'Manual' = X on only 57 of 103 rows where 4.2.2.1.(3) makes that column apply to EVERY listed space type. The 2025 extraction keeps Space Category correct per row and carries Manual = X on 85 of 105 rows, so it is the primary source. The 2020 extraction is used ONLY to corroborate, never to negate: an X in the 2020 extraction where 2025 is blank is treated as a CONFLICT (state 'unknown'), not as an absence. Consequently an empty cell is NOT read as 'not required' on the strength of one extraction alone. Each of the 105 NECB space-function catalog names (openstudio-loads space_types_2020.json, -sch-A..K suffixes stripped) was mapped BY HAND to a table row, and every one of the 102 hard mappings was then validated by comparing the catalog's lighting_per_area (W/ft2 x 10.7639) against the table row's LPD (W/m2): 102 of 102 agree within 0.06 W/m2 / 1%. The three names with no table row and the six/seven columns left 'unknown' are enumerated in 'residue' below.",
+  "semantics": {
+   "required": "Table 4.2.1.6 carries 'X' in the column - 4.2.2.1.(10) or (13) applies to this space type, subject to its own power thresholds and to the (12)/(15) exceptions",
+   "not_required": "the column is blank or a dash in BOTH extractions - the sentence does not apply to this space type",
+   "not_applicable": "Table 4.2.1.6 refers this space type to a DIFFERENT article instead of carrying a flag (4.2.2.2. for interior storage garages, 4.2.2.6.(2) for guest rooms)",
+   "unknown": "the two extractions CONFLICT, the cell holds header/footnote text, or the space type has no row at all. Callers must not silently decide - the gem WARNS and applies the documented conservative default",
+   "not_listed": "the space type has NO Table 4.2.1.6 row at all, and 4.2.2.1.(10)/(13) apply only to spaces requiring the control 'in accordance with Table 4.2.1.6.' - so the sentences do not reach it. A determination from the code text, distinct from 'unknown'"
+  },
+  "counts": {
+   "sidelighting_not_applicable": 2,
+   "sidelighting_not_listed": 2,
+   "sidelighting_not_required": 25,
+   "sidelighting_required": 72,
+   "sidelighting_unknown": 5,
+   "toplighting_not_applicable": 2,
+   "toplighting_not_listed": 2,
+   "toplighting_not_required": 27,
+   "toplighting_required": 69,
+   "toplighting_unknown": 6
+  }
+ },
+ "space_types": {
+  "- undefined -": {
+   "table_row": null,
+   "sidelighting": "unknown",
+   "toplighting": "unknown",
+   "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
+   "note": "catalog sentinel for an unlisted space function (4.2.1.6.(1)(b) is a human judgement); the gem's reference transform already hard-raises on it"
+  },
+  "Atrium (6 =< height <= 12m)": {
+   "table_row": "Atrium | ≥ 6 m and ≤ 12 m in height",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Atrium (height < 6m)": {
+   "table_row": "Atrium | < 6 m in height",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Atrium (height > 12m)": {
+   "table_row": "Atrium | > 12 m in height",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - auditorium": {
+   "table_row": "Audience seating area - permanent | for auditorium",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - convention centre": {
+   "table_row": null,
+   "sidelighting": "unknown",
+   "toplighting": "unknown",
+   "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
+   "note": "a legacy-only space function: NECB 2020/2025 Table 4.2.1.6 lists no 'for convention centre' row under 'Audience seating area - permanent', and the catalog LPD (8.8 W/m2) does not match that category's 'other' row (2.5 W/m2), so the 'other' catch-all is NOT a safe substitute"
+  },
+  "Audience seating area permanent - gymnasium": {
+   "table_row": "Audience seating area - permanent | for gymnasium",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - motion picture theatre": {
+   "table_row": "Audience seating area - permanent | for motion picture theatre",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - other": {
+   "table_row": "Audience seating area - permanent | other",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - penitentiary": {
+   "table_row": "Audience seating area - permanent | for penitentiary",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - performing arts theatre": {
+   "table_row": "Audience seating area - permanent | for performing arts theatre",
+   "sidelighting": "required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - religious building": {
+   "table_row": "Audience seating area - permanent | for religious building",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Audience seating area permanent - sports arena": {
+   "table_row": "Audience seating area - permanent | for sports arena",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Banking activity area and offices": {
+   "table_row": "Banking activity area and offices | Banking activity area and offices",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Classroom/Lecture hall/Training room - Penitentary": {
+   "table_row": "Classroom/lecture/training | for penitentiary",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Classroom/Lecture hall/Training room other": {
+   "table_row": "Classroom/lecture/training | other",
+   "sidelighting": "required",
+   "toplighting": "unknown",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "CONFLICT: 2025 extraction blank/dash, 2020 extraction X"
+  },
+  "Computer/Server room": {
+   "table_row": "Computer/Server room | Computer/Server room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Conference/Meeting/Multi-purpose room": {
+   "table_row": "Conference/Meeting/Multi-purpose room | Conference/Meeting/ Multi-purpose room",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Confinement cell": {
+   "table_row": "Confinement cell | Confinement cell",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Convention centre exhibit space": {
+   "table_row": "Convention centre - exhibit space | Convention centre - exhibit space",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Copy/Print room": {
+   "table_row": "Copy/Print room | Copy/Print room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Corridor/Transition area - hospital": {
+   "table_row": "Corridor/Transition area | for hospital",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Corridor/Transition area - manufacturing facility": {
+   "table_row": "Corridor/Transition area | for manufacturing facility",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)": {
+   "table_row": "Corridor/Transition area | for space designed to ANSI/IES RP-28 (and used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Corridor/Transition area other": {
+   "table_row": "Corridor/Transition area | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Courtroom": {
+   "table_row": "Courtroom | Courtroom",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - bar lounge/leisure dining": {
+   "table_row": "Dining area | for bar lounge/leisure dining",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - cafeteria/fast food dining": {
+   "table_row": "Dining area | for cafeteria/fast food dining",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - family dining": {
+   "table_row": "Dining area | for family dining",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - other": {
+   "table_row": "Dining area | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - penitentiary": {
+   "table_row": "Dining area | for penitentiary",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dining area - space designed to ANSI/IES RP-28 (used primarily by residents)": {
+   "table_row": "Dining area | for space designed to ANSI/IES RP-28 (and used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dormitory living quarters": {
+   "table_row": "Dormitory - living quarters | Dormitory - living quarters",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Dressing/Fitting room - performing arts theatre": {
+   "table_row": "Dressing/Fitting room for performing arts theatre | Dressing/Fitting room for performing arts theatre",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Dwelling units general": {
+   "table_row": null,
+   "sidelighting": "not_listed",
+   "toplighting": "not_listed",
+   "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
+   "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+  },
+  "Dwelling units long-term": {
+   "table_row": null,
+   "sidelighting": "not_listed",
+   "toplighting": "not_listed",
+   "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
+   "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+  },
+  "Electrical/Mechanical room": {
+   "table_row": "Electrical/Mechanical room | Electrical/Mechanical room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Emergency vehicle garage": {
+   "table_row": "Emergency vehicle garage | Emergency vehicle garage",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Fire station sleeping quarters": {
+   "table_row": "Fire station - sleeping quarters | Fire station - sleeping quarters",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Food preparation area": {
+   "table_row": "Food preparation area | Food preparation area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Guest room": {
+   "table_row": "Guest room | Guest room",
+   "sidelighting": "not_applicable",
+   "toplighting": "not_applicable",
+   "note": "Table 4.2.1.6 defers guest rooms to Sentence 4.2.2.6.(2) (occupancy shut-off of all guest-room lighting), not to 4.2.2.1.(10)/(13)"
+  },
+  "Gymnasium/Fitness centre exercise area": {
+   "table_row": "Gymnasium/Fitness centre | Gymnasium/Fitness centre exercise area playing area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Gymnasium/Fitness centre playing area": {
+   "table_row": "Gymnasium/Fitness centre | Gymnasium/Fitness centre exercise area playing area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Health care facility exam/treatment room": {
+   "table_row": "Healthcare facility | Healthcare facility exam/treatment room imaging room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Health care facility imaging room": {
+   "table_row": "Healthcare facility | Healthcare facility exam/treatment room imaging room",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in the 2025 extraction (no corroborating 2020 row matched)",
+   "evidence_toplighting": "blank/dash in the 2025 extraction (no corroborating 2020 row matched)"
+  },
+  "Health care facility medical supply room": {
+   "table_row": "Storage room | ≥ 5 m²",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "mapping": "cross_reference_storage_room",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction 'JUNK'",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction 'JUNK'",
+   "note": "Table 4.2.1.6 refers medical supply rooms to the Storage Room rows under Common Space Types; requirements taken from 'Storage room >= 5 m2'"
+  },
+  "Health care facility nursery": {
+   "table_row": "Healthcare facility | nursery",
+   "sidelighting": "not_required",
+   "toplighting": "required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Health care facility nurses station": {
+   "table_row": "Healthcare facility | nurses' station",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Health care facility operating room": {
+   "table_row": "Healthcare facility | operating room",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Health care facility patient room": {
+   "table_row": "Healthcare facility | patient room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Health care facility physical therapy room": {
+   "table_row": "Healthcare facility | physical therapy room",
+   "sidelighting": "unknown",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "CONFLICT: 2025 extraction blank/dash, 2020 extraction X",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Health care facility recovery room": {
+   "table_row": "Healthcare facility | recovery room",
+   "sidelighting": "required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Laboratory - classrooms": {
+   "table_row": "Laboratory | for classroom",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Laboratory - other": {
+   "table_row": "Laboratory | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Laundry/Washing area": {
+   "table_row": "Laundry/Washing area | Laundry/Washing area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Library reading area": {
+   "table_row": "Library | reading area",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Library stacks": {
+   "table_row": "Library | stacks",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Loading dock interior": {
+   "table_row": "Loading dock - interior | Loading dock - interior",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - elevator": {
+   "table_row": "Lobby | for elevator",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - hotel": {
+   "table_row": "Lobby | for hotel",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - motion picture theatre": {
+   "table_row": "Lobby | for motion picture theatre",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - other": {
+   "table_row": "Lobby | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - performing arts theatre": {
+   "table_row": "Lobby | for performing arts theatre",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lobby - space designed to ANSI/IES RP-28 (used primarily by residents)": {
+   "table_row": "Lobby | for space designed to ANSI/IES RP-28 (and used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Locker room": {
+   "table_row": "Locker room | Locker room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lounge/Break room - health care facility": {
+   "table_row": "Lounge/Break room | for healthcare facility",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Lounge/Break room - other": {
+   "table_row": "Lounge/Break room | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Manufacturing facility detailed manufacturing area": {
+   "table_row": "Manufacturing facility | detailed manufacturing area",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Manufacturing facility equipment room": {
+   "table_row": "Manufacturing facility | equipment room",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Manufacturing facility extra high bay area (> 15 m floor-to-ceiling height)": {
+   "table_row": "Manufacturing facility | extra high bay area (> 15 m floor-to-ceiling height)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Manufacturing facility high bay area (7.5 to 15 m floor-to-ceiling height)": {
+   "table_row": "Manufacturing facility | high bay area (7.5 m to 15 m floor-to-ceiling height)",
+   "sidelighting": "required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Manufacturing facility low bay area (< 7.5 m floor-to-ceiling height)": {
+   "table_row": "Manufacturing facility | low bay area (< 7.5 m floor-to-ceiling height)",
+   "sidelighting": "required",
+   "toplighting": "unknown",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "CONFLICT: 2025 extraction blank/dash, 2020 extraction X"
+  },
+  "Museum general exhibition area": {
+   "table_row": "Museum | general exhibition area",
+   "sidelighting": "unknown",
+   "toplighting": "unknown",
+   "evidence_sidelighting": "CONFLICT: 2025 extraction blank/dash, 2020 extraction X",
+   "evidence_toplighting": "CONFLICT: 2025 extraction blank/dash, 2020 extraction X"
+  },
+  "Museum restoration room": {
+   "table_row": "Museum | restoration room",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Office enclosed <= 25 m2": {
+   "table_row": "Office | enclosed, ≤ 25 m²",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Office enclosed > 25 m2": {
+   "table_row": "Office | enclosed, > 25 m²",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Office open plan": {
+   "table_row": "Office | open plan",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Pharmacy area": {
+   "table_row": "Pharmacy area | Pharmacy area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Post office sorting area": {
+   "table_row": "Post office - sorting area | Post office - sorting area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Religious building fellowship hall": {
+   "table_row": "Religious building | Religious building fellowship hall",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Religious building worship/pulpit/choir area": {
+   "table_row": "Religious building | worship/pulpit/choir area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Retail facility dressing/fitting room": {
+   "table_row": "Retail facility | dressing/fitting room",
+   "sidelighting": "not_required",
+   "toplighting": "required",
+   "retail": true,
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Retail facility mall concourse": {
+   "table_row": "Retail facility | mall concourse",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "retail": true,
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Sales area": {
+   "table_row": "Sales area | Sales area⁷⁷",
+   "sidelighting": "not_required",
+   "toplighting": "required",
+   "retail": true,
+   "evidence_sidelighting": "blank/dash in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Seating area general": {
+   "table_row": "Seating area - general | Seating area - general",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Space designed to ANSI/IES RP-28 chapel (used primarily by residents)": {
+   "table_row": "Space designed to ANSI/IES RP-28 | chapel (used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Space designed to ANSI/IES RP-28 recreation room (used primarily by residents)": {
+   "table_row": "Space designed to ANSI/IES RP-28 | recreation room (used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Sports arena playing area class I facility(4)": {
+   "table_row": "Sports arena/playing area | Class I facility(8)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Sports arena playing area class II facility(4)": {
+   "table_row": "Sports arena/playing area | Class Il facility(8)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Sports arena playing area class III facility(4)": {
+   "table_row": "Sports arena/playing area | Class III facility(8)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Sports arena playing area class IV facility(4)": {
+   "table_row": "Sports arena/playing area | Class IV facility(8)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Stairway/Stairwell": {
+   "table_row": "Stairwell | Stairwell",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "mapping": "stairwell_row",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions",
+   "note": "the catalog carries ONE 'Stairway/Stairwell' name; Table 4.2.1.6 has two rows - 'Stairway' (requirements = those of the space containing it) and 'Stairwell'. Mapped to the Stairwell row"
+  },
+  "Storage garage interior": {
+   "table_row": "Parking garage - interior | Parking garage - interior",
+   "sidelighting": "not_applicable",
+   "toplighting": "not_applicable",
+   "note": "Table 4.2.1.6 defers interior parking/storage garages to Article 4.2.2.2., whose Sentence (4) carries its OWN daylight-response rule (>150 W of luminaires within 6.1 m of a >=40%-glazed perimeter wall) instead of 4.2.2.1.(10)/(13)"
+  },
+  "Storage room < 5 m2": {
+   "table_row": "Storage room | Storage room <5m2",
+   "sidelighting": "not_required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "blank/dash in the 2025 extraction (no corroborating 2020 row matched)",
+   "evidence_toplighting": "blank/dash in the 2025 extraction (no corroborating 2020 row matched)"
+  },
+  "Storage room >= 5 m2": {
+   "table_row": "Storage room | ≥ 5 m²",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Transportation facility airport concourse": {
+   "table_row": "Transportation facility | airport concourse",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Transportation facility baggage/carousel area": {
+   "table_row": "Transportation facility | baggage/carousel area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Transportation facility terminal ticket counter": {
+   "table_row": "Transportation facility | terminal ticket counter",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Vehicle maintenance area": {
+   "table_row": "Vehicle maintenance area | Vehicle maintenance area",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Warehouse storage area medium to bulky palletized items": {
+   "table_row": "Warehouse - storage area | medium to bulky palletized items",
+   "sidelighting": "required",
+   "toplighting": "not_required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "blank/dash in both the 2020 and 2025 extractions"
+  },
+  "Warehouse storage area small hand-carried items(4)": {
+   "table_row": "Warehouse - storage area | small hand-carried items(8)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)",
+   "evidence_toplighting": "2025 extraction X; 2020 extraction cell empty (that extraction demonstrably drops cells)"
+  },
+  "Washroom - other": {
+   "table_row": "Washroom | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)": {
+   "table_row": "Washroom | Washroom for space designed to ANSI/IES RP-28 (and used primarily by residents)",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "Washroom other": {
+   "table_row": "Washroom | other",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  },
+  "WholeBuilding": {
+   "table_row": null,
+   "sidelighting": "unknown",
+   "toplighting": "unknown",
+   "evidence": "BUILDING-TYPE METHOD — NOT IN TABLE 4.2.1.6",
+   "note": "a WholeBuilding tag means the LPD came from the building-type method (Table 4.2.1.5). 4.2.2.1.(2) ties the control requirements to the space-by-space space types OF Table 4.2.1.6, which a WholeBuilding tag does not identify, so no column can be read"
+  },
+  "Workshop": {
+   "table_row": "Workshop | Workshop",
+   "sidelighting": "required",
+   "toplighting": "required",
+   "evidence_sidelighting": "X in both the 2020 and 2025 extractions",
+   "evidence_toplighting": "X in both the 2020 and 2025 extractions"
+  }
+ },
+ "residue": [
+  {
+   "space_type": "- undefined -",
+   "issue": "no Table 4.2.1.6 row",
+   "detail": "catalog sentinel for an unlisted space function (4.2.1.6.(1)(b) is a human judgement); the gem's reference transform already hard-raises on it"
+  },
+  {
+   "space_type": "Dwelling units general",
+   "issue": "no Table 4.2.1.6 row -> 4.2.2.1.(10)/(13) do not reach it (state not_listed)",
+   "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+  },
+  {
+   "space_type": "Dwelling units long-term",
+   "issue": "no Table 4.2.1.6 row -> 4.2.2.1.(10)/(13) do not reach it (state not_listed)",
+   "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+  },
+  {
+   "space_type": "Audience seating area permanent - convention centre",
+   "issue": "no Table 4.2.1.6 row",
+   "detail": "a legacy-only space function: NECB 2020/2025 Table 4.2.1.6 lists no 'for convention centre' row under 'Audience seating area - permanent', and the catalog LPD (8.8 W/m2) does not match that category's 'other' row (2.5 W/m2), so the 'other' catch-all is NOT a safe substitute"
+  },
+  {
+   "space_type": "WholeBuilding",
+   "issue": "building-type method, no Table 4.2.1.6 row",
+   "detail": "a WholeBuilding tag means the LPD came from the building-type method (Table 4.2.1.5). 4.2.2.1.(2) ties the control requirements to the space-by-space space types OF Table 4.2.1.6, which a WholeBuilding tag does not identify, so no column can be read"
+  },
+  {
+   "space_type": "Classroom/Lecture hall/Training room other",
+   "issue": "extraction CONFLICT on toplighting",
+   "detail": "2025 extraction blank, 2020 extraction X"
+  },
+  {
+   "space_type": "Health care facility physical therapy room",
+   "issue": "extraction CONFLICT on sidelighting",
+   "detail": "2025 extraction blank, 2020 extraction X"
+  },
+  {
+   "space_type": "Manufacturing facility low bay area (< 7.5 m floor-to-ceiling height)",
+   "issue": "extraction CONFLICT on toplighting",
+   "detail": "2025 extraction blank, 2020 extraction X"
+  },
+  {
+   "space_type": "Museum general exhibition area",
+   "issue": "extraction CONFLICT on sidelighting AND toplighting",
+   "detail": "2025 extraction blank on both, 2020 extraction X on both"
+  }
+ ]
+}

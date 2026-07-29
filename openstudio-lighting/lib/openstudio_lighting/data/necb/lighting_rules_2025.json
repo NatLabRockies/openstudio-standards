@@ -1,103 +1,116 @@
 {
-  "provenance": {
-    "vintage": "2025",
-    "generated": "2026-07-12",
-    "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPD values are IDENTICAL to 2020: Table 4.2.1.6 (2025) transcribed in full (lpd_space_functions_2025.json) and joined to the 2020 space-type records by normalized name — 162 exact matches with ZERO value differences (incl. all three atrium bins 4.2/5.2/6.5 W/m2 and manual spot checks of every rename); residual unmatched rows are renames ('Health care facility' -> 'Healthcare facility', the legacy 'Penitentary' typo, atrium bin phrasing) and dwelling units (handled by 8.4.4.5.(2), not the table). The significant edition diff is STRUCTURAL: 2025 added the per-row 4.2.2.1 lighting-control requirement matrix (vendored in lpd_space_functions_2025.json) and reorganized 4.2.2. Table 4.2.1.5 (2025) also transcribed (lpd_building_types_2025.json).",
-    "changes_vs_2020": {
-      "interior_lpd_values": "none found",
-      "controls": "4.2.2 reorganized into per-space-function requirement matrix (4.2.2.1 sentences); vendored as controls_4_2_2_1 per row"
-    }
-  },
-  "data_vintage_alias": "2020",
-  "sensor_schedule_lpd_threshold_w_per_ft2": 0.799256505,
-  "dwelling_unit_lpd_w_per_m2": 5.0,
-  "atrium_led": {
-    "below_12m": {
-      "intercept": 0.0,
-      "slope": 1.06
-    },
-    "at_or_above_12m": {
-      "intercept": 4.3,
-      "slope": 0.71
-    }
-  },
-  "article_coverage": {
-    "articles": [
-      {
-        "article": "4.2.1.4.",
-        "title": "Methods of Determining Interior Lighting Power Allowance",
-        "status": "implemented",
-        "how": "space-function method via NECB space-type records; building-type method via the vendored 2025 4.2.1.5 table"
-      },
-      {
-        "article": "4.2.1.5.",
-        "title": "Building Type Method LPD",
-        "status": "implemented",
-        "how": "2025 table vendored (lpd_building_types_2025.json)"
-      },
-      {
-        "article": "4.2.1.6.",
-        "title": "Space Function Method LPD",
-        "status": "implemented",
-        "how": "2025 table transcribed in full and verified value-identical to the 2020 space-type records (162 joined rows, 0 deltas)"
-      },
-      {
-        "article": "4.2.2.1.",
-        "title": "Interior lighting controls (2025 requirement matrix)",
-        "status": "partial",
-        "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); occupancy-based control is modeled via the sensor-schedule synthesis | daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name)",
-        "gaps": "photocontrol ENERGY evaluation not modeled"
-      },
-      {
-        "article": "4.2.3.1.",
-        "title": "Exterior Lighting Power Allowances",
-        "status": "implemented",
-        "how": "allowance calculator over the vendored Tables 4.2.3.1.-A..-E (2025 verified essentially unchanged, Table -D similarity 0.978) + ExteriorLights creation"
-      },
-      {
-        "article": "4.3.2.10.",
-        "title": "Occupancy/personal control factors",
-        "status": "implemented",
-        "how": "space-type keys drive the sensor-schedule synthesis"
-      },
-      {
-        "article": "8.4.5.5.(1)",
-        "title": "Reference building interior lighting power = Part 4 allowance",
-        "status": "implemented",
-        "how": "apply_lights sets the allowance LPD from the space-type records"
-      },
-      {
-        "article": "8.4.5.5.(2)",
-        "title": "Dwelling units 5 W/m2",
-        "status": "implemented",
-        "how": "reference_lighting overrides dwelling space types to 5 W/m2"
-      },
-      {
-        "article": "8.4.5.5.(3)",
-        "title": "Occupancy/personal control factors in the reference",
-        "status": "partial",
-        "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+",
-        "gaps": "strict reading multiplies installed power by Focc x Fpers"
-      },
-      {
-        "article": "8.4.5.5.(4)",
-        "title": "Radiant/convective/return-air fractions identical to proposed",
-        "status": "implemented",
-        "how": "fractions come from the same space-type records for both models"
-      },
-      {
-        "article": "8.4.5.5.(5)-(12)",
-        "title": "Reference daylighting geometry + photocontrols",
-        "status": "partial",
-        "how": "reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)",
-        "gaps": "sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation)"
-      },
-      {
-        "article": "8.4.1.1. (lighting)",
-        "title": "General — lighting accounted",
-        "status": "implemented",
-        "how": "Interior lighting accounted per the prescriptive Section 4.2 requirements via the reference lighting allowance (8.4.5.5.) — the realization of 8.4.1.1.(1) for the lighting slice. Unresolvable space types hard-fail rather than silently keeping the proposed LPD."
-      }
-    ]
+ "provenance": {
+  "vintage": "2025",
+  "generated": "2026-07-12",
+  "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPD values are IDENTICAL to 2020: Table 4.2.1.6 (2025) transcribed in full (lpd_space_functions_2025.json) and joined to the 2020 space-type records by normalized name — 162 exact matches with ZERO value differences (incl. all three atrium bins 4.2/5.2/6.5 W/m2 and manual spot checks of every rename); residual unmatched rows are renames ('Health care facility' -> 'Healthcare facility', the legacy 'Penitentary' typo, atrium bin phrasing) and dwelling units (handled by 8.4.4.5.(2), not the table). The significant edition diff is STRUCTURAL: 2025 added the per-row 4.2.2.1 lighting-control requirement matrix (vendored in lpd_space_functions_2025.json) and reorganized 4.2.2. Table 4.2.1.5 (2025) also transcribed (lpd_building_types_2025.json).",
+  "changes_vs_2020": {
+   "interior_lpd_values": "none found",
+   "controls": "4.2.2 reorganized into per-space-function requirement matrix (4.2.2.1 sentences); vendored as controls_4_2_2_1 per row"
   }
+ },
+ "data_vintage_alias": "2020",
+ "sensor_schedule_lpd_threshold_w_per_ft2": 0.799256505,
+ "dwelling_unit_lpd_w_per_m2": 5.0,
+ "atrium_led": {
+  "below_12m": {
+   "intercept": 0.0,
+   "slope": 1.06
+  },
+  "at_or_above_12m": {
+   "intercept": 4.3,
+   "slope": 0.71
+  }
+ },
+ "article_coverage": {
+  "articles": [
+   {
+    "article": "4.2.1.4.",
+    "title": "Methods of Determining Interior Lighting Power Allowance",
+    "status": "implemented",
+    "how": "space-function method via NECB space-type records; building-type method via the vendored 2025 4.2.1.5 table"
+   },
+   {
+    "article": "4.2.1.5.",
+    "title": "Building Type Method LPD",
+    "status": "implemented",
+    "how": "2025 table vendored (lpd_building_types_2025.json)"
+   },
+   {
+    "article": "4.2.1.6.",
+    "title": "Space Function Method LPD",
+    "status": "implemented",
+    "how": "2025 table transcribed in full and verified value-identical to the 2020 space-type records (162 joined rows, 0 deltas)"
+   },
+   {
+    "article": "4.2.2.1.(16)-(23)",
+    "title": "Occupancy and scheduled-shutoff lighting controls",
+    "status": "partial",
+    "how": "modeled as the NECB2015-lineage lighting-schedule synthesis (hourly x (1 - rel_absence_occ x occ_sense - personal_control) when occupancy < rel_absence_occ) for space types with LPD > 8.6 W/m2, using the Table 4.3.2.10 factors carried in the space-type data",
+    "gaps": "control HARDWARE (sensors) is not modeled as objects; area-threshold occupancy-sensor space-type cloning is 2011-only machinery (no-op in 2015+, out of scope); renumbered from the former bogus 4.2.2.2. citation (4.2.2.2. is \"Lighting Controls in Storage Garages\" in NECB 2020/2025, not occupancy controls)"
+   },
+   {
+    "article": "4.2.2.2.",
+    "title": "Lighting Controls in Storage Garages",
+    "status": "not_implemented",
+    "gaps": "zoning <=360 m2 (1), 30% occupancy reduction (2), 50% sunset-to-sunrise entrance/exit reduction (3) and the storage-garage-specific daylight response of (4) (>150 W of luminaires within 6.1 m of a >=40%-glazed perimeter wall) are NOT modelled; Table 4.2.1.6. refers 'Storage garage interior' here instead of to 4.2.2.1.(10)/(13), so those spaces are correctly EXCLUDED from the photocontrol rule rather than silently swept into it"
+   },
+   {
+    "article": "4.2.2.1.(10)-(15); 4.2.2.3.; 4.2.2.4.; 4.2.2.5.",
+    "title": "Interior lighting controls — daylighting (2025 requirement matrix)",
+    "status": "partial",
+    "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); daylighting photocontrol REQUIREMENT now follows the 2020/2025 code (D-57, placement: :necb2020, the default): Table 4.2.1.6.'s sidelighting/toplighting column gates each space type (daylighting_controls_4_2_1_6.json), then 4.2.2.1.(10) tests general-lighting INPUT POWER inside the primary sidelighted areas (>=150 W) or primary + secondary (>=300 W) and 4.2.2.1.(13) tests it inside the daylighted areas under skylights (>=150 W), the two INDEPENDENT. With a uniform space-level LPD that power is exactly LPD x daylighted_area. Exceptions honoured: (12)(a) obstruction ratio >=2 from ShadingSurfaces, (12)(b) glazing <2 m2, (12)(c) retail, (15)(b) skylight VT <0.4, (15)(c) >55 degN with <200 W. Daylighted AREAS per 4.2.2.3./4.2.2.5. with polygon UNION and NECB's primary > toplit > secondary precedence (DaylightedAreas), so overlaps are not double-counted. Sensors: Stepped x3 = 67%/33%/off per 4.2.2.1.(11)(a)(i)/(14)(a)(i), zone fraction = daylighted share of the zone floor area (not 1.0), space-type illuminance set-points, per-sensor costing BOM. The legacy NECB 2011 rule is still reachable as placement: :necb2011 (defects preserved and audited: any-single-criterion exception, skylight-only zero area, 2011-era office name) so the legacy parity gate stays callable",
+    "gaps": "4.2.2.1.(15)(a) (>1 500 h/yr of blocked direct sun) needs an annual solar-obstruction study and is NOT evaluated — a WARNING every run; not applying an exception is the strict direction. 4.2.2.4. ROOF MONITORS are not a distinguishable object in an OpenStudio model, so toplighted area covers skylights only. The vertical-obstruction bounds in 4.2.2.3.(3)(b)/(4)(b)/(8)(b) and 4.2.2.5.(2)(c) are honoured only at the space enclosure (areas are clipped to the floor); obstructions inside a space are not in the model. 4.2.2.1.(11)(b)'s independent control of the secondary band is modelled as ONE zone control covering the combined daylighted fraction, not two. 7 sidelighting and 8 toplighting Table 4.2.1.6. columns could not be resolved from the MCP extractions and take a documented conservative default with a LOUD warning (enumerated in daylighting_controls_4_2_1_6.json 'residue')"
+   },
+   {
+    "article": "4.2.3.1.",
+    "title": "Exterior Lighting Power Allowances",
+    "status": "implemented",
+    "how": "allowance calculator over the vendored Tables 4.2.3.1.-A..-E (2025 verified essentially unchanged, Table -D similarity 0.978) + ExteriorLights creation"
+   },
+   {
+    "article": "4.3.2.10.",
+    "title": "Occupancy/personal control factors",
+    "status": "implemented",
+    "how": "space-type keys drive the sensor-schedule synthesis"
+   },
+   {
+    "article": "8.4.5.5.(1)",
+    "title": "Reference building interior lighting power = Part 4 allowance",
+    "status": "implemented",
+    "how": "apply_lights sets the allowance LPD from the space-type records"
+   },
+   {
+    "article": "8.4.5.5.(2)",
+    "title": "Dwelling units 5 W/m2",
+    "status": "implemented",
+    "how": "reference_lighting overrides dwelling space types to 5 W/m2"
+   },
+   {
+    "article": "8.4.5.5.(3)",
+    "title": "Occupancy/personal control factors in the reference",
+    "status": "partial",
+    "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+",
+    "gaps": "strict reading multiplies installed power by Focc x Fpers"
+   },
+   {
+    "article": "8.4.5.5.(4)",
+    "title": "Radiant/convective/return-air fractions identical to proposed",
+    "status": "implemented",
+    "how": "fractions come from the same space-type records for both models"
+   },
+   {
+    "article": "8.4.5.5.(5)-(12)",
+    "title": "Reference daylighting geometry + photocontrols",
+    "status": "partial",
+    "how": "reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available); WHERE 4.2.2 requires photocontrols is decided by the 2020/2025 rule 4.2.2.1.(10)-(15) as of D-57 — before that it was the NECB 2011 criteria, which are conjunctive and so placed NO photocontrols on window-only spaces (L-26) [D-51 D-57]",
+    "gaps": "sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction"
+   },
+   {
+    "article": "8.4.1.1. (lighting)",
+    "title": "General — lighting accounted",
+    "status": "implemented",
+    "how": "Interior lighting accounted per the prescriptive Section 4.2 requirements via the reference lighting allowance (8.4.5.5.) — the realization of 8.4.1.1.(1) for the lighting slice. Unresolvable space types hard-fail rather than silently keeping the proposed LPD."
+   }
+  ]
+ }
 }

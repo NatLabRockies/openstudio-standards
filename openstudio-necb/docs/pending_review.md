@@ -440,3 +440,38 @@ Phase 7 was barred from this file, so NOTHING below is ticked; verify all of it.
       even with the conditional broken. Now scoped to
       `step == :lighting_reference`. Check no other assertion in the suite has
       the same weakness.
+
+### Phase 7 items raised by the implementer (merged by Fable)
+
+- [ ] **D-57 fleet sweep and attribution.** D-57 changes reference photocontrol
+      placement from 21 to 174 spaces over the 17 cached NECB2020 archetypes, so
+      it changes reference ENERGY on 14 of them. No sweep was run in Phase 7
+      (deferred gate). Run
+      `SWEEP_MODE=annual ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
+      from the repo root and compare line-by-line against the D-46 final table.
+      **Every building that moves needs an attributed cause.** Watch in
+      particular: RetailStandalone / RetailStripmall (toplighting only —
+      4.2.2.1.(12)(c) excepts retail sidelighting); PrimarySchool /
+      SecondarySchool (toplighting-heavy, the biggest movers); the three
+      Apartments (must stay put — their daylighted spaces are dwelling units,
+      which 4.2.2.1. does not reach, plus corridors that fail the 150 W test at
+      30 W); LargeOffice (moves here, 0 -> 12 spaces, so it is NOT a valid
+      control building for this change).
+- [ ] **The four unresolved Table 4.2.1.6 columns.** Both MCP extractions are
+      corrupted and disagree on 38 of 91 rows; four space types are left
+      `unknown` and take a conservative default (`Classroom/Lecture hall/Training
+      room other` toplighting — hit on **37 spaces** across the two schools;
+      `Health care facility physical therapy room` sidelighting — 2 spaces in
+      Outpatient; `Manufacturing facility low bay area` toplighting; `Museum
+      general exhibition area` both), plus `- undefined -`, `WholeBuilding` and
+      the legacy-only `Audience seating area permanent - convention centre`.
+      Resolve against a clean copy of the printed table (the residue list is
+      published in `daylighting_controls_4_2_1_6.json` for filing with hbix).
+- [ ] **Is `required` the right default for an unresolved column?** It tightens
+      the target, so it cannot grant an undeserved pass — but it can fail a
+      compliant building. Confirm the direction, or flip specific rows once the
+      printed table is available.
+- [ ] **4.2.2.1.(11)(b)** wants the secondary sidelighted area controlled
+      independently of the primary. One zone control over the combined
+      daylighted fraction is used instead. Decide whether two E+ controls
+      (primary + secondary, with split zone fractions) are worth the complexity.
