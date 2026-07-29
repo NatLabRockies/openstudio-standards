@@ -1493,6 +1493,43 @@ re-homes every schedule, setpoint and sizing path that used to reach it. The
 unit tests all passed both before and after this fix — only the fleet sweep
 saw it, which is why the sweep is a merge gate and not a formality.
 
+### D-46 DEFECT (2026-07-29, full-annual sweep): staged flow ratios make a CONSTANT-VOLUME system variable-volume — OPEN
+
+The full-annual sweep attributed almost all of staging's fleet gain to
+reference FAN energy, not coil efficiency: PSZ references fell 21-36% on fans
+(SmallOffice -36%, Warehouse -27%, SecondarySchool -23%) against 1-5% on
+heating and 8-22% on cooling. LargeOffice (system 6, no PSZ) is bit-identical
+end-use for end-use — a clean control confirming the change touches exactly
+what staging touches.
+
+Cause: `Coils.set_stage_flow_ratios` writes supply-airflow ratio k/N per
+stage, so stage 1 runs the fan at 1/N of design flow. Verified in the built
+IDF ("Cooling Speed Supply Air Flow Ratio 1 = 0.5"). But **Table 8.4.4.7.-B
+gives systems 1-5 "Constant-volume" fan control** — only system 6 is
+Variable-volume — and the staging sentences stage CAPACITY ("two stages of
+equal capacity"), never airflow. The fan power spec is right (640 Pa / 0.40
+per 8.4.4.18, confirmed reaching the fan inside the container); it is the
+flow PROFILE that the code does not authorise. The reference is therefore
+more efficient than the code prescribes, making the target too strict — a
+proposed building could fail against a reference it should have beaten.
+
+Why it is not a one-line fix: the k/N flow ratios are also the MECHANISM by
+which the equal capacity increments realize themselves under autosizing
+(D-46's central design choice — Phase-0 gate 1 measured stage capacities at
+exactly k/N of total). Setting every ratio to 1.0 restores constant volume but
+autosizes every stage to the same capacity, i.e. no staging at all.
+
+Recommended resolution: set all supply-airflow ratios to 1.0 (constant volume)
+and hard-set stage capacities to k/N of the sized total, with those capacities
+released by `NECB.prepare_for_resizing` before each re-size and re-applied
+after — the same release/re-apply pattern the D-27 amendment established for
+pump power, which did not exist when D-46 was designed and which removes the
+original objection to hard-setting.
+
+STATUS: OPEN. Every PSZ number in the 2026-07-29 full-annual sweep is
+PROVISIONAL until this is resolved; the system-6/hydronic/MURB numbers are
+unaffected.
+
 ## D-47 — Stage count CLAMPED at the EnergyPlus four-stage ceiling, with a shouted warning on every clamp
 
 **What.** `Coil:Cooling:DX:MultiSpeed`, `Coil:Heating:DX:MultiSpeed` and
