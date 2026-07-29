@@ -2,10 +2,11 @@
 
 **Status: OPEN. The work below was implemented WITHOUT a review pass.**
 
-The backlog closing NECB 8.4.4.13.(2)(b)/(g), 5.2.2.9 water-side economizers,
-8.4.4.15.(2) DCV copy, humidification rebuild, 8.4.4.20.(5) SHW part-load
-curves and 8.4.4.5.(5)-(12) daylighting was implemented on 2026-07-29 with the
-review deferred (no reviewer available that day).
+Most of the backlog closing 5.2.2.9 water-side economizers, 8.4.4.15.(2) DCV
+copy, humidification rebuild, 8.4.4.20.(5) SHW part-load curves and
+8.4.4.5.(5)-(12) daylighting was implemented on 2026-07-29 with the review
+deferred (no reviewer available that day). **8.4.4.13.(2)(b)/(g) — Phase 5 —
+was NOT implemented.** See the status table below for exactly what landed.
 
 Until every box below is ticked with evidence:
 
@@ -21,6 +22,51 @@ decision log; the phase numbering below matches it.
 Written 2026-07-29 because the review pass could not run the same day. Each
 item is a check the implementer cannot self-certify; tick with evidence
 (`[RAN]` + the command, or `[READ]` + file:line), not with assertion.
+
+## STATUS AT A GLANCE — read this first (updated 2026-07-29, end of day)
+
+| Phase | What | State | Commit |
+|---|---|---|---|
+| 0 | Doc truth-up (stale gap strings, conditional lighting warning) | **LANDED, unreviewed** | `6ac9434e4` |
+| 1 | SHW part-load curve / scope (D-53) | **LANDED, unreviewed** | `6ac9434e4` |
+| 2 | Reference daylighting ON by default (D-51) | **LANDED, unreviewed** — and largely INERT, see below | `6ac9434e4` |
+| — | L-26 legacy finding (daylighting criteria are NECB 2011) | ledgered | `aa01577f7` |
+| 3 | DCV copy 8.4.4.15.(2) (D-54) | **LANDED, unreviewed** | `843e72e9c` |
+| 4 | Humidification rebuild (D-55) | **LANDED, unreviewed** | `843e72e9c` |
+| 6 | Water-side economizer 5.2.2.9 (D-56) | **LANDED, unreviewed** | `edb793c57` |
+| 7 | Daylighting per NECB 2020 4.2.2.1.(10)/(13) (D-57) | **IN FLIGHT at end of day** — verify it landed and is green before reviewing | TBD |
+| **5** | **HP capacity (2)(b) + (2)(g) real annual-energy election** | **NOT IMPLEMENTED — NOT STARTED** | — |
+
+**Phase 5 was never dispatched.** Its checklist section below is a plan, not a
+review target. It carries the batch's biggest architectural risk (moving the
+proposed annual run ahead of the reference build) and should be scoped fresh.
+
+### Fable's own merge debt, carried into tomorrow
+
+- [ ] **Register D-57.** Phase 7 was barred from `openstudio-necb/**` to avoid a
+      concurrent-write race, so it wrote its decision entry to
+      `scratchpad/d57_for_merge.md` and left `ruling: 'D-57'` cited from
+      `openstudio-lighting`. Merge it into `necb_decisions.md` +
+      `decisions.json`, then re-run `test_decisions_registry.rb` and
+      `test_compliance.rb` — BOTH are currently RED on the unregistered id and
+      that is expected, not a defect.
+- [ ] **Fix a malformed `ruling:` literal** the Phase 6 agent spotted in the
+      lighting work: a DYNAMIC `ruling: article['ruling']` (reported at
+      `apply_lights.rb:331`). The D-44 convention requires a single-quoted
+      literal on ONE line so the static drift grep can see it; the registry
+      test enforces this. Confirm the exact location after Phase 7 lands — the
+      file may have moved.
+- [ ] **Candidate hbix issue, demonstrable this time.** `get_table('necb',
+      '4.2.1.6')` returns the right 12 headers (including the two
+      daylight-responsive-control columns) and 103 rows, but the extraction is
+      partly corrupted: `Space Category`/`Space Type` are misaligned on some
+      rows and several cells carry header fragments as data
+      (`'of Lighting Control(1)'`, `'Space Types'`, `'be the same as'`,
+      `'See Article 4.2.2.2.'`). Phase 7 was told to vendor only confidently
+      mappable rows and to hand back the unmappable list with a count — use
+      that list as the issue body. NB: an earlier "missing articles
+      4.2.2.7-4.2.2.10" issue was NOT filed because those articles do not
+      exist; do not resurrect it.
 
 ### Cross-cutting (apply to EVERY phase)
 
@@ -219,7 +265,7 @@ refutation, not just the diff.
       None of the 15 archetypes does, so no archetype should move; verify in
       the sweep.
 
-### Phase 5 — HP (2)(b) + (2)(g)
+### Phase 5 — HP (2)(b) + (2)(g) — **NOT IMPLEMENTED; this is a PLAN, not a review target**
 - [ ] **The pipeline reorder is the risk item.** Confirm nothing mutates the
       proposed between its sizing run and the reference build before relying
       on the earlier annual run; confirm capacity iteration still re-runs what
@@ -300,6 +346,32 @@ refutation, not just the diff.
       a warning instead of an exchanger (no evaporatively cooled fluid to
       economize with) rather than being silently skipped.
 
+### Phase 7 — daylighting per NECB 2020 (D-57) — agent could not tick these
+
+Phase 7 was barred from this file, so NOTHING below is ticked; verify all of it.
+
+- [ ] The rule implemented is 4.2.2.1.(10)/(13), and the two are INDEPENDENT
+      (the L-26 defect was ANDing four NECB 2011 criteria). Confirm no
+      conjunction survives.
+- [ ] Power tests use `LPD x daylighted_area >= 150 W` (300 W for
+      primary+secondary). Confirm the derivation is stated in the audit, and
+      that it is sound for our uniform space-level LPD.
+- [ ] The (12) and (15) EXCEPTIONS are honoured, not skipped: obstruction ratio
+      >= 2, glazing < 2 m2, retail; blocked sun > 1500 h/yr, skylight VT < 0.4,
+      above 55 degN with < 200 W.
+- [ ] Areas are UNIONED (no double-counting per 4.2.2.3.(1)/4.2.2.4.(1)/
+      4.2.2.5.(1)) and SECONDARY sidelighted areas now exist — the old port had
+      neither. Confirm against `space_daylighted_areas`, which it was told to
+      port rather than rewrite.
+- [ ] Table 4.2.1.6 gating: only confidently-mapped space types vendored;
+      unmapped ones WARN loudly with a documented conservative default, never a
+      silent decision. Get the unmappable count.
+- [ ] The NECB 2011 path stays reachable and `test_daylighting_parity.rb` still
+      passes (needs `BUNDLE_GEMFILE=.../Gemfile bundle exec`).
+- [ ] Bogus citations fixed (4.2.2.9/4.2.2.10 do not exist in NECB 2020).
+- [ ] **Energy-affecting and unswept — this is what D-51 was supposed to
+      deliver.** The ten previously-inert archetypes are the ones to watch.
+
 ### Final, once all phases land
 - [ ] ONE `SWEEP_MODE=full` run; the resulting table replaces D-46's in
       `necb_decisions.md` with an explicit note of what it supersedes.
@@ -327,7 +399,9 @@ refutation, not just the diff.
       in NECB 2020, and our audit string citing them is itself wrong. The real
       requirement is **4.2.2.1.(10)-(15)** — see **L-26**. This nearly became
       false premise #7; the refuting check was one `get_section` call.
-- [ ] **RULING NEEDED (supersedes the D-51 inertness item above).** Our
+- [x] ~~RULING NEEDED~~ **RULED by phylroy 2026-07-29: the reference follows
+      NECB 2020.** Implemented as Phase 7 (D-57) — verify it landed.
+      Original framing kept for the reasoning: Our
       selection uses NECB 2011 area/effective-aperture criteria, ANDed, while
       NECB 2020 4.2.2.1.(10)/(13) uses INPUT-POWER thresholds (>=150 W
       sidelit, >=300 W primary+secondary, >=150 W toplit) gated by the space
