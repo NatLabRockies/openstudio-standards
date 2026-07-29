@@ -9,8 +9,8 @@ module OpenStudioNECB
       module_function
 
       ORDER = %i[header verdict_banner path_declaration checklist energy ghg envelope
-                 hvac lighting loads shw costing coverage_appendix audit_appendix
-                 declarations].freeze
+                 hvac lighting loads shw costing coverage_appendix rulings_appendix
+                 audit_appendix declarations].freeze
 
       DOMAIN_STEPS = {
         envelope: %w[envelope reference_envelope thermal_bridging fdwr srr],
@@ -49,7 +49,7 @@ module OpenStudioNECB
               <a href="#verdict">Summary</a><a href="#paths">Compliance paths</a><a href="#checklist">Checklist</a>
               <a href="#energy">Energy</a>#{ctx[:report].dig('proposed', 'ghg_kg_co2e') ? '<a href="#ghg">GHG</a>' : ''}<a href="#envelope">Envelope</a><a href="#hvac">HVAC</a>
               <a href="#lighting">Lighting</a><a href="#loads">Loads</a><a href="#shw">SHW</a>
-              <a href="#coverage">Coverage</a><a href="#audit">Audit trail</a>
+              <a href="#coverage">Coverage</a><a href="#rulings">Decisions</a><a href="#audit">Audit trail</a>
             </nav>
           </header>
         HTML
@@ -466,6 +466,43 @@ module OpenStudioNECB
         when 'not_implemented' then [:fail, 'not implemented']
         else [:na, '—']
         end
+      end
+
+      # -- 10b ---------------------------------------------------------------
+      # The DECISIONS axis of the audit trail. Where the coverage appendix
+      # reports which CODE ARTICLES this run acted on, this one reports which of
+      # the project's adjudicated interpretations actually fired — the "why did
+      # it do it that way" a reader cannot get from the article citation alone.
+      #
+      # Self-containment: the summary text IS the documentation (no links out —
+      # the report is one file and cites nothing external, by contract).
+      # Always rendered, because the TOC link is unconditional and the html
+      # tests assert every href resolves.
+      def rulings_appendix(ctx)
+        fired = {} # id => { count:, first_index: }
+        ctx[:audit_entries].each_with_index do |e, i|
+          Decisions.ids_in(e[:ruling]).each do |id|
+            hit = (fired[id] ||= { count: 0, first_index: i })
+            hit[:count] += 1
+          end
+        end
+        body =
+          if fired.empty?
+            '<p>No ruled code paths fired in this run.</p>'
+          else
+            rows = fired.sort.map do |id, hit|
+              entry = Decisions.lookup(id)
+              title = entry ? entry['title'] : 'not in registry'
+              summary = entry ? entry['summary'] : "Decision #{id} was cited by this run but is not in the decision registry."
+              [id, title, summary, hit[:count],
+               H.raw(%(<a href="#audit-#{hit[:first_index]}">entry #{hit[:first_index]}</a>))]
+            end
+            H.table(['Decision', 'Title', 'What was decided, and why', 'Times applied', 'First audit entry'], rows)
+          end
+        note = %(<p class="meta">Modelling the code requires interpreting it. Each row is an
+          interpretation or implementation choice this project adopted and that this run acted on;
+          the audit entries above carry the same identifiers alongside the article citation.</p>)
+        H.section('rulings', 'Decisions and assumptions applied', body + note, page_break: true)
       end
 
       # -- 11 ----------------------------------------------------------------

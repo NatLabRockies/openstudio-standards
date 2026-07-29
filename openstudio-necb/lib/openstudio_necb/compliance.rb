@@ -553,7 +553,7 @@ module OpenStudioNECB
               inputs[:zones] = factors['zones'].first(8).to_h
             end
             inputs[:global] = factors['global'] if factors['global']
-            audit.decision(:compliance, summary, inputs: inputs, article: '8.4.1.2.(5)')
+            audit.decision(:compliance, summary, inputs: inputs, article: '8.4.1.2.(5)', ruling: 'D-43')
 
             dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
             if label == 'reference'
@@ -583,7 +583,8 @@ module OpenStudioNECB
         audit.warn(:compliance,
                    "capacity iteration #{iteration} produced no unmet-hours improvement — the failing " \
                    'equipment is not responding to sizing-factor increases (hard-sized capacity, or the ' \
-                   'gate concerns equipment the building does not have); stopping', article: '8.4.1.2.(5)')
+                   'gate concerns equipment the building does not have); stopping', article: '8.4.1.2.(5)',
+                   ruling: 'D-43')
         record['stalled'] = true
         break
       end
@@ -804,7 +805,8 @@ module OpenStudioNECB
       resolved = Archetypes.resolve!(proposed, mapping, audit: audit)
       problems = Archetypes.applicability_problems(resolved, hdd: hdd, audit: audit)
       unless problems.empty?
-        audit.warn(:compliance, 'EUI supplement NOT COMPUTED — outside 8.4.4 applicability', article: '8.4.4.1.(1)')
+        audit.warn(:compliance, 'EUI supplement NOT COMPUTED — outside 8.4.4 applicability', article: '8.4.4.1.(1)',
+                   ruling: 'D-04')
         return { 'computed' => false, 'reason' => "outside 8.4.4 applicability: #{problems.join('; ')}" }
       end
 
@@ -831,7 +833,7 @@ module OpenStudioNECB
                    'EUI supplement NOT COMPUTED — the proposed does not conform to Table 8.4.4.2, so the ' \
                    'reference-path annual result cannot lawfully serve the 8.4.4 verdict (pass ' \
                    'eui_supplement: {run_normalized: true} to run the normalized proposed)',
-                   article: '8.4.4.2.(1)')
+                   article: '8.4.4.2.(1)', ruling: 'D-04')
         return { 'computed' => false,
                  'reason' => 'proposed does not conform to Table 8.4.4.2 (run_normalized not requested)',
                  'mismatches' => check[:mismatches].first(50) }
@@ -842,7 +844,7 @@ module OpenStudioNECB
                      eui_ok ? 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)' \
                             : 'proposed does NOT meet the archetype-EUI target (8.4.4 path)',
                      inputs: { proposed_kwh: proposed_kwh, bet_kwh: target['bet_kwh'], basis: source },
-                     article: '8.4.4.1.(2); 8.4.4.2.(1)')
+                     article: '8.4.4.1.(2); 8.4.4.2.(1)', ruling: 'D-04')
       { 'computed' => true, 'bet_kwh' => target['bet_kwh'], 'compliant' => eui_ok,
         'basis' => source, 'lines' => target['lines'] }
         .merge(Tiers.energy_tier(proposed_kwh, target['bet_kwh']))
@@ -881,7 +883,7 @@ module OpenStudioNECB
                    "space type '#{name}' [#{bt.inspect}, #{st.inspect}] is UNRESOLVABLE against the NECB " \
                    "#{data_vintage} catalog — lighting/loads/SHW rules cannot be established for " \
                    "#{spaces.size} space(s)",
-                   target: spaces.join(', '), article: '8.4.3.1.(2); 4.2.1.6.')
+                   target: spaces.join(', '), article: '8.4.3.1.(2); 4.2.1.6.', ruling: 'D-02')
         hint = if st
                  suggestions = suggest_space_types(st, catalog)
                  suggestions.empty? ? '' : " — did you mean: #{suggestions.join(' | ')}?"

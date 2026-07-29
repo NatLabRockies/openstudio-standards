@@ -61,7 +61,7 @@ module OpenStudioHVAC
       category, = votes.max_by { |cat, count| [count, cat.nil? ? 0 : 1] }
       if votes.keys.compact.size > 1
         audit&.warn(:selection, '8.4.4.7.(1) assigns systems PER THERMAL BLOCK, but this zone group mixes '                                 "categories #{votes.keys.compact.join(' / ')} — majority (#{category}) applied "                                 'to the whole group', target: group[:air_loop] || group[:zones].first,
-                    article: '8.4.4.7.(1)')
+                    article: '8.4.4.7.(1)', ruling: 'D-22')
       end
       if category.nil?
         category = selection['default_category']
@@ -131,7 +131,7 @@ module OpenStudioHVAC
       # family lands in the compatible-cooling copy branch.
       if heat_pump_redirects?(group)
         audit&.decision(:selection, 'residential with heat pump -> ASHP reference redirect (A1/D-34: follow legacy)',
-                        target: group[:zones].join(','), article: '8.4.4.7.(4)')
+                        target: group[:zones].join(','), article: '8.4.4.7.(4)', ruling: 'D-34')
         return Assignment.new(zones: group[:zones], category: category, reference_system: 1,
                               action: :build, articles: articles + ['8.4.4.7.(4)'])
       end
@@ -190,14 +190,14 @@ module OpenStudioHVAC
                         target: group[:zones].join(','),
                         inputs: { selected_system: assignment.reference_system,
                                   heat_pump_sources: group[:heat_pump_sources] },
-                        value: 'hp', article: hp_rule['article'])
+                        value: 'hp', article: hp_rule['article'], ruling: 'D-37')
         assignment.reference_system = 'hp'
         assignment.articles << hp_rule['article']
       elsif group[:heat_pump] && !heat_pump_redirects?(group)
         audit&.decision(:selection, 'water-loop heat pump — Table 8.4.4.7.-A selection retained (no ASHP redirect)',
                         target: group[:zones].join(','),
                         inputs: { selected_system: assignment.reference_system },
-                        article: '8.4.4.13.(1); Note A-8.4.4.13')
+                        article: '8.4.4.13.(1); Note A-8.4.4.13', ruling: 'D-37')
       end
 
       assignment.energy_type = reference_energy_type(group, selection, facts, audit)
@@ -217,14 +217,14 @@ module OpenStudioHVAC
         if group[:heated]
           audit&.decision(:selection, 'System 5 reference keeps its heating — proposed block is heated, 8.4.4.1.(5) presence override of the Table -B "None" heating column',
                           target: group[:zones].join(','),
-                          article: '8.4.4.1.(5); Table 8.4.4.7.-B')
+                          article: '8.4.4.1.(5); Table 8.4.4.7.-B', ruling: 'D-39')
         else
           assignment.config = (assignment.config || {}).merge(
             'heating' => 'none', 'needs_boiler' => false, 'mau_heating_coil_type' => 'None'
           )
           audit&.decision(:selection, 'System 5 reference built COOLING-ONLY — Table 8.4.4.7.-B heating "None" honoured (proposed block is unheated)',
                           target: group[:zones].join(','),
-                          article: 'Table 8.4.4.7.-B; 8.4.4.1.(5)')
+                          article: 'Table 8.4.4.7.-B; 8.4.4.1.(5)', ruling: 'D-39')
         end
       end
 
@@ -298,14 +298,14 @@ module OpenStudioHVAC
         next unless c.minimumOutdoorAirFlowRate.is_initialized
 
         audit.warn(:build, "proposed OA controller '#{c.nameString}' carries a HARD-SET minimum OA "                            "(#{(c.minimumOutdoorAirFlowRate.get * 1000).round(0)} L/s) — the rebuilt reference "                            'autosizes OA from the space DSOA; verify 8.4.4.15.(1) identity',
-                   article: '8.4.4.15.(1)')
+                   article: '8.4.4.15.(1)', ruling: 'D-22')
       end
       # T8 (Table 8.4.4.7.-B note (1)): humidifiers on replaced loops vanish with
       # the loop; the reference would silently lose humidification.
       humidifiers = reference.getHumidifierSteamElectrics.size + reference.getHumidifierSteamGass.size
       if humidifiers.positive?
         audit.warn(:build, "proposed model has #{humidifiers} humidifier(s) — reference humidification with the "                            'same energy source is NOT rebuilt (Table 8.4.4.7.-B note (1)) — modeller attention',
-                   article: '8.4.4.7.')
+                   article: '8.4.4.7.', ruling: 'D-22')
       end
       # D-28 (LargeOffice end-use isolation): Note (3) to Table 8.4.4.7.-B
       # scopes a MULTIZONE reference system to the thermal blocks of ALL
@@ -333,7 +333,7 @@ module OpenStudioHVAC
         audit.decision(:build, 'multizone selection groups merged into whole-building systems',
                        inputs: { selection_groups: assignments.size, merged_groups: merged.size },
                        value: 'one multizone system spans the thermal blocks of all storeys; facade/internal/underground split applied inside the builder',
-                       article: 'Table 8.4.4.7.-B Note (3)')
+                       article: 'Table 8.4.4.7.-B Note (3)', ruling: 'D-28')
       end
       assignments = merged.map(&:last)
 
@@ -399,7 +399,7 @@ module OpenStudioHVAC
       audit.decision(:build, 'zone-equipment supply fans set to the systems 1-5 spec',
                      inputs: { fans: touched, pressure_pa: pressure, total_efficiency: eff },
                      value: "#{touched} zone fan(s) at #{pressure} Pa / #{(eff * 100).round}%",
-                     article: '8.4.4.18.(3)')
+                     article: '8.4.4.18.(3)', ruling: 'D-22')
     end
 
     # T3 (audit 2026-07-25): 8.4.4.12 economizers apply only where Article
@@ -427,7 +427,7 @@ module OpenStudioHVAC
         end
         chw = air_loop.supplyComponents.any? { |c| c.to_CoilCoolingWater.is_initialized }
         if supply.nil?
-          audit.warn(:rules, "#{air_loop.nameString}: supply flow not sized — 5.2.2.7 economizer trigger "                              'not evaluated (economizer retained)', article: '5.2.2.7.(1)')
+          audit.warn(:rules, "#{air_loop.nameString}: supply flow not sized — 5.2.2.7 economizer trigger "                              'not evaluated (economizer retained)', article: '5.2.2.7.(1)', ruling: 'D-22')
           next
         end
         # chilled-water systems (sys 2/5/6) are large by construction; the kW
@@ -437,13 +437,13 @@ module OpenStudioHVAC
           audit.decision(:rules, 'economizer retained (5.2.2.7 trigger met)',
                          target: air_loop.nameString,
                          inputs: { supply_l_s: (supply * 1000).round(0), cooling_kw: (cooling_w / 1000.0).round(1) },
-                         value: ctrl.getEconomizerControlType, article: '8.4.4.12.; 5.2.2.7.(1)')
+                         value: ctrl.getEconomizerControlType, article: '8.4.4.12.; 5.2.2.7.(1)', ruling: 'D-22')
         else
           ctrl.setEconomizerControlType('NoEconomizer')
           audit.decision(:rules, 'economizer REMOVED — below the 5.2.2.7 trigger (<=1500 L/s and <=20 kW)',
                          target: air_loop.nameString,
                          inputs: { supply_l_s: (supply * 1000).round(0), cooling_kw: (cooling_w / 1000.0).round(1) },
-                         value: 'NoEconomizer', article: '8.4.4.12.; 5.2.2.7.(1)')
+                         value: 'NoEconomizer', article: '8.4.4.12.; 5.2.2.7.(1)', ruling: 'D-22')
         end
       end
       audit
@@ -489,7 +489,7 @@ module OpenStudioHVAC
       audit.warn(:build, 'proposed EMS artifacts with DANGLING references removed from the reference ' \
                          "(#{removed.size}): #{removed.first(6).join('; ')}#{removed.size > 6 ? ' …' : ''} — " \
                          'reference controls come from the reference ruleset, not proposed EMS overrides',
-                 article: '8.4.4.1.')
+                 article: '8.4.4.1.', ruling: 'D-16')
     end
 
     # D-14: reference air systems inherit the proposed's operating schedule
@@ -505,7 +505,7 @@ module OpenStudioHVAC
         if schedules.empty?
           loop_.setNightCycleControlType('CycleOnAny') # T5: harmless with Always On, correct once scheduled
           audit.info(:build, 'no proposed air-system operating schedule to inherit — builder default retained',
-                     target: loop_.nameString, article: '8.4.3.2.(1)')
+                     target: loop_.nameString, article: '8.4.3.2.(1)', ruling: 'D-14')
           next
         end
         tally = schedules.group_by(&:nameString)
@@ -521,11 +521,11 @@ module OpenStudioHVAC
         if tally.size > 1
           audit.warn(:build, "zones carried #{tally.size} DIFFERENT proposed operating schedules — " \
                              "'#{chosen.nameString}' (most zones) applied to the whole reference loop",
-                     target: loop_.nameString, article: '8.4.3.2.(1)')
+                     target: loop_.nameString, article: '8.4.3.2.(1)', ruling: 'D-14')
         else
           audit.decision(:build, 'reference system operates on the proposed operating schedule',
                          target: loop_.nameString, inputs: { schedule: chosen.nameString },
-                         value: chosen.nameString, article: '8.4.3.2.(1)')
+                         value: chosen.nameString, article: '8.4.3.2.(1)', ruling: 'D-14')
         end
       end
     end
@@ -613,7 +613,7 @@ module OpenStudioHVAC
       if reference_system == 1
         audit.info(:build, 'System 1 (100% OA makeup air): economizer not applicable — an all-outdoor-air ' \
                            'system cannot economize, and the economizer signal would lock out the 5.2.10.1 ' \
-                           'energy-recovery wheel all winter', article: "#{prefix}.12.")
+                           'energy-recovery wheel all winter', article: "#{prefix}.12.", ruling: 'D-20')
         return
       end
 
@@ -630,7 +630,7 @@ module OpenStudioHVAC
         controller.setEconomizerControlType('DifferentialEnthalpy')
         audit.decision(:build, 'air economizer applied (5.2.2.8: up to 100% outdoor air, differential-enthalpy reversion)',
                        target: air_loop.nameString,
-                       article: "#{prefix}.12. (Table -12 -> 5.2.2.8)")
+                       article: "#{prefix}.12. (Table -12 -> 5.2.2.8)", ruling: 'D-20')
       end
     end
 
@@ -711,7 +711,8 @@ module OpenStudioHVAC
                  optional_flow(ctrl.autosizedMinimumOutdoorAirFlowRate)
         if supply.nil? || min_oa.nil? || supply.zero?
           audit.warn(:rules, '5.2.10.1 energy-recovery trigger needs SIZED supply/OA flows — not evaluated ' \
-                             '(run sizing first)', target: air_loop.nameString, article: rule['trigger_article'])
+                             '(run sizing first)', target: air_loop.nameString, article: rule['trigger_article'],
+                     ruling: 'D-06')
           next
         end
 
@@ -720,7 +721,7 @@ module OpenStudioHVAC
         hours = annual_availability_hours(air_loop)
         if hours.nil?
           audit.warn(:rules, 'fan availability hours not computable — conservatively classified CONTINUOUS',
-                     target: air_loop.nameString, article: rule['trigger_article'])
+                     target: air_loop.nameString, article: rule['trigger_article'], ruling: 'D-06')
         end
         mode = hours.nil? || hours >= rule['continuous_hours_per_year'] ? 'continuous' : 'non_continuous'
         required, threshold_desc = erv_threshold_verdict(rule, mode, hdd, oa_pct, supply_l_s)
@@ -734,10 +735,12 @@ module OpenStudioHVAC
                          value: "rotary HX @ #{(rule['effectiveness'] * 100).round}% sensible+latent effectiveness " \
                                 "(= #{(rule['effectiveness'] * 100).round}% ENTHALPY effectiveness by identity, " \
                                 "the 5.2.10.1.(4) minimum) with 5.2.10.1.(6) overshoot control (#{erv.nameString})",
-                         article: "#{rule['article']}; #{rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)")
+                         article: "#{rule['article']}; #{rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)",
+                         ruling: 'D-06 D-15')
         else
           audit.decision(:rules, 'energy recovery not required (below the Table 5.2.10.1 threshold)',
-                         target: air_loop.nameString, inputs: inputs, article: rule['trigger_article'])
+                         target: air_loop.nameString, inputs: inputs, article: rule['trigger_article'],
+                         ruling: 'D-06')
         end
       end
       audit
@@ -873,7 +876,7 @@ module OpenStudioHVAC
                                generic_zone_factors_cleared: cleared },
                      value: "heating sizing factor #{heat_ref.round(3)} = min(proposed #{heat_prop.round(3)}, cap #{(1.0 + caps['heating_max_fraction']).round(2)}); " \
                             "cooling #{cool_ref.round(3)} = min(proposed #{cool_prop.round(3)}, cap #{(1.0 + caps['cooling_max_fraction']).round(2)})",
-                     article: caps['article'])
+                     article: caps['article'], ruling: 'D-22')
     end
 
     # 8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;

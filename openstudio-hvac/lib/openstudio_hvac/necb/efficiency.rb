@@ -148,10 +148,10 @@ module OpenStudioHVAC
         stats = proposed_pump_stats(proposed)
         if proposed.nil?
           audit&.info(:efficiency, "no proposed model supplied — #{prefix}.14.(1)-(3) pump power transfer " \
-                                   "skipped (Table #{prefix}.14. curves still applied)")
+                                   "skipped (Table #{prefix}.14. curves still applied)", ruling: 'D-11')
         elsif stats.empty?
           audit&.warn(:efficiency, 'proposed model has NO pumps with determinable power+flow — ' \
-                                   "#{prefix}.14.(1)-(3) power NOT transferred to any reference pump")
+                                   "#{prefix}.14.(1)-(3) power NOT transferred to any reference pump", ruling: 'D-11')
         end
         model.getPlantLoops.sort_by(&:nameString).each do |loop_|
           # 8.4.4.14 scopes HVAC hydronic pumping; a service-water loop's
@@ -162,7 +162,7 @@ module OpenStudioHVAC
           # fleet passed the same code path only by arithmetic luck.
           if swh_loop?(loop_)
             audit&.info(:efficiency, 'service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built',
-                        target: loop_.nameString)
+                        target: loop_.nameString, ruling: 'D-27')
             next
           end
 
@@ -183,7 +183,7 @@ module OpenStudioHVAC
                                         minimum_flow_fraction: row['d'], loop: loop_.nameString },
                               value: flow ? "below-D floor (E=#{row['e']}) via min flow #{(row['d'] * flow).round(5)} m3/s" \
                                           : 'coefficients set; min-flow clamp deferred (flow not sized)',
-                              article: "#{prefix}.14.(4)-(5); Table #{prefix}.14.")
+                              article: "#{prefix}.14.(4)-(5); Table #{prefix}.14.", ruling: 'D-11')
               transfer_pump_power(pump, flow, loop_type, stats, prefix, audit) if proposed && !stats.empty?
             elsif comp.to_PumpConstantSpeed.is_initialized && proposed && !stats.empty?
               pump = comp.to_PumpConstantSpeed.get
@@ -211,7 +211,7 @@ module OpenStudioHVAC
 
         if thermal_kw.nil? || thermal_kw <= 0.0
           audit&.info(:efficiency, "5.2.6.3 pump-power cap not evaluable — loop's peak thermal demand unsized",
-                      target: loop_.nameString, article: '5.2.6.3.(1)')
+                      target: loop_.nameString, article: '5.2.6.3.(1)', ruling: 'D-38')
           return
         end
         pumps = loop_.supplyComponents.filter_map do |c|
@@ -220,7 +220,7 @@ module OpenStudioHVAC
         powers = pumps.map { |p| optional_f(p.ratedPowerConsumption) || optional_f(p.autosizedRatedPowerConsumption) }
         if pumps.empty? || powers.any?(&:nil?)
           audit&.info(:efficiency, '5.2.6.3 pump-power cap not evaluable — pump power unsized',
-                      target: loop_.nameString, article: '5.2.6.3.(1)')
+                      target: loop_.nameString, article: '5.2.6.3.(1)', ruling: 'D-38')
           return
         end
         combined = powers.sum
@@ -230,7 +230,7 @@ module OpenStudioHVAC
                       target: loop_.nameString,
                       inputs: { combined_w: combined.round, cap_w: cap_w.round, w_per_kw: rate,
                                 thermal_kw: thermal_kw.round(1), system_type: row },
-                      article: '5.2.6.3.(1)')
+                      article: '5.2.6.3.(1)', ruling: 'D-38')
           return
         end
 
@@ -249,7 +249,7 @@ module OpenStudioHVAC
                         inputs: { before_w: combined.round, cap_w: cap_w.round, w_per_kw: rate,
                                   thermal_kw: thermal_kw.round(1), system_type: row, scale: factor.round(3) },
                         value: "#{combined.round} W -> #{cap_w.round} W",
-                        article: "5.2.6.3.(1); #{prefix}.1.(2)")
+                        article: "5.2.6.3.(1); #{prefix}.1.(2)", ruling: 'D-38')
       end
 
       # Table 5.2.6.3 row + the loop's peak thermal demand (kW). A loop hosting
@@ -328,12 +328,13 @@ module OpenStudioHVAC
         s = stats[loop_type]
         if s.nil?
           audit&.warn(:efficiency, "#{pump.nameString}: proposed has NO #{loop_type}-type loop pumps with known " \
-                                   "power+flow — #{prefix}.14.(1)-(3) power NOT transferred (gem default retained)")
+                                   "power+flow — #{prefix}.14.(1)-(3) power NOT transferred (gem default retained)",
+                     ruling: 'D-11')
           return
         end
         if flow.nil?
           audit&.warn(:efficiency, "#{pump.nameString}: reference pump flow not sized — #{prefix}.14.(1)-(3) " \
-                                   'transfer needs the sized flow; run sizing first')
+                                   'transfer needs the sized flow; run sizing first', ruling: 'D-11')
           return
         end
         w_per_l_s = s[:power_w] / s[:flow_l_s]
@@ -348,7 +349,7 @@ module OpenStudioHVAC
           new_head = 0.65 * power_w / flow
           audit&.warn(:efficiency, "#{pump.nameString}: inherited rated head #{head.round} Pa implies pump efficiency " \
                                    "above motor efficiency with the transferred #{power_w.round} W — head reduced to " \
-                                   "#{new_head.round} Pa (65% total efficiency) to stay physical")
+                                   "#{new_head.round} Pa (65% total efficiency) to stay physical", ruling: 'D-27')
           pump.setRatedPumpHead(new_head)
         end
         pump.setRatedPowerConsumption(power_w)
@@ -357,7 +358,7 @@ module OpenStudioHVAC
                         inputs: { proposed_pumps: s[:count], proposed_w_per_l_s: w_per_l_s.round(2),
                                   reference_flow_l_s: (flow * 1000.0).round(2), loop_type: loop_type },
                         value: "rated power #{power_w.round(0)} W (combined proposed intensity x reference flow)",
-                        article: "#{prefix}.14.(1)-(3)")
+                        article: "#{prefix}.14.(1)-(3)", ruling: 'D-11')
       end
 
       # Combined peak power and flow of the PROPOSED building's pumps, grouped
@@ -414,7 +415,7 @@ module OpenStudioHVAC
           audit&.decision(:efficiency, 'heat pump heating capacity pinned to cooling capacity',
                           target: heat.nameString, inputs: { cooling_kw: (cool_w / 1000.0).round(1) },
                           value: "rated heating capacity = #{(cool_w / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
-                          article: '8.4.4.13.(2)(c)')
+                          article: '8.4.4.13.(2)(c)', ruling: 'D-22')
         end
       end
 
@@ -703,7 +704,7 @@ module OpenStudioHVAC
           end
           if tower_cap <= 0.0
             audit&.warn(:efficiency, 'condenser loop has a tower but no readable chiller capacity — tower rules not applied',
-                        target: towers[0].nameString)
+                        target: towers[0].nameString, ruling: 'D-26')
             next
           end
 
@@ -738,12 +739,12 @@ module OpenStudioHVAC
           audit&.decision(:efficiency, 'cooling tower cells set from heat rejection',
                           target: towers[0].nameString,
                           inputs: { tower_cap_kw: (tower_cap / 1000.0).round(1), chillers_on_loop: chillers.size },
-                          value: "#{cells} cell(s)", article: '8.4.4.11.(2)-(3)')
+                          value: "#{cells} cell(s)", article: '8.4.4.11.(2)-(3)', ruling: 'D-26')
           if fan_w > 13_000.0
             audit&.decision(:efficiency, 'cooling tower fan power set at the Table 5.2.12.2 maximum',
                             target: towers[0].nameString,
                             inputs: { kw_per_kw: 0.013, tower_cap_kw: (tower_cap / 1000.0).round(1) },
-                            value: "fan #{(fan_w / 1000.0).round(1)} kW", article: 'Table 5.2.12.2')
+                            value: "fan #{(fan_w / 1000.0).round(1)} kW", article: 'Table 5.2.12.2', ruling: 'D-22')
           end
         end
       end

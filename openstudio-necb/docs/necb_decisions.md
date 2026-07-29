@@ -12,6 +12,18 @@ product-shaping call is made.
 
 Format per entry: **what was decided / who / when / why / evidence & commit**.
 
+**Maintenance (D-44):** every new `## D-XX` heading here must also land in
+`openstudio-necb/lib/openstudio_necb/data/decisions.json` — the runtime registry
+the audit log and the AHJ report read. `test/test_decisions_registry.rb` fails
+the build in both directions (heading without registry entry, registry entry
+without heading), and a `kind: "runtime"` entry must be cited by at least one
+`ruling:` tag in gem code. Registry summaries are PARAPHRASE — never NECB text
+verbatim (D-01 scopes verbatim reproduction to the generated coverage docs).
+
+**Live registers:** D (decisions, here) and L (legacy findings,
+`legacy_findings.md`). The A/T registers of the 2026-07-25 reference-systems
+audit are drained and archived — see `docs/README.md`.
+
 ---
 
 ## D-01 — NECB text reproduction (Crown copyright)
@@ -1251,3 +1263,85 @@ Findings:
   8.4.1.2 how-text, umbrella CLAUDE.md.
 - Who/when: Claude under D-10 delegation, 2026-07-28 (implementation requested
   by phylroy: "implement it — per-zone targeting plus the secant step").
+
+## D-44 — Decisions surfaced at RUNTIME: `ruling:` audit tags, a registry, and a report appendix
+
+- **What:** the 43 decisions in this file governed pipeline behaviour but were
+  invisible to anyone running it — the *why* lived only in docs a user of the
+  gems has no reason to know exists. Audit entries now carry an optional
+  `ruling:` tag citing decision ids alongside the existing `article:` citation,
+  and the AHJ report grows an appendix naming every decision that actually
+  fired in the run, with a self-contained explanation of each.
+- **Why:** phylroy, 2026-07-28: *"bake some of this into the code… reported in
+  the logs"*. `article:` answers "what does the code require"; `ruling:` answers
+  "why did we read it that way" — the second axis a reviewer needs and could
+  previously only get by reading this file.
+- **Design:**
+  - `ruling:` is an optional TOP-LEVEL kwarg on `AuditLog#decision/#info/#warn`
+    (never inside `inputs:`), threaded through the private `add`. `.compact`
+    drops it when nil, so untagged entries are byte-identical to before.
+    `to_s` appends `" | ruling D-XX"` AFTER the `" | per <article>"` segment;
+    `to_json` needed no change. Applied identically to all six copies.
+  - Multi-ruling sites use ONE space-separated string (`ruling: 'D-19 D-21'`),
+    mirroring the joined-articles convention; every consumer parses with
+    `Decisions.ids_in` (`/\bD-\d{2}\b/`). Literals always sit on one line —
+    the drift grep depends on it.
+  - `data/decisions.json` + `OpenStudioNECB::Decisions` (the `Tiers` loader
+    pattern): all entries as `{id, title, kind, summary, articles}`.
+    `kind` is `runtime` (a `ruling:`-tagged call site exists) /
+    `runtime_unwired` (runtime behaviour, nothing tagged yet — D-09, D-18,
+    D-25, D-36, D-45) / `data` (manifest or vendored-data only — D-03, D-12,
+    D-41) / `process` (how the project works). Summaries are 2-3 self-contained
+    sentences, paraphrased, no external links: the report is one file and cites
+    nothing outside itself, so the summary IS the documentation.
+  - Report: `rulings_appendix` between the coverage and audit appendices, with
+    an unconditional TOC link — ALWAYS rendered (placeholder when nothing
+    fired) because the html test asserts every href resolves. One row per fired
+    decision: id, title, summary, fire count, anchor to the first firing audit
+    entry. An unregistered id renders "not in registry" rather than crashing.
+  - Coverage-emitter entries (`step: :coverage`) are deliberately NOT tagged —
+    they are manifest boilerplate and would swamp the appendix fire counts.
+    This is why D-09 is `runtime_unwired` rather than `runtime`.
+- **Scope:** 61 `ruling:` tags across 24 decisions, in
+  `openstudio-hvac/.../necb/{reference,efficiency}.rb`,
+  `openstudio-envelope/.../necb/{prescriptive,reference}.rb`,
+  `openstudio-necb/{compliance,archetypes}.rb`. No message text, article,
+  input or determination behaviour changed anywhere — this is reporting only.
+- **Drift guards** (`test/test_decisions_registry.rb`): headings == registry
+  ids; every cited id resolves; every `kind: runtime` entry is cited; nothing
+  non-runtime is cited; literals are one-line and well-formed; `ruling:` never
+  nested in `inputs:`; and the six `audit_log.rb` copies are byte-identical
+  modulo their module line.
+- **Also flattened** (phylroy's "this is confusing" feedback): the A and T
+  registers of the 2026-07-25 audit are drained — A6 moves here as D-45, that
+  file is banner-marked archived evidence, and `docs/README.md` now states
+  which registers are live.
+- **Files:** 6x `audit_log.rb`; the six tagged source files;
+  `lib/openstudio_necb/decisions.rb` + `data/decisions.json`;
+  `report/sections.rb`; `docs/{necb_decisions,README,audit_2026-07-25_reference_systems}.md`;
+  CLAUDE.md (necb + hvac); tests `test_decisions_registry.rb` (new),
+  `openstudio-hvac/test/test_audit_log.rb` (new), `test_report_units.rb`,
+  `test_compliance.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-28.
+
+## D-45 — Museum exhibition galleries: which Table 8.4.4.7.-A row? (OPEN — pending phylroy ruling)
+
+- **The question (was A6 on the 2026-07-25 audit list, moved here by D-44):**
+  a space named for a museum's general exhibition area selects the Assembly
+  Area category via the 'exhibit' keyword rather than Historical Collections
+  via 'museum' — a keyword-ORDER collision in the category matcher, found by
+  the D-33 variant mockups. Which Table 8.4.4.7.-A row should museum
+  exhibition galleries take?
+- **Why it is genuinely ambiguous:** the printed row wording supports either
+  reading — a gallery is both an assembly space and a collections space, and
+  the two rows can select different reference systems. This is an
+  interpretation call, not a defect.
+- **Current behaviour (unchanged, untagged):** first keyword wins, so
+  'exhibit' -> Assembly Area. The D-33 mockup sidesteps it by using a
+  'Museum restoration room' space type, so no test depends on the collision
+  either way.
+- **Status:** OPEN, awaiting phylroy. Registered `runtime_unwired` — when it
+  is ruled, tag the selection call site with `ruling: 'D-45'` and flip the
+  registry entry to `runtime`.
+- **Who/when:** raised Claude under D-10 (2026-07-27, D-33); re-filed here
+  2026-07-28 under D-44's register flattening.

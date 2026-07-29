@@ -11,14 +11,34 @@ its `AuditLog` is the canonical copy the umbrella aliases.
 - **Never simulates.** Only the umbrella (openstudio-necb) runs EnergyPlus.
   Anything capacity-binned must work on already-sized models or skip loudly.
 - **One AuditLog schema** across all gems:
-  `{step, target, action, inputs, value, article, evidence, building, level}`,
+  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
   levels `:decision | :info | :warning`. **Warnings are never silent** —
   anything skipped/unknown lands in the log. `audit.building=` /
   `audit.with_building(name) {}` stamps entries with WHICH model they concern
   (`'input model'` / `'proposed building'` / `'reference building'`; nil =
   cross-building verdict). The six sibling `audit_log.rb` files are **verbatim
   copies** — change hvac's, then regenerate the others with a sed module-name
-  swap (see git history of the `building:` stamp commit).
+  swap (`sed 's/^module OpenStudioHVAC$/module <Mod>/'`; note `OpenStudioSHW`,
+  not `OpenStudioShw`). `test_decisions_registry.rb` in the umbrella fails if
+  they ever diverge. Do NOT touch the 9-line `necb/audit_log.rb` alias files.
+- **`ruling:` — the second citation axis (D-44).** `article:` cites the CODE
+  that mandates a value; `ruling:` cites the adjudicated DECISION that says how
+  we read it (`openstudio-necb/docs/necb_decisions.md`). Rules:
+  - TOP-LEVEL kwarg, **never** inside `inputs:` (the report's input renderers
+    would swallow it).
+  - Single-quoted literal on **ONE line** — a static test greps for exactly
+    that shape. Several ids = one space-separated string: `ruling: 'D-19 D-21'`
+    (mirrors the joined-`article:` convention); parse with
+    `OpenStudioNECB::Decisions.ids_in`.
+  - Every id cited must exist in
+    `openstudio-necb/lib/openstudio_necb/data/decisions.json`, and every entry
+    there with `kind: "runtime"` must be cited by ≥1 tag — the drift test is
+    hard in both directions. Adding a decision means adding it to BOTH the doc
+    and the registry.
+  - Do **not** tag `step: :coverage` entries — manifest boilerplate would swamp
+    the report appendix's fire counts.
+  - Purely additive: tagging never changes an action string, article, input or
+    any determination behaviour.
 - **Audit text convention:** violations are SHOUTED (`EXCEEDS`, `does NOT
   meet`, `BELOW the`), passes are lowercase (`does not exceed`, `within`).
   The report checklist classifier is deliberately case-SENSITIVE about this —

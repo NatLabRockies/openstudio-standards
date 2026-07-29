@@ -34,6 +34,7 @@ end
 
 require_relative 'openstudio_necb/version'
 require_relative 'openstudio_necb/tiers'
+require_relative 'openstudio_necb/decisions'
 require_relative 'openstudio_necb/archetypes'
 require_relative 'openstudio_necb/compliance'
 require_relative 'openstudio_necb/report'

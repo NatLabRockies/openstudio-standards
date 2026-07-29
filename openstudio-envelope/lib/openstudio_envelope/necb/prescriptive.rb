@@ -48,7 +48,7 @@ module OpenStudioEnvelope
         audit.info(:prescriptive, 'film convention',
                    value: include_films ? 'code-literal: table U treated as overall transmittance incl. air films (1.4.1.2 definition; films subtracted from construction)' \
                                         : 'legacy-BTAP-compatible: table U applied as construction-only conductance',
-                   article: '1.4.1.2.')
+                   article: '1.4.1.2.', ruling: 'D-23')
 
         cache = {}
         window_construction = nil
@@ -95,7 +95,7 @@ module OpenStudioEnvelope
         if outside_envelope.positive?
           audit.info(:prescriptive,
                      'exterior/ground surfaces of unconditioned spaces left untouched — not part of the building envelope',
-                     inputs: { surfaces: outside_envelope }, article: '1.4.1.2.')
+                     inputs: { surfaces: outside_envelope }, article: '1.4.1.2.', ruling: 'D-24')
         end
 
         if apply_fdwr
@@ -166,7 +166,7 @@ module OpenStudioEnvelope
         construction = surface.construction
         if construction.empty? || construction.get.to_Construction.empty?
           audit.warn(:prescriptive, 'envelope surface to unconditioned space has no layered construction — skipped',
-                     target: surface.nameString)
+                     target: surface.nameString, ruling: 'D-24')
           return
         end
 
@@ -183,7 +183,7 @@ module OpenStudioEnvelope
                          target: c.nameString,
                          inputs: { hdd: hdd, table_u: u.round(4), target_u_construction: target.round(4) },
                          value: "conductance #{c.thermalConductance.to_f.round(4)} W/m2K",
-                         article: 'Table 3.2.2.2.; 3.1.1.7.(4)')
+                         article: 'Table 3.2.2.2.; 3.1.1.7.(4)', ruling: 'D-24')
           c
         end
         surface.setConstruction(cache[key])
@@ -243,7 +243,7 @@ module OpenStudioEnvelope
         if kiva.empty?
           audit.warn(:prescriptive,
                      'ground floor without a Kiva foundation in a perimeter-strip zone — the 1.2 m strip (3.2.3.3.(3)) is not representable; slab left as modeled',
-                     target: surface.nameString, article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+                     target: surface.nameString, article: 'Table 3.2.3.1.; 3.2.3.3.(3)', ruling: 'D-32')
           return
         end
 
@@ -273,12 +273,12 @@ module OpenStudioEnvelope
                            inputs: { hdd: hdd, table_u: u.round(4), strip_target_u_construction: target.round(4),
                                      slab_r: slab_r.round(4), strip_insulation_r: r_add.round(4), width_m: width_m },
                            value: "insulation R #{r_add.round(3)} m2K/W x #{width_m} m from perimeter",
-                           article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+                           article: 'Table 3.2.3.1.; 3.2.3.3.(3)', ruling: 'D-32')
           else
             audit.info(:prescriptive, 'slab construction already meets the perimeter-strip U — no strip insulation added',
                        target: surface.nameString,
                        inputs: { hdd: hdd, strip_target_u_construction: target.round(4), slab_r: slab_r.round(4) },
-                       article: 'Table 3.2.3.1.; 3.2.3.3.(3)')
+                       article: 'Table 3.2.3.1.; 3.2.3.3.(3)', ruling: 'D-32')
           end
           true
         end

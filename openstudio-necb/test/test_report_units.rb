@@ -28,7 +28,8 @@ class TestReportUnits < Minitest::Test
                    inputs: { proposed_kwh: 90_000.0, reference_building_energy_target_kwh: 100_000.0 },
                    value: 'margin 10000.0 kWh (10.0%)', article: '8.4.1.2.(2)')
     audit.decision(:compliance, 'unmet heating hours EXCEED 100 h',
-                   inputs: { proposed_h: 140.0, reference_h: 20.0, limit_h: 100 }, article: '8.4.1.2.(3)')
+                   inputs: { proposed_h: 140.0, reference_h: 20.0, limit_h: 100 }, article: '8.4.1.2.(3)',
+                   ruling: 'D-43')
     audit.decision(:compliance, 'proposed ALSO meets the archetype-EUI building energy target (8.4.4 path)',
                    inputs: { proposed_kwh: 90_000.0, bet_kwh: 120_000.0 }, article: '8.4.4.1.(2)')
     # implemented — no checklist row (appendix-only)
@@ -46,6 +47,11 @@ class TestReportUnits < Minitest::Test
     audit.with_building('reference building') do
       audit.warn(:efficiency, 'unsized DX coil skipped by capacity-binned lookup',
                  target: 'Coil 1', article: 'Table 5.2.12.1.')
+      # two entries citing D-19 (fire count 2) + a multi-ruling string
+      audit.decision(:reference, 'air-leakage default applied',
+                     article: '8.4.3.3.(3)', ruling: 'D-19 D-21')
+      audit.decision(:build, 'reference system operates on the proposed operating schedule',
+                     article: '8.4.3.2.(1)', ruling: 'D-19')
     end
     audit.with_building('input model') do
       audit.warn(:loads, 'space with no space type assigned', target: 'Space 9')
@@ -143,6 +149,41 @@ class TestReportUnits < Minitest::Test
     assert_equal :fail, glyph, 'only gap_owner "modeller" softens'
     glyph, = Sections.coverage_status({ inputs: { status: 'implemented', gap_owner: 'modeller' } }, Set.new)
     assert_equal :pass, glyph, 'flag is inert on implemented statuses'
+  end
+
+  # -- rulings appendix (D-44) --------------------------------------------
+  def test_rulings_appendix_renders_fired_decisions
+    entries = canned_audit.entries
+    html = Sections.rulings_appendix({ audit_entries: entries })
+    assert_includes html, 'id="rulings"'
+    assert_includes html, 'Decisions and assumptions applied'
+    # every id in the canned audit is listed...
+    %w[D-19 D-21 D-43].each { |id| assert_includes html, id, "#{id} listed" }
+    # ...with its registry title and self-contained summary, not just the id
+    assert_includes html, H.esc(OpenStudioNECB::Decisions.lookup('D-43')['title'])
+    assert_includes html, H.esc(OpenStudioNECB::Decisions.lookup('D-19')['summary'][0, 40])
+    # fire count: D-19 fired twice, D-21 once
+    row = html[/<tr><td>D-19<\/td>.*?<\/tr>/m]
+    assert_includes row, '<td>2</td>', 'D-19 fire count is 2'
+    assert_includes html[/<tr><td>D-21<\/td>.*?<\/tr>/m], '<td>1</td>', 'D-21 fire count is 1'
+    # anchor points at the FIRST firing entry, and that anchor exists in the doc
+    first = entries.index { |e| e[:ruling].to_s.include?('D-19') }
+    assert_includes html, %(<a href="#audit-#{first}">)
+    assert_includes OpenStudioNECB::Report.render(canned_result), %(<tr id="audit-#{first}">)
+    # self-containment: the appendix never links out
+    refute_match(%r{(src|href)\s*=\s*"https?://}, html)
+  end
+
+  def test_rulings_appendix_always_renders_with_a_placeholder
+    html = Sections.rulings_appendix({ audit_entries: [{ step: :build, action: 'untagged' }] })
+    assert_includes html, 'id="rulings"', 'section renders even with nothing to report'
+    assert_includes html, 'No ruled code paths fired in this run.'
+  end
+
+  def test_rulings_appendix_tolerates_an_unregistered_id
+    html = Sections.rulings_appendix({ audit_entries: [{ step: :build, action: 'x', ruling: 'D-99' }] })
+    assert_includes html, 'D-99'
+    assert_includes html, 'not in registry'
   end
 
   def test_building_stamp_traces_issues_to_their_model

@@ -61,6 +61,33 @@ stamped — the HTML report's "Applies to" chips and issue-traceability depend
 on it. Audit text convention: violations SHOUTED, passes lowercase — the
 checklist classifier in `report/checklist.rb` parses this CASE-SENSITIVELY.
 
+## Decision rulings (`ruling:`, D-44)
+
+Audit entries carry a second citation axis next to `article:`: `ruling:` names
+the adjudicated decision(s) governing the code path, so a report reader learns
+*why* we read the article that way without needing `docs/necb_decisions.md`.
+
+- TOP-LEVEL kwarg, never inside `inputs:`; single-quoted literal on ONE line;
+  several ids as one space-separated string (`ruling: 'D-19 D-21'`), parsed
+  everywhere by `Decisions.ids_in` (`/\bD-\d{2}\b/`).
+- `decisions.rb` + `data/decisions.json` are the machine-readable mirror of
+  `docs/necb_decisions.md` (`{id, title, kind, summary, articles}`; `kind` =
+  runtime / runtime_unwired / data / process). Summaries are PARAPHRASE and
+  self-contained — the report links to nothing, so the summary IS the
+  explanation.
+- **Adding a `## D-XX` heading means adding a registry entry**, and a
+  `kind: runtime` entry must be cited by ≥1 `ruling:` tag.
+  `test/test_decisions_registry.rb` enforces both directions (and that the six
+  `audit_log.rb` copies stay byte-identical modulo their module line).
+- `report/sections.rb#rulings_appendix` renders the decisions that FIRED in the
+  run (id, title, summary, fire count, anchor to the first audit entry). It is
+  ALWAYS rendered — the TOC link is unconditional and `test_report_html.rb`
+  asserts every href resolves.
+- `step: :coverage` entries are deliberately untagged (manifest boilerplate
+  would swamp the appendix fire counts — this is why D-09 is `runtime_unwired`).
+- Live registers are D (decisions) and L (legacy findings) — see
+  `docs/README.md`; the A/T registers of the 2026-07-25 audit are archived.
+
 ## Modules
 
 - `compliance.rb` — the pipeline + eui path + capacity iteration + costing.
@@ -128,6 +155,7 @@ ruby test/test_compliance.rb          # pipeline modes + capacity iteration + pr
 ruby test/test_archetypes.rb          # 8.4.4 mapping/check/normalize (round-trip pinned)
 ruby test/test_tiers_eui.rb           # tiers, 8.4.4 EUI path, GHG
 ruby test/test_report_units.rb        # SDK-free renderer units + goldens
+ruby test/test_decisions_registry.rb  # D-XX registry drift + audit_log six-copy sync
 ruby test/test_report_model_query.rb  # SDK extraction
 ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 ```

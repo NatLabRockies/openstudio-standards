@@ -212,7 +212,8 @@ module OpenStudioEnvelope
                        inputs: { surfaces: rebuilt, unique_assemblies: cache.size,
                                  areal_mass_kg_m2: LIGHTWEIGHT_MASS_KG_M2,
                                  heat_capacity_kj_m2k: LIGHTWEIGHT_HEAT_CAPACITY_J_M2K / 1000.0 },
-                       article: "#{prefix}.4.(1) (Note A-8.4.4.4.(1): light-frame example mass/heat capacity)")
+                       article: "#{prefix}.4.(1) (Note A-8.4.4.4.(1): light-frame example mass/heat capacity)",
+                       ruling: 'D-35')
       end
 
       # 8.4.4.3.(6) via 8.4.3.3.(3) + 8.4.2.9.(2):
@@ -335,7 +336,7 @@ module OpenStudioEnvelope
                                         'default %.0f L/s by %+.0f%% — only a 3.2.4.2 airtightness test justifies ' \
                                         'a different value', proposed_total_l_s, code_total_l_s,
                                         100 * (proposed_total_l_s / code_total_l_s - 1)),
-                     article: '8.4.3.3.(3)-(4)')
+                     article: '8.4.3.3.(3)-(4)', ruling: 'D-19 D-21')
         end
         audit.decision(:reference, 'air-leakage default applied',
                        inputs: { i75_l_per_s_m2: AIR_LEAKAGE_I75, flow_exponent: AIR_LEAKAGE_N,
@@ -345,7 +346,7 @@ module OpenStudioEnvelope
                                                            schedule: coeffs[:schedule]&.nameString } },
                        value: "I_AGW = (5/75)^0.6 x #{AIR_LEAKAGE_I75} x #{envelope_area.round(1)}/#{wall_area.round(1)} " \
                               "= #{i_agw.round(4)} L/(s.m2 AG wall), per space as flow-per-exterior-wall-area",
-                       article: "#{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)")
+                       article: "#{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)", ruling: 'D-19 D-21')
       end
 
       # Completeness accounting (same contract as openstudio-hvac).

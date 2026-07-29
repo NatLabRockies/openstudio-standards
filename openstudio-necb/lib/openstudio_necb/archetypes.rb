@@ -98,7 +98,7 @@ module OpenStudioNECB
                      inputs: { areas_m2: out[:archetypes].transform_values { |v| v[:area_m2].round(1) },
                                unmapped_m2: out[:unmapped][:area_m2].round(1),
                                floor_area_basis: 'partofTotalFloorArea, non-plenum, x space multiplier (proxy for conditioned per 8.4.4.1.(3))' },
-                     article: '8.4.4.1.(3)')
+                     article: '8.4.4.1.(3)', ruling: 'D-04')
       out
     end
 
@@ -138,12 +138,12 @@ module OpenStudioNECB
         problems << format('only %.1f%% of floor area maps to listed archetypes (8.4.4.1.(1) requires >= %.0f%%)',
                            coverage * 100, rules['min_archetype_floor_fraction'] * 100)
         audit.warn(:eui, "archetype floor coverage BELOW the 8.4.4.1.(1) threshold (#{(coverage * 100).round(1)}%)",
-                   article: '8.4.4.1.(1)')
+                   article: '8.4.4.1.(1)', ruling: 'D-04')
       end
       if hdd && hdd >= rules['max_hdd']
         problems << "HDD #{hdd} >= #{rules['max_hdd']} (Table 8.4.4.1 note (1))"
         audit.warn(:eui, "HDD #{hdd} is outside the 8.4.4 applicability bound (< #{rules['max_hdd']})",
-                   article: 'Table 8.4.4.1.')
+                   article: 'Table 8.4.4.1.', ruling: 'D-04')
       end
       problems
     end
@@ -272,13 +272,13 @@ module OpenStudioNECB
                                  occupant_density_m2_per_person: record['occupant_density_m2_per_person'],
                                  receptacle_w_per_m2: (record['electric_equipment_per_area'] * 10.7639104).round(2),
                                  schedule_letter: record['necb_schedule_type'] },
-                       article: '8.4.4.2.(1)')
+                       article: '8.4.4.2.(1)', ruling: 'D-05')
       end
       force_zone_thermostats!(model, resolved, audit)
       audit.info(:eui, 'lighting POWER (the design under evaluation) and unmapped spaces are left as modeled; ' \
                        'lighting OPERATION follows the archetype letter and outdoor air is set to the ASHRAE ' \
                        '62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretations, 2026-07-22)',
-                 article: '8.4.4.2.(1); 8.4.3.6.(1)(a)')
+                 article: '8.4.4.2.(1); 8.4.3.6.(1)(a)', ruling: 'D-05')
       model
     end
 

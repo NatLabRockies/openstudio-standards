@@ -1,0 +1,337 @@
+{
+  "_comment": [
+    "Machine-readable mirror of openstudio-necb/docs/necb_decisions.md — the adjudicated",
+    "interpretations and product decisions governing the NECB Part 8 pipeline. Runtime code",
+    "cites these ids through the AuditLog `ruling:` kwarg, and the AHJ report's rulings",
+    "appendix renders the ones that actually fired in a run, so a reader sees WHY a value was",
+    "chosen without needing access to this repository's documentation.",
+    "",
+    "kind: runtime          — governs a code path that carries a `ruling:` audit tag",
+    "      runtime_unwired  — governs runtime behaviour with no ruling-tagged audit call",
+    "      data             — manifest / vendored-data or verification-only decision",
+    "      process          — how the project works (authorship, delegation, sign-off, sweeps)",
+    "",
+    "MAINTENANCE: every `## D-XX` heading in necb_decisions.md must have an entry here, and",
+    "every kind:runtime entry must be cited by at least one `ruling:` literal in gem code.",
+    "test/test_decisions_registry.rb enforces both directions.",
+    "Summaries are PARAPHRASE — never reproduce NECB text verbatim here (D-01 governs where",
+    "code text may be reproduced, and this file is not one of those places)."
+  ],
+  "decisions": [
+    {
+      "id": "D-01",
+      "title": "NECB text reproduction (Crown copyright)",
+      "kind": "process",
+      "articles": [],
+      "summary": "Generated coverage documents committed to the public repository may quote NECB article text in full, because NRCan is the Crown and the code's copyright belongs to the Government of Canada. This decision scopes where verbatim code text is allowed: the generated coverage HTML and its article cache, not arbitrary source or data files."
+    },
+    {
+      "id": "D-02",
+      "title": "Unresolvable space types are a hard error",
+      "kind": "runtime",
+      "articles": ["8.4.3.1.(2)", "4.2.1.6."],
+      "summary": "Before running a performance-path determination the pipeline checks every floor-area space type against the NECB catalog and raises an error (with did-you-mean suggestions) when one cannot be resolved. The earlier behaviour silently waived the lighting allowance for unmatched types, producing a compliance result that looked complete but was not. This is deliberately breaking for untagged models."
+    },
+    {
+      "id": "D-03",
+      "title": "Chiller EIR curves verified against the proposed erratum",
+      "kind": "data",
+      "articles": ["8.4.5.5.-C", "8.4.6.5.-C"],
+      "summary": "Two water-cooled chiller part-load rows in the printed tables carry misplaced decimals — one yields a physically impossible negative power ratio at the rating point. The verification probe therefore compares against erratum-corrected coefficients, labelled as such pending NRC confirmation, since an independent vendored curve lineage corroborates the corrections to within a few parts per million."
+    },
+    {
+      "id": "D-04",
+      "title": "EUI path: two-run design with check-then-normalize",
+      "kind": "runtime",
+      "articles": ["8.4.4.1.(1)", "8.4.4.1.(2)", "8.4.4.1.(3)", "8.4.4.2.(1)", "Table 8.4.4.1."],
+      "summary": "The archetype-EUI path and the reference-performance path evaluate different proposed models, so normalization to the archetype operating-condition table uses a two-run design: first check whether the model already carries the table values, and only run a second annual simulation if it does not. By default the EUI supplement reports NOT COMPUTED with the mismatches listed rather than silently doubling simulation cost; an explicit opt-in runs the normalized model."
+    },
+    {
+      "id": "D-05",
+      "title": "Two archetype-normalization interpretations adopted",
+      "kind": "runtime",
+      "articles": ["8.4.4.2.(1)", "8.4.3.6.(1)(a)"],
+      "summary": "Two readings of the archetype operating-conditions table were adopted: lighting operating schedules are normalized (not only lighting power density), and outdoor-air rates are taken as the applicable ventilation standard's rates evaluated at the table's occupant density. Leaving the proposed model's lighting schedules or ventilation rates in place would leak design-specific behaviour into a run whose whole purpose is an apples-to-apples archetype comparison."
+    },
+    {
+      "id": "D-06",
+      "title": "Energy-recovery trigger uses the current-vintage airflow tables, post-sizing",
+      "kind": "runtime",
+      "articles": ["5.2.10.1."],
+      "summary": "The inherited energy-recovery trigger was a much older vintage's exhaust-heat-content formula, which is permissive for small high-outdoor-air systems. It was replaced with the current editions' airflow-threshold tables — heating-degree-day row by percent-outdoor-air band, split by whether the system operates continuously — evaluated after sizing, since the thresholds cannot be known before flows exist. Sizing-only and no-simulation modes skip the determination loudly rather than guessing."
+    },
+    {
+      "id": "D-07",
+      "title": "Cooling-tower part-load behaviour dispositioned to the engine",
+      "kind": "process",
+      "articles": ["8.4.6.6."],
+      "summary": "The reference tower's part-load capacity requirement is satisfied by EnergyPlus's effectiveness-NTU tower model, which exposes no curve fields the code's polynomial could be installed into. The disposition is backed by a gated numeric cross-check rather than argument alone: exact agreement at the industry rating point and bounded divergence across the rating slice, in the conservative direction at cold wet-bulbs where capacity never binds."
+    },
+    {
+      "id": "D-08",
+      "title": "Batch sign-off of the remaining article dispositions",
+      "kind": "process",
+      "articles": [],
+      "summary": "The nineteen remaining draft article dispositions were signed off in four groups: probe-evidenced coverage claims, engine-physics claims, modeller-responsibility articles, and four acknowledged gaps that stay publicly documented as uncovered. A disposition is a claim of responsibility rather than of correctness — the deliberately weaker claim — so implementing any of the gap articles later remains separate, evidence-backed work."
+    },
+    {
+      "id": "D-09",
+      "title": "Umbrella coverage manifest emits at runtime; modeller-scope notes split from warnings",
+      "kind": "runtime_unwired",
+      "articles": ["8.4.2.2.", "8.4.2.3."],
+      "summary": "The umbrella gem emits its own article-coverage manifest into the audit at the end of every successful run, and all six emitters share one semantic: a partial or unimplemented entry whose remaining gap is wholly the modeller's responsibility emits as an informational scope note rather than a warning. A warning no model change can ever clear trains readers to ignore warnings altogether. Its audit calls are the coverage emitters, which are deliberately left untagged so the report's fired-rulings counts reflect real code paths rather than manifest boilerplate."
+    },
+    {
+      "id": "D-10",
+      "title": "Remaining adjudications delegated, with mandatory logging",
+      "kind": "process",
+      "articles": [],
+      "summary": "The project owner delegated the remaining queued interpretation decisions, on the condition that every judgement call is logged as a numbered decision entry, self-contained enough to be reversed on later review. Entries marked as made under this delegation were decided on the best evidence-backed recommendation rather than by direct instruction."
+    },
+    {
+      "id": "D-11",
+      "title": "Hydronic pump power implemented as intensity transfer plus table curves",
+      "kind": "runtime",
+      "articles": ["8.4.4.14."],
+      "summary": "Reference hydronic pump power is derived from the proposed building's combined pump power intensity in watts per litre per second, matched by loop type rather than pump-to-pump, since the two buildings' topologies legitimately differ. The intensity is multiplied by the reference's own flow rather than transferred as absolute watts, which prevents a consolidation free ride. Variable-speed reference pumps additionally receive the table's riding-curve coefficients with a minimum-flow clamp."
+    },
+    {
+      "id": "D-12",
+      "title": "Space temperature control re-manifested as modeller scope",
+      "kind": "data",
+      "articles": ["8.4.4.16."],
+      "summary": "Claiming this article unimplemented was factually wrong. Identical throttling between the two buildings is satisfied by construction, because both use ideal thermostat control on cloned schedules with no throttling knob that could differ. The remaining sentence only binds when a modeller approximates a radiant design convectively, which is the modeller's responsibility, so the entry is now a scope note rather than a permanent warning."
+    },
+    {
+      "id": "D-13",
+      "title": "Screw and centrifugal chiller curves probed; imperfect printed normalization accepted",
+      "kind": "process",
+      "articles": ["8.4.6.5."],
+      "summary": "The water-cooled screw and centrifugal curve rows match the printed tables exactly and are not erratum-affected. Three of those printed fits do not normalize to unity at the standard rating point; this is accepted as a genuine property of the published curve fits rather than a transcription error, because an independent vendored curve lineage agrees with the printed rows digit for digit."
+    },
+    {
+      "id": "D-14",
+      "title": "Reference air systems inherit the proposed operating schedule",
+      "kind": "runtime",
+      "articles": ["8.4.3.2.(1)"],
+      "summary": "Each zone's proposed air-system availability schedule is captured before the HVAC strip and applied to the reference loop serving those zones, since operating schedules must be identical in both buildings. With no proposed air system the builder default is retained with an informational note; when one reference loop's zones carried conflicting schedules the most-common one wins with a loud warning. This also feeds the energy-recovery continuous-versus-intermittent classification."
+    },
+    {
+      "id": "D-15",
+      "title": "Energy-recovery effectiveness and frost values verified against the code text",
+      "kind": "runtime",
+      "articles": ["5.2.10.1.(4)", "5.2.10.1.(6)"],
+      "summary": "The minimum effectiveness requirement is enthalpy-based, and setting both sensible and latent effectiveness to the minimum yields exactly that enthalpy effectiveness by identity — minimum-compliant for a reference build, verified on every heat-exchanger field. The overshoot-control requirement is met by supply-air outlet temperature control plus a pretreat setpoint manager. The frost-control values are simulation-engine modelling assumptions, not code values, and are now labelled as such so they cannot be mistaken for code transcriptions."
+    },
+    {
+      "id": "D-16",
+      "title": "Orphaned proposed EMS purged from the reference",
+      "kind": "runtime",
+      "articles": ["8.4.4.1."],
+      "summary": "An archetype breadth sweep found that some proposed models' energy-management-system programs survive the reference HVAC strip carrying dangling object references, which reach the simulation engine as raw identifier tokens and cause a fatal error. Such programs, along with emptied calling managers and orphaned actuators, are now removed with a loud audit warning: the reference building's controls come from the reference ruleset, never from proposed-side overrides."
+    },
+    {
+      "id": "D-17",
+      "title": "Legacy energy-recovery diagnosis filed upstream",
+      "kind": "process",
+      "articles": ["5.2.10.1."],
+      "summary": "The legacy library's energy-recovery determination was diagnosed to file and line and reported upstream: its newest applicable vintage inherits an older data-driven formula that transcribes only the continuous-operation table, so it never consults operating hours and has no low-outdoor-air exemption. The result is over-equipping recovery devices above the heating-degree-day threshold, observed on several archetypes. The issue includes a full solution draft and regression tests."
+    },
+    {
+      "id": "D-18",
+      "title": "Multizone system zone grouping rewritten to the table note",
+      "kind": "runtime_unwired",
+      "articles": ["Table 8.4.4.7.-B Note (3)"],
+      "summary": "The builder's one-air-handler-per-storey convention had no code basis and was caught by an archetype comparison in which our reference built ten corridor systems where the legacy library built one. Grouping now follows the table note literally: one system for all storeys up to four above grade, and above that external thermal blocks grouped by facade orientation with internal and underground blocks in their own groups. Corner blocks bin by largest exterior wall area with a deterministic tie-break."
+    },
+    {
+      "id": "D-19",
+      "title": "Infiltration lineage reconciled; reference inherits proposed leakage coefficients",
+      "kind": "runtime",
+      "articles": ["8.4.3.3.(3)", "8.4.2.9.(2)", "8.4.4.3.(6)"],
+      "summary": "For an untested building the proposed and reference must carry identical air leakage, so an observed large difference was not code-intended. The real defect was ours and temporal: the reference wrote a constant-coefficient infiltration convention while the cloned proposed carried wind-driven coefficients, giving identical design totals but very different delivered air changes. The reference now inherits the proposed's coefficients and schedule, and a proposed whose installed total deviates materially from the code default draws a loud warning."
+    },
+    {
+      "id": "D-20",
+      "title": "Economizer exempted on 100%-outdoor-air makeup air units",
+      "kind": "runtime",
+      "articles": ["8.4.4.12.", "5.2.2.8."],
+      "summary": "A residual reference heating gap was traced to the economizer pass applying differential-enthalpy control to every reference air system, including a fully outdoor-air makeup air unit. Such a system cannot economize, but the winter economizer signal engages the heat-exchanger lockout and bypasses the mandated energy-recovery wheel for the entire heating season. The pass now exempts these systems with an audited note, which brought reference heating into agreement with the proposed."
+    },
+    {
+      "id": "D-21",
+      "title": "Envelope area for air leakage computed as the conditioned-space enclosure",
+      "kind": "runtime",
+      "articles": ["3.2.4.2.(1)(c)", "8.4.2.9.(2)"],
+      "summary": "The normalization area for default air leakage is the set of surfaces separating conditioned from unconditioned space. For an unconditioned attic that means the ceiling below it counts and the attic roof does not — both our implementation and the legacy library had been computing a roof-inclusive area, a shared conservative bias. The area is now built as the enclosure of the conditioned volume, and unconditioned spaces receive no infiltration object at all."
+    },
+    {
+      "id": "D-22",
+      "title": "Reference-systems audit findings implemented as one batch",
+      "kind": "runtime",
+      "articles": ["8.4.4.8.", "8.4.4.12.", "8.4.4.13.(2)(c)", "8.4.4.15.(1)", "8.4.4.18.(3)", "5.2.2.7.(1)", "Table 5.2.12.2"],
+      "summary": "Thirteen findings from a four-way reference-systems audit were fixed together: oversizing caps made to actually bind, heat-rejection fan power corrected to the current table value, the economizer applicability trigger evaluated after sizing, heat-pump heating capacity pinned to cooling capacity, night-cycle and minimum-outdoor-air scheduling added, energy-recovery wheel parasitic power modelled, zone-equipment fans brought to the reference fan specification, and several warnings added where the pipeline had been silent. The archetype fleet converged to the tightest fixed-point clustering achieved so far."
+    },
+    {
+      "id": "D-23",
+      "title": "Table transmittance values treated as overall, air films included",
+      "kind": "runtime",
+      "articles": ["1.4.1.2."],
+      "summary": "An object-level comparison against legacy archetypes showed every wall differing by about four percent. The code's own definition settles it: overall thermal transmittance accounts for the air films on both faces, so the prescriptive table values include films and the construction-only conductance must be derived by subtracting them. The film-inclusive convention is now the default, with simple-glazing fenestration exempt because its rated factor is already the film-inclusive value."
+    },
+    {
+      "id": "D-24",
+      "title": "Envelope scope: unconditioned spaces out, interzone assemblies in",
+      "kind": "runtime",
+      "articles": ["1.4.1.2.", "Table 3.2.2.2.", "3.1.1.7.(4)"],
+      "summary": "Both the prescriptive and reference envelope transforms had been iterating all exterior and ground surfaces while skipping all interzone surfaces, which is backwards relative to the definition of the building envelope as what separates conditioned space from everything else. Surfaces belonging to unconditioned spaces are now left untouched with an audited note, while assemblies separating conditioned from enclosed unconditioned space are treated as envelope, with the table row chosen by inclination and the enclosure credited."
+    },
+    {
+      "id": "D-25",
+      "title": "Design-day attach replaces rather than appends, filtered to annual extremes",
+      "kind": "runtime_unwired",
+      "articles": [],
+      "summary": "A cooling-tower archetype crashed during sizing because the weather-attach step appended a full design-day file onto models that already carried design days, and a first-cut filter still matched monthly percentile days whose low wet-bulbs make the tower heat-transfer solve infeasible. The attach step now removes existing design days and imports only the small standard extreme set, falling back to the full set only when nothing matches."
+    },
+    {
+      "id": "D-26",
+      "title": "Heat-rejection fan power sums the condenser loop; sized tower hydraulics hardened",
+      "kind": "runtime",
+      "articles": ["8.4.4.11.(2)-(3)", "Table 5.2.12.2"],
+      "summary": "Tower fan power had been computed from a single chiller, so a two-chiller plant produced half the required value; heat rejection is now summed across all chillers on the loop after their capacities are final. Separately, re-running sizing with a hard-set code fan power can make the engine's tower heat-transfer solve fail, so the pass first freezes the previously solved flow and heat-transfer values — the code governs fan power, not the tower's heat-transfer sizing."
+    },
+    {
+      "id": "D-27",
+      "title": "Service-water circulators are outside the hydronic pump article; transfer head reconciled",
+      "kind": "runtime",
+      "articles": ["8.4.4.14."],
+      "summary": "The pump-power transfer had been applying a space-heating power intensity to service-water circulators, which combined with an inherited high head implies an impossible pump efficiency and is fatal to the simulation engine. Loops carrying a water heater or water-use connections are now outside the hydronic pump scope entirely, and are also excluded from the proposed-side intensity statistics. Every remaining transfer carries a physicality guard that reconciles head, with a loud warning, when the implied efficiency is impossible."
+    },
+    {
+      "id": "D-28",
+      "title": "Multizone selection groups merge into whole-building systems",
+      "kind": "runtime",
+      "articles": ["Table 8.4.4.7.-B Note (3)"],
+      "summary": "Because a proposed archetype may partition its zones per storey, building one reference system per selection group leaked that partition into the reference and produced far more systems than the table note prescribes. The fragmentation had real consequences: small per-loop flows fell below the economizer and energy-recovery thresholds. Multizone build assignments of the same catalog family now merge before building, with the facade and internal split happening inside the builder; single-zone families keep their selection grouping."
+    },
+    {
+      "id": "D-29",
+      "title": "Upstream issues carry explicit Claude authorship",
+      "kind": "process",
+      "articles": [],
+      "summary": "At the project owner's direction, upstream issues drafted by the AI assistant state that authorship in the issue body, even when submitted from a human account for access reasons. The note was also applied retroactively to previously filed issues. This is a standing rule for future filings and supersedes an earlier no-attribution convention."
+    },
+    {
+      "id": "D-30",
+      "title": "Legacy findings ledger cleared upstream",
+      "kind": "process",
+      "articles": [],
+      "summary": "Eight legacy-library findings were filed upstream as three grouped issues covering reference-system selection, reference modelling rules, and a construction film-convention disagreement. After this the ledger had no unfiled rows, leaving only entries that were still under investigation."
+    },
+    {
+      "id": "D-31",
+      "title": "Two legacy findings root-caused and closed with no defect",
+      "kind": "process",
+      "articles": ["5.2.12.1."],
+      "summary": "A suspected cooling-efficiency mismatch turned out to be a false premise: the archetype coil names carry ratings that are exactly the printed minimums, and the observed coefficients follow from the standard fan-stripping conversions, which are identical in both lineages. A suspected wrong-vintage energy-recovery trigger was found to be vintage-correct for that edition. The convention that rated efficiencies are fan-inclusive while engine coil coefficients are coil-only is now pinned."
+    },
+    {
+      "id": "D-32",
+      "title": "Ground-floor insulation extent corrected to a perimeter strip below the coldest zone",
+      "kind": "runtime",
+      "articles": ["Table 3.2.3.1.", "3.2.3.3.(3)"],
+      "summary": "A warehouse residual was traced to insulating the full slab area to the table value in climate zones where the printed table prescribes only a perimeter strip and sets no maximum for the slab field. The transform now keeps the modelled slab field in those zones and adds the strip via the foundation model's interior horizontal insulation, sized so the strip assembly meets the table value; the coldest zone keeps its full-area requirement. Ground floors without a foundation object get an audited warning that the strip is not representable."
+    },
+    {
+      "id": "D-33",
+      "title": "Variant mockups exercise the never-fleet-tested reference routes",
+      "kind": "process",
+      "articles": [],
+      "summary": "A coverage audit showed the archetype fleet only ever selects a handful of reference system types, leaving several build routes never exercised end to end. Seven synthetic mockup models were generated so that every reference route runs through the full pipeline including sizing. This also surfaced a space-type keyword-ordering collision affecting museum exhibition areas, queued for adjudication."
+    },
+    {
+      "id": "D-34",
+      "title": "Residential blocks with heat pumps take the air-source redirect",
+      "kind": "runtime",
+      "articles": ["8.4.4.7.(4)"],
+      "summary": "A residential or accommodation block whose proposed system includes a heat pump takes the air-source heat-pump reference redirect rather than the selection table's identical-to-proposed parenthetical. The ruling was to follow the legacy library's effective behaviour, which has no per-block heat-pump detection and redirects whenever heat pumps are present anywhere. The heat-pump check therefore runs before the other residential branches."
+    },
+    {
+      "id": "D-35",
+      "title": "Lightweight reference rebuild corrected to light-frame mass",
+      "kind": "runtime",
+      "articles": ["8.4.4.4.(1)"],
+      "summary": "The explanatory note for the thermal-mass requirement makes clear that lightweight does not mean massless: it directs following the proposed assembly's layer structure with insulation varied to meet the required transmittance, and its example assemblies are light-frame constructions with real areal mass and heat capacity. Opaque reference assemblies are now rebuilt with a single calibrated material carrying the note's wood-frame example properties instead of a massless layer, which also lets one material serve every boundary condition."
+    },
+    {
+      "id": "D-36",
+      "title": "Campus 3D renderer ported into the geometry gem",
+      "kind": "runtime_unwired",
+      "articles": [],
+      "summary": "A model viewer from a separate campus project was ported into the geometry gem at the project owner's request, keeping the original design: a crash-isolated subprocess export, a three-step repair ladder that falls back to a massing shell and then bisects out crashing surfaces, and a self-contained embedded viewer page. It is a visualization utility with no bearing on compliance determination."
+    },
+    {
+      "id": "D-37",
+      "title": "Heat-pump reference split by source, boundary per the explanatory note",
+      "kind": "runtime",
+      "articles": ["8.4.4.13.(1)", "8.4.4.13.(2)", "Note A-8.4.4.13"],
+      "summary": "Heat pumps on an internal water loop — the configuration the explanatory note describes, where an auxiliary boiler and heat-rejection device are expressly allowed — keep their ordinary selection-table reference. Air-, water- and ground-source heat pumps redirect to the air-source heat-pump reference instead. Each group's heat-pump sources are classified from the source plant loop, and a detected heat pump with no source evidence keeps the conservative redirect."
+    },
+    {
+      "id": "D-38",
+      "title": "Prescriptive pump-power caps applied min-wins over the intensity transfer",
+      "kind": "runtime",
+      "articles": ["5.2.6.3.(1)", "8.4.4.14."],
+      "summary": "Reference hydronic pump power is set by the proposed-intensity transfer and then clamped at the prescriptive maximum watts per kilowatt of the loop's peak thermal demand, because the prescriptive requirement is a ceiling the reference building may never pierce. Taking the smaller of the two is the only reading that satisfies both articles at once, and it removes the perverse incentive whereby wasteful proposed pumping inflates its own target. Unsized inputs produce an audited not-evaluable note rather than a silent skip."
+    },
+    {
+      "id": "D-39",
+      "title": "Two-pipe fan-coil reference heating honoured conditionally",
+      "kind": "runtime",
+      "articles": ["8.4.4.1.(5)", "Table 8.4.4.7.-B"],
+      "summary": "The selection table lists this reference system with no heating, while a separate sentence requires heating presence per thermal block to match the proposed. The reconciliation: a cooled-but-unheated proposed block gets the table-literal cooling-only reference, and a heated block keeps the existing two-pipe changeover heating under the presence override, with no new heating equipment invented. A block with no conditioning at all still gets no reference system, since that is absence rather than a stated none."
+    },
+    {
+      "id": "D-40",
+      "title": "Reheat-coil autosizing trusted; legacy hard-size workaround rejected",
+      "kind": "process",
+      "articles": [],
+      "summary": "Reference variable-air-volume reheat coils stay autosized; the legacy library's geometry-based hard-sizing formula was measured against a sized reference building and misses in both directions by up to an order of magnitude because it is load-blind. Adopting it would undersize some coils, inflate others into the plant sizing, disable the capacity auto-iteration that hard-sized equipment ignores, and rests on no code text."
+    },
+    {
+      "id": "D-41",
+      "title": "Service-water reference article machine-verified; gap refined",
+      "kind": "data",
+      "articles": ["8.4.4.20."],
+      "summary": "The service-water manifest's long-standing caveat that the article text was not machine-verifiable is closed now that the full article and its explanatory note retrieve cleanly. The verification showed the clone-based treatment already satisfies most sentences, so the declared gap was narrowed to two genuinely unimplemented items: part-load curves on reference service-water equipment, and consolidation of multiple proposed circulation pumps into one."
+    },
+    {
+      "id": "D-42",
+      "title": "First full-annual fleet sweep validates reference generation",
+      "kind": "process",
+      "articles": ["8.4.1.2.(4)"],
+      "summary": "The first code-compliant-duration sweep across fifteen archetypes put thirteen of them within a narrow band of the fixed-point expectation, and showed reference conditioning is sound through a full year with essentially no unmet heating hours. The non-compliance wave came from the proposed side: the legacy archetypes' hard-sized cooling produces far more unmet cooling hours than the reference, and hard-sized equipment does not respond to sizing-factor iteration. The reference pipeline itself behaved correctly end to end."
+    },
+    {
+      "id": "D-43",
+      "title": "Capacity iteration made per thermal block, secant-targeted from run history",
+      "kind": "runtime",
+      "articles": ["8.4.1.2.(5)"],
+      "summary": "The capacity auto-iteration no longer bumps only the building's global sizing factors. Each round reads the previous annual run's per-zone unmet-hours and raises sizing factors on the failing thermal blocks only, which is the code-literal reading since the governing sentences are written per thermal block. The first bump per zone is geometric and later bumps are extrapolated from that zone's own history, clamped so the increase stays incremental; global and mixed fallbacks are audited by name."
+    },
+    {
+      "id": "D-44",
+      "title": "Decision rulings surfaced at runtime in the audit log and AHJ report",
+      "kind": "process",
+      "articles": [],
+      "summary": "Adjudicated decisions previously lived only in project documentation, so a user running the pipeline never learned why a ruled code path behaved as it did. Audit entries now carry an optional ruling tag citing decision identifiers alongside the existing code-article citation, this registry mirrors every decision in machine-readable form with a self-contained summary, and the compliance report renders an appendix listing the decisions that actually fired in the run. Purely additive: no determination behaviour changes."
+    },
+    {
+      "id": "D-45",
+      "title": "Museum exhibition galleries: which selection-table row? (open)",
+      "kind": "runtime_unwired",
+      "articles": ["Table 8.4.4.7.-A"],
+      "summary": "A space named for a museum's general exhibition area currently matches the assembly-area category on an 'exhibit' keyword before it can match the historical-collections category on 'museum' — a keyword-ordering collision that can change which reference system the block receives. The printed row wording supports either reading, since a gallery is both an assembly space and a collections space, so this is an interpretation call rather than a defect. It is open pending adjudication and current behaviour is unchanged."
+    }
+  ]
+}

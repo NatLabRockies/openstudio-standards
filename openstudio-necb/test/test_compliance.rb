@@ -170,6 +170,20 @@ class TestCompliance < Minitest::Test
     assert_equal report['compliant'], result.compliant
     audit_json = JSON.parse(File.read(File.join(dir, 'audit.json')))
     assert_operator audit_json.size, :>, 80, 'the unified audit is substantial'
+
+    # D-44: ruled code paths name the decision that governs them, in the
+    # persisted audit and in the human-readable narrative. D-14 (reference air
+    # systems inherit the proposed operating schedule) fires on every run that
+    # builds a reference air system.
+    rulings = audit_json.filter_map { |e| e['ruling'] }
+    refute_empty rulings, 'ruling tags reach audit.json'
+    assert_includes rulings.flat_map { |r| OpenStudioNECB::Decisions.ids_in(r) }.uniq, 'D-14',
+                    'D-14 (operating-schedule inheritance) fired and was tagged'
+    rulings.flat_map { |r| OpenStudioNECB::Decisions.ids_in(r) }.uniq.each do |id|
+      refute_nil OpenStudioNECB::Decisions.lookup(id), "audited ruling #{id} resolves in the registry"
+    end
+    assert_match(/\| ruling D-\d{2}/, File.read(File.join(dir, 'audit.txt')),
+                 'audit.txt narrative carries the ruling segment')
   ensure
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
