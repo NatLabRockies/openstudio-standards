@@ -38,8 +38,11 @@ lighting fixture costing.
   judgement (4.2.1.6.(1)(b)), so no fallback is invented; before this gate an
   unmatched type silently kept the proposed's LPD in the reference clone
   (allowance waived). The umbrella pre-flights even earlier with suggestions;
-  this guards direct gem callers. reference daylighting is opt-in from the umbrella
-  (`reference_daylighting: true`) and needs the PROPOSED model for comparison.
+  this guards direct gem callers. reference daylighting runs BY DEFAULT from the
+  umbrella (D-51; `reference_daylighting: false` opts out) and needs the PROPOSED
+  model for comparison. `reference_lighting(daylighting:)` tells the lighting
+  transform whether the daylighting one will run: the "(5)-(12) NOT modeled"
+  warning fires only when it will not.
 - `necb/exterior.rb` + `exterior_lighting_2020.json` — exterior allowances.
 - `costing/*` — fixture takeoff and costing.
 

@@ -48,7 +48,7 @@
         "article": "4.2.2.3.-4.2.2.12.",
         "title": "Other interior lighting controls (daylighting, exterior control, etc.)",
         "status": "partial",
-        "gaps": "photocontrol ENERGY evaluation not modeled; 8.4.4.5.(5)-(12) reference daylighting geometry not modeled",
+        "gaps": "photocontrol ENERGY evaluation not modeled",
         "how": "daylighting: DaylightingControl placement (all-daylighted-spaces option: stepped x2, space-type illuminance setpoints, zone primary control) + per-sensor costing BOM | daylighted-area geometry PORTED: primary sidelighted area (4.2.2.9) + under-skylight area (4.2.2.5) + effective apertures (4.2.2.7/.10) with legacy-exact parity; NECB_Default threshold placement available (option: 'NECB_Default') with legacy defects preserved+audited (any-single-criterion exception; skylight-only zero area; 2011-era office name)"
       },
       {
@@ -93,7 +93,7 @@
         "title": "Reference daylighting geometry + photocontrols",
         "status": "partial",
         "gaps": "sentences (5)-(8) analytic single-centered-window/skylight AREA convention replaced by the ported 4.2.2 threshold geometry on the actual scaled fenestration (audited interpretation)",
-        "how": "reference photocontrols evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)"
+        "how": "reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available)"
       },
       {
         "article": "8.4.1.1. (lighting)",

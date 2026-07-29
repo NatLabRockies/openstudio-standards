@@ -6,8 +6,11 @@ module OpenStudioSHW
     # efficiency 1.0 + max standby-loss formulas -> UA. Gas/oil storage: UEF
     # ladder by tank volume and first-hour rating (FHR = 0.7 x V_litres + 151,
     # the legacy rule of thumb), burner efficiency 0.82, RE/UA from the UEF test
-    # draw; large equipment: Et 0.9 + SL formula. Cubic part-load curve
-    # SWH-EFFFPLR-NECB2011 on fuel-fired heaters.
+    # draw; large equipment: Et 0.9 + SL formula. The 8.4.5.9. (2025: 8.4.6.9.)
+    # part-load fuel curve is applied to fuel-fired heaters, storage and
+    # instantaneous alike, as the cubic SWH-EFFFPLR-NECB2011 — which is the
+    # PLF-domain image of the code's FHeatPLC quadratic, not a rival curve
+    # (D-53).
     module Efficiency
       module_function
 
@@ -34,7 +37,7 @@ module OpenStudioSHW
         # named instantaneous) as tankless: UEF/Et applied as thermal efficiency,
         # zero standby UA.
         if volume_l <= 7.6 || water_heater.nameString =~ /instantaneous/i
-          return apply_instantaneous(water_heater, fuel, capacity, audit)
+          return apply_instantaneous(water_heater, rules, fuel, capacity, audit)
         end
 
         case fuel
@@ -84,9 +87,6 @@ module OpenStudioSHW
         water_heater.setOffCycleParasiticFuelType(fuel)
         water_heater.setOffCycleParasiticHeatFractiontoTank(rules['parasitic']['off_cycle_heat_fraction'].to_f)
 
-        if rules['part_load_curve']['applies_to'].include?(fuel)
-          water_heater.setPartLoadFactorCurve(part_load_curve(water_heater.model, rules['part_load_curve']))
-        end
         water_heater.setName("#{water_heater.nameString} #{efficiency.round(3)} Therm Eff")
 
         audit.decision(:shw_efficiency, 'water heater performance applied (Table 6.2.2.1, NECB2020 UEF procedure)',
@@ -94,6 +94,7 @@ module OpenStudioSHW
                        inputs: { fuel: fuel, capacity_kw: (capacity / 1000).round(2), volume_l: volume_l.round(1),
                                  thermal_efficiency: efficiency.round(4), ua_w_per_k: ua_w_k.round(4) },
                        evidence: evidence, article: '6.2.2.1.')
+        apply_part_load_curve(water_heater, rules, fuel, audit)
         true
       end
 
@@ -102,7 +103,7 @@ module OpenStudioSHW
       # CONSERVATIVE 0.86 is used (audited); gas all others: Et >= 94%. Oil:
       # Et >= 80% (< 37.8 L) / 78%. Electric instantaneous carries footnote (6)
       # (no numeric requirement) — modeled at 1.0.
-      def apply_instantaneous(water_heater, fuel, capacity, audit)
+      def apply_instantaneous(water_heater, rules, fuel, capacity, audit)
         efficiency, evidence =
           case fuel
           when 'NaturalGas'
@@ -123,6 +124,10 @@ module OpenStudioSHW
                        target: water_heater.nameString,
                        inputs: { fuel: fuel, capacity_kw: (capacity / 1000).round(2), thermal_efficiency: efficiency },
                        evidence: evidence, article: '6.2.2.1. (instantaneous rows)')
+        # 8.4.5.9 draws no storage/instantaneous distinction — a fuel-fired
+        # instantaneous heater is a fuel-fired service water heater, so the
+        # part-load fuel curve reaches it too.
+        apply_part_load_curve(water_heater, rules, fuel, audit)
         true
       end
 
@@ -168,16 +173,69 @@ module OpenStudioSHW
         [efficiency, ua]
       end
 
-      def part_load_curve(model, spec)
-        existing = model.getCurveCubicByName(spec['name'])
-        return existing.get if existing.is_initialized
+      # NECB 8.4.5.9. (2025: 8.4.6.9.) "Fuel-Fired Service Water Heater" — the
+      # part-load fuel curve. SCOPE IS THE ARTICLE'S, not an implementation
+      # convenience: the article governs "the reference fuel-fired service
+      # water heater", so it reaches gas and oil (storage and instantaneous
+      # alike) and does NOT reach electric heaters — 8.4.5 carries no electric
+      # counterpart to apply. An out-of-scope fuel is audited as such rather
+      # than silently skipped. See D-53.
+      def apply_part_load_curve(water_heater, rules, fuel, audit)
+        spec = rules['part_load_curve']
+        unless spec['applies_to'].include?(fuel)
+          audit.info(:shw_efficiency,
+                     "part-load fuel curve not applied — '#{fuel}' is not a fuel-fired service water heater, " \
+                     "so #{spec['article']} does not reach it (article scope, not an omission)",
+                     target: water_heater.nameString, article: spec['article'], ruling: 'D-53')
+          return false
+        end
 
-        curve = OpenStudio::Model::CurveCubic.new(model)
+        water_heater.setPartLoadFactorCurve(part_load_curve(water_heater.model, spec))
+        audit.decision(:shw_efficiency,
+                       'part-load fuel curve applied to the fuel-fired water heater',
+                       target: water_heater.nameString,
+                       inputs: { fuel: fuel, curve: spec['name'], form: spec['form'] },
+                       value: spec['coefficients'],
+                       evidence: "code FHeatPLC #{spec['code_fheatplc']['coefficients'].inspect} is a fuel-ratio " \
+                                 'curve; the EnergyPlus part-load-factor field is a degradation divisor, so it ' \
+                                 'carries the transform PLF(x) = x / FHeatPLC(x) — probe-verified equivalent to ' \
+                                 '0.98% over PLR 0.25-1.0 (necb_8_4_6_curve_probe.rb)',
+                       article: spec['article'], ruling: 'D-53')
+        true
+      end
+
+      # Builds the curve in the form the ruleset declares. `form` is honoured
+      # rather than assumed: the field accepts any UnivariateFunction, so a
+      # Quadratic ruleset must not be smuggled through as a cubic with a zero
+      # cubic term (that would silently accept a mis-shaped spec).
+      def part_load_curve(model, spec)
+        coeffs = spec['coefficients']
+        case spec['form']
+        when 'Quadratic'
+          raise ArgumentError, "part_load_curve '#{spec['name']}': Quadratic needs 3 coefficients" unless coeffs.size == 3
+
+          existing = model.getCurveQuadraticByName(spec['name'])
+          return existing.get if existing.is_initialized
+
+          curve = OpenStudio::Model::CurveQuadratic.new(model)
+          curve.setCoefficient1Constant(coeffs[0])
+          curve.setCoefficient2x(coeffs[1])
+          curve.setCoefficient3xPOW2(coeffs[2])
+        when 'Cubic'
+          raise ArgumentError, "part_load_curve '#{spec['name']}': Cubic needs 4 coefficients" unless coeffs.size == 4
+
+          existing = model.getCurveCubicByName(spec['name'])
+          return existing.get if existing.is_initialized
+
+          curve = OpenStudio::Model::CurveCubic.new(model)
+          curve.setCoefficient1Constant(coeffs[0])
+          curve.setCoefficient2x(coeffs[1])
+          curve.setCoefficient3xPOW2(coeffs[2])
+          curve.setCoefficient4xPOW3(coeffs[3])
+        else
+          raise ArgumentError, "part_load_curve '#{spec['name']}': unsupported form '#{spec['form']}'"
+        end
         curve.setName(spec['name'])
-        curve.setCoefficient1Constant(spec['coefficients'][0])
-        curve.setCoefficient2x(spec['coefficients'][1])
-        curve.setCoefficient3xPOW2(spec['coefficients'][2])
-        curve.setCoefficient4xPOW3(spec['coefficients'][3])
         curve.setMinimumValueofx(0.0)
         curve.setMaximumValueofx(1.0)
         curve

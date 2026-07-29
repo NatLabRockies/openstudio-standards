@@ -69,13 +69,19 @@ module OpenStudioNECB
     #   8.4.4.1.(4). The mapping also drives the Table 8.4.4.2 conformance
     #   check and (when non-conformant) the normalization of the proposed.
     # @param process_loads_kwh [Numeric] :eui path PL term (8.4.4.1.(2))
+    # @param reference_daylighting [Boolean] build the reference building's
+    #   photocontrols and evaluate them by detailed daylighting
+    #   (8.4.4.5.(9)-(12); 2025: 8.4.5.5.). Defaults to TRUE (D-51): 4.2.2
+    #   requires the photocontrols, so a reference without them is
+    #   non-conformant and sets a target more lenient than the code. Pass false
+    #   to opt out — the run then warns that (9)-(12) went unevaluated.
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
                                costing: false, city: nil, province_state: nil,
                                costs_csv: nil, thermal_bridging: nil,
                                actual_roof_absorptance_used: false,
                                max_capacity_iterations: 3, capacity_step: 1.25,
-                               necb_loads: nil, reference_daylighting: false,
+                               necb_loads: nil, reference_daylighting: true,
                                path: :reference, archetypes: nil,
                                process_loads_kwh: 0.0, eui_supplement: nil,
                                report_html: false, report_options: {}, audit: nil)
@@ -138,6 +144,7 @@ module OpenStudioNECB
 
       # 2. reference building: HVAC then envelope on ONE clone, same audit
       reference = nil
+      lighting_prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       audit.with_building('reference building') do
         reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
                                                                building: building, audit: audit)
@@ -145,10 +152,26 @@ module OpenStudioNECB
         OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
                                                     actual_roof_absorptance_used: actual_roof_absorptance_used,
                                                     thermal_bridging: thermal_bridging, audit: audit)
-        OpenStudioLighting::NECB.reference_lighting(reference, vintage: vintage, audit: audit)
+        # daylighting: tells reference_lighting whether (5)-(12) are covered by
+        # the separate daylighting transform below — it shouts the gap only when
+        # they are not (Phase 0 truth-up; the warning used to fire either way).
+        OpenStudioLighting::NECB.reference_lighting(reference, vintage: vintage,
+                                                    daylighting: reference_daylighting, audit: audit)
         if reference_daylighting
+          audit.decision(:compliance,
+                         'reference photocontrols BUILT by default: 4.2.2 requires photocontrols, and ' \
+                         "#{lighting_prefix}.5.(9)-(12) requires their effect to be evaluated in the reference — " \
+                         'a reference generated without them is non-conformant, so correctness outranks ' \
+                         'the detailed-daylighting runtime cost (pass reference_daylighting: false to opt out)',
+                         article: "#{lighting_prefix}.5.(9)-(12)", ruling: 'D-51')
           OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
                                                          proposed: proposed, audit: audit)
+        else
+          audit.warn(:compliance,
+                     'reference photocontrols SUPPRESSED by the caller (reference_daylighting: false): ' \
+                     "#{lighting_prefix}.5.(9)-(12) photocontrol effect is NOT evaluated in this reference, so the " \
+                     'target it sets is more lenient than the code requires',
+                     article: "#{lighting_prefix}.5.(9)-(12)", ruling: 'D-51')
         end
         OpenStudioSHW::NECB.reference_shw(reference, vintage: vintage, audit: audit)
       end

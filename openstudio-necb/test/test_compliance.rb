@@ -82,8 +82,24 @@ class TestCompliance < Minitest::Test
            'reference_lighting Part 4 allowance cited, stamped reference building')
     assert(result.audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.20.') && e[:building] == 'reference building' },
            'reference_shw Part 6 efficiencies cited, stamped reference building')
-    assert(result.audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') && w[:building] == 'reference building' },
-           'untagged fixture: reference_lighting warns loudly (daylighting gaps), no LPD change')
+    # D-51: reference daylighting is ON by default, so the pipeline builds the
+    # 8.4.4.5.(9)-(12) photocontrols and reference_lighting must NOT claim
+    # (5)-(12) are unmodeled (that warning is now conditional on the transform
+    # having been skipped).
+    d51 = result.audit.entries.find do |e|
+      e[:step] == :compliance && e[:ruling].to_s.include?('D-51') && e[:building] == 'reference building'
+    end
+    refute_nil d51, 'reference daylighting ran by default, cited as D-51 and stamped reference building'
+    assert_equal :decision, d51[:level], 'daylighting ON is a decision, not a warning'
+    assert_includes d51[:article].to_s, '8.4.4.5.(9)-(12)'
+    refute(result.audit.warnings.any? do |w|
+             w[:step] == :lighting_reference && w[:article].to_s.include?('8.4.4.5.(5)-(12)')
+           end,
+           'the "(5)-(12) NOT modeled" warning is silenced when reference_daylighting ran')
+    # the transform really ran (whether it PLACES controls depends on the 4.2.2
+    # threshold selection, which excepts this fixture's spaces — see D-51)
+    assert(result.audit.entries.any? { |e| e[:step] == :daylighting && e[:building] == 'reference building' },
+           'the reference daylighting transform ran and audited itself')
 
     # The umbrella's OWN manifest is emitted at runtime (D-09): real pipeline
     # limitations warn; gap_owner "modeller" entries are info scope notes.

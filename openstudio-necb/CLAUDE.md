@@ -17,7 +17,7 @@ audit still flushes) → weather attach → HDD (explicit → Table C-1 → .sta
 proposed sizing
 → reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
 LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
-optional reference_daylighting on ONE clone/audit → reference sizing →
+reference_daylighting (ON by default, D-51) on ONE clone/audit → reference sizing →
 efficiencies RE-applied on sized capacities (with `proposed:` for the
 8.4.4.14 pump W/(L/s) transfer) + 5.2.10.1 energy-recovery
 determination on sized flows (Table 5.2.10.1.-A/-B) → annual runs → 8.4.1.2.(2)–(4)

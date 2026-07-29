@@ -8,7 +8,14 @@ class TestSHW < Minitest::Test
     %w[2020 2025].each do |vintage|
       rules = OpenStudioSHW::NECB.rules(vintage)
       assert_equal 0.82, rules['efficiency']['fuel_fired']['burner_efficiency']
-      assert_equal [0.7576, 1.0071, -1.4443, 0.6844], rules['efficiency']['part_load_curve']['coefficients']
+      plc = rules['efficiency']['part_load_curve']
+      assert_equal [0.7576, 1.0071, -1.4443, 0.6844], plc['coefficients']
+      assert_equal 'Cubic', plc['form']
+      assert_equal %w[NaturalGas FuelOilNo2], plc['applies_to'], 'article scope: fuel-fired only'
+      # 8.4.5.9.(2) in 2020, renumbered 8.4.6.9.(2) in 2025 (directional — the
+      # 2025 SWH article is 8.4.6.9, NOT 8.4.5.9).
+      assert_equal(vintage == '2025' ? '8.4.6.9.(2)' : '8.4.5.9.(2)', plc['article'])
+      assert_equal [0.021826, 0.97763, 0.000543], plc['code_fheatplc']['coefficients']
       coverage = rules['article_coverage']['articles']
       assert_operator coverage.size, :>=, 6
       coverage.each { |a| assert(a['how'] || a['gaps']) }
@@ -90,6 +97,90 @@ class TestSHW < Minitest::Test
     large.setHeaterFuelType('NaturalGas')
     OpenStudioSHW::NECB.apply_water_heater_efficiency(large, vintage: '2020', audit: audit)
     assert_operator large.heaterThermalEfficiency.get, :>, 0.9, 'Et + UA/capacity adjustment'
+  end
+
+  # 8.4.5.9.(2) / 8.4.6.9.(2). FUNCTIONAL gate, not a coefficient pin: the code
+  # writes a fuel-ratio curve (Fuel_pl = Fuel_des x FHeatPLC) while the E+
+  # part-load-factor field is a degradation divisor (fuel = Q/(eta x PLF)), so
+  # the model curve must satisfy x / PLF(x) ~= FHeatPLC(x). Comparing the
+  # vendored cubic to the code quadratic coefficient-wise would be meaningless.
+  def test_part_load_curve_is_functionally_the_code_fheatplc
+    %w[2020 2025].each do |vintage|
+      plc = OpenStudioSHW::NECB.rules(vintage)['efficiency']['part_load_curve']
+      cubic = plc['coefficients']
+      a, b, c = plc['code_fheatplc']['coefficients']
+      poly = ->(k, x) { k.each_with_index.sum { |v, i| v * (x**i) } }
+      fheatplc = ->(x) { a + (b * x) + (c * x * x) }
+
+      # self-check the code polynomial at its rating point before trusting it
+      assert_in_delta 1.0, fheatplc.call(1.0), 1e-5, "#{vintage}: FHeatPLC(1.0) must be ~1.0"
+      assert_in_delta 1.0, poly.call(cubic, 1.0), 5e-3, "#{vintage}: applied PLF(1.0) must be ~1.0"
+
+      worst = (25..100).step(5).map do |pct|
+        x = pct / 100.0
+        ((x / poly.call(cubic, x)) - fheatplc.call(x)).abs / fheatplc.call(x)
+      end.max
+      assert_operator worst, :<, 0.03,
+                      "#{vintage}: applied curve deviates #{(worst * 100).round(2)}% from the code FHeatPLC"
+    end
+  end
+
+  # The curve builder must honour the declared form rather than assume Cubic —
+  # a Quadratic spec is built as a Curve:Quadratic, not faked with a zero cubic
+  # term, and a mis-shaped spec raises instead of being silently accepted.
+  def test_part_load_curve_builder_honours_form
+    model = OpenStudio::Model::Model.new
+    quad = OpenStudioSHW::NECB::Efficiency.part_load_curve(
+      model, { 'name' => 'Probe Quadratic', 'form' => 'Quadratic', 'coefficients' => [0.021826, 0.97763, 0.000543] }
+    )
+    assert quad.to_CurveQuadratic.is_initialized, 'Quadratic form builds a Curve:Quadratic'
+    assert_in_delta 1.0, quad.to_CurveQuadratic.get.coefficient1Constant +
+                         quad.to_CurveQuadratic.get.coefficient2x +
+                         quad.to_CurveQuadratic.get.coefficient3xPOW2, 1e-5
+
+    assert_raises(ArgumentError) do
+      OpenStudioSHW::NECB::Efficiency.part_load_curve(
+        model, { 'name' => 'Bad', 'form' => 'Quadratic', 'coefficients' => [1.0, 2.0, 3.0, 4.0] }
+      )
+    end
+    assert_raises(ArgumentError) do
+      OpenStudioSHW::NECB::Efficiency.part_load_curve(
+        model, { 'name' => 'Bad2', 'form' => 'Quartic', 'coefficients' => [1.0] }
+      )
+    end
+  end
+
+  # Scope of 8.4.5.9 is the ARTICLE's: fuel-fired storage AND instantaneous get
+  # the curve; electric gets none, and says so in the audit.
+  def test_part_load_curve_scope_by_fuel_and_type
+    model = OpenStudio::Model::Model.new
+    build = lambda do |fuel, volume_m3|
+      h = OpenStudio::Model::WaterHeaterMixed.new(model)
+      h.setName("Probe #{fuel} #{volume_m3}")
+      h.setHeaterFuelType(fuel)
+      h.setHeaterMaximumCapacity(30_000)
+      h.setTankVolume(volume_m3)
+      audit = OpenStudioSHW::AuditLog.new
+      OpenStudioSHW::NECB.apply_water_heater_efficiency(h, vintage: '2020', audit: audit)
+      [h, audit]
+    end
+
+    gas_storage, = build.call('NaturalGas', 0.3)
+    assert gas_storage.partLoadFactorCurve.is_initialized, 'fuel-fired storage carries the curve'
+
+    gas_inst, inst_audit = build.call('NaturalGas', 0.005) # 5 L -> instantaneous bound
+    assert gas_inst.partLoadFactorCurve.is_initialized,
+           'fuel-fired INSTANTANEOUS carries the curve — 8.4.5.9 draws no storage/instantaneous distinction'
+    assert(inst_audit.entries.any? { |e| e[:ruling] == 'D-53' && e[:level] == :decision })
+
+    oil_inst, = build.call('FuelOilNo2', 0.005)
+    assert oil_inst.partLoadFactorCurve.is_initialized, 'oil instantaneous is fuel-fired too'
+
+    elec, elec_audit = build.call('Electricity', 0.3)
+    refute elec.partLoadFactorCurve.is_initialized, 'electric is outside the article scope'
+    scope = elec_audit.entries.find { |e| e[:ruling] == 'D-53' }
+    refute_nil scope, 'the out-of-scope skip is AUDITED, not silent'
+    assert_match(/article scope/, scope[:action])
   end
 
   def test_reference_shw_coverage

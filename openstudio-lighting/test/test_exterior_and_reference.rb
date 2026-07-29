@@ -58,9 +58,25 @@ class TestExteriorAndReference < Minitest::Test
     %w[8.4.4.5.(1) 8.4.4.5.(2)].each do |article|
       assert(audit.entries.any? { |e| e[:article].to_s.include?(article) }, article)
     end
-    assert(audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
-           'daylighting gaps are loud')
+    assert(audit.warnings.any? { |w| w[:step] == :lighting_reference && w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
+           'daylighting gaps are loud when reference_daylighting did NOT run (the default)')
     assert(audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.5.(3)') && e[:action].include?('schedule modulation') })
+  end
+
+  # The (5)-(12) warning is CONDITIONAL: reference_daylighting.rb models and
+  # audits those sentences itself, so when the caller runs it (the umbrella's
+  # default since D-51) this transform must not claim they are unmodeled.
+  def test_reference_lighting_daylighting_kwarg_silences_the_gap_warning
+    model = OpenStudio::Model::Model.new
+    tagged_space_type(model, 'Space Function', 'Office enclosed > 25 m2')
+
+    audit = OpenStudioLighting::AuditLog.new
+    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', daylighting: true, audit: audit)
+
+    refute(audit.warnings.any? { |w| w[:step] == :lighting_reference && w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
+           'daylighting: true — (5)-(12) is modeled elsewhere, so no "NOT modeled" warning here')
+    assert(audit.entries.any? { |e| e[:article].to_s.include?('8.4.4.5.(1)') },
+           'the rest of the reference lighting transform is unchanged')
   end
 
   def test_reference_2025_prefix
@@ -99,8 +115,8 @@ class TestExteriorAndReference < Minitest::Test
     audit = OpenStudioLighting::AuditLog.new
     OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
 
-    assert(audit.warnings.any? { |w| w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
-           'daylighting gaps still warn loudly')
+    assert(audit.warnings.any? { |w| w[:step] == :lighting_reference && w[:article].to_s.include?('8.4.4.5.(5)-(12)') },
+           'daylighting gaps still warn loudly on a run without reference_daylighting')
 
     coverage = audit.entries.select { |e| e[:step] == :coverage }
     refute_empty coverage, 'lighting article coverage emitted'

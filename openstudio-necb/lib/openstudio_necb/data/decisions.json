@@ -367,6 +367,20 @@
       "kind": "runtime",
       "articles": ["8.4.4.9.(3)", "8.4.4.10.(7)", "8.4.5.9.(3)", "8.4.5.10.(7)"],
       "summary": "Where the selection table places heating or cooling in both a zone terminal and a secondary system, the terminal is to be sized for the space loads while the pair together covers the peak. For the reference systems that pair a zone terminal with a make-up-air unit this is expressed directly as dedicated-outdoor-air zone-sizing accounting with a neutral supply-air strategy, so the ventilation stream neither adds nor removes zone load and the terminal is sized on the space load alone. Reference systems that mix outdoor air into the supply stream have no equivalent accounting, so their split is only approximated by ordinary mixed-air zone sizing and each such group is audited as an approximation."
+    },
+    {
+      "id": "D-51",
+      "title": "Reference daylighting photocontrols are built by default",
+      "kind": "runtime",
+      "articles": ["8.4.4.5.(9)-(12)", "8.4.5.5.(9)-(12)"],
+      "summary": "The reference building is required to carry the daylighting photocontrols that the prescriptive lighting-control requirements mandate, and the effect of those controls must be evaluated in the reference. The pipeline therefore builds them on every reference-path run by default and evaluates them with detailed daylighting calculations, because a reference generated without them over-states reference lighting energy and hands the proposed building an energy target more lenient than the code sets. A caller may still switch the photocontrols off, and a run that does so is warned in the audit that the requirement went unevaluated rather than being left silent."
+    },
+    {
+      "id": "D-53",
+      "title": "Service water heater part-load curve carries the code fuel-ratio curve transformed into the EnergyPlus part-load-factor domain",
+      "kind": "runtime",
+      "articles": ["8.4.5.9.(2)", "8.4.6.9.(2)"],
+      "summary": "The code states the reference fuel-fired water heater's part-load behaviour as a quadratic ratio of design fuel consumption, whereas the simulation engine's part-load-factor field is an efficiency divisor, so the two express the same requirement in different domains and cannot be compared coefficient by coefficient. The vendored cubic is the polynomial image of that transform and is verified functionally against the code curve on a sampled part-load range rather than by its coefficients; entering the code's own quadratic into the engine field would invert the relation, roughly double part-load fuel at half load, and double-count standby the engine already models separately. The curve is applied to gas- and oil-fired heaters, storage and instantaneous alike, and is withheld from electric heaters because the governing article covers only fuel-fired equipment, a scope limit that is audited rather than left as a silent skip."
     }
   ]
 }

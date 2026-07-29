@@ -51,29 +51,97 @@ item is a check the implementer cannot self-certify; tick with evidence
       have preceded the claim.
 
 ### Phase 0 — truth-up
-- [ ] The three test sites pinning the unconditional lighting warning were
+- [x] The three test sites pinning the unconditional lighting warning were
       updated, not deleted: `test_exterior_and_reference.rb:61`, `:102`,
       `openstudio-necb/test/test_compliance.rb:85`.
-- [ ] No behaviour changed — diff should be docs/strings/conditionals only.
+      [READ] all three now assert step-scoped semantics
+      (`w[:step] == :lighting_reference`) — the old assertions were ALSO
+      satisfied by the manifest coverage warning on the same article, so they
+      would have passed even if the conditional were broken; a new case
+      `test_reference_lighting_daylighting_kwarg_silences_the_gap_warning`
+      pins the `daylighting: true` side.
+- [x] No behaviour changed by the truth-up itself — the Phase 0 diff is
+      strings, one comment and one `unless daylighting` guard.
+      [RAN] `ruby test/test_exterior_and_reference.rb` 8 runs 0 failures;
+      `ruby test/test_data_integrity.rb` 5 runs 0 failures.
+- [ ] STILL OPEN: reviewer to confirm the 8.4.4.13 gap string edit is the ONLY
+      hvac change and that dropping (2)(c) is right
+      ([READ] `efficiency.rb:617` `align_heat_pump_heating_capacity`,
+      `:654` `align_staged_heat_pump`, both audited `8.4.4.13.(2)(c)`).
 
 ### Phase 1 — SHW part-load curve
-- [ ] The 8.4.5.9 quadratic (a=0.021826, b=0.977630, c=0.000543) was verified
+
+**The phase premise was REFUTED — read D-53 before reviewing.** The plan called
+the vendored cubic "wrong form, wrong coefficients". The coefficients quoted
+for 8.4.5.9.(2) were correct, but the inference was not: the code curve is a
+FUEL-RATIO curve and the EnergyPlus field is a DEGRADATION DIVISOR, related by
+`PLF(x) = x / FHeatPLC(x)` (rational, so no exact polynomial exists). The cubic
+is that transform's image. **The curve was therefore NOT replaced.** Review the
+refutation, not just the diff.
+
+- [x] The 8.4.5.9 quadratic (a=0.021826, b=0.977630, c=0.000543) was verified
       FUNCTIONALLY over a sampled PLR envelope, self-checking ≈1.0 at the
-      rating point — not compared coefficient-wise (vendored rounding reads as
-      fake deviation; D-03/D-13 precedent).
-- [ ] Whether the curve legitimately applies to electric and instantaneous
+      rating point — not compared coefficient-wise. [RAN]
+      `ruby openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` →
+      `8.4.6.9 SWH FHeatPLC EQUIVALENT — max dev 0.98% over PLR 0.25-1.0`;
+      independent re-derivation table in D-53 (worst 1.47% at PLR 0.20).
+- [ ] **Reviewer's own check:** confirm the article text retrieved
+      independently agrees that `Fuel_partload = Fuel_design × FHeatPLC` is a
+      fuel ratio and not an efficiency multiplier — the whole non-change rests
+      on that reading. [READ] `mcp codes get_section('necb','8.4.5.9','2020')`
+      and `('necb','8.4.6.9','2025')`.
+- [x] Whether the curve legitimately applies to electric and instantaneous
       water heaters was decided from the article text ("Fuel-Fired Service
       Water Heater"), and the answer is stated in `how` rather than left as a
-      silent skip.
-- [ ] `test_shw.rb:11` (pins the old cubic) moved deliberately, and
-      `test_shw.rb:103` (requires ≥1 coverage warning) still passes.
+      silent skip. Electric = OUT (audited on every electric heater, not a
+      silent branch); fuel-fired instantaneous = IN (was the one real gap;
+      `efficiency.rb` early-returned before setting the curve).
+- [ ] **Energy-affecting, unswept:** the instantaneous fix is the only
+      behaviour change. It fires ONLY on heaters with tank ≤ 7.6 L or named
+      `instantaneous`; the gem's own autosized reference tanks are far above
+      that bound, so no archetype should move. **Verify that claim in the
+      sweep** — if any archetype moves on Phase 1 alone, this reasoning is
+      wrong.
+- [x] `test_shw.rb:11` moved deliberately: the bare coefficient pin became a
+      functional gate (`test_part_load_curve_is_functionally_the_code_fheatplc`)
+      plus form/scope/article pins. `test_shw.rb`'s coverage-warning assertion
+      still passes — closing (5) did NOT remove the last warning, because
+      `6.2.2.1.` (partial), `6.2.3.-6.2.7.` (not_implemented) and
+      `8.4.4.20.(3)-(4)` (still partial for (9)) all still warn.
+- [ ] The `part_load_curve` builder now honours the ruleset's `form` and raises
+      on a mis-shaped spec. Confirm no other caller passed a spec relying on
+      the old assume-Cubic behaviour.
 
 ### Phase 2 — daylighting default ON
-- [ ] Runtime cost measured and recorded in D-51 (sweep wall-clock before vs
-      after) — detailed daylighting on 15 archetypes is the risk.
-- [ ] Reference interior-lighting energy fell (the expected direction) and the
-      per-building shift is attributed.
-- [ ] `test_compliance.rb:85` still meaningful now that the default flipped.
+- [x] Runtime cost measured and recorded in D-51 (wall-clock before vs after).
+      [RAN] whole week-run pipeline, twice per archetype: SmallOffice
+      31.9 s -> 32.2 s (+0.9%), MediumOffice 32.6 s -> 33.2 s (+1.8%). The
+      feared sweep blow-up does not happen.
+- [x] Reference interior-lighting energy fell (the expected direction) on the
+      archetype where controls are actually placed. [RAN] SmallOffice
+      230.6 -> 158.3 kWh/wk (-31%), reference total -3.0%, percent-of-target
+      91.4 -> 94.2 (STRICTER).
+- [ ] **REVIEWER DECISION OWED: the flip is inert on 10 of 17 archetypes.**
+      [RAN] `scratchpad/d51_placement.rb` — `placement: :necb_default` (the
+      legacy-exact 4.2.2 selection, which excepts any space failing ANY single
+      criterion, so window-only spaces are always excepted) yields ZERO
+      eligible spaces on FullServiceRestaurant, HighriseApartment, LargeHotel,
+      LargeOffice, LowriseApartment, MediumOffice, MidriseApartment,
+      QuickServiceRestaurant, RetailStandalone, RetailStripmall. Whether the
+      REFERENCE building should instead use `placement: :all` is unruled and
+      was deliberately NOT decided during implementation. Expect ten unmoved
+      buildings in the fleet sweep; that is this, not a regression.
+- [ ] ONE stale string left deliberately untouched (Phase 2 was scoped out of
+      openstudio-hvac): `reference_rules_{2020,2025}.json` article `8.4.4.5.` /
+      `8.4.5.5.` still says "reference_daylighting (opt-in)". It is the HVAC
+      manifest's cross-gem delegation note; someone with the hvac file open
+      should change "opt-in" to "on by default (D-51)".
+- [x] `test_compliance.rb:85` still meaningful now that the default flipped.
+      [READ] it now asserts the D-51 ruling entry fired, stamped
+      `reference building`, AND that the `:lighting_reference` "(5)-(12) NOT
+      modeled" warning is absent. Note the old assertion would still have
+      passed unchanged — the manifest coverage warning carries the same
+      article — so it was strengthened, not merely moved.
 
 ### Phase 3 — DCV copy
 - [ ] DCV is read from the proposed's `controllerMechanicalVentilation` and
@@ -118,3 +186,36 @@ item is a check the implementer cannot self-certify; tick with evidence
 - [ ] `docs/NECB_GEM_COVERAGE.md` regenerated (`rake necb:coverage_doc`).
 - [ ] `pending_review.md` deleted or emptied — a stale checklist is worse than
       none.
+
+## Reviewer items raised during implementation (2026-07-29)
+
+- [ ] **D-51 is largely INERT and needs a ruling.** `reference_daylighting`
+      uses `placement: :necb_default`, whose selection excepts a space failing
+      ANY single 4.2.2 criterion (`daylighting.rb#necb_default_spaces`:
+      `side_area <= 100 || side_ea <= 0.1 || sky_area <= 400 || sky_ea <=
+      0.006`). A window-only space therefore always fails the skylight test
+      (0 <= 400) and gets NO controls. Measured eligible spaces: **0 on 10 of
+      17 archetypes**; nonzero only for SmallOffice 4/4, Hospital 8/153,
+      Outpatient 4/76, SecondarySchool 2/45, PrimarySchool 1/25, SmallHotel
+      1/67, Warehouse 1/3. So the default flip changes almost nothing, and ten
+      unmoved buildings in the sweep must NOT be read as a regression.
+      The open question: should the REFERENCE use `placement: :all` instead?
+- [ ] **BLOCKED on a codes-MCP ingestion gap.** The above cannot be settled
+      from the code text: `get_section('necb','4.2.2.4'/'4.2.2.5')` return the
+      daylighted-AREA geometry articles, but **4.2.2.6 through 4.2.2.10 all
+      return null** — the articles that actually REQUIRE the controls are not
+      retrievable. Do not rule the OR-of-four-criteria semantics defective
+      without them (that would be false premise #7). File the ingestion gap
+      with hbix as was done for Appendix A (hbix#67), then revisit.
+- [ ] `openstudio-hvac` `reference_rules_{2020,2025}.json` articles
+      `8.4.4.5.`/`8.4.5.5.` still say "reference_daylighting (opt-in)" —
+      stale after D-51; outside the Phase 0 agent's scope.
+- [ ] **Parallel-agent artifact:** `test_decisions_registry.rb` can fail
+      spuriously while phases land concurrently (one agent cites an id another
+      has not yet registered). Re-run it after ALL phases, not per-phase.
+      Confirmed green after phases 0/1/2: 12 runs, 861 assertions.
+- [ ] The three lighting warning assertions were previously satisfied by the
+      MANIFEST coverage warning on the same article string, so they passed
+      even with the conditional broken. Now scoped to
+      `step == :lighting_reference`. Check no other assertion in the suite has
+      the same weakness.

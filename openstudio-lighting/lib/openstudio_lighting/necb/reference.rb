@@ -10,11 +10,21 @@ module OpenStudioLighting
     #       interpretation of the power-multiplier wording
     #   (4) radiant/convective/return-air fractions identical to proposed — holds
     #       by construction (same space-type records drive both models)
-    #   (5)-(12) daylighting geometry + photocontrols — not modeled (loud gaps)
+    #   (5)-(12) daylighting geometry + photocontrols — modeled by the SEPARATE
+    #       reference_daylighting transform (reference_daylighting.rb), which
+    #       audits (5)-(12) itself. This transform therefore says nothing about
+    #       them when it is told daylighting ran (daylighting: true) and warns
+    #       loudly only when it did not.
     module Reference
       module_function
 
-      def reference_lighting(model, vintage: '2020', audit: nil)
+      # @param daylighting [Boolean] whether the caller ALSO runs
+      #   reference_daylighting on this model. When it does, (5)-(12) are
+      #   modeled and audited there, so this transform stays silent about them;
+      #   when it does not, the gap is shouted here. Defaults to false so a
+      #   caller that never runs the daylighting transform still gets the loud
+      #   gap without opting in.
+      def reference_lighting(model, vintage: '2020', daylighting: false, audit: nil)
         audit ||= AuditLog.new
         prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
 
@@ -56,10 +66,13 @@ module OpenStudioLighting
         audit.info(:lighting_reference,
                    'lighting heat fractions identical to proposed by construction (same space-type records)',
                    article: "#{prefix}.5.(4)")
-        audit.warn(:lighting_reference,
-                   "#{prefix}.5.(5)-(12): reference daylighting geometry (centered-window sidelighting, " \
-                   'centred-skylight toplighting) and photocontrol evaluation are NOT modeled',
-                   article: "#{prefix}.5.(5)-(12)")
+        unless daylighting
+          audit.warn(:lighting_reference,
+                     "#{prefix}.5.(5)-(12): reference daylighting geometry (centered-window sidelighting, " \
+                     'centred-skylight toplighting) and photocontrol evaluation are NOT modeled on this run ' \
+                     '(reference_daylighting was not run)',
+                     article: "#{prefix}.5.(5)-(12)")
+        end
         audit
       end
 

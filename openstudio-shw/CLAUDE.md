@@ -42,8 +42,21 @@ pump and instantaneous water heaters), the reference transform, and costing.
   (`OpenStudioLoads::NECB.data_vintage`, called from `necb/demand.rb`) — the
   2025 rules file deliberately has no `data_vintage_alias` key (deleted as
   dead config by the orphan-key lint).
-- The water-heater part-load factor curve is probe-verified equivalent to the
-  8.4.6.9 FHeatPLC (≤0.98%; `rake necb:curves`).
+- **The water-heater part-load curve looks wrong and is not (D-53).** The code
+  (2020 **8.4.5.9.(2)**, 2025 **8.4.6.9.(2)**) writes a QUADRATIC *fuel-ratio*
+  curve `FHeatPLC = 0.021826 + 0.977630x + 0.000543x²`
+  (`Fuel_pl = Fuel_des × FHeatPLC`); the gem vendors a CUBIC in the E+
+  `WaterHeater:Mixed` part-load-factor field, which is a *degradation divisor*
+  (`fuel = Q/(η·PLF)`). They relate as `PLF(x) = x / FHeatPLC(x)` — RATIONAL,
+  so no exact polynomial exists — and the cubic is that image, probe-verified
+  ≤0.98% over PLR 0.25-1.0 (`rake necb:curves`). **Do not "fix" this by putting
+  the code quadratic in the PLF field**: it inverts the relation (+92% fuel at
+  half load, +253% at quarter load) and double-counts the standby `a` term that
+  E+ already carries as off-cycle parasitic fuel + tank UA.
+- The curve's scope is the ARTICLE's: gas/oil, storage AND instantaneous;
+  electric is out of scope and is AUDITED as such, never silently skipped.
+  `part_load_curve` honours the ruleset `form` (Cubic/Quadratic) and raises on
+  a mis-shaped spec.
 
 ## Facade
 

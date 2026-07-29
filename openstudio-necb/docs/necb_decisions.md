@@ -1719,3 +1719,179 @@ attribution (#2127, L-9/L-10), untouched by staging because system 6 is
 hydronic — LargeOffice is bit-identical end-use for end-use across the whole
 staging change, which is the cleanest available control that staging touches
 only what it should.
+
+## D-51 — Reference daylighting is ON by default: the reference carries the photocontrols 4.2.2 mandates
+
+**What.** `performance_compliance(reference_daylighting:)` now defaults to
+**true** (`openstudio-necb/lib/openstudio_necb/compliance.rb`). Every
+reference-path run builds the reference building's photocontrols and evaluates
+them with EnergyPlus detailed daylighting (`reference_daylighting` in
+openstudio-lighting). The keyword survives, so a caller can still opt out —
+and a run that opts out now says so loudly in the audit instead of pretending
+the sentences were never implemented.
+
+**Why.** 8.4.4.5.(9) (2025: 8.4.5.5.(9)) is not optional: *where photocontrols
+are required by Subsection 4.2.2, their effect **shall** be evaluated in
+accordance with Sentences (10) to (12)*. The reference building is defined to
+carry the Part 4 prescriptive package, and 4.2.2 requires photocontrols in the
+daylighted areas of most space functions. A reference generated WITHOUT them
+therefore over-states the reference's lighting energy, which makes the building
+energy target too generous — every proposed building was being compared against
+a target more lenient than the code writes. Correctness of the target outranks
+the runtime cost of detailed daylighting; that cost is measured below rather
+than assumed.
+
+**Ruled by phylroy 2026-07-29** (recorded in the plan's "Decisions taken"
+section); implemented by Claude under the D-10 delegation.
+
+**Runtime cost [RAN].** Two cached archetypes (NECB2020, Electricity, Toronto
+CWEC2020), whole week-run pipeline each — proposed sizing + reference build +
+reference sizing + two January-week annual runs + capacity iteration — timed
+with `reference_daylighting:` false then true, back to back on the same
+machine (`scratchpad/d51_runtime.rb`):
+
+| Archetype | daylighting | wall-clock | controls built | reference interior lighting (kWh/wk) | reference total (kWh/wk) | % of target |
+|---|---|---|---|---|---|---|
+| SmallOffice | off | 31.9 s | 0 | 230.6 | 1286 | 91.4 |
+| SmallOffice | **on** | **32.2 s** | **4** | **158.3** | **1247** | **94.2** |
+| MediumOffice | off | 32.6 s | 0 | 1855.6 | 9189 | 111.5 |
+| MediumOffice | **on** | **33.2 s** | **0** | 1855.6 | 9189 | 111.5 |
+
+**The runtime cost is negligible: +0.3 s (+0.9%) and +0.6 s (+1.8%).** The
+plan's worry that detailed daylighting would lengthen the sweep materially is
+NOT borne out — because the number of photocontrols actually placed is small
+(next paragraph), and because EnergyPlus's daylighting solver is cheap next to
+the four simulation runs the pipeline already pays for.
+
+**Direction check [RAN].** On SmallOffice, where controls are placed, reference
+interior lighting falls 230.6 -> 158.3 kWh/wk (-31%), the reference total falls
+3.0%, and percent-of-target rises 91.4 -> 94.2: the target got STRICTER, which
+is the direction the sentence intends. Per-building attribution across the
+fleet is a DEFERRED review gate, not something this entry claims:
+`docs/pending_review.md` holds the sweep item, and until it is run the D-46
+table remains the last validated fleet baseline.
+
+**Scope limit found while measuring — the flip is inert on most archetypes
+[RAN].** `reference_daylighting` places controls with `placement:
+:necb_default`, the legacy-exact 4.2.2 threshold selection, which EXCEPTS a
+space that fails ANY single criterion — including the skylight criteria, so a
+window-only space is always excepted (its skylight area is 0, which is <= the
+400 m2 threshold). Counting eligible spaces over the 17 cached NECB2020
+archetypes (`scratchpad/d51_placement.rb`, SDK-only):
+
+| eligible / daylighted | archetypes |
+|---|---|
+| 0 | FullServiceRestaurant, HighriseApartment, LargeHotel, LargeOffice, LowriseApartment, MediumOffice, MidriseApartment, QuickServiceRestaurant, RetailStandalone, RetailStripmall |
+| 1-8 | Warehouse 1/3, SmallHotel 1/67, PrimarySchool 1/25, SecondarySchool 2/45, Outpatient 4/76, Hospital 8/153, SmallOffice 4/4 |
+
+So flipping the default makes the pipeline CAPABLE of honouring (9)-(12) and
+makes it honest about when it did not, but on ten of the seventeen archetypes
+it changes nothing at all. Whether the legacy exception semantics are the right
+reading of 4.2.2 for the REFERENCE building — as opposed to `placement: :all`,
+which gives every daylighted space a control — is a separate, unruled question
+and is NOT decided here. It is recorded as an open item so the fleet-sweep
+reviewer is not surprised by ten unmoved buildings.
+
+**Companion truth-up.** `reference_lighting`'s "(5)-(12) are NOT modeled"
+warning was unconditional — it fired even on runs where `reference_daylighting`
+had just built and audited those sentences. It now takes a `daylighting:`
+keyword from the umbrella and shouts only when the transform really was
+skipped. The lighting manifest's stale `4.2.2.3.-4.2.2.12.` gap sentence
+(contradicted by the same file's own `8.4.4.5.(5)-(12)` entry) is gone, as is
+the HVAC manifest's claim that 8.4.4.13.(2)(c) is unimplemented — it has been
+implemented by `align_heat_pump_heating_capacity` since D-22.
+
+- **Files:** `openstudio-necb/lib/openstudio_necb/compliance.rb`;
+  `openstudio-lighting/lib/openstudio_lighting/necb/reference.rb`;
+  `openstudio-lighting/lib/openstudio_lighting/data/necb/lighting_rules_{2020,2025}.json`;
+  `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`.
+- **Who/when:** phylroy ruled 2026-07-29, implemented by Claude under D-10.
+
+## D-53 — The SHW part-load curve is the PLF-domain IMAGE of 8.4.5.9's FHeatPLC, not a rival curve; the raw quadratic must never enter the EnergyPlus part-load-factor field
+
+**What.** NECB 2020 **8.4.5.9.(2)** (2025: **8.4.6.9.(2)**, identical text)
+prescribes, for the reference *fuel-fired* service water heater, a QUADRATIC
+`FHeatPLC = a + b(Qpl/Qdes) + c(Qpl/Qdes)^2` with `a = 0.021826`,
+`b = 0.977630`, `c = 0.000543`, applied as
+`Fuel_partload = Fuel_design x FHeatPLC`. The gem vendors a CUBIC
+`SWH-EFFFPLR-NECB2011` `[0.7576, 1.0071, -1.4443, 0.6844]` in the
+`WaterHeater:Mixed` *Part Load Factor Curve* field. **These are the same
+requirement in two different domains, and the cubic stays.**
+
+**Why.** The two curves are not comparable coefficient-wise because they are
+not the same quantity:
+
+- The code writes a **fuel-ratio** curve — `FHeatPLC` is the fraction of
+  *design* fuel burned at a given part load.
+- The EnergyPlus field is a **degradation divisor** — `fuel = Q_load / (eta x
+  PLF)`, i.e. PLF is a part-load *efficiency* multiplier.
+
+The map between them is `PLF(x) = x / FHeatPLC(x)`, which is a **rational**
+function, not a polynomial — so the code quadratic has no exact polynomial
+representation in that field, and the vendored cubic is its polynomial image.
+Measured, it is a good one.
+
+**Evidence [RAN].** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb`
+(`rake necb:curves`), which reads the curve back off a built model and compares
+under the documented transform, reports
+`8.4.6.9 SWH FHeatPLC (via part-load factor curve) EQUIVALENT — vs SWH row: max
+dev 0.98% over PLR 0.25-1.0 (tol 3%)`. An independent re-derivation over a
+wider envelope (self-checking `FHeatPLC(1.0) = 0.999999` and applied
+`PLF(1.0) = 1.0048` at the rating point first) gives, as applied-fuel-ratio vs
+code FHeatPLC:
+
+| PLR | code FHeatPLC | as applied `x/PLF(x)` | rel dev |
+|-----|---------------|-----------------------|---------|
+| 0.10 | 0.119594 | 0.118406 | 0.99% |
+| 0.20 | 0.217374 | 0.220574 | 1.47% |
+| 0.25 | 0.266267 | 0.268875 | 0.98% |
+| 0.50 | 0.510777 | 0.507292 | 0.68% |
+| 0.75 | 0.755354 | 0.758160 | 0.37% |
+| 1.00 | 0.999999 | 0.995223 | 0.48% |
+
+**The counterfactual is the point [RAN].** Had the raw quadratic been dropped
+into the part-load-factor field as if it were a PLF, EnergyPlus would have
+divided by it. Resulting part-load fuel error: **+91.6% at PLR 0.50, +252.6% at
+PLR 0.25, +599% at PLR 0.10**. It would also double-count standby — the
+`a = 0.021826` term is fuel burned at zero load, which E+ already carries
+separately as off-cycle parasitic fuel plus tank UA — and would collide with
+E+'s PLF floor of 0.1. **The reported "wrong form, wrong coefficients" defect
+was a false premise** (the sixth on this project); the coefficients quoted were
+correct, the inference from them was not. Verified before acting, per the
+standing rule.
+
+**Scope, decided from the article text, not from convenience.** 8.4.5.9 is
+titled *"Fuel-Fired Service Water Heater"* and its sentences govern *"the
+reference fuel-fired service water heater"*. Therefore:
+
+- **Gas and oil are in scope** (`applies_to: [NaturalGas, FuelOilNo2]`).
+- **Electric is OUT of scope by the article**, not skipped by omission —
+  Subsection 8.4.5 carries no electric counterpart to apply. This is now stated
+  in the manifest `how` and AUDITED on every electric heater rather than being
+  a silent branch.
+- **Instantaneous fuel-fired heaters ARE in scope** — the article draws no
+  storage/instantaneous distinction, and a fuel-fired instantaneous heater is a
+  fuel-fired service water heater. This was the one REAL gap: the instantaneous
+  path early-returned before the curve was ever set. It now applies it. Only
+  models carrying an instantaneous heater (tank <= 7.6 L or named
+  `instantaneous`) change; the gem's own reference tanks are autosized well
+  above that bound, so no archetype this toolchain authors moves.
+
+**Also.** The curve builder now honours the ruleset's declared `form`
+(`Cubic`/`Quadratic`) and raises on a mis-shaped spec, instead of assuming
+Cubic — a `form` key that was vendored but never read. A Quadratic spec builds
+a real `Curve:Quadratic`, never a cubic with a zeroed cubic term.
+
+**8.4.4.20.(9) pump consolidation — re-worded, not implemented.** The gem's own
+`necb/demand.rb:202-207` builds exactly ONE `PumpConstantSpeed` per service
+water loop, so there is never a set of pumps to consolidate on any model this
+toolchain authors; (9) is satisfied by construction. It is unverified only for
+a FOREIGN proposed arriving with several pumps on one SHW loop, which is cloned
+as-is at identical W/(L/s) — energy-equivalent, topology different. A
+consolidation pass would be unreachable code on every model we produce, so the
+manifest now says precisely that instead of calling it unimplemented.
+
+- **Files:** `openstudio-shw/lib/openstudio_shw/necb/efficiency.rb`;
+  `openstudio-shw/lib/openstudio_shw/data/necb/shw_rules_{2020,2025}.json`;
+  `openstudio-shw/test/test_shw.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
