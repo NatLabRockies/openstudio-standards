@@ -95,6 +95,45 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   peak W/(L/s) intensity × reference flow ((1)-(3); (2) combines by summing
   power AND flow; sentence (6) is an acknowledged gap). Undeterminable
   proposed pumps or unsized flows warn loudly.
+- **Staged coils (8.4.4.9.(7)/8.4.4.10.(8), D-46..D-50)** — reference systems
+  3/4 and the Table -13 ASHP build their fan + coils inside an
+  `AirLoopHVACUnitarySystem` (multispeed coils CANNOT sit bare on an air loop;
+  `addToNode` returns false). Load-bearing names: `CoilCoolingDXMultiSpeed_dx`
+  / `_ashp`, `CoilHeatingGasMultiStage_gas`, `CoilHeatingDXMultiSpeed_ashp`.
+  - **Flag:** `config['staged_coils']`, set ONLY by the reference ruleset's
+    `system_definitions` — catalog/proposed/CBECS builds stay bare.
+  - **NEVER hard-set a stage capacity.** `Efficiency.apply_staging` adjusts the
+    stage COUNT post-sizing (`kW <= 66 ? 2 : ceil(kW/66)`) and re-autosizes;
+    the equal increments come from `Coils.set_stage_flow_ratios` writing k/N
+    into the `UnitarySystemPerformanceMultispeed`. Hard-sizing kills D-43
+    capacity iteration (the L-23 lesson).
+  - **4-stage clamp (D-47):** the SDK refuses a fifth stage; clamps emit a
+    SHOUTED warning.
+  - **`Coils.supply_components(air_loop)`** is the contract: it expands unitary
+    containers into their fan/coils. Every consumer that scans a supply path
+    for coils or fans MUST go through it (reference fan rules, economizers,
+    classify, costing, checker, diagrams; the umbrella's `model_query.rb` and
+    `necb_fixed_point_diff.rb` inline their own copies).
+  - The reference ASHP's supplemental coil sits on the LOOP downstream of the
+    unitary, not in the unitary's supplemental slot — E+ sizes a unitary's
+    supplemental heater to the heat-pump capacity, which starved back-up heat
+    below the -10 degC cutoff (84 unmet hours -> 1.75 after the move).
+  - Efficiencies bin by TOP-stage (= total) capacity, one row applied to every
+    stage. The unitary sizes its heating coil ~2.2x the bare air-loop coil
+    (full-flow mixed-air-to-43 degC vs the heating-day ideal-loads peak) —
+    measured in D-46.
+  - **A container re-homes every schedule that used to reach the equipment.**
+    The loop's availability does NOT govern a fan INSIDE a unitary: the unitary
+    has its own availability, and its fan-operating-mode schedule picks
+    continuous (1) vs cycling (0). The AVAILABILITY must follow the loop
+    schedule — set at build time AND re-pointed by the D-14 pass
+    (`apply_unitary_operating_schedule`); the fan MODE stays continuous, since
+    E+ rejects a mode schedule containing zeros. The first cut left it at the
+    always-on default and every staged reference fan ran 8760 h: Warehouse fan
+    energy 2.68x the proposed's (0.98x before staging; 0.88x after the fix),
+    which moved every PSZ archetype 7-9 points MORE LENIENT. Every unit test
+    passed; only the fleet sweep caught it (D-46 amendment) — which is why the
+    sweep is a merge gate.
 - `necb/checker.rb` — `check_part5`: warnings-only QAQC (economizers 5.2.2.8,
   5.2.10.1 table trigger (needs `hdd:` + sized flows), 5.2.12 minimums via
   clone-and-diff against the efficiency pass).
@@ -129,9 +168,9 @@ apply_efficiencies / check_part5 / rules`.
   (labelled "vs proposed erratum"); the vendored legacy curves match the
   corrected rows on all six coefficients to <4e-6 — do NOT "fix" them toward
   the printed values.
-- `furnace_staging`/`dx_staging` in the rules JSONs are
-  `non_rule_keys`-exempted FUTURE-implementation data backing declared-partial
-  articles — not dead weight, not yet consumed (`hydronic_pumps` graduated to a consumed rule block in D-11).
+- `furnace_staging`/`dx_staging` graduated to CONSUMED rule blocks in D-46 (as
+  `hydronic_pumps` did in D-11) — `non_rule_keys` is now empty in both vintages
+  and the orphan lint enforces their consumption.
 - Base efficiency setters already apply NECB values to CBECS-built DX/fan/pump
   equipment — there is NO "90.1 fallback gap" (a previously-suspected defect
   that turned out to be a false premise).

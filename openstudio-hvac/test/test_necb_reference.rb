@@ -171,8 +171,11 @@ class TestNecbReference < Minitest::Test
     result = OpenStudioHVAC::NECB.reference_hvac(model, building: { storeys: 1, zone_types: types(model, 'Office - enclosed') })
 
     assert_equal ['hp'], result.assignments.map(&:reference_system).uniq
-    hp_coils = result.model.getCoilHeatingDXSingleSpeeds
+    # D-46: the reference ASHP is a STAGED unitary (multispeed heating + cooling),
+    # so the -10 degC cutoff lands on the multispeed coil.
+    hp_coils = result.model.getCoilHeatingDXMultiSpeeds
     refute_empty hp_coils
+    assert_empty result.model.getCoilHeatingDXSingleSpeeds, 'reference ASHP heating is staged, not single-speed'
     hp_coils.each { |c| assert_in_delta(-10.0, c.minimumOutdoorDryBulbTemperatureforCompressorOperation, 1e-6) }
   end
 

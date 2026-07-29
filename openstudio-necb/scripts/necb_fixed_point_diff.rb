@@ -50,6 +50,20 @@ def lpd_by_space_type(model)
   end.to_h
 end
 
+# Staged reference systems (8.4.4.9.(7)/8.4.4.10.(8)) hold their fan and coils
+# inside an AirLoopHVACUnitarySystem — expand it so the fingerprint keeps seeing
+# them. Inlined rather than calling the hvac gem: this script loads only the SDK.
+def supply_components_deep(air_loop)
+  air_loop.supplyComponents.flat_map do |comp|
+    unitary = comp.to_AirLoopHVACUnitarySystem
+    next [comp] unless unitary.is_initialized
+
+    unitary = unitary.get
+    [unitary.supplyFan, unitary.coolingCoil, unitary.heatingCoil, unitary.supplementalHeatingCoil]
+      .filter_map { |o| o.is_initialized ? o.get : nil }
+  end
+end
+
 def hvac_signature(model)
   fans = (model.getFanConstantVolumes + model.getFanVariableVolumes + model.getFanOnOffs)
   pumps = model.getPumpConstantSpeeds + model.getPumpVariableSpeeds
@@ -57,9 +71,13 @@ def hvac_signature(model)
   {
     'air loops' => model.getAirLoopHVACs.size,
     'coil types' => (model.getAirLoopHVACs.flat_map do |l|
-      l.supplyComponents.map { |c| c.iddObjectType.valueName.sub('OS_', '') }
-                        .grep(/Coil|Fan|HeatExchanger/)
+      supply_components_deep(l).map { |c| c.iddObjectType.valueName.sub('OS_', '') }
+                               .grep(/Coil|Fan|HeatExchanger/)
     end).tally.sort.to_h,
+    'staged coil stages' => (model.getCoilCoolingDXMultiSpeeds + model.getCoilHeatingDXMultiSpeeds +
+                             model.getCoilHeatingGasMultiStages).map { |c| c.stages.size }.tally.sort.to_h,
+    'staged DX cool COP' => model.getCoilCoolingDXMultiSpeeds.map { |c| c.stages.last&.grossRatedCoolingCOP&.round(2) }.uniq.sort,
+    'staged gas burner eff' => model.getCoilHeatingGasMultiStages.map { |c| c.stages.last&.gasBurnerEfficiency&.round(3) }.uniq.sort,
     'plant loops' => model.getPlantLoops.size,
     'boiler eff' => model.getBoilerHotWaters.map { |b| b.nominalThermalEfficiency.round(3) }.uniq.sort,
     'chiller COP' => model.getChillerElectricEIRs.map { |c| c.referenceCOP.round(2) }.uniq.sort,

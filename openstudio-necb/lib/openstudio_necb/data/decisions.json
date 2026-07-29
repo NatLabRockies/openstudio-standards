@@ -332,6 +332,41 @@
       "kind": "runtime_unwired",
       "articles": ["Table 8.4.4.7.-A"],
       "summary": "A space named for a museum's general exhibition area currently matches the assembly-area category on an 'exhibit' keyword before it can match the historical-collections category on 'museum' — a keyword-ordering collision that can change which reference system the block receives. The printed row wording supports either reading, since a gallery is both an assembly space and a collections space, so this is an interpretation call rather than a defect. It is open pending adjudication and current behaviour is unchanged."
+    },
+    {
+      "id": "D-46",
+      "title": "Staged heating and cooling as unitary multispeed coils, stage count set after sizing",
+      "kind": "runtime",
+      "articles": ["8.4.4.9.(7)", "8.4.4.10.(8)", "8.4.5.9.(7)", "8.4.5.10.(8)"],
+      "summary": "The code requires the reference building's furnaces and direct-expansion systems to be modelled as equal capacity stages, two of them up to a threshold capacity and one per threshold increment above it. Reference packaged single-zone systems now build their fan and coils inside a unitary container holding multi-stage coils, because the simulation engine cannot place a multi-stage coil directly on an air loop; a pass that runs after sizing sets only the NUMBER of stages from the sized total, leaving every stage capacity automatically sized so that capacity auto-iteration keeps working. Equal increments are realized through the container's per-stage airflow ratios, and minimum-efficiency values are looked up once against the unit's total capacity and written to every stage."
+    },
+    {
+      "id": "D-47",
+      "title": "Stage count clamped at the simulation engine's four-stage ceiling, with a shouted warning",
+      "kind": "runtime",
+      "articles": ["8.4.4.9.(7)", "8.4.4.10.(8)", "8.4.5.9.(7)", "8.4.5.10.(8)"],
+      "summary": "The multi-stage coil objects in the simulation engine cannot hold more than four stages, so very large equipment cannot be given the number of equal stages the code asks for. The stage count is clamped at four and every clamp raises a loud audit warning naming the required count, the sized capacity and the ceiling, so that oversized cases are enumerated rather than hidden. Splitting the load across extra parallel units was rejected because it would change the reference system topology to work around a tool limit."
+    },
+    {
+      "id": "D-48",
+      "title": "Staging applies to air-loop unitary equipment only; zone terminals and tempering coils stay single-speed",
+      "kind": "runtime",
+      "articles": ["8.4.4.9.(7)", "8.4.4.10.(8)", "8.4.5.9.(7)", "8.4.5.10.(8)"],
+      "summary": "Equipment staging is applied to air-loop unitary equipment only. Packaged terminal units keep single-speed coils because the simulation engine's input schema forbids a multi-stage coil there even though the modelling toolkit accepts the assignment, and make-up-air tempering coils temper a ventilation stream rather than being the staged unitary equipment the sentences describe. Every skip is reported in the audit grouped by reason with a count, rather than one entry per coil, so that a building with hundreds of identical terminals does not swamp the report."
+    },
+    {
+      "id": "D-49",
+      "title": "Electric resistance heating is not a furnace, so the furnace staging sentence does not reach it",
+      "kind": "runtime",
+      "articles": ["8.4.4.9.(7)", "8.4.5.9.(7)"],
+      "summary": "The staging sentence governs furnaces, and an electric resistance heating coil is not one: it has no burner, no combustion staging, and linear part-load behaviour, so dividing it into equal stages would add objects without changing anything physical. Electric-heated reference packaged systems therefore pair the staged multi-speed cooling coil, which the cooling article does require, with a plain single-stage electric heating coil in the same unitary container."
+    },
+    {
+      "id": "D-50",
+      "title": "Terminal and secondary capacity split accounted through dedicated-outdoor-air zone sizing",
+      "kind": "runtime",
+      "articles": ["8.4.4.9.(3)", "8.4.4.10.(7)", "8.4.5.9.(3)", "8.4.5.10.(7)"],
+      "summary": "Where the selection table places heating or cooling in both a zone terminal and a secondary system, the terminal is to be sized for the space loads while the pair together covers the peak. For the reference systems that pair a zone terminal with a make-up-air unit this is expressed directly as dedicated-outdoor-air zone-sizing accounting with a neutral supply-air strategy, so the ventilation stream neither adds nor removes zone load and the terminal is sized on the space load alone. Reference systems that mix outdoor air into the supply stream have no equivalent accounting, so their split is only approximated by ordinary mixed-air zone sizing and each such group is audited as an approximation."
     }
   ]
 }

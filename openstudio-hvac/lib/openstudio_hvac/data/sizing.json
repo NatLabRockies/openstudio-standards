@@ -83,6 +83,10 @@
     },
     "necb_mau_ptac": {
       "comment": "NECB sys1 make-up air unit + PTAC (hvac_system_1_single_speed.rb, non-heat-pump path). MAU is 100% outdoor air sized on ventilation requirement, 20C constant supply.",
+      "account_for_dedicated_outdoor_air_system": true,
+      "dedicated_outdoor_air_system_control_strategy": "NeutralSupplyAir",
+      "dedicated_outdoor_air_low_setpoint_temperature_for_design": 20.0,
+      "dedicated_outdoor_air_high_setpoint_temperature_for_design": 20.1,
       "central_cooling_design_supply_air_temperature": 13.0,
       "central_heating_design_supply_air_temperature": 43.0,
       "all_outdoor_air_in_cooling": true,
@@ -111,6 +115,10 @@
     },
     "necb_mau": {
       "comment": "NECB sys2/sys5 make-up air unit (hvac_system_2_and_5.rb). NOTE the SPM min/max are inverted (min 13.1 > max 13.0) in the legacy source; preserved for parity.",
+      "account_for_dedicated_outdoor_air_system": true,
+      "dedicated_outdoor_air_system_control_strategy": "NeutralSupplyAir",
+      "dedicated_outdoor_air_low_setpoint_temperature_for_design": 20.0,
+      "dedicated_outdoor_air_high_setpoint_temperature_for_design": 20.1,
       "central_cooling_design_supply_air_temperature": 13.0,
       "central_heating_design_supply_air_temperature": 13.1,
       "all_outdoor_air_in_cooling": false,

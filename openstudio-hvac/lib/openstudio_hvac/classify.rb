@@ -147,7 +147,10 @@ module OpenStudioHVAC
       group = base_group(air_loop.thermalZones.map(&:nameString), air_loop.nameString)
       recognize_gem_name(group, air_loop, audit)
 
-      air_loop.supplyComponents.each do |comp|
+      # Coils.supply_components descends into AirLoopHVACUnitarySystem containers
+      # (staged NECB reference systems) — otherwise a staged sys 3/4 reads as an
+      # air loop with no coils at all.
+      Coils.supply_components(air_loop).each do |comp|
         scan_heating_component(group, comp, plant_by_name, "#{comp.iddObjectType.valueName} on #{air_loop.nameString}")
         scan_cooling_component(group, comp, plant_by_name, "#{comp.iddObjectType.valueName} on #{air_loop.nameString}")
       end
@@ -198,6 +201,8 @@ module OpenStudioHVAC
 
     HEATING_COILS = [
       [:to_CoilHeatingGas, ->(_c, _p) { 'NaturalGas' }, false],
+      [:to_CoilHeatingGasMultiStage, ->(_c, _p) { 'NaturalGas' }, false],
+      [:to_CoilHeatingDXMultiSpeed, ->(_c, _p) { 'Electricity' }, :air],
       [:to_CoilHeatingElectric, ->(_c, _p) { 'Electricity' }, nil],
       [:to_CoilHeatingWater, ->(c, p) { hydronic_fuels(c, p) }, nil],
       [:to_CoilHeatingDXSingleSpeed, ->(_c, _p) { 'Electricity' }, :air],
@@ -261,6 +266,11 @@ module OpenStudioHVAC
         c = comp.to_CoilCoolingDXSingleSpeed.get
         fuels = 'Electricity'
         kw = optional_kw(c.ratedTotalCoolingCapacity, c.autosizedRatedTotalCoolingCapacity)
+      elsif comp.to_CoilCoolingDXMultiSpeed.is_initialized
+        # a staged coil's TOTAL capacity is its TOP stage (E+ stages are cumulative)
+        top = comp.to_CoilCoolingDXMultiSpeed.get.stages.last
+        fuels = 'Electricity'
+        kw = top && optional_kw(top.grossRatedTotalCoolingCapacity, top.autosizedGrossRatedTotalCoolingCapacity)
       elsif comp.to_CoilCoolingDXTwoSpeed.is_initialized
         c = comp.to_CoilCoolingDXTwoSpeed.get
         fuels = 'Electricity'

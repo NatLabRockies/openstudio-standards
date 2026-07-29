@@ -77,7 +77,40 @@ module OpenStudioHVAC
         end
         sz.setZoneCoolingSizingFactor(z['zone_cooling_sizing_factor']) if z['zone_cooling_sizing_factor']
         sz.setZoneHeatingSizingFactor(z['zone_heating_sizing_factor']) if z['zone_heating_sizing_factor']
+        apply_doas_zone_sizing(sz, z)
         sz
+      end
+
+      # 8.4.4.9.(3)/8.4.4.10.(7) (2025: 8.4.5.x) terminal/secondary capacity
+      # split, D-50. Where the selection table puts heating (or cooling) in BOTH
+      # a zone terminal and a make-up-air secondary system, the terminal is sized
+      # for the space loads and the ventilation air is carried at system level.
+      # EnergyPlus expresses exactly that as Sizing:Zone dedicated-outdoor-air
+      # accounting with a NEUTRAL supply-air strategy: the DOAS stream neither
+      # adds nor removes zone load, so the terminal's design load is the
+      # envelope(-and-internal) load alone.
+      #
+      # The low/high setpoint pair must be strictly increasing (EnergyPlus
+      # rejects low >= high with a Severe), hence the 0.1 degC spread — the same
+      # convention the make-up-air sizing block already uses for its own
+      # setpoint pair.
+      def apply_doas_zone_sizing(sizing_zone, z)
+        return unless z['account_for_dedicated_outdoor_air_system']
+
+        sizing_zone.setAccountforDedicatedOutdoorAirSystem(true)
+        if z['dedicated_outdoor_air_system_control_strategy']
+          sizing_zone.setDedicatedOutdoorAirSystemControlStrategy(z['dedicated_outdoor_air_system_control_strategy'])
+        end
+        if z['dedicated_outdoor_air_low_setpoint_temperature_for_design']
+          sizing_zone.setDedicatedOutdoorAirLowSetpointTemperatureforDesign(
+            z['dedicated_outdoor_air_low_setpoint_temperature_for_design']
+          )
+        end
+        return unless z['dedicated_outdoor_air_high_setpoint_temperature_for_design']
+
+        sizing_zone.setDedicatedOutdoorAirHighSetpointTemperatureforDesign(
+          z['dedicated_outdoor_air_high_setpoint_temperature_for_design']
+        )
       end
 
       # ZoneSum outdoor-air controller with autosized minimum OA (the NECB convention).

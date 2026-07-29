@@ -714,6 +714,32 @@ test_transfer_reconciles_unphysical_inherited_head.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
 
+### D-27 amendment (2026-07-29): a reconciled pump is only physical for the sizes it was reconciled AGAINST
+
+Found reviewing the D-46 staging change, but NOT caused by it — a latent
+defect the topology change happened to trip. The transfer (and the D-38 clamp)
+hard-set pump POWER and reconcile the head, while pump FLOW stays autosized.
+The triple is physical for the flow sized SO FAR; the next sizing run
+re-derives the flow, and a grown flow makes the frozen power/head imply a pump
+efficiency above the motor efficiency — an EnergyPlus INPUT fatal ("Calculated
+Pump Efficiency > 100%"), thrown during input checking, before the efficiency
+pass gets its chance to re-reconcile. Measured: reference HW pump reconciled
+at 2.0e-4 m3/s, re-sized to 3.24e-4 (1.62x) in an 8.4.1.2.(5) round, 117%.
+
+Fix (root, not margin): `NECB.prepare_for_resizing(model)` releases hard-set
+pump power back to AUTOSIZE, and the umbrella calls it before every
+capacity-iteration re-size. EnergyPlus then derives power from the flow and
+head it just sized — inconsistency impossible by construction — and the
+efficiency pass immediately re-transfers against the NEW flow, so no article
+value is lost. A pure margin (reconciling at 65% instead of the ~90% motor
+ceiling) was tried first and rejected: it only buys a ratio of headroom and
+still failed this case.
+
+Pinned by test_capacity_iteration_converges_undersized_building (which fataled
+before the fix). Any future pass that hard-sets a sized quantity on a model
+that may be re-sized belongs in `prepare_for_resizing` too — reference boiler
+and chiller capacities are the standing candidates.
+
 ## D-28 — Multizone selection groups merge into whole-building systems
 
 LargeOffice end-use isolation (the +7-12% fleet outlier): the proposed
@@ -1345,3 +1371,251 @@ Findings:
   registry entry to `runtime`.
 - **Who/when:** raised Claude under D-10 (2026-07-27, D-33); re-filed here
   2026-07-28 under D-44's register flattening.
+
+## D-46 — Staged heating and cooling built as unitary multispeed coils; stage COUNT set post-sizing, capacities left autosized
+
+**What.** NECB 8.4.4.9.(7) and 8.4.4.10.(8) (2025: 8.4.5.9.(7)/8.4.5.10.(8))
+require the reference building's furnaces and DX systems to be modelled as
+equal stages — two of them at or below the 66 kW threshold, `ceil(kW/66)`
+above it. The vendored `furnace_staging`/`dx_staging` blocks carried those
+numbers since 2026-07-12 but nothing read them. They are now consumed:
+
+- **Topology.** Reference systems 3 and 4 (and the Table 8.4.4.13 ASHP) build
+  as an `AirLoopHVACUnitarySystem` holding the supply fan, a
+  `CoilCoolingDXMultiSpeed`, and a `CoilHeatingGasMultiStage` (gas) /
+  `CoilHeatingDXMultiSpeed` (ASHP) / plain `CoilHeatingElectric` (electric,
+  see D-49). A multispeed coil cannot sit bare on an air loop — `addToNode`
+  returns false — so the container is mandatory, not a style choice.
+  Controls mirror the legacy multi-speed sys-3 build: `Load` control on the
+  elected control zone, always-on fan schedule, and the
+  `SetpointManagerSingleZoneReheat` left on the loop outlet.
+- **Flag-gated.** The builder branches on a `staged_coils` config key set ONLY
+  by the reference ruleset's `system_definitions`. Catalog defaults, proposed
+  models and CBECS builds keep today's bare single-speed topology and their
+  pins stay green.
+- **Stage COUNT post-sizing, capacities AUTOSIZED.** The efficiency pass's new
+  `apply_staging` reads the sized TOP-stage capacity (which IS the unit total —
+  EnergyPlus stages are cumulative, not additive), computes N, adds/removes
+  stages, re-autosizes every stage, and rewrites the
+  `UnitarySystemPerformanceMultispeed` flow ratios to k/N. **Capacities are
+  never hard-set.** That is what keeps 8.4.1.2.(5) capacity auto-iteration
+  (D-43) responsive — the L-23 lesson. Heating and cooling stage counts are
+  independent; the SDK writes each mode's speed count from its own coil.
+- **Efficiencies bin by TOP stage.** `apply_dx_cooling_multi` /
+  `apply_dx_heating_multi` / `apply_gas_multi` look the row up against the same
+  `unitary_acs` / `heat_pumps` / `furnaces` tables using the total capacity and
+  write that row's COP/burner efficiency and curves to EVERY stage — what the
+  legacy multispeed applier does, and correct because those are unit-capacity
+  tables, not per-stage tables.
+
+**Why this shape.** Alternatives were rejected: hard-sizing stage capacities to
+kW/N defeats capacity iteration and the D-40 autosizing ruling; leaving the
+coils bare is impossible in the SDK; per-stage table lookups would invent a
+binning the tables do not define.
+
+**Evidence [RAN — four Phase-0 mockup gates, OpenStudio 3.11 / EnergyPlus 25.2,
+5ZoneNoHVAC + Toronto CWEC2020]:**
+
+1. A 2-stage autosized unitary PSZ sizes stage 1 at exactly 0.5000 of stage 2,
+   cooling and heating alike (29 542 / 59 085 W and 50 821 / 101 641 W).
+2. Bare-vs-unitary: DX cooling matches within 0.03% (59 066 vs 59 085 W) and
+   supply flow is identical, but the **heating coil sizes 2.22x larger**
+   (45 781 W bare vs 101 641 W in the unitary). This is a structural EnergyPlus
+   sizing-path difference, not a modelling error: the unitary sizes its heating
+   coil on the FULL design supply air flow from the design heating mixed-air
+   temperature to the central heating supply temperature, while a bare air-loop
+   coil sizes on the heating-day ideal-loads peak flow (0.92 of 3.06 m3/s).
+   Probed and confirmed invariant under MaximumSupplyAirTemperature (set,
+   autosized, and default), fan placement, and Load-vs-SetPoint control. The
+   reference furnace therefore gets LARGER and can land in a different
+   Table 5.2.12.1 capacity bin — a real fleet-wide change that the week-run
+   sweep must attribute.
+3. Post-sizing 2 -> 3 stages -> re-size gives exact 1/3, 2/3, 1 ratios on both
+   coils; going back to 2 stages reproduces the original capacities bit for bit.
+4. EnergyPlus accepts the gas multistage + performance object: 2-stage gas and
+   electric January week runs complete with zero severe errors. (A synthetic
+   4-stage run on the same small fixture raised warmup-convergence severes; the
+   staging rule would never produce four stages at that capacity.)
+
+**Design deviation, logged:** the reference ASHP's supplemental coil is placed
+on the air LOOP downstream of the unitary rather than in the unitary's
+supplemental slot. EnergyPlus sizes a unitary's supplemental heater equal to
+the heat-pump capacity, which measured 26% short on a catalog build (71.8 kW vs
+97.2 kW) and about 70% short on a reference build (15.2 kW vs the loop-sized
+coil) — below the -10 degC compressor cutoff that failed the cold-week
+conditioning gate at 84 unmet occupied heating hours against a 24 h limit. On
+the loop the coil sizes on the loop's heating design and is driven by the outlet
+setpoint manager (the legacy arrangement); the same week run then reports 1.75
+unmet hours. No capacity was hard-set to achieve this.
+
+**Re-validation owed:** the sys 3/4 topology change alters every archetype
+fingerprint, so the D-42 full-annual fleet claim does NOT carry over. The
+15-archetype week-run sweep is the gate before any fresh energy claim.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/{components/coils.rb,
+  systems/psz.rb, necb/efficiency.rb, necb/reference.rb, necb/checker.rb,
+  classify.rb, catalog_icons.rb, catalog_report.rb, costing/ventilation.rb,
+  data/necb/reference_rules_{2020,2025}.json}`;
+  `openstudio-necb/{lib/openstudio_necb/report/model_query.rb,
+  scripts/necb_fixed_point_diff.rb}`; tests `test_necb_staging.rb` (new),
+  `test_necb_reference.rb`, `test_necb_e2e_run.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+### D-46 amendment (2026-07-29, review): the staged unitary was bypassing D-14 and running its fan 8760 h
+
+Caught by the week-run sweep gate, not by any unit test. A fan inside an
+`AirLoopHVACUnitarySystem` is NOT governed by the air loop's availability
+schedule — the unitary carries its OWN. The first staged build left that at
+its always-on default, so every staged reference fan ran continuously all
+year, silently overriding the operating schedule D-14 inherits from the
+proposed building.
+
+MEASURED on the Warehouse (January week): reference fan energy 4 642 kWh
+against the proposed's 1 733 (2.68x). The same building before staging:
+0.98x. Fleet effect: every PSZ archetype fell 7-9 percentage points of
+percent-of-target (Warehouse 103 -> 94, SecondarySchool 97 -> 88,
+SmallOffice 88 -> 81, PrimarySchool 95 -> 88, RetailStandalone 101 -> 94) —
+i.e. the reference got MORE permissive, the dangerous direction for a
+compliance target, and for a reason with no basis in the code.
+
+Fix: the unitary's AVAILABILITY schedule follows the loop's — at build time,
+and again in `apply_operating_schedules` (the D-14 owner, which now propagates
+into unitaries via `apply_unitary_operating_schedule`). The fan OPERATING MODE
+stays continuous, as a constant-volume system's is; an intermediate attempt to
+put the inherited schedule in that field instead was rejected by EnergyPlus
+outright ("schedule contains values that are <= 0"), which fataled every PSZ
+reference sizing run until corrected. Post-fix Warehouse fan ratio: 0.88, with
+zero unmet hours on both sides — the night-cycle pickup concern did not
+materialize.
+
+Lesson for future topology work: wrapping equipment in a container silently
+re-homes every schedule, setpoint and sizing path that used to reach it. The
+unit tests all passed both before and after this fix — only the fleet sweep
+saw it, which is why the sweep is a merge gate and not a formality.
+
+## D-47 — Stage count CLAMPED at the EnergyPlus four-stage ceiling, with a shouted warning on every clamp
+
+**What.** `Coil:Cooling:DX:MultiSpeed`, `Coil:Heating:DX:MultiSpeed` and
+`Coil:Heating:Gas:MultiStage` structurally cap at four stages — the SDK's fifth
+`addStage` silently returns false (probe-verified). Above 264 kW the staging
+rule asks for five or more equal stages, which EnergyPlus cannot represent. The
+count is clamped at four and the audit entry is a SHOUTED warning naming the
+required count, the sized capacity and the ceiling, so a fleet sweep enumerates
+the real cases rather than hiding them.
+
+**Why not something else.** Splitting the load across two parallel unitary
+systems would change the reference TOPOLOGY (and its fan count, economizer
+trigger and costing) to work around a tool limit; refusing to build would break
+determination for large systems. A clamped count with larger-than-code stage
+increments is the honest approximation, and the warning makes it visible in
+the report checklist.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/necb/efficiency.rb`
+  (`MAX_STAGES`, `stage_multispeed_coil`).
+- **Evidence:** [RAN] SDK probe — the fifth `addStage` returns false on both the
+  cooling and the gas coil while the object keeps four stages.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-48 — Staging scope is AIR-LOOP unitary equipment; zone terminals and make-up-air tempering coils stay single-speed
+
+**What.** 8.4.4.9.(7)/8.4.4.10.(8) staging is applied to air-loop unitary
+equipment only. Packaged terminal units (PTAC/PTHP) keep single-speed coils:
+the OpenStudio SDK will accept a multispeed coil there, but the EnergyPlus IDD
+restricts the terminal's coil choices and the model would die at forward
+translation. Make-up-air tempering DX (reference systems 1, 2 and 5) also stays
+single-speed — those coils temper a ventilation stream rather than being the
+staged unitary equipment the sentences describe.
+
+**How it is audited.** The skips are reported as info entries grouped BY REASON
+(one entry per reason with the coil count and the first few names) rather than
+one entry per coil. A deliberate deviation from per-skip auditing: a MURB or
+hotel reference carries hundreds of identical packaged terminals, and per-coil
+entries would swamp the report's audit appendix without adding information.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/necb/efficiency.rb`
+  (`audit_staging_skips`).
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-49 — Electric resistance heating is not a furnace: 8.4.4.9.(7) staging is not applied to it
+
+**What.** The staging sentence governs furnaces. An electric-resistance heating
+coil is not a furnace — it has no burner, no combustion staging, and its
+part-load behaviour is linear, so splitting it into equal stages would change
+nothing physical while adding objects and a false claim of compliance
+machinery. Electric-heated reference systems 3 and 4 therefore build the staged
+multispeed DX COOLING coil (8.4.4.10.(8) does bind) paired with a plain
+single-stage `CoilHeatingElectric` inside the same unitary.
+
+**Consequence.** The heating side of an electric sys 3/4 reference is
+unchanged by this work apart from its move inside the unitary container (which
+does change how EnergyPlus sizes it — see the D-46 measurement).
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/systems/psz.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-50 — Terminal/secondary capacity split realized as Sizing:Zone dedicated-outdoor-air accounting
+
+**What.** 8.4.4.9.(3) and 8.4.4.10.(7) (2025: 8.4.5.9.(3)/8.4.5.10.(7)) say
+that where the selection table puts heating (or cooling) in BOTH a zone
+terminal and a secondary system, the terminal covers the space loads and the
+combined pair covers the peak. Reference systems 1, 2 and 5 are exactly that
+shape (PTAC / four-pipe / two-pipe fan coil plus a make-up-air unit), and
+EnergyPlus expresses the accounting directly: `Sizing:Zone` dedicated-outdoor-
+air accounting with a NEUTRAL supply-air strategy makes the ventilation stream
+neither add nor remove zone load, so the terminal's design load is the
+envelope-and-internal load alone while the make-up-air unit carries ventilation
+at system level. The combined pair still meets the peak because both are sized
+on the same design day.
+
+**Approximations declared, not assumed.** (a) The setpoint pair is 20.0/20.1
+degC — EnergyPlus rejects a low setpoint that is not strictly below the high
+one, and 20 degC is the make-up-air unit's own neutral supply temperature for
+system 1. For systems 2 and 5 the unit actually supplies about 13 degC, so
+using a neutral setpoint for SIZING is a deliberate reading of the split rather
+than a description of operation; it is also the only one EnergyPlus solves
+cleanly (a 13 degC setpoint made the fan-coil chilled-water coil's design UA
+solve fail). (b) Reference systems 3, 4, 6 and the ASHP mix outdoor air into
+the supply stream instead of feeding the zone separately, so they have no
+equivalent accounting: their split is approximated by ordinary mixed-air zone
+sizing with baseboards taking the residual, and every such group gets an audit
+entry saying so.
+
+**Evidence [RAN — sized 5ZoneNoHVAC mockups, Toronto CWEC2020]:** turning the
+accounting on moves the summed zone design loads by +1.3% heating and -8.6%
+cooling on systems 1, 2 and 5 alike, with no new EnergyPlus severe errors. The
+13 degC variant produced a severe ("Calculation of cooling coil design UA
+failed") on the four-pipe fan coil and was rejected on that basis.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/{data/sizing.json,
+  systems/base_system.rb, necb/reference.rb}`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+### D-46 sweep gate (2026-07-29): fleet re-validated; staging TIGHTENS the reference
+
+Week-run sweep, 15/15 PASS, after both review fixes. Percent-of-target moved
+UP everywhere versus the D-42 week baseline — the reference building now
+consumes LESS, because staged equipment runs at better part-load efficiency
+than the single-speed coils it replaced. That is the direction the code
+intends: the reference is REQUIRED to be staged, so the target it sets is
+genuinely harder to beat.
+
+| Building | D-42 | now | Building | D-42 | now |
+|---|---|---|---|---|---|
+| RetailStripmall | 89 | **104** | LargeHotel | 90 | 92 |
+| SecondarySchool | 97 | **103** | PrimarySchool | 95 | 97 |
+| Warehouse | 103 | **107** | LowriseApartment | 96 | 98 |
+| RetailStandalone | 101 | **105** | MidriseApartment | 97 | 99 |
+| SmallOffice | 88 | 91 | MediumOffice | 110 | 112 |
+| LargeOffice | 110 | 113 | HighriseApartment | 99 | 99 |
+| SmallHotel | 92 | 92 | FullServiceRestaurant | 95 | 95 |
+| QuickServiceRestaurant | 92 | 92 | | | |
+
+Consequence to note: four legacy archetypes cross 100% and now fail sentence
+(2) that previously passed (Warehouse, RetailStandalone, RetailStripmall,
+SecondarySchool). Nothing about the PROPOSED side changed — they fail because
+the reference got more efficient. The gain scales with how part-loaded the
+systems are, which is why RetailStripmall (ten small PSZ units) moves most
+(+15) and the hydronic/MURB archetypes barely move.
+
+The D-42 FULL-ANNUAL numbers are superseded and have NOT been re-run — the
+full-annual claim is owed a fresh sweep before it is quoted again.

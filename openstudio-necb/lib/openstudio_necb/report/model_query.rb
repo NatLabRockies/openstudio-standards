@@ -113,7 +113,7 @@ module OpenStudioNECB
 
       def air_loops(model)
         model.getAirLoopHVACs.sort_by(&:nameString).map do |loop|
-          chain = loop.supplyComponents.filter_map do |component|
+          chain = expand_unitary(loop.supplyComponents).filter_map do |component|
             kind = classify(component.iddObjectType.valueName)
             kind && { kind: kind, name: component.nameString } || nil
           end
@@ -140,6 +140,21 @@ module OpenStudioNECB
         return value.get if value.respond_to?(:is_initialized) && value.is_initialized
 
         nil
+      end
+
+      # A staged NECB reference system (8.4.4.9.(7)/8.4.4.10.(8)) puts its fan and
+      # coils INSIDE an AirLoopHVACUnitarySystem, which is what the air loop
+      # reports as its supply component — expand it so the rendered supply chain
+      # still shows the fan and coils rather than an empty path.
+      def expand_unitary(components)
+        components.flat_map do |component|
+          unitary = component.to_AirLoopHVACUnitarySystem
+          next [component] unless unitary.is_initialized
+
+          unitary = unitary.get
+          [unitary.supplyFan, unitary.coolingCoil, unitary.heatingCoil, unitary.supplementalHeatingCoil]
+            .filter_map { |opt| opt.is_initialized ? opt.get : nil }
+        end
       end
 
       def classify(idd_name)

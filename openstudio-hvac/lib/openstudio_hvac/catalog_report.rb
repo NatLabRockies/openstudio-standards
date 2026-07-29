@@ -582,9 +582,11 @@ module OpenStudioHVAC
     end
 
     # An air loop's supply is a single air-handler path (no supply splitter): every
-    # real component is a series cell in flow order.
+    # real component is a series cell in flow order. AirLoopHVACUnitarySystem
+    # containers (staged NECB reference systems) are expanded to the fan and
+    # coils they hold — the container itself draws nothing.
     def decompose_air_supply(loop)
-      { pre: real_cells(loop.supplyComponents, method(:classify_component)), branches: [], post: [] }
+      { pre: real_cells(Coils.supply_components(loop), method(:classify_component)), branches: [], post: [] }
     end
 
     # Flatten a decomposition into ordered supply COLUMNS for the renderer: the

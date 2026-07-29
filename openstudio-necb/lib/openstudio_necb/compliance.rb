@@ -558,7 +558,11 @@ module OpenStudioNECB
             dir = File.join(run_dir, "#{label}_annual_iter#{iteration}")
             if label == 'reference'
               # size on the new factors FIRST so efficiencies re-bin on the new
-              # capacities, then run the energy simulation
+              # capacities, then run the energy simulation. Release the values
+              # the previous efficiency pass hard-set against the OLD sizes
+              # first — a frozen pump power against a freshly grown autosized
+              # flow is an EnergyPlus input FATAL, not a modeling nuance.
+              OpenStudioHVAC::NECB.prepare_for_resizing(model, audit: audit)
               Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
               OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit, proposed: proposed)
             end

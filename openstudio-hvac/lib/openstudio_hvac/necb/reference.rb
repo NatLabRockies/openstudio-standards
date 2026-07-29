@@ -357,6 +357,7 @@ module OpenStudioHVAC
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
         apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
         apply_operating_schedules(result.air_loops, proposed_availability, audit)
+        audit_terminal_secondary_split(zones, assignment.reference_system, vintage, audit)
       end
 
       purge_orphaned_ems(reference, audit)
@@ -365,6 +366,41 @@ module OpenStudioHVAC
       emit_article_coverage(ruleset, audit)
 
       ReferenceResult.new(model: reference, assignments: assignments, audit: audit)
+    end
+
+    # 8.4.4.9.(3) / 8.4.4.10.(7) (2025: 8.4.5.9.(3)/8.4.5.10.(7)) — the
+    # terminal/secondary capacity split, D-50. Reference systems 1, 2 and 5 put
+    # heating and/or cooling in BOTH a zone terminal (PTAC / four- or two-pipe
+    # fan coil) and a make-up-air secondary system, so the sentences bind. The
+    # builder realizes them through Sizing:Zone dedicated-outdoor-air accounting
+    # with a neutral supply-air strategy: the terminal's design load excludes the
+    # ventilation air, and the combined pair still meets the design-day peak
+    # because both are sized on the same design day. Systems 3, 4 and 6 mix
+    # outdoor air into the supply stream instead of feeding it to the zone
+    # separately, so EnergyPlus has no equivalent accounting for them — declared,
+    # not silently assumed.
+    def self.audit_terminal_secondary_split(zones, reference_system, vintage, audit)
+      prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+      article = "#{prefix}.9.(3); #{prefix}.10.(7)"
+      accounted = zones.count { |z| z.sizingZone.accountforDedicatedOutdoorAirSystem }
+      if accounted.positive?
+        audit.decision(:rules, 'terminal/secondary capacity split accounted at zone sizing',
+                       target: zones.map(&:nameString).join(','),
+                       inputs: { zones: accounted, reference_system: reference_system,
+                                 strategy: 'NeutralSupplyAir' },
+                       value: 'terminal sized on the space load alone; the make-up-air unit carries the ' \
+                              'ventilation load at system level',
+                       article: article, ruling: 'D-50')
+        return
+      end
+      return unless [3, 4, 6, 'hp'].include?(reference_system)
+
+      audit.info(:rules, "system #{reference_system} mixes outdoor air into the supply stream, so the " \
+                         'terminal/secondary split is approximated by ordinary mixed-air zone sizing ' \
+                         '(baseboards take the residual space load the air system does not meet)',
+                 target: zones.map(&:nameString).join(','),
+                 inputs: { zones: zones.size, reference_system: reference_system },
+                 article: article, ruling: 'D-50')
     end
 
     # T10 (audit 2026-07-25): 8.4.4.18.(3) fan spec (640 Pa / 40% combined)
@@ -419,13 +455,26 @@ module OpenStudioHVAC
         next if ctrl.getEconomizerControlType == 'NoEconomizer'
 
         supply = optional_flow(air_loop.designSupplyAirFlowRate) || optional_flow(air_loop.autosizedDesignSupplyAirFlowRate)
-        cooling_w = air_loop.supplyComponents.sum do |c|
-          coil = c.to_CoilCoolingDXSingleSpeed
-          next 0.0 if coil.empty?
+        # Coils.supply_components descends into AirLoopHVACUnitarySystem containers:
+        # a staged reference system's DX capacity lives on the TOP stage inside the
+        # unitary, invisible to a plain supplyComponents scan.
+        components = Coils.supply_components(air_loop)
+        cooling_w = components.sum do |c|
+          single = c.to_CoilCoolingDXSingleSpeed
+          unless single.empty?
+            next optional_flow(single.get.ratedTotalCoolingCapacity) ||
+                 optional_flow(single.get.autosizedRatedTotalCoolingCapacity) || 0.0
+          end
+          staged = c.to_CoilCoolingDXMultiSpeed
+          next 0.0 if staged.empty?
 
-          optional_flow(coil.get.ratedTotalCoolingCapacity) || optional_flow(coil.get.autosizedRatedTotalCoolingCapacity) || 0.0
+          top = staged.get.stages.last
+          next 0.0 if top.nil?
+
+          optional_flow(top.grossRatedTotalCoolingCapacity) ||
+            optional_flow(top.autosizedGrossRatedTotalCoolingCapacity) || 0.0
         end
-        chw = air_loop.supplyComponents.any? { |c| c.to_CoilCoolingWater.is_initialized }
+        chw = components.any? { |c| c.to_CoilCoolingWater.is_initialized }
         if supply.nil?
           audit.warn(:rules, "#{air_loop.nameString}: supply flow not sized — 5.2.2.7 economizer trigger "                              'not evaluated (economizer retained)', article: '5.2.2.7.(1)', ruling: 'D-22')
           next
@@ -499,6 +548,24 @@ module OpenStudioHVAC
     # note; several -> the schedule serving the most zones wins, with a loud
     # warning. Schedules survive replace_system (removing a loop never deletes
     # shared schedules).
+    # A staged system's fan lives INSIDE its AirLoopHVACUnitarySystem, where the
+    # loop's availability schedule does not reach it — the unitary carries its
+    # own. Left at the always-on default, a staged reference fan runs 8760 h no
+    # matter what 8.4.3.2.(1) says the system's hours are: measured at 2.7x the
+    # proposed's fan energy on the Warehouse, against 0.98x for the same
+    # building before staging. So the unitary inherits the SAME schedule the
+    # loop just got. (Only the availability: the fan OPERATING MODE stays
+    # continuous, as a constant-volume system's does, and EnergyPlus rejects a
+    # mode schedule containing zeros for that field outright.)
+    def self.apply_unitary_operating_schedule(loop_, chosen)
+      loop_.supplyComponents.each do |comp|
+        unitary = comp.to_AirLoopHVACUnitarySystem
+        next if unitary.empty?
+
+        unitary.get.setAvailabilitySchedule(chosen)
+      end
+    end
+
     def self.apply_operating_schedules(air_loops, proposed_availability, audit)
       air_loops.each do |loop_|
         schedules = loop_.thermalZones.filter_map { |z| proposed_availability[z.nameString] }
@@ -518,6 +585,7 @@ module OpenStudioHVAC
         loop_.setNightCycleControlType('CycleOnAny')
         oa = loop_.airLoopHVACOutdoorAirSystem
         oa.get.getControllerOutdoorAir.setMinimumOutdoorAirSchedule(chosen) if oa.is_initialized
+        apply_unitary_operating_schedule(loop_, chosen)
         if tally.size > 1
           audit.warn(:build, "zones carried #{tally.size} DIFFERENT proposed operating schedules — " \
                              "'#{chosen.nameString}' (most zones) applied to the whole reference loop",
@@ -621,7 +689,7 @@ module OpenStudioHVAC
         oa_system = air_loop.airLoopHVACOutdoorAirSystem
         next if oa_system.empty?
 
-        has_cooling = air_loop.supplyComponents.any? do |component|
+        has_cooling = Coils.supply_components(air_loop).any? do |component|
           component.iddObjectType.valueName =~ /Coil_Cooling|CoilSystem_Cooling/
         end
         next unless has_cooling
@@ -640,7 +708,7 @@ module OpenStudioHVAC
       fans = ruleset.fetch('fans')
       spec = reference_system == 6 ? fans['system_6'] : fans['systems_1_3_4_5']
       Array(air_loops).each do |air_loop|
-        air_loop.supplyComponents.each do |comp|
+        Coils.supply_components(air_loop).each do |comp|
           fan = comp.to_FanConstantVolume.is_initialized ? comp.to_FanConstantVolume.get : nil
           fan ||= comp.to_FanVariableVolume.is_initialized ? comp.to_FanVariableVolume.get : nil
           next if fan.nil?
@@ -672,10 +740,11 @@ module OpenStudioHVAC
     def self.apply_heat_pump_limits(air_loops, ruleset, audit)
       cutoff = ruleset.fetch('heat_pump_reference')['heating_cutoff_oat_c']
       Array(air_loops).each do |air_loop|
-        air_loop.supplyComponents.each do |comp|
-          next unless comp.to_CoilHeatingDXSingleSpeed.is_initialized
+        Coils.supply_components(air_loop).each do |comp|
+          staged = comp.to_CoilHeatingDXMultiSpeed
+          next unless comp.to_CoilHeatingDXSingleSpeed.is_initialized || staged.is_initialized
 
-          coil = comp.to_CoilHeatingDXSingleSpeed.get
+          coil = staged.is_initialized ? staged.get : comp.to_CoilHeatingDXSingleSpeed.get
           coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(cutoff)
           audit.decision(:rules, 'heat pump heating cutoff set', target: coil.nameString,
                          value: "compressor off below #{cutoff} degC",

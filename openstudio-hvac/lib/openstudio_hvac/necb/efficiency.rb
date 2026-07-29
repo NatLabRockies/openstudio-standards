@@ -66,9 +66,16 @@ module OpenStudioHVAC
         model.getBoilerHotWaters.sort_by(&:nameString).each { |b| apply_boiler(b, tables, heating_plant, audit) }
         model.getChillerElectricEIRs.sort_by(&:nameString).each { |c| apply_chiller(c, tables, cooling_plant, audit) }
         apply_tower_rules(model, audit) # after ALL chiller capacities are final — the tower sees the loop SUM
+        # 8.4.4.9.(7)/8.4.4.10.(8) stage COUNTS first: the multispeed appliers bin
+        # by TOP-stage capacity, and the top stage is unchanged by re-staging, but
+        # the per-stage values must land on the stages the staging pass leaves behind.
+        totals = apply_staging(model, plant_rules, requested_vintage, audit)
         model.getCoilCoolingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_cooling(c, tables, audit) }
+        model.getCoilCoolingDXMultiSpeeds.sort_by(&:nameString).each { |c| apply_dx_cooling_multi(c, tables, audit, totals[c.handle.to_s]) }
         model.getCoilHeatingDXSingleSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating(c, tables, audit) }
+        model.getCoilHeatingDXMultiSpeeds.sort_by(&:nameString).each { |c| apply_dx_heating_multi(c, tables, audit, totals[c.handle.to_s]) }
         model.getCoilHeatingGass.sort_by(&:nameString).each { |c| apply_gas_coil(c, tables, audit) }
+        model.getCoilHeatingGasMultiStages.sort_by(&:nameString).each { |c| apply_gas_multi(c, tables, audit, totals[c.handle.to_s]) }
         model.getFanVariableVolumes.sort_by(&:nameString).each { |f| apply_fan_power_curve(f, vintage, audit) }
         apply_pump_rules(model, requested_vintage, plant_rules['hydronic_pumps'], audit, proposed: proposed)
         align_heat_pump_heating_capacity(model, audit)
@@ -77,9 +84,184 @@ module OpenStudioHVAC
                               boilers: model.getBoilerHotWaters.size,
                               chillers: model.getChillerElectricEIRs.size,
                               dx_cooling: model.getCoilCoolingDXSingleSpeeds.size,
+                              dx_cooling_staged: model.getCoilCoolingDXMultiSpeeds.size,
                               dx_heating: model.getCoilHeatingDXSingleSpeeds.size,
-                              gas_coils: model.getCoilHeatingGass.size })
+                              dx_heating_staged: model.getCoilHeatingDXMultiSpeeds.size,
+                              gas_coils: model.getCoilHeatingGass.size,
+                              gas_coils_staged: model.getCoilHeatingGasMultiStages.size })
         true
+      end
+
+      # ---------------- 8.4.4.9.(7) / 8.4.4.10.(8) staged heating and cooling ----------------
+
+      # The EnergyPlus structural ceiling: both Coil:Cooling:DX:MultiSpeed and
+      # Coil:Heating:Gas:MultiStage refuse a fifth stage (probe-verified on the
+      # SDK — addStage returns false), so a system needing more equal stages
+      # than this is clamped, loudly (D-47).
+      MAX_STAGES = 4
+
+      # Post-sizing stage-COUNT pass. Sentence (7)/(8) read the same way: at or
+      # below the two-stage threshold the equipment is modelled as two equal
+      # stages; above it, as equal stages of the stage size (rounded up). Only
+      # the COUNT is set here — every stage capacity stays AUTOSIZED, and the
+      # equal increments realize themselves through the containing unitary's
+      # UnitarySystemPerformanceMultispeed flow ratios (stage k -> k/N). Never
+      # hard-set a stage capacity: hard-sized equipment stops responding to the
+      # 8.4.1.2.(5) capacity iteration.
+      #
+      # @return [Hash{String => Float}] coil handle -> the TOTAL capacity measured
+      #   before re-staging. Growing a coil appends a stage EnergyPlus has never
+      #   sized, so the new top stage reads back nil and shrinking one leaves a
+      #   stale partial value behind — the appliers must bin on the measurement
+      #   taken here, not on a re-read.
+      def apply_staging(model, rules, vintage, audit)
+        prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+        totals = {}
+        model.getAirLoopHVACUnitarySystems.sort_by(&:nameString).each do |unitary|
+          stage_multispeed_coil(unitary.coolingCoil, rules['dx_staging'],
+                                "#{prefix}.10.(8)", 'DX cooling', audit, totals)
+          stage_multispeed_coil(unitary.heatingCoil, rules['furnace_staging'],
+                                "#{prefix}.9.(7)", 'furnace', audit, totals)
+          audit_electric_resistance_heating(unitary, prefix, audit)
+          Coils.set_stage_flow_ratios(unitary)
+        end
+        audit_staging_skips(model, prefix, audit)
+        totals
+      end
+
+      # @return [Integer, nil] the stage count applied, nil when the coil is not staged
+      def stage_multispeed_coil(optional_coil, rule, article, label, audit, totals = {})
+        return nil if rule.nil?
+
+        coil = Coils.multispeed(optional_coil)
+        return nil if coil.nil?
+
+        name = coil.nameString
+        capacity_w = top_stage_capacity(coil)
+        if capacity_w.nil?
+          audit&.warn(:efficiency, "#{name}: staged capacity unavailable (model not sized?) — #{article} stage " \
+                                   'count NOT set; run sizing first', article: article, ruling: 'D-46')
+          return nil
+        end
+        totals[coil.handle.to_s] = capacity_w
+
+        kw = capacity_w / 1000.0
+        wanted = kw <= rule['two_stage_max_kw'] ? 2 : (kw / rule['stage_size_kw']).ceil
+        stages = [wanted, MAX_STAGES].min
+        if wanted > MAX_STAGES
+          audit&.warn(:efficiency, "#{name}: #{wanted} equal stages required at #{kw.round(1)} kW but EnergyPlus " \
+                                   "EXCEEDS its multispeed ceiling beyond #{MAX_STAGES} — stage count CLAMPED to " \
+                                   "#{MAX_STAGES} (stages are larger than the code increment)",
+                      target: name, article: article, ruling: 'D-47')
+        end
+        before = coil.stages.size
+        resize_stages(coil, stages)
+        audit&.decision(:efficiency, "#{label} modelled as #{stages} equal stages",
+                        target: name,
+                        inputs: { capacity_kw: kw.round(1), two_stage_max_kw: rule['two_stage_max_kw'],
+                                  stage_size_kw: rule['stage_size_kw'], stages_required: wanted,
+                                  stages_before: before },
+                        value: "#{stages} autosized stage(s), each sized to #{(100.0 / stages).round(1)}% increments " \
+                               'of the total by the unitary flow ratios',
+                        article: article, ruling: 'D-46')
+        stages
+      end
+
+      # The TOTAL capacity of a staged coil is its TOP stage (the stages are
+      # cumulative in EnergyPlus, not additive).
+      def top_stage_capacity(coil)
+        stage = coil.stages.last
+        return nil if stage.nil?
+
+        if stage.respond_to?(:grossRatedTotalCoolingCapacity)
+          optional_f(stage.grossRatedTotalCoolingCapacity) || optional_f(stage.autosizedGrossRatedTotalCoolingCapacity)
+        elsif stage.respond_to?(:grossRatedHeatingCapacity)
+          optional_f(stage.grossRatedHeatingCapacity) || optional_f(stage.autosizedGrossRatedHeatingCapacity)
+        else
+          optional_f(stage.nominalCapacity) || optional_f(stage.autosizedNominalCapacity)
+        end
+      end
+
+      # Grow/shrink to +stages+ and, when the count actually moved, re-autosize
+      # every stage capacity and flow so the next sizing run redistributes them
+      # at the new k/N increments. An unchanged count is left untouched — the
+      # stages are already autosized from the build, and re-autosizing would
+      # wipe the 8.4.4.13.(2)(c) heating=cooling pinning a previous pass applied.
+      def resize_stages(coil, stages)
+        model = coil.model
+        before = coil.stages.size
+        while coil.stages.size > stages
+          doomed = coil.stages.last
+          coil.removeStage(doomed)
+          doomed.remove
+        end
+        while coil.stages.size < stages
+          added =
+            if coil.to_CoilCoolingDXMultiSpeed.is_initialized then Coils.dx_cooling_stage(model)
+            elsif coil.to_CoilHeatingDXMultiSpeed.is_initialized then Coils.dx_heating_stage(model)
+            else Coils.gas_heating_stage(model)
+            end
+          break unless coil.addStage(added) # SDK refuses beyond MAX_STAGES
+
+          added.setName("#{coil.nameString} Stage #{coil.stages.size}")
+        end
+        return coil.stages.size if coil.stages.size == before
+
+        coil.stages.each do |stage|
+          stage.autosizeGrossRatedTotalCoolingCapacity if stage.respond_to?(:autosizeGrossRatedTotalCoolingCapacity)
+          stage.autosizeGrossRatedHeatingCapacity if stage.respond_to?(:autosizeGrossRatedHeatingCapacity)
+          stage.autosizeNominalCapacity if stage.respond_to?(:autosizeNominalCapacity)
+          stage.autosizeRatedAirFlowRate if stage.respond_to?(:autosizeRatedAirFlowRate)
+        end
+        coil.stages.size
+      end
+
+      # D-49: an electric-resistance coil is not a furnace — no burner, no
+      # combustion staging, linear part-load — so the furnace staging sentence
+      # does not reach it and the staged unitary keeps a single-stage electric
+      # coil next to its staged DX cooling. Recorded per unit so the reader sees
+      # the sentence was considered and declined, not overlooked.
+      def audit_electric_resistance_heating(unitary, prefix, audit)
+        return if audit.nil?
+
+        coil = unitary.heatingCoil
+        return if coil.empty? || !coil.get.to_CoilHeatingElectric.is_initialized
+
+        audit.info(:efficiency, 'electric resistance heating left single-stage — it is not a furnace, so the ' \
+                                'furnace staging sentence does not apply (the staged DX cooling still does)',
+                   target: coil.get.nameString,
+                   inputs: { unitary: unitary.nameString },
+                   article: "#{prefix}.9.(7)", ruling: 'D-49')
+      end
+
+      # D-48: the staging scope is AIR-LOOP equipment. Zone terminals (PTAC /
+      # PTHP) cannot host a multispeed coil — the EnergyPlus IDD restricts their
+      # coil choices even though the SDK accepts the assignment — and make-up-air
+      # tempering DX is not the staged unitary equipment the sentences describe.
+      # Both stay single-speed; the skips are audited by REASON (one entry per
+      # reason with the count, rather than one per coil, so a fleet-scale model's
+      # hundreds of identical terminals cannot swamp the log).
+      def audit_staging_skips(model, prefix, audit)
+        return if audit.nil?
+
+        zonal = []
+        air_loop = []
+        (model.getCoilCoolingDXSingleSpeeds + model.getCoilHeatingDXSingleSpeeds).sort_by(&:nameString).each do |coil|
+          (coil.airLoopHVAC.is_initialized ? air_loop : zonal) << coil.nameString
+        end
+        unless zonal.empty?
+          audit.info(:efficiency, "#{zonal.size} zone-terminal DX coil(s) left single-speed — " \
+                                  "#{prefix}.9.(7)/#{prefix}.10.(8) staging is modelled on air-loop unitary " \
+                                  'equipment; EnergyPlus packaged terminal objects cannot host a multispeed coil',
+                     inputs: { coils: zonal.size }, value: zonal.first(5).join(', '),
+                     article: "#{prefix}.9.(7); #{prefix}.10.(8)", ruling: 'D-48')
+        end
+        return if air_loop.empty?
+
+        audit.info(:efficiency, "#{air_loop.size} air-loop DX coil(s) left single-speed — make-up-air tempering " \
+                                'and non-reference systems are outside the staged-unitary scope',
+                   inputs: { coils: air_loop.size }, value: air_loop.first(5).join(', '),
+                   article: "#{prefix}.9.(7); #{prefix}.10.(8)", ruling: 'D-48')
       end
 
       # 8.4.4.17.(2)-(5) (2025: 8.4.5.17): VAV fan power-vs-flow curves from
@@ -239,9 +421,7 @@ module OpenStudioHVAC
           new_power = power * factor
           flow = optional_f(pump.ratedFlowRate) || optional_f(pump.autosizedRatedFlowRate)
           # keep the flow/head/power triple physical (same guard as the transfer)
-          if flow&.positive? && new_power.positive? && (flow * pump.ratedPumpHead / new_power) > pump.motorEfficiency
-            pump.setRatedPumpHead(0.65 * new_power / flow)
-          end
+          reconcile_pump_head(pump, new_power, flow)
           pump.setRatedPowerConsumption(new_power)
         end
         audit&.decision(:efficiency, 'combined pump power exceeds Table 5.2.6.3 — clamped to the maximum (min-wins over the pump-power transfer)',
@@ -324,6 +504,24 @@ module OpenStudioHVAC
       # reference pump's rated power is hard-set to that intensity times its own
       # sized flow (reference flows legitimately differ from proposed flows, so
       # the INTENSITY, not the absolute wattage, is what transfers).
+      # The total (wire-to-water) pump efficiency the reconciliation targets when
+      # a hard-set power and an inherited head disagree.
+      DESIGN_PUMP_EFFICIENCY = 0.65
+
+      # Keep a pump's flow/head/power triple physical whenever the power is
+      # hard-set (the 8.4.4.14 transfer and the 5.2.6.3 clamp both do that):
+      # EnergyPlus FATALS on a triple implying a pump efficiency above the motor
+      # efficiency. The transferred power is authoritative (it IS the article's
+      # number), so the inherited head is what gives.
+      # @return [Boolean] whether the head was changed
+      def reconcile_pump_head(pump, power_w, flow)
+        return false unless flow&.positive? && power_w.to_f.positive?
+        return false if (flow * pump.ratedPumpHead / power_w) <= pump.motorEfficiency
+
+        pump.setRatedPumpHead(DESIGN_PUMP_EFFICIENCY * power_w / flow)
+        true
+      end
+
       def transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
         s = stats[loop_type]
         if s.nil?
@@ -344,13 +542,10 @@ module OpenStudioHVAC
         # The transferred power is authoritative (it IS the article's number);
         # reconcile the inherited head to a physical 65% total efficiency.
         head = pump.ratedPumpHead
-        motor_eff = pump.motorEfficiency
-        if power_w > 0.0 && (flow * head / power_w) > motor_eff
-          new_head = 0.65 * power_w / flow
+        if reconcile_pump_head(pump, power_w, flow)
           audit&.warn(:efficiency, "#{pump.nameString}: inherited rated head #{head.round} Pa implies pump efficiency " \
                                    "above motor efficiency with the transferred #{power_w.round} W — head reduced to " \
-                                   "#{new_head.round} Pa (65% total efficiency) to stay physical", ruling: 'D-27')
-          pump.setRatedPumpHead(new_head)
+                                   "#{pump.ratedPumpHead.round} Pa (65% total efficiency) to stay physical", ruling: 'D-27')
         end
         pump.setRatedPowerConsumption(power_w)
         audit&.decision(:efficiency, 'pump power transferred from the proposed building',
@@ -400,8 +595,17 @@ module OpenStudioHVAC
       # both capacities must be readable; paired coils only (same air loop).
       def align_heat_pump_heating_capacity(model, audit)
         model.getAirLoopHVACs.sort_by(&:nameString).each do |loop_|
-          heat = loop_.supplyComponents.find { |c| c.to_CoilHeatingDXSingleSpeed.is_initialized }
-          cool = loop_.supplyComponents.find { |c| c.to_CoilCoolingDXSingleSpeed.is_initialized }
+          comps = Coils.supply_components(loop_)
+          staged_heat = comps.find { |c| c.to_CoilHeatingDXMultiSpeed.is_initialized }
+          staged_cool = comps.find { |c| c.to_CoilCoolingDXMultiSpeed.is_initialized }
+          if staged_heat && staged_cool
+            align_staged_heat_pump(staged_heat.to_CoilHeatingDXMultiSpeed.get,
+                                   staged_cool.to_CoilCoolingDXMultiSpeed.get, audit)
+            next
+          end
+
+          heat = comps.find { |c| c.to_CoilHeatingDXSingleSpeed.is_initialized }
+          cool = comps.find { |c| c.to_CoilCoolingDXSingleSpeed.is_initialized }
           next if heat.nil? || cool.nil?
 
           heat = heat.to_CoilHeatingDXSingleSpeed.get
@@ -417,6 +621,44 @@ module OpenStudioHVAC
                           value: "rated heating capacity = #{(cool_w / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
                           article: '8.4.4.13.(2)(c)', ruling: 'D-22')
         end
+      end
+
+      # Same sentence on a STAGED heat pump: the unit's heating capacity is its
+      # top stage, so the top stages are what must match. The lower stages follow
+      # the cooling coil's own increments stage-for-stage, which keeps the two
+      # coils staged identically (both were sized to the same k/N ratios).
+      # This pins capacities that were autosized — the article demands a specific
+      # capacity, so the same D-22 exception that governs the single-speed coil
+      # governs here; the COOLING side stays autosized and drives the pair.
+      def align_staged_heat_pump(heat, cool, audit)
+        pairs = heat.stages.zip(cool.stages)
+        if pairs.any? { |_, c| c.nil? }
+          audit&.warn(:efficiency, "#{heat.nameString}: staged heat pump has MORE heating stages than cooling " \
+                                   'stages — 8.4.4.13.(2)(c) alignment applied only to the matched stages',
+                      target: heat.nameString, article: '8.4.4.13.(2)(c)', ruling: 'D-22')
+        end
+        top = nil
+        pairs.each do |heat_stage, cool_stage|
+          next if cool_stage.nil?
+
+          cool_w = optional_f(cool_stage.grossRatedTotalCoolingCapacity) ||
+                   optional_f(cool_stage.autosizedGrossRatedTotalCoolingCapacity)
+          next if cool_w.nil?
+
+          heat_stage.setGrossRatedHeatingCapacity(cool_w)
+          top = cool_w
+        end
+        if top.nil?
+          audit&.warn(:efficiency, "#{heat.nameString}: staged cooling capacity unavailable — 8.4.4.13.(2)(c) " \
+                                   'heating=cooling alignment skipped (run sizing first)',
+                      target: heat.nameString, article: '8.4.4.13.(2)(c)', ruling: 'D-22')
+          return
+        end
+        audit&.decision(:efficiency, 'staged heat pump heating capacity pinned to cooling capacity, stage for stage',
+                        target: heat.nameString,
+                        inputs: { stages: heat.stages.size, cooling_kw: (top / 1000.0).round(1) },
+                        value: "top-stage heating capacity = #{(top / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
+                        article: '8.4.4.13.(2)(c)', ruling: 'D-22 D-46')
       end
 
       # ---------------- table lookup (legacy model_find_object semantics) ----------------
@@ -768,22 +1010,7 @@ module OpenStudioHVAC
 
         # SEER2/EER2 converted like SEER/EER — the documented openstudio-standards
         # assumption (Standards.CoilCoolingDXSingleSpeed: 'assumed to be the same').
-        cop, label =
-          if row['minimum_seasonal_energy_efficiency_ratio']
-            [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio']),
-             "#{row['minimum_seasonal_energy_efficiency_ratio']}SEER"]
-          elsif row['minimum_seasonal_energy_efficiency_ratio_2']
-            [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio_2']),
-             "#{row['minimum_seasonal_energy_efficiency_ratio_2']}SEER2"]
-          elsif row['minimum_seasonal_efficiency']
-            [seer_to_cop_no_fan(row['minimum_seasonal_efficiency']), "#{row['minimum_seasonal_efficiency']}SEER"]
-          elsif row['minimum_energy_efficiency_ratio']
-            [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio']), "#{row['minimum_energy_efficiency_ratio']}EER"]
-          elsif row['minimum_energy_efficiency_ratio_2']
-            [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio_2']), "#{row['minimum_energy_efficiency_ratio_2']}EER2"]
-          elsif row['minimum_full_load_efficiency']
-            [eer_to_cop_no_fan(row['minimum_full_load_efficiency']), "#{row['minimum_full_load_efficiency']}EER"]
-          end
+        cop, label = dx_cooling_cop(row)
         return audit&.warn(:efficiency, 'DX cooling row has no efficiency value — not set', target: name) if cop.nil?
 
         coil.setRatedCOP(cop)
@@ -803,6 +1030,148 @@ module OpenStudioHVAC
                         article: 'NECB 2020 Table 5.2.12.1 (unitary equipment)')
       end
 
+      # Staged DX cooling (8.4.4.10.(8)). Binned by TOP-stage capacity — which IS
+      # the unit's total capacity — against the same unitary_acs/heat_pumps
+      # tables as the single-speed coil, with the row's COP and curves applied to
+      # EVERY stage. That is exactly what the legacy multispeed applier does
+      # (one row read from the last stage, same values per stage): the tables are
+      # unit-capacity tables, not per-stage tables.
+      def apply_dx_cooling_multi(coil, tables, audit, capacity_w = nil)
+        name = coil.nameString
+        capacity_w ||= top_stage_capacity(coil)
+        return audit&.warn(:efficiency, 'staged DX cooling capacity unavailable (model not sized?) — not set', target: name) if capacity_w.nil?
+
+        heat_pump = paired_with_dx_heating?(coil)
+        table = heat_pump ? tables['heat_pumps'] : tables['unitary_acs']
+        heating_type = electric_or_no_heating?(coil) ? 'Electric Resistance or None' : 'All Other'
+        cap_btuh = w_to_btu_per_hr(capacity_w)
+        row = find_row(table, { 'cooling_type' => 'AirCooled', 'heating_type' => heating_type,
+                                'subcategory' => 'Single Package' }, cap_btuh)
+        row ||= find_row(table, { 'cooling_type' => 'AirCooled', 'subcategory' => 'Single Package' }, cap_btuh)
+        return audit&.warn(:efficiency, 'no DX cooling efficiency row found — not set', target: name,
+                           inputs: { heat_pump: heat_pump, heating_type: heating_type, capacity_btu_hr: cap_btuh.round }) if row.nil?
+
+        cop, label = dx_cooling_cop(row)
+        return audit&.warn(:efficiency, 'DX cooling row has no efficiency value — not set', target: name) if cop.nil?
+
+        curves = { 'cool_cap_ft' => :setTotalCoolingCapacityFunctionofTemperatureCurve,
+                   'cool_cap_fflow' => :setTotalCoolingCapacityFunctionofFlowFractionCurve,
+                   'cool_eir_ft' => :setEnergyInputRatioFunctionofTemperatureCurve,
+                   'cool_eir_fflow' => :setEnergyInputRatioFunctionofFlowFractionCurve,
+                   'cool_plf_fplr' => :setPartLoadFractionCorrelationCurve }
+        coil.stages.each do |stage|
+          stage.setGrossRatedCoolingCOP(cop)
+          curves.each do |key, setter|
+            c = curve(coil.model, tables, row[key])
+            stage.send(setter, c) if c
+          end
+        end
+        coil.setName("#{name} #{w_to_kbtu_per_hr(capacity_w).round}kBtu/hr #{label}")
+        audit&.decision(:efficiency, 'staged DX cooling efficiency applied to every stage', target: name,
+                        inputs: { table: heat_pump ? 'heat_pumps' : 'unitary_acs', stages: coil.stages.size,
+                                  heating_type: heating_type, top_stage_kw: (capacity_w / 1000.0).round(1) },
+                        value: "COP #{cop.round(2)} (#{label}) on all #{coil.stages.size} stages, binned by total capacity",
+                        article: 'NECB 2020 Table 5.2.12.1 (unitary equipment)', ruling: 'D-46')
+      end
+
+      # The SEER/EER/full-load ladder shared by the single- and multi-speed DX
+      # cooling appliers. @return [Array(Float, String), nil]
+      def dx_cooling_cop(row)
+        if row['minimum_seasonal_energy_efficiency_ratio']
+          [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio']),
+           "#{row['minimum_seasonal_energy_efficiency_ratio']}SEER"]
+        elsif row['minimum_seasonal_energy_efficiency_ratio_2']
+          [seer_to_cop_no_fan(row['minimum_seasonal_energy_efficiency_ratio_2']),
+           "#{row['minimum_seasonal_energy_efficiency_ratio_2']}SEER2"]
+        elsif row['minimum_seasonal_efficiency']
+          [seer_to_cop_no_fan(row['minimum_seasonal_efficiency']), "#{row['minimum_seasonal_efficiency']}SEER"]
+        elsif row['minimum_energy_efficiency_ratio']
+          [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio']), "#{row['minimum_energy_efficiency_ratio']}EER"]
+        elsif row['minimum_energy_efficiency_ratio_2']
+          [eer_to_cop_no_fan(row['minimum_energy_efficiency_ratio_2']), "#{row['minimum_energy_efficiency_ratio_2']}EER2"]
+        elsif row['minimum_full_load_efficiency']
+          [eer_to_cop_no_fan(row['minimum_full_load_efficiency']), "#{row['minimum_full_load_efficiency']}EER"]
+        end
+      end
+
+      # Staged DX heating (reference ASHP). Same top-stage binning contract as
+      # the staged cooling applier.
+      def apply_dx_heating_multi(coil, tables, audit, capacity_w = nil)
+        name = coil.nameString
+        capacity_w ||= top_stage_capacity(coil)
+        return audit&.warn(:efficiency, 'staged DX heating capacity unavailable (model not sized?) — not set', target: name) if capacity_w.nil?
+
+        cap_btuh = w_to_btu_per_hr(capacity_w)
+        row = find_row(tables['heat_pumps_heating'],
+                       { 'cooling_type' => 'AirCooled', 'subcategory' => 'Single Package' }, cap_btuh)
+        return audit&.warn(:efficiency, 'no DX heating efficiency row found — not set', target: name,
+                           inputs: { capacity_btu_hr: cap_btuh.round }) if row.nil?
+
+        cop, label = dx_heating_cop(row, capacity_w)
+        return audit&.warn(:efficiency, 'DX heating row has no efficiency value — not set', target: name) if cop.nil?
+
+        curves = { 'heat_cap_ft' => :setHeatingCapacityFunctionofTemperatureCurve,
+                   'heat_cap_fflow' => :setHeatingCapacityFunctionofFlowFractionCurve,
+                   'heat_eir_ft' => :setEnergyInputRatioFunctionofTemperatureCurve,
+                   'heat_eir_fflow' => :setEnergyInputRatioFunctionofFlowFractionCurve,
+                   'heat_plf_fplr' => :setPartLoadFractionCorrelationCurve }
+        coil.stages.each do |stage|
+          stage.setGrossRatedHeatingCOP(cop)
+          curves.each do |key, setter|
+            c = curve(coil.model, tables, row[key])
+            stage.send(setter, c) if c && stage.respond_to?(setter)
+          end
+        end
+        coil.setName("#{name} #{w_to_kbtu_per_hr(capacity_w).round}kBtu/hr #{label}")
+        audit&.decision(:efficiency, 'staged DX heating efficiency applied to every stage', target: name,
+                        inputs: { stages: coil.stages.size, top_stage_kw: (capacity_w / 1000.0).round(1) },
+                        value: "heating COP #{cop.round(2)} (#{label}) on all #{coil.stages.size} stages",
+                        article: 'NECB 2020 Table 5.2.12.1 (heat pumps, heating)', ruling: 'D-46')
+      end
+
+      # @return [Array(Float, String), nil]
+      def dx_heating_cop(row, capacity_w)
+        if row['minimum_heating_seasonal_performance_factor']
+          [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor']),
+           "#{row['minimum_heating_seasonal_performance_factor']}HSPF"]
+        elsif row['minimum_heating_seasonal_performance_factor_2']
+          # HSPF2 converted like HSPF (consistent with the SEER2/EER2 assumption)
+          [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor_2']),
+           "#{row['minimum_heating_seasonal_performance_factor_2']}HSPF2"]
+        elsif row['minimum_coefficient_of_performance_heating']
+          [cop_heating_to_cop_heating_no_fan(row['minimum_coefficient_of_performance_heating'], capacity_w),
+           "#{row['minimum_coefficient_of_performance_heating']}COPH"]
+        end
+      end
+
+      # Staged gas furnace (8.4.4.9.(7)). Binned by TOP-stage (= total) capacity
+      # against the same furnaces table; the burner efficiency goes on every
+      # stage and the part-load curve on the parent coil.
+      def apply_gas_multi(coil, tables, audit, capacity_w = nil)
+        name = coil.nameString
+        capacity_w ||= top_stage_capacity(coil)
+        return audit&.warn(:efficiency, 'staged gas coil capacity unavailable (model not sized?) — not set', target: name) if capacity_w.nil?
+
+        cap_btuh = [w_to_btu_per_hr(capacity_w), 0.001].max
+        row = find_row(tables['furnaces'], { 'fluid_type' => 'Air', 'fuel_type' => 'Gas' }, cap_btuh)
+        return audit&.warn(:efficiency, 'no furnace efficiency row found — not set', target: name,
+                           inputs: { capacity_btu_hr: cap_btuh.round }) if row.nil?
+
+        plf = curve(coil.model, tables, row['efffplr'])
+        coil.setPartLoadFractionCorrelationCurve(plf) if plf
+
+        thermal_eff, label = boiler_thermal_efficiency(row) # same AFUE/thermal/combustion triad
+        return audit&.warn(:efficiency, 'furnace row has no efficiency value — not set', target: name) if thermal_eff.nil?
+
+        coil.stages.each { |stage| stage.setGasBurnerEfficiency(thermal_eff) }
+        coil.setName("#{name} #{w_to_kbtu_per_hr(capacity_w).round}kBtu/hr #{label}")
+        audit&.decision(:efficiency, 'staged gas heating efficiency applied to every stage', target: name,
+                        inputs: { stages: coil.stages.size, top_stage_kw: (capacity_w / 1000.0).round(1) },
+                        value: "burner efficiency #{thermal_eff.round(3)} (#{label}) on all #{coil.stages.size} " \
+                               "stages, curve #{row['efffplr']}",
+                        article: 'NECB 2020 Table 5.2.12.1 (furnaces)', ruling: 'D-46')
+      end
+
       # Legacy DX heating via heat_pumps_heating: HSPF or COPH47 -> heating COP (no fan).
       def apply_dx_heating(coil, tables, audit)
         name = coil.nameString
@@ -815,18 +1184,7 @@ module OpenStudioHVAC
         return audit&.warn(:efficiency, 'no DX heating efficiency row found — not set', target: name,
                            inputs: { capacity_btu_hr: cap_btuh.round }) if row.nil?
 
-        cop, label =
-          if row['minimum_heating_seasonal_performance_factor']
-            [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor']),
-             "#{row['minimum_heating_seasonal_performance_factor']}HSPF"]
-          elsif row['minimum_heating_seasonal_performance_factor_2']
-            # HSPF2 converted like HSPF (consistent with the SEER2/EER2 assumption)
-            [hspf_to_cop_no_fan(row['minimum_heating_seasonal_performance_factor_2']),
-             "#{row['minimum_heating_seasonal_performance_factor_2']}HSPF2"]
-          elsif row['minimum_coefficient_of_performance_heating']
-            [cop_heating_to_cop_heating_no_fan(row['minimum_coefficient_of_performance_heating'], capacity_w),
-             "#{row['minimum_coefficient_of_performance_heating']}COPH"]
-          end
+        cop, label = dx_heating_cop(row, capacity_w)
         return audit&.warn(:efficiency, 'DX heating row has no efficiency value — not set', target: name) if cop.nil?
 
         coil.setRatedCOP(cop)
@@ -876,8 +1234,12 @@ module OpenStudioHVAC
       # air loop / containing HVAC component)?
       def paired_with_dx_heating?(coil)
         loop = coil.airLoopHVAC
-        if loop.is_initialized
-          return loop.get.supplyComponents.any? { |c| c.to_CoilHeatingDXSingleSpeed.is_initialized || c.to_CoilHeatingDXVariableSpeed.is_initialized }
+        loop = containing_unitary(coil)&.airLoopHVAC if loop.nil? || loop.empty?
+        if loop&.is_initialized
+          return Coils.supply_components(loop.get).any? do |c|
+            c.to_CoilHeatingDXSingleSpeed.is_initialized || c.to_CoilHeatingDXVariableSpeed.is_initialized ||
+              c.to_CoilHeatingDXMultiSpeed.is_initialized
+          end
         end
 
         containing = coil.containingHVACComponent
@@ -888,14 +1250,28 @@ module OpenStudioHVAC
           (comp.to_AirLoopHVACUnitaryHeatPumpAirToAir.is_initialized rescue false)
       end
 
+      # The AirLoopHVACUnitarySystem holding this coil, if any — a staged coil is
+      # never a direct supply component of its air loop.
+      # @return [OpenStudio::Model::AirLoopHVACUnitarySystem, nil]
+      def containing_unitary(coil)
+        containing = coil.containingHVACComponent
+        return nil unless containing.is_initialized
+
+        unitary = containing.get.to_AirLoopHVACUnitarySystem
+        unitary.is_initialized ? unitary.get : nil
+      end
+
       # Legacy coil_dx_heating_type: 'Electric Resistance or None' vs 'All Other'.
       def electric_or_no_heating?(coil)
         loop = coil.airLoopHVAC
-        if loop.is_initialized
-          comps = loop.get.supplyComponents
+        loop = containing_unitary(coil)&.airLoopHVAC if loop.nil? || loop.empty?
+        if loop&.is_initialized
+          comps = Coils.supply_components(loop.get)
           gas_or_hydronic = comps.any? do |c|
             c.to_CoilHeatingGas.is_initialized || c.to_CoilHeatingWater.is_initialized ||
-              c.to_CoilHeatingDXSingleSpeed.is_initialized || c.to_CoilHeatingDXVariableSpeed.is_initialized
+              c.to_CoilHeatingGasMultiStage.is_initialized ||
+              c.to_CoilHeatingDXSingleSpeed.is_initialized || c.to_CoilHeatingDXVariableSpeed.is_initialized ||
+              c.to_CoilHeatingDXMultiSpeed.is_initialized
           end
           return !gas_or_hydronic
         end
@@ -915,6 +1291,34 @@ module OpenStudioHVAC
     # curves still apply and the skip is noted in the audit.
     def self.apply_efficiencies(model, vintage: '2020', audit: nil, proposed: nil)
       Efficiency.apply(model, vintage: vintage, audit: audit, proposed: proposed)
+    end
+
+    # Facade: make an ALREADY-EFFICIENCY-APPLIED model safe to re-size.
+    #
+    # The efficiency pass hard-sets pump rated power (the 8.4.4.14 transfer and
+    # the 5.2.6.3 clamp) while pump FLOW stays autosized, and reconciles the
+    # head so the triple is physical at the flow sized so far. A later sizing
+    # run re-derives the flow: if it grows, the frozen power/head no longer fit
+    # it and EnergyPlus FATALS on "Calculated Pump Efficiency > 100%" during
+    # input checking — before the efficiency pass gets its chance to
+    # re-reconcile. Releasing the hard power back to autosize removes the
+    # inconsistency by construction (EnergyPlus then derives power from the
+    # flow and head it just sized), and the caller's next apply_efficiencies
+    # re-transfers it against the NEW flow.
+    #
+    # Call this before EVERY re-sizing run of a model that has already been
+    # through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
+    # @return [Integer] pumps released
+    def self.prepare_for_resizing(model, audit: nil)
+      pumps = model.getPumpVariableSpeeds.reject { |p| p.ratedPowerConsumption.empty? } +
+              model.getPumpConstantSpeeds.reject { |p| p.ratedPowerConsumption.empty? }
+      pumps.each(&:autosizeRatedPowerConsumption)
+      unless pumps.empty?
+        audit&.info(:efficiency, 'hard-set pump power released to autosize for the re-sizing run — the ' \
+                                 'efficiency pass re-transfers it against the newly sized flow',
+                    inputs: { pumps: pumps.size }, article: '8.4.4.14.(1)-(3)', ruling: 'D-11 D-27')
+      end
+      pumps.size
     end
   end
 end

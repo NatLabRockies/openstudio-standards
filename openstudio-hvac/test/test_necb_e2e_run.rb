@@ -44,8 +44,12 @@ class TestNecbE2ERun < Minitest::Test
     OpenStudioHVAC::NECB.apply_efficiencies(result.model, vintage: '2020', audit: audit)
     assert_empty audit.warnings.select { |w| w[:action].include?('not sized') },
                  'all components sized after the reference E+ run'
-    gas_coil = result.model.getCoilHeatingGass.min_by(&:nameString)
-    assert_operator gas_coil.gasBurnerEfficiency, :>=, 0.80
+    # D-46: the sys3 reference furnace is a STAGED Coil:Heating:Gas:MultiStage
+    # inside the unitary; the burner efficiency lands on every stage.
+    gas_coil = result.model.getCoilHeatingGasMultiStages.min_by(&:nameString)
+    refute_nil gas_coil, 'staged sys3 reference builds a multi-stage gas coil'
+    assert_operator gas_coil.stages.size, :>=, 2, '8.4.4.9.(7): at least two equal stages'
+    gas_coil.stages.each { |stage| assert_operator stage.gasBurnerEfficiency, :>=, 0.80 }
     boiler = result.model.getBoilerHotWaters.find { |b| b.nameString.include?('Primary') }
     assert_in_delta 0.90, boiler.nominalThermalEfficiency, 1e-6
   end
@@ -72,8 +76,9 @@ class TestNecbE2ERun < Minitest::Test
                              max_heating_hours: 24, max_cooling_hours: 6)
 
     OpenStudioHVAC::NECB.apply_efficiencies(result.model, vintage: '2020')
-    hp = result.model.getCoilHeatingDXSingleSpeeds.min_by(&:nameString)
-    assert_operator hp.ratedCOP, :>, 2.0
+    hp = result.model.getCoilHeatingDXMultiSpeeds.min_by(&:nameString)
+    refute_nil hp, 'staged reference ASHP builds a multispeed heating coil'
+    hp.stages.each { |stage| assert_operator stage.grossRatedHeatingCOP, :>, 2.0 }
     assert_in_delta(-10.0, hp.minimumOutdoorDryBulbTemperatureforCompressorOperation, 1e-6)
   end
 

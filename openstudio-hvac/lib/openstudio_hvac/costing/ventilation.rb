@@ -113,16 +113,22 @@ module OpenStudioHVAC
         flow.get
       end
 
+      # Staged NECB reference systems hide their coils inside an
+      # AirLoopHVACUnitarySystem — Coils.supply_components descends into it. A
+      # staged coil costs as the same equipment as its single-speed sibling
+      # (a two-stage furnace is still a furnace); capacity comes from the top
+      # stage, which is the unit's total.
       def coil_keys(air_loop)
         htg = 'none'
         clg = 'none'
-        air_loop.supplyComponents.each do |comp|
-          htg = 'Gas' if comp.to_CoilHeatingGas.is_initialized
+        Coils.supply_components(air_loop).each do |comp|
+          htg = 'Gas' if comp.to_CoilHeatingGas.is_initialized || comp.to_CoilHeatingGasMultiStage.is_initialized
           htg = 'elec' if comp.to_CoilHeatingElectric.is_initialized && htg == 'none'
           htg = 'HW' if comp.to_CoilHeatingWater.is_initialized
-          htg = 'HP-e' if comp.to_CoilHeatingDXSingleSpeed.is_initialized
+          htg = 'HP-e' if comp.to_CoilHeatingDXSingleSpeed.is_initialized || comp.to_CoilHeatingDXMultiSpeed.is_initialized
           htg = 'CCASHP-e' if comp.to_CoilHeatingDXVariableSpeed.is_initialized
-          clg = 'DX' if comp.to_CoilCoolingDXSingleSpeed.is_initialized || comp.to_CoilCoolingDXTwoSpeed.is_initialized
+          clg = 'DX' if comp.to_CoilCoolingDXSingleSpeed.is_initialized || comp.to_CoilCoolingDXTwoSpeed.is_initialized ||
+                        comp.to_CoilCoolingDXMultiSpeed.is_initialized
           clg = 'CHW' if comp.to_CoilCoolingWater.is_initialized
           clg = 'CCASHP' if comp.to_CoilCoolingDXVariableSpeed.is_initialized
         end
@@ -237,8 +243,17 @@ module OpenStudioHVAC
       # as equipment on a per-air-handler basis (capacity / unit count, quantity x units).
       def cost_airloop_coils(air_loop, sys_type, units, flow_m3s)
         coils = []
-        air_loop.supplyComponents.each do |comp|
-          if comp.to_CoilHeatingWater.is_initialized
+        Coils.supply_components(air_loop).each do |comp|
+          if comp.to_CoilHeatingGasMultiStage.is_initialized
+            c = comp.to_CoilHeatingGasMultiStage.get
+            coils << { role: :heat_gas, lookup: 'FurnaceGas', kw: staged_kw(c), name: c.nameString }
+          elsif comp.to_CoilHeatingDXMultiSpeed.is_initialized
+            c = comp.to_CoilHeatingDXMultiSpeed.get
+            coils << { role: :heat_hp, lookup: 'ashp', kw: staged_kw(c), name: c.nameString }
+          elsif comp.to_CoilCoolingDXMultiSpeed.is_initialized
+            c = comp.to_CoilCoolingDXMultiSpeed.get
+            coils << { role: :cool_dx, lookup: 'coils', kw: staged_kw(c), name: c.nameString }
+          elsif comp.to_CoilHeatingWater.is_initialized
             c = comp.to_CoilHeatingWater.get
             coils << { role: :heat, lookup: 'Coils', kw: kw_of(c.ratedCapacity, c.autosizedRatedCapacity), name: c.nameString }
           elsif comp.to_CoilHeatingElectric.is_initialized
@@ -329,6 +344,21 @@ module OpenStudioHVAC
       def kw_of(hard, autosized)
         value = optional_f(hard) || optional_f(autosized)
         value.nil? ? nil : value / 1000.0
+      end
+
+      # A staged coil's TOTAL capacity is its TOP stage (EnergyPlus stages are
+      # cumulative, not additive), so that is what gets costed.
+      def staged_kw(coil)
+        stage = coil.stages.last
+        return nil if stage.nil?
+
+        if stage.respond_to?(:grossRatedTotalCoolingCapacity)
+          kw_of(stage.grossRatedTotalCoolingCapacity, stage.autosizedGrossRatedTotalCoolingCapacity)
+        elsif stage.respond_to?(:grossRatedHeatingCapacity)
+          kw_of(stage.grossRatedHeatingCapacity, stage.autosizedGrossRatedHeatingCapacity)
+        else
+          kw_of(stage.nominalCapacity, stage.autosizedNominalCapacity)
+        end
       end
 
       def optional_f(value)

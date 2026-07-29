@@ -43,7 +43,7 @@ module OpenStudioHVAC
           oa_system = air_loop.airLoopHVACOutdoorAirSystem
           next if oa_system.empty?
 
-          cooled = air_loop.supplyComponents.any? { |c| c.iddObjectType.valueName =~ /Coil_Cooling|CoilSystem_Cooling/ }
+          cooled = Coils.supply_components(air_loop).any? { |c| c.iddObjectType.valueName =~ /Coil_Cooling|CoilSystem_Cooling/ }
           next unless cooled
 
           controller = oa_system.get.getControllerOutdoorAir
@@ -110,6 +110,10 @@ module OpenStudioHVAC
         clone = model.clone(true).to_Model
         Efficiency.apply(clone, vintage: vintage)
         unsized = model.getCoilCoolingDXSingleSpeeds.count { |c| c.ratedTotalCoolingCapacity.empty? && !c.autosizedRatedTotalCoolingCapacity.is_initialized }
+        unsized += model.getCoilCoolingDXMultiSpeeds.count do |c|
+          top = c.stages.last
+          top.nil? || (top.grossRatedTotalCoolingCapacity.empty? && !top.autosizedGrossRatedTotalCoolingCapacity.is_initialized)
+        end
         if unsized.positive?
           audit.info(:check_part5, "#{unsized} DX coil(s) unsized — capacity-binned 5.2.12 minimums cannot be " \
                                    'checked for them; run sizing first for full coverage')
@@ -120,7 +124,13 @@ module OpenStudioHVAC
           [:getChillerElectricEIRs, ->(c) { c.referenceCOP }, 'chiller reference COP'],
           [:getCoilCoolingDXSingleSpeeds, ->(c) { c.ratedCOP.respond_to?(:get) && c.ratedCOP.is_initialized ? c.ratedCOP.get : c.ratedCOP }, 'DX cooling rated COP'],
           [:getCoilHeatingDXSingleSpeeds, ->(c) { c.ratedCOP }, 'DX heating rated COP'],
-          [:getCoilHeatingGass, ->(c) { c.gasBurnerEfficiency }, 'gas coil burner efficiency']
+          [:getCoilHeatingGass, ->(c) { c.gasBurnerEfficiency }, 'gas coil burner efficiency'],
+          # staged coils carry their performance on the STAGES; the efficiency
+          # pass writes one row's value to every stage, so the top stage is
+          # representative of the whole coil
+          [:getCoilCoolingDXMultiSpeeds, ->(c) { c.stages.last&.grossRatedCoolingCOP }, 'staged DX cooling rated COP'],
+          [:getCoilHeatingDXMultiSpeeds, ->(c) { c.stages.last&.grossRatedHeatingCOP }, 'staged DX heating rated COP'],
+          [:getCoilHeatingGasMultiStages, ->(c) { c.stages.last&.gasBurnerEfficiency }, 'staged gas coil burner efficiency']
         ]
         pairs.each do |getter, reader, label|
           proposed_items = model.send(getter).sort_by(&:nameString)

@@ -15,12 +15,9 @@
       "8.4.4.18"
     ],
     "note": "Rule values are transcriptions of the code text. Runtime never contacts the MCP server; regenerate/verify this file against the code text when editions change.",
-    "non_rule_keys_note": "furnace_staging and dx_staging are future-implementation data backing the declared-partial 8.4.4.9./8.4.4.10. articles (see article_coverage gaps for each) — vendored ahead of the staged-object/pump-transfer modeling work and exempted from the orphan-key lint (non_rule_keys) until implemented."
+    "non_rule_keys_note": "None: furnace_staging and dx_staging graduated to consumed rule blocks in D-46 (read by the efficiency pass's post-sizing staging pass), so the orphan-key exemption list is now empty."
   },
-  "non_rule_keys": [
-    "furnace_staging",
-    "dx_staging"
-  ],
+  "non_rule_keys": [],
   "selection": {
     "table": "8.4.4.7.-A",
     "article": "8.4.4.7.(1)",
@@ -341,19 +338,31 @@
     "3": {
       "description": "Single-zone packaged rooftop unit with baseboard heating; CV; air-cooled DX",
       "gas": {
-        "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard"
+        "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       },
       "electric": {
-        "name": "PSZ RTU Electric and DX Coils and Electric Baseboard"
+        "name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       }
     },
     "4": {
       "description": "Single-zone make-up air unit with baseboard heating; CV; air-cooled DX",
       "gas": {
-        "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard"
+        "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       },
       "electric": {
-        "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard"
+        "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       }
     },
     "5": {
@@ -380,10 +389,16 @@
     "hp": {
       "description": "Table 8.4.4.13: packaged unitary rooftop heat pump, CV; auxiliary furnace + baseboards",
       "gas": {
-        "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard"
+        "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       },
       "electric": {
-        "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard"
+        "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+        "config": {
+          "staged_coils": true
+        }
       }
     }
   },
@@ -640,15 +655,15 @@
         "article": "8.4.4.9.",
         "title": "Heating System",
         "status": "partial",
-        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (4); boiler plant staging 176/352 kW incl. modulating flow mode + 25% floor and HWST 82/60 reset conventions applied via plant defaults + efficiency pass (6).",
-        "gaps": "Terminal/secondary capacity split (3), multi-energy capacity ratios (5), and furnace multi-stage modeling (7: staged objects) are sizing-time refinements not yet modeled."
+        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (4); boiler plant staging 176/352 kW incl. modulating flow mode + 25% floor and HWST 82/60 reset conventions applied via plant defaults + efficiency pass (6). Furnace staging (7) IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil (the Table -13 ASHP holds multispeed DX coils on the same machinery), and a post-sizing pass sets the stage COUNT from the sized capacity (two equal stages at or below the threshold, ceil(kW / stage size) above it) with every stage capacity left AUTOSIZED - the equal increments come from the unitary's multispeed flow ratios, so capacity auto-iteration still works. Terminal/secondary split (3) accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50): the terminal is sized on the space load alone and the make-up-air unit carries ventilation at system level.",
+        "gaps": "Multi-energy capacity ratios (5) are not modelled. (7): electric-resistance heating is not a furnace so it is not staged (D-49), zone-terminal and make-up-air DX/furnace equipment stays single-stage (D-48), and a system needing more than four equal stages is CLAMPED at four with a shouted audit warning because EnergyPlus multispeed objects cannot hold a fifth stage (D-47). (3): systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is only approximated by ordinary mixed-air zone sizing with baseboards taking the residual - audited as an approximation, not claimed."
       },
       {
         "article": "8.4.4.10.",
         "title": "Cooling Systems",
         "status": "partial",
-        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (3); chiller plant: 2100 kW split, 7 C CHWST, 25% modulating floor (6) via plant defaults + efficiency pass.",
-        "gaps": "Terminal/secondary capacity split (7) and DX multi-stage modeling (8) are sizing-time refinements not yet modeled."
+        "how": "System per Table -A (1); purchased energy (2); energy type follows proposed (3); chiller plant: 2100 kW split, 7 C CHWST, 25% modulating floor (6) via plant defaults + efficiency pass. DX staging (8) IS modelled since D-46 on the same machinery as the furnace staging of the heating article: multispeed DX cooling inside an AirLoopHVACUnitarySystem on reference systems 3/4 and the ASHP, stage COUNT set post-sizing from the sized total, stage capacities AUTOSIZED, efficiencies and curves binned by the TOP-stage (= total) capacity and applied to every stage. Terminal/secondary split (7) accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50).",
+        "gaps": "Multi-energy capacity ratios (4) are not modelled. (8): zone-terminal DX (packaged terminal units cannot host a multispeed coil in EnergyPlus) and make-up-air tempering DX stay single-speed (D-48), and stage counts above four are CLAMPED at the EnergyPlus ceiling with a shouted warning (D-47). (7): systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such."
       },
       {
         "article": "8.4.4.11.",
