@@ -200,13 +200,24 @@ refutation, not just the diff.
       1/67, Warehouse 1/3. So the default flip changes almost nothing, and ten
       unmoved buildings in the sweep must NOT be read as a regression.
       The open question: should the REFERENCE use `placement: :all` instead?
-- [ ] **BLOCKED on a codes-MCP ingestion gap.** The above cannot be settled
-      from the code text: `get_section('necb','4.2.2.4'/'4.2.2.5')` return the
-      daylighted-AREA geometry articles, but **4.2.2.6 through 4.2.2.10 all
-      return null** — the articles that actually REQUIRE the controls are not
-      retrievable. Do not rule the OR-of-four-criteria semantics defective
-      without them (that would be false premise #7). File the ingestion gap
-      with hbix as was done for Appendix A (hbix#67), then revisit.
+- [x] ~~BLOCKED on a codes-MCP ingestion gap~~ **RESOLVED 2026-07-29 — there is
+      NO MCP gap and no issue was filed.** `4.2.2.6` is "Special Applications"
+      and its text runs straight into `4.2.3. Exterior Lighting Power`, so
+      Subsection 4.2.2 ENDS at 4.2.2.6: articles 4.2.2.7-4.2.2.10 do not exist
+      in NECB 2020, and our audit string citing them is itself wrong. The real
+      requirement is **4.2.2.1.(10)-(15)** — see **L-26**. This nearly became
+      false premise #7; the refuting check was one `get_section` call.
+- [ ] **RULING NEEDED (supersedes the D-51 inertness item above).** Our
+      selection uses NECB 2011 area/effective-aperture criteria, ANDed, while
+      NECB 2020 4.2.2.1.(10)/(13) uses INPUT-POWER thresholds (>=150 W
+      sidelit, >=300 W primary+secondary, >=150 W toplit) gated by the space
+      type's Table 4.2.1.6 control column, with (12)/(15) exceptions — and
+      sidelighting and toplighting are INDEPENDENT requirements, not
+      conjunctive. That is why D-51 is inert on 10 of 17 archetypes. Decide:
+      implement the 2020 rule for the reference (and keep the 2011 port only
+      behind the legacy parity gate), or keep parity and document the
+      deviation. Fix the bogus `4.2.2.7.-4.2.2.10.` article citation either
+      way.
 - [ ] `openstudio-hvac` `reference_rules_{2020,2025}.json` articles
       `8.4.4.5.`/`8.4.5.5.` still say "reference_daylighting (opt-in)" —
       stale after D-51; outside the Phase 0 agent's scope.
