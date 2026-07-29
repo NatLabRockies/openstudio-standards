@@ -395,6 +395,13 @@
       "kind": "runtime",
       "articles": ["Table 8.4.4.7.-B Note (1)", "Table 8.4.5.7.-B Note (1)"],
       "summary": "The reference building's humidification is required to use the same energy source as the corresponding humidification in the proposed building, which presupposes the reference carries humidification wherever the proposed does. Previously the humidifiers were merely counted before the old systems were torn out and one warning was issued, which both misreported systems that were never replaced and let the rest be destroyed as an unintended side effect. Each thermal block's humidification is now recorded before the teardown and re-created on the serving reference air system as the same steam-humidifier type — electric resistance or gas-fired — with its capacity left to the sizing run. The humidity control is taken from the proposed building rather than invented: the zone humidistat that survives on the thermal zone, or failing that the proposed system's own scheduled minimum-humidity setpoint; where neither exists no humidifier is built, because a humidifier without a setpoint never operates and would falsely present the reference as humidified."
+    },
+    {
+      "id": "D-56",
+      "title": "Reference fan-coil systems get a real water-side economizer, and the cooling-tower setpoint reset is what makes it operate",
+      "kind": "runtime",
+      "articles": ["8.4.4.12.", "8.4.5.12.", "5.2.2.9."],
+      "summary": "The reference selection table sends the fan-coil systems to the indirect, water-side form of cooling with outdoor air rather than to the air-side economizer, and that requirement was previously only warned about, leaving the reference with no economizer at all while the quality-assurance checker flagged the same system for lacking one. A plate heat exchanger is now built between the heat-rejection loop and the chilled-water loop, sized from the loop's full design cooling load and modulating onto the chilled-water loop's own design supply temperature. Because the reference rejects heat through an evaporative cooling tower, the wet-bulb criterion is the sentence that governs and the sensible-transfer criterion is recorded as inapplicable; the tower setpoint must also be reset to track the outdoor wet-bulb plus the tower's design approach, since the builder otherwise pins the loop at its design heat-rejection temperature and no exchanger placed there could ever operate."
     }
   ]
 }

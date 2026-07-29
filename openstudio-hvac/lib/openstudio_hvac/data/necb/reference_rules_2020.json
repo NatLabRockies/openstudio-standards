@@ -599,6 +599,21 @@
     "effectiveness_article": "5.2.10.1.(4) — >= 50% ENTHALPY effectiveness at design conditions; setting sensible AND latent effectiveness to 0.50 at every rating point gives enthalpy effectiveness exactly 0.50 by identity (both components of delta-h transfer at 50%) — minimum-compliant for the reference",
     "overshoot_article": "5.2.10.1.(6) — supply-air outlet temperature control + OutdoorAirPretreat setpoint manager are the required bypass/control against setpoint overshoot"
   },
+  "water_economizer": {
+    "article": "8.4.4.12.",
+    "trigger_article": "5.2.2.9.",
+    "applies_to_reference_systems": [2, 5],
+    "text": "5.2.2.9.(1): HVAC systems that reduce mechanical cooling energy use by using outdoor air to chill cooling distribution fluid by direct evaporation, indirect evaporation, or both, shall be capable of cooling supply air so as to provide 100% of the cooling load when the outdoor air wet-bulb temperature is 7 C or lower. (2): the same, by sensible heat transfer, when the outdoor-air dry-bulb temperature is 10 C or lower.",
+    "capability_wet_bulb_c": 7.0,
+    "capability_dry_bulb_c": 10.0,
+    "heat_exchanger_model_type": "Ideal",
+    "control_type": "CoolingSetpointModulated",
+    "metering_end_use": "FreeCooling",
+    "sizing_factor": 1.0,
+    "condenser_reset_reference": "OutdoorAirWetBulb",
+    "condenser_reset_fallback_approach_k": 5.0,
+    "modeling_note": "Table -12 routes reference systems 2 and 5 to 5.2.2.9. Their Table 8.4.4.7.-B row prescribes a WATER-COOLED chiller, so the reference plant rejects heat through an evaporative cooling tower and the economizer chills the chilled water by INDIRECT EVAPORATION - sentence (1), the wet-bulb criterion, is the one that binds; sentence (2) would bind a dry-cooler arrangement the reference never builds. Built as a HeatExchangerFluidToFluid with the condenser loop as source and the chilled-water loop as load, UA and both design flows AUTOSIZED at sizing factor 1.0 so the exchanger is sized for the loop's full design cooling load (the modelled form of 'capable of 100% of the cooling load'), CoolingSetpointModulated onto a setpoint equal to the loop's own design exit temperature. The condenser setpoint is ALSO reset to follow the outdoor wet-bulb plus the tower's design approach (floored at the chilled-water setpoint, capped at the condenser design exit temperature): without that reset the tower stays pinned at 29 C, never delivers water colder than the chilled-water return, and the economizer is inert. control_type was chosen on measured evidence, not preference - see D-56."
+  },
   "humidification": {
     "article": "Table 8.4.4.7.-B Note (1)",
     "text": "Where present, humidification systems in the reference building shall use the same energy source as the corresponding humidification system in the proposed building.",
@@ -689,8 +704,8 @@
         "article": "8.4.4.12.",
         "title": "Cooling with Outside Air (economizers)",
         "status": "partial",
-        "gaps": "systems 2/5 route to the 5.2.2.9 WATER economizer (hydronic, not modeled — loud warning); DX staging clauses 5.2.2.8.(4)-(5) not enforced",
-        "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA"
+        "gaps": "DX staging clauses 5.2.2.8.(4)-(5) are not enforced. The 5.2.2.9 capability is realized as an INTEGRATED economizer against the prescribed 7 C chilled-water setpoint: measured hour by hour it carries 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower (the sentence-(1) criterion), and a partial share above that band; systems whose chilled water is air-cooled or purchased have no evaporatively-cooled fluid to economize with and are warned instead.",
+        "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. Sentence (1) (wet-bulb 7 C) binds because the reference rejects heat evaporatively; (2) is declared inapplicable rather than ignored."
       },
       {
         "article": "8.4.4.13.",

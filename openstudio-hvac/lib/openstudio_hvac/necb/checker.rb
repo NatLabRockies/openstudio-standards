@@ -48,6 +48,18 @@ module OpenStudioHVAC
 
           controller = oa_system.get.getControllerOutdoorAir
           if controller.getEconomizerControlType == 'NoEconomizer'
+            # D-56: cooling with outside air can be satisfied INDIRECTLY. Where the
+            # loop's chilled water already carries a 5.2.2.9 water-side economizer,
+            # 5.2.2.9 is the applicable article and the absence of an AIR economizer
+            # is not a finding — the old warning fired on exactly the loops the
+            # reference builder now equips.
+            if (economized = water_economizer_loops(air_loop)).any?
+              audit.info(:check_part5, 'no air economizer, but the chilled water is cooled by a 5.2.2.9 water-side ' \
+                                       'economizer — cooling with outside air is provided indirectly',
+                         target: air_loop.nameString, inputs: { plant_loops: economized },
+                         article: '5.2.2.9.', ruling: 'D-56')
+              next
+            end
             audit.warn(:check_part5,
                        'mechanically-cooled air system has NO economizer — 5.2.2.8.(1) requires the capability ' \
                        'to mix up to 100% outdoor air with differential reversion (5.2.2.8.(2))',
@@ -57,6 +69,20 @@ module OpenStudioHVAC
                        target: air_loop.nameString, article: '5.2.2.8.')
           end
         end
+      end
+
+      # Names of the chilled-water loops feeding this air loop's water cooling coils
+      # that carry a water-side economizer heat exchanger (D-56).
+      def water_economizer_loops(air_loop)
+        Coils.supply_components(air_loop).filter_map do |component|
+          next unless component.respond_to?(:to_CoilCoolingWater) && component.to_CoilCoolingWater.is_initialized
+
+          plant = component.to_CoilCoolingWater.get.plantLoop
+          next unless plant.is_initialized
+          next unless plant.get.supplyComponents(OpenStudio::Model::HeatExchangerFluidToFluid.iddObjectType).any?
+
+          plant.get.nameString
+        end.uniq
       end
 
       # 5.2.10.1: same Table 5.2.10.1.-A/-B trigger as the reference ERV rule.

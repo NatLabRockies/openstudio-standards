@@ -2054,3 +2054,157 @@ above, run in-suite). It was previously unpinned by ANY test.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
   `openstudio-hvac/test/test_necb_humidification.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-56 — 5.2.2.9 water-side economizer built for reference systems 2/5; sentence (1) binds, and the tower setpoint reset is what makes it real
+
+**What.** `apply_economizers` no longer warns and returns for reference systems 2
+and 5. It builds a `HeatExchangerFluidToFluid` between the reference's condenser
+loop (source) and its chilled-water loop (load), sized for the loop's full
+design cooling load, modulating onto the loop's own design exit temperature —
+**and resets the condenser loop setpoint**, without which the economizer cannot
+operate at all. `HeatExchangerFluidToFluid` did not previously appear anywhere
+in the gem. A `water_economizer` rule block is vendored in both vintages, and
+the QAQC checker no longer contradicts the builder.
+
+**Which sentence binds — read from the code, not chosen.** 5.2.2.9 has two
+sentences and they are **not alternatives to pick between**; they apply to
+different equipment:
+
+- **(1)** systems chilling the distribution fluid by *direct evaporation,
+  indirect evaporation, or both* → capable of 100% of the cooling load at
+  outdoor **wet-bulb ≤ 7 °C**;
+- **(2)** systems chilling it by *sensible heat transfer* → outdoor **dry-bulb
+  ≤ 10 °C**.
+
+Table 8.4.4.7.-B gives reference systems 2 and 5 a **water-cooled** water
+chiller, and the gem builds that as a `CoolingTowerSingleSpeed` — an
+evaporative device. The economizer therefore chills the chilled water by
+INDIRECT EVAPORATION and **sentence (1) is the binding one**. Sentence (2)
+would bind a dry-cooler arrangement the reference never builds; that is audited
+as inapplicable rather than silently ignored. [READ]
+`get_section('necb','5.2.2.9','2020')` and `('necb','5.2.2.9','2025')` —
+identical text in both editions.
+
+**The finding worth reporting: the tower setpoint was the real blocker.** The
+premise handed to this phase was that `plant_loops.rb` already builds everything
+the economizer needs (CHW loop 7 °C/6 K, condenser loop + tower) so only the
+heat exchanger was missing. The loops are indeed there — but
+`plant_loops.rb` pins the condenser loop with a **constant 29 °C scheduled
+setpoint**, so the tower never delivers water colder than the chilled-water
+return and **any heat exchanger added to that plant is inert**. The economizer
+therefore required a second change: the condenser setpoint now follows the
+outdoor **wet bulb** (the quantity an evaporative tower actually tracks) plus
+the **tower's own `designApproachTemperature`** read off the object, floored at
+the chilled-water design exit temperature (colder buys no free cooling for a
+loop held at 7 °C) and capped at the condenser loop's original design exit
+temperature. No number is duplicated into the ruleset that the model already
+carries.
+
+**Side effect, stated rather than discovered later.** The reset also gives the
+CHILLERS colder condenser water in mild weather, which improves their COP. It
+is a real, intended consequence of complying with 5.2.2.9 (a plant that can
+free-cool is a plant whose tower is reset), and it was measured, not assumed:
+the reset ALONE moved cooling electricity 0.37 → 0.34 GJ/wk with total
+electricity essentially flat (5.26 → 5.28 GJ/wk, the difference being tower fan
+energy that a 29 °C setpoint never spent). Where a reference System 6 group
+shares the same chilled-water plant it sees this too; that is physical — one
+plant, one economizer — and 8.4.4.12 still gives System 6 its own AIR
+economizer.
+
+### The Phase-0 SDK gate [RAN], before any repo change
+
+`scratchpad/d56_wse_gate.rb` — five configurations, each an E+ sizing run plus a
+Toronto week (1-7 May, the shoulder band where OA dry-bulb ≈ 10 °C and wet-bulb
+≈ 7 °C), all on the `FPFC MAU Chilled Water Coils with Scroll Chiller` plant
+that reference System 2 actually builds:
+
+| variant | SDK accepted | E+ | cooling elec (GJ/wk) | heat rejection | pumps | TOTAL elec | HX transfer |
+|---|---|---|---|---|---|---|---|
+| baseline (no HX, tower pinned 29 °C) | — | clean | 0.37 | 0.00 | 0.58 | **5.26** | — |
+| tower reset only, no HX | — | clean | 0.34 | 0.05 | 0.57 | 5.28 | — |
+| HX, `CoolingDifferentialOnOff`, 2 K activation ΔT | supply ✓ demand ✓ | clean | 0.32 | 0.04 | **0.79** | **5.47** | 163 MJ |
+| HX, **`CoolingSetpointModulated`** | supply ✓ demand ✓ + setpoint ✓ | clean | **0.16** | 0.02 | 0.59 | **5.09** | 1857 MJ |
+| HX, `CoolingSetpointOnOffWithComponentOverride` (WetBulbTemperature) | supply ✓ demand ✓ + setpoint ✓ | **FATAL** | — | — | — | — | — |
+
+Verbatim, the failing variant:
+
+```
+**  Fatal  ** GetFluidHeatExchangerInput: Errors found in processing HeatExchanger:FluidToFluid input.
+** Severe  ** GetFluidHeatExchangerInput: HeatExchanger:FluidToFluid="WATER-SIDE ECONOMIZER HX", invalid entry.
+```
+
+**Topology: accepted.** `chw.addSupplyBranchForComponent(hx)` and
+`cw.addDemandBranchForComponent(hx)` both return true — the exchanger is supply
+equipment on the load loop and demand equipment on the source loop. It sizes:
+UA 7302 W/K, both design flows 0.00464 m³/s, from autosize at sizing factor 1.0.
+
+**Control type chosen on the measurement, not on preference.**
+`CoolingSetpointModulated` wins outright: 11× the heat transfer of the
+differential variant and the only variant that lowers TOTAL electricity below
+the baseline. `CoolingDifferentialOnOff` *raised* total electricity (5.47 vs
+5.26) by running condenser-loop flow at any temperature difference — its
+behaviour also swings by an order of magnitude on
+`minimumTemperatureDifferencetoActivateHeatExchanger` alone (163 MJ at 2 K
+versus 677 MJ at the 0.01 K default in the same week), i.e. an arbitrary
+parameter with a dominant effect, which is a modelling liability. The modulated
+control needs no such parameter: it modulates onto the loop's own prescribed
+setpoint.
+`CoolingSetpointOnOffWithComponentOverride` is the most *literal* encoding of a
+wet-bulb criterion and looked attractive for that reason, but E+ rejects it
+unless the component-override loop supply/demand inlet nodes are also
+supplied — recorded so nobody re-litigates it from the IDD alone.
+
+### The capability, verified hour by hour [RAN]
+
+"Capable of ... 100% of the cooling load" is a capability claim, so "an HX
+exists" is not evidence. `scratchpad/d56_capability_probe.rb` +
+`d56_capability_analyse.rb` request hourly `Site Outdoor Air Wetbulb
+Temperature`, `Fluid Heat Exchanger Heat Transfer Rate` and `Chiller Evaporator
+Cooling Rate`, restricted to the **weather run period** (the shared DDY carries
+**85 design days**, so an unfiltered hourly series is 2208 steps of which only
+168 are the week — the first cut of this analysis mixed them, and every variant
+came out identical because design-day hours swamped it):
+
+| period | hours | with a CHW load | of those at OA WB ≤ 7 °C | economizer share in-band (min/mean/max) | hours at 100% (chiller OFF) |
+|---|---|---|---|---|---|
+| 1-7 May | 168 | 61 | 4 | 1.000 / 1.000 / 1.000 | **4 of 4** |
+| **1-30 April** | 720 | 113 | **65** | **1.000 / 1.000 / 1.000** | **65 of 65** |
+
+Worst in-band hour of the April month: OA WB 6.5 °C, DB 12.6 °C, load 669 W,
+economizer 669 W, **chiller 0 W**. Above the band (OA WB > 7 °C) it runs
+integrated, mean share 0.67 — which is what an integrated water-side economizer
+should do. **Sentence (1) is met in every in-band hour measured, not asserted.**
+
+The same gate runs in-suite as
+`test_energyplus_economizer_carries_the_whole_load_below_7c_wet_bulb`, which
+fails if ANY loaded hour at or below 7 °C wet-bulb is not fully carried.
+
+### The checker stops contradicting the builder
+
+`checker.rb#check_economizers` flagged every mechanically-cooled air loop whose
+OA controller was `NoEconomizer` — which is exactly the loop the reference
+builder now equips with a 5.2.2.9 economizer instead of a 5.2.2.8 one. It now
+emits an `info` citing 5.2.2.9 where the loop's chilled water carries an
+economizer heat exchanger, and the 5.2.2.8 warning otherwise. The suppression is
+SCOPED, not blanket: removing the exchanger restores the finding
+(`test_checker_still_flags_a_loop_with_no_economizer_at_all`).
+
+### 8.4.4.12 stays `partial`
+
+DX staging clauses **5.2.2.8.(4)-(5)** remain unenforced, so the coverage entry
+keeps warning and `test_necb_energy_recovery.rb:174` still passes. The `gaps`
+string now names only what is actually open, and records that the capability is
+realized as an INTEGRATED economizer against the prescribed 7 °C chilled-water
+setpoint. Loops with air-cooled or purchased cooling have no evaporatively
+cooled fluid to economize with and are warned rather than silently skipped.
+
+**Verification [RAN].** `openstudio-hvac/test/test_necb_water_economizer.rb` —
+11 runs, 62 assertions, 0 failures, 0 skips.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/necb/reference.rb`;
+  `openstudio-hvac/lib/openstudio_hvac/necb/checker.rb`;
+  `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
+  `openstudio-hvac/test/test_necb_water_economizer.rb`;
+  `openstudio-hvac/test/test_helper.rb` (`run_energyplus!` gained an optional
+  `run_period:` — shoulder weather is where this control acts).
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.

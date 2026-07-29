@@ -232,15 +232,73 @@ refutation, not just the diff.
       `test_reference_hp.rb:23`, `:27-28`; `test_necb_reference.rb:185-190`.
 
 ### Phase 6 — water-side economizer
-- [ ] The Phase-0 SDK gate ran in a scratchpad BEFORE any repo change, and a
+- [x] The Phase-0 SDK gate ran in a scratchpad BEFORE any repo change, and a
       clean E+ sizing + week run was obtained with the HX in place.
-- [ ] The QAQC checker no longer flags "NO economizer" on loops that now have
-      one (`checker.rb:41-59`).
-- [ ] 8.4.4.12 still `partial` (DX staging 5.2.2.8.(4)-(5) remains open), so
-      `test_necb_energy_recovery.rb:174` still passes.
-- [ ] Capability actually verified against the code text: 100% of the cooling
-      load at OA wet-bulb ≤ 7 °C (evaporative) or dry-bulb ≤ 10 °C (sensible)
-      — not merely "an HX exists".
+      [RAN] `scratchpad/d56_wse_gate.rb` — 5 variants, sizing + 1-7 May week
+      each. Topology accepted (`addSupplyBranchForComponent` on the CHW loop
+      and `addDemandBranchForComponent` on the condenser loop both true); sizes
+      (UA 7302 W/K, both design flows 0.00464 m³/s). Full table in D-56.
+      **`CoolingSetpointModulated` chosen on the measurement**: cooling
+      electricity 0.37 → 0.16 GJ/wk and TOTAL electricity 5.26 → 5.09, whereas
+      `CoolingDifferentialOnOff` RAISED total electricity to 5.47 on pump
+      energy and swings 163 MJ ↔ 677 MJ on the activation-ΔT parameter alone.
+      `CoolingSetpointOnOffWithComponentOverride` **E+ FATAL** without the
+      component-override nodes — recorded in D-56 so it is not re-litigated.
+- [x] The QAQC checker no longer flags "NO economizer" on loops that now have
+      one (`checker.rb`). [RAN]
+      `test_checker_no_longer_flags_a_loop_that_has_a_water_economizer`, and
+      the suppression is SCOPED not blanket —
+      `test_checker_still_flags_a_loop_with_no_economizer_at_all` removes the
+      exchanger and the 5.2.2.8 finding returns.
+- [x] 8.4.4.12 still `partial` (DX staging 5.2.2.8.(4)-(5) remains open), so
+      `test_necb_energy_recovery.rb:174` still passes. [RAN]
+      `ruby test/test_necb_energy_recovery.rb` → 10 runs, 238 assertions, 0
+      failures; plus `test_8_4_4_12_remains_partial_and_still_warns` pins the
+      status AND that the gaps string still names 5.2.2.8.(4)-(5), in both
+      vintages.
+- [x] Capability actually verified against the code text — not merely "an HX
+      exists". [READ] `get_section('necb','5.2.2.9')` in BOTH editions: the two
+      sentences are **not alternatives to choose between**, they bind different
+      equipment — (1) direct/indirect EVAPORATION → OA wet-bulb ≤ 7 °C, (2)
+      SENSIBLE transfer → OA dry-bulb ≤ 10 °C. The reference rejects heat
+      through a `CoolingTowerSingleSpeed`, so (1) governs and (2) is audited
+      inapplicable.
+      [RAN] `scratchpad/d56_capability_probe.rb` + `d56_capability_analyse.rb`,
+      hourly, restricted to the weather run period: **1-30 April — 65 of 65
+      loaded hours at OA WB ≤ 7 °C carried 100% by the economizer, chiller
+      OFF** (worst in-band hour: OA WB 6.5 °C, load 669 W, economizer 669 W,
+      chiller 0 W); 1-7 May, 4 of 4. Above the band, mean share 0.67
+      (integrated operation). Pinned in-suite by
+      `test_energyplus_economizer_carries_the_whole_load_below_7c_wet_bulb`.
+      **Analysis trap worth knowing:** the shared DDY carries **85 design
+      days**, so an unfiltered hourly series is 2208 steps of which only 168
+      are the week. The first cut of this analysis mixed them and every variant
+      came out identical; the numbers above are `EnvironmentType = 3` only.
+- [ ] **REVIEWER: the condenser setpoint reset is the load-bearing change, and
+      it was NOT in the phase brief.** The premise was that `plant_loops.rb`
+      already builds everything but the HX. It builds the loops, but pins the
+      condenser loop at a **constant 29 °C**, so any exchanger added there is
+      INERT. The reset (follow outdoor wet-bulb + the tower's own
+      `designApproachTemperature`, floored at the CHW design exit temperature,
+      capped at the condenser design exit temperature) is therefore part of
+      5.2.2.9 compliance, not a bonus. Confirm that reading.
+- [ ] **Side effect to sign off:** the reset also hands the CHILLERS colder
+      condenser water in mild weather. Measured in isolation (reset only, no
+      HX): cooling electricity 0.37 → 0.34 GJ/wk, total electricity 5.26 →
+      5.28 (tower fan energy a 29 °C setpoint never spent). A reference
+      System 6 group sharing the same chilled-water plant sees this too —
+      physical (one plant, one economizer), and System 6 still gets its own
+      5.2.2.8 air economizer.
+- [ ] **Energy-affecting, unswept — this is the phase most likely to move the
+      fleet.** It fires on every reference System 2 / System 5 group, i.e. any
+      archetype with a data centre, hospital, hotel/motel or other Table -A
+      fan-coil row. Expect real movement in the LENIENT direction (reference
+      cooling energy falls). Attribute per building before commit.
+- [ ] Scope note to confirm: the economizer is placed on the reference's
+      chilled-water plant, which `plant_loops.rb` SHARES across groups
+      (`reuse: true`). A second CHW loop that is air-cooled or purchased gets
+      a warning instead of an exchanger (no evaporatively cooled fluid to
+      economize with) rather than being silently skipped.
 
 ### Final, once all phases land
 - [ ] ONE `SWEEP_MODE=full` run; the resulting table replaces D-46's in
@@ -287,6 +345,22 @@ refutation, not just the diff.
       spuriously while phases land concurrently (one agent cites an id another
       has not yet registered). Re-run it after ALL phases, not per-phase.
       Confirmed green after phases 0/1/2: 12 runs, 861 assertions.
+      **Still open as of the phase-6 landing (2026-07-29), and both failures
+      belong to concurrent `openstudio-lighting` work, not to phases 3/4/6:**
+      [RAN] `ruby test/test_decisions_registry.rb` → 12 runs, 962 assertions,
+      **2 failures** — (a) `code cites unregistered decision id(s): D-57`
+      (`openstudio-lighting/lib/openstudio_lighting/necb/daylight_control_requirement.rb`,
+      a file that does not exist at HEAD), and (b)
+      `apply_lights.rb:331 — ruling: literal must be a single-quoted string on
+      ONE line` (a dynamic `ruling: article['ruling']`).
+      [RAN] `ruby test/test_compliance.rb` → 10 runs, 168 assertions,
+      **1 failure**, also D-57: `audited ruling D-57 resolves in the registry`.
+      Phase 3/4/6's own side was verified scoped: D-54/D-55/D-56 all registered
+      `kind: runtime`, all present as `## D-XX` headings, all cited, zero
+      malformed or inputs-nested `ruling:` literals in
+      `reference.rb` / `checker.rb` / `classify.rb`, and no unregistered id
+      cited from those files. **Re-run both once the lighting agent registers
+      D-57 and fixes its literal.**
 - [ ] The three lighting warning assertions were previously satisfied by the
       MANIFEST coverage warning on the same article string, so they passed
       even with the conditional broken. Now scoped to

@@ -29,9 +29,11 @@ module FixtureHelper
   end
 
   # Run E+ via the CLI. sizing_only: design-day sizing run; otherwise a short
-  # weather-period run (first week of January) to exercise runtime controls.
+  # weather-period run (first week of January by default) to exercise runtime
+  # controls. run_period: [begin month, begin day, end month, end day] overrides it —
+  # some controls only act in shoulder weather (D-56's water-side economizer).
   # @return [String] the run directory
-  def run_energyplus!(model, dir, sizing_only: true)
+  def run_energyplus!(model, dir, sizing_only: true, run_period: [1, 1, 1, 7])
     FileUtils.mkdir_p(dir)
     sim = model.getSimulationControl
     sim.setDoZoneSizingCalculation(true)
@@ -40,11 +42,11 @@ module FixtureHelper
     sim.setRunSimulationforSizingPeriods(true)
     sim.setRunSimulationforWeatherFileRunPeriods(!sizing_only)
     unless sizing_only
-      run_period = model.getRunPeriod
-      run_period.setBeginMonth(1)
-      run_period.setBeginDayOfMonth(1)
-      run_period.setEndMonth(1)
-      run_period.setEndDayOfMonth(7)
+      period = model.getRunPeriod
+      period.setBeginMonth(run_period[0])
+      period.setBeginDayOfMonth(run_period[1])
+      period.setEndMonth(run_period[2])
+      period.setEndDayOfMonth(run_period[3])
     end
     model.save("#{dir}/in.osm", true)
     osw = OpenStudio::WorkflowJSON.new

@@ -390,7 +390,7 @@ module OpenStudioHVAC
         apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
         apply_zone_fan_rules(zones, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
-        apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
+        apply_economizers(reference, result.air_loops, assignment.reference_system, vintage, ruleset, audit)
         apply_dcv(result.air_loops, zones, proposed_dcv, vintage, audit)
         apply_operating_schedules(result.air_loops, proposed_availability, audit)
         audit_terminal_secondary_split(zones, assignment.reference_system, vintage, audit)
@@ -700,12 +700,11 @@ module OpenStudioHVAC
     # 8.4.4.12 (2025: 8.4.5.12): reference cooling-with-outside-air. Table -12
     # routes systems 1/3/4/6 and all heat-pump systems to 5.2.2.8 (air
     # economizer: up to 100% outdoor air, differential reversion) and systems
-    # 2/5 to 5.2.2.9 (WATER-side economizer — hydronic, not modeled: loud gap).
-    def self.apply_economizers(air_loops, reference_system, vintage, audit)
+    # 2/5 to 5.2.2.9 (WATER-side economizer, built since D-56).
+    def self.apply_economizers(model, air_loops, reference_system, vintage, ruleset, audit)
       prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       if [2, 5].include?(reference_system)
-        audit.warn(:build, 'system 2/5 reference cooling-with-outside-air is the 5.2.2.9 WATER economizer — ' \
-                           'hydronic economizers are not modeled (gap)', article: "#{prefix}.12.")
+        apply_water_economizer(model, reference_system, vintage, ruleset, audit)
         return
       end
       # D-20: NO economizer on System 1 (100%-outdoor-air makeup air). An air
@@ -737,6 +736,149 @@ module OpenStudioHVAC
                        target: air_loop.nameString,
                        article: "#{prefix}.12. (Table -12 -> 5.2.2.8)", ruling: 'D-20')
       end
+    end
+
+    # ============ 5.2.2.9 water-side economizer, reference systems 2/5 (D-56) ============
+    #
+    # Table -12 sends reference systems 2 and 5 — the fan-coil systems, whose Table
+    # 8.4.4.7.-B row prescribes a WATER-COOLED water chiller — to 5.2.2.9 rather than
+    # to the air economizer of 5.2.2.8. 5.2.2.9 has two sentences, and WHICH ONE binds
+    # follows from the heat-rejection equipment:
+    #
+    #   (1) chilling the distribution fluid by direct or indirect EVAPORATION ->
+    #       capable of 100% of the cooling load at outdoor WET-BULB <= 7 C;
+    #   (2) chilling it by SENSIBLE heat transfer -> at outdoor DRY-BULB <= 10 C.
+    #
+    # The reference plant rejects heat through a CoolingTowerSingleSpeed, which is an
+    # evaporative device, so the economizer chills the chilled water by INDIRECT
+    # evaporation and sentence (1) governs. Sentence (2) would bind a dry-cooler
+    # arrangement, which the reference never builds — declared, not silently ignored.
+    #
+    # Realized as a plate heat exchanger between the condenser loop (source) and the
+    # chilled-water loop (load), plus the tower setpoint reset WITHOUT WHICH the
+    # economizer is inert: the builder pins the condenser loop at its 29 C design exit
+    # temperature, and a tower held at 29 C can never deliver water colder than the
+    # chilled-water return.
+    def self.apply_water_economizer(model, reference_system, vintage, ruleset, audit)
+      prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+      article = "#{prefix}.12. (Table -12 -> 5.2.2.9)"
+      spec = ruleset.fetch('water_economizer')
+      loops = chilled_water_loops(model)
+      if loops.empty?
+        audit.warn(:build, "reference system #{reference_system} routes to the 5.2.2.9 water economizer but the " \
+                           'reference has NO chilled-water loop with a chiller — no economizer built',
+                   article: article, ruling: 'D-56')
+        return
+      end
+
+      loops.each { |chw| build_water_economizer(chw, reference_system, spec, article, audit) }
+    end
+
+    def self.chilled_water_loops(model)
+      model.getPlantLoops.select do |plant_loop|
+        plant_loop.supplyComponents(OpenStudio::Model::ChillerElectricEIR.iddObjectType).any?
+      end
+    end
+
+    # The condenser loop is the one the chilled-water loop's water-cooled chillers
+    # reject into (their secondary plant loop).
+    def self.condenser_loop_for(chw)
+      chw.supplyComponents(OpenStudio::Model::ChillerElectricEIR.iddObjectType)
+         .filter_map { |c| c.to_ChillerElectricEIR.get.secondaryPlantLoop }
+         .find(&:is_initialized)&.get
+    end
+
+    def self.build_water_economizer(chw, reference_system, spec, article, audit)
+      if chw.supplyComponents(OpenStudio::Model::HeatExchangerFluidToFluid.iddObjectType).any?
+        audit.info(:build, 'water-side economizer already present on this chilled-water loop — plant shared with ' \
+                           'another reference system group', target: chw.nameString,
+                   article: article, ruling: 'D-56')
+        return
+      end
+      cw = condenser_loop_for(chw)
+      if cw.nil?
+        audit.warn(:build, "reference system #{reference_system} routes to the 5.2.2.9 water economizer, but this " \
+                           'chilled-water loop rejects heat with NO condenser loop (air-cooled or purchased ' \
+                           'cooling) — there is no evaporatively-cooled fluid to economize with, so none is built',
+                   target: chw.nameString, article: article, ruling: 'D-56')
+        return
+      end
+
+      hx = OpenStudio::Model::HeatExchangerFluidToFluid.new(chw.model)
+      hx.setName('Water-Side Economizer HX')
+      hx.setHeatExchangeModelType(spec['heat_exchanger_model_type'])
+      hx.setHeatTransferMeteringEndUseType(spec['metering_end_use'])
+      # Capability, not a guess: sizing factor 1.0 on autosized UA and both design
+      # flows sizes the exchanger to the loop's FULL design cooling load, which is
+      # what "capable of ... 100% of the cooling load" asks for. Never hard-sized
+      # (L-23) — the reference sizing run and the D-43 capacity iteration still govern.
+      hx.autosizeHeatExchangerUFactorTimesAreaValue
+      hx.autosizeLoopSupplySideDesignFlowRate
+      hx.autosizeLoopDemandSideDesignFlowRate
+      hx.setSizingFactor(spec['sizing_factor'])
+      hx.setControlType(spec['control_type'])
+      unless chw.addSupplyBranchForComponent(hx) && cw.addDemandBranchForComponent(hx)
+        hx.remove
+        audit.warn(:build, 'the SDK REFUSED the water-side economizer topology on this plant — no economizer built',
+                   target: chw.nameString, article: article, ruling: 'D-56')
+        return
+      end
+
+      setpoint_c = chw.sizingPlant.designLoopExitTemperature
+      OpenStudio::Model::SetpointManagerScheduled.new(
+        chw.model, Schedules.constant_ruleset(chw.model, 'WSE HX Setpoint', setpoint_c)
+      ).addToNode(hx.supplyOutletModelObject.get.to_Node.get)
+
+      reset = reset_condenser_setpoint(cw, spec, audit, setpoint_c)
+      audit.decision(:build, 'water-side economizer built (5.2.2.9: indirect evaporation, capable of 100% of the ' \
+                             'cooling load at outdoor wet-bulb 7 C or lower)',
+                     target: chw.nameString,
+                     inputs: { reference_system: reference_system, source_loop: cw.nameString,
+                               control: spec['control_type'], setpoint_c: setpoint_c,
+                               sizing_factor: spec['sizing_factor'],
+                               capability_wet_bulb_c: spec['capability_wet_bulb_c'],
+                               condenser_setpoint_reset: reset },
+                     value: 'HeatExchangerFluidToFluid between the condenser and chilled-water loops, sized for ' \
+                            'the full design cooling load',
+                     article: article, ruling: 'D-56')
+      audit.info(:build, 'the 5.2.2.9.(2) sensible-transfer criterion (outdoor dry-bulb 10 C or lower) does not ' \
+                         'apply: the reference rejects heat through an evaporative cooling tower, so the ' \
+                         'economizer chills the distribution fluid by indirect evaporation and sentence (1) binds',
+                 target: chw.nameString,
+                 inputs: { capability_dry_bulb_c: spec['capability_dry_bulb_c'] },
+                 article: article, ruling: 'D-56')
+    end
+
+    # Without this the economizer cannot operate at all: the tower is pinned at the
+    # condenser loop's 29 C design exit temperature by plant_loops.rb, so the source
+    # fluid is never colder than the chilled-water return. Reset it to follow the
+    # outdoor WET BULB (the quantity an evaporative tower actually tracks) plus the
+    # tower's own design approach, floored at the chilled-water setpoint — colder than
+    # that buys no free cooling for a loop held at 7 C — and capped at the original
+    # design exit temperature so nothing gets warmer than the builder intended.
+    def self.reset_condenser_setpoint(cw, spec, audit, minimum)
+      maximum = cw.sizingPlant.designLoopExitTemperature
+      # designApproachTemperature is an OptionalDouble — unwrap, never pass it through.
+      approach = cw.supplyComponents(OpenStudio::Model::CoolingTowerSingleSpeed.iddObjectType)
+                   .filter_map { |t| optional_flow(t.to_CoolingTowerSingleSpeed.get.designApproachTemperature) }
+                   .first || spec['condenser_reset_fallback_approach_k']
+      cw.supplyOutletNode.setpointManagers.each(&:remove)
+      manager = OpenStudio::Model::SetpointManagerFollowOutdoorAirTemperature.new(cw.model)
+      manager.setName("#{cw.nameString} Economizer Reset")
+      manager.setReferenceTemperatureType(spec['condenser_reset_reference'])
+      manager.setOffsetTemperatureDifference(approach)
+      manager.setMinimumSetpointTemperature(minimum)
+      manager.setMaximumSetpointTemperature(maximum)
+      manager.addToNode(cw.supplyOutletNode)
+      reset = { reference: spec['condenser_reset_reference'], approach_k: approach,
+                minimum_c: minimum, maximum_c: maximum }
+      audit.decision(:build, 'condenser loop setpoint reset to follow the outdoor wet-bulb so the tower can make ' \
+                             'the cold water the economizer needs',
+                     target: cw.nameString, inputs: reset,
+                     value: "#{spec['condenser_reset_reference']} + #{approach} K approach, " \
+                            "clamped to #{minimum}-#{maximum} C",
+                     article: '5.2.2.9.', ruling: 'D-56')
+      reset
     end
 
     # ==================== Table 8.4.4.7.-B note (1): humidification (D-55) ====================

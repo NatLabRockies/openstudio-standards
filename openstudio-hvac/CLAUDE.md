@@ -71,8 +71,13 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   `base_system.rb` is the shared scaffold). Output is topology-only; the NECB
   efficiency pass sets performance values.
 - `necb/reference.rb` — Table 8.4.4.7.-A system selection + reference build +
-  8.4.4.12 economizers (DifferentialEnthalpy on sys1/3/4/6+HP; sys2/5 water
-  economizer = warning only). The 5.2.10.1 ERV trigger is the NECB 2020
+  8.4.4.12 economizers (DifferentialEnthalpy on sys1/3/4/6+HP; sys2/5 get the
+  5.2.2.9 WATER-side economizer since D-56 — `HeatExchangerFluidToFluid`
+  condenser->CHW, `CoolingSetpointModulated`, UA + both flows autosized at
+  sizing factor 1.0. **The tower setpoint reset is not optional**:
+  `plant_loops.rb` pins the condenser loop at a constant 29 degC, so any
+  exchanger added there is INERT until the setpoint follows the outdoor wet-bulb
+  plus the tower's own `designApproachTemperature`). The 5.2.10.1 ERV trigger is the NECB 2020
   Table 5.2.10.1.-A/-B airflow thresholds (HDD row x %OA band x
   continuous/non-continuous, >=8000 h/yr from the loop availability
   schedule) — `NECB.apply_energy_recovery(model, vintage:, hdd:)`, a
