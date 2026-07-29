@@ -34,7 +34,7 @@ item is a check the implementer cannot self-certify; tick with evidence
 | 3 | DCV copy 8.4.4.15.(2) (D-54) | **LANDED, unreviewed** | `843e72e9c` |
 | 4 | Humidification rebuild (D-55) | **LANDED, unreviewed** | `843e72e9c` |
 | 6 | Water-side economizer 5.2.2.9 (D-56) | **LANDED, unreviewed** | `edb793c57` |
-| 7 | Daylighting per NECB 2020 4.2.2.1.(10)/(13) (D-57) | **IN FLIGHT at end of day** — verify it landed and is green before reviewing | TBD |
+| 7 | Daylighting per NECB 2020 4.2.2.1.(10)/(13) (D-57) | **LANDED, unreviewed** | `29efc3e3e` |
 | **5** | **HP capacity (2)(b) + (2)(g) real annual-energy election** | **NOT IMPLEMENTED — NOT STARTED** | — |
 
 **Phase 5 was never dispatched.** Its checklist section below is a plan, not a
@@ -43,19 +43,15 @@ proposed annual run ahead of the reference build) and should be scoped fresh.
 
 ### Fable's own merge debt, carried into tomorrow
 
-- [ ] **Register D-57.** Phase 7 was barred from `openstudio-necb/**` to avoid a
-      concurrent-write race, so it wrote its decision entry to
-      `scratchpad/d57_for_merge.md` and left `ruling: 'D-57'` cited from
-      `openstudio-lighting`. Merge it into `necb_decisions.md` +
-      `decisions.json`, then re-run `test_decisions_registry.rb` and
-      `test_compliance.rb` — BOTH are currently RED on the unregistered id and
-      that is expected, not a defect.
-- [ ] **Fix a malformed `ruling:` literal** the Phase 6 agent spotted in the
-      lighting work: a DYNAMIC `ruling: article['ruling']` (reported at
-      `apply_lights.rb:331`). The D-44 convention requires a single-quoted
-      literal on ONE line so the static drift grep can see it; the registry
-      test enforces this. Confirm the exact location after Phase 7 lands — the
-      file may have moved.
+- [x] ~~Register D-57~~ **DONE 2026-07-29** (`29efc3e3e`): merged into
+      `necb_decisions.md` + `decisions.json`, L-26 replaced with the
+      deliberate-divergence row, Phase 7's reviewer items folded in.
+      `test_decisions_registry.rb` 12 runs/1045 assertions and
+      `test_compliance.rb` 10 runs/173 assertions both GREEN — they were red on
+      the unregistered id by design, not by defect.
+- [x] ~~Fix a malformed `ruling:` literal~~ **DONE by the Phase 7 implementer**
+      — the ternaries and the `ruling: article['ruling']` passthrough are gone;
+      the registry's literal lint passes, which is the authoritative check.
 - [ ] **Candidate hbix issue, demonstrable this time.** `get_table('necb',
       '4.2.1.6')` returns the right 12 headers (including the two
       daylight-responsive-control columns) and 103 rows, but the extraction is
