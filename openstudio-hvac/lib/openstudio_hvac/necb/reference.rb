@@ -317,6 +317,19 @@ module OpenStudioHVAC
       reference.getAirLoopHVACs.each do |loop_|
         loop_.thermalZones.each { |z| proposed_availability[z.nameString] = loop_.availabilitySchedule }
       end
+      # 8.4.4.15.(2) (D-54): the proposed's demand-control-ventilation strategy must be
+      # reproduced in the reference, but the loops that carry it are about to be torn
+      # down. Index it per zone off the characterization, which ran while the clone
+      # still held the proposed HVAC.
+      proposed_dcv = {}
+      facts.fetch(:zone_groups).each do |group|
+        next if group[:air_loop].nil?
+
+        group[:zones].each do |zone_name|
+          proposed_dcv[zone_name] = { dcv: group[:dcv], method: group[:system_outdoor_air_method],
+                                      air_loop: group[:air_loop] }
+        end
+      end
       # T7 (8.4.4.15.(1)): OA identity rests on cloned DesignSpecification:OutdoorAir;
       # a hard-set proposed minimum-OA controller value would silently diverge.
       reference.getControllerOutdoorAirs.each do |c|
@@ -325,13 +338,10 @@ module OpenStudioHVAC
         audit.warn(:build, "proposed OA controller '#{c.nameString}' carries a HARD-SET minimum OA "                            "(#{(c.minimumOutdoorAirFlowRate.get * 1000).round(0)} L/s) — the rebuilt reference "                            'autosizes OA from the space DSOA; verify 8.4.4.15.(1) identity',
                    article: '8.4.4.15.(1)', ruling: 'D-22')
       end
-      # T8 (Table 8.4.4.7.-B note (1)): humidifiers on replaced loops vanish with
-      # the loop; the reference would silently lose humidification.
-      humidifiers = reference.getHumidifierSteamElectrics.size + reference.getHumidifierSteamGass.size
-      if humidifiers.positive?
-        audit.warn(:build, "proposed model has #{humidifiers} humidifier(s) — reference humidification with the "                            'same energy source is NOT rebuilt (Table 8.4.4.7.-B note (1)) — modeller attention',
-                   article: '8.4.4.7.', ruling: 'D-22')
-      end
+      # Table 8.4.4.7.-B note (1) (D-55): record every proposed thermal block's
+      # humidification and its energy source BEFORE the teardown destroys the loops
+      # that carry it — the rebuild happens once the reference loops exist.
+      proposed_humidification = capture_humidification(reference, audit)
       # D-28 (LargeOffice end-use isolation): Note (3) to Table 8.4.4.7.-B
       # scopes a MULTIZONE reference system to the thermal blocks of ALL
       # storeys — one system at <=4 above-ground storeys, per-facade splits
@@ -381,10 +391,12 @@ module OpenStudioHVAC
         apply_zone_fan_rules(zones, assignment.reference_system, ruleset, audit)
         apply_heat_pump_limits(result.air_loops, ruleset, audit) if assignment.reference_system == 'hp'
         apply_economizers(result.air_loops, assignment.reference_system, vintage, audit)
+        apply_dcv(result.air_loops, zones, proposed_dcv, vintage, audit)
         apply_operating_schedules(result.air_loops, proposed_availability, audit)
         audit_terminal_secondary_split(zones, assignment.reference_system, vintage, audit)
       end
 
+      rebuild_humidification(reference, proposed_humidification, ruleset, vintage, audit)
       purge_orphaned_ems(reference, audit)
       apply_oversizing_caps(model, reference, ruleset, audit)
       Efficiency.apply(reference, vintage: vintage, audit: audit)
@@ -725,6 +737,275 @@ module OpenStudioHVAC
                        target: air_loop.nameString,
                        article: "#{prefix}.12. (Table -12 -> 5.2.2.8)", ruling: 'D-20')
       end
+    end
+
+    # ==================== Table 8.4.4.7.-B note (1): humidification (D-55) ====================
+    #
+    # "Where present, humidification systems in the reference building shall use the
+    # same energy source as the corresponding humidification system in the proposed
+    # building." Humidification was previously COUNTED before the teardown and merely
+    # warned about — which warned even about humidifiers that go on to survive
+    # untouched on :copy_proposed loops, and let the ones on replaced loops be
+    # destroyed as a side effect of `air_loop.remove` rather than deliberately.
+    #
+    # Now: capture per thermal block before the teardown, rebuild on the serving
+    # reference loop afterwards, on the same energy source, WITH a control that
+    # actually operates it. An uncontrolled humidifier is silently inert in
+    # EnergyPlus, so a rebuild without a working setpoint would be worse than the
+    # warning it replaces.
+
+    # HumidifierSteamGas is Humidifier:Steam:Gas, which EnergyPlus burns as natural
+    # gas (the object carries no fuel-type field); HumidifierSteamElectric is
+    # resistance steam. Those are the only two humidifier classes the SDK offers on
+    # an air loop, so the energy source is always determinable for an attributable
+    # humidifier — the undeterminable case is one we cannot attribute to a block.
+    def self.humidifier_kind(component)
+      return :gas if component.respond_to?(:to_HumidifierSteamGas) && component.to_HumidifierSteamGas.is_initialized
+      return :electric if component.respond_to?(:to_HumidifierSteamElectric) && component.to_HumidifierSteamElectric.is_initialized
+
+      nil
+    end
+
+    def self.air_loop_humidifier(air_loop)
+      Coils.supply_components(air_loop).find { |component| humidifier_kind(component) }
+    end
+
+    # Record, per zone, the humidification of the proposed loop serving it, plus the
+    # material needed to rebuild a working control: the proposed's own scheduled
+    # minimum-humidity setpoint, if it used one. (A ZoneControlHumidistat lives on the
+    # THERMAL ZONE, which the teardown does not touch, so it needs no capture.)
+    def self.capture_humidification(reference, audit)
+      captured = {}
+      attributed = []
+      reference.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
+        component = air_loop_humidifier(air_loop)
+        next if component.nil?
+
+        attributed << component.handle.to_s
+        record = { kind: humidifier_kind(component), air_loop: air_loop.nameString,
+                   name: component.nameString,
+                   scheduled_setpoint: scheduled_humidity_setpoint(air_loop) }
+        air_loop.thermalZones.each { |zone| captured[zone.nameString] = record }
+        audit.info(:build, 'proposed humidification recorded for the reference rebuild',
+                   target: air_loop.nameString,
+                   inputs: { energy_source: humidifier_energy_source(record[:kind]),
+                             zones: air_loop.thermalZones.size,
+                             scheduled_setpoint: !record[:scheduled_setpoint].nil? },
+                   value: component.nameString,
+                   article: 'Table 8.4.4.7.-B Note (1)', ruling: 'D-55')
+      end
+
+      orphans = (reference.getHumidifierSteamElectrics + reference.getHumidifierSteamGass)
+                .reject { |h| attributed.include?(h.handle.to_s) }
+      unless orphans.empty?
+        audit.warn(:build, "#{orphans.size} proposed humidifier(s) sit on NO air loop serving a thermal block " \
+                           "(#{orphans.map(&:nameString).sort.join(', ')}) — the reference humidification they " \
+                           'correspond to CANNOT be determined and is not rebuilt',
+                   article: 'Table 8.4.4.7.-B Note (1)', ruling: 'D-55')
+      end
+      captured
+    end
+
+    def self.humidifier_energy_source(kind)
+      kind == :gas ? 'NaturalGas' : 'Electricity'
+    end
+
+    # A scheduled minimum-humidity-ratio setpoint on the proposed loop is the only
+    # humidity control that does NOT survive the teardown (it lives on a loop node);
+    # keep the SCHEDULE so the rebuilt control uses the proposed's own setpoint.
+    def self.scheduled_humidity_setpoint(air_loop)
+      manager = air_loop.model.getSetpointManagerScheduleds.find do |spm|
+        spm.controlVariable == 'MinimumHumidityRatio' &&
+          spm.setpointNode.is_initialized && spm.setpointNode.get.airLoopHVAC.is_initialized &&
+          spm.setpointNode.get.airLoopHVAC.get.handle == air_loop.handle
+      end
+      manager&.schedule
+    end
+
+    # Rebuild humidification on the reference loops, after they exist.
+    def self.rebuild_humidification(reference, captured, ruleset, vintage, audit)
+      return if captured.empty?
+
+      spec = ruleset.fetch('humidification')
+      article = "#{vintage.to_s == '2025' ? 'Table 8.4.5.7.-B' : 'Table 8.4.4.7.-B'} Note (1)"
+      served = []
+      reference.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
+        records = air_loop.thermalZones.filter_map { |zone| captured[zone.nameString] }
+        next if records.empty?
+
+        served |= records.map { |r| r[:air_loop] }
+        if air_loop_humidifier(air_loop)
+          audit.info(:build, 'proposed humidification retained on this reference loop — the loop was not replaced',
+                     target: air_loop.nameString, article: article, ruling: 'D-55')
+          next
+        end
+        build_reference_humidifier(air_loop, records, spec, article, audit)
+      end
+
+      missed = captured.values.map { |r| r[:air_loop] }.uniq - served
+      return if missed.empty?
+
+      audit.warn(:build, "the proposed humidification on #{missed.sort.join(', ')} has NO reference loop to carry " \
+                         'it — the thermal blocks it served are unconditioned or zonally served in the reference, ' \
+                         'so it is not rebuilt',
+                 article: article, ruling: 'D-55')
+    end
+
+    def self.build_reference_humidifier(air_loop, records, spec, article, audit)
+      kind = elect_humidifier_kind(air_loop, records, article, audit)
+      source = humidifier_energy_source(kind)
+      humidifier = if kind == :gas
+                     OpenStudio::Model::HumidifierSteamGas.new(air_loop.model)
+                   else
+                     OpenStudio::Model::HumidifierSteamElectric.new(air_loop.model)
+                   end
+      humidifier.setName("#{air_loop.nameString} #{source} Steam Humidifier")
+      # Never hard-size reference equipment (L-23): capacity follows the sizing run.
+      humidifier.autosizeRatedCapacity if spec['autosize']
+      humidifier.autosizeRatedPower if spec['autosize'] && humidifier.respond_to?(:autosizeRatedPower)
+      unless humidifier.addToNode(air_loop.supplyOutletNode)
+        humidifier.remove
+        audit.warn(:build, 'the SDK REFUSED the reference humidifier on this supply path — humidification is NOT ' \
+                           'rebuilt on this loop', target: air_loop.nameString, article: article, ruling: 'D-55')
+        return
+      end
+
+      control = attach_humidity_control(air_loop, humidifier, records, spec)
+      if control.nil?
+        humidifier.remove
+        audit.warn(:build, 'the proposed humidification on this thermal block has NO determinable humidity ' \
+                           'control (no zone humidistat survives and the proposed used no scheduled minimum-humidity ' \
+                           'setpoint) — an uncontrolled humidifier is INERT, so none is rebuilt',
+                   target: air_loop.nameString, article: article, ruling: 'D-55')
+        return
+      end
+
+      audit.decision(:build, 'reference humidification rebuilt on the proposed energy source',
+                     target: air_loop.nameString,
+                     inputs: { energy_source: source, proposed_systems: records.map { |r| r[:air_loop] }.uniq,
+                               control: control, capacity: 'autosized' },
+                     value: humidifier.nameString, article: article, ruling: 'D-55')
+    end
+
+    # Note (1) binds the SOURCE; where a reference system merges blocks whose proposed
+    # humidifiers disagree, the majority source is taken and the divergence is shouted.
+    def self.elect_humidifier_kind(air_loop, records, article, audit)
+      votes = records.group_by { |r| r[:kind] }.transform_values(&:size)
+      elected, = votes.max_by { |kind, count| [count, kind == :gas ? 1 : 0] }
+      return elected if votes.size == 1
+
+      audit.warn(:build, 'the proposed thermal blocks merged onto this reference system used DIFFERENT ' \
+                         "humidification energy sources (#{votes.keys.map { |k| humidifier_energy_source(k) }.sort.join(', ')}) " \
+                         "— note (1) is satisfied for the majority source (#{humidifier_energy_source(elected)}) only",
+                 target: air_loop.nameString, article: article, ruling: 'D-55')
+      elected
+    end
+
+    # The control has to come from the PROPOSED (8.4.3.2 identity), not be invented:
+    # either a zone humidistat that survived the teardown on the zone, or the
+    # proposed loop's own scheduled minimum-humidity setpoint.
+    def self.attach_humidity_control(air_loop, humidifier, records, spec)
+      node = humidifier.outletModelObject.get.to_Node.get
+      zone = air_loop.thermalZones.sort_by(&:nameString).find { |z| z.zoneControlHumidistat.is_initialized }
+      if zone
+        manager = OpenStudio::Model::SetpointManagerSingleZoneHumidityMinimum.new(air_loop.model)
+        manager.setName("#{air_loop.nameString} Min Humidity Setpoint Manager")
+        manager.setControlZone(zone)
+        manager.addToNode(node)
+        return "#{spec['control']} on #{zone.nameString}'s humidistat"
+      end
+
+      schedule = records.filter_map { |r| r[:scheduled_setpoint] }.first
+      return nil if schedule.nil?
+
+      manager = OpenStudio::Model::SetpointManagerScheduled.new(air_loop.model, schedule)
+      manager.setName("#{air_loop.nameString} Min Humidity Setpoint Manager")
+      manager.setControlVariable('MinimumHumidityRatio')
+      manager.addToNode(node)
+      "#{spec['fallback_control']} on the proposed's schedule '#{schedule.nameString}'"
+    end
+
+    # 8.4.4.15.(2) (2025: 8.4.5.15.(2)), D-54 — "where demand control ventilation
+    # strategies required by Article 5.2.3.4. are implemented in the proposed
+    # building, the reference building shall be modeled with those same
+    # strategies". The reference OA controller is rebuilt from scratch
+    # (build_oa_system) with the gem's ZoneSum convention and DCV off, so the
+    # proposed's strategy has to be copied back onto it.
+    #
+    # The strategy is the DCV FLAG plus, where it is itself a demand-control
+    # method, the system outdoor-air method: CO2-based DCV rides
+    # IndoorAirQualityProcedure and occupancy-proportional DCV rides the
+    # ProportionalControl* methods, so copying only the flag would silently
+    # substitute occupancy-based control for the proposed's strategy. The
+    # PEAK-rate methods (ZoneSum, Standard 62.1 Ventilation Rate Procedure) are
+    # NOT copied: those determine the peak ventilation rate, which is sentence
+    # (1)'s subject, and the reference realizes (1) through the cloned
+    # DesignSpecification:OutdoorAir under ZoneSum.
+    DCV_METHODS = %w[IndoorAirQualityProcedure IndoorAirQualityProcedureGenericContaminant
+                     IndoorAirQualityProcedureCombined ProportionalControlBasedOnOccupancySchedule
+                     ProportionalControlBasedOnDesignOccupancy ProportionalControlBasedOnDesignOARate].freeze
+
+    def self.apply_dcv(air_loops, zones, proposed_dcv, vintage, audit)
+      prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
+      article = "#{prefix}.15.(2)"
+      sources = zones.map(&:nameString).filter_map { |name| proposed_dcv[name] }
+      enabled = sources.select { |s| s[:dcv] }
+
+      Array(air_loops).each do |air_loop|
+        oa_system = air_loop.airLoopHVACOutdoorAirSystem
+        next if oa_system.empty?
+
+        mech = oa_system.get.getControllerOutdoorAir.controllerMechanicalVentilation
+        if enabled.empty?
+          audit.info(:rules, 'no demand-controlled ventilation on the proposed systems serving these thermal ' \
+                             'blocks — none modeled in the reference',
+                     target: air_loop.nameString,
+                     inputs: { proposed_loops: sources.map { |s| s[:air_loop] }.uniq },
+                     article: article, ruling: 'D-54')
+          next
+        end
+
+        mech.setDemandControlledVentilation(true)
+        methods = enabled.filter_map { |s| s[:method] }.uniq
+        copied = methods & DCV_METHODS
+        mech.setSystemOutdoorAirMethod(copied.first) if copied.size == 1
+        audit.decision(:rules, 'proposed demand-controlled ventilation strategy copied to the reference system',
+                       target: air_loop.nameString,
+                       inputs: { proposed_loops: enabled.map { |s| s[:air_loop] }.uniq,
+                                 proposed_system_outdoor_air_method: methods,
+                                 blocks_with_dcv: "#{enabled.size} of #{sources.size}" },
+                       value: "demand-controlled ventilation on, system outdoor air method " \
+                              "#{mech.systemOutdoorAirMethod}",
+                       article: article, ruling: 'D-54')
+        audit_dcv_caveats(air_loop, mech, sources, enabled, copied, article, audit)
+      end
+    end
+
+    # Everything about the copy that a reader must not have to infer: a partly-DCV
+    # merged system, an ambiguous set of demand-control methods, and a CO2-based
+    # strategy whose contaminant balance did not survive into the reference.
+    def self.audit_dcv_caveats(air_loop, mech, sources, enabled, copied, article, audit)
+      if enabled.size < sources.size
+        audit.warn(:rules, "only #{enabled.size} of #{sources.size} proposed thermal blocks served by this " \
+                           'reference system carry demand-controlled ventilation — the reference system is a ' \
+                           'single controller, so the strategy is applied to ALL of its blocks',
+                   target: air_loop.nameString, article: article, ruling: 'D-54')
+      end
+      if copied.size > 1
+        audit.warn(:rules, "the proposed thermal blocks use DIFFERENT demand-control methods (#{copied.join(', ')}) " \
+                           "— the reference keeps #{mech.systemOutdoorAirMethod} and the other strategies are NOT reproduced",
+                   target: air_loop.nameString, article: article, ruling: 'D-54')
+      end
+      return unless mech.systemOutdoorAirMethod.start_with?('IndoorAirQualityProcedure')
+
+      # getZoneAirContaminantBalance CREATES the unique object when absent — probe
+      # the optional accessor so a diagnostic never mutates the reference model.
+      balance = mech.model.getOptionalZoneAirContaminantBalance
+      return if balance.is_initialized && balance.get.carbonDioxideConcentration
+
+      audit.warn(:rules, 'CO2-based demand-controlled ventilation copied, but the reference model has NO carbon ' \
+                         'dioxide concentration balance — the strategy will NOT operate in EnergyPlus',
+                 target: air_loop.nameString, article: article, ruling: 'D-54')
     end
 
     # 8.4.4.18.(3): systems 1/3/4/5 -> supply fan 640 Pa @ 40% combined efficiency, no

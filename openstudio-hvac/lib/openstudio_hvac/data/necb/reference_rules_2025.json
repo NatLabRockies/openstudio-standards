@@ -601,6 +601,18 @@
     "effectiveness_article": "5.2.10.1.(4) — >= 50% ENTHALPY effectiveness at design conditions; setting sensible AND latent effectiveness to 0.50 at every rating point gives enthalpy effectiveness exactly 0.50 by identity (both components of delta-h transfer at 50%) — minimum-compliant for the reference",
     "overshoot_article": "5.2.10.1.(6) — supply-air outlet temperature control + OutdoorAirPretreat setpoint manager are the required bypass/control against setpoint overshoot"
   },
+  "humidification": {
+    "article": "Table 8.4.5.7.-B Note (1)",
+    "text": "Where present, humidification systems in the reference building shall use the same energy source as the corresponding humidification system in the proposed building.",
+    "energy_sources": {
+      "electric": "Electricity",
+      "gas": "NaturalGas"
+    },
+    "control": "SetpointManagerSingleZoneHumidityMinimum",
+    "fallback_control": "SetpointManagerScheduled (MinimumHumidityRatio)",
+    "autosize": true,
+    "modeling_note": "The proposed's humidification is recorded per thermal block BEFORE the teardown that removes the proposed air loops, then rebuilt on the serving reference loop as the same EnergyPlus humidifier class (Humidifier:Steam:Electric -> electricity, Humidifier:Steam:Gas -> natural gas), capacity AUTOSIZED so the reference sizing run and the capacity iteration still govern it. Control is taken from the proposed, never invented: preferably the ZoneControlHumidistat that survives on the thermal zone, otherwise the proposed loop's own scheduled minimum-humidity-ratio setpoint. Where neither exists the humidifier is NOT built, because an uncontrolled humidifier never operates in EnergyPlus and would misrepresent the reference as humidified."
+  },
   "article_coverage": {
     "note": "Complete accounting of Subsection 8.4.5 articles and how this gem handles each - emitted into every reference_hvac audit so nothing is silently missed. Statuses: implemented / partial / not_implemented / satisfied_by_clone / host_scope.",
     "articles": [
@@ -646,7 +658,7 @@
         "title": "HVAC System Selection (Tables -A/-B)",
         "status": "implemented",
         "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.5.1.(5) presence override keeps the changeover heating when the proposed block heats).",
-        "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification is NOT rebuilt (runtime warning when the proposed has humidifiers, T8); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication)."
+        "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification IS rebuilt since D-55 (the proposed's humidifier is recorded per thermal block before the teardown and re-created on the serving reference loop with the same energy source, autosized, and with a control taken from the proposed); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication)."
       },
       {
         "article": "8.4.5.8.",
@@ -700,8 +712,8 @@
         "article": "8.4.5.15.",
         "title": "Outdoor Air",
         "status": "partial",
-        "how": "Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1).",
-        "gaps": "DCV strategies (2) are not copied onto rebuilt reference systems; OA identity (1) holds only for DSOA-driven proposeds — hard-set proposed minimum-OA controller values draw a runtime warning (T7)."
+        "how": "Spaces (and their DesignSpecificationOutdoorAir) are retained by the clone; rebuilt systems draw the same peak OA specifications (1). DCV strategies (2) ARE copied since D-54: each proposed air loop's Controller:MechanicalVentilation demand-controlled-ventilation flag and system outdoor-air method are recorded per thermal block by the characterization (before the teardown that removes the proposed loop) and re-applied to the rebuilt reference controller, the method only when it is itself a demand-control method (IndoorAirQualityProcedure* / ProportionalControl*).",
+        "gaps": "OA identity (1) holds only for DSOA-driven proposeds — hard-set proposed minimum-OA controller values draw a runtime warning (T7). (2): the peak-rate outdoor-air methods (ZoneSum, Standard 62.1 Ventilation Rate Procedure) are deliberately NOT copied because they determine the peak rate that sentence (1) governs; where a reference system merges thermal blocks of which only some carry DCV, the single reference controller applies the strategy to all of them and says so in a warning."
       },
       {
         "article": "8.4.5.16.",

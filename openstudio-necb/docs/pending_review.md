@@ -144,18 +144,80 @@ refutation, not just the diff.
       article — so it was strengthened, not merely moved.
 
 ### Phase 3 — DCV copy
-- [ ] DCV is read from the proposed's `controllerMechanicalVentilation` and
-      applied to the REFERENCE controller — confirm on a model that actually
-      has DCV on (the fixtures may not; build one if needed).
-- [ ] Legacy's misspelled `'NECB_Defualt'` guard (L-13) was NOT ported.
+- [x] DCV is read from the proposed's `controllerMechanicalVentilation` and
+      applied to the REFERENCE controller — confirmed on a model that actually
+      has DCV on. The fixtures do NOT have it, so
+      `test/test_necb_dcv.rb#proposed` builds a PSZ proposed and switches DCV
+      on before the transform. [RAN] `ruby test/test_necb_dcv.rb` → 8 runs,
+      31 assertions, 0 failures.
+      The freshness of the reference controller is proved, not assumed, by
+      `test_peak_rate_method_is_not_copied`: the proposed is
+      `Standard62.1VentilationRateProcedure`, the reference comes out `ZoneSum`
+      with DCV **on** — only a rebuilt controller plus `apply_dcv` produces
+      that pair.
+- [x] Legacy's misspelled `'NECB_Defualt'` guard (L-13) was NOT ported.
+      [RAN] `test_legacy_misspelled_sentinel_is_not_ported` greps the whole of
+      `openstudio-hvac/lib/**/*.rb` for the string; empty.
+      [READ] the legacy site is `necb_2011.rb:1932`.
+- [ ] **REVIEWER DECISION OWED (the real judgement call in this phase):**
+      D-54 copies the DCV FLAG always, but copies the `systemOutdoorAirMethod`
+      only when it is itself a demand-control method (`IndoorAirQualityProcedure*`,
+      `ProportionalControlBasedOn*`) and NOT when it is a peak-rate method
+      (`ZoneSum`, `Standard62.1VentilationRateProcedure`), on the reading that
+      peak rate is sentence **(1)**'s subject and the reference realizes (1)
+      through the cloned DSOA under `ZoneSum`. If the reviewer reads (1)
+      instead as "identical to whatever the proposed computed", VRP would have
+      to be copied too and reference peak OA would move. Stated in D-54 rather
+      than left implicit.
+- [ ] **Scope caveat to confirm.** [READ]
+      `get_section('necb','5.2.3.4','2020')`: the DCV that (2) points at is
+      5.2.3.4's — enclosed vehicle spaces and commercial kitchen exhaust — not
+      general occupant CO2 control. Models carry no marker separating a
+      5.2.3.4-required DCV from a voluntary one, so the implementation copies
+      whatever DCV the proposed carries. That direction is conservative
+      (copying LOWERS reference ventilation energy → STRICTER target); confirm
+      the reviewer agrees that is the right way to be wrong.
+- [ ] **Energy-affecting, unswept.** Fires only where a proposed air loop has
+      DCV on. The 15 archetypes this toolchain authors do not set it, so no
+      archetype should move; **verify in the sweep** — if any does, this
+      reasoning is wrong.
 
 ### Phase 4 — humidification
-- [ ] The pre-teardown over-count is fixed: humidifiers surviving on
+- [x] The pre-teardown over-count is fixed: humidifiers surviving on
       `:copy_proposed` loops no longer trigger the "not rebuilt" warning.
-- [ ] Rebuilt humidifiers carry the SAME energy source as the proposed's, and
-      a humidistat/setpoint manager that actually controls them (an
-      uncontrolled humidifier is silently inert).
-- [ ] A test exists — the T8 warning is currently unpinned by anything.
+      [RAN] `test_humidifier_surviving_on_a_copy_proposed_loop_does_not_warn`
+      — a residential FPFC MAU block (`:copy_proposed`, so its loop is never
+      replaced) leaves the humidifier untouched and produces ZERO D-55
+      warnings; the loop is audited `info` "retained on this reference loop".
+- [x] Rebuilt humidifiers carry the SAME energy source as the proposed's, and
+      a setpoint manager that actually controls them.
+      [RAN] `scratchpad/d55_humidification_gate.rb` (both fuels, E+ sizing +
+      January week, clean, unmet htg 1.75 h): gas proposed → reference
+      Humidification **Natural Gas 0.58 GJ/wk, Electricity 0.00**; electric
+      proposed → **Electricity 0.46 GJ/wk, Natural Gas 0.00**; Water 0.18 m³
+      in both. Same moisture, different source — E+ OPERATES it, it is not
+      merely present. The same gate runs in-suite as
+      `test_rebuilt_humidifier_consumes_its_energy_source_in_energyplus`.
+      Control provenance is pinned too: the humidistat is the PROPOSED's,
+      surviving on the thermal zone (`test_rebuilt_humidifier_carries_a_working_control`),
+      and the scheduled fallback reuses the proposed's own schedule object.
+- [x] A test exists — the T8 warning was unpinned by anything.
+      [RAN] `ruby test/test_necb_humidification.rb` → 9 runs, 57 assertions,
+      0 failures, 0 skips.
+- [ ] **REVIEWER: confirm the DIRECTION is acceptable.** Rebuilding
+      humidification RAISES reference energy, i.e. makes the target more
+      LENIENT than the previous silent-drop behaviour. D-55 argues note (1)
+      presupposes it (it legislates the reference humidifier's energy source,
+      which is meaningless if the reference has none), but this is the one
+      place in the backlog where the fix moves the target the permissive way.
+- [ ] **The no-control case is a judgement call.** Where the proposed has
+      neither a zone humidistat nor a scheduled minimum-humidity setpoint, NO
+      humidifier is built (warned, SHOUTED "INERT") rather than one built with
+      an invented setpoint schedule. Confirm that is preferred over inventing
+      a default RH setpoint.
+- [ ] **Energy-affecting, unswept.** Fires only on proposeds that humidify.
+      None of the 15 archetypes does, so no archetype should move; verify in
+      the sweep.
 
 ### Phase 5 — HP (2)(b) + (2)(g)
 - [ ] **The pipeline reorder is the risk item.** Confirm nothing mutates the

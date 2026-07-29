@@ -18,7 +18,8 @@ module OpenStudioHVAC
   #         heating_energy_types: ['NaturalGas'], cooling_energy_types: ['Electricity'],
   #         heat_pump: false, heat_pump_sources: [:air|:water_loop|:external],
   #         terminal_type: :vav_reheat|:cv_reheat|:cv|:none,
-  #         design_cooling_kw: 42.0|nil } ],
+  #         design_cooling_kw: 42.0|nil,
+  #         dcv: false, system_outdoor_air_method: 'ZoneSum'|nil } ],
   #     plants: [ { name:, type: :hot_water|:chilled_water|:condenser|:service_water|:other,
   #                 fuels: ['NaturalGas'], purchased: false, heat_pump: false } ],
   #     purchased_energy: { heating: false, cooling: false }
@@ -146,6 +147,7 @@ module OpenStudioHVAC
     def self.air_loop_group(air_loop, plant_by_name, audit)
       group = base_group(air_loop.thermalZones.map(&:nameString), air_loop.nameString)
       recognize_gem_name(group, air_loop, audit)
+      outdoor_air_facts(group, air_loop, audit)
 
       # Coils.supply_components descends into AirLoopHVACUnitarySystem containers
       # (staged NECB reference systems) — otherwise a staged sys 3/4 reads as an
@@ -196,7 +198,29 @@ module OpenStudioHVAC
         heating_energy_types: [], cooling_energy_types: [],
         heat_pump: false, heat_pump_sources: [], terminal_type: :none,
         design_cooling_kw: 0.0, cooling_capacity_complete: true,
+        dcv: false, system_outdoor_air_method: nil,
         evidence: [] }
+    end
+
+    # 8.4.4.15.(2) (2025: 8.4.5.15.(2)): the demand-control-ventilation strategy of
+    # the PROPOSED air loop has to be reproduced in the reference building, so the
+    # facts hash has to carry it across the teardown that replaces the loop.
+    # EnergyPlus expresses the strategy on Controller:MechanicalVentilation as the
+    # DCV flag plus the system outdoor-air method (ZoneSum = occupancy-based,
+    # IndoorAirQualityProcedure = CO2-based) — both are recorded.
+    def self.outdoor_air_facts(group, air_loop, audit)
+      oa_system = air_loop.airLoopHVACOutdoorAirSystem
+      return if oa_system.empty?
+
+      mech = oa_system.get.getControllerOutdoorAir.controllerMechanicalVentilation
+      group[:dcv] = mech.demandControlledVentilation
+      group[:system_outdoor_air_method] = mech.systemOutdoorAirMethod
+      return unless group[:dcv]
+
+      group[:evidence] << "demand-controlled ventilation enabled (#{group[:system_outdoor_air_method]})"
+      audit&.info(:characterize, 'proposed air loop carries demand-controlled ventilation',
+                  target: air_loop.nameString, value: group[:system_outdoor_air_method],
+                  inputs: { demand_controlled_ventilation: true })
     end
 
     HEATING_COILS = [

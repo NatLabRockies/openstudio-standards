@@ -1895,3 +1895,162 @@ manifest now says precisely that instead of calling it unimplemented.
   `openstudio-shw/lib/openstudio_shw/data/necb/shw_rules_{2020,2025}.json`;
   `openstudio-shw/test/test_shw.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-54 — 8.4.4.15.(2): the proposed's demand-control ventilation strategy is carried across the reference teardown; the peak-rate outdoor-air method is not
+
+**What.** `Classify.characterize` now records, per air loop,
+`Controller:MechanicalVentilation`'s `demandControlledVentilation` flag and its
+`systemOutdoorAirMethod` (`dcv:` / `system_outdoor_air_method:` in the facts
+schema). `NECB.reference_hvac` indexes those facts per thermal block BEFORE the
+teardown that removes the proposed loops, and `apply_dcv` re-applies the
+strategy to each rebuilt reference OA controller, audited and cited
+`8.4.4.15.(2)` (2025: `8.4.5.15.(2)`).
+
+**Why.** 8.4.4.15.(2) reads: *"Where demand control ventilation strategies
+required by Article 5.2.3.4. are implemented in the proposed building, the
+reference building shall be modeled with those same strategies."* Nothing
+implemented it. The reference OA controller is BUILT FRESH by
+`base_system.rb#build_oa_system` with `setSystemOutdoorAirMethod('ZoneSum')`
+and the SDK's DCV default of off, and `setDemandControlledVentilation` was
+never called anywhere in the gem — so a proposed building with DCV was compared
+against a reference that ventilated at full design rate whenever its fans ran.
+That inflates reference ventilation energy and hands the proposed a target more
+lenient than the code sets.
+
+**What "the same strategies" means in EnergyPlus, and the line drawn.**
+EnergyPlus expresses demand control on `Controller:MechanicalVentilation` as
+the DCV flag *plus* a system outdoor-air method, and the method is not one
+knob but two kinds of knob:
+
+- **Demand-control methods** — `IndoorAirQualityProcedure` (and its generic /
+  combined variants) is CO2-sensor control; `ProportionalControlBasedOn*` is
+  occupancy-proportional control. These ARE the strategy. Copying only the
+  flag and leaving the reference at `ZoneSum` would silently substitute
+  occupancy-based control for a proposed CO2-based one — a different strategy,
+  which is exactly what (2) forbids. **These are copied.**
+- **Peak-rate methods** — `ZoneSum` and `Standard62.1VentilationRateProcedure`
+  determine the PEAK ventilation rate, which is sentence **(1)**'s subject, not
+  (2)'s. The gem realizes (1) by keeping the cloned
+  `DesignSpecification:OutdoorAir` and summing it (`ZoneSum`). Copying VRP onto
+  the reference would move its peak outdoor air off that identity to satisfy a
+  sentence that does not ask for it. **These are not copied**, and the audit
+  entry records the proposed's method so a reader sees the divergence rather
+  than inferring it.
+
+**Scope note taken from the code text, not assumed.** (2) is scoped to
+strategies *"required by Article 5.2.3.4."*, which is enclosed vehicle spaces
+and commercial kitchen exhaust — not general occupant CO2 control. The model
+carries no marker distinguishing a 5.2.3.4-required DCV from a voluntary one,
+so the implementation copies whatever DCV the proposed carries. That is the
+conservative direction: a copied strategy LOWERS reference ventilation energy,
+which makes the target STRICTER, never more lenient. Refusing to copy would be
+the lenient error.
+
+**Never silent.** Three caveats are warned rather than inferred: a reference
+system merged (D-28) from thermal blocks of which only some carry DCV applies
+the single controller's strategy to all of them; blocks disagreeing on the
+demand-control method keep one and lose the others; and a copied CO2-based
+strategy on a model with no carbon-dioxide concentration balance would be inert
+in EnergyPlus. The DCV-off case is audited as an `info`, not left silent.
+
+**Legacy NOT ported (L-13).** `necb_2011.rb:1932` guards its DCV ECM with
+`return if dcv_type == 'NECB_Defualt'` — a misspelling of the documented
+sentinel `'NECB_Default'`, so the guard never fires. It is a filed legacy
+defect; `test_necb_dcv.rb` statically asserts the string never appears in this
+gem.
+
+**Verification [RAN].** `openstudio-hvac/test/test_necb_dcv.rb` — 8 runs, 31
+assertions, 0 failures. The DCV-**on** path is the gate: the fixtures carry no
+DCV, so the test builds a proposed PSZ and switches DCV on before the reference
+transform. The peak-rate case proves the reference controller is genuinely
+fresh: the proposed is VRP, the reference comes out `ZoneSum` with DCV on.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`;
+  `openstudio-hvac/lib/openstudio_hvac/necb/reference.rb`;
+  `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
+  `openstudio-hvac/test/test_necb_dcv.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+## D-55 — Table 8.4.4.7.-B note (1): reference humidification is REBUILT on the proposed's energy source, with a control taken from the proposed — or not built at all
+
+**What.** `reference_hvac` now records each proposed thermal block's
+humidification and its energy source BEFORE the teardown
+(`capture_humidification`), and rebuilds it on the serving reference loop after
+the reference systems exist (`rebuild_humidification`). Same EnergyPlus
+humidifier class, capacity AUTOSIZED, and a humidity control that actually
+operates it. A `humidification` rule block is vendored in both vintages.
+
+**Why — and the two defects the old code carried.** Note (1) to Table
+8.4.4.7.-B (2025: Table 8.4.5.7.-B) reads: *"Where present, humidification
+systems in the reference building shall use the same energy source as the
+corresponding humidification system in the proposed building."* The previous
+implementation counted `HumidifierSteamElectric` + `HumidifierSteamGas` on the
+clone and emitted one warning. Both halves were wrong:
+
+1. **The count was taken BEFORE the teardown**, so it also warned "reference
+   humidification is NOT rebuilt" about humidifiers that go on to survive
+   untouched on `:copy_proposed` loops — a false warning about a model that was
+   already correct.
+2. **Humidifiers on replaced loops were destroyed as a side effect** of
+   `air_loop.remove`, not deliberately. Nothing decided that outcome and
+   nothing recorded what was lost.
+
+**The rebuild, and what is deliberately NOT invented.** The energy source is
+always determinable for an attributable humidifier — `Humidifier:Steam:Electric`
+is resistance steam, `Humidifier:Steam:Gas` burns natural gas, and the SDK
+offers no third air-loop humidifier class, nor any fuel-type field on the gas
+one. The CONTROL is the hard part, and **an uncontrolled humidifier is silently
+inert in EnergyPlus** — it appears in the model, reports zero energy, and
+misrepresents the reference as humidified. So the control is taken from the
+proposed and never invented:
+
+- preferably the `ZoneControlHumidistat`, which lives on the THERMAL ZONE and
+  therefore survives the teardown untouched, driving a
+  `SetpointManagerSingleZoneHumidityMinimum` on the humidifier's own outlet
+  node;
+- otherwise the proposed loop's own scheduled minimum-humidity-ratio setpoint,
+  re-created as a `SetpointManagerScheduled` on the same schedule object;
+- **and where neither exists, no humidifier is built** and the omission is
+  warned. Inventing a setpoint schedule would invent a code requirement.
+
+**Direction of the change, stated plainly.** Rebuilding humidification RAISES
+reference energy, which makes the target more LENIENT than it was while the
+humidification was silently dropped. That is nonetheless what note (1)
+presupposes — it legislates the reference humidifier's energy source, which
+only means something if the reference has one — and the previous behaviour
+compared a humidified proposed against a reference with no humidification load
+at all.
+
+**Never silent.** Warnings remain for exactly the cases that cannot be decided:
+a humidifier attributable to no air loop serving a thermal block; a captured
+proposed humidification whose blocks end up with no reference air loop; merged
+blocks (D-28) disagreeing on energy source, where note (1) can only be
+satisfied for the majority; an SDK refusal on the supply path; and the
+undeterminable-control case above.
+
+**Capacity is AUTOSIZED, never hard-set** — the L-23 lesson. A hard-sized
+humidifier would be blind to the reference's actual latent load and would not
+respond to the D-43 capacity iteration.
+
+**EnergyPlus gate [RAN].** `scratchpad/d55_humidification_gate.rb` builds a
+humidified 3-storey office proposed, takes the reference, and runs sizing plus a
+January week in Toronto. Clean run both times (unmet heating 1.75 h, cooling
+0.0). End-use `Humidification`:
+
+| proposed humidifier | reference class built | Humidification Electricity (GJ/wk) | Humidification Natural Gas (GJ/wk) | Humidification Water (m3) |
+|---|---|---|---|---|
+| `Humidifier:Steam:Gas` | `HumidifierSteamGas` | 0.00 | **0.58** | 0.18 |
+| `Humidifier:Steam:Electric` | `HumidifierSteamElectric` | **0.46** | 0.00 | 0.18 |
+
+Same moisture delivered, different energy source — which is precisely what note
+(1) legislates. **The humidifier is not merely present; EnergyPlus operates
+it.**
+
+**Verification [RAN].** `openstudio-hvac/test/test_necb_humidification.rb` —
+9 runs, 57 assertions, 0 failures, 0 skips (the last case is the E+ gate
+above, run in-suite). It was previously unpinned by ANY test.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/necb/reference.rb`;
+  `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
+  `openstudio-hvac/test/test_necb_humidification.rb`.
+- **Who/when:** Claude under D-10 delegation, 2026-07-29.

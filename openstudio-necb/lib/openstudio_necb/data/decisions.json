@@ -381,6 +381,20 @@
       "kind": "runtime",
       "articles": ["8.4.5.9.(2)", "8.4.6.9.(2)"],
       "summary": "The code states the reference fuel-fired water heater's part-load behaviour as a quadratic ratio of design fuel consumption, whereas the simulation engine's part-load-factor field is an efficiency divisor, so the two express the same requirement in different domains and cannot be compared coefficient by coefficient. The vendored cubic is the polynomial image of that transform and is verified functionally against the code curve on a sampled part-load range rather than by its coefficients; entering the code's own quadratic into the engine field would invert the relation, roughly double part-load fuel at half load, and double-count standby the engine already models separately. The curve is applied to gas- and oil-fired heaters, storage and instantaneous alike, and is withheld from electric heaters because the governing article covers only fuel-fired equipment, a scope limit that is audited rather than left as a silent skip."
+    },
+    {
+      "id": "D-54",
+      "title": "The proposed's demand-control ventilation strategy is carried across the reference teardown, but its peak-rate outdoor-air method is not",
+      "kind": "runtime",
+      "articles": ["8.4.4.15.(2)", "8.4.5.15.(2)"],
+      "summary": "The reference building is required to be modelled with the same demand-control ventilation strategies the proposed building implements, but the reference air systems are rebuilt from scratch and their fresh outdoor-air controllers start with demand control switched off, so a proposed building with demand control was being compared against a reference that ventilated at full design rate whenever its fans ran. The characterization step now records each proposed air loop's demand-control setting before the old systems are torn out, and the rebuilt reference controllers receive the same setting. The simulation engine states demand control as a flag plus an outdoor-air method, and only the methods that are themselves demand-control schemes — carbon-dioxide sensing and occupancy-proportional control — are copied, because the remaining methods determine the PEAK ventilation rate, which a different sentence governs and which the reference already inherits from the cloned space ventilation specifications."
+    },
+    {
+      "id": "D-55",
+      "title": "Reference humidification is rebuilt on the proposed's energy source with a control taken from the proposed, or it is not built at all",
+      "kind": "runtime",
+      "articles": ["Table 8.4.4.7.-B Note (1)", "Table 8.4.5.7.-B Note (1)"],
+      "summary": "The reference building's humidification is required to use the same energy source as the corresponding humidification in the proposed building, which presupposes the reference carries humidification wherever the proposed does. Previously the humidifiers were merely counted before the old systems were torn out and one warning was issued, which both misreported systems that were never replaced and let the rest be destroyed as an unintended side effect. Each thermal block's humidification is now recorded before the teardown and re-created on the serving reference air system as the same steam-humidifier type — electric resistance or gas-fired — with its capacity left to the sizing run. The humidity control is taken from the proposed building rather than invented: the zone humidistat that survives on the thermal zone, or failing that the proposed system's own scheduled minimum-humidity setpoint; where neither exists no humidifier is built, because a humidifier without a setpoint never operates and would falsely present the reference as humidified."
     }
   ]
 }
