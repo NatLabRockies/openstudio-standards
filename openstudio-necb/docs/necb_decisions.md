@@ -1659,3 +1659,41 @@ systems are, which is why RetailStripmall (ten small PSZ units) moves most
 
 The D-42 FULL-ANNUAL numbers are superseded and have NOT been re-run — the
 full-annual claim is owed a fresh sweep before it is quoted again.
+
+### D-46 FINAL full-annual sweep (2026-07-29, post-staging + ventilation floor)
+
+True 8760 h, all 15 archetypes, 15/15 PASS. This supersedes D-42's
+full-annual table, which predates staging.
+
+| Building | D-42 | final | | Building | D-42 | final |
+|---|---|---|---|---|---|---|
+| SmallOffice | 89 | **98.0** | | FullServiceRestaurant | 91 | 95.3 |
+| Warehouse | 97 | **104.6** | | LargeHotel | 92 | 93.2 |
+| RetailStandalone | 98 | **104.9** | | QuickServiceRestaurant | 89 | 93.9 |
+| RetailStripmall | 97 | **103.8** | | MidriseApartment | 99 | 100.1 |
+| SecondarySchool | 98 | **102.9** | | HighriseApartment | 98 | 99.4 |
+| PrimarySchool | 93 | 98.5 | | LowriseApartment | 98 | 99.0 |
+| SmallHotel | 91 | 95.6 | | MediumOffice | 111 | 113.9 |
+| | | | | LargeOffice | 113 | 113.3 |
+
+5/15 compliant (was 4/15). Every building moved UP: the reference is more
+efficient once its DX/furnace equipment is staged, so the target is stricter.
+
+**D-42's last open residual is CLOSED.** SmallOffice's ~11% gap, which D-42
+proved was structural rather than seasonal and left unexplained, was the
+missing staging: 89 -> 98.0. SmallOffice is almost entirely PSZ, the most
+staging-sensitive archetype in the fleet.
+
+Ventilation floor: bound on 43 units across 7 buildings (SecondarySchool 28,
+PrimarySchool 7, SmallHotel 3, RetailStandalone 2, and one each in the
+restaurants and LargeHotel), several at an outdoor-air fraction of 1.00 —
+100%-OA make-up air units that would otherwise have staged down to half flow
+while owing full ventilation. Energy effect is small (+0.00% to +0.41% on the
+reference total, largest on FullServiceRestaurant); the correctness is the
+point.
+
+Unchanged and still owed: the offices sit at 113-114% on the legacy fan
+attribution (#2127, L-9/L-10), untouched by staging because system 6 is
+hydronic — LargeOffice is bit-identical end-use for end-use across the whole
+staging change, which is the cleanest available control that staging touches
+only what it should.
