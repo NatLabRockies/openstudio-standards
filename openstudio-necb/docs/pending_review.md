@@ -71,15 +71,22 @@ proposed annual run ahead of the reference build) and should be scoped fresh.
 
 ### Cross-cutting (apply to EVERY phase)
 
-- [ ] **Fleet sweep, week mode**, compared line-by-line against the D-46 final
-      table in `necb_decisions.md`. Command:
+- [x] ~~Fleet sweep, week mode~~ **DONE 2026-07-30** — 15/15 PASS, 14 of 15
+      moved as pre-registered; the one exception (MediumOffice -3) was chased
+      to a Table 8.4.4.17 25 kW fan-band crossing, then vindicated by the
+      full-annual run (+2.0). ALSO DONE: the **full-annual** sweep, 15/15 PASS,
+      recorded in `necb_decisions.md` as the NEW VALIDATED BASELINE superseding
+      D-46. Original instruction retained:
       `SWEEP_MODE=annual ruby openstudio-necb/scripts/necb_archetype_sweep.rb <15 types>`
       (run from the repo root with an absolute script path — a relative path
       from a gem directory fails with LoadError).
       **Every building that moves needs an attributed cause before commit.**
       Precedent: staging moved the fleet 7-9 points in the LENIENT direction
       from a fan-schedule bug that every unit test passed through.
-- [ ] **Reference vs proposed sanity ratios**, not just totals. The staging
+- [x] ~~Reference vs proposed sanity ratios~~ **DONE** — the fan ratio is
+      exactly what exposed the MediumOffice band crossing; see the D-46
+      successor entry. Original instruction retained:
+- [ ] (retained) **Reference vs proposed sanity ratios**, not just totals. The staging
       regression was only visible as `reference fans / proposed fans = 2.68`
       (normally ~1.0). Check fans, heating and cooling ratios per building.
 - [ ] **A control building.** LargeOffice (system 6, hydronic) should be
@@ -374,8 +381,8 @@ Phase 7 was barred from this file, so NOTHING below is ticked; verify all of it.
       deliver.** The ten previously-inert archetypes are the ones to watch.
 
 ### Final, once all phases land
-- [ ] ONE `SWEEP_MODE=full` run; the resulting table replaces D-46's in
-      `necb_decisions.md` with an explicit note of what it supersedes.
+- [x] ~~ONE `SWEEP_MODE=full` run~~ **DONE 2026-07-30**, table recorded and
+      marked as superseding D-46.
 - [ ] `docs/NECB_GEM_COVERAGE.md` regenerated (`rake necb:coverage_doc`).
 - [ ] `pending_review.md` deleted or emptied — a stale checklist is worse than
       none.
