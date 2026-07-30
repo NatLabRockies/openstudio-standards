@@ -2613,3 +2613,69 @@ decisive test** and must be run before anyone concludes daylighting is a net
 penalty for heating-dominated buildings.
 
 - Who/when: Claude under D-10 delegation, 2026-07-30.
+
+### Post-backlog FULL-ANNUAL sweep (2026-07-30) — new validated fleet baseline
+
+True 8760 h, all 15 archetypes, 15/15 PASS, after phases 0-4, 6 and 7.
+**This supersedes the D-46 final table.** Every building moved UP or held: the
+reference is more efficient once it carries the photocontrols 4.2.2 requires,
+so the target it sets is harder.
+
+| Building | D-46 | now | | Building | D-46 | now |
+|---|---|---|---|---|---|---|
+| SmallOffice | 98.0 | **105.6** | | FullServiceRestaurant | 95.3 | 97.8 |
+| PrimarySchool | 98.5 | **105.3** | | MediumOffice | 113.9 | 115.9 |
+| RetailStripmall | 103.8 | **109.9** | | LargeHotel | 93.2 | 94.4 |
+| QuickServiceRestaurant | 93.9 | 99.4 | | RetailStandalone | 104.9 | 105.7 |
+| LargeOffice | 113.3 | **118.2** | | SmallHotel | 95.6 | 96.3 |
+| SecondarySchool | 102.9 | 106.5 | | Warehouse | 104.6 | 105.0 |
+| HighriseApartment | 99.4 | 99.4 | | MidriseApartment | 100.1 | 100.1 |
+| LowriseApartment | 99.0 | 99.0 | | | | |
+
+The three apartments are unchanged, which is the expected null result: dwelling
+units are `not_listed` in Table 4.2.1.6 so (10)/(13) never reach them, and
+their corridors fail the power test.
+
+### The MediumOffice week anomaly: RESOLVED — a Table 8.4.4.17 band crossing
+
+The week sweep showed MediumOffice moving the WRONG way (-3). Full-annual it is
+**+2.0**, so the week result was a January artifact — but the mechanism turned
+out to be worth finding, and it is not seasonal at all.
+
+Chased with an A/B plus two IDFs re-run with `Fan Air Mass Flow Rate` and
+`Fan Electricity Rate` requested hourly. Every alternative is RULED OUT by
+measurement:
+
+- run hours: **identical** (134 vs 135 of 240 steps)
+- mean airflow: **LOWER** with daylighting on (3.167 vs 3.324 kg/s)
+- flow fraction: **unchanged** (0.283 vs 0.288)
+- fan spec: pressure 1000 Pa and efficiency 0.55 identical; rated power
+  **fell** 4.6% (25 601 -> 24 412 W)
+
+Yet fan energy rose 49%. The cause is the fan-curve SELECTION:
+
+1. daylighting cuts lighting gains -> reference design airflow 14.08 -> 13.43
+   m3/s (-4.6%)
+2. `apply_fan_power_curve` derives `power_kw = pressureRise x flow /
+   efficiency` -> 25.6 kW -> 24.4 kW
+3. that crosses the 8.4.4.17.(3)-(5) boundary at **25 kW**: `>= 25` picks
+   'forward curved with inlet vanes', `> 7.5 && < 25` picks 'airfoil with
+   inlet vanes'
+4. the rows differ sharply — min flow fraction 0.25 vs 0.35, coefficients
+   (0.3396, -0.8481, 1.4957) vs (0.5843, -0.5792, 0.9702). At the measured
+   0.285 flow fraction they evaluate to **0.219 vs 0.498 of rated power,
+   2.27x**
+
+**This is code-faithful; the implementation is correct.** Table 8.4.4.17 does
+select by rated fan power and those are the printed rows. The consequence is
+the point: reference fan energy is **DISCONTINUOUS in design airflow at
+25 kW**, so a 4.6% change in fan size produced a 49% change in fan energy —
+large enough to swamp a genuine 21% lighting saving in a heating-dominated
+week. Note also that the row for LARGER fans is markedly better at low part
+load than the row for smaller ones, which is counterintuitive and adjacent to
+the already-filed L-9 / #2127 fan-curve concerns.
+
+**Do not read a step change in reference fan energy as a regression without
+first checking whether the fan crossed 25 kW.**
+
+- Who/when: Claude under D-10 delegation, 2026-07-30.

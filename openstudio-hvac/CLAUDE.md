@@ -148,6 +148,17 @@ its `AuditLog` is the canonical copy the umbrella aliases.
     which moved every PSZ archetype 7-9 points MORE LENIENT. Every unit test
     passed; only the fleet sweep caught it (D-46 amendment) — which is why the
     sweep is a merge gate.
+- **Reference fan energy is DISCONTINUOUS at 25 kW** (8.4.4.17.(3)-(5),
+  `apply_fan_power_curve`). Selection is by `pressureRise x flow / efficiency`:
+  `>= 25 kW` -> 'forward curved with inlet vanes' (min flow 0.25, coefficients
+  0.3396/-0.8481/1.4957); `> 7.5 && < 25 kW` -> 'airfoil with inlet vanes'
+  (min flow 0.35, 0.5843/-0.5792/0.9702). At a 0.285 flow fraction those are
+  0.219 vs 0.498 of rated power — **2.27x across the boundary**. MEASURED: a
+  4.6% cut in design airflow (daylighting reducing gains) moved a MediumOffice
+  supply fan 25.6 -> 24.4 kW and raised fan energy 49%, with run hours,
+  airflow and fan spec all unchanged. Any change that nudges a reference fan
+  across 25 kW produces a step that LOOKS like a regression and is not — check
+  the band before investigating anything else.
 - `necb/checker.rb` — `check_part5`: warnings-only QAQC (economizers 5.2.2.8,
   5.2.10.1 table trigger (needs `hdd:` + sized flows), 5.2.12 minimums via
   clone-and-diff against the efficiency pass).
