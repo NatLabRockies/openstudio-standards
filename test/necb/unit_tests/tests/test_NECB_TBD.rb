@@ -52,8 +52,8 @@ class NECB_TBD_Tests < Minitest::Test
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
-      'Warehouse'
+      'SmallOffice',
+      # 'Warehouse'
     ]
 
     @structure = [
