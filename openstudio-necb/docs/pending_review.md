@@ -442,6 +442,53 @@ Phase 7 was barred from this file, so NOTHING below is ticked; verify all of it.
       `step == :lighting_reference`. Check no other assertion in the suite has
       the same weakness.
 
+### hbix#88 VERIFIED FIXED 2026-07-30 — Phase 7's vendored table is now STALE
+
+Re-ran the exact checks from the issue. The extraction is fixed, and the fix
+changes our data materially.
+
+| check | at filing | now |
+|---|---|---|
+| rows (2020 / 2025) | 103 / 105 | **101 / 101** |
+| `Manual` == X | 57/103 vs 85/105 | **97/101 in BOTH** |
+| cross-edition control-cell diffs | 35 of 95 rows disagreed | **0 of 909 cells** |
+| sidelighting `X` | 40 | **90** of 101 |
+| toplighting `X` | 40 | **92** of 101 |
+
+The response also now carries a `known_issue` block declaring the nine control
+columns verified against the printed pages, with remaining limits confined to
+the synthesised `Space Category` column and one OCR label
+(`Class Il facility` for "Class II", LPD and all nine marks correct). I
+confirmed the residual: one section heading in `Space Category`, plus a new
+`Note` column whose contents are legitimate.
+
+- [x] **A/B marks do NOT affect us — checked because the annotation warns
+      about it.** `known_issue` cautions that a consumer keeping only `X`
+      silently drops the "at least one A and one B" group requirements
+      (140 A / 163 B per edition). Those marks live in Restricted-to-Manual-ON
+      (72 A), Restricted-to-Partial-Automatic-ON (72 A), Automatic-Partial-OFF
+      (1 B), Automatic-Full-OFF (81 B) and Scheduled-Shut-off (81 B). **Both
+      daylight columns are pure X / - / blank**, so our X-only consumption is
+      sound. No change needed.
+- [ ] **ACTION: regenerate `daylighting_controls_4_2_1_6.json` from the fixed
+      table.** It was built from the corrupt extraction and now UNDER-applies.
+      Vendored today: sidelighting required 72 / not_required 25 / unknown 5;
+      toplighting required 69 / not_required 27 / unknown 6. The fixed table
+      marks 90 and 92 respectively. Regeneration should:
+      - resolve all 11 `unknown` states and retire the conservative
+        `required` defaults (including the classroom/lecture-hall toplighting
+        conflict that reaches 37 school spaces);
+      - drop the "2025 is primary, 2020 may corroborate but never negate"
+        conflict machinery in `provenance.method` — the editions now agree
+        exactly, so that rule is obsolete and misleading if left in;
+      - keep `not_listed` for dwelling units (that came from the code text,
+        4.2.2.1.(2), not from the extraction — still correct);
+      - re-check the 9-row `residue` list, most of which should now resolve.
+- [ ] **This makes Phase 7 MORE energy-affecting than measured.** The 21 -> 174
+      placement count was computed against the under-marked table; expect it to
+      rise again. Re-measure before the sweep so the attribution is against the
+      final data, not an intermediate.
+
 ### Phase 7 items raised by the implementer (merged by Fable)
 
 - [ ] **D-57 fleet sweep and attribution.** D-57 changes reference photocontrol
