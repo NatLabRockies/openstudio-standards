@@ -470,24 +470,29 @@ confirmed the residual: one section heading in `Space Category`, plus a new
       (1 B), Automatic-Full-OFF (81 B) and Scheduled-Shut-off (81 B). **Both
       daylight columns are pure X / - / blank**, so our X-only consumption is
       sound. No change needed.
-- [ ] **ACTION: regenerate `daylighting_controls_4_2_1_6.json` from the fixed
-      table.** It was built from the corrupt extraction and now UNDER-applies.
-      Vendored today: sidelighting required 72 / not_required 25 / unknown 5;
-      toplighting required 69 / not_required 27 / unknown 6. The fixed table
-      marks 90 and 92 respectively. Regeneration should:
-      - resolve all 11 `unknown` states and retire the conservative
-        `required` defaults (including the classroom/lecture-hall toplighting
-        conflict that reaches 37 school spaces);
-      - drop the "2025 is primary, 2020 may corroborate but never negate"
-        conflict machinery in `provenance.method` — the editions now agree
-        exactly, so that rule is obsolete and misleading if left in;
-      - keep `not_listed` for dwelling units (that came from the code text,
-        4.2.2.1.(2), not from the extraction — still correct);
-      - re-check the 9-row `residue` list, most of which should now resolve.
-- [ ] **This makes Phase 7 MORE energy-affecting than measured.** The 21 -> 174
-      placement count was computed against the under-marked table; expect it to
-      rise again. Re-measure before the sweep so the attribution is against the
-      final data, not an intermediate.
+- [x] ~~ACTION: regenerate `daylighting_controls_4_2_1_6.json`~~ **DONE
+      2026-07-30.** Re-read marks only from the corrected table (the script
+      ASSERTS the 0-of-909 edition agreement rather than assuming it); every
+      curated semantic state preserved. sidelighting required 72 -> 92,
+      not_required 25 -> 7; toplighting 69 -> 94, 27 -> 5; unresolved 5/6 ->
+      3/3; residue 9 -> 5. All four extraction CONFLICTs resolved and off the
+      conservative default, including the classroom toplighting one that
+      reached 37 school spaces. The obsolete 2025-primary machinery is removed
+      and cell semantics recorded in its place. The 3 remaining unresolved
+      entries are structural (no table row at all) and will never resolve.
+- [x] ~~A/B marks~~ verified irrelevant to us — see the D-57 amendment.
+- [x] ~~Re-measure placement~~ **DONE 2026-07-30: 21 -> 174 (corrupt) -> 183
+      (corrected)** on the 17 cached archetypes, 200 including gas variants.
+      LargeOffice and MediumOffice now receive controls — both were in D-51's
+      "inert ten". Apartments stay at 0 for the already-reasoned cause.
+- [ ] **STILL ENERGY-AFFECTING AND UNSWEPT.** The placement count above is
+      SDK-only — no simulation. Phase 7's energy attribution must be done
+      against THIS data, not the 174 intermediate.
+- [ ] Three Phase 7 tests moved because they pinned the CORRUPT marks
+      (`Library reading area` is `X` in the corrected table). Confirm the
+      replacements are sound: spot-value and gate tests now use
+      `Dormitory living quarters` (a genuine `-` row), and the
+      unresolved-column test uses a space type with no table row.
 
 ### Phase 7 items raised by the implementer (merged by Fable)
 

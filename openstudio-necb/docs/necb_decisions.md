@@ -2502,3 +2502,64 @@ not merged yet. `test_decisions_registry.rb` — 12 runs, 1 failure:
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
 
 ---
+
+### D-57 amendment (2026-07-30): control table re-generated after hbix#88 was fixed
+
+The vendored `daylighting_controls_4_2_1_6.json` was built on 2026-07-29 from
+an extraction that was dropping control marks. hbix#88 was fixed overnight and
+verified: the nine control columns are now checked against the printed pages
+and the 2020/2025 editions agree exactly — **0 differing cells of 909**, which
+the regeneration script asserts rather than assumes.
+
+Re-read from the corrected table, marks only; every curated semantic state was
+preserved:
+
+| | 2026-07-29 (corrupt) | 2026-07-30 (corrected) |
+|---|---|---|
+| sidelighting required | 72 | **92** |
+| sidelighting not_required | 25 | **7** |
+| toplighting required | 69 | **94** |
+| toplighting not_required | 27 | **5** |
+| unresolved (either column) | 5 / 6 | **3 / 3** |
+| residue entries | 9 | **5** |
+
+**All four extraction CONFLICTs are resolved** and no longer ride the
+conservative `required` default — including the classroom/lecture-hall
+toplighting conflict that reached 37 school spaces, and
+`Museum general exhibition area`, which ties back to D-45. Each now reads its
+mark directly (all four: required/required). The three remaining unresolved
+entries are structural — `- undefined -`, `WholeBuilding` and the legacy-only
+`Audience seating area permanent - convention centre` have no Table 4.2.1.6.
+row at all — so they are unaffected by extraction quality and will not resolve
+with any future fix.
+
+The `2025 is primary, 2020 may corroborate but never negate` conflict machinery
+is **removed** — it existed only to survive the corruption and is now
+misleading. Cell semantics are recorded instead: `X` -> required, `-` ->
+not_required, and BLANK occurs only on the four rows whose new `Note` column
+defers the space type elsewhere (Guest room -> 4.2.2.6.(2); Parking garage ->
+4.2.2.2.; Stairway -> its containing space; Healthcare medical supply room ->
+the Storage Room rows), which keep their curated states.
+
+**A trap checked and cleared.** The upstream `known_issue` warns that Note (1)
+makes `A`/`B` at-least-one-of-group marks, so a consumer keeping only `X`
+silently drops 140 A and 163 B requirements. Verified those marks sit in the
+manual and occupancy columns (Restricted to Manual ON 72 A, Automatic Full OFF
+81 B, Scheduled Shut-off 81 B, ...): **both daylight columns are pure
+X / - / blank**, so our X-only consumption is sound. No change needed.
+
+Fleet placement re-measured on the cached archetypes (SDK-only, no simulation):
+**21 (pre-Phase-7) -> 174 (corrupt table) -> 183 (corrected)**, 200 including
+the gas variants. LargeOffice and MediumOffice now receive controls — both were
+in D-51's "inert ten". The three apartments stay at 0 for the reasoned cause
+already recorded (dwelling units are `not_listed`; their corridors fail the
+power test at ~30 W against 150 W).
+
+Three tests moved because they pinned the corrupt marks, not because behaviour
+regressed: `Library reading area` is `X` in the corrected table, so the
+spot-value and gate tests now use `Dormitory living quarters` (a genuine `-`
+row), and the unresolved-column test uses a space type with no table row, since
+the CONFLICT it relied on no longer exists.
+
+- Who/when: Claude under D-10 delegation, 2026-07-30, at phylroy's request to
+  check whether the table was fixed.

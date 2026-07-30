@@ -201,7 +201,10 @@ class TestDaylightingNecb2020 < Minitest::Test
   def test_control_matrix_spot_values
     assert_equal 'required', REQ.requirement('Office enclosed > 25 m2')['sidelighting']
     assert_equal 'required', REQ.requirement('Office enclosed > 25 m2')['toplighting']
-    assert_equal 'not_required', REQ.requirement('Library reading area')['sidelighting']
+    # 'X' in the corrected table (hbix#88) — it was not_required only in the
+    # corrupt extraction. A genuine '-' row instead:
+    assert_equal 'required', REQ.requirement('Library reading area')['sidelighting']
+    assert_equal 'not_required', REQ.requirement('Dormitory living quarters')['sidelighting']
     # Table 4.2.1.6. refers these two out to other articles entirely
     assert_equal 'not_applicable', REQ.requirement('Guest room')['sidelighting']
     assert_equal 'not_applicable', REQ.requirement('Storage garage interior')['toplighting']
@@ -315,7 +318,7 @@ class TestDaylightingNecb2020 < Minitest::Test
 
   def test_table_column_closes_the_gate_entirely
     _model, space = box(windows: [[0.0, 10.0, 0.0, 3.0]], skylights: [[4.0, 6.0, 3.0, 5.0]],
-                        space_type: 'Library reading area')
+                        space_type: 'Dormitory living quarters')
     verdict, = evaluate(space)
     refute verdict[:required], 'Table 4.2.1.6. requires neither column for this space type'
     assert_match(/Table 4\.2\.1\.6\./, verdict[:sidelighting][:reason])
@@ -323,8 +326,10 @@ class TestDaylightingNecb2020 < Minitest::Test
   end
 
   def test_unresolved_table_column_warns_and_takes_the_conservative_default
-    # 3.3 W/m2 x a 30 m x 3 m primary band = 297 W, over (10)(a)'s 150 W
-    args = { windows: [[0.0, 30.0, 0.0, 3.0]], width: 30.0, space_type: 'Museum general exhibition area' }
+    # A space type with NO Table 4.2.1.6. row at all — the only unresolved kind
+    # left once hbix#88 was fixed (the four extraction CONFLICTs are resolved).
+    args = { windows: [[0.0, 30.0, 0.0, 3.0]], width: 30.0,
+             space_type: 'Audience seating area permanent - convention centre' }
     _model, space = box(**args)
     verdict, audit = evaluate(space)
     assert verdict[:sidelighting][:required], 'conservative default: required'
