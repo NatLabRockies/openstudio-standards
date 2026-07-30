@@ -4416,6 +4416,20 @@
       ]
     },
     {
+      "name": "ACM2019 RetailStandalone FRONT_ENTRY_COOLING",
+      "template": "179d-ACM-2019",
+      "category": "Thermostat Setpoint",
+      "units": "C",
+      "day_types": "Default|WntrDsn|SmrDsn",
+      "start_date": "2014-01-01T00:00:00+00:00",
+      "end_date": "2014-12-31T00:00:00+00:00",
+      "type": "Constant",
+      "notes": "Customized schedule to support realistic modeling rather than following ACM schedules. From OpenStudio standards ASHRAE 90.1-2019 schedule: RetailStandalone FRONT_ENTRY_COOLING",
+      "values": [
+        100
+      ]
+    },
+    {
       "name": "ACM2019 SchoolClgSetpt",
       "template": "179d-ACM-2019",
       "category": "Thermostat Setpoint",
