@@ -2563,3 +2563,53 @@ the CONFLICT it relied on no longer exists.
 
 - Who/when: Claude under D-10 delegation, 2026-07-30, at phylroy's request to
   check whether the table was fixed.
+
+### Post-backlog week sweep (2026-07-30): 15/15 PASS, one anomaly quantified but NOT explained
+
+First fleet sweep after phases 0-4, 6 and 7. Week mode, compared against the
+D-46 sweep-gate week baseline. Directions were pre-registered before the run.
+
+| Building | pre | now | | Building | pre | now |
+|---|---|---|---|---|---|---|
+| PrimarySchool | 97 | **101** | | SecondarySchool | 103 | 104 |
+| SmallOffice | 91 | **94** | | LargeHotel | 92 | 93 |
+| LargeOffice | 113 | **116** | | QuickServiceRestaurant | 92 | 93 |
+| RetailStripmall | 104 | 106 | | Warehouse / FSR / HRA / | | |
+| RetailStandalone | 105 | 106 | | SmallHotel / LRA / MRA | — | unchanged |
+| **MediumOffice** | 112 | **109** | | | | |
+
+Fourteen of fifteen moved as predicted (up, on reduced reference lighting).
+
+**MediumOffice moved the WRONG WAY and the cause is only half-established.**
+An A/B on that archetype (reference_daylighting true vs false, same week):
+
+| | lighting | heating | fans | ref total | % of target |
+|---|---|---|---|---|---|
+| daylighting OFF | 1855 | 2752 | **711** | 9188 | 111.5 |
+| daylighting ON | 1469 | 2913 | **1113** | 9430 | 108.6 |
+
+Daylighting works — lighting falls 386 kWh (-21%). But fans rise **402 kWh
+(+57%)** and heating 161 kWh, so the reference consumes MORE and the target
+gets LOOSER.
+
+What is established: the fan OBJECTS are byte-identical between the two runs
+(0.30 efficiency, 250 Pa, 0.35 minimum flow fraction), and the sized fan is
+SMALLER with daylighting on (13.43 vs 14.08 m3/s) — so this is not a fan-spec
+or Table 8.4.4.17 band change. Smaller fan, more energy, therefore run-hours
+or flow-fraction. Unmet occupied heating is identical (0.17 h both), so it is
+not a night-cycle-on-unmet-load story either.
+
+What is NOT established: the actual mechanism. A ventilation-floor effect (the
+same absolute OA flow becomes a larger fraction of a smaller design flow, and
+VAV fan power is strongly nonlinear) accounts for perhaps 15% on a cubic curve,
+not 57%. **Not asserting a cause without demonstrating it.**
+
+Why this may be a January artifact rather than a defect: the week run is
+January-only, exactly the season where removing internal gains costs the most
+and daylight is scarcest; daylighting's savings accrue in shoulder and summer.
+The muted SecondarySchool result (+1 despite 42 controls, the most in the
+fleet) fits the same offsetting pattern. **The full-annual sweep is the
+decisive test** and must be run before anyone concludes daylighting is a net
+penalty for heating-dominated buildings.
+
+- Who/when: Claude under D-10 delegation, 2026-07-30.
