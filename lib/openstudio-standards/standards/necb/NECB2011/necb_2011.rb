@@ -1021,7 +1021,7 @@ class NECB2011 < Standard
       lc = surface.construction
       tp = surface.surfaceType.downcase
       bc = surface.outsideBoundaryCondition.downcase
-      next unless tp == "outdoors"
+      next unless bc == "outdoors"
 
       uo = max_u_necb(tp, bc, hdd)
       ty = case tp
@@ -1031,12 +1031,13 @@ class NECB2011 < Standard
            end
 
       next if lc.empty?
-      next if lc.additionalProperties.hasFeature("btap_film")
 
       lc = lc.get.to_LayeredConstruction
       next if lc.empty?
 
       lc = lc.get
+      next if lc.additionalProperties.hasFeature("btap_film")
+
       lc.additionalProperties.setFeature("btap_film", filmR(lc))
 
       unless lc.additionalProperties.hasFeature("btap_type")

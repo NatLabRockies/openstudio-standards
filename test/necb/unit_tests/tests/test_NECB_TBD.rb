@@ -41,19 +41,19 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
-      # 'RetailStandalone',
+      'QuickServiceRestaurant',
+      'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
-      # 'Warehouse'
+      'Warehouse'
     ]
 
     @structure = [
@@ -62,7 +62,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     # BTAP currently supports 4 options when enabling linear thermal bridging
-    # calculations (e.g. uprating, derating), via the TBD gem.
+    # calculations (e.g. uprating, derating), all relying on the TBD gem.
     @options = [
       # 'none', # ignore linear thermal bridging altogether
       # 'bad',  # derating from poor thermal bridging details
@@ -90,10 +90,10 @@ class NECB_TBD_Tests < Minitest::Test
     # between 2 discrete levels of performance (e.g. 0.130 < 0.124 < 0.100), to
     # determine final costs for a given surface type. If 'not interpolating',
     # the solution becomes more categorical, with the inconvenience of being
-    # more expensive (i.e. 0.100 $$$ > 0.124 $$).
+    # more expensive (i.e. $$$ Uo 0.100 > $$ Uo 0.124).
     @interpolate = [
-      true,
-      # false
+      # true,
+      false
     ]
 
     # AdditionalProperty override.
@@ -121,7 +121,7 @@ class NECB_TBD_Tests < Minitest::Test
               fdback << cas
               st = Standard.build(template)
 
-              # Customizing STRUCTURE options (similar to the unit test
+              # Customizing STRUCTURE options - similar to the unit test
               # 'test_necb_structures'. STRUCTURE customization triggers thermal
               # bridging PSI factor variants in BTAP. In this Warehouse example,
               # the building would inherit a steel (or metal) structure by
@@ -219,92 +219,28 @@ class NECB_TBD_Tests < Minitest::Test
                   #     - customized spaces
                   err_msg  = "BTAP/TBD: #{id} defaulted construction (#{cas})?"
                   assert(surface.isConstructionDefaulted, err_msg)
-
                   lc      = surface.construction
-                  film    = surface.filmResistance
                   err_msg = "BTAP/TBD: #{id} construction (#{cas})?"
                   refute_empty(lc, err_msg)
                   lc      = lc.get.to_LayeredConstruction
                   err_msg = "BTAP/TBD: #{id} layered construction (#{cas})?"
                   refute_empty(lc, err_msg)
 
-                  # No surface construction IDs hold any "c tbd" stamps.
+                  # No surface construction IDs hold any "c tbd" suffixes.
                   lc      = lc.get
                   name    = lc.nameString.downcase
                   err_msg = "BTAP/TBD processes enabled (#{cas})?"
                   refute_includes(name, " c tbd", err_msg)
+                  prop    = lc.additionalProperties
+                  next unless prop.hasFeature("btap_uo")
 
-                  # The remaining tests are limited to automated construction
-                  # generation and assignment using the BTAP's 'structure'
-                  # option. These would likely fail with e.g. 3rd-party models
-                  # holding uninsulated, mass walls in 19th-century buildings,
-                  # or non-compliant curtainwall spandrels.
-                  next unless structure == "structure"
-                  next if @addprop && building == "Warehouse"
-
-                  space   = surface.space
-                  err_msg = "BTAP/TBD: #{id} space (#{cas})?"
-                  refute_empty(space, err_msg)
-
-                  # All spaces are tagged as either:
-                  #   - 'unconditioned' (e.g. attics, crawlspaces), or
-                  #   - 'nonresconditioned' (e.g. plenums, classrooms)
-                  space = space.get
-                  attic = false
-                  prop  = space.additionalProperties.getFeatureAsString(tag)
-
-                  err_msg = "BTAP/TBD: #{id} space condition (#{cas})?"
-                  refute_empty(prop, err_msg)
-
-                  unless space.partofTotalFloorArea
-                    attic = prop.get.downcase == "unconditioned"
-                  end
-
-                  # The greatest (poorest) possible NECB Uo factor in insulated
-                  # assemblies is 0.315 W/m2.K, or Rsi 3.17 (R18).
-                  #
-                  # The lowest possible Uo factor in uninsulated assemblies is
-                  # approx. 4.46 W/m2.K, or RSi 0.224 (R 1.27).
-                  #
-                  # So there's quite a gap between insulated vs uninsulated
-                  # constructions when working with the NECBs. A potentially
-                  # simple way of determining whether an assembly is indeed
-                  # insulated/costed: if TBD.rsi() > 1.0.
-                  err_msg = "BTAP/TBD: #{id} attic rsi (#{cas})?"
-
-                  if attic
-                    if boundary == "outdoors"
-                      assert(TBD.rsi(lc, film) < 1.0, err_msg) # uninsulated
-                    else
-                      adjacent = surface.adjacentSurface
-                      err_msg  = "BTAP/TBD: #{id} adjacent (#{cas})?"
-                      refute_empty(adjacent, err_msg)
-
-                      other   = adjacent.get.space
-                      err_msg = "BTAP/TBD: #{id} other (#{cas})?"
-                      refute_empty(other, err_msg)
-
-                      other = other.get
-                      prop  = other.additionalProperties.getFeatureAsString(tag)
-
-                      err_msg = "BTAP/TBD: #{id} space condition 2 (#{cas})?"
-                      refute_empty(prop, err_msg)
-
-                      if other.partofTotalFloorArea
-                        assert(TBD.rsi(lc, film) > 1.0, err_msg)   # insulated
-                      else
-                        if prop.get.downcase == "unconditioned"    # 2nd attic?
-                          assert(TBD.rsi(lc, film) < 1.0, err_msg) # uninsulated
-                        else
-                          assert(TBD.rsi(lc, film) > 1.0, err_msg) # insulated
-                        end
-                      end
-                    end
-                  else
-                    if boundary == "outdoors"
-                      assert(TBD.rsi(lc, film) > 1.0, err_msg) # insulated
-                    end
-                  end
+                  # Any (insulated) layered construction also holds:
+                  err_msg = "BTAP/TBD air film resistances (#{cas})?"
+                  assert(prop.hasFeature("btap_film"))
+                  err_msg = "BTAP/TBD total Ut factor (#{cas})?"
+                  assert(prop.hasFeature("btap_ut"))
+                  err_msg = "BTAP/TBD costed construction identifier (#{cas})?"
+                  assert(prop.hasFeature("btap_id"))
                 end
 
                 fdback << "BTAP/TBD processes skipped"
@@ -317,42 +253,42 @@ class NECB_TBD_Tests < Minitest::Test
                 assert_kind_of(Hash, st.tbd.feedback, err_msg)
                 err_msg = "BTAP/TBD: Missing feedback logs (#{cas})?"
                 assert(st.tbd.feedback.key?(:logs), err_msg)
-                # err_msg = "BTAP/TBD: Invalid feedback logs (#{cas})?"
-                # assert_kind_of(Array, st.tbd.feedback[:logs], err_msg)
-                # err_msg = "BTAP/TBD: Missing tally Hash (#{cas})?"
-                # assert_kind_of(Hash, st.tbd.tally, err_msg)
-                # err_msg = "BTAP/TBD: Missing model 'comply' key (#{cas})?"
+                err_msg = "BTAP/TBD: Invalid feedback logs (#{cas})?"
+                assert_kind_of(Array, st.tbd.feedback[:logs], err_msg)
+                err_msg = "BTAP/TBD: Missing tally Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.tally, err_msg)
+                err_msg = "BTAP/TBD: Missing model 'comply' key (#{cas})?"
 
-                # assert(st.tbd.model.key?(:complies), err_msg)
+                assert(st.tbd.model.key?(:complies), err_msg)
 
-                # if st.tbd.model[:complies]
-                  # fdback << " ... compliant!"
-                # else
-                  # fdback << " ... non-compliant!"
-                # end
+                if st.tbd.model[:complies]
+                  fdback << " ... compliant!"
+                else
+                  fdback << " ... non-compliant!"
+                end
 
-                # err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
-                # assert(st.tbd.model.key?(:surfaces), err_msg)
-                # err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
-                # assert_kind_of(Hash, st.tbd.model[:surfaces], err_msg)
-                # err_msg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
-                # refute_empty(st.tbd.model[:surfaces], err_msg)
-                # surfaces = st.tbd.model[:surfaces]
+                err_msg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
+                assert(st.tbd.model.key?(:io), err_msg)
+                err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
+                assert(st.tbd.model.key?(:surfaces), err_msg)
+                err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.model[:surfaces], err_msg)
+                err_msg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
+                refute_empty(st.tbd.model[:surfaces], err_msg)
+                surfaces = st.tbd.model[:surfaces]
 
                 # Regardless of whether BTAP/TBD were successful or not in
                 # uprating the building constructions (option == 'uprate'),
                 # deratable surfaces should have been derated nonetheless.
                 model.getSurfaces.each do |surface|
-                  id   = surface.nameString
-                  film = surface.filmResistance
-                  # err_msg = "BTAP/TBD: Mismatched #{id} surfaces (#{cas})?"
-                  # assert(surfaces.key?(id), err_msg)
-                  # next unless surfaces[id].key?(:deratable)
-                  # next unless surfaces[id].key?(:type     )
-                  # next unless surfaces[id].key?(:heatloss )
-                  # next unless surfaces[id][:deratable]
-                  # next unless surfaces[id][:heatloss ].abs > TBD::TOL
-                  next unless surface.outsideBoundaryCondition.downcase == "outdoors" # TEMPORARY!!
+                  id = surface.nameString
+                  err_msg = "BTAP/TBD: Mismatched #{id} surfaces (#{cas})?"
+                  assert(surfaces.key?(id), err_msg)
+                  next unless surfaces[id].key?(:deratable)
+                  next unless surfaces[id].key?(:type     )
+                  next unless surfaces[id].key?(:heatloss )
+                  next unless surfaces[id][:deratable]
+                  next unless surfaces[id][:heatloss ].abs > TBD::TOL
 
                   lc = surface.construction
                   err_msg = "BTAP/TBD: Nilled #{id} construction (#{cas})?"
@@ -360,15 +296,26 @@ class NECB_TBD_Tests < Minitest::Test
                   lc.get.to_LayeredConstruction
                   err_msg = "BTAP/TBD: Nilled #{id} layered construction (#{cas})?"
                   refute_empty(lc, err_msg)
-                  lc = lc.get
-                  next unless lc.additionalProperties.hasFeature("btap_uo")
-
+                  lc      = lc.get
                   nom     = lc.nameString.downcase
                   err_msg = "Failed TBD processes #{nom} #{id} (#{cas})?"
                   assert_includes(nom, " c tbd", err_msg)
+                  prop    = lc.additionalProperties
+                  next unless prop.hasFeature("btap_uo")
 
-                  # prop = surface.additionalProperties.getFeatureAsDouble("btap_uo")
-                  # err_msg = "BTAP/TBD: #{id} uprated Uo (#{cas})?"
+                  # Any (insulated) layered construction also holds:
+                  err_msg = "BTAP/TBD air film resistances (#{cas})?"
+                  assert(prop.hasFeature("btap_film"))
+                  err_msg = "BTAP/TBD total Ut factor (#{cas})?"
+                  assert(prop.hasFeature("btap_ut"))
+                  err_msg = "BTAP/TBD costed construction identifier (#{cas})?"
+                  assert(prop.hasFeature("btap_id"))
+                  uo      = prop.getFeatureAsDouble("btap_uo")
+                  film    = prop.getFeatureAsDouble("btap_film")
+                  err_msg = "BTAP/TBD: #{id} Uo (#{cas})?"
+                  refute_empty(uo, err_msg)
+                  err_msg = "BTAP/TBD: #{id} air film resistances (#{cas})?"
+                  refute_empty(film, err_msg)
 
                   if option == 'uprate'
                     # refute_empty(prop, err_msg)

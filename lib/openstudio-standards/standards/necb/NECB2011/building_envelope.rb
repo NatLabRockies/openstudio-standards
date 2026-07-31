@@ -743,12 +743,19 @@ class NECB2011
     eWall.additionalProperties.setFeature("btap_id", id)
     eWall.additionalProperties.setFeature("btap_type", "walls")
 
-    # Also assign default exterior wall construction properties to building.
+    # Add default exterior wall construction properties to building or spaces.
     if bldg
       model.getBuilding.additionalProperties.setFeature("btap_uo", eWallU)
       model.getBuilding.additionalProperties.setFeature("btap_ut", eWallU)
       model.getBuilding.additionalProperties.setFeature("btap_id", id)
       model.getBuilding.additionalProperties.setFeature("btap_type", "walls")
+    else
+      spaces.each do |sp|
+        sp.additionalProperties.setFeature("btap_uo", eWallU)
+        sp.additionalProperties.setFeature("btap_ut", eWallU)
+        sp.additionalProperties.setFeature("btap_id", id)
+        sp.additionalProperties.setFeature("btap_type", "walls")
+      end
     end
 
     # Outdoor-facing roof.
@@ -1041,6 +1048,14 @@ class NECB2011
       iAtticWall.additionalProperties.setFeature("btap_ut", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)
       iAtticWall.additionalProperties.setFeature("btap_type", "walls")
+
+      # Add default exterior wall construction properties to building or spaces.
+      attics.each do |sp|
+        sp.additionalProperties.setFeature("btap_uo", eWallU)
+        sp.additionalProperties.setFeature("btap_ut", eWallU)
+        sp.additionalProperties.setFeature("btap_id", id)
+        sp.additionalProperties.setFeature("btap_type", "walls")
+      end
 
       # Interzone (insulated) attic 'floors': insulation levels should match
       # 'exposed roof' presciptive requirements of CONDITIONED spaces below.

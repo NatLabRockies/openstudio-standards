@@ -43,7 +43,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
-      'Warehouse'
+      # 'Warehouse'
     ]
 
     @templates = [
@@ -322,8 +322,6 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "# insulated constructions (#{cas})"
               assert_equal(cs.size, 6, err_msg)
 
-              puts
-
               # Insulated (layered) constructions (i.e. part of the building
               # envelope) inherit area-weighted air film resistances, if relying
               # on the 'structure' option.
@@ -356,8 +354,6 @@ class NECB_Structure_Tests < Minitest::Test
                 err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
                 assert_equal(fR.round(3), fr.round(3))
               end
-
-              puts
 
               # NECB2015: No uprating (Uo == NECB prescriptive requirements).
               if template == "NECB2015"
