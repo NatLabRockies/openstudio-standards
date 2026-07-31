@@ -1,4 +1,44 @@
+module ACM179dPRMFanPowerMetadata
+  PRM_FAN_POWER_FEATURE_METHODS = {
+    'supply_fan_w' => :air_loop_hvac_get_supply_fan_power,
+    'return_fan_w' => :air_loop_hvac_get_return_fan_power,
+    'relief_fan_w' => :air_loop_hvac_get_relief_fan_power,
+  }.freeze
+
+  def ensure_prm_fan_power_features(air_loop_hvac, prm_standard)
+    fan_power_by_feature = PRM_FAN_POWER_FEATURE_METHODS.transform_values do |method_name|
+      prm_standard.send(method_name, air_loop_hvac).to_f
+    end
+    ensure_prm_fan_power_features_for_zones(air_loop_hvac.thermalZones.sort, air_loop_hvac.name, fan_power_by_feature)
+  end
+
+  def ensure_prm_fan_power_features_for_zones(thermal_zones, object_name, fan_power_by_feature)
+    repaired_zones = []
+    thermal_zones.each do |zone|
+      additional = zone.additionalProperties
+      missing_features = fan_power_by_feature.keys.reject do |feature|
+        additional.hasFeature(feature) && additional.getFeatureAsDouble(feature).is_initialized
+      end
+      next if missing_features.empty?
+
+      missing_features.each do |feature|
+        additional.setFeature(feature, fan_power_by_feature[feature])
+      end
+      repaired_zones << zone.nameString
+    end
+
+    unless repaired_zones.empty?
+      OpenStudio.logFree(OpenStudio::Warn, '179d.acm.Model',
+                         "Added missing PRM fan-power metadata for #{repaired_zones.size} zone(s) on #{object_name}.")
+    end
+
+    repaired_zones
+  end
+end
+
 class ACM179dACM2019
+  include ACM179dPRMFanPowerMetadata
+
   ACM_BUILDING_TYPE_BY_PROTOTYPE = {
     'SmallOffice' => 'Office',
     'MediumOffice' => 'Office',
@@ -14,7 +54,6 @@ class ACM179dACM2019
   ACM_EXHAUST_SPACE_TYPES_PRM_2019 = ['Kitchen', 'Restroom', 'Cafeteria'].freeze
   ACM_INFILTRATION_RATE_CFM_PER_FT2 = 0.0448
   NON_ACM_REHEAT_MAX_AIR_TEMPERATURE_C = 43.3
-  NON_ACM_REHEAT_SMALL_ZONE_FLOOR_AREA_RATIO = 0.05
   REHEAT_HIGH_OCC_MIN_DENSITY_PPL_PER_M2 = 0.269
   REHEAT_HIGH_OCC_MIN_PEOPLE = 50.0
 
@@ -296,8 +335,11 @@ class ACM179dACM2019
 
   def acm_excluded_electric_equipment?(equipment)
     definition = equipment.electricEquipmentDefinition
-    values = [equipment.nameString, definition.nameString]
-    values << equipment.endUseSubcategory if equipment.respond_to?(:endUseSubcategory)
+    name_values = [equipment.nameString, definition.nameString]
+    end_use = equipment.respond_to?(:endUseSubcategory) ? equipment.endUseSubcategory.to_s : ''
+    return false if end_use != 'Elevators' && name_values.any? { |value| value.to_s.downcase.include?('acm electric equipment') }
+
+    values = name_values + [end_use]
     values.any? do |value|
       ACM_ELECTRIC_EQUIPMENT_EXCLUDED_NAME_FRAGMENTS.any? { |fragment| value.to_s.downcase.include?(fragment) }
     end
@@ -557,13 +599,13 @@ class ACM179dACM2019
     true
   end
 
-  # Why: the ACM overlay should own 179D decisions without replacing the PRM
-  # rule engine.
-  # What: installs ACM infiltration and DCV hooks on one vanilla PRM instance.
-  # How: defines singleton methods that delegate selected calls back here.
+  # Why: the ACM overlay should own 179D decisions without replacing the PRM rule engine.
+  # What: installs ACM infiltration, building-type, lighting, and fan-power hooks.
+  # How: uses singleton methods so the pinned PRM class stays untouched.
   # Used by: the baseline and HVAC-control measures on PRM-2019 paths.
   def prepare_prm_standard_for_acm_overrides(prm_standard)
     acm_standard = self
+    prm_fan_power_method = prm_standard.method(:air_loop_hvac_apply_prm_baseline_fan_power)
 
     prm_standard.define_singleton_method(:baseline_thermal_zone_demand_control_ventilation_required?) do |thermal_zone|
       prm_standard.send(:user_model_zone_demand_control_ventilation_required?, thermal_zone)
@@ -588,6 +630,10 @@ class ACM179dACM2019
     end
     prm_standard.define_singleton_method(:model_remap_office) do |model, floor_area|
       acm_standard.model_remap_office(model, floor_area)
+    end
+    prm_standard.define_singleton_method(:air_loop_hvac_apply_prm_baseline_fan_power) do |air_loop_hvac|
+      acm_standard.ensure_prm_fan_power_features(air_loop_hvac, prm_standard)
+      prm_fan_power_method.call(air_loop_hvac)
     end
 
     prm_standard
@@ -951,20 +997,11 @@ class ACM179dACM2019
     end
   end
 
-  # Why: small non-ACM perimeter VAV zones can lack reheat headroom after PRM
-  # sizing adjustments.
-  # What: raises MaximumReheatAirTemperature on qualifying VAV:Reheat terminals.
-  # How: limits changes to small exterior zones and never lowers an existing cap.
-  # Used by: baseline post-overrides and proposed normalization.
+  # Raises exterior non-ACM VAV:Reheat terminal caps after PRM sizing without lowering existing caps.
   def apply_non_acm_reheat_max_air_temperature_headroom(model)
-    total_floor_area_m2 = model.getThermalZones.sum(&:floorArea)
-    return if total_floor_area_m2 <= 0.0
-
-    small_zone_max_area_m2 = total_floor_area_m2 * NON_ACM_REHEAT_SMALL_ZONE_FLOOR_AREA_RATIO
     model.getThermalZones.each do |zone|
       next if acm_exhaust_zone?(zone)
       next unless zone.spaces.any? { |space| space.exteriorWallArea > 0.0 }
-      next if zone.floorArea > small_zone_max_area_m2
 
       air_terminal = zone.airLoopHVACTerminal
       next unless air_terminal.is_initialized && air_terminal.get.to_AirTerminalSingleDuctVAVReheat.is_initialized
