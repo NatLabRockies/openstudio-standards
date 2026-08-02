@@ -3131,3 +3131,24 @@ hbix ran a structural + PDF-verified audit of all 192 NECB tables
   D-59/D-60/D-61.
 
 - Who/when: Fable under D-10, 2026-08-02, on phylroy relaying the audit.
+
+### D-60 sweep amendment (2026-08-02): first-ever 2025-vintage fleet sweep
+
+`VINTAGE` knob added to `necb_archetype_sweep.rb` (pipeline edition only —
+the proposed is always the legacy NECB2020 archetype; the OSM cache is
+shared, run dirs/results fork as `_v2025`). Week sweep, all 17 archetypes
+(fleet 15 + Hospital + Outpatient), 17/17 PASS.
+
+**Reference kWh IDENTICAL to the 2020 week table on all 17** — as D-60's
+matrix and efficiency verification pre-registered. Three attributed
+differences, ONE mechanism: 2020's sentence-(4) unmet-cooling test (within
++10% of reference) fails on single-digit week-run hours (LargeOffice 4.67 vs
+0.0, SmallHotel 8.25 vs 6.9, Outpatient 14.33 vs 3.3) and triggers one
+capacity iteration each; 2025's allowance is max(+10%, **+20 h**) and the
+floor absorbs all three (zero iterations). Consequent proposed-kWh deltas
+(−0.2 to −1.1%) are the 2020-side sizing bumps, and the two verdict flips
+(Outpatient, SmallHotel week runs → compliant under 2025) are the same
+documented floor. The vintages differ exactly where the printed sentences
+differ, nowhere else.
+
+- Who/when: Fable under D-10, 2026-08-02.

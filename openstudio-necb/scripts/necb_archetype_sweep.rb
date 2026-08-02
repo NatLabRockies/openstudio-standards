@@ -21,7 +21,11 @@
 # NaturalGas flips the whole Table 8.4.4.7.-B gas column (boilers, HW
 # baseboards, gas coils, boiler staging). LOC picks the EPW/DDY + Table C-1
 # HDD — edmonton (zone 7A) / yellowknife (zone 8) exercise the HDD-dependent
-# envelope and ERV rows. Cache keys include both, so variants coexist.
+# envelope and ERV rows. VINTAGE (2020 default | 2025) picks the PIPELINE
+# edition only — the proposed is ALWAYS the legacy NECB2020 archetype (legacy
+# has no 2025 generator), so the generated-OSM cache is shared across
+# vintages while run dirs and result files fork. Cache keys include
+# fuel/loc(/vintage), so variants coexist.
 
 require 'fileutils'
 require 'json'
@@ -46,8 +50,15 @@ raise(ArgumentError, "unknown LOC '#{LOC}' (#{LOCATIONS.keys.join('/')})") unles
 EPW = LOCATIONS[LOC][:epw]
 DDY = EPW.sub('.epw', '.ddy')
 HDD = LOCATIONS[LOC][:hdd]
-VARIANT = [FUEL == 'Electricity' ? nil : FUEL.downcase, LOC == 'toronto' ? nil : LOC].compact.join('_')
-SUFFIX = VARIANT.empty? ? '' : "_#{VARIANT}"
+VINTAGE = ENV.fetch('VINTAGE', '2020')
+raise(ArgumentError, "unknown VINTAGE '#{VINTAGE}' (2020/2025)") unless %w[2020 2025].include?(VINTAGE)
+
+# The proposed-OSM cache is vintage-independent (always the legacy NECB2020
+# archetype); run dirs and result files carry the vintage.
+GEN_VARIANT = [FUEL == 'Electricity' ? nil : FUEL.downcase, LOC == 'toronto' ? nil : LOC].compact.join('_')
+SUFFIX = GEN_VARIANT.empty? ? '' : "_#{GEN_VARIANT}"
+RUN_VARIANT = [GEN_VARIANT.empty? ? nil : GEN_VARIANT, VINTAGE == '2020' ? nil : "v#{VINTAGE}"].compact.join('_')
+RUN_SUFFIX = RUN_VARIANT.empty? ? '' : "_#{RUN_VARIANT}"
 FileUtils.mkdir_p(CACHE_DIR)
 
 def generate!(type)
@@ -82,11 +93,11 @@ def sweep_one(type)
   # dirs/result files so week-run artifacts survive side by side.
   mode = ENV.fetch('SWEEP_MODE', 'sizing')
   annual = %w[annual full].include?(mode)
-  run_dir = File.join(CACHE_DIR, "sweep_run#{mode == 'full' ? '_full' : ''}_#{type.downcase}#{SUFFIX}")
+  run_dir = File.join(CACHE_DIR, "sweep_run#{mode == 'full' ? '_full' : ''}_#{type.downcase}#{RUN_SUFFIX}")
   FileUtils.rm_rf(run_dir)
   FileUtils.mkdir_p(run_dir)
   result = OpenStudioNECB.performance_compliance(
-    osm, vintage: '2020', simulate: annual ? :annual : :sizing, hdd: HDD,
+    osm, vintage: VINTAGE, simulate: annual ? :annual : :sizing, hdd: HDD,
     weather: { epw: EPW, ddy: DDY }, run_dir: run_dir,
     run_period: mode == 'annual' ? { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 } : nil)
   ref = result.reference_model
@@ -110,7 +121,7 @@ rescue StandardError => e
   { type: type, verdict: 'ERROR', detail: "#{e.class}: #{e.message[0, 200]}" }
 end
 
-RESULT_TAG = ENV.fetch('SWEEP_MODE', 'sizing') == 'full' ? "_full#{SUFFIX}" : SUFFIX
+RESULT_TAG = ENV.fetch('SWEEP_MODE', 'sizing') == 'full' ? "_full#{RUN_SUFFIX}" : RUN_SUFFIX
 pids = TYPES.to_h do |type|
   [Process.fork do
     result = sweep_one(type)
@@ -123,6 +134,6 @@ results = TYPES.map { |t| JSON.parse(File.read(File.join(CACHE_DIR, "result_#{t}
 
 puts
 mode_label = { 'annual' => 'annual/week-run', 'full' => 'FULL ANNUAL (8760 h)' }.fetch(ENV.fetch('SWEEP_MODE', 'sizing'), 'sizing')
-puts "necb_archetype_sweep results (#{mode_label} mode, fuel=#{FUEL}, loc=#{LOC}, #{TYPES.size} parallel):"
+puts "necb_archetype_sweep results (#{mode_label} mode, vintage=#{VINTAGE}, fuel=#{FUEL}, loc=#{LOC}, #{TYPES.size} parallel):"
 results.each { |r| puts format('  %-22s %-18s %s', r[:type], r[:verdict], r[:detail]) }
 exit(results.all? { |r| r[:verdict] == 'PASS' } ? 0 : 1)
