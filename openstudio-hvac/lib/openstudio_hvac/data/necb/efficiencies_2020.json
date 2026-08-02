@@ -8,7 +8,7 @@
       "5.2.12.1",
       "5.2.12.2"
     ],
-    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards."
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 (D-59): unitary_acs = Table 5.2.12.1.-A exact; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps >= 19 kW = Table -A exact, < 19 kW = Table -B SPVAC EER 11 (documented interpretation); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The heat_rejection family is VESTIGIAL for the reference path - never read by apply_efficiencies; the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the vendored NECB reference part-load curves."
   },
   "boilers": [
     {
@@ -180,7 +180,7 @@
       "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
       "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -197,7 +197,7 @@
       "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
       "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -214,7 +214,7 @@
       "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
       "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -231,7 +231,7 @@
       "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
       "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -248,7 +248,7 @@
       "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
       "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -265,7 +265,7 @@
       "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
       "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -282,7 +282,7 @@
       "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
       "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -299,7 +299,7 @@
       "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
       "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -316,7 +316,7 @@
       "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
       "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -333,7 +333,7 @@
       "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
       "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -350,7 +350,7 @@
       "capft": "WaterCooled_Screw_CAPFT_NECB2011",
       "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -367,7 +367,7 @@
       "capft": "WaterCooled_Screw_CAPFT_NECB2011",
       "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -384,7 +384,7 @@
       "capft": "WaterCooled_Screw_CAPFT_NECB2011",
       "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -401,7 +401,7 @@
       "capft": "WaterCooled_Screw_CAPFT_NECB2011",
       "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -418,7 +418,7 @@
       "capft": "WaterCooled_Screw_CAPFT_NECB2011",
       "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -435,7 +435,7 @@
       "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
       "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -452,7 +452,7 @@
       "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
       "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -469,7 +469,7 @@
       "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
       "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "WaterCooled",
@@ -486,7 +486,7 @@
       "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
       "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
       "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
       "cooling_type": "AirCooled",
@@ -503,7 +503,7 @@
       "capft": null,
       "eirft": null,
       "eirfplr": null,
-      "notes": "capacity in ton, full load eff in kW/ton"
+      "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     }
   ],
   "unitary_acs": [

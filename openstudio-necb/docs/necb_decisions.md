@@ -1893,6 +1893,54 @@ orphan-keys all green.
 - **Who/when:** phylroy ruled the election 2026-07-29; implemented by Fable
   under D-10, 2026-08-02.
 
+## D-59 — Equipment-efficiency minimums verified against the printed NECB 2020 tables
+
+**What.** phylroy asked (2026-08-02): "did you do a comparison of the system
+efficiencies required by the NECB 2020 reference systems?" Answer was no —
+the vendored `efficiencies_2020.json` was ported from legacy and never diffed
+against the printed tables. Done now, value by value, for every family the
+reference path applies [RAN `get_table` on 5.2.12.1.-A/-B/-G/-H/-I/-K/-M/-N/-O/-P].
+
+| family | printed table | verdict |
+|---|---|---|
+| unitary_acs (RTU DX) | -A | EXACT — bins (19/40/70/223 kW ↔ Btu/h) + EER/SEER ladder |
+| PTAC (TTW reference) | -G | EXACT — formula coefficient 0.3058/kBtu·h = printed 1.0435/kW ÷ 3.412 |
+| heat_pumps cooling | -A (≥19 kW), -B (<19) | ≥19 EXACT; <19 = -B SPVAC EER 11 (interpretation, below) |
+| heat_pumps_heating | -A | EXACT — HSPF 7.4; COPh 3.30/3.20 at 8.3 °C |
+| boilers | -N | EXACT — gas AFUE 90/Et 90/Ec 90; oil 86/87/88; electric 100% |
+| furnaces | -O | EXACT within strict-side row choices (AFUE 95% ≤66 kW; Et 81% above) |
+| chillers | **-K PATH B** | EXACT — every kW/ton = 3.51685/printed COPc (4.513/4.694/5.177/5.633/6.018 PD; 5.065/5.544/5.917/6.018 centrifugal; 2.866 air-cooled) |
+| heat_rejection | (none) | VESTIGIAL — 90.1-sourced rows never read; tower fan from Table 5.2.12.2 + 8.4.4.11.(2)-(3) cells (apply_tower_rules, D-26) |
+
+**Findings — all documentation, no value defects:**
+
+1. **The chiller family carried NO provenance** ("capacity in ton, kW/ton") —
+   it is Table -K **Path B** exactly. The path election is now documented:
+   Path B full-load COPc with the vendored NECB reference part-load curves
+   standing in for Path B's IPLV side (E+ models full-load COP + curves, not
+   IPLV). Notes rewritten on all 20 rows.
+2. **Small-HP cooling (<19 kW) = EER 11.0 from Table -B (SPVAC)**, not -A's
+   SEER 15. Lenient-side interpretation, faithful to its cited cell, and
+   nearly inert: the NECB shared-unit reference RTU almost always sizes into
+   the ≥19 kW bins, which match -A exactly. Kept, documented.
+3. **heat_rejection is 90.1-vintage data AND unread by the reference path** —
+   pinned as vestigial by test (a future consumer must face the provenance
+   deliberately).
+4. PTHP formula rows are empty — inert (no PTHP reference component; the TTW
+   reference builds PTAC + baseboard).
+5. IEER/IPLV/SCOP columns are not modeled anywhere — full-load + curves is
+   the modeling idiom (the curve story of D-03/D-13).
+6. **2025's unitary/HP families DIFFER from 2020's** — the 2025-edition pass
+   is open follow-on work.
+
+**Pinned:** `openstudio-hvac/test/test_efficiency_provenance.rb` (6 runs,
+37 assertions) — each assertion states the printed value and the conversion,
+so data drift fails with the printed number in the message.
+
+- **Files:** `efficiencies_2020.json` (chiller notes + provenance block),
+  the new test.
+- **Who/when:** Fable under D-10, 2026-08-02.
+
 ## D-58 — The proposed→reference matrix (97 catalog systems): residential compatible-cooling and HP detection go fact-based
 
 **What.** phylroy asked (2026-08-02): "verify that the reference system that
