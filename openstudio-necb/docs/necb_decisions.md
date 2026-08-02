@@ -2990,3 +2990,41 @@ markers).
 VALIDATED baseline in the full sense — reviewed, not just swept.
 
 - Who/when: Fable under D-10 delegation, 2026-08-02.
+
+### D-58 FULL-ANNUAL refresh (2026-08-02) — five rows of the validated baseline superseded
+
+True 8760 h re-run of the five buildings the D-58 residential-copy fix moved;
+5/5 PASS. **These rows supersede their entries in the 2026-07-30 post-backlog
+table; the other ten rows of that table stand unchanged** (the D-52 and D-58
+week sweeps showed them identical to the kWh).
+
+| Building | 2026-07-30 | now | compliant | driver |
+|---|---|---|---|---|
+| HighriseApartment | 99.4 | **101.8** | NO | (4) unmet cooling 131 h vs ref 63.5 h; energy over by 1.8% |
+| LowriseApartment | 99.0 | **101.6** | NO | (4) unmet cooling 126 h vs ref 87.5 h; energy over by 1.6% |
+| MidriseApartment | 100.1 | **102.8** | NO | (4) unmet cooling 195.5 h vs ref 99 h; energy over by 2.8% |
+| SmallHotel | 95.6 | **97.2** | NO | energy PASSES; (4) unmet cooling 2 752.5 h vs ref 1 119.25 h |
+| LargeHotel | 93.2* | **95.4** | YES | clean; no iterations |
+
+(*the 2026-07-30 table listed LargeHotel under its D-46 column pair 93.2→94.4;
+94.4 was the standing value.)
+
+**Reading the flips honestly.** Nothing about the PROPOSED buildings changed —
+their unmet-cooling hours were always these. What changed is the REFERENCE:
+the dwelling-unit/guest-room blocks now carry the proposed's own systems (the
+Table -A copy the code requires) instead of through-the-wall systems whose
+large unmet-cooling made sentence (4)'s +10% test easy to pass. Against a
+correctly-copied reference that overheats less (allowance-level lighting
+gains), the legacy archetypes' residential blocks fail the unmet-cooling
+gate, and the three apartments also drift 1.6–2.8% over the energy target.
+The capacity iteration (2–3 rounds) bumped the proposed cooling factors and
+could not close 60–1 600 h gaps — PTAC cooling responds weakly to sizing
+factors on these blocks.
+
+**Standing consequence for the fixed-point premise:** the apartments are no
+longer ~100% anchors; under the corrected reference the legacy residential
+archetypes read as slightly NON-code-minimum (in the strict direction). The
+fleet trend table should quote 101.8 / 101.6 / 102.8 / 97.2 / 95.4 for these
+five from here on.
+
+- Who/when: Fable under D-10 delegation, 2026-08-02.
