@@ -102,4 +102,54 @@ class TestEfficiencyProvenance < Minitest::Test
                  'apply_efficiencies grew a heat_rejection consumer — re-verify its values against ' \
                  'the printed NECB table first (they are 90.1 vintages, D-59)')
   end
+
+  # ==================== NECB 2025 (D-60) ====================
+
+  DATA_2025 = JSON.parse(File.read(
+                           File.expand_path('../lib/openstudio_hvac/data/necb/efficiencies_2025.json', __dir__)
+                         ))
+
+  # 2025 -K/-N and the -G PTAC coefficients are byte-identical to 2020's
+  # printed tables (verified 2026-08-02) — so the vendored families must stay
+  # identical across editions.
+  def test_2025_shared_families_are_identical_to_2020
+    %w[chillers boilers heat_rejection].each do |family|
+      strip = ->(rows) { rows.map { |r| r.reject { |k, _| k == 'notes' } } }
+      assert_equal strip.call(DATA[family]), strip.call(DATA_2025[family]),
+                   "#{family}: printed 2025 tables are identical to 2020's — the vendored data must match"
+    end
+    ptac = ->(d) { d['unitary_acs'].select { |r| r['equipment_type'] == 'PTAC' }.map { |r| r.reject { |k, _| k == 'notes' } } }
+    assert_equal ptac.call(DATA), ptac.call(DATA_2025),
+                 'Table -G (PTAC) is identical in both printed editions'
+  end
+
+  # Table -A 2025: split-system small HSPF 7.8 (printed; 2020 printed 7.4),
+  # single-package stays 7.4; the COPh ladder is unchanged.
+  def test_2025_heat_pump_heating_matches_printed_table_a
+    small = DATA_2025['heat_pumps_heating'].select { |r| r['minimum_capacity'].to_f.zero? }
+    by_sub = small.to_h { |r| [r['subcategory'], r['minimum_heating_seasonal_performance_factor']] }
+    assert_in_delta 7.4, by_sub['Single Package'], 1e-9, 'printed 2025: single-package others HSPF 7.4'
+    assert_in_delta 7.8, by_sub['Split System'], 1e-9, 'printed 2025: split-system others HSPF 7.8'
+    low_temp = DATA_2025['heat_pumps_heating'].filter_map { |r| r['minimum_coefficient_of_performance_heating_low_temp'] }.uniq.sort
+    assert_equal [2.05, 2.25], low_temp, 'printed -8.3 C COPh vendored informationally'
+  end
+
+  # 2025 small-HP cooling takes the printed -A reading (SEER 15), unlike
+  # 2020's legacy -B reading (EER 11) — a documented cross-edition difference.
+  def test_2025_small_heat_pump_cooling_is_seer_15
+    small = DATA_2025['heat_pumps'].select { |r| r['minimum_capacity'].to_f.zero? && r['subcategory'] !~ /single-phase/ }
+    assert small.any?
+    assert(small.all? { |r| r['minimum_seasonal_efficiency'] == 15.0 },
+           'printed 2025 -A: small air conditioners AND heat pumps, others — SEER 15')
+  end
+
+  # The SEER2 single-phase additions (printed 14.3) are INERT for the engine:
+  # their subcategory never matches the Single Package lookup.
+  def test_2025_seer2_rows_are_present_and_inert
+    seer2 = DATA_2025['unitary_acs'].select { |r| r['minimum_seasonal_energy_efficiency_ratio_2'] }
+    assert_equal 4, seer2.size
+    assert(seer2.all? { |r| r['minimum_seasonal_energy_efficiency_ratio_2'] == 14.3 }, 'printed SEER2 14.3')
+    assert(seer2.all? { |r| r['subcategory'] =~ /single-phase/ },
+           "single-phase subcategory — never matched by the engine's 'Single Package' lookup")
+  end
 end

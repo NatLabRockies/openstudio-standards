@@ -2,21 +2,22 @@
   "provenance": {
     "code": "NECB",
     "edition": "2025",
-    "source": "NECB 2025 Table 5.2.12.1 series, transcribed/verified via the building-codes MCP server (necb:2025) against the vendored NECB 2020 tables. Letter map (2025): -K chillers, -N boilers, -O furnaces, -A unitary ACs & HPs, -I VRF, -M plant heat pumps (heating), -C PTAC/PTHP.",
+    "source": "NECB 2025 Table 5.2.12.1 series. RE-VERIFIED against the post-hbix#88 MCP extraction 2026-08-02 (D-60): the 2025 letter map MIRRORS 2020 (-A unitary ACs & HPs, -G PTAC/PTHP, -K chillers, -N boilers, -O furnaces, -I VRF, -M plant heat pumps heating). The earlier map in this block (\"-C PTAC/PTHP\") came from a corrupted pre-fix extraction; 2025 -C is the water/evaporatively-cooled unitary table.",
     "generated": "2026-07-12",
     "articles": [
       "5.2.12.1",
       "5.2.12.2"
     ],
     "verification": {
-      "chillers": "IDENTICAL: 2025 Table 5.2.12.1.-K Path B COPc values match all vendored bins exactly (scroll/screw/recip 4.513/4.694/5.177/5.633/6.018 at <264/528/1055/2110/>2110 kW; centrifugal 5.065/5.544/5.917/6.018; air-cooled 2.866). NECB reference uses Path B.",
-      "boilers": "IDENTICAL: -N gas AFUE 90 / Et 90 / Ec 90 at <88 / 88-733 / >=733 kW; oil 86/87/88 (MCP diff: trivial).",
-      "furnaces": "IDENTICAL: -O gas warm-air <=66 kW AFUE 95; 66-117 kW Et 81 (MCP diff: trivial).",
-      "unitary_acs": "IDENTICAL for engine-selected rows: small (<19 kW) SEER 15 (CSA C656 class); large EER ladder 11.2/11.0, 11.0/10.8, 10.0/9.8, 9.7/9.5 unchanged. 2025 ADDS single-phase DOE Appendix M1 classes (SEER2) - appended as distinct subcategory rows.",
-      "heat_pumps": "CHANGED (small bin): 2025 -A merges AC+HP classes, so HP cooling <19 kW is now SEER 15 (2020 tables used EER 11.0). Large EER ladder unchanged.",
-      "heat_pumps_heating": "CHANGED (split small bin): Split System <19 kW HSPF 7.4 -> 7.8 (CSA C656 split-others); Single Package stays 7.4. COPh bins 3.3/3.2/3.2/3.2 unchanged; 2025 also publishes COPh at -8.3C (2.25/2.05) - recorded informationally.",
-      "ptac_pthp": "Table -C changed moderately in 2025; the PTAC/PTHP EER-coefficient path is not implemented by this engine (documented gap, same as 2020) - 2020 coefficient rows carried over unmodified.",
-      "seer2_note": "SEER2/EER2/HSPF2 metrics are converted with the same formulas as SEER/EER/HSPF, matching the documented openstudio-standards assumption (Standards.CoilCoolingDXSingleSpeed: SEER2 assumed same as SEER for now)."
+      "unitary_acs": "Table -A 2025: large EER ladder identical to 2020 (verified printed); SEER2 single-phase rows (14.3) added verbatim - INERT for the engine (subcategory \"(single-phase)\" never matches the Single Package lookup).",
+      "heat_pumps": "Table -A 2025 small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions; the 2025 file takes that -A reading (SEER 15) while the 2020 file keeps legacy parity with the -B SPVAC EER 11 reading (D-59 finding 2) - a documented cross-edition interpretation difference, near-inert (shared-unit RTUs size >= 19 kW). Large ladder identical.",
+      "heat_pumps_heating": "Table -A 2025: split-system small HSPF 7.4 -> 7.8 (printed, verified); single-package stays 7.4; COPh 3.3/3.2 ladder identical; low-temp COPh 2.25/2.05 vendored informationally (unread by the engine - the -8.3 C behaviour comes from the reference curves).",
+      "ptac_pthp": "Table -G 2025 is IDENTICAL to 2020 -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9). The earlier claim that \"Table -C changed moderately\" was the corrupted-extraction artifact; the carried-over coefficients are CORRECT for 2025 and the engine DOES apply them (verified in fleet audits).",
+      "chillers": "Table -K 2025 is byte-identical to 2020 -K (verified printed): Path B COPc ladder unchanged.",
+      "boilers": "Table -N 2025 identical to 2020 (verified printed).",
+      "furnaces": "Table -O 2025 identical under the same documented row choices (2025 moves the three-phase AFUE 78/Et 80 option to the <= 66 kW bin; the vendored strict-side picks are unaffected).",
+      "heat_rejection_5_2_12_2": "Table 5.2.12.2 2025 = the same 10 rows as 2020 (the 2020 extraction doubled them); axial direct-contact tower <= 0.013 kW/kW in BOTH editions - the apply_tower_rules constant is correct for 2025.",
+      "selection_8_4_5_7_A": "Table 8.4.5.7.-A 2025 is VERBATIM 8.4.4.7.-A 2020 (verified printed); the vendored 2025 selection rules differ from 2020 only in table-number strings; the 97-system matrix run under vintage 2025 produces identical assignments (D-60)."
     }
   },
   "boilers": [

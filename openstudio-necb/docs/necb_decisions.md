@@ -1893,6 +1893,35 @@ orphan-keys all green.
 - **Who/when:** phylroy ruled the election 2026-07-29; implemented by Fable
   under D-10, 2026-08-02.
 
+## D-60 — The same verification pass, run for the NECB 2025 edition
+
+**What.** phylroy asked (2026-08-02): "run the same verification pass for the
+2025 edition." The vendored `efficiencies_2025.json` had been transcribed
+2026-07-12 — BEFORE the hbix table-extraction fixes — and its provenance
+carried a letter map from the corrupted extraction ("-C PTAC/PTHP"). Re-run
+against the corrected extraction [RAN `get_table` on 2025
+5.2.12.1.-A/-C/-G/-K/-N/-O, 5.2.12.2, 8.4.5.7.-A + 2020 5.2.12.2].
+
+| check | verdict |
+|---|---|
+| Letter map | 2025 MIRRORS 2020 exactly (-A unitary/HP, -G PTAC, -K chillers, -N boilers, -O furnaces). The old "-C = PTAC" map read the water/evap-cooled unitary table |
+| PTAC/PTHP (-G) | **IDENTICAL in both printed editions** — the old "changed moderately" claim was the corrupted-extraction artifact; the carried-over coefficients are CORRECT, and the engine DOES apply them (verified in fleet audits: 11.9/11.8/9.5 EER on reference PTACs) |
+| Chillers (-K) | byte-identical to 2020 printed — Path B ladder stands for 2025 |
+| Boilers (-N) / Furnaces (-O) | identical (2025 moves the three-phase furnace option to ≤66 kW; vendored strict-side picks unaffected) |
+| Tower (5.2.12.2) | same 10 rows both editions (2020's "20 rows" was extraction doubling); axial direct-contact ≤ 0.013 kW/kW — `apply_tower_rules`' constant correct for both |
+| Unitary/HP (-A) | genuine 2025 changes verified: split-system small HSPF 7.4→**7.8** ✓; SEER2 single-phase rows (14.3) vendored and INERT (subcategory never matches the lookup) ✓; low-temp COPh 2.25/2.05 vendored informationally (unread — the −8.3 °C behaviour comes from the reference curves) |
+| Small-HP cooling | cross-edition interpretation difference documented: 2025 file takes the printed -A reading (SEER 15); 2020 file keeps legacy's -B SPVAC reading (EER 11, D-59 finding 2). Both near-inert (shared-unit RTUs size ≥ 19 kW, where both editions match exactly) |
+| `dx_cooling_cop` field coverage | reads every 2025 field variant incl. `minimum_seasonal_efficiency` and SEER2/EER2 — the 2025 rows apply cleanly [READ efficiency.rb:1100-1116] |
+| Selection (8.4.5.7.-A) | **verbatim 2020's 8.4.4.7.-A** (printed); vendored 2025 selection rules differ only in table-number strings; the 97-system matrix under vintage '2025' produces IDENTICAL assignments (system/action/energy_type) to the adjudicated 2020 golden |
+
+**Pinned:** `test_efficiency_provenance.rb` extended to 10 runs / 49
+assertions — cross-edition identity for the shared families, the 7.8/7.4
+HSPF split, SEER 15, SEER2 inertness. The 2025 provenance block rewritten
+with the corrected letter map and today's verification.
+
+- **Files:** `efficiencies_2025.json` (provenance), the test.
+- **Who/when:** Fable under D-10, 2026-08-02.
+
 ## D-59 — Equipment-efficiency minimums verified against the printed NECB 2020 tables
 
 **What.** phylroy asked (2026-08-02): "did you do a comparison of the system
