@@ -227,7 +227,8 @@ module OpenStudioLighting
                        'daylighting sensors costed from the DAYLIGHTED-AREA fixture ratio (legacy rule: ' \
                        'ceil(ceil(fixtures x area ratio)/4) per aperture type per controlled zone)',
                        inputs: { zones: zones.size, sensors: sensors_total },
-                       value: "$#{total.round(2)}", article: '4.2.2.4.; 4.2.2.5.; 4.2.2.9.')
+                       value: "$#{total.round(2)}",
+                       article: 'NECB 2011 4.2.2.4./4.2.2.5./4.2.2.9. (legacy costing rule; 4.2.2.9. does not exist in NECB 2020/2025)')
         section['daylighting_sensor_cost'] = total.round(2)
         total
       end

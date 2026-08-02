@@ -2679,3 +2679,101 @@ the already-filed L-9 / #2127 fan-curve concerns.
 first checking whether the fan crossed 25 kW.**
 
 - Who/when: Claude under D-10 delegation, 2026-07-30.
+
+### Deferred review EXECUTED (2026-08-02, Fable) — pending_review.md closed
+
+The review pass deferred on 2026-07-29 ("no Fable today") ran today. Every
+reviewer DECISION owed by phases 0-4, 6 and 7 is adjudicated below; every
+verification item was ticked with fresh evidence (commands re-run today, not
+inherited from the implementers). Phase 5 (8.4.4.13.(2)(b)/(g), planned as
+D-52) remains the ONLY open backlog item — it was never implemented and was
+not a review target.
+
+**Gates re-run today, all green:** `test_decisions_registry.rb` 12/1045,
+`test_compliance.rb` 10/173, `test_necb_energy_recovery.rb` 10/238 (re-run
+AFTER the manifest edits below), `necb_orphan_keys.rb` OK,
+`test_daylighting_parity.rb` 3/17, `test_costing.rb` 5/29 (1 licensed-CSV
+skip), `rake necb:coverage_doc` regenerated with zero conflicts.
+
+**Adjudications (D-10 delegation):**
+
+- **D-53 confirmed by independent article read.** `get_section` on 2020
+  8.4.5.9 AND 2025 8.4.6.9: `Fuel_partload = Fuel_design x FHeatPLC` adjusts
+  FUEL CONSUMPTION — a fuel ratio, not an efficiency divisor — identical
+  coefficients both editions, FHeatPLC(1.0) = 0.999999 at the rating point.
+  The cubic stays. Also verified: only one caller path reaches
+  `part_load_curve`, and both vintage specs carry an explicit `form` key.
+- **D-54 VRP reading confirmed, with the reason made explicit:** the quantity
+  8.4.4.15.(1) makes identical is 8.4.3.6.(1)'s "minimum rates required by
+  the applicable ventilation standard, based on the proposed building's
+  specifications" — a property of the standard plus the proposed's specs. The
+  cloned DSOAs under ZoneSum ARE that quantity; copying VRP onto the
+  DIFFERENT reference topology would compute different, topology-dependent
+  system rates, which is precisely what (1) does not ask for. Peak-rate
+  methods stay uncopied. The 5.2.3.4 scope caveat (copying voluntary DCV is
+  the stricter direction) is also confirmed.
+- **D-55 direction and no-control case confirmed.** Note (1) to Table
+  8.4.4.7.-B legislates the reference humidifier's ENERGY SOURCE, which
+  presupposes its existence — a humidified proposed with no reference
+  counterpart could never comply, so the leniency is the code's, not ours.
+  And NO humidifier is built where the proposed has no working control: an
+  inert proposed humidifier consumes nothing, so inventing a reference RH
+  setpoint would inflate the target from fabricated input.
+- **D-56 condenser setpoint reset confirmed as PART of 5.2.2.9 compliance.**
+  An HX against a tower pinned at 29 C can never receive fluid colder than
+  the CHW return, so the "capable of 100% of the cooling load at wet-bulb
+  <= 7 C" capability would be fictitious without the reset — the E+
+  capability measurement (65/65 loaded hours carried, chiller off) exists
+  only WITH it. Side effect signed off: chillers get colder condenser water
+  in mild weather (+0.4% total electricity, physical — one plant, one
+  economizer). Scope guards verified in code (shared-loop info entry;
+  air-cooled/purchased loops warn, `reference.rb:792-805`).
+- **D-51's ':all' question is MOOT, superseded by D-57.** The reference now
+  uses `placement: :necb2020` — the code's own selection rule — which is
+  strictly more correct than either `:necb_default` (the 2011 criteria) or
+  `:all` (over-placement relative to 4.2.2.1.(10)/(13)).
+- **D-57 battery verified against the article text fetched today:**
+  (10)/(13) independence (`side || top`), every threshold operator matches
+  the verbatim sentences (>=150 / >=300 / ratio >= 2 / glazing < 2 m2 /
+  VT < 0.4 / > 55 degN with < 200 W), the (15)(a) blocked-sun exception is a
+  DECLARED manifest gap warned every run (not applying an exception is the
+  strict direction), the precedence flip primary > toplit > secondary is the
+  code's own order (4.2.2.5.(2)(b) stops the skylight extension at the
+  primary band; 4.2.2.3.(9) kills secondary beyond both), and the parity
+  gate still passes. `unknown_default: :required` confirmed — it tightens
+  the target and cannot grant an undeserved pass; the loud warning lets an
+  AHJ override. The 4 extraction conflicts were resolved by the hbix#88 fix
+  (2026-07-30 regen); the 3 remaining unresolved rows are structural (no
+  table row) and will never resolve.
+- **D-57 amendment — 4.2.2.1.(11)(b) independent secondary control: KEEP the
+  single combined-fraction zone control.** Two E+ DaylightingControl
+  reference points with split zone fractions are possible but the secondary
+  band's marginal dimming energy is small against the modelling complexity
+  (multi-space zones, reference-point placement); the deviation stays
+  declared in both manifests' gaps. Revisit only if a validation partner
+  needs it.
+- **Two interpretation notes recorded, no change:** (12)(a) is implemented as
+  max-ratio-over-all-windows excepting the WHOLE space's sidelighting —
+  per-area attribution would need per-window area bookkeeping the union
+  geometry discards; inert on the current fleet (no shading surfaces). And
+  strict 4.2.2.3.(9) can kill MORE secondary area than overlap-subtraction
+  does; keeping more secondary places more controls, the stricter direction.
+- **8.4.4.13.(2)(c) re-measured:** vendored CAP_FT cubic gives 0.9984 at
+  8.3 C (the identity holds) and 0.478 at -8.3 C against the code's "reduced
+  to 50%" — a 4.3% relative shortfall inherited from the legacy NECB2011
+  reference curve. Recorded as a known approximation under D-22, not
+  changed: exact-50% would break legacy parity for a sub-half-point effect.
+
+**Fixes made during review:** the stale "reference_daylighting (opt-in)"
+`how` strings in `reference_rules_{2020,2025}.json` now say "ON by default,
+D-51; placement per the 4.2.2.1.(10)-(15) rule, D-57"; the costing
+daylighting-sensor decision's `4.2.2.9.` citation is now labelled as the
+NECB 2011 legacy costing rule (that article does not exist in 2020/2025).
+The weak-assertion sweep found no other test satisfied by a manifest
+coverage warning (all remaining unscoped assertions match distinctive action
+markers).
+
+**Standing consequence:** the post-backlog FULL-ANNUAL table above is now the
+VALIDATED baseline in the full sense — reviewed, not just swept.
+
+- Who/when: Fable under D-10 delegation, 2026-08-02.
