@@ -3057,3 +3057,45 @@ fleet trend table should quote 101.8 / 101.6 / 102.8 / 97.2 / 95.4 for these
 five from here on.
 
 - Who/when: Fable under D-10 delegation, 2026-08-02.
+
+## D-61 — Staleness audit after the hbix extraction fixes: zero stale-data defects
+
+**What.** phylroy asked (2026-08-02): with hbix#88 fixed, "should you check for
+any other updates to the hbix tables/information that may have impacted our
+approach?" The issue history shows FOUR extraction fixes: #67 (Appendix A
+notes missing, closed 7-27), #71 (130 equations attached to the wrong
+article, 7-28), #87 (equation residue mis-classified as table content, 7-30),
+#88 (Table 4.2.1.6, 7-30). Most vendored data was transcribed 2026-07-12 —
+inside every suspect window.
+
+**Method [RAN `scratchpad/hbix_staleness_audit.rb`]:** every MCP-primary
+vendored artifact re-fetched via the stateless JSON-RPC path against the
+corrected extraction and diffed value-by-value; the 8.4.6 curve probe re-run
+for the #71 equation window.
+
+| artifact (fetched 7-12) | verdict |
+|---|---|
+| LPD Table 4.2.1.6 values (96 rows, 2025) | EXACT (one flag was the harness collapsing ≤25/>25 m²) |
+| engine interior LPDs | immune — legacy-primary; the MCP join was name-keyed (misalignment ⇒ non-match, never a wrong value) |
+| ERV 5.2.10.1.-A/-B | EXACT (all HDD bands, both tables) |
+| pumps 8.4.4.14 curves + 5.2.6.3 caps | EXACT (every coefficient; D-38 reconfirmed) |
+| envelope 3.2.2.2/3.2.2.3/3.2.3.1 | EXACT (incl. 0.757-for-1.2 m) |
+| exterior 4.2.3.1.-A..-E | EXACT |
+| GHG 11.4.1.1 + 11.4.2.1.-A/-B | EXACT |
+| EUI Table 8.4.4.1 | EXACT (all 4 printed rows) |
+| 8.4.6 curve equations (#71 window) | probe re-run: ALL EQUIVALENT — D-03/D-13 stand (the D-13 erratum was print-level; extraction faithful) |
+| 5.2.12.x, selection tables, 4.2.1.6 marks, fan bands | already re-verified post-fix (D-45/D-59/D-60) |
+| table_c1, shw_rules, loads/schedules | legacy-primary, immune |
+
+**Why nothing broke:** the corruption concentrated in complex multi-header
+tables (4.2.1.6) and cross-table letter alignment (caught by D-60); numeric
+single-header tables extracted correctly even pre-fix; several files were
+legacy-cross-checked at build time; name-keyed joins fail loudly. Open hbix
+issues (#85/#86/#90) are performance-only.
+
+Re-verified files carry a dated provenance stamp. (Repeat trap confirmed: a
+whole-file `json.dump` stamp pass reformatted two files — reverted and
+stamped by targeted regex; ALWAYS `git diff --stat` after touching data
+files.)
+
+- **Who/when:** Fable under D-10, 2026-08-02.
