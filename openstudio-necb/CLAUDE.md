@@ -14,16 +14,22 @@ floor-area space type must resolve against the NECB catalog; hard
 BY DESIGN, since unmatched types silently keep the proposed's lighting/loads
 in the reference clone; the raise lands inside the diagnostics begin so the
 audit still flushes) → weather attach → HDD (explicit → Table C-1 → .stat) →
-proposed sizing
+proposed sizing → **proposed ANNUAL (D-52: runs BEFORE the reference build —
+it depends on nothing downstream; when the proposed carries a heat pump,
+per-equipment delivered-heat variables are requested first and joined with
+`Classify.heating_election_inventory` into `proposed_annual:` for the
+8.4.4.13.(2)(g) aux-fuel election)**
 → reference_hvac + reference_envelope + reference_lighting (Part 4 allowance
 LPDs, always) + reference_shw (Part 6 minimum efficiencies, always) +
 reference_daylighting (ON by default, D-51) on ONE clone/audit → reference sizing →
 efficiencies RE-applied on sized capacities (with `proposed:` for the
 8.4.4.14 pump W/(L/s) transfer) + 5.2.10.1 energy-recovery
-determination on sized flows (Table 5.2.10.1.-A/-B) → annual runs → 8.4.1.2.(2)–(4)
+determination on sized flows (Table 5.2.10.1.-A/-B) → reference annual → 8.4.1.2.(2)–(4)
 verdicts → sentence-(5) capacity auto-iteration (per-thermal-block
 Sizing:Zone factor bumps, secant-targeted; global fallback; stall
-detection) → Section 10 tier → 2025 Part 11 GHG → optional costing of both
+detection; iterations may RE-run either building's annual, but the (2)(g)
+election is made once from the FIRST proposed annual and never re-litigated)
+→ Section 10 tier → 2025 Part 11 GHG → optional costing of both
 models → report.json / audit.json / audit.txt → optional compliance_report.html.
 
 All reference transforms run inside `audit.with_building('reference building')`

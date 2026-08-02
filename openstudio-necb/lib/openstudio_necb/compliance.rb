@@ -134,7 +134,7 @@ module OpenStudioNECB
       # 1. size the PROPOSED building (selection thresholds + efficiencies + costing
       #    all need capacities; the domain gems never simulate)
       if simulate == :none
-        audit.warn(:compliance, 'simulate: :none — proposed is UNSIZED; data-centre kW thresholds ' \
+        audit.warn(:compliance, 'proposed is UNSIZED (simulate: :none) — data-centre kW thresholds ' \
                                 'and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 ' \
                                 'energy-recovery determination needs sized flows and is SKIPPED')
       else
@@ -142,12 +142,38 @@ module OpenStudioNECB
         audit.info(:compliance, 'proposed sizing run complete', target: 'proposed')
       end
 
+      report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
+                 'proposed' => {}, 'reference' => {} }
+
+      # 1b. the proposed ANNUAL run — BEFORE the reference build (D-52). The
+      # proposed annual depends on nothing downstream (the reference is a
+      # clone; every later use of the proposed is read-only), so running it
+      # here costs zero extra simulations and hands the reference builder the
+      # annual data the 8.4.4.13.(2)(g) auxiliary-fuel election needs. When
+      # the proposed carries a heat pump, its per-equipment heating energy is
+      # requested first and joined with the SDK inventory after the run.
+      proposed_annual_data = nil
+      if simulate == :annual
+        report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
+        inventory = OpenStudioHVAC::Classify.heating_election_inventory(proposed)
+        hp_present = inventory[:loops].any? { |_, e| e[:hp].any? } ||
+                     inventory[:zones].any? { |_, list| list.any? { |e| e[:role] == :hp } }
+        if hp_present
+          Runner.request_run_period_variables!(
+            proposed, ['Heating Coil Heating Energy', 'Baseboard Total Heating Energy']
+          )
+        end
+        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
+        proposed_annual_data = heating_election_data(proposed, inventory, audit) if hp_present
+      end
+
       # 2. reference building: HVAC then envelope on ONE clone, same audit
       reference = nil
       lighting_prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       audit.with_building('reference building') do
         reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
-                                                               building: building, audit: audit)
+                                                               building: building, audit: audit,
+                                                               proposed_annual: proposed_annual_data)
         reference = reference_result.model
         OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
                                                     actual_roof_absorptance_used: actual_roof_absorptance_used,
@@ -204,15 +230,12 @@ module OpenStudioNECB
         end
       end
 
-      report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
-                 'proposed' => {}, 'reference' => {} }
       compliant = nil
 
       # 4. the energy comparison (8.4.1.2.(2)-(4)) with the sentence-(5) capacity
-      #    iteration loop
+      #    iteration loop. The PROPOSED annual already ran in step 1b (D-52);
+      #    only the reference's annual is new here.
       if simulate == :annual
-        report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
-        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
         run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'])
         iterate_capacities(proposed, reference, report, vintage: vintage, run_dir: run_dir,
                            run_period: run_period, max_iterations: max_capacity_iterations,
@@ -402,6 +425,36 @@ module OpenStudioNECB
       section['unmet_occupied_hours'] = Runner.unmet_occupied_hours(model)
       section['zone_unmet_occupied_hours'] = Runner.zone_unmet_occupied_hours(model)
       section['run_dir'] = run_dir
+    end
+
+    # D-52: join the SDK heating-equipment inventory (names + fuels, from
+    # openstudio-hvac's Classify) with the proposed annual run's per-equipment
+    # delivered-heat sums — the data the 8.4.4.13.(2)(g) auxiliary-fuel
+    # election consumes inside reference_hvac. SQL keys are upper-cased.
+    def heating_election_data(proposed, inventory, audit)
+      coil = Runner.run_period_sums(proposed, 'Heating Coil Heating Energy')
+      baseboard = Runner.run_period_sums(proposed, 'Baseboard Total Heating Energy')
+      lookup = lambda do |name, variable|
+        source = variable == OpenStudioHVAC::Classify::BASEBOARD_VARIABLE ? baseboard : coil
+        source[name.upcase] || 0.0
+      end
+      loops = inventory[:loops].to_h do |loop_name, entry|
+        [loop_name,
+         { hp_j: entry[:hp].sum { |n| lookup.call(n, OpenStudioHVAC::Classify::COIL_VARIABLE) },
+           aux: entry[:aux].map { |a| { fuel: a[:fuel], j: lookup.call(a[:name], OpenStudioHVAC::Classify::COIL_VARIABLE) } } }]
+      end
+      zones = inventory[:zones].to_h do |zone_name, list|
+        [zone_name, list.map { |e| { fuel: e[:fuel], j: lookup.call(e[:name], e[:variable]), role: e[:role] } }]
+      end
+      hp_gj = loops.values.sum { |e| e[:hp_j] } +
+              zones.values.sum { |l| l.sum { |e| e[:role] == :hp ? e[:j] : 0.0 } }
+      audit.info(:compliance,
+                 'proposed per-equipment heating energy extracted for the 8.4.4.13.(2)(g) auxiliary-fuel ' \
+                 'election (delivered heat, weather run period only)',
+                 target: 'proposed',
+                 inputs: { air_loops: loops.size, zones_with_heating: zones.size,
+                           heat_pump_gj: (hp_gj / 1e9).round(2) }, ruling: 'D-52')
+      { loops: loops, zones: zones }
     end
 
     # 8.4.1.2 sentences (2)-(4). A shortened run period reports the same arithmetic

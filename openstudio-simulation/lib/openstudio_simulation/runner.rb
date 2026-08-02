@@ -170,6 +170,45 @@ module OpenStudioSimulation
       zones
     end
 
+    # Request output variables at RunPeriod frequency (key '*'), idempotently —
+    # the NECB 8.4.4.13.(2)(g) auxiliary-fuel election (D-52) needs per-equipment
+    # heating energy from the proposed annual run.
+    def request_run_period_variables!(model, names)
+      existing = model.getOutputVariables.map { |v| [v.keyValue, v.variableName] }
+      names.each do |name|
+        next if existing.include?(['*', name])
+
+        variable = OpenStudio::Model::OutputVariable.new(name, model)
+        variable.setKeyValue('*')
+        variable.setReportingFrequency('RunPeriod')
+      end
+    end
+
+    # Sum a reported variable per KeyValue over the WEATHER run period(s) only.
+    # EnvironmentType = 3 filters out design days — a shared DDY can carry
+    # dozens, and an unfiltered sum silently mixes them in (the D-56 analysis
+    # trap). Keys are EnergyPlus UPPER-CASED object names.
+    # @return [Hash{String=>Float}] { 'COIL NAME' => joules }
+    def run_period_sums(model, variable_name)
+      sql = model.sqlFile
+      return {} if sql.empty?
+
+      rows = sql.get.execAndReturnVectorOfString(
+        "SELECT d.KeyValue || '|' || SUM(r.Value) FROM ReportData r " \
+        'JOIN ReportDataDictionary d ON r.ReportDataDictionaryIndex = d.ReportDataDictionaryIndex ' \
+        'JOIN Time t ON r.TimeIndex = t.TimeIndex ' \
+        "WHERE d.Name = '#{variable_name}' AND t.EnvironmentPeriodIndex IN " \
+        '(SELECT EnvironmentPeriodIndex FROM EnvironmentPeriods WHERE EnvironmentType = 3) ' \
+        'GROUP BY d.KeyValue'
+      )
+      return {} unless rows.is_initialized
+
+      rows.get.to_h do |line|
+        name, _, value = line.rpartition('|')
+        [name, value.to_f]
+      end
+    end
+
     def optional(value)
       value.is_initialized ? value.get : nil
     end

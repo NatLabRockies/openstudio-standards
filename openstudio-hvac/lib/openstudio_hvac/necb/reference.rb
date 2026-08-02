@@ -33,17 +33,19 @@ module OpenStudioHVAC
     # @param vintage [String] e.g. '2020'
     # @param audit [AuditLog, nil]
     # @return [Array<Assignment>]
-    def self.select_reference_systems(facts:, building:, vintage: '2020', audit: nil)
+    def self.select_reference_systems(facts:, building:, vintage: '2020', audit: nil, proposed_annual: nil)
       ruleset = rules(vintage)
       selection = ruleset.fetch('selection')
       definitions = ruleset.fetch('system_definitions')
+      hp_rules = ruleset.fetch('heat_pump_reference')
 
       facts.fetch(:zone_groups).map do |group|
         next unless group[:heated] || group[:cooled] # unconditioned: no reference system
 
         category = category_for(group, building, selection, audit)
         assignment = assign(group, category, building, selection, audit)
-        finalize(assignment, group, definitions, selection, facts, audit)
+        finalize(assignment, group, definitions, selection, facts, audit,
+                 hp_rules: hp_rules, proposed_annual: proposed_annual)
       end.compact
     end
 
@@ -206,7 +208,8 @@ module OpenStudioHVAC
 
     # ---- finalize: heat-pump override, energy type, catalog name ----
 
-    def self.finalize(assignment, group, definitions, selection, facts, audit)
+    def self.finalize(assignment, group, definitions, selection, facts, audit,
+                      hp_rules: nil, proposed_annual: nil)
       return assignment if assignment.action == :copy_proposed
 
       hp_rule = selection['special_rules']['heat_pump']
@@ -225,7 +228,11 @@ module OpenStudioHVAC
                         article: '8.4.4.13.(1); Note A-8.4.4.13', ruling: 'D-37')
       end
 
-      assignment.energy_type = reference_energy_type(group, selection, facts, audit)
+      assignment.energy_type = nil
+      if assignment.reference_system == 'hp'
+        assignment.energy_type = heat_pump_aux_energy_type(group, facts, hp_rules, proposed_annual, audit)
+      end
+      assignment.energy_type ||= reference_energy_type(group, selection, facts, audit)
       definition = definitions.fetch(assignment.reference_system.to_s)
       variant = definition.fetch(assignment.energy_type)
       assignment.catalog_name = variant.fetch('name')
@@ -298,14 +305,15 @@ module OpenStudioHVAC
     #   :kitchen_hood_zones, :refrigerated_zones (defaults derived from the model)
     # @param audit [AuditLog, nil]
     # @return [ReferenceResult] model (clone), assignments, audit
-    def self.reference_hvac(model, vintage: '2020', building: nil, audit: nil)
+    def self.reference_hvac(model, vintage: '2020', building: nil, audit: nil, proposed_annual: nil)
       audit ||= AuditLog.new
       reference = clone_model(model)
 
       facts = Classify.characterize(reference, audit: audit)
       info = building_info(reference, building, audit)
       assignments = select_reference_systems(facts: facts, building: info,
-                                             vintage: vintage, audit: audit)
+                                             vintage: vintage, audit: audit,
+                                             proposed_annual: proposed_annual)
 
       ruleset = rules(vintage)
       zones_by_name = reference.getThermalZones.to_h { |z| [z.nameString, z] }
@@ -1376,6 +1384,7 @@ module OpenStudioHVAC
       # zone cooling factor 1.0 required by 8.4.4.13.(2)(b) "without
       # oversizing").
       cleared = 0
+      hp_pinned = 0
       reference.getSizingZones.each do |sz|
         if (sz.zoneHeatingSizingFactor.get - 1.3).abs < 1e-9
           sz.resetZoneHeatingSizingFactor
@@ -1384,6 +1393,8 @@ module OpenStudioHVAC
         if (sz.zoneCoolingSizingFactor.get - 1.1).abs < 1e-9
           sz.resetZoneCoolingSizingFactor
           cleared += 1
+        elsif (sz.zoneCoolingSizingFactor.get - 1.0).abs < 1e-9
+          hp_pinned += 1 # the HP builders' deliberate 1.0 — preserved
         end
       rescue StandardError
         next # OptionalDouble empty on some SDK versions — nothing stamped, nothing to clear
@@ -1394,6 +1405,142 @@ module OpenStudioHVAC
                      value: "heating sizing factor #{heat_ref.round(3)} = min(proposed #{heat_prop.round(3)}, cap #{(1.0 + caps['heating_max_fraction']).round(2)}); " \
                             "cooling #{cool_ref.round(3)} = min(proposed #{cool_prop.round(3)}, cap #{(1.0 + caps['cooling_max_fraction']).round(2)})",
                      article: caps['article'], ruling: 'D-22')
+      return if hp_pinned.zero?
+
+      # 8.4.4.13.(2)(b): "the heat pump's cooling capacity shall be set based on
+      # the peak cooling load, without oversizing". The HP builders stamp a
+      # Sizing:Zone cooling factor of 1.0, which OVERRIDES (does not multiply
+      # with) the capped global above — measured on the sized DX coil: identical
+      # capacity with the global at 1.10 vs 1.00 (A/B ratio 1.0000), while
+      # clearing the zone factor grew it 4.15%, proving the probe's sensitivity.
+      audit.decision(:rules, 'heat pump cooling sized at the peak cooling load, without oversizing',
+                     inputs: { zones_pinned: hp_pinned, global_cooling_factor: cool_ref },
+                     value: 'per-zone cooling sizing factor 1.0 overrides the global factor (measured: sized DX ' \
+                            'capacity identical with the global at 1.10 vs 1.00)',
+                     article: '8.4.4.13.(2)(b)', ruling: 'D-52')
+    end
+
+    # 8.4.4.13.(2)(g)/(h) — the reference heat pump's terminal/auxiliary heating
+    # energy type (D-52). The election is ANNUAL-ENERGY-based: among the energy
+    # types used for terminal or auxiliary heating of the thermal blocks the
+    # heat pump serves, elect the one with the largest annual energy use —
+    # PROVIDED the heat pump exceeds the vendored threshold (33%) of the total
+    # annual space-heating energy use for those blocks. (g)(i) scopes an
+    # air-source HP to its own blocks; (g)(ii) scopes a water-/ground-source HP
+    # to the blocks of ALL heat pumps connected to the same water loop. All
+    # quantities are DELIVERED heat (one consistent basis across fuels).
+    #
+    # Returns nil — falling back to the structural 8.4.4.9.(4) proxy, audited —
+    # when there is no annual data (simulate: :sizing/:none), when the blocks
+    # have no terminal/aux heating at all, or when the 33% proviso fails (the
+    # sentence then simply does not elect).
+    #
+    # (h) forces electricity when the HP is not air-, water- or ground-source.
+    # Our taxonomy classifies every detected HP as :air, :water_loop or
+    # :external (water/ground), so (h) is only ever AFFIRMATIVELY established
+    # for a source-less detection — which keeps the proxy instead, with the
+    # inapplicability recorded, rather than guessing.
+    def self.heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit)
+      threshold = (hp_rules || {})['aux_energy_type_threshold_fraction'] || 0.33
+      if annual.nil?
+        audit&.info(:selection,
+                    'no proposed annual data (simulate: :sizing/:none, or the annual run predates this ' \
+                    'feature) — the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural ' \
+                    '8.4.4.9.(4) proxy elects the fuel instead',
+                    target: group[:zones].join(','), article: '8.4.4.13.(2)(g)', ruling: 'D-52')
+        return nil
+      end
+
+      scope_loops, scope_zones, sentence = election_scope(group, facts)
+      hp_j = 0.0
+      aux_by_fuel = Hash.new(0.0)
+      scope_loops.each do |loop_name|
+        entry = (annual[:loops] || {})[loop_name] || {}
+        hp_j += entry[:hp_j].to_f
+        Array(entry[:aux]).each { |a| aux_by_fuel[a[:fuel]] += a[:j].to_f }
+      end
+      scope_zones.each do |zone_name|
+        Array((annual[:zones] || {})[zone_name]).each do |e|
+          e[:role] == :hp ? hp_j += e[:j].to_f : aux_by_fuel[e[:fuel]] += e[:j].to_f
+        end
+      end
+
+      total_j = hp_j + aux_by_fuel.values.sum
+      if aux_by_fuel.empty? || total_j <= 0.0
+        audit&.info(:selection,
+                    'the proposed thermal blocks have no terminal or auxiliary heating energy in the annual ' \
+                    'run — 8.4.4.13.(2)(g) has nothing to elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                    target: group[:zones].join(','),
+                    inputs: { hp_gj: (hp_j / 1e9).round(2) }, article: '8.4.4.13.(2)(g)', ruling: 'D-52')
+        return nil
+      end
+
+      share = hp_j / total_j
+      if share <= threshold
+        audit&.decision(:selection,
+                        "the heat pump carries #{(share * 100).round(1)}% of the blocks' annual space-heating " \
+                        "energy — NOT above the #{(threshold * 100).round}% proviso, so sentence (g) does not " \
+                        'elect; the structural 8.4.4.9.(4) proxy elects the fuel',
+                        target: group[:zones].join(','),
+                        inputs: { hp_gj: (hp_j / 1e9).round(2), total_gj: (total_j / 1e9).round(2),
+                                  share: share.round(3), threshold: threshold, sentence: sentence },
+                        article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+        return nil
+      end
+
+      elected_fuel, elected_j = aux_by_fuel.max_by { |_fuel, j| j }
+      variant = energy_type_variant(elected_fuel)
+      if variant.nil?
+        audit&.warn(:selection,
+                    "the largest terminal/aux energy type is '#{elected_fuel}', which maps to NO reference " \
+                    'system variant — the structural 8.4.4.9.(4) proxy elects the fuel instead',
+                    target: group[:zones].join(','),
+                    inputs: { by_fuel_gj: aux_by_fuel.transform_values { |j| (j / 1e9).round(2) } },
+                    article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+        return nil
+      end
+      audit&.decision(:selection,
+                      'auxiliary heating energy type ELECTED from the proposed annual run: the terminal/aux ' \
+                      "energy type with the largest annual energy use is #{elected_fuel} " \
+                      "(#{(elected_j / 1e9).round(2)} GJ delivered), and the heat pump's " \
+                      "#{(share * 100).round(1)}% share exceeds the #{(threshold * 100).round}% proviso " \
+                      '((h) inapplicable: the source is classified air/water/ground)',
+                      target: group[:zones].join(','),
+                      inputs: { by_fuel_gj: aux_by_fuel.transform_values { |j| (j / 1e9).round(2) },
+                                hp_gj: (hp_j / 1e9).round(2), share: share.round(3),
+                                sentence: sentence, scope_loops: scope_loops, scope_zone_count: scope_zones.size },
+                      value: variant, article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+      variant
+    end
+
+    # (g)(i) vs (g)(ii): an :external-source (water/ground) heat pump elects over
+    # the thermal blocks of ALL heat pumps connected to the same source water
+    # loop, so sibling zone groups sharing a source loop are pulled in.
+    def self.election_scope(group, facts)
+      loops = [group[:air_loop]].compact
+      zones = group[:zones].dup
+      if (group[:heat_pump_sources] || []).include?(:external) && group[:heat_pump_source_loops]&.any?
+        (facts[:zone_groups] || []).each do |other|
+          next if other.equal?(group)
+          next unless (Array(other[:heat_pump_source_loops]) & group[:heat_pump_source_loops]).any?
+
+          loops |= [other[:air_loop]].compact
+          zones |= other[:zones]
+        end
+        [loops, zones, '(g)(ii)']
+      else
+        [loops, zones, '(g)(i)']
+      end
+    end
+
+    # Map an elected proposed energy type onto the reference system-definition
+    # variant. Purchased heating is represented by a gas-fired boiler
+    # (8.4.4.6.(1)); an unknown type cannot elect (nil -> structural proxy).
+    def self.energy_type_variant(fuel)
+      return 'gas' if fuel =~ /gas|oil|propane|purchased/i
+      return 'electric' if fuel =~ /electric/i
+
+      nil
     end
 
     # 8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;

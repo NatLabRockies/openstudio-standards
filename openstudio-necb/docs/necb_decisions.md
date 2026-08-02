@@ -1807,6 +1807,92 @@ implemented by `align_heat_pump_heating_capacity` since D-22.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`.
 - **Who/when:** phylroy ruled 2026-07-29, implemented by Claude under D-10.
 
+## D-52 — 8.4.4.13.(2)(b)/(g)/(h): HP cooling sized without oversizing (measured), and the auxiliary-heating fuel is ELECTED from the proposed annual run
+
+**What.** The last item of the reference-generation backlog (Phase 5), ruled by
+phylroy 2026-07-29 ("implement the real election"), implemented 2026-08-02.
+
+**(2)(b) — measured, no change needed.** "Cooling capacity set based on the
+peak cooling load, without oversizing." The HP builders stamp a per-zone
+`Sizing:Zone` cooling factor of 1.0, and `apply_oversizing_caps` deliberately
+preserves it while clearing the generic 1.1 stamps. Whether the model-wide
+capped global (typically 1.10) COMPOUNDS with the per-zone 1.0 was measured,
+not assumed [RAN `scratchpad/d52_2b_compounding_probe.rb`, three E+ sizing
+runs on the SYS3-ASHP fixture]: sized DX cooling capacity is IDENTICAL with
+the global at 1.10 vs 1.00 (A/B ratio 1.0000, 56.703 kW both), while clearing
+the zone factor grows it 4.15% — the probe detects the global, so the null is
+real. An audited decision now records the (2)(b) determination whenever
+preserved HP zone factors exist.
+
+**(2)(g) — the real annual-energy election.** The proposed ANNUAL run moved
+ahead of the reference build (it depends on nothing downstream — every use of
+the proposed after its sizing run is read-only; verified: `reference_hvac`
+characterizes the CLONE, `reference_daylighting` reads the proposed's windows,
+`apply_efficiencies` reads pump stats). Zero extra simulations. When the
+proposed carries a heat pump, per-equipment delivered-heat output variables
+(`Heating Coil Heating Energy`, `Baseboard Total Heating Energy`, RunPeriod
+frequency, weather-period-only sums — EnvironmentType 3, the D-56 DDY trap)
+are requested before the run, joined with the SDK equipment inventory
+(`Classify.heating_election_inventory`), and handed to `reference_hvac` as
+`proposed_annual:`. The election (`heat_pump_aux_energy_type`):
+
+- aggregates terminal/aux heating BY ENERGY TYPE over the blocks the HP
+  serves — (g)(i) the group's own blocks for air-source; (g)(ii) the union of
+  blocks over all HPs sharing the same source water loop (source-loop names
+  now captured by `Classify.record_heat_pump`);
+- applies the 33% proviso from the previously vendored-but-unread
+  `heat_pump_reference.aux_energy_type_threshold_fraction`: share =
+  HP delivered heat / (HP + all terminal/aux delivered heat);
+- elects the largest energy type and maps it to the 'gas'/'electric' system
+  variant (oil/propane/purchased → gas per the existing conventions);
+- **basis: DELIVERED heat for all quantities** — one consistent basis across
+  fuels; "annual energy use" input-energy readings would make electric
+  resistance and gas incomparable through their efficiencies.
+
+**Fallback is the rule, audited.** `simulate: :sizing/:none` (no annual
+data), blocks with no terminal/aux heating, a share at or below 33% (the
+proviso is unmet, so sentence (g) simply does not elect), or an unmappable
+elected type — each falls back to the structural 8.4.4.9.(4) proxy with an
+audit entry saying WHICH path elected the fuel and why.
+
+**(h)** is applied only when a non-air/water/ground source is AFFIRMATIVELY
+established — which the source taxonomy (:air / :water_loop / :external)
+never produces — so an evidence-less HP detection keeps the proxy rather
+than guessing; the (g) election entry records (h)'s inapplicability.
+
+**Election stability.** The fuel is elected ONCE, from the first proposed
+annual run. Capacity iteration (D-43) adjusts sizes but never rebuilds the
+reference topology, so the election is not re-litigated — re-electing would
+be circular (the reference would depend on a run that depends on the
+reference).
+
+**Sweep gate [RAN 2026-08-02]:** `SWEEP_MODE=annual`, all 15 Toronto-electric
+archetypes, 15/15 PASS, **zero movement** — percent-of-target identical to the
+post-backlog week table on every building (none of the 15 carries a heat
+pump, so the pre-registered prediction was a fleet no-op, and it held; the
+fuel/location variant results were not re-run and are excluded from the
+comparison). Verification: new `test_necb_hp_election.rb` (7 runs — election,
+33% gate, (g)(ii) shared-loop aggregation, finalize wiring, inventory on a
+real ASHP build), new umbrella E2E
+`test_hp_proposed_runs_the_2g_election_machinery` (real E+ week run: data
+extracted, (2)(g) determination fired, both runs clean), full
+`test_compliance.rb` 10/173 over the reordered pipeline, and the
+classify/selector/staging/WSE/humidification/reference/audit-fixes/
+energy-recovery suites plus registry (D-52 registered AND cited) and
+orphan-keys all green.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`
+  (inventory + source-loop capture), `.../components/coils.rb`
+  (`supply_components` now unwraps the legacy
+  `AirLoopHVACUnitaryHeatPumpAirToAir(MultiSpeed)` wrappers, whose coils were
+  previously invisible), `.../necb/reference.rb` (election + plumb-through +
+  the (2)(b) audit), `openstudio-simulation/lib/openstudio_simulation/runner.rb`
+  (`request_run_period_variables!`, `run_period_sums`),
+  `openstudio-necb/lib/openstudio_necb/compliance.rb` (pipeline reorder +
+  `heating_election_data`), `reference_rules_{2020,2025}.json` (8.4.4.13 gaps).
+- **Who/when:** phylroy ruled the election 2026-07-29; implemented by Fable
+  under D-10, 2026-08-02.
+
 ## D-53 — The SHW part-load curve is the PLF-domain IMAGE of 8.4.5.9's FHeatPLC, not a rival curve; the raw quadratic must never enter the EnergyPlus part-load-factor field
 
 **What.** NECB 2020 **8.4.5.9.(2)** (2025: **8.4.6.9.(2)**, identical text)

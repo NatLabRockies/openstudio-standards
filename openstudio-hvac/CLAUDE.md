@@ -226,6 +226,17 @@ family — do not duplicate them. E+-dependent tests skip without the
   on Table -A; empty sources = conservative redirect. The catalog 'Water
   source heat pumps' system is a water-LOOP system by the note (internal
   boiler + fluid cooler) — do NOT use it to test the ASHP redirect; use PTHP.
+- **HP aux-fuel election** (D-52, 8.4.4.13.(2)(g)): when the umbrella hands
+  `reference_hvac` a `proposed_annual:` hash (per-loop/per-zone delivered
+  heating energy joined from `Classify.heating_election_inventory` + the
+  proposed annual SQL), `heat_pump_aux_energy_type` elects the hp variant's
+  fuel — largest terminal/aux energy type over the (g)(i)/(g)(ii) scope,
+  gated by the 33% proviso; every fallback path (no data / no aux / gate
+  fails) drops to the structural 8.4.4.9.(4) proxy AUDITED. (2)(b) is a
+  measured no-op: the builders' per-zone cooling factor 1.0 OVERRIDES the
+  capped global (A/B 1.0000). `Coils.supply_components` now also unwraps the
+  legacy `AirLoopHVACUnitaryHeatPumpAirToAir(MultiSpeed)` wrappers — before
+  D-52 those loops read coil-less and their HPs were invisible.
 - **5.2.6.3 pump caps** (D-38): after the 8.4.4.14 transfer, each loop's
   COMBINED pump power is clamped min-wins at Table 5.2.6.3 W/kW of peak
   thermal demand (`apply_pump_power_cap`; caps vendored under

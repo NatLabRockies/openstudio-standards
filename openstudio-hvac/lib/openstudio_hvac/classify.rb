@@ -196,7 +196,7 @@ module OpenStudioHVAC
         family: nil, catalog_name: nil, family_guess: nil,
         heated: false, cooled: false,
         heating_energy_types: [], cooling_energy_types: [],
-        heat_pump: false, heat_pump_sources: [], terminal_type: :none,
+        heat_pump: false, heat_pump_sources: [], heat_pump_source_loops: [], terminal_type: :none,
         design_cooling_kw: 0.0, cooling_capacity_complete: true,
         dcv: false, system_outdoor_air_method: nil,
         evidence: [] }
@@ -259,6 +259,13 @@ module OpenStudioHVAC
 
       group[:heat_pump] = true
       group[:heat_pump_sources] |= [hp_kind == :water_to_air ? water_to_air_hp_source(unit) : :air]
+      # 8.4.4.13.(2)(g)(ii) needs "all the heat pumps connected to the same
+      # water loop" — record the source-loop NAME so the aux-fuel election can
+      # aggregate across zone groups sharing it (D-52).
+      return unless hp_kind == :water_to_air && unit.respond_to?(:plantLoop)
+
+      loop = unit.plantLoop
+      group[:heat_pump_source_loops] |= [loop.get.nameString] if loop.is_initialized
     end
 
     GROUND_HX_CASTS = %i[to_GroundHeatExchangerVertical to_GroundHeatExchangerHorizontalTrench].freeze
@@ -355,6 +362,127 @@ module OpenStudioHVAC
         return value.get.to_f / 1000.0 if value.is_initialized
       end
       nil
+    end
+
+    # ---------------- 8.4.4.13.(2)(g) heating-election inventory (D-52) ----------------
+
+    BASEBOARD_VARIABLE = 'Baseboard Total Heating Energy'
+    COIL_VARIABLE = 'Heating Coil Heating Energy'
+
+    DX_HEATING_CASTS = %i[to_CoilHeatingDXSingleSpeed to_CoilHeatingDXMultiSpeed
+                          to_CoilHeatingDXVariableSpeed to_CoilHeatingWaterToAirHeatPumpEquationFit
+                          to_CoilHeatingDXVariableRefrigerantFlow].freeze
+    AUX_COIL_FUELS = {
+      to_CoilHeatingGas: 'NaturalGas',
+      to_CoilHeatingGasMultiStage: 'NaturalGas',
+      to_CoilHeatingElectric: 'Electricity',
+      to_CoilHeatingWater: :hydronic
+    }.freeze
+
+    # The SDK-side half of the 8.4.4.13.(2)(g) auxiliary-fuel election: which
+    # equipment on the PROPOSED delivers space heating, under which EnergyPlus
+    # output variable, and on which energy type. The umbrella joins these names
+    # with the proposed annual run's SQL sums (this gem never simulates) and
+    # hands the joined data back to reference_hvac as `proposed_annual:`.
+    #
+    # @return [Hash]
+    #   :loops — { air loop name => { hp: [coil names], aux: [{name:, fuel:}] } }
+    #   :zones — { zone name => [{name:, fuel:, variable:, role: :aux | :hp}] }
+    #   All heating quantities the election compares are DELIVERED heat
+    #   (Heating Coil Heating Energy / Baseboard Total Heating Energy), one
+    #   consistent basis across fuels.
+    def self.heating_election_inventory(model)
+      plants = model.getPlantLoops.sort_by(&:nameString).map { |loop| plant_facts(loop, nil) }
+      plant_by_name = plants.to_h { |p| [p[:name], p] }
+
+      loops = {}
+      model.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
+        entry = { hp: [], aux: [] }
+        Coils.supply_components(air_loop).each do |comp|
+          if DX_HEATING_CASTS.any? { |cast| comp.respond_to?(cast) && comp.send(cast).is_initialized }
+            entry[:hp] << comp.nameString
+          elsif (aux = aux_coil_entry(comp, plant_by_name))
+            entry[:aux] << aux
+          end
+        end
+        loops[air_loop.nameString] = entry if entry[:hp].any? || entry[:aux].any?
+      end
+
+      zones = {}
+      model.getThermalZones.sort_by(&:nameString).each do |zone|
+        list = zone.equipment.flat_map { |eq| zonal_heating_entries(eq, plant_by_name) }
+        zones[zone.nameString] = list if list.any?
+      end
+      { loops: loops, zones: zones }
+    end
+
+    def self.aux_coil_entry(comp, plant_by_name)
+      AUX_COIL_FUELS.each do |cast, fuel|
+        optional = comp.respond_to?(cast) ? comp.send(cast) : nil
+        next unless optional&.is_initialized
+
+        coil = optional.get
+        resolved = fuel == :hydronic ? Array(hydronic_fuels(coil, plant_by_name)).join('+') : fuel
+        return { name: coil.nameString, fuel: resolved }
+      end
+      nil
+    end
+
+    def self.zonal_heating_entries(eq, plant_by_name)
+      if eq.to_ZoneHVACBaseboardConvectiveElectric.is_initialized ||
+         (eq.respond_to?(:to_ZoneHVACBaseboardRadiantConvectiveElectric) &&
+          eq.to_ZoneHVACBaseboardRadiantConvectiveElectric.is_initialized)
+        return [{ name: eq.nameString, fuel: 'Electricity', variable: BASEBOARD_VARIABLE, role: :aux }]
+      end
+
+      water_baseboard = %i[to_ZoneHVACBaseboardConvectiveWater to_ZoneHVACBaseboardRadiantConvectiveWater]
+                        .filter_map { |cast| eq.respond_to?(cast) ? eq.send(cast) : nil }
+                        .find(&:is_initialized)
+      if water_baseboard
+        coil = water_baseboard.get.heatingCoil
+        fuel = Array(hydronic_fuels(coil, plant_by_name)).join('+')
+        return [{ name: eq.nameString, fuel: fuel, variable: BASEBOARD_VARIABLE, role: :aux }]
+      end
+
+      coils = zonal_heating_coils(eq)
+      coils.filter_map do |coil, role|
+        if role == :hp
+          { name: coil.nameString, fuel: 'Electricity', variable: COIL_VARIABLE, role: :hp }
+        elsif (aux = aux_coil_entry(coil, plant_by_name))
+          aux.merge(variable: COIL_VARIABLE, role: :aux)
+        end
+      end
+    end
+
+    # [coil, :hp | :aux] pairs for a zonal unit or terminal. The unit's DX
+    # heating coil is the heat pump itself; its supplemental coil and every
+    # non-DX heating coil are terminal/auxiliary heating.
+    def self.zonal_heating_coils(eq)
+      pairs = []
+      { to_ZoneHVACPackagedTerminalAirConditioner: [:heatingCoil],
+        to_ZoneHVACPackagedTerminalHeatPump: %i[heatingCoil supplementalHeatingCoil],
+        to_ZoneHVACWaterToAirHeatPump: %i[heatingCoil supplementalHeatingCoil],
+        to_ZoneHVACFourPipeFanCoil: [:heatingCoil],
+        to_ZoneHVACUnitHeater: [:heatingCoil],
+        to_AirTerminalSingleDuctVAVReheat: [:reheatCoil],
+        to_AirTerminalSingleDuctConstantVolumeReheat: [:reheatCoil] }.each do |cast, accessors|
+        optional = eq.respond_to?(cast) ? eq.send(cast) : nil
+        next unless optional&.is_initialized
+
+        unit = optional.get
+        accessors.each do |accessor|
+          next unless unit.respond_to?(accessor)
+
+          coil = unit.send(accessor)
+          coil = coil.get if coil.respond_to?(:is_initialized) && coil.is_initialized
+          next unless coil.respond_to?(:nameString)
+
+          hp = DX_HEATING_CASTS.any? { |c| coil.respond_to?(c) && coil.send(c).is_initialized }
+          pairs << [coil, hp ? :hp : :aux]
+        end
+        break
+      end
+      pairs
     end
 
     TERMINALS = {

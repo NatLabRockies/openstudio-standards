@@ -11,6 +11,11 @@ simulate** — the domain gems are SDK-only by contract.
   `energy_results` (End Uses via TabularData GJ rows — SqlFile has NO
   fuel-agnostic end-use methods), unmet hours, `clean_run?`. District-energy
   accessors were renamed across SDK versions — probe with `respond_to?`.
+  Also `request_run_period_variables!` (idempotent '*'-keyed OutputVariable
+  requests) and `run_period_sums` (per-KeyValue sums restricted to
+  `EnvironmentType = 3` — design days EXCLUDED; a shared DDY carries dozens
+  and an unfiltered sum silently mixes them in). Both exist for the NECB
+  8.4.4.13.(2)(g) aux-fuel election (D-52).
 - `backends.rb` — `Backend` seam. `Local` runs `openstudio run -w in.osw`.
   `Remote` is a documented stub whose docstring mirrors the real hbix
   AWS-Batch service (upload_model → presigned S3 PUT → submit_simulation →

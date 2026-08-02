@@ -134,7 +134,20 @@ module OpenStudioHVAC
     def self.supply_components(air_loop)
       air_loop.supplyComponents.flat_map do |comp|
         unitary = comp.to_AirLoopHVACUnitarySystem
-        unitary.is_initialized ? unitary_children(unitary.get) : [comp]
+        next unitary_children(unitary.get) if unitary.is_initialized
+
+        # Legacy unitary HP wrappers (the NECB archetypes' PSZ ASHP recipe) hold
+        # their coils the same way — without this unwrap the loop reads coil-less
+        # and its heat pump is invisible to characterize (D-52).
+        hp = comp.to_AirLoopHVACUnitaryHeatPumpAirToAir
+        next [hp.get.heatingCoil, hp.get.coolingCoil, hp.get.supplementalHeatingCoil, hp.get.supplyAirFan] if hp.is_initialized
+
+        if comp.respond_to?(:to_AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed)
+          hp_ms = comp.to_AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed
+          next [hp_ms.get.heatingCoil, hp_ms.get.coolingCoil, hp_ms.get.supplementalHeatingCoil, hp_ms.get.supplyAirFan] if hp_ms.is_initialized
+        end
+
+        [comp]
       end
     end
 

@@ -204,6 +204,37 @@ class TestCompliance < Minitest::Test
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
 
+  # D-52: an HP proposed drives the 8.4.4.13.(2)(g) machinery end to end —
+  # the proposed annual runs BEFORE the reference build, the per-equipment
+  # heating energy is extracted from its SQL, and the election (or its audited
+  # fallback) decides the reference hp variant's aux fuel.
+  def test_hp_proposed_runs_the_2g_election_machinery
+    skip 'openstudio CLI not available' unless openstudio_cli?
+    dir = Dir.mktmpdir('osnecb-hp-election-')
+    result = OpenStudioNECB.performance_compliance(
+      proposed_with_hvac('PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard'),
+      vintage: '2020', simulate: :annual, weather: weather,
+      building: { storeys: 1, zone_types: zone_types_for(load_fixture), winter_design_temp_c: -20 },
+      run_dir: dir,
+      run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 })
+
+    extraction = result.audit.entries.find { |e| e[:action].include?('per-equipment heating energy extracted') }
+    refute_nil extraction, 'the election data was extracted from the proposed annual SQL'
+    assert_operator extraction[:inputs][:heat_pump_gj], :>=, 0.0
+    assert_operator extraction[:inputs][:air_loops], :>=, 1, 'the ASHP loop was inventoried'
+
+    election = result.audit.entries.select { |e| e[:article].to_s.include?('8.4.4.13.(2)(g)') }
+    refute_empty election, 'a (2)(g) determination fired — elected or audited fallback'
+    assert(election.all? { |e| e[:ruling].to_s.include?('D-52') })
+    # Whatever path elected, the reference hp system was actually built with a
+    # concrete variant (the fixture ASHP redirects per Table 8.4.4.13).
+    assert(result.audit.entries.any? { |e| e[:action].include?('air-source heat pump (Table 8.4.4.13)') })
+    assert result.report['proposed']['clean_run'], 'proposed ran clean with the requested output variables'
+    assert result.report['reference']['clean_run']
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
   # 8.4.1.2.(5) unit mechanics (no EnergyPlus): the secant step extrapolates the
   # next sizing factor from a zone's own (factor, unmet-hours) history, clamped
   # to stay incremental; without a usable slope it falls back to the geometric

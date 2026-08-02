@@ -13,13 +13,14 @@ This file is intentionally near-empty per its own final checklist item ("a
 stale checklist is worse than none"). Git history holds the executed
 checklist verbatim.
 
-## The one remaining open item
+## Phase 5 — CLOSED 2026-08-02 (same day, after the review)
 
-**Phase 5 — 8.4.4.13.(2)(b) capacity-without-oversizing verification and the
-(2)(g) real annual-energy auxiliary-fuel election (planned as D-52) — was
-never implemented and remains open.** Its plan (pipeline reorder: proposed
-annual BEFORE the reference build; per-fuel zone-group heating aggregation;
-the 33% gate from the vendored `aux_energy_type_threshold_fraction`; the
-structural proxy kept as an audited fallback) lives in the backlog plan and
-the D-52 placeholder discussion in `necb_decisions.md`. Its risk item is the
-pipeline reorder; land it alone and re-sweep.
+**8.4.4.13.(2)(b)/(g) landed as D-52** — see the `## D-52` entry in
+`necb_decisions.md`: (2)(b) verified by measurement (per-zone 1.0 overrides
+the capped global, A/B ratio 1.0000), (2)(g) implemented as the real
+annual-energy election (proposed annual moved BEFORE the reference build,
+delivered-heat aggregation, 33% proviso, (g)(i)/(g)(ii) scoping, audited
+structural-proxy fallback). The reorder was the risk item and it landed
+alone, immediately after the review baseline, with a week sweep gating it.
+
+**The backlog that opened this file is now fully closed.**
