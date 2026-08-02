@@ -131,7 +131,7 @@
         "title": "Service water heater performance (Table 6.2.2.1)",
         "status": "partial",
         "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented",
-        "gaps": "solar-thermal and pool-heater classes not modeled (legacy scope); HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)"
+        "gaps": "solar-thermal and pool-heater classes not modeled (legacy scope) — and hbix's 2026-08-02 table audit confirmed those printed sections were LOST from the 6.2.2.1 extraction in BOTH editions (Solar Thermal SWH SEF >= 1.4 / >= 0.9; pool heaters gas-fired Et >= 82%, oil-fired Et >= 78%, heat pump COP 4.0 — values recovered from the printed pages by that audit, services/codes/docs/table-audit-necb-2020-2025.md), so the MCP could never have supplied them; the audit also found the Volume of Tank column empty in all 27 extracted rows, so the D-41 MCP cross-check could not see tank volumes — the volume-binned values stand on their legacy-primary transcription; HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)"
       },
       {
         "article": "6.2.3.-6.2.7.",

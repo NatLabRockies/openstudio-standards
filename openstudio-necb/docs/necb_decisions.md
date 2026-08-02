@@ -3099,3 +3099,35 @@ stamped by targeted regex; ALWAYS `git diff --stat` after touching data
 files.)
 
 - **Who/when:** Fable under D-10, 2026-08-02.
+
+### D-61 amendment (2026-08-02): hbix's own table audit, mapped to our exposure
+
+hbix ran a structural + PDF-verified audit of all 192 NECB tables
+(`services/codes/docs/table-audit-necb-2020-2025.md`). Outcome against us:
+
+- **Table 6.2.2.1 is the one CONFIRMED data loss (both editions):** the
+  printed Solar Thermal SWH and Pool Heater sections are absent from the
+  store, and the Volume of Tank column is empty in all 27 rows. For us:
+  values are UNAFFECTED (shw_rules is legacy-primary), but **D-41's "MCP
+  cross-check" was weaker than recorded** — it could not see tank volumes or
+  the lost sections. The shw_rules gaps now carry the printed minimums the
+  audit recovered (solar SEF ≥ 1.4/≥ 0.9; pool gas Eₜ ≥ 82%, oil ≥ 78%, HP
+  COP 4.0) so the declared gap is closable without waiting on the extraction.
+- **C-1 lat/long is FABRICATED (never printed) and Province holds region
+  headings for 29–40% of rows:** immune — our `table_c1.json` is
+  legacy-vendored including its lat/longs; we never read C-1 via MCP.
+- **The edition mapper is broken (NULL titles; 22 Part 8 renames read as
+  remove+add):** this invalidated the JUSTIFICATION (not the conclusion) of
+  our "2025 exterior lighting essentially unchanged" claim, which rested on
+  a mapper similarity score. Re-verified by DIRECT value diff of
+  4.2.3.1.-A..-E across editions: **identical**, only unicode m²/m2
+  cosmetics inside 2025 cells. Provenance updated to cite the direct diff.
+  (The first diff pass false-alarmed three "value shifts" — set-difference
+  arithmetic fooled by the mixed unicode; refuted by printing the full rows.)
+- **10.1.2.1 "isn't a table" (Part 10 prose):** consistent with what D-61's
+  fetch observed — we diffed EUI targets against Table 8.4.4.1, not 10.1.2.1.
+- Phantom columns / blank-row tables (6.2.3.1 8/27 etc.): none of the rows
+  our data consumes — every consumed table was value-diffed EXACT in
+  D-59/D-60/D-61.
+
+- Who/when: Fable under D-10, 2026-08-02, on phylroy relaying the audit.
