@@ -169,12 +169,18 @@ module OpenStudioHVAC
                        action: :build, articles: articles)
       elsif group[:cooled] && residential_compatible_cooling?(group)
         audit&.decision(:selection, 'residential with compatible cooling -> reference identical to proposed',
-                        target: group[:zones].join(','), article: res['article'])
+                        target: group[:zones].join(','),
+                        inputs: { zonal_units: group[:zonal_units], loop_dx_cooling: group[:loop_dx_cooling],
+                                  family: group[:family] || group[:family_guess] },
+                        article: res['article'], ruling: 'D-58')
         Assignment.new(zones: group[:zones], category: category, reference_system: nil,
                        action: :copy_proposed, articles: articles)
       else
         audit&.decision(:selection, 'residential otherwise -> through-the-wall systems',
-                        target: group[:zones].join(','), article: res['article'])
+                        target: group[:zones].join(','),
+                        inputs: { zonal_units: group[:zonal_units], loop_dx_cooling: group[:loop_dx_cooling],
+                                  family: group[:family] || group[:family_guess] },
+                        article: res['article'], ruling: 'D-58')
         Assignment.new(zones: group[:zones], category: category, reference_system: 1,
                        action: :through_the_wall, articles: articles)
       end
@@ -199,11 +205,33 @@ module OpenStudioHVAC
     # 'air-cooled unitary, packaged terminal or room air conditioner, or fan coils'
     # (the "(or heat pumps)" parenthetical is superseded by the 8.4.4.7.(4)
     # redirect per D-34 — REDIRECTING heat-pump groups never reach this check;
-    # water-loop HPs do per D-37 and 'wshp' is in the allowlist)
+    # water-loop HPs do per D-37 and 'wshp' is in the allowlist).
+    #
+    # D-58: the test is FACT-based, not name-based. The 97-system matrix showed
+    # three ways the old family-string allowlist got Table -A wrong:
+    #  * legacy pipe names put family STRINGS into :family_guess, which the old
+    #    symbol test never matched — the fleet hotels' 53-zone MAU+PTAC guest
+    #    blocks (zc>ptac, verbatim "packaged terminal air conditioner" in the
+    #    parenthetical) were getting through-the-wall instead of the copy the
+    #    printed table requires;
+    #  * a scrubbed-name (foreign) MAU + fan-coil/PTAC building lost the copy
+    #    because the structural guess reads the AIR LOOP only;
+    #  * DOAS + fan-coil composites cool their zones with fan coils but carry a
+    #    'doas'/'composite' family.
+    # The facts: zones cooled by packaged-terminal/room units or fan coils
+    # (:zonal_units), or by the loop's own DX on a no-reheat constant-volume
+    # single-package shape (:loop_dx_cooling).
+    COMPATIBLE_RESIDENTIAL_FAMILIES = %w[psz mau_ptac zone_terminal fan_coils wshp vrf].freeze
+    COMPATIBLE_ZONAL_UNITS = %i[ptac pthp fan_coil vrf_terminal wshp].freeze
+
     def self.residential_compatible_cooling?(group)
       return true if %i[zonal_heat_cool packaged_single_zone].include?(group[:family_guess])
+      return true if COMPATIBLE_RESIDENTIAL_FAMILIES.include?(group[:family].to_s) ||
+                     COMPATIBLE_RESIDENTIAL_FAMILIES.include?(group[:family_guess].to_s)
+      return true if (group[:zonal_units] || []).any? { |u| COMPATIBLE_ZONAL_UNITS.include?(u) }
 
-      %w[psz mau_ptac zone_terminal fan_coils wshp vrf].include?(group[:family])
+      !group[:air_loop].nil? && group[:loop_dx_cooling] == true &&
+        %i[none cv].include?(group[:terminal_type])
     end
 
     # ---- finalize: heat-pump override, energy type, catalog name ----

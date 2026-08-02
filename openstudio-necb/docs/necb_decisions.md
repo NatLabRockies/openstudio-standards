@@ -1893,6 +1893,85 @@ orphan-keys all green.
 - **Who/when:** phylroy ruled the election 2026-07-29; implemented by Fable
   under D-10, 2026-08-02.
 
+## D-58 — The proposed→reference matrix (97 catalog systems): residential compatible-cooling and HP detection go fact-based
+
+**What.** phylroy asked (2026-08-02): "verify that the reference system that
+would be generated from the proposed system are NECB correct." Method: every
+one of the 97 catalog systems built as a PROPOSED on the 5-zone fixture,
+characterized, and selected under 4 discriminating scenarios (general 2-storey,
+general 3-storey, residential, data-processing), in TWO naming passes —
+`catalog` (name resolution) and `scrubbed` (randomized names → the structural
+detector foreign models hit). SDK-only. Independently: Table 8.4.4.7.-A
+fetched via MCP and checked row-by-row against the vendored selection rules —
+**all 12 category rules match the printed table**.
+
+**Matrix results (before fixes):** 97/97 built; general-area storey splits and
+the HP redirect correct on all 97×2; three defect classes found:
+
+1. **[FLEET-LIVE] The residential compatible-cooling test was name-based and
+   missed the printed parenthetical.** Table -A: residential "heated as well
+   as being cooled with an air-cooled unitary, packaged terminal or room air
+   conditioner (or heat pumps), or fan coils → identical to that of the
+   proposed". The old test matched catalog family STRINGS against `:family`
+   (nil for legacy pipe-named loops) and a symbol list against
+   `:family_guess` (which legacy names fill with strings) — so the fleet's own
+   LargeHotel/SmallHotel guest blocks (`sys_1|...|zc>ptac`, 53 zones, PTAC =
+   verbatim "packaged terminal air conditioner") got THROUGH-THE-WALL instead
+   of the copy the table requires [READ largehotel audit: "residential
+   otherwise -> through-the-wall systems"]. Scrubbed-name (foreign) MAU +
+   fan-coil / MAU + PTAC / shared-PSZ buildings — the canonical MURB shapes —
+   lost the copy the same way (28 parity mismatches), and DOAS + fan-coil
+   composites lost it in BOTH passes. Fix: `residential_compatible_cooling?`
+   now reads FACTS — new `zonal_units` (ptac/pthp/fan_coil/vrf_terminal/wshp)
+   and `loop_dx_cooling` on a no-reheat CV shape — plus string-normalized
+   family names.
+2. **A plant heat pump was invisible to the 8.4.4.13.(2) redirect.**
+   The sentence reaches a HP that "supplies ... conditioned water to a
+   hydronic loop" — a central-plant HP serving fan coils/baseboards (the ECM
+   hs09/12/14/15/16 shapes). Detection stopped at coil level, so
+   hs14_cgshp_fancoils selected **System 3** instead of the ASHP reference.
+   Fix: `record_plant_heat_pump` marks groups whose hydronic coils draw from
+   a HP plant; `annotate_heat_pump_plants` classifies each HP plant's source
+   from its source-side loop (external evidence → :external; none → :air;
+   else :water_loop) with the same Note A-8.4.4.13 boundary as water-to-air
+   units, and records the source-loop name for the D-52 (g)(ii) scope.
+3. **A ground loop read as PURCHASED heating.** The legacy GLHX pattern puts
+   District objects on the HP's source loop as the ground proxy;
+   purchased-energy detection saw "district heating" and hs14's variant came
+   out **gas** (8.4.4.6.(1)) — a ground-source HP proposed got a gas
+   reference. Fix: HP source loops are excluded from purchased-energy
+   detection.
+
+**Post-fix verification [RAN]:** hs14 → `system=hp, energy=electric,
+sources=[:external], src_loops=["Condenser PlantLoop GLHX"]`; matrix re-run;
+selector 26/82, classify 6/26, murb 2/8, reference 10/89, reference_hp 3/22,
+hp_election 7/22, hp_plant_fancoils 3/29 all green (notably: NO existing test
+pinned the hotel TTW behavior — the defect was invisible to every suite). The
+adjudicated matrix is vendored as
+`openstudio-hvac/test/fixtures/reference_selection_matrix.json` and pinned by
+`test_reference_selection_matrix.rb` (full rebuild + catalog-vs-scrubbed
+parity; `UPDATE_GOLDEN=1` regenerates).
+
+**Fleet impact [RAN, week sweep, 15/15 PASS]:** zero TTW decisions remain in
+any audit. Five buildings moved, all attributed to the single TTW→copy flip
+and all in the STRICTER direction: HighriseApartment 99→100,
+LowriseApartment 98→99, MidriseApartment 99→100, SmallHotel 92→93 (percent of
+target), LargeHotel −114 kWh ref (sub-rounding). The apartments moved because
+their `Dwelling units general` blocks are PTAC-cooled too — the
+pre-registration ("hotels only") under-predicted for the same reason the
+defect existed. The other 10 buildings are unchanged to the kWh. Audit
+warning counts collapsed (HRA 108→27) — the TTW builds were the source of
+most per-zone warnings.
+
+**Consequence: the post-backlog FULL-ANNUAL baseline is STALE for the five
+moved buildings** (HRA now reads 100% in the week run, proposed 33 kWh over).
+A 5-building full-annual refresh supersedes those rows; the other 10 rows
+stand.
+
+- **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`,
+  `.../necb/reference.rb`; test + golden as above.
+- **Who/when:** Fable under D-10, 2026-08-02.
+
 ## D-53 — The SHW part-load curve is the PLF-domain IMAGE of 8.4.5.9's FHeatPLC, not a rival curve; the raw quadratic must never enter the EnergyPlus part-load-factor field
 
 **What.** NECB 2020 **8.4.5.9.(2)** (2025: **8.4.6.9.(2)**, identical text)

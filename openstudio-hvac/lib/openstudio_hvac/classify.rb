@@ -34,6 +34,7 @@ module OpenStudioHVAC
     def self.characterize(model, audit: nil)
       plants = model.getPlantLoops.sort_by(&:nameString).map { |loop| plant_facts(loop, audit) }
       plant_by_name = plants.to_h { |p| [p[:name], p] }
+      annotate_heat_pump_plants(model, plant_by_name)
 
       groups = []
       served = {}
@@ -63,7 +64,10 @@ module OpenStudioHVAC
         group.delete(:cooling_capacity_complete)
       end
 
-      hvac_plants = plants.reject { |p| p[:type] == :service_water }
+      # HP SOURCE loops are excluded from purchased-energy detection: a district
+      # object standing in for a ground field / condenser water (the legacy
+      # GLHX pattern) is not purchased heating for the building (D-58).
+      hvac_plants = plants.reject { |p| p[:type] == :service_water || p[:hp_source_loop] }
       facts = {
         built_by_gem: groups.any? && groups.all? { |g| g[:air_loop].nil? || g[:catalog_name] },
         zone_groups: groups,
@@ -197,6 +201,7 @@ module OpenStudioHVAC
         heated: false, cooled: false,
         heating_energy_types: [], cooling_energy_types: [],
         heat_pump: false, heat_pump_sources: [], heat_pump_source_loops: [], terminal_type: :none,
+        zonal_units: [], loop_dx_cooling: false,
         design_cooling_kw: 0.0, cooling_capacity_complete: true,
         dcv: false, system_outdoor_air_method: nil,
         evidence: [] }
@@ -245,10 +250,45 @@ module OpenStudioHVAC
         group[:heated] = true
         group[:heating_energy_types] |= Array(fuel_of.call(coil, plant_by_name))
         record_heat_pump(group, hp_kind, coil)
+        record_plant_heat_pump(group, coil, plant_by_name) if hp_kind.nil? # hydronic coils: plant may BE a heat pump
         group[:evidence] << "heated: #{evidence}"
         return true
       end
       false
+    end
+
+    # 8.4.4.13.(2) reaches a heat pump that "supplies ... conditioned water to a
+    # hydronic loop" — a PLANT heat pump serving coils/baseboards/fan coils, not
+    # just a coil-level unit. When the plant a hydronic coil draws from carries
+    # a heat pump, the group is a heat-pump group and the plant's annotated
+    # source kind (:air / :external / :water_loop) governs the D-37 redirect
+    # split (D-58).
+    def self.record_plant_heat_pump(group, coil, plant_by_name)
+      return if coil.nil?
+
+      loop = coil.respond_to?(:plantLoop) ? coil.plantLoop : nil
+      return if loop.nil? || loop.empty?
+
+      plant = plant_by_name[loop.get.nameString]
+      return unless plant && plant[:heat_pump]
+
+      group[:heat_pump] = true
+      group[:heat_pump_sources] |= [plant[:hp_source] || :water_loop]
+      group[:heat_pump_source_loops] |= [plant[:hp_source_loop_name]].compact
+      group[:evidence] << "plant heat pump on '#{plant[:name]}' (source #{plant[:hp_source] || :water_loop})"
+    end
+
+    # The water heating coil a zonal unit draws from its plant, if any.
+    def self.zonal_water_heating_coil(unit)
+      coil = unit.respond_to?(:heatingCoil) ? unit.heatingCoil : nil
+      coil = coil.get if coil.respond_to?(:is_initialized) && coil.is_initialized
+      return nil if coil.nil? || !coil.respond_to?(:to_CoilHeatingWater)
+
+      return coil.to_CoilHeatingWater.get if coil.to_CoilHeatingWater.is_initialized
+      return coil.to_CoilHeatingWaterBaseboard.get if coil.respond_to?(:to_CoilHeatingWaterBaseboard) &&
+                                                      coil.to_CoilHeatingWaterBaseboard.is_initialized
+
+      nil
     end
 
     # D-37 (Note A-8.4.4.13): heat-pump SOURCE matters for the 8.4.4.13
@@ -270,22 +310,64 @@ module OpenStudioHVAC
 
     GROUND_HX_CASTS = %i[to_GroundHeatExchangerVertical to_GroundHeatExchangerHorizontalTrench].freeze
 
-    # Classify a water-to-air heat pump by its SOURCE loop per Note
-    # A-8.4.4.13: ground HX / district / temperature-source components mean
-    # the loop is fed by EXTERNAL water or ground (water-/ground-source ->
-    # :external); otherwise it is an internal water loop (:water_loop —
-    # an aux boiler and/or heat-rejection device is explicitly allowed).
-    def self.water_to_air_hp_source(coil)
-      loop = coil.respond_to?(:plantLoop) ? coil.plantLoop : nil
-      return :water_loop if loop.nil? || loop.empty?
-
-      external = loop.get.supplyComponents.any? do |c|
+    # Note A-8.4.4.13's boundary evidence: ground HX / district / temperature-
+    # source components mean the loop is fed by EXTERNAL water or ground
+    # (water-/ground-source); otherwise it is an internal water loop (aux
+    # boiler and/or heat-rejection device explicitly allowed).
+    def self.external_source_loop?(loop)
+      loop.supplyComponents.any? do |c|
         GROUND_HX_CASTS.any? { |cast| c.respond_to?(cast) && c.send(cast).is_initialized } ||
           c.to_DistrictHeating.is_initialized || c.to_DistrictCooling.is_initialized ||
           defined_district_heating_water?(c) ||
           (c.respond_to?(:to_PlantComponentTemperatureSource) && c.to_PlantComponentTemperatureSource.is_initialized)
       end
-      external ? :external : :water_loop
+    end
+
+    # Classify a water-to-air heat pump by its SOURCE loop per Note
+    # A-8.4.4.13 (see external_source_loop?).
+    def self.water_to_air_hp_source(coil)
+      loop = coil.respond_to?(:plantLoop) ? coil.plantLoop : nil
+      return :water_loop if loop.nil? || loop.empty?
+
+      external_source_loop?(loop.get) ? :external : :water_loop
+    end
+
+    PLANT_HP_CASTS = %i[to_HeatPumpPlantLoopEIRHeating to_HeatPumpWaterToWaterEquationFitHeating
+                        to_HeatPumpPlantLoopEIRCooling to_HeatPumpWaterToWaterEquationFitCooling].freeze
+
+    # Classify each heat-pump PLANT's source per Note A-8.4.4.13 (D-58): the HP
+    # object's source-side loop carries the evidence — external components =>
+    # :external (water/ground source); a plain internal loop => :water_loop;
+    # no source loop at all (air-source condenser) => :air. The source loop is
+    # flagged (`hp_source_loop`) so purchased-energy detection skips it: a
+    # district object standing in for a ground field (the legacy GLHX pattern)
+    # is not purchased heating for the building.
+    def self.annotate_heat_pump_plants(model, plant_by_name)
+      model.getPlantLoops.each do |loop|
+        plant = plant_by_name[loop.nameString]
+        next unless plant && plant[:heat_pump]
+
+        source = nil
+        loop.supplyComponents.each do |comp|
+          PLANT_HP_CASTS.each do |cast|
+            optional = comp.respond_to?(cast) ? comp.send(cast) : nil
+            next unless optional&.is_initialized
+
+            hp = optional.get
+            secondary = hp.respond_to?(:secondaryPlantLoop) ? hp.secondaryPlantLoop : nil
+            if secondary.nil? || secondary.empty?
+              source ||= :air
+            else
+              src_loop = secondary.get
+              src_plant = plant_by_name[src_loop.nameString]
+              src_plant[:hp_source_loop] = true if src_plant
+              plant[:hp_source_loop_name] = src_loop.nameString
+              source = external_source_loop?(src_loop) ? :external : (source || :water_loop)
+            end
+          end
+        end
+        plant[:hp_source] = source || :water_loop
+      end
     end
 
     def self.scan_cooling_component(group, comp, plant_by_name, evidence)
@@ -336,6 +418,10 @@ module OpenStudioHVAC
       group[:cooled] = true
       group[:cooling_energy_types] |= Array(fuels)
       record_heat_pump(group, hp, hp_unit)
+      # The Table 8.4.4.7.-A residential parenthetical needs to know whether the
+      # LOOP's own DX cools the zones (an air-cooled unitary/packaged shape) —
+      # a fact, where the family string is only a name (D-58).
+      group[:loop_dx_cooling] = true if comp.iddObjectType.valueName =~ /Coil_Cooling_DX/
       group[:evidence] << "cooled: #{evidence}"
       if kw.nil?
         group[:cooling_capacity_complete] = false
@@ -511,16 +597,16 @@ module OpenStudioHVAC
     # ---------------- zonal equipment ----------------
 
     ZONAL = [
-      [:to_ZoneHVACBaseboardConvectiveWater, { heat: :hydronic }],
-      [:to_ZoneHVACBaseboardConvectiveElectric, { heat: 'Electricity' }],
-      [:to_ZoneHVACPackagedTerminalAirConditioner, { cool: 'Electricity', heat: :coil }],
-      [:to_ZoneHVACPackagedTerminalHeatPump, { heat: 'Electricity', cool: 'Electricity', hp: true }],
-      [:to_ZoneHVACFourPipeFanCoil, { heat: :coil, cool: :coil }],
-      [:to_ZoneHVACTerminalUnitVariableRefrigerantFlow, { heat: 'Electricity', cool: 'Electricity', hp: true }],
-      [:to_ZoneHVACUnitHeater, { heat: :coil }],
-      [:to_ZoneHVACWaterToAirHeatPump, { heat: 'Electricity', cool: 'Electricity', hp: true }],
-      [:to_ZoneHVACHighTemperatureRadiant, { heat: 'Electricity' }],
-      [:to_ZoneHVACLowTemperatureRadiantElectric, { heat: 'Electricity' }]
+      [:to_ZoneHVACBaseboardConvectiveWater, { heat: :hydronic, kind: :baseboard }],
+      [:to_ZoneHVACBaseboardConvectiveElectric, { heat: 'Electricity', kind: :baseboard }],
+      [:to_ZoneHVACPackagedTerminalAirConditioner, { cool: 'Electricity', heat: :coil, kind: :ptac }],
+      [:to_ZoneHVACPackagedTerminalHeatPump, { heat: 'Electricity', cool: 'Electricity', hp: true, kind: :pthp }],
+      [:to_ZoneHVACFourPipeFanCoil, { heat: :coil, cool: :coil, kind: :fan_coil }],
+      [:to_ZoneHVACTerminalUnitVariableRefrigerantFlow, { heat: 'Electricity', cool: 'Electricity', hp: true, kind: :vrf_terminal }],
+      [:to_ZoneHVACUnitHeater, { heat: :coil, kind: :unit_heater }],
+      [:to_ZoneHVACWaterToAirHeatPump, { heat: 'Electricity', cool: 'Electricity', hp: true, kind: :wshp }],
+      [:to_ZoneHVACHighTemperatureRadiant, { heat: 'Electricity', kind: :radiant }],
+      [:to_ZoneHVACLowTemperatureRadiantElectric, { heat: 'Electricity', kind: :radiant }]
     ].freeze
 
     def self.merge_zonal_equipment(group, zone, plant_by_name, _audit)
@@ -533,10 +619,12 @@ module OpenStudioHVAC
 
           unit = optional.get
           evidence = "#{eq.iddObjectType.valueName} in #{zone.nameString}"
+          group[:zonal_units] |= [roles[:kind]] if roles[:kind]
           if roles[:heat]
             group[:heated] = true
             group[:heating_energy_types] |= zonal_fuels(unit, roles[:heat], :heat, plant_by_name)
             group[:evidence] << "heated: #{evidence}"
+            record_plant_heat_pump(group, zonal_water_heating_coil(unit), plant_by_name)
           end
           if roles[:cool]
             group[:cooled] = true

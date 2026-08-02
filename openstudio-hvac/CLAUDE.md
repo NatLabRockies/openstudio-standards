@@ -226,6 +226,19 @@ family — do not duplicate them. E+-dependent tests skip without the
   on Table -A; empty sources = conservative redirect. The catalog 'Water
   source heat pumps' system is a water-LOOP system by the note (internal
   boiler + fluid cooler) — do NOT use it to test the ASHP redirect; use PTHP.
+- **Facts over family names** (D-58): `residential_compatible_cooling?` reads
+  `zonal_units` (ptac/pthp/fan_coil/vrf_terminal/wshp) and `loop_dx_cooling` —
+  NEVER go back to family-string matching; legacy pipe names put family
+  STRINGS into `:family_guess` and the old symbol test silently sent the
+  fleet hotels' MAU+PTAC guest blocks to through-the-wall instead of the
+  Table -A identical-copy. Plant HPs (HeatPumpPlantLoopEIR / WaterToWater on
+  a loop serving hydronic coils) mark their groups via
+  `record_plant_heat_pump` — 8.4.4.13.(2) reaches "conditioned water to a
+  hydronic loop", not just coil-level units — and their SOURCE loops are
+  excluded from purchased-energy detection (the legacy GLHX district-object
+  ground proxy is not purchased heating). The whole proposed→reference matrix
+  is pinned by `test_reference_selection_matrix.rb` against the adjudicated
+  golden (FULL_MATRIX=1 for all 97; regen requires re-adjudication, D-58).
 - **HP aux-fuel election** (D-52, 8.4.4.13.(2)(g)): when the umbrella hands
   `reference_hvac` a `proposed_annual:` hash (per-loop/per-zone delivered
   heating energy joined from `Classify.heating_election_inventory` + the
