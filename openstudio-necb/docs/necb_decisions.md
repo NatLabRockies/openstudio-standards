@@ -3198,3 +3198,36 @@ before. Lead worth chasing: the staged-coil off-rated flow band (adjacent to
 the `coils.rb` staged-airflow work and L-9/#2127).
 
 - Who/when: Fable under D-10 delegation, 2026-08-03.
+
+### CURRENT VALIDATED FLEET BASELINE (consolidated 2026-08-03)
+
+The single current table — full-annual (8760 h), Toronto CWEC2020,
+Electricity, legacy NECB2020 proposeds. Assembled at report precision from
+the standing run artifacts; supersedes chaining through the 2026-07-30
+table → D-58 refresh → the 2025 sweep entries. ✓/✗ is the full 8.4.1.2
+determination (energy AND unmet-hours gates — several buildings under 100%
+still fail a sentence-(3)/(4) gate).
+
+| Building | 2020 full | 2025 full | | Building | 2020 full | 2025 full |
+|---|---|---|---|---|---|---|
+| SmallOffice | 105.6 ✗ | 105.6 ✗ | | QuickServiceRestaurant | 99.4 ✗ | 99.4 ✗ |
+| MediumOffice | 115.9 ✗ | 113.2 ✗ | | HighriseApartment | 101.8 ✗ | 101.3 ✗ |
+| LargeOffice | 118.2 ✗ | 118.2 ✗ | | LowriseApartment | 101.6 ✗ | 101.4 ✗ |
+| PrimarySchool | 105.3 ✗ | 105.3 ✗ | | MidriseApartment | 102.8 ✗ | 102.5 ✗ |
+| SecondarySchool | 106.5 ✗ | 106.5 ✗ | | SmallHotel | 97.2 ✗ | 99.8 ✗ |
+| RetailStandalone | 105.7 ✗ | 105.7 ✗ | | LargeHotel | 95.4 ✓ | 95.4 ✓ |
+| RetailStripmall | 109.9 ✗ | 109.9 ✗ | | Hospital | — | 113.2 ✗ |
+| Warehouse | 105.0 ✗ | 105.0 ✗ | | Outpatient | — | 100.4 ✗ |
+| FullServiceRestaurant | 97.8 ✓ | 97.8 ✓ | | | | |
+
+Reading guide: identical-to-the-decimal pairs are the norm (the reference is
+edition-identical for these shapes); every 2020↔2025 difference is the
+sentence-(4) allowance acting on the D-43 iteration (see the 2025 sweep
+entry above); Hospital/Outpatient have no 2020 full-annual runs (2025-first,
+week-mode 2020 only). Under the post-D-58 corrected reference the legacy
+archetypes read as broadly NON-code-minimum — only FullServiceRestaurant and
+LargeHotel earn the full determination. Refreshing any row: `VINTAGE=<v>
+SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
+(Hospital+Outpatient need a ~12 h window — see the runtime finding above).
+
+- Who/when: consolidated by Fable under D-10, 2026-08-03.
