@@ -24,8 +24,10 @@
 # envelope and ERV rows. VINTAGE (2020 default | 2025) picks the PIPELINE
 # edition only — the proposed is ALWAYS the legacy NECB2020 archetype (legacy
 # has no 2025 generator), so the generated-OSM cache is shared across
-# vintages while run dirs and result files fork. Cache keys include
-# fuel/loc(/vintage), so variants coexist.
+# vintages while run dirs and result files fork. ECM (e.g. hs08_ccashp_vrf)
+# passes the legacy generator's ecm_system_name — the vehicle for HP-proposed
+# buildings (the 8.4.4.13 redirect + D-52 election on real annual data).
+# Cache keys include fuel/loc/ecm(/vintage), so variants coexist.
 
 require 'fileutils'
 require 'json'
@@ -53,9 +55,12 @@ HDD = LOCATIONS[LOC][:hdd]
 VINTAGE = ENV.fetch('VINTAGE', '2020')
 raise(ArgumentError, "unknown VINTAGE '#{VINTAGE}' (2020/2025)") unless %w[2020 2025].include?(VINTAGE)
 
+ECM = ENV['ECM'] # legacy ecm_system_name, nil = NECB_Default
+
 # The proposed-OSM cache is vintage-independent (always the legacy NECB2020
 # archetype); run dirs and result files carry the vintage.
-GEN_VARIANT = [FUEL == 'Electricity' ? nil : FUEL.downcase, LOC == 'toronto' ? nil : LOC].compact.join('_')
+GEN_VARIANT = [FUEL == 'Electricity' ? nil : FUEL.downcase, LOC == 'toronto' ? nil : LOC,
+               ECM&.downcase].compact.join('_')
 SUFFIX = GEN_VARIANT.empty? ? '' : "_#{GEN_VARIANT}"
 RUN_VARIANT = [GEN_VARIANT.empty? ? nil : GEN_VARIANT, VINTAGE == '2020' ? nil : "v#{VINTAGE}"].compact.join('_')
 RUN_SUFFIX = RUN_VARIANT.empty? ? '' : "_#{RUN_VARIANT}"
@@ -72,6 +77,7 @@ def generate!(type)
     model = std.model_create_prototype_model(
       template: 'NECB2020', building_type: '#{type}',
       primary_heating_fuel: '#{FUEL}',
+      ecm_system_name: '#{ECM || 'NECB_Default'}',
       epw_file: '#{File.basename(EPW)}',
       sizing_run_dir: File.join('#{CACHE_DIR}', 'gen_sizing_#{type}#{SUFFIX}'))
     (warn('GENERATION FAILED'); exit 1) if model.nil? || model.is_a?(FalseClass)
