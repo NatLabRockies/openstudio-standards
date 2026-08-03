@@ -244,6 +244,78 @@ module OpenStudioSHW
       def optional(value)
         value.is_initialized ? value.get : nil
       end
+
+      # ---------------- Table 6.2.2.1 solar + pool minimums (D-63) ----------------
+      #
+      # Apply-when-present: no archetype carries either class, but a foreign
+      # proposed can. The printed rows were recovered by hbix's table audit
+      # (the extraction LOST both sections in every edition), so the values
+      # come from the vendored solar_pool_minimums block, not the service.
+      #
+      # Pool heaters: a WaterHeaterMixed on a loop that serves a
+      # SwimmingPoolIndoor gets the printed minimum thermal efficiency (gas
+      # 82% / oil 78%); a heat-pump water heater on such a loop gets the
+      # printed COP 4.0 floor. Solar thermal: SEF is an equipment RATING with
+      # no EnergyPlus field — detected solar collectors get an audited
+      # determination citing the printed minimums, never a silent skip.
+      def apply_solar_pool_minimums(model, vintage: '2020', audit: nil)
+        spec = NECB.rules(vintage)['solar_pool_minimums']
+        return if spec.nil?
+
+        pool_loops = model.getSwimmingPoolIndoors.filter_map { |p| p.plantLoop.is_initialized ? p.plantLoop.get : nil }.uniq
+        pool_loops.each do |loop|
+          loop.supplyComponents.each do |comp|
+            heater = comp.to_WaterHeaterMixed
+            next unless heater.is_initialized
+
+            heater = heater.get
+            # A heat-pump water heater puts its TANK on the loop; the wrapper is
+            # the tank's containing ZoneHVAC component.
+            containing = heater.containingZoneHVACComponent
+            hp = containing.is_initialized ? containing.get.to_WaterHeaterHeatPump : nil
+            if hp&.is_initialized
+              coil = hp.get.dXCoil.to_CoilWaterHeatingAirToWaterHeatPump
+              next unless coil.is_initialized
+
+              floored = [coil.get.ratedCOP, spec['pool_heat_pump_cop']].max
+              coil.get.setRatedCOP(floored)
+              audit&.decision(:shw_efficiency, 'heat-pump pool heater floored at the Table 6.2.2.1 minimum COP',
+                              target: hp.get.nameString,
+                              inputs: { pool_loop: loop.nameString },
+                              value: "COP #{floored.round(2)} (minimum #{spec['pool_heat_pump_cop']})",
+                              article: spec['article'], ruling: 'D-63')
+              next
+            end
+
+            fuel = heater.heaterFuelType
+            minimum = fuel =~ /gas|propane/i ? spec['pool_gas_thermal_efficiency'] :
+                      (fuel =~ /oil/i ? spec['pool_oil_thermal_efficiency'] : nil)
+            if minimum
+              heater.setHeaterThermalEfficiency(minimum)
+              audit&.decision(:shw_efficiency, 'pool heater set to the Table 6.2.2.1 minimum thermal efficiency',
+                              target: heater.nameString, inputs: { fuel: fuel, pool_loop: loop.nameString },
+                              value: "Et = #{(minimum * 100).round}%", article: spec['article'], ruling: 'D-63')
+            else
+              audit&.info(:shw_efficiency, "pool heater fuel '#{fuel}' has no Table 6.2.2.1 pool row — left as cloned",
+                          target: heater.nameString, article: spec['article'], ruling: 'D-63')
+            end
+          end
+        end
+
+        collectors = model.getSolarCollectorFlatPlateWaters.to_a
+        collectors += model.getSolarCollectorFlatPlatePhotovoltaicThermals.to_a
+        collectors += model.getSolarCollectorIntegralCollectorStorages.to_a
+        return if collectors.empty?
+
+        audit&.decision(:shw_efficiency,
+                        'solar-thermal service water heating detected — the Table 6.2.2.1 minimum Solar Energy ' \
+                        "Factor (SEF >= #{spec['solar_sef_aux_electric']} electric-auxiliary / " \
+                        ">= #{spec['solar_sef_aux_gas']} gas-auxiliary) is an equipment RATING with no " \
+                        'EnergyPlus field; the collectors are modeled physically as cloned and the rating-level ' \
+                        'requirement is recorded here rather than silently skipped',
+                        inputs: { collectors: collectors.size },
+                        article: spec['article'], ruling: 'D-63')
+      end
     end
 
     def self.apply_water_heater_efficiency(water_heater, **kwargs)

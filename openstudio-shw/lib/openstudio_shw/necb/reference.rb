@@ -20,6 +20,8 @@ module OpenStudioSHW
                    'by construction (clone; no transform touches SWH sizing or fuel)',
                    inputs: { water_heaters: heaters.size }, article: "#{prefix}.20.(1)")
         heaters.each { |heater| Efficiency.apply_efficiency(heater, vintage: vintage, audit: audit) }
+        # Table 6.2.2.1 solar-thermal + pool-heater rows (D-63): apply-when-present.
+        Efficiency.apply_solar_pool_minimums(model, vintage: vintage, audit: audit)
         emit_article_coverage(vintage, audit)
         audit
       end

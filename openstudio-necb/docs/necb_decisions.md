@@ -3366,3 +3366,30 @@ move without an audited mechanism as suspect: RERUN SOLO before attributing.
   `efficiency.rb` (floor + plumb), `test_necb_staging.rb`,
   `test_necb_energy_recovery.rb`.
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+## D-63 — Table 6.2.2.1 pool-heater + solar-thermal minimums, apply-when-present (Phase 3b)
+
+**What.** The solar/pool sections of Table 6.2.2.1 were LOST from the
+extraction in both editions (hbix's page-verified audit recovered the
+printed values; D-61 amendment). Now vendored (`solar_pool_minimums`, both
+vintages) and applied when present in `reference_shw`:
+
+- **Pool heaters** (WaterHeaterMixed serving a `SwimmingPoolIndoor`): set to
+  the printed minimum Eₜ — gas 82%, oil 78%; a heat-pump pool heater
+  (tank's containing `WaterHeaterHeatPump`) is FLOORED at COP 4.0; fuels
+  with no printed pool row are left as cloned with a note.
+- **Solar thermal** (flat-plate water / PVT / ICS collectors): SEF ≥ 1.4
+  (electric-aux) / ≥ 0.9 (gas-aux) is an equipment RATING with no
+  EnergyPlus field — an audited determination records the requirement, the
+  collector physics stay cloned. Never a silent skip.
+
+**Verification [RAN]:** `test_solar_pool_minimums.rb` 5 runs / 19
+assertions (gas 0.82, oil 0.78, electric left-as-cloned with note, solar
+determination, structural no-op without the equipment); `test_shw.rb` 8/102;
+registry + orphan keys green; control building (fleet no-op) below. No
+archetype carries either class — the pass exists for foreign proposeds.
+
+- **Files:** `shw_rules_{2020,2025}.json` (rules + 6.2.2.1 gaps narrowed),
+  `efficiency.rb` (`apply_solar_pool_minimums`), `reference.rb` (call),
+  the new test.
+- **Who/when:** Fable under D-10, 2026-08-03.
