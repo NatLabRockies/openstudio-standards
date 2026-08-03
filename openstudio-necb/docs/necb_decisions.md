@@ -3152,3 +3152,49 @@ documented floor. The vintages differ exactly where the printed sentences
 differ, nowhere else.
 
 - Who/when: Fable under D-10, 2026-08-02.
+
+### 2025 FULL-ANNUAL sweep (2026-08-03): 17/17, first full-annual 2025 table + first Hospital/Outpatient full-annual determinations
+
+True 8760 h under `VINTAGE=2025`, all 17 archetypes. Run in three tranches
+(the Hospital/Outpatient pair needed a 12 h window — see the runtime finding
+below).
+
+**Reference kWh identical to the 2020 full-annual baseline on 14 of 15
+comparable buildings.** The five differences, all attributed to the ONE
+mechanism the week sweep pre-registered — the 2025 sentence-(4) allowance
+(ref + max(10%, 20 h) vs 2020's ref × 1.1) gives the D-43 secant different
+targets, so converged sizing factors differ:
+
+| Building | 2020 | 2025 | note |
+|---|---|---|---|
+| MediumOffice | 116 | **113** | same 1 iteration, different bump magnitude (proposed −2.3%) |
+| HighriseApartment | 102 | **101** | 2025 CONVERGES (63.0 h vs target ~83) where 2020 stalled at 131 h |
+| LowriseApartment | 102 | 101 | 3 iterations both, different targets |
+| MidriseApartment | 103 | 102 | 3 iterations both (both stall) |
+| SmallHotel | 97 | **100** | the ONLY reference mover (+564 kWh, +0.1%): its reference fails the sentence-(3) heating gate in both vintages (318–480 h > 100), so iteration bumps the REFERENCE too and the differing paths leave different reference sizing factors |
+
+Unchanged rows: SmallOffice 106, PrimarySchool 105, RetailStripmall 110,
+RetailStandalone 106, LargeOffice 118, SecondarySchool 106, Warehouse 105,
+FullServiceRestaurant 98, QuickServiceRestaurant 99, LargeHotel 95.
+
+**First-ever full-annual determinations for the two giants (2025 vintage):**
+
+- **Hospital 113.2%**, non-compliant (energy; unmet cooling 1526 h vs ref
+  333 h also fails; 3 iterations, stalled) — matches its week number (113).
+- **Outpatient 100.4%**, non-compliant BY 0.4% — the week run said 95;
+  the seasonal shift moved it just over the line, the same week-vs-annual
+  pattern as the fleet. Both buildings' unmet-hours profiles are dominated
+  by the legacy proposed's own characteristics (Outpatient proposed unmet
+  heating 2 990 h).
+
+**Runtime finding (why the pair needed 12 h):** Hospital's REFERENCE annual
+runs 3–4× slower than its proposed (118 vs 34 min) — the staged reference DX
+coils trip EnergyPlus's flow-per-watt range check MILLIONS of times per coil
+at off-rated timesteps (6.5 M on one coil; 309 M total recurrences vs the
+proposed's 143 M, which are the legacy SWH target-temperature warnings), and
+the nurses-station ERVs log 4 'unbalanced air volume flow' Severes. Not a
+2025 regression — identical coils/values under 2020, never full-annual-run
+before. Lead worth chasing: the staged-coil off-rated flow band (adjacent to
+the `coils.rb` staged-airflow work and L-9/#2127).
+
+- Who/when: Fable under D-10 delegation, 2026-08-03.
