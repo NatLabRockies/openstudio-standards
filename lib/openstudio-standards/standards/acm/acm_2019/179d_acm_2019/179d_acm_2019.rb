@@ -1,6 +1,5 @@
 class ACM179dACM2019 < Standard
   register_standard '179D ACM 2019'
-  register_standard '179D ACM'
   attr_reader :template
 
   ACM_TEMPLATE = '179d-ACM-2019'.freeze
