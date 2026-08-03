@@ -3416,3 +3416,28 @@ standing in the baseline table; revisit only if a determination on a real
 project turns on it.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+## D-65 — Hospital reference runtime root-caused: the OA floor × the flow-per-watt band, plus 30 required ERVs (Phase 4a)
+
+**The recurrence churn [RAN]:** the multi-million "air volume flow rate per
+watt out of range" recurrences (6.5 M on one 26 kW coil; 309 M total) are the
+staged coils' LOWEST stages operating above EnergyPlus's per-stage
+flow-per-watt band on HIGH-OA hospital loops: D-46 floors staged supply flow
+at the minimum-OA fraction (staging must never starve ventilation), and
+where OA fraction > lowest-stage capacity fraction, that floor sits outside
+the band → E+ warns and clamps every call. Converse verified: the D-62 gate
+model (low OA, 4 stages, economizer) logs ZERO such warnings. Abandoning the
+floor trades a warning for a ventilation violation → **inherent, dispositioned.**
+
+**The runtime delta (34 → 118 min) is substantially LEGITIMATE equipment:**
+the reference carries 30 ERVs the legacy proposed lacks (5.2.10.1 requires
+them), each simulated every timestep, on a 162-zone / 32-loop model.
+
+**Open lead:** 4 input-time Severes, "unbalanced air volume flow", on two
+nurses-station ERV wheels — localized, non-fatal; targeted flow-balance look
+when that subsystem is next touched.
+
+**Operational note (already applied):** Hospital+Outpatient full-annual
+sweeps get a ~12 h window.
+
+- **Who/when:** Fable under D-10, 2026-08-03.
