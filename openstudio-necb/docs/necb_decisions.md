@@ -3216,15 +3216,16 @@ still fail a sentence-(3)/(4) gate).
 | PrimarySchool | 105.3 ✗ | 105.3 ✗ | | MidriseApartment | 102.8 ✗ | 102.5 ✗ |
 | SecondarySchool | 106.5 ✗ | 106.5 ✗ | | SmallHotel | 97.2 ✗ | 99.8 ✗ |
 | RetailStandalone | 105.7 ✗ | 105.7 ✗ | | LargeHotel | 95.4 ✓ | 95.4 ✓ |
-| RetailStripmall | 109.9 ✗ | 109.9 ✗ | | Hospital | — | 113.2 ✗ |
-| Warehouse | 105.0 ✗ | 105.0 ✗ | | Outpatient | — | 100.4 ✗ |
+| RetailStripmall | 109.9 ✗ | 109.9 ✗ | | Hospital | 117.7 ✗ | 113.2 ✗ |
+| Warehouse | 105.0 ✗ | 105.0 ✗ | | Outpatient | 104.4 ✗ | 100.4 ✗ |
 | FullServiceRestaurant | 97.8 ✓ | 97.8 ✓ | | | | |
 
 Reading guide: identical-to-the-decimal pairs are the norm (the reference is
 edition-identical for these shapes); every 2020↔2025 difference is the
 sentence-(4) allowance acting on the D-43 iteration (see the 2025 sweep
-entry above); Hospital/Outpatient have no 2020 full-annual runs (2025-first,
-week-mode 2020 only). Under the post-D-58 corrected reference the legacy
+entry above); Hospital/Outpatient 2020 fulls completed 2026-08-03 (12 h window; references
+kWh-identical across vintages; the 2020-vs-2025 percent gaps are the
+sentence-(4) allowance driving stronger proposed-side capacity bumps). Under the post-D-58 corrected reference the legacy
 archetypes read as broadly NON-code-minimum — only FullServiceRestaurant and
 LargeHotel earn the full determination. Refreshing any row: `VINTAGE=<v>
 SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
