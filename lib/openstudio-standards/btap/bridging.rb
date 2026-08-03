@@ -706,14 +706,20 @@ module BTAP
             end
 
             unless @model[:attic][stypes].empty?
+              types = case stypes
+                      when :roofs  then :floors
+                      when :floors then :roofs
+                      else              :walls
+                      end
+
               aOPTs         = {} # attic(s)
-              aOPTs[:id   ] = @model[:attic][stypes][:id]
-              aOPTs[:stype] = stypes
+              aOPTs[:id   ] = @model[:attic][types][:id]
+              aOPTs[:stype] = types
               aOPTs[:uo   ] = target
               aID = costed_assembly(aOPTs)
 
               unless costed_uo(aID, target)
-                comply[stypes] = false
+                comply[types] = false
                 complies = false
                 next
               end
@@ -776,28 +782,34 @@ module BTAP
             end
 
             unless @model[:attic][stypes].empty?
+              types = case stypes
+                      when :roofs  then :floors
+                      when :floors then :roofs
+                      else              :walls
+                      end
+
               aOPTs         = {} # attic
               aOPTs[:id   ] = @model[:attic][stypes][:id]
-              aOPTs[:stype] = stypes
+              aOPTs[:stype] = types
               aOPTs[:uo   ] = target
               aID = costed_assembly(aOPTs)
 
-              @model[:attic][stypes][:id] = aID
+              @model[:attic][types][:id] = aID
               aUo = costed_uo(aID, target)
 
               if aUo
                 aUo = target if @model[:interpolate]
 
                 # Candidate construction successfully identified.
-                @model[:attic][stypes][:compliant] = true
-                @model[:attic][stypes][:uo       ] = aUo
+                @model[:attic][types][:compliant] = true
+                @model[:attic][types][:uo       ] = aUo
               else
                 aUo = lowest_uo(aID)
                 comply[stypes] = false
 
                 # Fallback.
-                @model[:attic][stypes][:compliant] = false
-                @model[:attic][stypes][:uo       ] = aUo
+                @model[:attic][types][:compliant] = false
+                @model[:attic][types][:uo       ] = aUo
               end
             end
 
@@ -846,19 +858,25 @@ module BTAP
             u[:uo] = bUo
 
             unless @model[:attic][stypes].empty?
-              aID = @model[:building][stypes][:id]
+              types = case stypes
+                      when :roofs  then :floors
+                      when :floors then :roofs
+                      else              :walls
+                      end
+
+              aID = @model[:building][types][:id]
               aUo = lowest_uo(aID)
 
               aOPTs         = {}
               aOPTs[:id   ] = aID
-              aOPTs[:stype] = stypes
+              aOPTs[:stype] = types
               aOPTs[:uo   ] = aUo
               aID = costed_assembly(aOPTs)
               aUo = costed_uo(aID, aUo)
 
-              @model[:attic][stypes][:compliant] = false
-              @model[:attic][stypes][:id       ] = aID
-              @model[:attic][stypes][:uo       ] = aUo
+              @model[:attic][types][:compliant] = false
+              @model[:attic][types][:id       ] = aID
+              @model[:attic][types][:uo       ] = aUo
             end
 
             @model[:spaces].each do |id, sp|
@@ -885,10 +903,10 @@ module BTAP
         next unless comply.key?(stypes) # true only if uprating
 
         # Reset uprated Uo factor for each 'deratable' construction.
-        bLC = @model[:building][stypes][:lc]
-        bFr = @model[:building][stypes][:film]
-        bIx = @model[:building][stypes][:indx]
-        bUo = @model[:building][stypes][:uo]
+        bLC  = @model[:building][stypes][:lc]
+        bFr  = @model[:building][stypes][:film]
+        bIx  = @model[:building][stypes][:indx]
+        bUo  = @model[:building][stypes][:uo]
         bRSI = TBD.resetUo(bLC, bFr, bIx, bUo)
 
         # Re/set to each construction the following AdditionalProperties:
@@ -896,10 +914,16 @@ module BTAP
 
         # Repeat for attics (if applicable).
         unless @model[:attic][stypes].empty?
-          aLC = @model[:attic][stypes][:lc]
-          aFr = @model[:attic][stypes][:film]
-          aIx = @model[:attic][stypes][:indx]
-          aUo = @model[:attic][stypes][:uo]
+          types = case stypes
+                  when :roofs  then :floors
+                  when :floors then :roofs
+                  else              :walls
+                  end
+
+          aLC  = @model[:attic][types][:lc]
+          aFr  = @model[:attic][types][:film]
+          aIx  = @model[:attic][types][:indx]
+          aUo  = @model[:attic][types][:uo]
           aRSI = TBD.resetUo(aLC, aFr, aIx, aUo)
 
           # Re/set to each construction the following AdditionalProperties:
@@ -945,7 +969,6 @@ module BTAP
     # @return [Boolean] true if valid (check @feedback logs if false)
     def populate()
       mth = "BTAP::Bridging::#{__callee__}"
-      tag = "space_conditioning_category"
       lgs = @feedback[:logs]
       cl  = OpenStudio::Model::LayeredConstruction
 
@@ -1095,6 +1118,14 @@ module BTAP
       rFR = 0 unless rFR
       fFR = 0 unless fFR
 
+      # Previously-assigned construction net area?
+      wM2 = prop(wallC,  "btap_area", Float)
+      rM2 = prop(roofC,  "btap_area", Float)
+      fM2 = prop(floorC, "btap_area", Float)
+      wM2 = wallC.getNetArea  unless wM2
+      rM2 = roofC.getNetArea  unless rM2
+      fM2 = floorC.getNetArea unless fM2
+
       # Previously-assigned BTAP-costed construction IDs?
       wID = prop(wallC,  "btap_id", String)
       rID = prop(roofC,  "btap_id", String)
@@ -1142,27 +1173,26 @@ module BTAP
         fID = BTAP::Bridging.costed_assembly(argh)
       end
 
-      # Re/set AdditionalProperties to BUILDING exterior wall constructions.
       addprop(bldg,   "btap_ut",   wUt)
       addprop(bldg,   "btap_uo",   wUo)
       addprop(bldg,   "btap_id",   wID)
-      # addprop(bldg,   "btap_film", wFR)
-      # addprop(bldg,   "btap_type", :walls)
+      addprop(bldg,   "btap_area", wM2)
+      addprop(bldg,   "btap_film", wFR)
       addprop(wallC,  "btap_ut",   wUt)
       addprop(wallC,  "btap_uo",   wUo)
       addprop(wallC,  "btap_id",   wID)
-      # addprop(wallC,  "btap_film", wFR)
-      # addprop(wallC,  "btap_type", :walls)
+      addprop(wallC,  "btap_area", wM2)
+      addprop(wallC,  "btap_film", wFR)
       addprop(roofC,  "btap_ut",   rUt)
       addprop(roofC,  "btap_uo",   rUo)
       addprop(roofC,  "btap_id",   rID)
-      # addprop(roofC,  "btap_film", rFR)
-      # addprop(roofC,  "btap_type", :roofs)
+      addprop(roofC,  "btap_area", rM2)
+      addprop(roofC,  "btap_film", rFR)
       addprop(floorC, "btap_ut",   fUt)
       addprop(floorC, "btap_uo",   fUo)
       addprop(floorC, "btap_id",   fID)
-      # addprop(floorC, "btap_film", fFR)
-      # addprop(floorC, "btap_type", :floors)
+      addprop(floorC, "btap_area", fM2)
+      addprop(floorC, "btap_film", fFR)
 
       # Building shortcuts.
       @model[:building][:walls ][:lc  ] = wallC
@@ -1171,6 +1201,9 @@ module BTAP
       @model[:building][:walls ][:indx] = walliL[:index]
       @model[:building][:roofs ][:indx] = roofiL[:index]
       @model[:building][:floors][:indx] = flooriL[:index]
+      @model[:building][:walls ][:area] = wM2
+      @model[:building][:roofs ][:area] = rM2
+      @model[:building][:floors][:area] = fM2
       @model[:building][:walls ][:id  ] = wID
       @model[:building][:roofs ][:id  ] = rID
       @model[:building][:floors][:id  ] = fID
@@ -1188,10 +1221,8 @@ module BTAP
       attics = []
 
       model.getSpaces.each do |space|
-        prop = space.additionalProperties.getFeatureAsString(tag)
-        next if prop.empty?
         next if space.partofTotalFloorArea
-        next unless prop.get.downcase == "unconditioned"
+        next unless TBD.unconditioned?(space)
 
         attics << space
       end
@@ -1255,6 +1286,14 @@ module BTAP
           rFR = 0 unless rFR
           fFR = 0 unless fFR
 
+          # Previously-assigned construction net area?
+          wM2 = prop(wallC,  "btap_area", Float)
+          rM2 = prop(roofC,  "btap_area", Float)
+          fM2 = prop(floorC, "btap_area", Float)
+          wM2 = wallC.getNetArea  unless wM2
+          rM2 = roofC.getNetArea  unless rM2
+          fM2 = floorC.getNetArea unless fM2
+
           # Previously-assigned BTAP-costed wall construction ID?
           wID = prop(wallC,  "btap_id", String)
           rID = prop(roofC,  "btap_id", String)
@@ -1306,22 +1345,26 @@ module BTAP
           addprop(wallC,  "btap_ut",   wUt)
           addprop(wallC,  "btap_uo",   wUo)
           addprop(wallC,  "btap_id",   wID)
-          # addprop(wallC,  "btap_film", wFR)
+          addprop(wallC,  "btap_area", wM2)
+          addprop(wallC,  "btap_film", wFR)
           addprop(roofC,  "btap_ut",   fUt) # not roof Ut
           addprop(roofC,  "btap_uo",   fUo) # not roof Uo
           addprop(roofC,  "btap_id",   rID)
-          # addprop(wallC,  "btap_film", wFR)
+          addprop(roofC,  "btap_area", rM2)
+          addprop(roofC,  "btap_film", rFR)
           addprop(floorC, "btap_ut",   rUt) # not floor Ut
           addprop(floorC, "btap_uo",   rUo) # not floor Uo
           addprop(floorC, "btap_id",   fID)
-          # addprop(wallC,  "btap_film", wFR)
+          addprop(floorC, "btap_area", fM2)
+          addprop(floorC, "btap_film", fFR)
 
           # Add interior wall parameters to attic spaces.
           attics.each do |att|
             addprop(att, "btap_ut",   wUt)
             addprop(att, "btap_uo",   wUo)
             addprop(att, "btap_id",   wID)
-            # addprop(att, "btap_film", wFR)
+            addprop(att, "btap_area", wM2)
+            addprop(att, "btap_film", wFR)
           end
 
           # Shortcuts.
@@ -1331,6 +1374,9 @@ module BTAP
           @model[:attic][:walls ][:indx] = walliL[:index]
           @model[:attic][:roofs ][:indx] = roofiL[:index]
           @model[:attic][:floors][:indx] = flooriL[:index]
+          @model[:attic][:walls ][:area] = wM2
+          @model[:attic][:roofs ][:area] = rM2
+          @model[:attic][:floors][:area] = fM2
           @model[:attic][:walls ][:id  ] = wID
           @model[:attic][:roofs ][:id  ] = rID
           @model[:attic][:floors][:id  ] = fID
@@ -1393,6 +1439,14 @@ module BTAP
         rFR = 0 unless rFR
         fFR = 0 unless fFR
 
+        # Previously-assigned construction net area?
+        wM2 = prop(wallC,  "btap_area", Float)
+        rM2 = prop(roofC,  "btap_area", Float)
+        fM2 = prop(floorC, "btap_area", Float)
+        wM2 = wallC.getNetArea  unless wM2
+        rM2 = roofC.getNetArea  unless rM2
+        fM2 = floorC.getNetArea unless fM2
+
         # Previously-assigned BTAP-costed construction IDs?
         wID = prop(wallC,  "btap_id", String)
         rID = prop(roofC,  "btap_id", String)
@@ -1441,18 +1495,26 @@ module BTAP
         end
 
         # Re/set AdditionalProperties to space exterior constructions.
-        addprop(space,  "btap_ut", wUt)
-        addprop(space,  "btap_uo", wUo)
-        addprop(space,  "btap_id", wID)
-        addprop(wallC,  "btap_ut", wUt)
-        addprop(wallC,  "btap_uo", wUo)
-        addprop(wallC,  "btap_id", wID)
-        addprop(roofC,  "btap_ut", rUt)
-        addprop(roofC,  "btap_uo", rUo)
-        addprop(roofC,  "btap_id", rID)
-        addprop(floorC, "btap_ut", fUt)
-        addprop(floorC, "btap_uo", fUo)
-        addprop(floorC, "btap_id", fID)
+        addprop(space,  "btap_ut",   wUt)
+        addprop(space,  "btap_uo",   wUo)
+        addprop(space,  "btap_id",   wID)
+        addprop(space,  "btap_area", wM2)
+        addprop(space,  "btap_film", wFR)
+        addprop(wallC,  "btap_ut",   wUt)
+        addprop(wallC,  "btap_uo",   wUo)
+        addprop(wallC,  "btap_id",   wID)
+        addprop(wallC,  "btap_area", wM2)
+        addprop(wallC,  "btap_film", wFR)
+        addprop(roofC,  "btap_ut",   rUt)
+        addprop(roofC,  "btap_uo",   rUo)
+        addprop(roofC,  "btap_id",   rID)
+        addprop(roofC,  "btap_area", rM2)
+        addprop(roofC,  "btap_film", rFR)
+        addprop(floorC, "btap_ut",   fUt)
+        addprop(floorC, "btap_uo",   fUo)
+        addprop(floorC, "btap_id",   fID)
+        addprop(floorC, "btap_area", fM2)
+        addprop(floorC, "btap_film", fFR)
 
         @model[:spaces][id] = {walls: {}, roofs: {}, floors: {}}
 
@@ -1463,6 +1525,9 @@ module BTAP
         @model[:spaces][id][:walls ][:indx] = walliL[:index]
         @model[:spaces][id][:roofs ][:indx] = roofiL[:index]
         @model[:spaces][id][:floors][:indx] = flooriL[:index]
+        @model[:spaces][id][:walls ][:area] = wM2
+        @model[:spaces][id][:roofs ][:area] = rM2
+        @model[:spaces][id][:floors][:area] = fM2
         @model[:spaces][id][:walls ][:id  ] = wID
         @model[:spaces][id][:roofs ][:id  ] = rID
         @model[:spaces][id][:floors][:id  ] = fID
@@ -1643,7 +1708,7 @@ module BTAP
       input[:schema     ] = schema
       input[:description] = "TBD input for BTAP"
       input[:psis       ] = psis.values
-      input[:spaces     ] = spaces.values
+      input[:spaces     ] = spaces.values unless spaces.empty?
       input[:building   ] = { psi: bPSI[:id] }
 
       input
@@ -1723,14 +1788,10 @@ module BTAP
       addprop(bldg, "btap_id", @model[:building][:walls][:id])
 
       # Repeat for attic(s) - if applicable.
-      tag = "space_conditioning_category"
-
       unless @model[:attic][:walls].empty?
         model.getSpaces.each do |space|
-          prop = space.additionalProperties.getFeatureAsString(tag)
-          next if prop.empty?
           next if space.partofTotalFloorArea
-          next unless prop.get.downcase == "unconditioned"
+          next unless TBD.unconditioned?(space)
 
           addprop(space, "btap_uo", @model[:attic][:walls][:uo])
           addprop(space, "btap_id", @model[:attic][:walls][:id])

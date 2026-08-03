@@ -549,7 +549,7 @@ class NECB2011 < Standard
 
     output_meters = check_output_meters(output_meters: output_meters) if oerd_utility_pricing
 
-    assign_building_activity(model: model)
+    assign_building_activity(model: model, option: construction_opt)
     assign_building_structure(model: model, activity: @activity, massive: massive)
     apply_loads(model: model,
                 lights_type: lights_type,
@@ -983,14 +983,15 @@ class NECB2011 < Standard
 
   ##
   # Assign surface area-weighted air film resistances (in m2.K/W) to insulated
-  # layered constructions (as AdditionalProperty "btap_film"). The solution
+  # (opaque) layered constructions (as AdditionalProperty "btap_film"), as well
+  # as the (net) area of surfaces referencing each construction. The solution
   # initially targets constructions having a valid AdditionalProperty "btap_uo"
   # (auto-generated with option "structure"). If no constructions are tagged
   # with "btap_uo" in the model, the fallback is to instead target all outdoor-
   # facing, above-grade layered constructions. In case of latter scenario,
-  # AdditionalProperties "btap_uo", "btap_ut", "btap_id" & "btap_type" are
-  # added. All constructions having (or inherting) a "btap_uo" property are
-  # adjusted to match the specified Uo (factoring in "btap_film").
+  # AdditionalProperties "btap_uo", "btap_ut", "btap_id", "btap_type" &
+  # "btap_area"are added. All constructions having (or inherting) a "btap_uo"
+  # property are adjusted to match the specified Uo (factoring in "btap_film").
   #
   # @author: denis@rd2.ca
   #
@@ -1003,25 +1004,31 @@ class NECB2011 < Standard
     ok  = false
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
-    model.getConstructions.each do |lc|
-      lc = lc.to_LayeredConstruction
-      next if lc.empty?
-
-      lc = lc.get
+    model.getLayeredConstructions.each do |lc|
       next unless lc.additionalProperties.hasFeature("btap_uo")
 
       ok = true
       lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      lc.additionalProperties.setFeature("btap_area", lc.getNetArea)
     end
 
     # No "btap_uo" AdditionalProperty?
     model.getSurfaces.each do |surface|
       break if ok
 
-      lc = surface.construction
       tp = surface.surfaceType.downcase
       bc = surface.outsideBoundaryCondition.downcase
       next unless bc == "outdoors"
+
+      lc = surface.construction
+      next if lc.empty?
+
+      lc = lc.get.to_LayeredConstruction
+      next if lc.empty?
+
+      lc = lc.get
+      m2 = lc.getNetArea
+      next unless m2 > 0
 
       uo = max_u_necb(tp, bc, hdd)
       ty = case tp
@@ -1030,15 +1037,13 @@ class NECB2011 < Standard
            else              :roofs
            end
 
-      next if lc.empty?
+      unless lc.additionalProperties.hasFeature("btap_film")
+        lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      end
 
-      lc = lc.get.to_LayeredConstruction
-      next if lc.empty?
-
-      lc = lc.get
-      next if lc.additionalProperties.hasFeature("btap_film")
-
-      lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      unless lc.additionalProperties.hasFeature("btap_area")
+        lc.additionalProperties.setFeature("btap_area", m2)
+      end
 
       unless lc.additionalProperties.hasFeature("btap_type")
         lc.additionalProperties.setFeature("btap_type", ty.to_s)
@@ -1082,17 +1087,20 @@ class NECB2011 < Standard
       ut = lc.additionalProperties.getFeatureAsDouble("btap_ut")
       fr = lc.additionalProperties.getFeatureAsDouble("btap_film")
       ty = lc.additionalProperties.getFeatureAsString("btap_type")
+      m2 = lc.additionalProperties.getFeatureAsString("btap_area")
       next if id.empty?
       next if uo.empty?
       next if ut.empty?
       next if fr.empty?
       next if ty.empty?
+      next if m2.empty?
 
       id = id.get
       uo = uo.get
       ut = ut.get
       fr = fr.get
       ty = ty.get
+      m2 = m2.get
       il = TBD.insulatingLayer(lc)
       next unless il[:index]
 
@@ -1107,6 +1115,7 @@ class NECB2011 < Standard
         model.getBuilding.additionalProperties.setFeature("btap_ut", uo)
         model.getBuilding.additionalProperties.setFeature("btap_film", fr)
         model.getBuilding.additionalProperties.setFeature("btap_type", ty)
+        model.getBuilding.additionalProperties.setFeature("btap_area", m2)
       end
     end
 
@@ -1377,10 +1386,11 @@ class NECB2011 < Standard
   # Initiates a BTAP building ACTIVITY.
   #
   # @param model [OpenStudio::Model::Model] a model
+  # @param option ["", "structure"] construction option
   #
   # @return [BTAP::Activity] a BTAP building ACTIVITY (see logs if failed)
-  def assign_building_activity(model: nil)
-    @activity = BTAP::Activity.new(model)
+  def assign_building_activity(model: nil, option: "")
+    @activity = BTAP::Activity.new(model, option)
   end
 
   # Initiates a BTAP building STRUCTURE.

@@ -23,14 +23,14 @@ class NECB_TBD_Tests < Minitest::Test
     # Range of test options.
     @templates = [
       # 'NECB2011',
-      # 'NECB2015',
+      'NECB2015',
       # 'NECB2017',
       'NECB2020',
       # 'NECB2025'
     ]
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -48,8 +48,8 @@ class NECB_TBD_Tests < Minitest::Test
       # 'Outpatient',
       # 'PrimarySchool',
       'QuickServiceRestaurant',
-      'RetailStandalone',
-      # 'RetailStripmall',
+      # 'RetailStandalone',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
@@ -57,7 +57,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @structure = [
-      # '',
+      '',
       'structure'
     ]
 
@@ -65,18 +65,15 @@ class NECB_TBD_Tests < Minitest::Test
     # calculations (e.g. uprating, derating), all relying on the TBD gem.
     @options = [
       # 'none', # ignore linear thermal bridging altogether
-      # 'bad',  # derating from poor thermal bridging details
+      'bad',  # derating from poor thermal bridging details
       # 'good', # derating from better thermal bridging details
       'uprate'  # uprating (then derating) per NECB2017, NECB2020, NECB2025
     ]
 
-    # PSI factor sets 'bad' or 'good' refer to costed BTAP details. If set
+    # PSI factor set variants 'bad' or 'good' refer to costed BTAP items. If set
     # to 'uprate', psi factor sets are determined iteratively, see:
     #
     #   lib/openstudio-standards/btap/bridging.rb
-    #
-    # AdditionalProperties tag derated surfaces with their initial,
-    # code-required Uo factors (whether derating or not).
     #
     # BTAP holds discrete performance levels for each e.g. wall construction:
     # discrete U factors, from 0.314 down to 0.100 (or even 0.080 ... it
@@ -96,10 +93,6 @@ class NECB_TBD_Tests < Minitest::Test
       false
     ]
 
-    # AdditionalProperty override.
-    @addprop = true
-
-    tag = "space_conditioning_category"
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
 
     fdback = []
@@ -129,7 +122,7 @@ class NECB_TBD_Tests < Minitest::Test
               #   - the office has a user-assigned wood structure
               #   - the fine storage space has user-assigned wood-framing
               #   - the bulk storage area has a user-assigned CMU structure
-              if @addprop && building == "Warehouse"
+              if building == "Warehouse"
                 id1  = "Zone1 Office"
                 id2  = "Zone2 Fine Storage"
                 id3  = "Zone3 Bulk Storage"
@@ -237,13 +230,15 @@ class NECB_TBD_Tests < Minitest::Test
                   # Any (insulated) layered construction also holds:
                   err_msg = "BTAP/TBD air film resistances (#{cas})?"
                   assert(prop.hasFeature("btap_film"))
+                  err_msg = "BTAP/TBD net area (#{cas})?"
+                  assert(prop.hasFeature("btap_area"))
                   err_msg = "BTAP/TBD total Ut factor (#{cas})?"
                   assert(prop.hasFeature("btap_ut"))
                   err_msg = "BTAP/TBD costed construction identifier (#{cas})?"
                   assert(prop.hasFeature("btap_id"))
                 end
 
-                fdback << "BTAP/TBD processes skipped"
+                fdback << "BTAP/TBD processes skipped."
               else
                 err_msg = "BTAP/TBD: Uninitialized (#{cas})?"
                 assert_kind_of(BTAP::Bridging, st.tbd, err_msg)
@@ -257,18 +252,223 @@ class NECB_TBD_Tests < Minitest::Test
                 assert_kind_of(Array, st.tbd.feedback[:logs], err_msg)
                 err_msg = "BTAP/TBD: Missing tally Hash (#{cas})?"
                 assert_kind_of(Hash, st.tbd.tally, err_msg)
-                err_msg = "BTAP/TBD: Missing model 'comply' key (#{cas})?"
-
+                err_msg = "BTAP/TBD: Missing model 'complies' key (#{cas})?"
                 assert(st.tbd.model.key?(:complies), err_msg)
-
-                if st.tbd.model[:complies]
-                  fdback << " ... compliant!"
-                else
-                  fdback << " ... non-compliant!"
-                end
+                cmplies = st.tbd.model[:complies]
+                cmplies = cmplies ? " ... compliant!" : " ... non-compliant!"
+                fdback << cmplies
 
                 err_msg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
                 assert(st.tbd.model.key?(:io), err_msg)
+
+                # Regardless of whether BTAP/TBD were successful or not in
+                # uprating the building constructions (option == 'uprate'),
+                # deratable surfaces should have been nonetheless derated.
+                #
+                # BTAP assigns to default constructions (targeted for derating)
+                # a handful of key parameters, as both BTAP::Bridging.model
+                # variables and AdditionalProperties ... inter alia:
+                #   - btap_type : targeted surface type (e.g. :walls)
+                #   - btap_area : net m2 of surfaces referencing construction
+                #   - btap_film : surface area-weighted air film resistances
+                #   - btap_ut   : prescriptive NECB U-factor targets
+                #   - btap_uo   : uprated Uo required for NECB2017+ compliance
+                #   - btap_id   : matching BTAP-costed construction ID
+                #
+                # TBD ultimately hard-assigns 'derated' constructions to each
+                # individual envelope 'deratable' surface. In so doing, initial
+                # default construction sets may no longer be relied upon when
+                # forward-translating the model (to IDF).
+                #
+                # Outdoor-facing surface construction not derated by TBD? The
+                # BTAP NorthernEducation prototype model holds a single example
+                # of an (exposed) floor (Surface 48, 150 m2) entirely surrounded
+                # by other exposed floor surfaces sharing the same 3D plane. All
+                # of its surrounding edges are "transition" edges, which won't
+                # derate the surface construction ("transition" == PSI 0 W/m per
+                # linear meter). In such circumstances, TBD still tracks the
+                # (theoretically deratable) surface construction, yet does not
+                # hard-assign a new derated construction. In BTAP, such surfaces
+                # therefore inherit from the default construction set. Caution
+                # is warranted when trying to reconcile a default construction
+                # initial vs final 'getNetArea' results.
+                #
+                # Nonetheless, (now potentially unused) default constructions
+                # maintain aforementioned thermal bridging-related variables.
+                # It is usually more efficient (and simpler) to parse the
+                # latter than looping through all derated surfaces.
+
+                # Building default (exterior) constructions. If uprating, Uo
+                # represents the (costed) assembly U-factors required to meet
+                # NECB Ut targets. If simply derating, Uo == Ut.
+                [:walls, :roofs, :floors].each do |stypes|
+                  m2   = st.tbd.model[:building][stypes][:area] # initial area
+                  lc   = st.tbd.model[:building][stypes][:lc]   # initial lc
+                  area = st.tbd.prop(lc, "btap_area", Float)
+                  uo   = st.tbd.prop(lc, "btap_uo",   Float)    # required Uo
+                  ut   = st.tbd.prop(lc, "btap_ut",   Float)    # required Ut
+                  film = st.tbd.prop(lc, "btap_film", Float)    # film RSi
+                  type = st.tbd.prop(lc, "btap_type", String)
+                  id   = lc.nameString
+                  net  = lc.getNetArea                          # rarely > 0
+                  next unless m2 > 0
+                  next unless area
+
+                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} Uo (#{cas})?"
+                  refute_nil(uo, err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} Ut (#{cas})?"
+                  refute_nil(ut, err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} film (#{cas})?"
+                  refute_nil(film, err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} type (#{cas})?"
+                  refute_nil(type, err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} vs #{type} (#{cas})?"
+                  assert_equal(type, stypes.to_s, err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} m2 vs area (#{cas})?"
+                  assert_equal(m2.round(1), area.round(1), err_msg)
+                  err_msg = "BTAP/TBD: BLDG #{stypes} m2 vs net (#{cas})?"
+                  refute_equal(m2.round(1), net.round(1), err_msg)
+
+                  if option == "uprate"
+                    err_msg = "BTAP/TBD: BLDG #{stypes} Uo != Ut (#{cas})?"
+                    refute_equal(uo.round(3), ut.round(3), err_msg)
+                  else
+                    err_msg = "BTAP/TBD: BLDG #{stypes} Uo == Ut (#{cas})?"
+                    assert_equal(uo.round(3), ut.round(3), err_msg)
+                  end
+                end
+
+                # Attic default (interior) constructions - if applicable.
+                attics = []
+
+                model.getSpaces.each do |space|
+                  next if space.partofTotalFloorArea
+
+                  attics << space if TBD.unconditioned?(space)
+                end
+
+                # No unconditioned attics with "structure" option.
+                if structure != "structure"
+                  err_msg = "BTAP/TBD: attics (#{cas})?"
+                  assert_empty(attics, err_msg)
+                end
+
+                [:walls, :roofs, :floors].each do |stypes|
+                  break if attics.empty?
+
+                  # BTAP's use of TBD rests on attic spaces referencing a shared
+                  # 'attic' default construction set. Attic space 'floors' are
+                  # insulated, yet as insulated 'roofs' of conditioned, occupied
+                  # spaces below.
+                  types = case stypes
+                          when :roofs  then :floors
+                          when :floors then :roofs
+                          else              :walls
+                          end
+
+                  m2   = st.tbd.model[:attic][types][:area]  # initial area
+                  lc   = st.tbd.model[:attic][types][:lc]    # initial lc
+                  area = st.tbd.prop(lc, "btap_area", Float)
+                  uo   = st.tbd.prop(lc, "btap_uo",   Float)  # required Uo
+                  ut   = st.tbd.prop(lc, "btap_ut",   Float)  # required Ut
+                  film = st.tbd.prop(lc, "btap_film", Float)  # film RSi
+                  type = st.tbd.prop(lc, "btap_type", String)
+                  id   = lc.nameString
+                  net  = lc.getNetArea                        # rarely > 0
+                  next unless m2 > 0
+                  next unless area
+
+                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} Uo (#{cas})?"
+                  refute_nil(uo, err_msg)
+                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} Ut (#{cas})?"
+                  refute_nil(ut, err_msg)
+                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} film (#{cas})?"
+                  refute_nil(film, err_msg)
+                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} type (#{cas})?"
+                  refute_nil(type, err_msg)
+                  err_msg = "BTAP/TBD: ATTIC #{types} m2 vs area (#{cas})?"
+                  assert_equal(m2.round(1), area.round(1), err_msg)
+                  err_msg = "BTAP/TBD: ATTIC #{types} m2 vs net (#{cas})?"
+                  refute_equal(m2.round(1), net.round(1), err_msg)
+
+                  if stypes == :walls
+                    err_msg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, stypes.to_s, err_msg)
+                    err_msg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, types.to_s, err_msg)
+
+                    if option == "uprate"
+                      err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
+                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                    else
+                      err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
+                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                    end
+                  else
+                    err_msg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, stypes.to_s, err_msg)
+                    err_msg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
+                    refute_equal(type, types.to_s, err_msg)
+
+                    if option == "uprate"
+                      err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
+                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                    else
+                      err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
+                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                    end
+                  end
+                end
+
+                st.tbd.model[:spaces].each do |name, sp|
+                  [:walls, :roofs, :floors].each do |stypes|
+                    m2   = sp[stypes][:area]                    # initial area
+                    lc   = sp[stypes][:lc]                      # initial lc
+                    area = st.tbd.prop(lc, "btap_area", Float)
+                    uo   = st.tbd.prop(lc, "btap_uo",   Float)  # required Uo
+                    ut   = st.tbd.prop(lc, "btap_ut",   Float)  # required Ut
+                    film = st.tbd.prop(lc, "btap_film", Float)  # film RSi
+                    type = st.tbd.prop(lc, "btap_type", String)
+                    id   = lc.nameString
+                    net  = lc.getNetArea                        # rarely > 0
+                    next unless m2 > 0
+                    next unless area
+
+                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} Uo (#{cas})?"
+                    refute_nil(uo, err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} Ut (#{cas})?"
+                    refute_nil(ut, err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} film (#{cas})?"
+                    refute_nil(film, err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} type (#{cas})?"
+                    refute_nil(type, err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} vs type (#{cas})?"
+                    assert_equal(type, stypes.to_s, err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} m2 vs area (#{cas})?"
+                    assert_equal(m2.round(1), area.round(1), err_msg)
+                    err_msg = "BTAP/TBD: #{name} #{stypes} m2 vs net (#{cas})?"
+                    refute_equal(m2.round(1), net.round(1), err_msg)
+
+                    if option == "uprate"
+                      err_msg = "BTAP/TBD: #{name} #{stypes} Uo != Ut (#{cas})?"
+                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                    else
+                      err_msg = "BTAP/TBD: #{name} #{stypes} Uo == Ut (#{cas})?"
+                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                    end
+                  end
+                end
+
+                # Tally wall, roof and exposed floor constructions separately.
+                walls  = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
+                roofs  = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
+                floors = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
+
+                # Start with surface type areas.
+                walls[ :m2] += st.tbd.model[:building][:walls ][:area]
+                roofs[ :m2] += st.tbd.model[:building][:roofs ][:area]
+                floors[:m2] += st.tbd.model[:building][:floors][:area]
+
                 err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
                 assert(st.tbd.model.key?(:surfaces), err_msg)
                 err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
@@ -277,16 +477,13 @@ class NECB_TBD_Tests < Minitest::Test
                 refute_empty(st.tbd.model[:surfaces], err_msg)
                 surfaces = st.tbd.model[:surfaces]
 
-                # Regardless of whether BTAP/TBD were successful or not in
-                # uprating the building constructions (option == 'uprate'),
-                # deratable surfaces should have been derated nonetheless.
                 model.getSurfaces.each do |surface|
                   id = surface.nameString
                   err_msg = "BTAP/TBD: Mismatched #{id} surfaces (#{cas})?"
                   assert(surfaces.key?(id), err_msg)
                   next unless surfaces[id].key?(:deratable)
-                  next unless surfaces[id].key?(:type     )
-                  next unless surfaces[id].key?(:heatloss )
+                  next unless surfaces[id].key?(:type)
+                  next unless surfaces[id].key?(:heatloss)
                   next unless surfaces[id][:deratable]
                   next unless surfaces[id][:heatloss ].abs > TBD::TOL
 
@@ -312,25 +509,16 @@ class NECB_TBD_Tests < Minitest::Test
                   assert(prop.hasFeature("btap_id"))
                   uo      = prop.getFeatureAsDouble("btap_uo")
                   film    = prop.getFeatureAsDouble("btap_film")
+                  area    = prop.getFeatureAsDouble("btap_area")
                   err_msg = "BTAP/TBD: #{id} Uo (#{cas})?"
                   refute_empty(uo, err_msg)
                   err_msg = "BTAP/TBD: #{id} air film resistances (#{cas})?"
                   refute_empty(film, err_msg)
 
                   if option == 'uprate'
-                    # refute_empty(prop, err_msg)
-                    # puts "#{id} : #{lc.nameString} #{lc.additionalProperties.getFeatureAsDouble("btap_uo").get}"
-
-                    # Initial, uprated Uo, e.g. (FullServiceRestaurant):
-                    #   0:1:1:0:1:Dining : 0.130 (R44) # skylight well wall
-                    #   0:1:1:Dining     : 0.100 (R57) # insulated attic ceiling
-                    # uo = prop.get
-                    # puts "#{id} : #{uo.round(3)} vs #{(1/TBD.rsi(lc, film)).round(3)}"
-
-                    # err_msg = "BTAP/TBD: #{id} Uo vs U (#{cas})?"
-                    # assert(uo < 1/TBD.rsi(lc, film))
+                    # @todo
                   else
-                    # assert_empty(prop, err_msg)
+                    # #todo
                   end
                 end
 

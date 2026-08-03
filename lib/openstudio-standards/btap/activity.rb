@@ -438,7 +438,8 @@ module BTAP
     # Initialize BTAP Activity parameters.
     #
     # @param model [OpenStudio::Model::Model] a model
-    def initialize(model = nil)
+    # @param option ["", "structure"] construction option
+    def initialize(model = nil, option = "")
       mth         = "BTAP::Activity::#{__callee__}"
       @feedback   = {logs: []}
       lgs         = @feedback[:logs]
@@ -450,6 +451,8 @@ module BTAP
         lgs << "Invalid or empty OpenStudio model (#{mth})"
         return
       end
+
+      option = "" unless option == "structure"
 
       # Tag spaces as un/conditioned with "space_conditioning_category". For
       # now, this is simply determined based on whether spaces are:
@@ -475,7 +478,11 @@ module BTAP
           space.additionalProperties.setFeature(tag, "nonresconditioned")
         else
           if space.nameString.downcase.include?("attic")
-            space.additionalProperties.setFeature(tag, "unconditioned")
+            if option.empty?
+              space.additionalProperties.setFeature(tag, "nonresconditioned")
+            else
+              space.additionalProperties.setFeature(tag, "unconditioned")
+            end
           else # treat all other cases as indirectly-conditioned e.g. plenums
             space.additionalProperties.setFeature(tag, "nonresconditioned")
           end

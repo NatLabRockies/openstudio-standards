@@ -20,7 +20,7 @@ class NECB_Structure_Tests < Minitest::Test
     @test_passed = true
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -31,7 +31,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
@@ -39,28 +39,27 @@ class NECB_Structure_Tests < Minitest::Test
       # 'PrimarySchool',
       'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
-      # 'Warehouse'
+      'SmallOffice',
+      'Warehouse'
     ]
 
     @templates = [
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      # "NECB2020",
+      "NECB2020",
       # "NECB2025"
     ]
 
     @options = [
-      # "",
+      "",
       "structure"
     ]
 
     tg  = "co2_structure"
-    tag = "space_conditioning_category"
     epw = "CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"
     tPs = ["walls", "floors", "roofs"]
     xds = ["BTAP-ExteriorWall-WoodFramed-5", "BTAP-ExteriorWall-Mass-2"]
@@ -158,13 +157,10 @@ class NECB_Structure_Tests < Minitest::Test
           plenums = []
 
           model.getSpaces.each do |space|
-            prop = space.additionalProperties.getFeatureAsString(tag)
-            next if prop.empty?
             next if space.partofTotalFloorArea
 
-            prop = prop.get.downcase
-            attics  << space if prop == "unconditioned"
-            plenums << space if prop == "nonresconditioned"
+            group = TBD.unconditioned?(space) ? attics : plenums
+            group << space
           end
 
           attics.each do |attic|
@@ -313,7 +309,7 @@ class NECB_Structure_Tests < Minitest::Test
               assert_empty(fineset.adiabaticSurfaceConstruction, err_msg2)
 
               # Validate generated constructions.
-              cs = model.getConstructions.select { |c| c.getNetArea > 0 }
+              cs = model.getLayeredConstructions.select { |c| c.getNetArea > 0 }
               err_msg = "# un/insulated constructions (#{cas})"
               assert_equal(cs.size, 11, err_msg)
 
@@ -432,7 +428,7 @@ class NECB_Structure_Tests < Minitest::Test
             #   - insulated slab-on-grade
             #   - insulated slab & attic floors should have same area
             if building == "QuickServiceRestaurant"
-              cs = model.getConstructions.select { |c| c.getNetArea > 0 }
+              cs = model.getLayeredConstructions.select { |c| c.getNetArea > 0 }
               err_msg = "# un/insulated constructions (#{cas})"
               assert_equal(cs.size, 6, err_msg)
 
@@ -446,11 +442,6 @@ class NECB_Structure_Tests < Minitest::Test
               # on the 'structure' option.
               cs.each do |lc|
                 id = lc.nameString
-                lc = lc.to_LayeredConstruction
-                err_msg = "#{id} non-layered constuction (#{cas})"
-                refute_empty(lc)
-
-                lc = lc.get
                 tP = lc.additionalProperties.getFeatureAsString("btap_type")
                 fR = lc.additionalProperties.getFeatureAsDouble("btap_film")
 

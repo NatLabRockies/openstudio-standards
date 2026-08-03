@@ -644,7 +644,6 @@ class NECB2011
   def add_construction_sets(spaces = [], bldg = true, hdd = true, a = {})
     bldg = true unless bldg == false
     hdd  = true unless hdd  == false
-    tag  = "space_conditioning_category"
     out  = "outdoors"
     gnd  = "ground"
     return false unless a.is_a?(Hash)
@@ -968,14 +967,10 @@ class NECB2011
     plenums = []
 
     spaces.each do |space|
-      prop = space.additionalProperties.getFeatureAsString(tag)
-      next if prop.empty?
       next if space.partofTotalFloorArea
-      next unless bldg
 
-      prop = prop.get.downcase
-      attics  << space if prop == "unconditioned"
-      plenums << space if prop == "nonresconditioned"
+      group = TBD.unconditioned?(space) ? attics : plenums
+      group << space
     end
 
     if bldg

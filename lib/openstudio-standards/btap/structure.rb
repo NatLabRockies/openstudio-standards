@@ -449,20 +449,10 @@ module BTAP
       end
 
       # Track CONDITIONED spaces, e.g. rooms & plenums - ignore vented attics.
-      cspaces = []
-      tag = "space_conditioning_category"
-
-      model.getSpaces.each do |space|
-        prop = space.additionalProperties.getFeatureAsString(tag)
-        next if prop.empty?
-        next if prop.get.downcase == "unconditioned"
-        next unless space.partofTotalFloorArea
-
-        cspaces << space
-      end
+      cspaces = model.getSpaces.reject { |sp| TBD.unconditioned?(sp) }
 
       if cspaces.empty?
-        lgs << "Only UNCONDITIONED spaces (#{mth})?"
+        lgs << "Only UNCONDITIONED spaces (#{mth})"
         return
       end
 
