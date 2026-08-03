@@ -3231,3 +3231,29 @@ SWEEP_MODE=full ruby openstudio-necb/scripts/necb_archetype_sweep.rb <types>`
 (Hospital+Outpatient need a ~12 h window — see the runtime finding above).
 
 - Who/when: consolidated by Fable under D-10, 2026-08-03.
+
+### D-52 amendment (2026-08-03): the election exercised on real HP buildings — Phase 2 of the close-out plan
+
+The sweep gained an `ECM` knob (legacy `ecm_system_name` pass-through), and
+`hs09_ccashp_baseboard` (CCASHP + electric baseboards — the canonical
+(2)(g)(i) shape) ran through the pipeline on SmallOffice and MediumOffice.
+
+**Every D-52 path fired on real annual data [RAN]:** the per-equipment
+extraction (5/3 air loops); the ELECTED branch (share > 33% → Electricity,
+(h) inapplicability recorded); and the gate-fail branch with real shares
+falling to the audited structural proxy. Week runs PASS at 88%/94%;
+SmallOffice full-annual PASS at 92%.
+
+**The share physics validate the delivered-heat basis:** January-week HP
+shares (12.7–30.4% — the CCASHP loses to baseboards below its −10 °C
+cutoff) all ROSE on the full annual (20.2–27.5%, two blocks crossing 33%
+and electing) — exactly the seasonal bias the code's "annual energy use"
+wording exists to avoid. The election belongs on annual data, and is.
+
+Elected fuel = Electricity either way on this all-electric proposed, so the
+reference is unchanged — the verification is of the MACHINERY, not a fleet
+mover. hs14 (ground-source plant HP) remains covered by the D-58 unit/E2E
+tests; a gas-aux ECM shape (electing gas) is the residual untested
+combination, low value while no such archetype exists.
+
+- Who/when: Fable under D-10, 2026-08-03.
