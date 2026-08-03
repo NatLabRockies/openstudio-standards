@@ -3294,3 +3294,25 @@ are against theirs — the gas fleet EXTENDS the not-code-minimum finding.
 Week-mode only; full-annual gas deferred (no anomalies demanding it).
 
 - Who/when: Fable under D-10, 2026-08-03.
+
+### Never-swept archetypes (2026-08-03, Phase 1b): two new rows, four honest refusals
+
+Week sweep, Toronto/Electricity, the 7 never-run archetypes:
+
+- **HighriseApartmentMult 99% PASS** and **LEEPTownHouse 103% PASS** — two
+  new fleet rows, both consistent with their residential siblings.
+- **LEEP Midrise/MultiTower/PointTower: PREFLIGHT-REFUSAL** on
+  `Space Function - undefined -` — the pre-flight doing exactly what it was
+  built for (an unresolvable floor-area space type would silently waive the
+  reference allowance). L-28.
+- **NorthernEducation / NorthernHealthCare: GEN-FAIL inside legacy** —
+  `apply_loads` validation rejects the legacy library's own geometry
+  (missing `standardsNumberOfStories` metadata). The zone-8 pair is
+  unreachable for cross-validation until legacy fixes its models. L-27,
+  upstream-bundle candidate.
+
+Coverage now stands at 19 of 24 archetypes swept, with the remaining 5
+blocked by legacy-side defects (L-27) or model tagging (L-28) — not by the
+pipeline.
+
+- Who/when: Fable under D-10, 2026-08-03.
