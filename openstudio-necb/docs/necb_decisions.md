@@ -3316,3 +3316,53 @@ blocked by legacy-side defects (L-27) or model tagging (L-28) — not by the
 pipeline.
 
 - Who/when: Fable under D-10, 2026-08-03.
+
+## D-62 — 5.2.2.8.(4)-(5): the economizer staging floor (Phase 3a of the close-out plan)
+
+**What.** The printed sentences [RAN get_section 5.2.2.8, both editions]:
+economizer systems ≥ 70 kW must stage cooling with the lowest stage ≤ 25% of
+full capacity ((4)); > 25 kW and < 70 kW, ≤ 50% ((5)). With our equal-increment
+staging (lowest = 1/N), that is a stage-count floor: N ≥ 4 at ≥ 70 kW, N ≥ 2
+above 25 kW. The 8.4.4.10.(8) incremental rule alone left 70–198 kW
+economizer'd RTUs at 2–3 stages — the 8.4.4.12 manifest's last declared gap.
+
+**How.** `economizer_dx_staging` rules (both vintages) + a floor in
+`stage_multispeed_coil` (cooling only, audited when it governs, ruling
+D-62). No pipeline reorder: any loop the floor reaches (> 25 kW) is above
+the 5.2.2.7 retention trigger (> 20 kW), so the build-time economizer state
+is final. Sentence (6) (OA reduction at the lowest stage) is a PERMISSION,
+not exercised — stage flows are already floored at the minimum-OA fraction
+(D-46). MAX_STAGES = 4 accommodates the deepest floor exactly (lowest 25%).
+
+**Gates [RAN]:** Phase-0 E+ gate BEFORE any repo change
+(`scratchpad/d62_staging_gate.rb`: 4-stage 100 kW-class RTU + Differential-
+Enthalpy economizer, sizing + January week, ZERO Severes). New
+`test_economizer_staging_floor_5_2_2_8` (100 kW → 4 stages audited; 40 kW →
+2; 20 kW → 2; NoEconomizer 100 kW → 2 — the floor is economizer-scoped).
+Staging suite 16/125. The 8.4.4.12/8.4.5.12 coverage entries graduate to
+IMPLEMENTED (the pin in `test_necb_energy_recovery.rb` moved knowingly:
+asserts implemented + the how naming 5.2.2.8.(4)-(5)).
+
+**Fleet impact [RAN, both week gates 15/15 PASS]:** the floor fires 12×
+across 4 buildings (SecondarySchool ×8, PrimarySchool ×2, Warehouse ×1,
+RetailStandalone ×1 — e.g. a 101 kW coil 2 → 4 stages). Week-mode energy
+effect ≈ nil on Electricity (SecondarySchool +6 kWh; January has no cooling)
+and −0.2 to −1.1% reference on the firing gas buildings; the cooling-season
+bound was measured with a SecondarySchool FULL annual: reference −4,825
+kWh/yr (−0.19%), 106.5 → 106.75% of target — finer staging runs better
+part-load, the sentence's intent, and the consolidated baseline row moves
+accordingly on its next refresh.
+
+**Reproducibility flutter found during attribution (NOT a D-62 effect):**
+one loaded-box gas run put LargeOffice's reference at 75,575 kWh where three
+other runs (pre-D-62 tree ×2, D-62 tree solo ×1) all reproduce 74,286 —
+zero floor firings and zero pump releases in its audit, same iteration
+count, different converged bump. Near-gate capacity iterations can bump
+differently under heavy concurrent load; cause unproven, effect bounded at
+±1.7% on one building in one run. Treat single loaded-box sweep rows that
+move without an audited mechanism as suspect: RERUN SOLO before attributing.
+
+- **Files:** `reference_rules_{2020,2025}.json` (rules + coverage),
+  `efficiency.rb` (floor + plumb), `test_necb_staging.rb`,
+  `test_necb_energy_recovery.rb`.
+- **Who/when:** Fable under D-10, 2026-08-03.

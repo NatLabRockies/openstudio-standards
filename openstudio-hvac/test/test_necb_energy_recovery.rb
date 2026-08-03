@@ -169,9 +169,13 @@ class TestNecbEnergyRecovery < Minitest::Test
     (1..20).each do |n|
       assert coverage.any? { |e| e[:article] == "8.4.4.#{n}." }, "article 8.4.4.#{n}. missing from coverage"
     end
-    # honesty: known gaps are warnings, not buried info lines
-    gaps = coverage.select { |e| e[:level] == :warning }
-    assert gaps.any? { |e| e[:article] == '8.4.4.12.' }, 'economizer gap (8.4.4.12) must be a warning'
+    # 8.4.4.12 graduated to implemented with D-62 (the 5.2.2.8.(4)-(5) staging
+    # floor closed its last gap) — it must now be an INFO coverage line whose
+    # how names the floor, never a warning.
+    econ = coverage.find { |e| e[:article] == '8.4.4.12.' }
+    assert_equal 'implemented', econ[:inputs][:status], '8.4.4.12 implemented since D-62'
+    refute_equal :warning, econ[:level], '8.4.4.12 no longer warns'
+    assert_includes econ[:action], '5.2.2.8.(4)-(5)'
     # 8.4.4.16 is re-manifested modeller-scope (D-11): (2) is identical by
     # construction, (1) binds only when the modeller approximates radiant
     # convectively — an info scope note, NOT a warning.

@@ -146,6 +146,43 @@ class TestNecbStaging < Minitest::Test
     assert_equal [2, 2, 2, 2, 3, 3, 4, 4], counts
   end
 
+  # D-62 — 5.2.2.8.(4)-(5): an ECONOMIZER system's staged cooling gets a
+  # stage-count floor (lowest stage <= 25% at >= 70 kW, <= 50% at > 25 kW).
+  # Capacities hard-set so top_stage_capacity is readable without a sizing run.
+  def test_economizer_staging_floor_5_2_2_8
+    spec = rules['economizer_dx_staging']
+    assert_equal 0.25, spec['ge_70_kw_lowest_fraction']
+    assert_equal 0.5, spec['over_25_kw_lowest_fraction']
+
+    { 100.0 => 4, 40.0 => 2, 20.0 => 2 }.each do |kw, expected|
+      model, = build(GAS_PSZ)
+      unitary = model.getAirLoopHVACUnitarySystems.first
+      coil = OpenStudioHVAC::Coils.multispeed(unitary.coolingCoil)
+      coil.stages.each_with_index { |s, i| s.setGrossRatedTotalCoolingCapacity(kw * 1000.0 * (i + 1) / coil.stages.size) }
+      model.getControllerOutdoorAirs.each { |c| c.setEconomizerControlType('DifferentialEnthalpy') }
+
+      audit = OpenStudioHVAC::AuditLog.new
+      OpenStudioHVAC::NECB::Efficiency.send(:apply_staging, model, rules, '2020', audit)
+      assert_equal expected, coil.stages.size,
+                   "#{kw} kW economizer system: lowest stage must be <= #{kw >= 70 ? 25 : 50}%"
+      if kw >= 70
+        entry = audit.entries.find { |e| e[:action].include?('5.2.2.8 economizer staging floor') }
+        refute_nil entry, 'the floor decision is audited'
+        assert_equal '5.2.2.8.(4)-(5)', entry[:article]
+        assert_includes entry[:ruling].to_s, 'D-62'
+      end
+    end
+
+    # No economizer -> the 8.4.4.10.(8) incremental rule alone (100 kW -> 2).
+    model, = build(GAS_PSZ)
+    unitary = model.getAirLoopHVACUnitarySystems.first
+    coil = OpenStudioHVAC::Coils.multispeed(unitary.coolingCoil)
+    coil.stages.each_with_index { |s, i| s.setGrossRatedTotalCoolingCapacity(100_000.0 * (i + 1) / coil.stages.size) }
+    model.getControllerOutdoorAirs.each { |c| c.setEconomizerControlType('NoEconomizer') }
+    OpenStudioHVAC::NECB::Efficiency.send(:apply_staging, model, rules, '2020', OpenStudioHVAC::AuditLog.new)
+    assert_equal 2, coil.stages.size, 'no economizer: ceil(100/66) = 2, no floor'
+  end
+
   def test_staged_capacities_size_to_equal_increments_and_efficiencies_bin_on_the_total
     skip 'openstudio CLI not available' unless openstudio_cli?
 

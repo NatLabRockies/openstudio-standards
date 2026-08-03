@@ -442,9 +442,15 @@
     "modulating_min_fraction": 0.25
   },
   "dx_staging": {
-    "article": "8.4.5.10.(8)",
+    "article": "8.4.4.10.(8)",
     "two_stage_max_kw": 66,
     "stage_size_kw": 66
+  },
+  "economizer_dx_staging": {
+    "article": "5.2.2.8.(4)-(5)",
+    "ge_70_kw_lowest_fraction": 0.25,
+    "over_25_kw_lowest_fraction": 0.5,
+    "note": "Economizer (sentence-(1)) systems: cooling equipment must operate below full capacity with the LOWEST stage <= 25% of full capacity at >= 70 kW ((4)) and <= 50% at > 25 kW and < 70 kW ((5)); equal-increment staging => stage-count floor ceil(1/fraction). Sentence (6) (OA reduction at lowest stage) is a PERMISSION, not exercised: stage flow ratios are already floored at the minimum-OA fraction (D-46)."
   },
   "fans": {
     "article": "8.4.5.18.(3)-(4)",
@@ -705,9 +711,8 @@
       {
         "article": "8.4.5.12.",
         "title": "Cooling with Outside Air (economizers)",
-        "status": "partial",
-        "gaps": "DX staging clauses 5.2.2.8.(4)-(5) are not enforced. The 5.2.2.9 capability is realized as an INTEGRATED economizer against the prescribed 7 C chilled-water setpoint: measured hour by hour it carries 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower (the sentence-(1) criterion), and a partial share above that band; systems whose chilled water is air-cooled or purchased have no evaporatively-cooled fluid to economize with and are warned instead.",
-        "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. Sentence (1) (wet-bulb 7 C) binds because the reference rejects heat evaporatively; (2) is declared inapplicable rather than ignored."
+        "status": "implemented",
+        "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. DX staging clauses 5.2.2.8.(4)-(5) enforced since D-62: economizer systems' staged cooling gets a stage-count FLOOR so the lowest stage is <= 25% of capacity at >= 70 kW and <= 50% at > 25 kW (economizer_dx_staging rules; sentence (6)'s OA-reduction permission is not exercised - stage flows are floored at the minimum-OA fraction per D-46). Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. The 5.2.2.9 capability is INTEGRATED and measured: 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower, partial share above the band; sentence (1) binds because the reference rejects heat evaporatively, (2) declared inapplicable; air-cooled/purchased chilled water warns (no evaporatively-cooled fluid)."
       },
       {
         "article": "8.4.5.13.",

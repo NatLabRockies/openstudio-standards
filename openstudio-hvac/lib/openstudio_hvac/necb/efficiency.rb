@@ -119,7 +119,8 @@ module OpenStudioHVAC
         totals = {}
         model.getAirLoopHVACUnitarySystems.sort_by(&:nameString).each do |unitary|
           stage_multispeed_coil(unitary.coolingCoil, rules['dx_staging'],
-                                "#{prefix}.10.(8)", 'DX cooling', audit, totals)
+                                "#{prefix}.10.(8)", 'DX cooling', audit, totals,
+                                unitary: unitary, economizer_spec: rules['economizer_dx_staging'])
           stage_multispeed_coil(unitary.heatingCoil, rules['furnace_staging'],
                                 "#{prefix}.9.(7)", 'furnace', audit, totals)
           audit_electric_resistance_heating(unitary, prefix, audit)
@@ -151,7 +152,8 @@ module OpenStudioHVAC
       end
 
       # @return [Integer, nil] the stage count applied, nil when the coil is not staged
-      def stage_multispeed_coil(optional_coil, rule, article, label, audit, totals = {})
+      def stage_multispeed_coil(optional_coil, rule, article, label, audit, totals = {},
+                                unitary: nil, economizer_spec: nil)
         return nil if rule.nil?
 
         coil = Coils.multispeed(optional_coil)
@@ -168,6 +170,25 @@ module OpenStudioHVAC
 
         kw = capacity_w / 1000.0
         wanted = kw <= rule['two_stage_max_kw'] ? 2 : (kw / rule['stage_size_kw']).ceil
+        # 5.2.2.8.(4)-(5) (D-62): a system with an air economizer must stage its
+        # cooling so the LOWEST stage is <= 25% of full capacity at >= 70 kW, or
+        # <= 50% at > 25 kW — with equal increments that is a stage-count FLOOR
+        # of ceil(1/fraction). Only cooling coils on economizer loops; any loop
+        # the floor reaches (> 25 kW) is above the 5.2.2.7 retention trigger
+        # (> 20 kW), so the build-time economizer state is the final state.
+        floor = economizer_stage_floor(unitary, kw, economizer_spec)
+        if floor && floor > wanted
+          audit&.decision(:efficiency, 'stage count RAISED to the 5.2.2.8 economizer staging floor — the lowest ' \
+                                       'stage of an economizer system must not exceed the sentence-(4)/(5) ' \
+                                       'fraction of full capacity',
+                          target: name,
+                          inputs: { capacity_kw: kw.round(1), incremental_stages: wanted, floor_stages: floor,
+                                    lowest_stage_fraction: (1.0 / floor).round(3) },
+                          value: "#{floor} stages (lowest #{(100.0 / floor).round(0)}% <= " \
+                                 "#{kw >= 70 ? '25' : '50'}%)",
+                          article: economizer_spec['article'], ruling: 'D-62')
+          wanted = floor
+        end
         stages = [wanted, MAX_STAGES].min
         if wanted > MAX_STAGES
           audit&.warn(:efficiency, "#{name}: #{wanted} equal stages required at #{kw.round(1)} kW but EnergyPlus " \
@@ -186,6 +207,25 @@ module OpenStudioHVAC
                                'of the total by the unitary flow ratios',
                         article: article, ruling: 'D-46')
         stages
+      end
+
+      # The 5.2.2.8.(4)/(5) stage-count floor for a cooling coil on an
+      # air-economizer loop, nil when no floor applies (no spec, no loop, no
+      # economizer, or capacity <= 25 kW).
+      def economizer_stage_floor(unitary, kw, spec)
+        return nil if spec.nil? || unitary.nil?
+
+        loop_ = unitary.airLoopHVAC
+        return nil if loop_.nil? || loop_.empty?
+
+        oa = loop_.get.airLoopHVACOutdoorAirSystem
+        return nil if oa.empty?
+        return nil if oa.get.getControllerOutdoorAir.getEconomizerControlType == 'NoEconomizer'
+
+        fraction = if kw >= 70 then spec['ge_70_kw_lowest_fraction']
+                   elsif kw > 25 then spec['over_25_kw_lowest_fraction']
+                   end
+        fraction && (1.0 / fraction).ceil
       end
 
       # The TOTAL capacity of a staged coil is its TOP stage (the stages are
