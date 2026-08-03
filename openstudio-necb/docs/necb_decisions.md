@@ -3393,3 +3393,26 @@ archetype carries either class — the pass exists for foreign proposeds.
   `efficiency.rb` (`apply_solar_pool_minimums`), `reference.rb` (call),
   the new test.
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+## D-64 — SmallHotel reference heating gate: morning setback-recovery lag in four micro-zones (Phase 4b)
+
+**Root cause [RAN, from the standing full-annual SQL + final iteration
+models]:** the 318–480 h of reference unmet heating is FOUR "Storage room
+< 5 m²" closets (one per storey; 161–311 h each; the other 63 zones ≤ 2.5 h),
+all served by ONE shared System 4 CV RTU with autosized electric baseboards.
+The failing four carry bumped zone heating factors (2.03–3.25×) and still
+fail: ~0.5–0.9 h of setback-recovery lag EVERY morning ≈ the observed
+totals. Each sentence-(5) round shaves < 1 h → the stall detector halts, by
+design. The proposed shows 0.0 h on the same zones because legacy HARD-SIZES
+its equipment (L-23) — the identical physics, masked.
+
+**Disposition: characteristic, not a defect.** The reference is honestly
+autosized per the code; the candidate remedies are all design decisions that
+move away from that: (a) splitting the shared single-zone system per block —
+the Industrial-row note points the OPPOSITE way ("can be divided ... as long
+as it matches the proposed['s] units", and the proposed has ONE unit);
+(b) a micro-zone oversizing floor; (c) recovery-ramp alignment. Left
+standing in the baseline table; revisit only if a determination on a real
+project turns on it.
+
+- **Who/when:** Fable under D-10, 2026-08-03.
