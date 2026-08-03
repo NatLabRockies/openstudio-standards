@@ -216,6 +216,14 @@ module OpenStudioNECB
       #    (the openstudio-hvac contract: efficiency rows are capacity-binned)
       if simulate != :none
         audit.with_building('reference building') do
+          # Loops COPIED from the proposed (the Table -A residential identity,
+          # D-58) arrive with the legacy's hard-set pump power; the reference
+          # sizing run re-derives flow against the frozen power/head and
+          # EnergyPlus FATALS on 'Calculated Pump Efficiency > 100%' (found by
+          # the SmallHotel gas variant). Release to autosize first — a no-op on
+          # clean references, and the 8.4.4.14 transfer below re-establishes
+          # the proposed-equivalent W/(L/s) on the sized flows (D-27 machinery).
+          OpenStudioHVAC::NECB.prepare_for_resizing(reference, audit: audit)
           Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
           # proposed: enables the 8.4.4.14.(1)-(3) pump power transfer (the
           # proposed was sized in step 1, so its pump flows/powers are readable)

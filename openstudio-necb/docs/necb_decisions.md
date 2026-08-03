@@ -3257,3 +3257,40 @@ tests; a gas-aux ECM shape (electing gas) is the residual untested
 combination, low value while no such archetype exists.
 
 - Who/when: Fable under D-10, 2026-08-03.
+
+### NaturalGas fleet baseline (2026-08-03) — first full-15 gas sweep, one E+ fatal found and fixed
+
+`FUEL=NaturalGas SWEEP_MODE=annual`, vintage 2020, all 15 — the Table
+8.4.4.7.-B gas column at fleet scale for the first time since the reference
+work stabilized. **15/15 PASS after one fix**:
+
+**Defect found: SmallHotel gas FATALED in the first reference sizing run**
+("Calculated Pump Efficiency=101.087%"): loops COPIED from the proposed (the
+Table -A residential identity, D-58) arrive with the legacy's hard-set pump
+power, and the reference sizing re-derives flow against the frozen
+power/head. Electric hotels have no copied hydronic loop (PTAC + electric
+baseboards); LargeHotel gas cleared the band by luck (the D-27 pattern).
+Fix: the umbrella now calls `prepare_for_resizing` (D-11/D-27 machinery)
+before the FIRST reference sizing — a structural no-op on clean references
+(it only touches hard-set pump power), and the 8.4.4.14 transfer
+re-establishes proposed-equivalent W/(L/s) on the sized flows. Verified:
+SmallHotel gas 94% PASS; LargeHotel + HighriseApartment gas re-runs
+kWh-IDENTICAL to their pre-fix passes (controls hold).
+
+**The gas week table (percent of target):** SmallOffice 93, MediumOffice
+111, LargeOffice 121, PrimarySchool 110, SecondarySchool 115,
+RetailStandalone 112, RetailStripmall 112, Warehouse 110, FSR 101, QSR 97,
+HighriseApartment 103, LowriseApartment 99, MidriseApartment 100,
+SmallHotel 94, LargeHotel 103.
+
+**Cross-fuel attribution (vs the electric week table):** gas reads 1–11
+points stricter. No pipeline artifact: interior-lighting ratios are
+IDENTICAL across fuels per building, fan ratios stable (LargeOffice 0.41
+both fuels), and the whole delta concentrates in PROPOSED-side heating —
+PrimarySchool proposed heating +38% on fuel switch vs reference +16%
+(SecondarySchool +45% vs +19%). The legacy gas proposeds are genuinely less
+efficient against code-minimum gas references than the electric proposeds
+are against theirs — the gas fleet EXTENDS the not-code-minimum finding.
+Week-mode only; full-annual gas deferred (no anomalies demanding it).
+
+- Who/when: Fable under D-10, 2026-08-03.
