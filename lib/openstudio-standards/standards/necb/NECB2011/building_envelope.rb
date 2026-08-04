@@ -1149,6 +1149,16 @@ class NECB2011
       plenums.each { |plenum| plenum.setDefaultConstructionSet(setPLENUM) }
     end
 
+    # Reset surface 'OtherSideCoefficients' boundary conditions to 'Ground'.
+    if bldg
+      model.getSurfaces.each do |surface|
+        bc = surface.outsideBoundaryCondition.downcase
+        next unless bc == "othersidecoefficients"
+
+        surface.setOutsideBoundaryCondition("Ground")
+      end
+    end
+
     # The above solution should work well for prototype models distributed with
     # OpenStudio-Standards. However, the solution may assign odd construction
     # choices for some 3rd-party models, e.g. underfloor plenums or 'sandwiched'

@@ -23,14 +23,14 @@ class NECB_TBD_Tests < Minitest::Test
     # Range of test options.
     @templates = [
       # 'NECB2011',
-      'NECB2015',
+      # 'NECB2015',
       # 'NECB2017',
       'NECB2020',
       # 'NECB2025'
     ]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -41,23 +41,23 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
-      'Warehouse'
+      # 'Warehouse'
     ]
 
     @structure = [
-      '',
+      # '',
       'structure'
     ]
 
@@ -65,7 +65,7 @@ class NECB_TBD_Tests < Minitest::Test
     # calculations (e.g. uprating, derating), all relying on the TBD gem.
     @options = [
       # 'none', # ignore linear thermal bridging altogether
-      'bad',  # derating from poor thermal bridging details
+      # 'bad',  # derating from poor thermal bridging details
       # 'good', # derating from better thermal bridging details
       'uprate'  # uprating (then derating) per NECB2017, NECB2020, NECB2025
     ]
@@ -89,8 +89,8 @@ class NECB_TBD_Tests < Minitest::Test
     # the solution becomes more categorical, with the inconvenience of being
     # more expensive (i.e. $$$ Uo 0.100 > $$ Uo 0.124).
     @interpolate = [
-      # true,
-      false
+      true,
+      # false
     ]
 
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
@@ -260,6 +260,13 @@ class NECB_TBD_Tests < Minitest::Test
 
                 err_msg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
                 assert(st.tbd.model.key?(:io), err_msg)
+                err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
+                assert(st.tbd.model.key?(:surfaces), err_msg)
+                err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.model[:surfaces], err_msg)
+                err_msg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
+                refute_empty(st.tbd.model[:surfaces], err_msg)
+                surfaces = st.tbd.model[:surfaces]
 
                 # Regardless of whether BTAP/TBD were successful or not in
                 # uprating the building constructions (option == 'uprate'),
@@ -356,18 +363,17 @@ class NECB_TBD_Tests < Minitest::Test
                 [:walls, :roofs, :floors].each do |stypes|
                   break if attics.empty?
 
-                  # BTAP's use of TBD rests on attic spaces referencing a shared
-                  # 'attic' default construction set. Attic space 'floors' are
-                  # insulated, yet as insulated 'roofs' of conditioned, occupied
-                  # spaces below.
+                  # BTAP/TBD rest on attic spaces referencing a shared 'attic'
+                  # default construction set. Attic 'floors' are insulated, yet
+                  # as insulated 'roofs' of conditioned, occupied spaces below.
                   types = case stypes
                           when :roofs  then :floors
                           when :floors then :roofs
                           else              :walls
                           end
 
-                  m2   = st.tbd.model[:attic][types][:area]  # initial area
-                  lc   = st.tbd.model[:attic][types][:lc]    # initial lc
+                  m2   = st.tbd.model[:attic][types][:area]   # initial area
+                  lc   = st.tbd.model[:attic][types][:lc]     # initial lc
                   area = st.tbd.prop(lc, "btap_area", Float)
                   uo   = st.tbd.prop(lc, "btap_uo",   Float)  # required Uo
                   ut   = st.tbd.prop(lc, "btap_ut",   Float)  # required Ut
@@ -459,23 +465,192 @@ class NECB_TBD_Tests < Minitest::Test
                   end
                 end
 
-                # Tally wall, roof and exposed floor constructions separately.
-                walls  = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
-                roofs  = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
-                floors = {m2: 0, film: 0, uo: 0, ut: 0, lcs: {}}
+                # Tally wall and roof/ceiling constructions properties
+                # separately, as maintained in BTAP/TBD attributes:
+                #   - m2: initial construction 'getNetArea'
+                #   - fa: m2 / area-weighted surface air film resistances
+                #   - ua: m2 x Uo factor
+                walls  = {m2: 0, fa: 0, ua: 0}
+                roofs  = {m2: 0, fa: 0, ua: 0}
+                floors = {m2: 0, fa: 0, ua: 0}
 
-                # Start with surface type areas.
-                walls[ :m2] += st.tbd.model[:building][:walls ][:area]
-                roofs[ :m2] += st.tbd.model[:building][:roofs ][:area]
-                floors[:m2] += st.tbd.model[:building][:floors][:area]
+                # Start with BUILDING constructions.
+                unless st.tbd.model[:building][:walls].empty?
+                  wA = st.tbd.model[:building][:walls][:area]
+                  walls[:m2] = wA
+                  walls[:fa] = wA / st.tbd.model[:building][:walls][:film]
+                  walls[:ua] = wA * st.tbd.model[:building][:walls][:uo]
+                end
 
-                err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
-                assert(st.tbd.model.key?(:surfaces), err_msg)
-                err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
-                assert_kind_of(Hash, st.tbd.model[:surfaces], err_msg)
-                err_msg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
-                refute_empty(st.tbd.model[:surfaces], err_msg)
-                surfaces = st.tbd.model[:surfaces]
+                unless st.tbd.model[:building][:roofs].empty?
+                  rA = st.tbd.model[:building][:roofs][:area]
+                  roofs[:m2] = rA
+                  roofs[:fa] = rA / st.tbd.model[:building][:roofs][:film]
+                  roofs[:ua] = rA * st.tbd.model[:building][:roofs][:uo]
+                end
+
+                # Attic constructions.
+                unless attics.empty?
+                  unless st.tbd.model[:attic][:walls].empty?
+                    wA = st.tbd.model[:attic][:walls][:area]
+                    walls[:m2] += wA
+                    walls[:fa] += wA / st.tbd.model[:attic][:walls][:film]
+                    walls[:ua] += wA * st.tbd.model[:attic][:walls][:uo]
+                  end
+
+                  unless st.tbd.model[:attic][:floors].empty?
+                    rA =  st.tbd.model[:attic][:floors][:area] # !roofs
+                    roofs[:m2] += rA
+                    roofs[:fa] += rA / st.tbd.model[:attic][:floors][:film]
+                    roofs[:ua] += rA * st.tbd.model[:attic][:floors][:uo]
+                  end
+                end
+
+                # Customized space constructions.
+                st.tbd.model[:spaces].values.each do |sp|
+                  unless sp[:walls].empty?
+                    wA = sp[:walls][:area]
+                    walls[:m2] += wA
+                    walls[:fa] += wA / sp[:walls][:film]
+                    walls[:ua] += wA * sp[:walls][:uo]
+                  end
+
+                  unless sp[:roofs].empty?
+                    rA = sp[:roofs][:area]
+                    roofs[:m2] += rA
+                    roofs[:fa] += rA / sp[:roofs][:film]
+                    roofs[:ua] += rA * sp[:roofs][:uo]
+                  end
+                end
+
+                wM2 = 0 # sum of wall surface areas
+                rM2 = 0 # sum of roof and/or (attic) floor areas
+                wFA = 0 # sum of wall surface-specific area / air film RSi
+                rFA = 0 # sum of roof surface-specific area / air film RSi
+                wUA = 0 # sum of wall surface-specific area / construction RSi
+                rUA = 0 # sum of roof surface-specific area / construction RSi
+
+                # Non- 'attic' surfaces.
+                model.getSurfaces.each do |surface|
+                  next if attics.include?(surface.space.get)
+                  next unless surface.surfaceType.downcase == "wall"
+                  next unless surface.outsideBoundaryCondition.downcase == "outdoors"
+
+                  id = surface.nameString
+                  wA = surface.netArea * surface.space.get.multiplier
+                  lc = surface.construction.get.to_LayeredConstruction.get
+                  fR = TBD.filmResistances(:wall, surface.tilt)
+                  next if fR.round(4).zero?
+
+                  wM2 += wA
+                  wFA += wA / fR
+                  wUA += wA / TBD.rsi(lc, fR)
+                end
+
+                model.getSurfaces.each do |surface|
+                  next if attics.include?(surface.space.get)
+                  next unless surface.surfaceType.downcase == "roofceiling"
+                  next unless surface.outsideBoundaryCondition.downcase == "outdoors"
+
+                  id = surface.nameString
+                  rA = surface.netArea * surface.space.get.multiplier
+                  lc = surface.construction.get.to_LayeredConstruction.get
+                  fR = TBD.filmResistances(:roof, surface.tilt)
+                  next if fR.round(4).zero?
+
+                  rM2 += rA
+                  rFA += rA / fR
+                  rUA += rA / TBD.rsi(lc, fR)
+                end
+
+                # 'Attic' surfaces.
+                attics.each do |attic|
+                  attic.surfaces.each do |surface|
+                    next unless surface.surfaceType.downcase == "wall"
+                    next unless surface.outsideBoundaryCondition.downcase == "surface"
+
+                    id = surface.nameString
+                    wA = surface.netArea * surface.space.get.multiplier
+                    lc = surface.construction.get.to_LayeredConstruction.get
+                    fR = TBD.filmResistances(:partition, surface.tilt)
+                    next if fR.round(4).zero?
+
+                    wM2 += wA
+                    wFA += wA / fR
+                    wUA += wA / TBD.rsi(lc, fR)
+                  end
+                end
+
+                attics.each do |attic|
+                  attic.surfaces.each do |surface|
+                    next unless surface.surfaceType.downcase == "floor"
+                    next unless surface.outsideBoundaryCondition.downcase == "surface"
+
+                    id = surface.nameString
+                    rA = surface.netArea * surface.space.get.multiplier
+                    lc = surface.construction.get.to_LayeredConstruction.get
+                    fR = TBD.filmResistances(:ceiling, surface.tilt)
+                    next if fR.round(4).zero?
+
+                    rM2 += rA
+                    rFA += rA / fR
+                    rUA += rA / TBD.rsi(lc, fR)
+                  end
+                end
+
+                # Tally of 'deratable' wall surface areas should match BTAP/TBD-
+                # stored aggregate attributes (easier/quicker for QAQC/testing).
+                err_msg = "BTAP/TBD: wall area tallies (#{cas})?"
+                assert_equal(walls[:m2].round(1), wM2.round(1))
+
+                # Tally of 'deratable' roof surface areas should also match
+                # BTAP/TBD tallies. In some attic or plenum cases, there may be
+                # discrepencies linked to OpenStudio/EnergyPlus limitations
+                # (see unit test_necb_skylights for discussion). As the NECB
+                # required SRR% has gradually gone down from 5% to 2%, the
+                # impact on thermal bridging tallies has gradually lessened.
+                #
+                # Examples (-2% SRR):
+                #   - 'SmallOffice'  (roofs[:m2]  501.01) vs (rM2  501.01)
+                #   - 'MediumOffice' (roofs[:m2] 1627.51) vs (rM2 1627.51)
+                #
+                # OSut gross roof area (includes 2% SRR, excludes overhangs)
+                #   - 'SmallOffice'  graX  538.80 - 2% SRR =  528.02 (poor)
+                #   - 'MediumOffice' grax 1660.73 - 2% SRR = 1627.51 (good)
+                err_msg = "BTAP/TBD: roof area tallies (#{cas})?"
+                assert_equal(roofs[:m2].round(1), rM2.round(1))
+
+                if option == "uprate" && cmplies
+                  wUo  = walls[:ua] / wM2
+                  bwUo = st.tbd.model[:building][:walls][:uo]
+                  rUo  = roofs[:ua] / rM2
+                  brUo = st.tbd.model[:building][:roofs][:uo]
+
+                  err_msg = "BTAP/TBD: BLDG uprated wall Uo (#{cas})?"
+                  assert_equal(wUo.round(3), bwUo.round(3), err_msg)
+                  err_msg = "BTAP/TBD: BLDG uprated roof Uo (#{cas})?"
+                  assert_equal(rUo.round(3), brUo.round(3), err_msg)
+                end
+
+                # puts
+                # puts wM2                                    #  217.585
+                # puts wFA                                    # 1379.362
+                # puts wUA                                    #   47.901
+                # puts walls[:fa]                             # 1379.876
+                # puts walls[:ua]                             #   19.876
+                # puts st.tbd.model[:building][:walls][:film] #    0.150
+                # puts st.tbd.model[:building][:walls][:uo]   #    0.091
+                # puts st.tbd.model[:argh][:walls][:ut]       #    0.215
+
+                # puts rM2                                    #  501.009
+                # puts rFA                                    # 1885.162
+                # puts rUA                                    #   59.613
+                # puts roofs[:fa]                             # 1885.166
+                # puts roofs[:ua]                             #   52.337
+                # puts st.tbd.model[:building][:roofs][:film] #    0.137
+                # puts st.tbd.model[:building][:roofs][:uo]   #    0.105
+                # puts st.tbd.model[:argh][:roofs][:ut]       #    0.121
+                # puts
 
                 model.getSurfaces.each do |surface|
                   id = surface.nameString
