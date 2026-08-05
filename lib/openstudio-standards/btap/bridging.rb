@@ -1617,13 +1617,13 @@ module BTAP
       return false unless obj.first.respond_to?(:model)
 
       cls = obj.first.class
-      tag = tag.to_s.downcase
+      tag = tag.to_s
       return false if tag.empty?
 
       obj.each { |ob| return false unless ob.is_a?(cls) }
 
       if prp.respond_to?(:to_sym)
-        prp = prp.to_s.downcase
+        prp = prp.to_s
         return false if prp.empty?
       else
         return false unless prp.is_a?(Numeric)
@@ -1647,7 +1647,7 @@ module BTAP
       return nil unless obj.respond_to?(:model)
       return nil unless tag.respond_to?(:to_sym)
 
-      tag = tag.to_s.downcase
+      tag = tag.to_s
       return nil if tag.empty?
 
       if typ == Integer

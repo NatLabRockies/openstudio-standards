@@ -49,7 +49,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'PrimarySchool',
       'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
@@ -135,43 +135,43 @@ class NECB_TBD_Tests < Minitest::Test
                 office = model.getSpaceByName(id1)
                 fine   = model.getSpaceByName(id2)
                 bulk   = model.getSpaceByName(id3)
-                err_msg1 = "Invalid space ID '#{id1}' (#{cas})?"
-                err_msg2 = "Invalid space ID '#{id2}' (#{cas})?"
-                err_msg3 = "Invalid space ID '#{id3}' (#{cas})?"
-                refute_empty(office, err_msg1)
-                refute_empty(  fine, err_msg2)
-                refute_empty(  bulk, err_msg3)
+                emsg1  = "Invalid space ID '#{id1}' (#{cas})?"
+                emsg2  = "Invalid space ID '#{id2}' (#{cas})?"
+                emsg3  = "Invalid space ID '#{id3}' (#{cas})?"
+                refute_empty(office, emsg1)
+                refute_empty(  fine, emsg2)
+                refute_empty(  bulk, emsg3)
                 office = office.get
                 fine   = fine.get
                 bulk   = bulk.get
 
                 # Assign custom STRUCTURE or FRAMING properties.
-                err_msg1 = "Failed AddProp '#{opt1}' #{id1} (#{cas})?"
-                err_msg2 = "Failed AddProp '#{opt2}' #{id2} (#{cas})?"
-                err_msg3 = "Failed AddProp '#{opt1}' #{id3} (#{cas})?"
-                assert(office.additionalProperties.setFeature(opt1, prp1), err_msg1)
-                assert(  fine.additionalProperties.setFeature(opt2, prp1), err_msg2)
-                assert(  bulk.additionalProperties.setFeature(opt1, prp2), err_msg3)
+                emsg1 = "Failed AddProp '#{opt1}' #{id1} (#{cas})?"
+                emsg2 = "Failed AddProp '#{opt2}' #{id2} (#{cas})?"
+                emsg3 = "Failed AddProp '#{opt1}' #{id3} (#{cas})?"
+                assert(office.additionalProperties.setFeature(opt1, prp1), emsg1)
+                assert(  fine.additionalProperties.setFeature(opt2, prp1), emsg2)
+                assert(  bulk.additionalProperties.setFeature(opt1, prp2), emsg3)
 
                 # Validate.
-                err_msg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
-                err_msg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
-                err_msg3 = "Missing AddProp '#{opt1}' #{id3} (#{cas})?"
+                emsg1 = "Missing AddProp '#{opt1}' #{id1} (#{cas})?"
+                emsg2 = "Missing AddProp '#{opt2}' #{id2} (#{cas})?"
+                emsg3 = "Missing AddProp '#{opt1}' #{id3} (#{cas})?"
                 prop1 = office.additionalProperties.getFeatureAsString(opt1)
                 prop2 =   fine.additionalProperties.getFeatureAsString(opt2)
                 prop3 =   bulk.additionalProperties.getFeatureAsString(opt1)
-                refute_empty(prop1, err_msg1)
-                refute_empty(prop2, err_msg2)
-                refute_empty(prop3, err_msg3)
+                refute_empty(prop1, emsg1)
+                refute_empty(prop2, emsg2)
+                refute_empty(prop3, emsg3)
                 prop1 = prop1.get
                 prop2 = prop2.get
                 prop3 = prop3.get
-                err_msg1 = "Incorrect AddProp '#{prop1}' #{id1} (#{cas})?"
-                err_msg2 = "Incorrect AddProp '#{prop2}' #{id2} (#{cas})?"
-                err_msg3 = "Incorrect AddProp '#{prop3}' #{id3} (#{cas})?"
-                assert_equal(prop1, prp1, err_msg1)
-                assert_equal(prop2, prp1, err_msg2)
-                assert_equal(prop3, prp2, err_msg3)
+                emsg1 = "Incorrect AddProp '#{prop1}' #{id1} (#{cas})?"
+                emsg2 = "Incorrect AddProp '#{prop2}' #{id2} (#{cas})?"
+                emsg3 = "Incorrect AddProp '#{prop3}' #{id3} (#{cas})?"
+                assert_equal(prop1, prp1, emsg1)
+                assert_equal(prop2, prp1, emsg2)
+                assert_equal(prop3, prp2, emsg3)
 
                 model = st.model_apply_standard(model: model,
                                                 epw_file: epw,
@@ -192,8 +192,8 @@ class NECB_TBD_Tests < Minitest::Test
               end
 
               if option == 'none'
-                err_msg = "BTAP/TBD: Initialized ('#{cas}')?"
-                assert_nil(st.tbd, err_msg)
+                emsg = "BTAP/TBD: Initialized ('#{cas}')?"
+                assert_nil(st.tbd, emsg)
 
                 model.getSurfaces.each do |surface|
                   id = surface.nameString
@@ -210,62 +210,62 @@ class NECB_TBD_Tests < Minitest::Test
                   #     - attics
                   #     - plenums
                   #     - customized spaces
-                  err_msg  = "BTAP/TBD: #{id} defaulted construction (#{cas})?"
-                  assert(surface.isConstructionDefaulted, err_msg)
-                  lc      = surface.construction
-                  err_msg = "BTAP/TBD: #{id} construction (#{cas})?"
-                  refute_empty(lc, err_msg)
-                  lc      = lc.get.to_LayeredConstruction
-                  err_msg = "BTAP/TBD: #{id} layered construction (#{cas})?"
-                  refute_empty(lc, err_msg)
+                  emsg = "BTAP/TBD: #{id} defaulted construction (#{cas})?"
+                  assert(surface.isConstructionDefaulted, emsg)
+                  lc   = surface.construction
+                  emsg = "BTAP/TBD: #{id} construction (#{cas})?"
+                  refute_empty(lc, emsg)
+                  lc   = lc.get.to_LayeredConstruction
+                  emsg = "BTAP/TBD: #{id} layered construction (#{cas})?"
+                  refute_empty(lc, emsg)
 
                   # No surface construction IDs hold any "c tbd" suffixes.
-                  lc      = lc.get
-                  name    = lc.nameString.downcase
-                  err_msg = "BTAP/TBD processes enabled (#{cas})?"
-                  refute_includes(name, " c tbd", err_msg)
-                  prop    = lc.additionalProperties
+                  lc   = lc.get
+                  name = lc.nameString.downcase
+                  emsg = "BTAP/TBD processes enabled (#{cas})?"
+                  refute_includes(name, " c tbd", emsg)
+                  prop = lc.additionalProperties
                   next unless prop.hasFeature("btap_uo")
 
                   # Any (insulated) layered construction also holds:
-                  err_msg = "BTAP/TBD air film resistances (#{cas})?"
+                  emsg = "BTAP/TBD air film resistances (#{cas})?"
                   assert(prop.hasFeature("btap_film"))
-                  err_msg = "BTAP/TBD net area (#{cas})?"
+                  emsg = "BTAP/TBD net area (#{cas})?"
                   assert(prop.hasFeature("btap_area"))
-                  err_msg = "BTAP/TBD total Ut factor (#{cas})?"
+                  emsg = "BTAP/TBD total Ut factor (#{cas})?"
                   assert(prop.hasFeature("btap_ut"))
-                  err_msg = "BTAP/TBD costed construction identifier (#{cas})?"
+                  emsg = "BTAP/TBD costed construction identifier (#{cas})?"
                   assert(prop.hasFeature("btap_id"))
                 end
 
                 fdback << "BTAP/TBD processes skipped."
               else
-                err_msg = "BTAP/TBD: Uninitialized (#{cas})?"
-                assert_kind_of(BTAP::Bridging, st.tbd, err_msg)
-                err_msg = "BTAP/TBD: Missing model Hash (#{cas})?"
-                assert_kind_of(Hash, st.tbd.model, err_msg)
-                err_msg = "BTAP/TBD: Missing feedback Hash (#{cas})?"
-                assert_kind_of(Hash, st.tbd.feedback, err_msg)
-                err_msg = "BTAP/TBD: Missing feedback logs (#{cas})?"
-                assert(st.tbd.feedback.key?(:logs), err_msg)
-                err_msg = "BTAP/TBD: Invalid feedback logs (#{cas})?"
-                assert_kind_of(Array, st.tbd.feedback[:logs], err_msg)
-                err_msg = "BTAP/TBD: Missing tally Hash (#{cas})?"
-                assert_kind_of(Hash, st.tbd.tally, err_msg)
-                err_msg = "BTAP/TBD: Missing model 'complies' key (#{cas})?"
-                assert(st.tbd.model.key?(:complies), err_msg)
+                emsg = "BTAP/TBD: Uninitialized (#{cas})?"
+                assert_kind_of(BTAP::Bridging, st.tbd, emsg)
+                emsg = "BTAP/TBD: Missing model Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.model, emsg)
+                emsg = "BTAP/TBD: Missing feedback Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.feedback, emsg)
+                emsg = "BTAP/TBD: Missing feedback logs (#{cas})?"
+                assert(st.tbd.feedback.key?(:logs), emsg)
+                emsg = "BTAP/TBD: Invalid feedback logs (#{cas})?"
+                assert_kind_of(Array, st.tbd.feedback[:logs], emsg)
+                emsg = "BTAP/TBD: Missing tally Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.tally, emsg)
+                emsg = "BTAP/TBD: Missing model 'complies' key (#{cas})?"
+                assert(st.tbd.model.key?(:complies), emsg)
                 cmplies = st.tbd.model[:complies]
                 cpl_msg = cmplies ? " ... compliant!" : " ... non-compliant!"
                 fdback << cpl_msg
 
-                err_msg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
-                assert(st.tbd.model.key?(:io), err_msg)
-                err_msg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
-                assert(st.tbd.model.key?(:surfaces), err_msg)
-                err_msg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
-                assert_kind_of(Hash, st.tbd.model[:surfaces], err_msg)
-                err_msg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
-                refute_empty(st.tbd.model[:surfaces], err_msg)
+                emsg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
+                assert(st.tbd.model.key?(:io), emsg)
+                emsg = "BTAP/TBD: Missing TBD 'surfaces' (#{cas})?"
+                assert(st.tbd.model.key?(:surfaces), emsg)
+                emsg = "BTAP/TBD: TBD 'surfaces' Hash (#{cas})?"
+                assert_kind_of(Hash, st.tbd.model[:surfaces], emsg)
+                emsg = "BTAP/TBD: Empty TBD 'surfaces' (#{cas})?"
+                refute_empty(st.tbd.model[:surfaces], emsg)
                 surfaces = st.tbd.model[:surfaces]
 
                 # Regardless of whether BTAP/TBD were successful or not in
@@ -321,27 +321,27 @@ class NECB_TBD_Tests < Minitest::Test
                   next unless m2 > 0
                   next unless area
 
-                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} Uo (#{cas})?"
-                  refute_nil(uo, err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} Ut (#{cas})?"
-                  refute_nil(ut, err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} film (#{cas})?"
-                  refute_nil(film, err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} type (#{cas})?"
-                  refute_nil(type, err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} #{id} vs #{type} (#{cas})?"
-                  assert_equal(type, stypes.to_s, err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} m2 vs area (#{cas})?"
-                  assert_equal(m2.round(1), area.round(1), err_msg)
-                  err_msg = "BTAP/TBD: BLDG #{stypes} m2 vs net (#{cas})?"
-                  refute_equal(m2.round(1), net.round(1), err_msg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} Uo (#{cas})?"
+                  refute_nil(uo, emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} Ut (#{cas})?"
+                  refute_nil(ut, emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} film (#{cas})?"
+                  refute_nil(film, emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} type (#{cas})?"
+                  refute_nil(type, emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} vs #{type} (#{cas})?"
+                  assert_equal(type, stypes.to_s, emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} m2 vs area (#{cas})?"
+                  assert_equal(m2.round(1), area.round(1), emsg)
+                  emsg = "BTAP/TBD: BLDG #{stypes} m2 vs net (#{cas})?"
+                  refute_equal(m2.round(1), net.round(1), emsg)
 
                   if option == "uprate"
-                    err_msg = "BTAP/TBD: BLDG #{stypes} Uo != Ut (#{cas})?"
-                    refute_equal(uo.round(3), ut.round(3), err_msg)
+                    emsg = "BTAP/TBD: BLDG #{stypes} Uo != Ut (#{cas})?"
+                    refute_equal(uo.round(3), ut.round(3), emsg)
                   else
-                    err_msg = "BTAP/TBD: BLDG #{stypes} Uo == Ut (#{cas})?"
-                    assert_equal(uo.round(3), ut.round(3), err_msg)
+                    emsg = "BTAP/TBD: BLDG #{stypes} Uo == Ut (#{cas})?"
+                    assert_equal(uo.round(3), ut.round(3), emsg)
                   end
                 end
 
@@ -356,8 +356,8 @@ class NECB_TBD_Tests < Minitest::Test
 
                 # No unconditioned attics with "structure" option.
                 if structure != "structure"
-                  err_msg = "BTAP/TBD: attics (#{cas})?"
-                  assert_empty(attics, err_msg)
+                  emsg = "BTAP/TBD: attics (#{cas})?"
+                  assert_empty(attics, emsg)
                 end
 
                 [:walls, :roofs, :floors].each do |stypes|
@@ -384,44 +384,44 @@ class NECB_TBD_Tests < Minitest::Test
                   next unless m2 > 0
                   next unless area
 
-                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} Uo (#{cas})?"
-                  refute_nil(uo, err_msg)
-                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} Ut (#{cas})?"
-                  refute_nil(ut, err_msg)
-                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} film (#{cas})?"
-                  refute_nil(film, err_msg)
-                  err_msg = "BTAP/TBD: ATTIC #{types} #{id} type (#{cas})?"
-                  refute_nil(type, err_msg)
-                  err_msg = "BTAP/TBD: ATTIC #{types} m2 vs area (#{cas})?"
-                  assert_equal(m2.round(1), area.round(1), err_msg)
-                  err_msg = "BTAP/TBD: ATTIC #{types} m2 vs net (#{cas})?"
-                  refute_equal(m2.round(1), net.round(1), err_msg)
+                  emsg = "BTAP/TBD: ATTIC #{types} #{id} Uo (#{cas})?"
+                  refute_nil(uo, emsg)
+                  emsg = "BTAP/TBD: ATTIC #{types} #{id} Ut (#{cas})?"
+                  refute_nil(ut, emsg)
+                  emsg = "BTAP/TBD: ATTIC #{types} #{id} film (#{cas})?"
+                  refute_nil(film, emsg)
+                  emsg = "BTAP/TBD: ATTIC #{types} #{id} type (#{cas})?"
+                  refute_nil(type, emsg)
+                  emsg = "BTAP/TBD: ATTIC #{types} m2 vs area (#{cas})?"
+                  assert_equal(m2.round(1), area.round(1), emsg)
+                  emsg = "BTAP/TBD: ATTIC #{types} m2 vs net (#{cas})?"
+                  refute_equal(m2.round(1), net.round(1), emsg)
 
                   if stypes == :walls
-                    err_msg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, stypes.to_s, err_msg)
-                    err_msg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, types.to_s, err_msg)
+                    emsg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, stypes.to_s, emsg)
+                    emsg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, types.to_s, emsg)
 
                     if option == "uprate"
-                      err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
-                      refute_in_epsilon(uo, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
+                      refute_in_epsilon(uo, ut, 0.01, emsg)
                     else
-                      err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
-                      assert_in_epsilon(uou, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
+                      assert_in_epsilon(uou, ut, 0.01, emsg)
                     end
                   else
-                    err_msg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, stypes.to_s, err_msg)
-                    err_msg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
-                    refute_equal(type, types.to_s, err_msg)
+                    emsg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
+                    assert_equal(type, stypes.to_s, emsg)
+                    emsg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
+                    refute_equal(type, types.to_s, emsg)
 
                     if option == "uprate"
-                      err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
-                      refute_in_epsilon(uo, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
+                      refute_in_epsilon(uo, ut, 0.01, emsg)
                     else
-                      err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
-                      assert_in_epsilon(uo, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
+                      assert_in_epsilon(uo, ut, 0.01, emsg)
                     end
                   end
                 end
@@ -440,27 +440,27 @@ class NECB_TBD_Tests < Minitest::Test
                     next unless m2 > 0
                     next unless area
 
-                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} Uo (#{cas})?"
-                    refute_nil(uo, err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} Ut (#{cas})?"
-                    refute_nil(ut, err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} film (#{cas})?"
-                    refute_nil(film, err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} type (#{cas})?"
-                    refute_nil(type, err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} #{id} vs type (#{cas})?"
-                    assert_equal(type, stypes.to_s, err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} m2 vs area (#{cas})?"
-                    assert_equal(m2.round(1), area.round(1), err_msg)
-                    err_msg = "BTAP/TBD: #{name} #{stypes} m2 vs net (#{cas})?"
-                    refute_equal(m2.round(1), net.round(1), err_msg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} Uo (#{cas})?"
+                    refute_nil(uo, emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} Ut (#{cas})?"
+                    refute_nil(ut, emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} film (#{cas})?"
+                    refute_nil(film, emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} type (#{cas})?"
+                    refute_nil(type, emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} vs type (#{cas})?"
+                    assert_equal(type, stypes.to_s, emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} m2 vs area (#{cas})?"
+                    assert_equal(m2.round(1), area.round(1), emsg)
+                    emsg = "BTAP/TBD: #{name} #{stypes} m2 vs net (#{cas})?"
+                    refute_equal(m2.round(1), net.round(1), emsg)
 
                     if option == "uprate"
-                      err_msg = "BTAP/TBD: #{name} #{stypes} Uo != Ut (#{cas})?"
-                      refute_in_epsilon(uo, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: #{name} #{stypes} Uo != Ut (#{cas})?"
+                      refute_in_epsilon(uo, ut, 0.01, emsg)
                     else
-                      err_msg = "BTAP/TBD: #{name} #{stypes} Uo == Ut (#{cas})?"
-                      assert_in_epsilon(uo, ut, 0.01, err_msg)
+                      emsg = "BTAP/TBD: #{name} #{stypes} Uo == Ut (#{cas})?"
+                      assert_in_epsilon(uo, ut, 0.01, emsg)
                     end
                   end
                 end
@@ -618,7 +618,7 @@ class NECB_TBD_Tests < Minitest::Test
 
                 # Tally of 'deratable' wall surface areas should match BTAP/TBD-
                 # stored aggregate attributes (easier/quicker for QAQC/testing).
-                err_msg = "BTAP/TBD: wall area tallies (#{cas})?"
+                emsg = "BTAP/TBD: wall area tallies (#{cas})?"
                 assert_equal(walls[:m2].round(1), wM2.round(1))
 
                 # Tally of 'deratable' roof surface areas should also match
@@ -635,7 +635,7 @@ class NECB_TBD_Tests < Minitest::Test
                 # OSut gross roof area (includes 2% SRR, excludes overhangs):
                 #   - 'SmallOffice'  graX  538.80 - 2% SRR =  528.02 (poor)
                 #   - 'MediumOffice' grax 1660.73 - 2% SRR = 1627.51 (good)
-                err_msg = "BTAP/TBD: roof area tallies (#{cas})"
+                emsg = "BTAP/TBD: roof area tallies (#{cas})"
                 assert_equal(roofs[:m2].round(1), rM2.round(1))
 
                 # The walls[:fA] tally represents the inverse of area-weighted
@@ -673,19 +673,20 @@ class NECB_TBD_Tests < Minitest::Test
                 #           above results reflect the latter BTAP option).
                 wfRSi = 1 / (wFA        / wM2)
                 wFrsi = 1 / (walls[:fa] / wM2)
-                err_msg = "BTAP/TBD: wall film RSi (#{cas})"
-                assert_in_epsilon(wfRSi, wFrsi, 0.01, err_msg)
+                emsg = "BTAP/TBD: wall film RSi (#{cas})"
+                assert_in_epsilon(wfRSi, wFrsi, 0.01, emsg)
 
                 rfRSi = 1 / (rFA        / rM2)
                 rFrsi = 1 / (roofs[:fa] / rM2)
-                err_msg = "BTAP/TBD: roof film RSi (#{cas})"
-                assert_in_epsilon(rfRSi, rFrsi, 0.01, err_msg)
+                emsg = "BTAP/TBD: roof film RSi (#{cas})"
+                assert_in_epsilon(rfRSi, rFrsi, 0.01, emsg)
 
                 # The walls[:ua] tally should match required (uprated, costed)
                 # wall Uo factors. The wUA tally should match NECB required Ut.
                 # This implies that post-simulation operations (e.g. costing)
                 # can safely access aggregate tallies as take-offs (i.e. without
-                # post-processing individual surfaces and constructions).
+                # post-processing individual surfaces and constructions). Post-
+                # simulation operations should rely on AdditionalProperties.
                 if option == "uprate" && cmplies && inter == true
                   wUo  = walls[:ua] / wM2
                   wUt  = wUA        / wM2
@@ -697,13 +698,32 @@ class NECB_TBD_Tests < Minitest::Test
                     lc   = st.tbd.model[:building][:walls][:lc  ]
                     bwUo = st.tbd.model[:building][:walls][:uo  ]
                     bwUt = st.tbd.model[:building][:walls][:ut  ]
+                    m2   = st.tbd.model[:building][:walls][:area]
                     uo   = 1/TBD.rsi(lc, film)
-                    err_msg = "BTAP/TBD: BLDG uprated wall Uo (#{cas})"
-                    assert_in_epsilon(wUo, bwUo, 0.01, err_msg)
-                    err_msg = "BTAP/TBD: BLDG uprated wall Uo 2 (#{cas})"
-                    assert_in_epsilon(wUo, uo, 0.01, err_msg)
-                    err_msg = "BTAP/TBD: BLDG wall Ut (#{cas})"
-                    assert_in_delta(wUt, bwUt, 0.02, err_msg)
+                    bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                    bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                    bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                    emsg = "BTAP/TBD: BLDG uprated wall Uo (#{cas})"
+                    assert_in_epsilon(wUo, bwUo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated wall Uo 2 (#{cas})"
+                    assert_in_epsilon(wUo, uo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG wall Ut (#{cas})"
+                    assert_in_delta(wUt, bwUt, 0.02, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated wall btap_uo (#{cas})"
+                    refute_empty(bUo, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated wall btap_id (#{cas})"
+                    refute_empty(bID, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated wall btap_m2 (#{cas})"
+                    refute_empty(bM2, emsg)
+                    bUo  = bUo.get
+                    bM2  = bM2.get
+                    bID  = bID.get
+                    emsg = "BTAP/TBD: BLDG wall btap_uo (#{cas})"
+                    assert_in_epsilon(wUo, bUo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG wall btap_area (#{cas})"
+                    assert_in_epsilon(bM2, m2, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG wall btap_id (#{cas})"
+                    assert(st.tbd.data.key?(bID), emsg)
                   end
 
                   unless st.tbd.model[:building][:roofs].empty?
@@ -711,13 +731,32 @@ class NECB_TBD_Tests < Minitest::Test
                     lc   = st.tbd.model[:building][:roofs][:lc  ]
                     brUo = st.tbd.model[:building][:roofs][:uo  ]
                     brUt = st.tbd.model[:building][:roofs][:ut  ]
+                    m2   = st.tbd.model[:building][:roofs][:area]
                     uo   = 1/TBD.rsi(lc, film)
-                    err_msg = "BTAP/TBD: BLDG uprated roof Uo (#{cas})"
-                    assert_in_epsilon(rUo, brUo, 0.01, err_msg)
-                    err_msg = "BTAP/TBD: BLDG uprated roof Uo 2 (#{cas})"
-                    assert_in_epsilon(rUo, uo, 0.01, err_msg)
-                    err_msg = "BTAP/TBD: BLDG roof Ut (#{cas})"
-                    assert_in_delta(rUt, brUt, 0.02, err_msg)
+                    bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                    bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                    bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                    emsg = "BTAP/TBD: BLDG uprated roof Uo (#{cas})"
+                    assert_in_epsilon(rUo, brUo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated roof Uo 2 (#{cas})"
+                    assert_in_epsilon(rUo, uo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG roof Ut (#{cas})"
+                    assert_in_delta(rUt, brUt, 0.02, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated roof btap_uo (#{cas})"
+                    refute_empty(bUo, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated roof btap_id (#{cas})"
+                    refute_empty(bID, emsg)
+                    emsg = "BTAP/TBD: BLDG uprated roof btap_m2 (#{cas})"
+                    refute_empty(bM2, emsg)
+                    bUo  = bUo.get
+                    bM2  = bM2.get
+                    bID  = bID.get
+                    emsg = "BTAP/TBD: BLDG roof btap_uo (#{cas})"
+                    assert_in_epsilon(rUo, bUo, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG roof btap_area (#{cas})"
+                    assert_in_epsilon(bM2, m2, 0.01, emsg)
+                    emsg = "BTAP/TBD: BLDG roof btap_id (#{cas})"
+                    assert(st.tbd.data.key?(bID), emsg)
                   end
 
                   unless attics.empty?
@@ -726,13 +765,32 @@ class NECB_TBD_Tests < Minitest::Test
                       lc   = st.tbd.model[:attic][:walls][:lc  ]
                       awUo = st.tbd.model[:attic][:walls][:uo  ]
                       awUt = st.tbd.model[:attic][:walls][:ut  ]
+                      m2   = st.tbd.model[:attic][:walls][:area]
                       uo   = 1/TBD.rsi(lc, film)
-                      err_msg = "BTAP/TBD: ATTIC uprated wall Uo (#{cas})"
-                      assert_in_epsilon(wUo, awUo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: ATTIC uprated wall Uo 2 (#{cas})"
-                      assert_in_epsilon(wUo, uo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: ATTIC wall Ut (#{cas})"
-                      assert_in_delta(wUt, awUt, 0.02, err_msg)
+                      bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                      bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                      bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                      emsg = "BTAP/TBD: ATTIC uprated wall Uo (#{cas})"
+                      assert_in_epsilon(wUo, awUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated wall Uo 2 (#{cas})"
+                      assert_in_epsilon(wUo, uo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC wall Ut (#{cas})"
+                      assert_in_delta(wUt, awUt, 0.02, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated wall btap_uo (#{cas})"
+                      refute_empty(bUo, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated wall btap_id (#{cas})"
+                      refute_empty(bID, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated wall btap_m2 (#{cas})"
+                      refute_empty(bM2, emsg)
+                      bUo  = bUo.get
+                      bM2  = bM2.get
+                      bID  = bID.get
+                      emsg = "BTAP/TBD: ATTIC wall btap_uo (#{cas})"
+                      assert_in_epsilon(wUo, bUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC wall btap_area (#{cas})"
+                      assert_in_epsilon(bM2, m2, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC attic btap_id (#{cas})"
+                      assert(st.tbd.data.key?(bID), emsg)
                     end
 
                     unless st.tbd.model[:attic][:floors].empty?
@@ -740,13 +798,32 @@ class NECB_TBD_Tests < Minitest::Test
                       lc   = st.tbd.model[:attic][:floors][:lc  ]
                       arUo = st.tbd.model[:attic][:floors][:uo  ]
                       arUt = st.tbd.model[:attic][:floors][:ut  ]
+                      m2   = st.tbd.model[:attic][:floors][:area]
                       uo   = 1/TBD.rsi(lc, film)
-                      err_msg = "BTAP/TBD: ATTIC uprated floor Uo (#{cas})"
-                      assert_in_epsilon(rUo, arUo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: ATTIC uprated floor Uo 2 (#{cas})"
-                      assert_in_epsilon(rUo, uo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: ATTIC floor Ut (#{cas})"
-                      assert_in_delta(rUt, arUt, 0.02, err_msg)
+                      bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                      bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                      bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                      emsg = "BTAP/TBD: ATTIC uprated floor Uo (#{cas})"
+                      assert_in_epsilon(rUo, arUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated floor Uo 2 (#{cas})"
+                      assert_in_epsilon(rUo, uo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC floor Ut (#{cas})"
+                      assert_in_delta(rUt, arUt, 0.02, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated floor btap_uo (#{cas})"
+                      refute_empty(bUo, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated floor btap_id (#{cas})"
+                      refute_empty(bID, emsg)
+                      emsg = "BTAP/TBD: ATTIC uprated floor btap_m2 (#{cas})"
+                      refute_empty(bM2, emsg)
+                      bUo  = bUo.get
+                      bM2  = bM2.get
+                      bID  = bID.get
+                      emsg = "BTAP/TBD: ATTIC roof btap_uo (#{cas})"
+                      assert_in_epsilon(rUo, bUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC floor btap_area (#{cas})"
+                      assert_in_epsilon(bM2, m2, 0.01, emsg)
+                      emsg = "BTAP/TBD: ATTIC floor btap_id (#{cas})"
+                      assert(st.tbd.data.key?(bID), emsg)
                     end
                   end
 
@@ -756,13 +833,32 @@ class NECB_TBD_Tests < Minitest::Test
                       lc   = sp[:walls][:lc  ]
                       swUo = sp[:walls][:uo  ]
                       swUt = sp[:walls][:ut  ]
+                      m2   = sp[:walls][:area]
                       uo   = 1/TBD.rsi(lc, film)
-                      err_msg = "BTAP/TBD: #{id} uprated wall Uo (#{cas})"
-                      assert_in_epsilon(wUo, swUo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: #{id} uprated wall Uo 2 (#{cas})"
-                      assert_in_epsilon(wUo, uo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: #{id} wall Ut (#{cas})"
-                      assert_in_delta(wUt, swUo, 0.02, err_msg)
+                      bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                      bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                      bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                      emsg = "BTAP/TBD: #{id} uprated wall Uo (#{cas})"
+                      assert_in_epsilon(wUo, swUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated wall Uo 2 (#{cas})"
+                      assert_in_epsilon(wUo, uo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} wall Ut (#{cas})"
+                      assert_in_delta(wUt, swUo, 0.02, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated wall btap_uo (#{cas})"
+                      refute_empty(bUo, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated wall btap_id (#{cas})"
+                      refute_empty(bID, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated wall btap_m2 (#{cas})"
+                      refute_empty(bM2, emsg)
+                      bUo  = bUo.get
+                      bM2  = bM2.get
+                      bID  = bID.get
+                      emsg = "BTAP/TBD: #{id} wall btap_uo (#{cas})"
+                      assert_in_epsilon(wUo, bUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} wall btap_area (#{cas})"
+                      assert_in_epsilon(bM2, m2, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} wall btap_id (#{cas})"
+                      assert(st.tbd.data.key?(bID), emsg)
                     end
 
                     unless sp[:roofs].empty?
@@ -770,13 +866,32 @@ class NECB_TBD_Tests < Minitest::Test
                       lc   = sp[:roofs][:lc  ]
                       srUo = sp[:roofs][:uo  ]
                       srUt = sp[:roofs][:ut  ]
+                      m2   = sp[:roofs][:area]
                       uo   = 1/TBD.rsi(lc, film)
-                      err_msg = "BTAP/TBD: #{id} uprated roof Uo (#{cas})"
-                      assert_in_epsilon(rUo, srUo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: #{id} uprated roof Uo 2 (#{cas})"
-                      assert_in_epsilon(rUo, uo, 0.01, err_msg)
-                      err_msg = "BTAP/TBD: #{id} roof Ut (#{cas})"
-                      assert_in_delta(rUo, srUo, 0.02, err_msg)
+                      bUo  = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+                      bM2  = lc.additionalProperties.getFeatureAsDouble("btap_area")
+                      bID  = lc.additionalProperties.getFeatureAsString("btap_id")
+                      emsg = "BTAP/TBD: #{id} uprated roof Uo (#{cas})"
+                      assert_in_epsilon(rUo, srUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated roof Uo 2 (#{cas})"
+                      assert_in_epsilon(rUo, uo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} roof Ut (#{cas})"
+                      assert_in_delta(rUo, srUo, 0.02, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated roof btap_uo (#{cas})"
+                      refute_empty(bUo, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated roof btap_id (#{cas})"
+                      refute_empty(bID, emsg)
+                      emsg = "BTAP/TBD: #{id} uprated roof btap_m2 (#{cas})"
+                      refute_empty(bM2, emsg)
+                      bUo  = bUo.get
+                      bM2  = bM2.get
+                      bID  = bID.get
+                      emsg = "BTAP/TBD: #{id} roof btap_uo (#{cas})"
+                      assert_in_epsilon(rUo, bUo, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} roof btap_area (#{cas})"
+                      assert_in_epsilon(bM2, m2, 0.01, emsg)
+                      emsg = "BTAP/TBD: #{id} roof btap_id (#{cas})"
+                      assert(st.tbd.data.key?(bID), emsg)
                     end
                   end
                 end
