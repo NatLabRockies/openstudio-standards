@@ -1122,6 +1122,7 @@ module BTAP
       wM2 = prop(wallC,  "btap_area", Float)
       rM2 = prop(roofC,  "btap_area", Float)
       fM2 = prop(floorC, "btap_area", Float)
+
       wM2 = wallC.getNetArea  unless wM2
       rM2 = roofC.getNetArea  unless rM2
       fM2 = floorC.getNetArea unless fM2

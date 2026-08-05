@@ -30,7 +30,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -41,23 +41,23 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
       'SmallOffice',
-      # 'Warehouse'
+      'Warehouse'
     ]
 
     @structure = [
-      # '',
+      '',
       'structure'
     ]
 
@@ -90,7 +90,7 @@ class NECB_TBD_Tests < Minitest::Test
     # more expensive (i.e. $$$ Uo 0.100 > $$ Uo 0.124).
     @interpolate = [
       true,
-      # false
+      false
     ]
 
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
@@ -255,8 +255,8 @@ class NECB_TBD_Tests < Minitest::Test
                 err_msg = "BTAP/TBD: Missing model 'complies' key (#{cas})?"
                 assert(st.tbd.model.key?(:complies), err_msg)
                 cmplies = st.tbd.model[:complies]
-                cmplies = cmplies ? " ... compliant!" : " ... non-compliant!"
-                fdback << cmplies
+                cpl_msg = cmplies ? " ... compliant!" : " ... non-compliant!"
+                fdback << cpl_msg
 
                 err_msg = "BTAP/TBD: Missing TBD 'IO' (#{cas})?"
                 assert(st.tbd.model.key?(:io), err_msg)
@@ -405,10 +405,10 @@ class NECB_TBD_Tests < Minitest::Test
 
                     if option == "uprate"
                       err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
-                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                      refute_in_epsilon(uo, ut, 0.01, err_msg)
                     else
                       err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
-                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                      assert_in_epsilon(uou, ut, 0.01, err_msg)
                     end
                   else
                     err_msg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
@@ -418,10 +418,10 @@ class NECB_TBD_Tests < Minitest::Test
 
                     if option == "uprate"
                       err_msg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
-                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                      refute_in_epsilon(uo, ut, 0.01, err_msg)
                     else
                       err_msg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
-                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                      assert_in_epsilon(uo, ut, 0.01, err_msg)
                     end
                   end
                 end
@@ -457,10 +457,10 @@ class NECB_TBD_Tests < Minitest::Test
 
                     if option == "uprate"
                       err_msg = "BTAP/TBD: #{name} #{stypes} Uo != Ut (#{cas})?"
-                      refute_equal(uo.round(3), ut.round(3), err_msg)
+                      refute_in_epsilon(uo, ut, 0.01, err_msg)
                     else
                       err_msg = "BTAP/TBD: #{name} #{stypes} Uo == Ut (#{cas})?"
-                      assert_equal(uo.round(3), ut.round(3), err_msg)
+                      assert_in_epsilon(uo, ut, 0.01, err_msg)
                     end
                   end
                 end
@@ -477,32 +477,44 @@ class NECB_TBD_Tests < Minitest::Test
                 # Start with BUILDING constructions.
                 unless st.tbd.model[:building][:walls].empty?
                   wA = st.tbd.model[:building][:walls][:area]
-                  walls[:m2] = wA
-                  walls[:fa] = wA / st.tbd.model[:building][:walls][:film]
-                  walls[:ua] = wA * st.tbd.model[:building][:walls][:uo]
+
+                  if wA > 0
+                    walls[:m2] = wA
+                    walls[:fa] = wA / st.tbd.model[:building][:walls][:film]
+                    walls[:ua] = wA * st.tbd.model[:building][:walls][:uo]
+                  end
                 end
 
                 unless st.tbd.model[:building][:roofs].empty?
                   rA = st.tbd.model[:building][:roofs][:area]
-                  roofs[:m2] = rA
-                  roofs[:fa] = rA / st.tbd.model[:building][:roofs][:film]
-                  roofs[:ua] = rA * st.tbd.model[:building][:roofs][:uo]
+
+                  if rA > 0
+                    roofs[:m2] = rA
+                    roofs[:fa] = rA / st.tbd.model[:building][:roofs][:film]
+                    roofs[:ua] = rA * st.tbd.model[:building][:roofs][:uo]
+                  end
                 end
 
                 # Attic constructions.
                 unless attics.empty?
                   unless st.tbd.model[:attic][:walls].empty?
                     wA = st.tbd.model[:attic][:walls][:area]
-                    walls[:m2] += wA
-                    walls[:fa] += wA / st.tbd.model[:attic][:walls][:film]
-                    walls[:ua] += wA * st.tbd.model[:attic][:walls][:uo]
+
+                    if wA > 0
+                      walls[:m2] += wA
+                      walls[:fa] += wA / st.tbd.model[:attic][:walls][:film]
+                      walls[:ua] += wA * st.tbd.model[:attic][:walls][:uo]
+                    end
                   end
 
                   unless st.tbd.model[:attic][:floors].empty?
                     rA =  st.tbd.model[:attic][:floors][:area] # !roofs
-                    roofs[:m2] += rA
-                    roofs[:fa] += rA / st.tbd.model[:attic][:floors][:film]
-                    roofs[:ua] += rA * st.tbd.model[:attic][:floors][:uo]
+
+                    if rA > 0
+                      roofs[:m2] += rA
+                      roofs[:fa] += rA / st.tbd.model[:attic][:floors][:film]
+                      roofs[:ua] += rA * st.tbd.model[:attic][:floors][:uo]
+                    end
                   end
                 end
 
@@ -510,16 +522,22 @@ class NECB_TBD_Tests < Minitest::Test
                 st.tbd.model[:spaces].values.each do |sp|
                   unless sp[:walls].empty?
                     wA = sp[:walls][:area]
-                    walls[:m2] += wA
-                    walls[:fa] += wA / sp[:walls][:film]
-                    walls[:ua] += wA * sp[:walls][:uo]
+
+                    if wA > 0
+                      walls[:m2] += wA
+                      walls[:fa] += wA / sp[:walls][:film]
+                      walls[:ua] += wA * sp[:walls][:uo]
+                    end
                   end
 
                   unless sp[:roofs].empty?
                     rA = sp[:roofs][:area]
-                    roofs[:m2] += rA
-                    roofs[:fa] += rA / sp[:roofs][:film]
-                    roofs[:ua] += rA * sp[:roofs][:uo]
+
+                    if rA > 0
+                      roofs[:m2] += rA
+                      roofs[:fa] += rA / sp[:roofs][:film]
+                      roofs[:ua] += rA * sp[:roofs][:uo]
+                    end
                   end
                 end
 
@@ -540,7 +558,7 @@ class NECB_TBD_Tests < Minitest::Test
                   wA = surface.netArea * surface.space.get.multiplier
                   lc = surface.construction.get.to_LayeredConstruction.get
                   fR = TBD.filmResistances(:wall, surface.tilt)
-                  next if fR.round(4).zero?
+                  next unless fR.round(4) > 0
 
                   wM2 += wA
                   wFA += wA / fR
@@ -556,7 +574,7 @@ class NECB_TBD_Tests < Minitest::Test
                   rA = surface.netArea * surface.space.get.multiplier
                   lc = surface.construction.get.to_LayeredConstruction.get
                   fR = TBD.filmResistances(:roof, surface.tilt)
-                  next if fR.round(4).zero?
+                  next unless fR.round(4) > 0
 
                   rM2 += rA
                   rFA += rA / fR
@@ -573,7 +591,7 @@ class NECB_TBD_Tests < Minitest::Test
                     wA = surface.netArea * surface.space.get.multiplier
                     lc = surface.construction.get.to_LayeredConstruction.get
                     fR = TBD.filmResistances(:partition, surface.tilt)
-                    next if fR.round(4).zero?
+                    next unless fR.round(4) > 0
 
                     wM2 += wA
                     wFA += wA / fR
@@ -590,7 +608,7 @@ class NECB_TBD_Tests < Minitest::Test
                     rA = surface.netArea * surface.space.get.multiplier
                     lc = surface.construction.get.to_LayeredConstruction.get
                     fR = TBD.filmResistances(:ceiling, surface.tilt)
-                    next if fR.round(4).zero?
+                    next unless fR.round(4) > 0
 
                     rM2 += rA
                     rFA += rA / fR
@@ -614,91 +632,155 @@ class NECB_TBD_Tests < Minitest::Test
                 #   - 'SmallOffice'  (roofs[:m2]  501.01) vs (rM2  501.01)
                 #   - 'MediumOffice' (roofs[:m2] 1627.51) vs (rM2 1627.51)
                 #
-                # OSut gross roof area (includes 2% SRR, excludes overhangs)
+                # OSut gross roof area (includes 2% SRR, excludes overhangs):
                 #   - 'SmallOffice'  graX  538.80 - 2% SRR =  528.02 (poor)
                 #   - 'MediumOffice' grax 1660.73 - 2% SRR = 1627.51 (good)
-                err_msg = "BTAP/TBD: roof area tallies (#{cas})?"
+                err_msg = "BTAP/TBD: roof area tallies (#{cas})"
                 assert_equal(roofs[:m2].round(1), rM2.round(1))
 
-                if option == "uprate" && cmplies
+                # The walls[:fA] tally represents the inverse of area-weighted
+                # surface air film resistances: fA = sum(A / film RSi), when
+                # strictly processing stored aggregate values for:
+                #   - 1. BUILDING,
+                #   - 2. ATTIC and
+                #   - 3. CUSTOMIZED spaces
+                #
+                # The calculated wFA represents the inverse of area-weighted
+                # surface air film resistances: fA = sum(A / film RSi), when
+                # processing individual deratable surfaces (one by one).
+                #
+                # There are observable gaps/errors between aggregate values:
+                #   - 'SmallOffice' : (wFA 1379.362) vs (walls[:fa] 1379.876)
+                #   - 'MediumOffice': (wFA 8814.859) vs (walls[:fa] 8818.470)
+                #
+                # Yet this has a negligible impact of the final inverse:
+                #   - 'SmallOffice':
+                #        - 1 / (wFA        / wM2) = film RSi 0.158 m2.K/W
+                #        - 1 / (walls[:fa] / wM2) = film RSi 0.158 m2.K/W
+                #   - 'MediumOffice':
+                #        - 1 / (wFA        / wM2) = film RSi 0.150 m2.K/W
+                #        - 1 / (walls[:fa] / wM2) = film RSi 0.150 m2.K/W
+                #
+                # Reminder: The 'MediumOffice' has plenums. All deratble
+                #           surfaces are outdoor-facing. So all walls inherit
+                #           a surface air film resistance of 0.150 m2.K/W.
+                #
+                #           The 'SmallOffice' has either a plenum (under the
+                #           current BTAP approach), or an attic (with the new
+                #           BTAP structure-based option). This affects whether
+                #           skylight well walls are insulated or not, and
+                #           consequently applicable air film resistances (the
+                #           above results reflect the latter BTAP option).
+                wfRSi = 1 / (wFA        / wM2)
+                wFrsi = 1 / (walls[:fa] / wM2)
+                err_msg = "BTAP/TBD: wall film RSi (#{cas})"
+                assert_in_epsilon(wfRSi, wFrsi, 0.01, err_msg)
+
+                rfRSi = 1 / (rFA        / rM2)
+                rFrsi = 1 / (roofs[:fa] / rM2)
+                err_msg = "BTAP/TBD: roof film RSi (#{cas})"
+                assert_in_epsilon(rfRSi, rFrsi, 0.01, err_msg)
+
+                # The walls[:ua] tally should match required (uprated, costed)
+                # wall Uo factors. The wUA tally should match NECB required Ut.
+                # This implies that post-simulation operations (e.g. costing)
+                # can safely access aggregate tallies as take-offs (i.e. without
+                # post-processing individual surfaces and constructions).
+                if option == "uprate" && cmplies && inter == true
                   wUo  = walls[:ua] / wM2
-                  bwUo = st.tbd.model[:building][:walls][:uo]
+                  wUt  = wUA        / wM2
                   rUo  = roofs[:ua] / rM2
-                  brUo = st.tbd.model[:building][:roofs][:uo]
+                  rUt  = rUA        / rM2
 
-                  err_msg = "BTAP/TBD: BLDG uprated wall Uo (#{cas})?"
-                  assert_equal(wUo.round(3), bwUo.round(3), err_msg)
-                  err_msg = "BTAP/TBD: BLDG uprated roof Uo (#{cas})?"
-                  assert_equal(rUo.round(3), brUo.round(3), err_msg)
-                end
+                  unless st.tbd.model[:building][:walls].empty?
+                    film = st.tbd.model[:building][:walls][:film]
+                    lc   = st.tbd.model[:building][:walls][:lc  ]
+                    bwUo = st.tbd.model[:building][:walls][:uo  ]
+                    bwUt = st.tbd.model[:building][:walls][:ut  ]
+                    uo   = 1/TBD.rsi(lc, film)
+                    err_msg = "BTAP/TBD: BLDG uprated wall Uo (#{cas})"
+                    assert_in_epsilon(wUo, bwUo, 0.01, err_msg)
+                    err_msg = "BTAP/TBD: BLDG uprated wall Uo 2 (#{cas})"
+                    assert_in_epsilon(wUo, uo, 0.01, err_msg)
+                    err_msg = "BTAP/TBD: BLDG wall Ut (#{cas})"
+                    assert_in_delta(wUt, bwUt, 0.02, err_msg)
+                  end
 
-                # puts
-                # puts wM2                                    #  217.585
-                # puts wFA                                    # 1379.362
-                # puts wUA                                    #   47.901
-                # puts walls[:fa]                             # 1379.876
-                # puts walls[:ua]                             #   19.876
-                # puts st.tbd.model[:building][:walls][:film] #    0.150
-                # puts st.tbd.model[:building][:walls][:uo]   #    0.091
-                # puts st.tbd.model[:argh][:walls][:ut]       #    0.215
+                  unless st.tbd.model[:building][:roofs].empty?
+                    film = st.tbd.model[:building][:roofs][:film]
+                    lc   = st.tbd.model[:building][:roofs][:lc  ]
+                    brUo = st.tbd.model[:building][:roofs][:uo  ]
+                    brUt = st.tbd.model[:building][:roofs][:ut  ]
+                    uo   = 1/TBD.rsi(lc, film)
+                    err_msg = "BTAP/TBD: BLDG uprated roof Uo (#{cas})"
+                    assert_in_epsilon(rUo, brUo, 0.01, err_msg)
+                    err_msg = "BTAP/TBD: BLDG uprated roof Uo 2 (#{cas})"
+                    assert_in_epsilon(rUo, uo, 0.01, err_msg)
+                    err_msg = "BTAP/TBD: BLDG roof Ut (#{cas})"
+                    assert_in_delta(rUt, brUt, 0.02, err_msg)
+                  end
 
-                # puts rM2                                    #  501.009
-                # puts rFA                                    # 1885.162
-                # puts rUA                                    #   59.613
-                # puts roofs[:fa]                             # 1885.166
-                # puts roofs[:ua]                             #   52.337
-                # puts st.tbd.model[:building][:roofs][:film] #    0.137
-                # puts st.tbd.model[:building][:roofs][:uo]   #    0.105
-                # puts st.tbd.model[:argh][:roofs][:ut]       #    0.121
-                # puts
+                  unless attics.empty?
+                    unless st.tbd.model[:attic][:walls].empty?
+                      film = st.tbd.model[:attic][:walls][:film]
+                      lc   = st.tbd.model[:attic][:walls][:lc  ]
+                      awUo = st.tbd.model[:attic][:walls][:uo  ]
+                      awUt = st.tbd.model[:attic][:walls][:ut  ]
+                      uo   = 1/TBD.rsi(lc, film)
+                      err_msg = "BTAP/TBD: ATTIC uprated wall Uo (#{cas})"
+                      assert_in_epsilon(wUo, awUo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: ATTIC uprated wall Uo 2 (#{cas})"
+                      assert_in_epsilon(wUo, uo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: ATTIC wall Ut (#{cas})"
+                      assert_in_delta(wUt, awUt, 0.02, err_msg)
+                    end
 
-                model.getSurfaces.each do |surface|
-                  id = surface.nameString
-                  err_msg = "BTAP/TBD: Mismatched #{id} surfaces (#{cas})?"
-                  assert(surfaces.key?(id), err_msg)
-                  next unless surfaces[id].key?(:deratable)
-                  next unless surfaces[id].key?(:type)
-                  next unless surfaces[id].key?(:heatloss)
-                  next unless surfaces[id][:deratable]
-                  next unless surfaces[id][:heatloss ].abs > TBD::TOL
+                    unless st.tbd.model[:attic][:floors].empty?
+                      film = st.tbd.model[:attic][:floors][:film]
+                      lc   = st.tbd.model[:attic][:floors][:lc  ]
+                      arUo = st.tbd.model[:attic][:floors][:uo  ]
+                      arUt = st.tbd.model[:attic][:floors][:ut  ]
+                      uo   = 1/TBD.rsi(lc, film)
+                      err_msg = "BTAP/TBD: ATTIC uprated floor Uo (#{cas})"
+                      assert_in_epsilon(rUo, arUo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: ATTIC uprated floor Uo 2 (#{cas})"
+                      assert_in_epsilon(rUo, uo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: ATTIC floor Ut (#{cas})"
+                      assert_in_delta(rUt, arUt, 0.02, err_msg)
+                    end
+                  end
 
-                  lc = surface.construction
-                  err_msg = "BTAP/TBD: Nilled #{id} construction (#{cas})?"
-                  refute_empty(lc, err_msg)
-                  lc.get.to_LayeredConstruction
-                  err_msg = "BTAP/TBD: Nilled #{id} layered construction (#{cas})?"
-                  refute_empty(lc, err_msg)
-                  lc      = lc.get
-                  nom     = lc.nameString.downcase
-                  err_msg = "Failed TBD processes #{nom} #{id} (#{cas})?"
-                  assert_includes(nom, " c tbd", err_msg)
-                  prop    = lc.additionalProperties
-                  next unless prop.hasFeature("btap_uo")
+                  st.tbd.model[:spaces].each do |id, sp|
+                    unless sp[:walls].empty?
+                      film = sp[:walls][:film]
+                      lc   = sp[:walls][:lc  ]
+                      swUo = sp[:walls][:uo  ]
+                      swUt = sp[:walls][:ut  ]
+                      uo   = 1/TBD.rsi(lc, film)
+                      err_msg = "BTAP/TBD: #{id} uprated wall Uo (#{cas})"
+                      assert_in_epsilon(wUo, swUo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: #{id} uprated wall Uo 2 (#{cas})"
+                      assert_in_epsilon(wUo, uo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: #{id} wall Ut (#{cas})"
+                      assert_in_delta(wUt, swUo, 0.02, err_msg)
+                    end
 
-                  # Any (insulated) layered construction also holds:
-                  err_msg = "BTAP/TBD air film resistances (#{cas})?"
-                  assert(prop.hasFeature("btap_film"))
-                  err_msg = "BTAP/TBD total Ut factor (#{cas})?"
-                  assert(prop.hasFeature("btap_ut"))
-                  err_msg = "BTAP/TBD costed construction identifier (#{cas})?"
-                  assert(prop.hasFeature("btap_id"))
-                  uo      = prop.getFeatureAsDouble("btap_uo")
-                  film    = prop.getFeatureAsDouble("btap_film")
-                  area    = prop.getFeatureAsDouble("btap_area")
-                  err_msg = "BTAP/TBD: #{id} Uo (#{cas})?"
-                  refute_empty(uo, err_msg)
-                  err_msg = "BTAP/TBD: #{id} air film resistances (#{cas})?"
-                  refute_empty(film, err_msg)
-
-                  if option == 'uprate'
-                    # @todo
-                  else
-                    # #todo
+                    unless sp[:roofs].empty?
+                      film = sp[:roofs][:film]
+                      lc   = sp[:roofs][:lc  ]
+                      srUo = sp[:roofs][:uo  ]
+                      srUt = sp[:roofs][:ut  ]
+                      uo   = 1/TBD.rsi(lc, film)
+                      err_msg = "BTAP/TBD: #{id} uprated roof Uo (#{cas})"
+                      assert_in_epsilon(rUo, srUo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: #{id} uprated roof Uo 2 (#{cas})"
+                      assert_in_epsilon(rUo, uo, 0.01, err_msg)
+                      err_msg = "BTAP/TBD: #{id} roof Ut (#{cas})"
+                      assert_in_delta(rUo, srUo, 0.02, err_msg)
+                    end
                   end
                 end
 
-                # Note: BTAP/TBD feedback logs are simple strings. Look up
-                #       st.tbd.tally Hash to extract quantities for costing.
                 # st.tbd.feedback[:logs].each { |log| fdback << log }
               end
             end                # |inter    |
@@ -715,5 +797,4 @@ class NECB_TBD_Tests < Minitest::Test
     #   f.write(JSON.pretty_generate(@test_results_array))
     # end
   end
-
 end
