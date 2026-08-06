@@ -40,11 +40,11 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
-      'MediumOffice',
-      # 'MidriseApartment',
-      # 'NorthernEducation',
-      # 'NorthernHealthCare',
+      'LowriseApartment',
+      # 'MediumOffice',
+      'MidriseApartment',
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       'QuickServiceRestaurant',
@@ -57,7 +57,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @structure = [
-      '',
+      # '',
       'structure'
     ]
 
@@ -90,7 +90,7 @@ class NECB_TBD_Tests < Minitest::Test
     # more expensive (i.e. $$$ Uo 0.100 > $$ Uo 0.124).
     @interpolate = [
       true,
-      false
+      # false
     ]
 
     epw = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw'
@@ -408,7 +408,7 @@ class NECB_TBD_Tests < Minitest::Test
                       refute_in_epsilon(uo, ut, 0.01, emsg)
                     else
                       emsg = "BTAP/TBD: ATTIC #{types} Uo == Ut (#{cas})?"
-                      assert_in_epsilon(uou, ut, 0.01, emsg)
+                      assert_in_epsilon(uo, ut, 0.01, emsg)
                     end
                   else
                     emsg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
@@ -896,7 +896,56 @@ class NECB_TBD_Tests < Minitest::Test
                   end
                 end
 
-                # st.tbd.feedback[:logs].each { |log| fdback << log }
+                # Thermal bridges (edges), specific to each model, are tallied/
+                # stored in both st.tbd.tally[:edges] and as a model's building
+                # AdditionalProperties.
+                edges = st.tbd.tally[:edges]
+                props = model.getBuilding.additionalProperties
+                names = props.featureNames.select { |k| k.start_with?("PSI") }
+
+                # The selected PSI factor set quality (e.g. costing).
+                emsg = "BTAP/TBD: BLDG prop psi_quality (#{cas})"
+                assert(props.hasFeature("psi_quality"), emsg)
+                qlty = props.getFeatureAsString("psi_quality").get
+                emsg = "BTAP/TBD: BLDG good/bad psi quality (#{cas})"
+                assert(["good", "bad"].include?(qlty), emsg)
+                emsg = "BTAP/TBD: BLDG model psi quality (#{cas})"
+                assert_equal(qlty.to_sym, st.tbd.model[:quality])
+
+                # Edges (as AdditionalProperties) are as follows (an example):
+                #
+                #   PSIfenestration1,
+                #   String,
+                #   BTAP-ExteriorWall-SteelFramed-2 bad 848.4,
+                #
+                # An example of edge takeoffs (e.g. costing, embodied carbon):
+                names.each do |name|
+                  k = name.delete_prefix("PSI")
+                  k = k.sub(/\d+$/, '').to_sym
+                  v = props.getFeatureAsString(name).get
+
+                  # Split feature as edge parameters:
+                  #   - id: costed construction identifier
+                  #   - q:  PSI factor set quality ("good" or "bad")
+                  #   - m:  edge length (m)
+                  id, q, m = v.split(" ")
+
+                  # Validate.
+                  q = q.to_sym
+                  m = m.to_f
+                  e = "BTAP/TBD: BLDG edge ID (#{cas})"
+                  assert(st.tbd.data.key?(id), e)
+                  e = "BTAP/TBD: BLDG PSI set quality (#{cas})"
+                  assert(st.tbd.data[id].key?(q), e)
+                  e = "BTAP/TBD: BLDG edge type (#{cas})"
+                  assert(st.tbd.data[id][q].key?(k), e)
+                  e = "BTAP/TBD: BLDG edge PSI (#{cas})"
+                  assert(st.tbd.data[id][q][k].key?(:psi), e)
+                  e = "BTAP/TBD: BLDG edge PSI (numerical) (#{cas})"
+                  assert(st.tbd.data[id][q][k][:psi].is_a?(Numeric), e)
+                end
+
+                st.tbd.feedback[:logs].each { |log| fdback << log }
               end
             end                # |inter    |
           end                  # |option   |

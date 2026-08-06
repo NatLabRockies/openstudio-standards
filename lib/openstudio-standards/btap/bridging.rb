@@ -1836,7 +1836,7 @@ module BTAP
         bCP  = @model[:building][stypes][:compliant]
         bID  = @model[:building][stypes][:id]
         lg   = "  - "
-        lg  += bCP ? " Compliant " : "Non-compliant "
+        lg  += bCP ? "Compliant " : "Non-compliant "
         lg  += "BUILDING: Ut #{bUt} W/m2.K "
         lg  += "(Uo #{bUo} W/m2.K, #{bID})"
         lg  += " - #{@model[:quality]}" if stypes == :walls
@@ -1848,8 +1848,8 @@ module BTAP
           aCP  = @model[:attic][stypes][:compliant]
           aID  = @model[:attic][stypes][:id]
           lg   = "  - "
-          lg  += aCP ? " Compliant " : "Non-compliant "
-          lg  += "ATTIC (floor): Ut #{aUt} W/m2.K "
+          lg  += aCP ? "Compliant " : "Non-compliant "
+          lg  += "ATTIC: Ut #{aUt} W/m2.K "
           lg  += "(Uo #{aUo} W/m2.K, #{aID})"
           lg  += " - #{@model[:quality]}" if stypes == :walls
           lgs << lg
@@ -1862,7 +1862,7 @@ module BTAP
           sID  = sp[stypes][:id]
           sQY  =
           lg   = "  - "
-          lg  += sCP ? " Compliant " : "Non-compliant "
+          lg  += sCP ? "Compliant " : "Non-compliant "
           lg  += "SPACE #{id}: Ut #{sUt} W/m2.K "
           lg  += "(Uo #{sUo} W/m2.K, #{sID})"
           lg  += " - #{@model[:quality]}" if stypes == :walls
