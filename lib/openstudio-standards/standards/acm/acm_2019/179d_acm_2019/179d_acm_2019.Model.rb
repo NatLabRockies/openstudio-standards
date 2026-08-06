@@ -606,12 +606,16 @@ class ACM179dACM2019
   def prepare_prm_standard_for_acm_overrides(prm_standard)
     acm_standard = self
     prm_fan_power_method = prm_standard.method(:air_loop_hvac_apply_prm_baseline_fan_power)
+    prm_get_airloop_design_oa = prm_standard.method(:get_airloop_hvac_design_oa_from_sql)
 
     prm_standard.define_singleton_method(:baseline_thermal_zone_demand_control_ventilation_required?) do |thermal_zone|
       prm_standard.send(:user_model_zone_demand_control_ventilation_required?, thermal_zone)
     end
     prm_standard.define_singleton_method(:baseline_air_loop_hvac_demand_control_ventilation_required?) do |air_loop_hvac|
       prm_standard.send(:user_model_air_loop_hvac_demand_control_ventilation_required?, air_loop_hvac)
+    end
+    prm_standard.define_singleton_method(:get_airloop_hvac_design_oa_from_sql) do |air_loop_hvac|
+      acm_standard.acm_airloop_design_oa_with_sizing_fallback(air_loop_hvac, prm_get_airloop_design_oa)
     end
     prm_standard.define_singleton_method(:space_type_light_sch_change) do |model|
       acm_standard.space_type_light_sch_change(model)
@@ -637,6 +641,27 @@ class ACM179dACM2019
     end
 
     prm_standard
+  end
+
+  # EnergyPlus only fills the Standard 62.1 Summary Vot when Sizing:System OA is
+  # autosized; a hard-set design OA (proposed normalization) leaves it 0 and the
+  # DCV air-loop gate wrongly drops DCV. Fall back to the Sizing:System (or OA
+  # controller) design OA when the 62.1 read is non-positive.
+  def acm_airloop_design_oa_with_sizing_fallback(air_loop_hvac, prm_get_airloop_design_oa)
+    oa_m3_per_s = prm_get_airloop_design_oa.call(air_loop_hvac)
+    return oa_m3_per_s if oa_m3_per_s.is_a?(Numeric) && oa_m3_per_s > 0.0
+
+    sizing_system = air_loop_hvac.sizingSystem
+    return sizing_system.designOutdoorAirFlowRate.get if sizing_system.designOutdoorAirFlowRate.is_initialized
+    return sizing_system.autosizedDesignOutdoorAirFlowRate.get if sizing_system.autosizedDesignOutdoorAirFlowRate.is_initialized
+
+    return 0.0 unless air_loop_hvac.airLoopHVACOutdoorAirSystem.is_initialized
+
+    controller_oa = air_loop_hvac.airLoopHVACOutdoorAirSystem.get.getControllerOutdoorAir
+    return controller_oa.minimumOutdoorAirFlowRate.get if controller_oa.minimumOutdoorAirFlowRate.is_initialized
+    return controller_oa.autosizedMinimumOutdoorAirFlowRate.get if controller_oa.autosizedMinimumOutdoorAirFlowRate.is_initialized
+
+    0.0
   end
 
   # Why: proposed models must keep claimed equipment/LPD choices while matching
