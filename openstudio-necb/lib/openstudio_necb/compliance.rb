@@ -244,7 +244,11 @@ module OpenStudioNECB
       #    iteration loop. The PROPOSED annual already ran in step 1b (D-52);
       #    only the reference's annual is new here.
       if simulate == :annual
-        run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'], audit: audit)
+        # Stamp the reference's first annual — step 4 sits outside the earlier
+        # with_building blocks and its run entry was landing unattributed.
+        audit.with_building('reference building') do
+          run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'], audit: audit)
+        end
         iterate_capacities(proposed, reference, report, vintage: vintage, run_dir: run_dir,
                            run_period: run_period, max_iterations: max_capacity_iterations,
                            step: capacity_step, audit: audit)
