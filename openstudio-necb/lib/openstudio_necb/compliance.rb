@@ -102,7 +102,7 @@ module OpenStudioNECB
       begin
       proposed = nil
       audit.with_building('input model') do
-        proposed = load_model(model)
+        proposed = load_model(model, audit: audit)
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
         # After the on-ramp (it may have added thermostats to bare geometry):
         # the input must be a simulate-able building before any transform.
@@ -314,7 +314,7 @@ module OpenStudioNECB
       end
     end
 
-    def load_model(model)
+    def load_model(model, audit: nil)
       if model.is_a?(String)
         raise(ArgumentError, "input model file not found: #{model}") unless File.exist?(model)
 
@@ -326,6 +326,15 @@ module OpenStudioNECB
         if loaded.empty?
           issues = translator.errors.map(&:logMessage).first(3).join('; ')
           raise(ArgumentError, "input model could not be loaded: #{model}#{issues.empty? ? '' : " — #{issues}"}")
+        end
+        original = translator.originalVersion.str
+        current = loaded.get.version.str
+        if original != current
+          # A version translation IS a model change — the ledger records it.
+          # The working copy is upgraded; the file on disk is never rewritten.
+          audit&.info(:compliance, "input file version-translated from OpenStudio #{original} to #{current} " \
+                                   '(in-memory working copy only — the original file is not modified)',
+                      inputs: { from: original, to: current, file: File.basename(model) })
         end
         return loaded.get
       end
@@ -403,7 +412,7 @@ module OpenStudioNECB
       begin
       proposed = nil
       audit.with_building('input model') do
-        proposed = load_model(model)
+        proposed = load_model(model, audit: audit)
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
         validate_input_model!(proposed, audit, building: nil, require_storeys: false)
       end
