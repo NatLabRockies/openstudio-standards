@@ -163,7 +163,7 @@ module OpenStudioNECB
             proposed, ['Heating Coil Heating Energy', 'Baseboard Total Heating Energy']
           )
         end
-        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
+        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'], audit: audit)
         proposed_annual_data = heating_election_data(proposed, inventory, audit) if hp_present
       end
 
@@ -244,7 +244,7 @@ module OpenStudioNECB
       #    iteration loop. The PROPOSED annual already ran in step 1b (D-52);
       #    only the reference's annual is new here.
       if simulate == :annual
-        run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'])
+        run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'], audit: audit)
         iterate_capacities(proposed, reference, report, vintage: vintage, run_dir: run_dir,
                            run_period: run_period, max_iterations: max_capacity_iterations,
                            step: capacity_step, audit: audit)
@@ -358,7 +358,7 @@ module OpenStudioNECB
 
       compliant = nil
       if simulate == :annual
-        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'])
+        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'], audit: audit)
         proposed_kwh = report['proposed']['total_site_kwh']
         compliant = proposed_kwh <= target['bet_kwh']
         audit.decision(:compliance,
@@ -419,20 +419,39 @@ module OpenStudioNECB
       shw_fuel = options[:shw_fuel]
       OpenStudioSHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
       hvac = options[:hvac_system]
-      OpenStudioHVAC.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString)) if hvac
+      if hvac
+        result = OpenStudioHVAC.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString))
+        # build_system takes no audit — record the built topology here so the
+        # on-ramp HVAC generation is visible in the narrative, not just an
+        # input on the summary line.
+        audit.info(:hvac, "proposed HVAC built from the catalog: '#{hvac}'",
+                   inputs: { air_loops: result.respond_to?(:air_loops) ? Array(result.air_loops).size : nil,
+                             plant_loops: proposed.getPlantLoops.size,
+                             zones: proposed.getThermalZones.size }.compact)
+      end
       audit.decision(:compliance, 'NECB space-use gems applied to the proposed (bare-geometry on-ramp)',
                      inputs: { spaces_mapped: map.size, lights_type: options[:lights_type] || 'NECB_Default',
                                shw_fuel: shw_fuel || 'none', hvac_system: hvac || 'model as given' },
                      article: '8.4.3.2.')
     end
 
-    def run_annual(model, dir, run_period, section)
+    def run_annual(model, dir, run_period, section, audit: nil)
       run_dir = Runner.run_energyplus!(model, dir, sizing_only: false, run_period: run_period)
       section['clean_run'] = Runner.clean_run?(run_dir)
       section.merge!(Runner.energy_results(model))
       section['unmet_occupied_hours'] = Runner.unmet_occupied_hours(model)
       section['zone_unmet_occupied_hours'] = Runner.zone_unmet_occupied_hours(model)
       section['run_dir'] = run_dir
+      # The audit narrative must show every simulation, not just the reference
+      # transforms — before this, the proposed annual left NO trace and a
+      # report reader could not see it ran, over what period, or how it ended.
+      period = run_period ? "#{run_period[:begin_month]}/#{run_period[:begin_day]}-#{run_period[:end_month]}/#{run_period[:end_day]} (SHORTENED)" : 'full year'
+      unmet = section['unmet_occupied_hours'] || {}
+      audit&.info(:compliance, "annual EnergyPlus run complete#{section['clean_run'] ? '' : ' — NOT CLEAN (see eplusout.err)'}",
+                  target: File.basename(dir),
+                  inputs: { run_period: period, clean_run: section['clean_run'],
+                            total_site_kwh: section['total_site_kwh']&.round(0),
+                            unmet_heating_h: unmet['heating'], unmet_cooling_h: unmet['cooling'] })
     end
 
     # D-52: join the SDK heating-equipment inventory (names + fuels, from
@@ -650,7 +669,7 @@ module OpenStudioNECB
               Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
               OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit, proposed: proposed)
             end
-            run_annual(model, dir, run_period, report[label])
+            run_annual(model, dir, run_period, report[label], audit: audit)
           end
         end
 
@@ -912,7 +931,7 @@ module OpenStudioNECB
                                 vintage: vintage, audit: audit)
         end
         eui_results = {}
-        run_annual(normalized, File.join(run_dir, 'proposed_eui_annual'), run_period, eui_results)
+        run_annual(normalized, File.join(run_dir, 'proposed_eui_annual'), run_period, eui_results, audit: audit)
         proposed_kwh = eui_results['total_site_kwh']
         report['proposed_eui_normalized'] = eui_results
         source = 'separate annual run of the Table-8.4.4.2-normalized proposed'
@@ -947,6 +966,7 @@ module OpenStudioNECB
     def validate_space_types!(proposed, vintage, audit)
       data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
       problems = {}
+      checked = 0
       proposed.getSpaces.sort_by(&:nameString).each do |space|
         next unless space.partofTotalFloorArea
 
@@ -954,6 +974,7 @@ module OpenStudioNECB
         name = space_type ? space_type.nameString : '(no space type)'
         next if name.downcase.include?('plenum')
 
+        checked += 1
         bt = space_type&.standardsBuildingType&.then { |o| o.is_initialized ? o.get : nil }
         st = space_type&.standardsSpaceType&.then { |o| o.is_initialized ? o.get : nil }
         st = nil if st&.downcase&.include?('plenum')
@@ -963,7 +984,14 @@ module OpenStudioNECB
 
         (problems[[name, bt, st]] ||= []) << space.nameString
       end
-      return if problems.empty?
+      if problems.empty?
+        # A silent pass left the 'input model' phase invisible in the audit —
+        # the narrative must show the gate ran and what it covered.
+        audit.info(:compliance, 'space-type pre-flight passed — every floor-area space type resolves against ' \
+                                'the NECB catalog',
+                   inputs: { floor_area_spaces_checked: checked, vintage: vintage })
+        return
+      end
 
       catalog = OpenStudioLoads::NECB.table(data_vintage, 'space_types')
       lines = problems.map do |(name, bt, st), spaces|
