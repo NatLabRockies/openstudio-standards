@@ -136,10 +136,30 @@ module OpenStudioHVAC
                      action: :build, articles: articles.compact)
     end
 
-    def self.condition_met?(rule, group, building, _audit)
+    def self.condition_met?(rule, group, building, audit)
       case rule['condition']
-      when 'kitchen_hood' then (building[:kitchen_hood_zones] || []).intersect?(group[:zones])
-      when 'refrigerated' then (building[:refrigerated_zones] || []).intersect?(group[:zones])
+      when 'kitchen_hood'
+        # A hood is a condition the MODEL cannot express — only the
+        # building[:kitchen_hood_zones] override can assert it. Electing the
+        # unhooded row without the override ever being provided is an
+        # ASSUMPTION the audit must state, not a silent default: the hooded
+        # row selects System 4 instead of 3 (Table -A Supermarket/Food row).
+        unless building.key?(:kitchen_hood_zones)
+          audit&.warn(:selection, 'no kitchen_hood_zones override provided — food-preparation spaces in this ' \
+                                  'block are ASSUMED to have no kitchen hood or vented appliance (the hooded ' \
+                                  'row would select System 4); pass building: {kitchen_hood_zones: [...]} if ' \
+                                  'any space has one',
+                      target: group[:zones].join(','), article: 'Table 8.4.4.7.-A (Supermarket/Food Service)')
+        end
+        (building[:kitchen_hood_zones] || []).intersect?(group[:zones])
+      when 'refrigerated'
+        unless building.key?(:refrigerated_zones)
+          audit&.warn(:selection, 'no refrigerated_zones override provided — warehouse spaces in this block ' \
+                                  'are ASSUMED non-refrigerated (a refrigerated space would select System 5 ' \
+                                  'instead of 4); pass building: {refrigerated_zones: [...]} if any space is',
+                      target: group[:zones].join(','), article: 'Table 8.4.4.7.-A (Warehouse Area)')
+        end
+        (building[:refrigerated_zones] || []).intersect?(group[:zones])
       else true
       end
     end

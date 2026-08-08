@@ -104,6 +104,9 @@ module OpenStudioNECB
       audit.with_building('input model') do
         proposed = load_model(model)
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+        # After the on-ramp (it may have added thermostats to bare geometry):
+        # the input must be a simulate-able building before any transform.
+        validate_input_model!(proposed, audit, building: building)
         # PRE-FLIGHT: every floor-area space type must resolve against the NECB
         # catalog BEFORE any transform runs. The reference is a clone of the
         # proposed, and the per-space-type transforms (lighting LPD, loads, SHW
@@ -138,7 +141,18 @@ module OpenStudioNECB
                                 'and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 ' \
                                 'energy-recovery determination needs sized flows and is SKIPPED')
       else
-        Runner.run_energyplus!(proposed, File.join(run_dir, 'proposed_sizing'), sizing_only: true)
+        begin
+          Runner.run_energyplus!(proposed, File.join(run_dir, 'proposed_sizing'), sizing_only: true)
+        rescue RuntimeError => e
+          # An E+ failure BEFORE any transform is the INPUT model's fault —
+          # frame it that way (SHOUTED, flushed with the audit) instead of
+          # letting it read as a pipeline failure.
+          audit.warn(:compliance, 'THE PROPOSED (INPUT) MODEL FAILED ITS SIZING SIMULATION — the input file ' \
+                                  'is not simulate-able as given; the EnergyPlus severes below are defects in ' \
+                                  'the input model, not in the compliance pipeline', target: 'proposed')
+          raise(RuntimeError, "the PROPOSED (input) model failed its sizing simulation — the input file is " \
+                              "not simulate-able as given. #{e.message}")
+        end
         audit.info(:compliance, 'proposed sizing run complete', target: 'proposed')
       end
 
@@ -301,10 +315,74 @@ module OpenStudioNECB
     end
 
     def load_model(model)
-      return OpenStudio::Model::Model.load(OpenStudio::Path.new(model)).get if model.is_a?(String)
+      if model.is_a?(String)
+        raise(ArgumentError, "input model file not found: #{model}") unless File.exist?(model)
+
+        # VersionTranslator, not Model.load: an OSM saved by an older
+        # OpenStudio must be translated forward, and a corrupt file must fail
+        # with the file named — not with an empty-optional crash.
+        translator = OpenStudio::OSVersion::VersionTranslator.new
+        loaded = translator.loadModel(OpenStudio::Path.new(model))
+        if loaded.empty?
+          issues = translator.errors.map(&:logMessage).first(3).join('; ')
+          raise(ArgumentError, "input model could not be loaded: #{model}#{issues.empty? ? '' : " — #{issues}"}")
+        end
+        return loaded.get
+      end
 
       # never mutate the caller's model — the pipeline sizes/simulates its own copy
       model.clone(true).to_Model
+    end
+
+    # Input-validity gate: the file must describe a SIMULATE-ABLE building
+    # before any transform runs. Structural absences (no spaces / zones /
+    # surfaces, or no thermostat anywhere) raise — a thermostat-less model is
+    # the dangerous case, because it RUNS: every zone free-floats, equipment
+    # sizes to nothing, and the determination is numerically valid and
+    # physically meaningless. Partial thermostat coverage only warns (storage
+    # and plenum zones legitimately float).
+    def validate_input_model!(proposed, audit, building: nil, require_storeys: true)
+      counts = { spaces: proposed.getSpaces.size, thermal_zones: proposed.getThermalZones.size,
+                 surfaces: proposed.getSurfaces.size }
+      empty = counts.select { |_, v| v.zero? }.keys
+      raise(ArgumentError, "input model is not simulate-able: it has no #{empty.join(', ')}") unless empty.empty?
+
+      # COMPLIANCE inputs the model must carry: the above-ground storey count
+      # drives the Table 8.4.4.7.-A System 3-vs-6 splits, and the downstream
+      # derivation silently CLAMPS an undeterminable count to 1 storey — a
+      # tower would select System 3 everywhere. Determinable means: declared
+      # on the Building object, derivable from BuildingStorys with above-grade
+      # spaces, or supplied via building: {storeys:}.
+      declared = proposed.getBuilding.standardsNumberOfAboveGroundStories
+      derivable = proposed.getBuildingStorys.any? { |st| st.spaces.any? { |s| s.zOrigin.to_f >= -0.01 } }
+      overridden = building&.transform_keys(&:to_sym)&.key?(:storeys)
+      unless !require_storeys || declared.is_initialized || derivable || overridden
+        raise(ArgumentError, 'input model cannot determine its ABOVE-GROUND STOREY COUNT — no ' \
+                             'Building.standardsNumberOfAboveGroundStories, no BuildingStory objects with ' \
+                             'above-grade spaces, and no building: {storeys:} override. Table 8.4.4.7.-A ' \
+                             'reference-system selection depends on it (System 3 vs 6), and the fallback would ' \
+                             'silently treat the building as ONE storey. Declare it in the model or pass the override')
+      end
+      counts[:storeys_source] = if overridden then 'building: override'
+                                elsif declared.is_initialized then 'declared on Building'
+                                elsif derivable then 'derived from BuildingStorys'
+                                else 'not required (EUI path)'
+                                end
+
+      with_stat = proposed.getThermalZones.count { |z| !z.thermostatSetpointDualSetpoint.empty? }
+      if with_stat.zero?
+        raise(ArgumentError, 'input model is not simulate-able as a building: NO thermal zone carries a ' \
+                             'thermostat — every zone would free-float and the 8.4.1.2 determination would be ' \
+                             'meaningless (attach thermostats, or use the necb_loads on-ramp)')
+      end
+      if with_stat < counts[:thermal_zones]
+        audit.warn(:compliance, "#{counts[:thermal_zones] - with_stat} of #{counts[:thermal_zones]} thermal " \
+                                'zones carry NO thermostat and will free-float — legitimate for storage/plenum ' \
+                                'zones; verify none of them is meant to be conditioned')
+      end
+      audit.info(:compliance, 'input model loaded and structurally simulate-able',
+                 inputs: counts.merge(zones_with_thermostats: with_stat,
+                                      openstudio_version: proposed.version.str))
     end
 
     # The NECB 2025 8.4.4 archetype-EUI path: the building energy target comes
@@ -327,6 +405,7 @@ module OpenStudioNECB
       audit.with_building('input model') do
         proposed = load_model(model)
         apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+        validate_input_model!(proposed, audit, building: nil, require_storeys: false)
       end
       audit.decision(:compliance, 'ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) — no reference building',
                      inputs: { vintage: vintage, archetypes: archetypes.keys },

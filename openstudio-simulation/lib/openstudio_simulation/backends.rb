@@ -38,10 +38,17 @@ module OpenStudioSimulation
 
       ok = system("openstudio run -w #{dir}/in.osw > #{dir}/cli.log 2>&1")
       err_path = "#{dir}/run/eplusout.err"
-      err = File.exist?(err_path) ? File.read(err_path) : '(no eplusout.err)'
-      raise("EnergyPlus run failed in #{dir}:\n#{err[/^.*Fatal.*$/] || err[-800..] || err}") if !ok || !File.exist?(err_path)
+      raise("EnergyPlus run failed in #{dir} and wrote no eplusout.err — see #{dir}/cli.log") unless File.exist?(err_path)
+      return nil if ok
 
-      nil
+      # The Fatal line is usually the useless 'final processing' one — the
+      # SEVERE lines above it carry the cause. Surface both, plus the path.
+      err = File.read(err_path)
+      severes = err.scan(/^\s*\*\* Severe {2}\*\*.*(?:\n\s*\*\* {3}~~~ {3}\*\*.*)*/)
+      fatal = err[/^.*Fatal.*$/]
+      detail = (severes.first(5) + [fatal]).compact.join("\n").strip
+      detail = err[-800..] || err if detail.empty?
+      raise("EnergyPlus run failed in #{dir}:\n#{detail}\n(full log: #{err_path})")
     end
   end
 

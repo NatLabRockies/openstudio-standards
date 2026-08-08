@@ -235,6 +235,49 @@ class TestCompliance < Minitest::Test
     FileUtils.remove_entry(dir) if dir && File.exist?(dir)
   end
 
+  # Input-validity gates: the file must describe a simulate-able building
+  # carrying the compliance inputs before any transform runs. All
+  # simulate: :none-speed (no EnergyPlus).
+  def test_input_model_validation_gates
+    dir = Dir.mktmpdir('osnecb-input-')
+    # missing file, named
+    e = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance('/nope/missing.osm', vintage: '2020',
+                                            simulate: :none, hdd: 3890, run_dir: dir)
+    end
+    assert_includes e.message, '/nope/missing.osm'
+
+    # structurally empty model
+    e = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(OpenStudio::Model::Model.new, vintage: '2020',
+                                            simulate: :none, hdd: 3890, run_dir: dir)
+    end
+    assert_includes e.message, 'not simulate-able'
+
+    # no thermostat anywhere -> a run would free-float into a meaningless determination
+    bare = load_fixture
+    bare.getThermalZones.each(&:resetThermostatSetpointDualSetpoint)
+    e = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(bare, vintage: '2020', simulate: :none, hdd: 3890, run_dir: dir)
+    end
+    assert_includes e.message, 'NO thermal zone carries a thermostat'
+
+    # storeys undeterminable -> raise naming all three remedies; override rescues
+    no_storeys = load_fixture
+    no_storeys.getBuildingStorys.each(&:remove)
+    no_storeys.getBuilding.resetStandardsNumberOfAboveGroundStories
+    e = assert_raises(ArgumentError) do
+      OpenStudioNECB.performance_compliance(no_storeys, vintage: '2020', simulate: :none, hdd: 3890, run_dir: dir)
+    end
+    assert_includes e.message, 'ABOVE-GROUND STOREY COUNT'
+    result = OpenStudioNECB.performance_compliance(no_storeys, vintage: '2020', simulate: :none, hdd: 3890,
+                                                   building: { storeys: 1 }, run_dir: dir)
+    info = result.audit.entries.find { |e2| e2[:action].include?('structurally simulate-able') }
+    assert_equal 'building: override', info[:inputs][:storeys_source]
+  ensure
+    FileUtils.remove_entry(dir) if dir && File.exist?(dir)
+  end
+
   # 8.4.1.2.(5) unit mechanics (no EnergyPlus): the secant step extrapolates the
   # next sizing factor from a zone's own (factor, unmet-hours) history, clamped
   # to stay incremental; without a usable slope it falls back to the geometric
