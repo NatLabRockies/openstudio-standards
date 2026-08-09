@@ -39,7 +39,7 @@ and SHW efficiencies ARE regenerated to code on the reference.
 
 - Modes `simulate: :annual | :sizing | :none` (only `:annual` determines).
 - `path: :eui` (2025 only) — the 8.4.4 archetype-EUI path via
-  `archetypes.rb`: `archetypes: {'Office' => :all | [space names]}` (a SPACE
+  `eui_archetypes.rb`: `archetypes: {'Office' => :all | [space names]}` (a SPACE
   mapping — `archetype_areas` is gone); areas COMPUTED from the model per
   8.4.4.1.(3), unmapped area pro-rata per (4); <90% coverage or HDD ≥ 9000
   HARD-REFUSE. The proposed is CHECKED against Table 8.4.4.2 (values +
@@ -102,9 +102,11 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   `run_energyplus!`, `energy_results` (End Uses via TabularData GJ rows —
   SqlFile has NO fuel-agnostic end-use methods), unmet hours, `clean_run?`.
   District accessors renamed across SDK versions — `respond_to?` probe.
-- `archetypes.rb` — the 8.4.4 machinery: mapping/areas/applicability +
+- `eui_archetypes.rb` — the 8.4.4 machinery: mapping/areas/applicability +
   Table 8.4.4.2 conformance check + normalization (built THROUGH
-  openstudio-loads' record machinery with synthetic archetype records).
+  openstudio-loads' record machinery with synthetic archetype records). Named
+  for the 8.4.4 *building* archetypes — NOT the 17-building legacy validation
+  fleet (see the glossary in `docs/README.md`).
 - `data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
   `article_coverage` manifests (8.4.1.2 determination, 8.4.2.x methods,
   8.4.4.x EUI). Emitted at runtime by `Compliance.emit_article_coverage` at
