@@ -61,8 +61,8 @@ are discoverability problems, and most were cheap to fix.
 | 🟡 | `necb_decisions.md` (3,444 lines) is chronological with IDs out of numeric order (…D-52, D-60, D-59, D-58, D-53…) and has no TOC | headings | ✅ generated TOC |
 | 🟡 | `report/` split (svg→charts→html→checklist→model_query→sections→report) is good layered design, invisible — seven bare requires | `report.rb:1-7` | ✅ stack map comment |
 | 🟡 | `sections.rb` hand-numbered `# -- N` markers drifted vs `ORDER`; helpers interleaved | `sections.rb:28-532` | ✅ |
-| 🟡 | `archetypes.rb` bang methods: `resolve!`/`applicability!` don't mutate; `normalize!` does | `archetypes.rb:59,125,225` | 🔶 rename |
-| 🟡 | `H` single-letter module used ~150× in the renderer | `report/html.rb:5` | 🔶 rename to `Html` |
+| 🟡 | `archetypes.rb` bang methods: `resolve!`/`applicability!` don't mutate; `normalize!` does | `archetypes.rb:59,125,225` | ✅ renamed `resolve`/`verify_applicability!` (aliased); file → `eui_archetypes.rb` disambiguating the two senses of "archetype" |
+| 🟡 | `H` single-letter module used ~150× in the renderer | `report/html.rb:5` | ✅ renamed `Html` (`H` aliased) |
 | 🟡 | `eui_compliance` duplicates ~40 lines of load/validate/weather/report scaffolding | `compliance.rb:405-499` | ⏳ shared scaffold in decomposition |
 
 **Also good:** the Modes table and the 8.4.1.2 sentence-by-sentence intro in
@@ -81,12 +81,12 @@ runtime data JSONs all carry provenance blocks (exemplary).
 | 🟠 | `ruling: 'D-nn'` — 196 occurrences, 36 distinct IDs, **defined nowhere in this gem**; three more undefined citation namespaces (`T7`, `L-23`, `A1`) layered on top | throughout | ✅ citation-conventions section |
 | 🟠 | Zero `private` in the four big modules: `NECB` publishes 51 methods (~5 intended), `Efficiency` 56, `Classify` 31, `CatalogReport` 87 | grep | ✅ private_class_method |
 | 🟠 | `necb/reference.rb`: section banners stop at line 940; the last 672 lines cover six unrelated topics unmarked | `reference.rb:1146-1611` | ✅ banners |
-| 🟠 | `systems/small_systems.rb` holds six unrelated system families (Furnace, EvapCooler, Wshp, Vrf, ZoneErvs, Doas) — named for a code-size property, not a domain one; `UnitHeaters` hides in `zone_terminal.rb` | `small_systems.rb` | 🔶 split per family |
+| 🟠 | `systems/small_systems.rb` holds six unrelated system families (Furnace, EvapCooler, Wshp, Vrf, ZoneErvs, Doas) — named for a code-size property, not a domain one; `UnitHeaters` hides in `zone_terminal.rb` | `small_systems.rb` | 🔶 split scheduled (follow-up pass, in flight) |
 | 🟠 | Oversizing-cap sentinels 1.3/1.1/1.0 hardcoded in Ruby duplicate `data/sizing.json` — the 8.4.4.8 cap silently stops working if the JSON changes | `reference.rb:1437-1444` | ✅ named constants citing the JSON |
 | 🟠 | 20-line block of uncited VRF constants (`COP 4.0`, `26.2 °C`, `-0.00019231`); similar bare numbers in `small_systems.rb`, `hp_plant_fancoils.rb`, `zone_terminal.rb`; `vav_reheat.rb:151`'s only justification is the undefined token "T11" | `components/ecm_air.rb:223-242` etc. | ✅ source note per line |
 | 🟠 | `systems.json` config vocabulary: three ways to say heating, two for cooling, three for ventilation, case-inconsistent values, and `heating_coil_type: 'DX'` semantically meaning "this is an ASHP" | 30 distinct keys, no schema doc | ✅ schema README; 🔶 key renames |
 | 🟠 | YARD coverage ~15%; near-zero in exactly the two files that implement the code (`reference.rb` 2/51, `efficiency.rb` 9/56); the flagship `to_html` docstring is attached to a constant, not the method | measured per file | ✅ tag public surface + fix orphan |
-| 🟡 | Sprint-named test files: `test_thin_tail.rb` (contains the VRF/ERV/GSHP tests), `test_cbecs_backlog.rb` | `test/` | 🔶 rename |
+| 🟡 | ~~Sprint-named test files: `test_thin_tail.rb` (contains the VRF/ERV/GSHP tests), `test_cbecs_backlog.rb`~~ — renamed to `test_vrf_erv_gshp_composites.rb` / `test_cbecs_families.rb` | `test/` | ✅ renamed |
 | 🟡 | `family_guess` holds either a real mapping (String) or an actual guess (Symbol) — "the name lies half the time"; `loop_` trailing-underscore workaround ×47; `row` = string label in one method, table hash in another | `classify.rb`, `efficiency.rb:451` | 🔶 |
 | 🟡 | 2.6 MB generated `SYSTEM_CATALOG.html` (+ .csv/.txt) committed at gem root, unexplained; gemspec ships a nonexistent `LICENSE*` | gem root | 🔶 |
 
@@ -104,8 +104,8 @@ provenance docs; domain naming (`pressure_rise_pa`, `w_per_kw`,
 | 🔴 | README documents the legacy-2011 path as the default; the code default is `placement: :necb2020` (new union-polygon geometry, none of the preserved defects) | `README.md:83-100` vs `daylighting.rb:260` | ✅ |
 | 🟠 | README contradicts itself ×3 on whether reference daylighting shipped ("loud gap" / "documented future" / a full section documenting it as shipped) | `README.md:45,77,102` | ✅ |
 | 🟠 | Stale hardware description: "stepped ×2", "zone primary at 1.0"; code: 3 steps, computed daylighted-area fraction (physically significant) | `daylighting.rb:43,301` | ✅ |
-| 🟡 | Two overlapping knobs (`option:` and `placement:`) where one enum would do; `option: 'all'` silently ignores `placement:` | `daylighting.rb:260-275` | 🔶 collapse |
-| 🟡 | `daylighting.rb` still contains the legacy area math that `daylighted_areas.rb` replaces — "how is daylighted area computed?" has two answers in two files (correctly labelled, but…) | `daylighting.rb:45-190` | 🔶 move to `daylighted_areas_legacy_2011.rb` |
+| 🟡 | Two overlapping knobs (`option:` and `placement:`) where one enum would do; `option: 'all'` silently ignores `placement:` | `daylighting.rb:260-275` | ✅ collapsed to `placement:` (`option:` deprecated alias, audit-warned) |
+| 🟡 | `daylighting.rb` still contains the legacy area math that `daylighted_areas.rb` replaces — "how is daylighted area computed?" has two answers in two files (correctly labelled, but…) | `daylighting.rb:45-190` | ✅ quarantined into `daylighted_areas_legacy_2011.rb` (constant paths unchanged) |
 | 🟡 | `data/costing/` has no provenance README (siblings have one) | — | ✅ |
 
 **Also good — hold this up as the family standard:** the three daylighting
@@ -221,9 +221,10 @@ reminder that headers drift exactly like READMEs.
 Two engineering values were flagged UNVERIFIED during the magic-number
 citation pass (they differ from legacy and no source was traced):
 `small_systems.rb` evap-cooler design effectiveness **0.85** (legacy uses
-0.90) and the evap-cooler SPM temperatures **30.0/15.5 °C** (legacy follows
-outdoor wet-bulb + 3 °R approach). Both are now labelled in-code as
-unverified. Worth a look — they affect only the CBECS evap-cooler family.
+0.90) and the evap-cooler SPM values (zero approach offset, 15.5/30.0 °C
+clamps vs legacy's +3 °R approach clamped 70/78 °F). RESOLVED in the
+follow-up pass: both aligned to legacy bit-identically (D-66); E+ gate
+green. CBECS-only family, no fleet exposure.
 
 The full-suite gate then caught two more:
 
@@ -232,11 +233,13 @@ The full-suite gate then caught two more:
   D-62 closed those clauses and moved the twin pin in
   `test_necb_energy_recovery.rb`, but not this one. The test now pins the
   implemented status.
-- **A pre-existing data/test drift, NOT fixed here** (out of scope, flagged):
-  `test_legacy_archetype_e2e.rb` and openstudio-loads `test_e2e_run.rb` both
-  fail on a wall U-value expectation (0.265 expected vs 0.2759 in data) —
-  proven independent of every change in this pass (identical failure with all
-  of it neutralized). Needs its own attribution pass.
+- **A pre-existing data/test drift** — root-caused and FIXED in the
+  follow-up pass: the D-23 `include_films` default flip (2026-07-25) left
+  `test_legacy_archetype_e2e.rb` and openstudio-loads `test_e2e_run.rb`
+  comparing construction-only conductance against the 0.265 OVERALL table
+  value (0.2759 = 1/(1/0.265 − film R); printed Table 3.2.2.2 zone-5 wall =
+  0.265 overall — the code was right). Both tests migrated to the D-23
+  convention; D-23 amendment logged.
 
 ## The public/private line (drawn in this pass)
 

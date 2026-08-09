@@ -18,26 +18,26 @@ class TestArchetypes < Minitest::Test
 
   def test_resolve_all_and_explicit_lists
     model = load_fixture
-    resolved = A.resolve!(model, { 'Office' => :all }, audit: quiet)
+    resolved = A.resolve(model, { 'Office' => :all }, audit: quiet)
     assert_equal 5, resolved[:archetypes]['Office'][:spaces].size
     assert_in_delta model.getBuilding.floorArea, resolved[:archetypes]['Office'][:area_m2], 0.01,
                     'areas come from the model, not the caller'
     assert_equal 0.0, resolved[:unmapped][:area_m2]
 
     core = model.getSpaces.map(&:nameString).find { |n| n.include?('Core') }
-    resolved = A.resolve!(model, { 'School (K-12)' => [core], 'Office' => :all }, audit: quiet)
+    resolved = A.resolve(model, { 'School (K-12)' => [core], 'Office' => :all }, audit: quiet)
     assert_equal 1, resolved[:archetypes]['School (K-12)'][:spaces].size
     assert_equal 4, resolved[:archetypes]['Office'][:spaces].size, ':all takes the unclaimed remainder'
   end
 
   def test_resolve_rejects_bad_input
     model = load_fixture
-    assert_raises(ArgumentError) { A.resolve!(model, { 'Casino' => :all }, audit: quiet) }
-    assert_raises(ArgumentError) { A.resolve!(model, { 'Office' => ['No Such Space'] }, audit: quiet) }
-    assert_raises(ArgumentError) { A.resolve!(model, { 'Office' => :all, 'School (K-12)' => :all }, audit: quiet) }
+    assert_raises(ArgumentError) { A.resolve(model, { 'Casino' => :all }, audit: quiet) }
+    assert_raises(ArgumentError) { A.resolve(model, { 'Office' => ['No Such Space'] }, audit: quiet) }
+    assert_raises(ArgumentError) { A.resolve(model, { 'Office' => :all, 'School (K-12)' => :all }, audit: quiet) }
     core = model.getSpaces.map(&:nameString).find { |n| n.include?('Core') }
     error = assert_raises(ArgumentError) do
-      A.resolve!(model, { 'Office' => [core], 'School (K-12)' => [core] }, audit: quiet)
+      A.resolve(model, { 'Office' => [core], 'School (K-12)' => [core] }, audit: quiet)
     end
     assert_includes error.message, 'mapped to both'
   end
@@ -47,7 +47,7 @@ class TestArchetypes < Minitest::Test
   def test_bet_areas_pro_rata_sums_to_model_total
     model = load_fixture
     names = model.getSpaces.sort_by { |s| -s.floorArea }.map(&:nameString)
-    resolved = A.resolve!(model, { 'Office' => names.first(4) }, audit: quiet) # 1 space unmapped
+    resolved = A.resolve(model, { 'Office' => names.first(4) }, audit: quiet) # 1 space unmapped
     assert_operator resolved[:unmapped][:area_m2], :>, 0
     areas = A.bet_areas(resolved, audit: quiet)
     assert_in_delta resolved[:total_area_m2], areas.values.sum, 1e-6,
@@ -56,12 +56,12 @@ class TestArchetypes < Minitest::Test
 
   def test_applicability_refusals
     model = load_fixture
-    all = A.resolve!(model, { 'Office' => :all }, audit: quiet)
-    assert_raises(ArgumentError) { A.applicability!(all, hdd: 9500, audit: quiet) }
+    all = A.resolve(model, { 'Office' => :all }, audit: quiet)
+    assert_raises(ArgumentError) { A.verify_applicability!(all, hdd: 9500, audit: quiet) }
 
     smallest = model.getSpaces.min_by(&:floorArea).nameString
-    sparse = A.resolve!(model, { 'Office' => [smallest] }, audit: quiet)
-    error = assert_raises(ArgumentError) { A.applicability!(sparse, hdd: 3890, audit: quiet) }
+    sparse = A.resolve(model, { 'Office' => [smallest] }, audit: quiet)
+    error = assert_raises(ArgumentError) { A.verify_applicability!(sparse, hdd: 3890, audit: quiet) }
     assert_includes error.message, '8.4.4.1.(1)'
   end
 
@@ -69,7 +69,7 @@ class TestArchetypes < Minitest::Test
 
   def test_bare_model_is_not_conformant_with_named_mismatches
     model = load_fixture
-    resolved = A.resolve!(model, { 'Office' => :all }, audit: quiet)
+    resolved = A.resolve(model, { 'Office' => :all }, audit: quiet)
     check = A.conformance(model, resolved, vintage: '2025', audit: quiet)
     refute check[:conformant]
     assert(check[:mismatches].any? { |m| m.include?('occupant density') }, 'names the density gap')
@@ -89,10 +89,10 @@ class TestArchetypes < Minitest::Test
       equipment.setSpace(space)
     end
     audit = quiet
-    resolved = A.resolve!(model, { 'Office' => :all }, audit: audit)
+    resolved = A.resolve(model, { 'Office' => :all }, audit: audit)
     A.normalize!(model, resolved, vintage: '2025', audit: audit)
 
-    check = A.conformance(model, A.resolve!(model, { 'Office' => :all }, audit: audit),
+    check = A.conformance(model, A.resolve(model, { 'Office' => :all }, audit: audit),
                           vintage: '2025', audit: audit)
     assert check[:conformant], "normalize->check round trip failed: #{check[:mismatches].first(5).join(' | ')}"
 
@@ -114,7 +114,7 @@ class TestArchetypes < Minitest::Test
 
     space = model.getSpaces.first
     before = space.lightingPowerPerFloorArea # fixture lights + the hostile 99
-    resolved = A.resolve!(model, { 'Office' => :all }, audit: quiet)
+    resolved = A.resolve(model, { 'Office' => :all }, audit: quiet)
     A.normalize!(model, resolved, vintage: '2025', audit: quiet)
 
     assert_in_delta before, space.lightingPowerPerFloorArea, 0.01,

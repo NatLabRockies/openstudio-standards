@@ -2,7 +2,7 @@ module OpenStudioNECB
   module Report
     # HTML string helpers + the report stylesheet. Everything is escaped unless
     # wrapped in Raw (pre-built fragments from these helpers).
-    module H
+    module Html
       Raw = Struct.new(:html)
 
       module_function
@@ -167,5 +167,7 @@ module OpenStudioNECB
         }
       CSS
     end
+
+    H = Html # back-compat alias (pre-2026-08 name); prefer Html
   end
 end

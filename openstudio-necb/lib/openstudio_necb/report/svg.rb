@@ -6,7 +6,7 @@ module OpenStudioNECB
       module_function
 
       def open_svg(width, height, label)
-        %(<svg viewBox="0 0 #{width} #{height}" role="img" aria-label="#{H.esc(label)}" ) +
+        %(<svg viewBox="0 0 #{width} #{height}" role="img" aria-label="#{Html.esc(label)}" ) +
           %(xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">)
       end
 
@@ -15,18 +15,18 @@ module OpenStudioNECB
       end
 
       def rect(x, y, w, h, fill, opts = {})
-        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{H.esc(v)}") }.join
+        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{Html.esc(v)}") }.join
         %(<rect x="#{x.round(1)}" y="#{y.round(1)}" width="#{[w, 0].max.round(1)}" height="#{h.round(1)}" fill="#{fill}"#{extra}/>)
       end
 
       def line(x1, y1, x2, y2, stroke, opts = {})
-        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{H.esc(v)}") }.join
+        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{Html.esc(v)}") }.join
         %(<line x1="#{x1.round(1)}" y1="#{y1.round(1)}" x2="#{x2.round(1)}" y2="#{y2.round(1)}" stroke="#{stroke}"#{extra}/>)
       end
 
       def text(x, y, string, opts = {})
-        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{H.esc(v)}") }.join
-        %(<text x="#{x.round(1)}" y="#{y.round(1)}"#{extra}>#{H.esc(string)}</text>)
+        extra = opts.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{Html.esc(v)}") }.join
+        %(<text x="#{x.round(1)}" y="#{y.round(1)}"#{extra}>#{Html.esc(string)}</text>)
       end
 
       # The shared horizontal-bar primitive: a labelled bar with its value

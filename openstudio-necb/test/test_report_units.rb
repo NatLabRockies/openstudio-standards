@@ -3,7 +3,7 @@ require_relative 'test_helper'
 # SDK-free renderer units: HTML helpers, checklist derivation, charts, and the
 # full-document render from CANNED report/audit data (no models, no simulation).
 class TestReportUnits < Minitest::Test
-  H = OpenStudioNECB::Report::H
+  H = OpenStudioNECB::Report::Html
   Checklist = OpenStudioNECB::Report::Checklist
   Charts = OpenStudioNECB::Report::Charts
   Sections = OpenStudioNECB::Report::Sections
@@ -214,8 +214,8 @@ class TestReportUnits < Minitest::Test
   def test_paired_bars_golden
     svg = Charts.paired_bars([['Heating', 50_000.0, 55_000.0], ['Cooling', 5_000.0, 6_000.0]],
                              unit: 'kWh', label: 'test chart')
-    assert_includes svg, OpenStudioNECB::Report::H::PROPOSED_COLOR
-    assert_includes svg, OpenStudioNECB::Report::H::REFERENCE_COLOR
+    assert_includes svg, OpenStudioNECB::Report::Html::PROPOSED_COLOR
+    assert_includes svg, OpenStudioNECB::Report::Html::REFERENCE_COLOR
     golden('paired_bars.svg', svg)
   end
 
@@ -223,7 +223,7 @@ class TestReportUnits < Minitest::Test
     assert_equal '', Charts.paired_bars([], unit: 'kWh', label: 'x')
     assert_equal '', Charts.paired_bars([['a', 0, 0]], unit: 'kWh', label: 'x')
     solo = Charts.paired_bars([['a', 10.0, nil]], unit: 'kWh', label: 'x')
-    refute_includes solo, OpenStudioNECB::Report::H::REFERENCE_COLOR, 'nil reference renders proposed-only'
+    refute_includes solo, OpenStudioNECB::Report::Html::REFERENCE_COLOR, 'nil reference renders proposed-only'
   end
 
   def test_total_bars_target_line

@@ -95,6 +95,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-63** — Pool-heater and solar-thermal service-water minimums applied when present, from the printed rows the extraction lost _(runtime)_
 - **D-64** — The SmallHotel reference's unmet-heating gate failure is morning setback-recovery lag in four micro-zones - a characteristic, not a build defect _(process)_
 - **D-65** — The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open _(process)_
+- **D-66** — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed) _(runtime_unwired)_
 
 <!-- TOC END -->
 
@@ -671,6 +672,22 @@ OSut within rounding (wall 0.1497/0.150, roof 0.1374/0.140, floor
 0.86283.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+**Amendment (2026-08-09):** the default flip left a latent stale-test
+regression — two CROSS-PACKAGE tests written before D-23 still compared the
+construction-only conductance against the 0.265 overall table value and
+went red the moment the default flipped: `openstudio-loads/test/
+test_e2e_run.rb:88` (name-regex `/:U-0\.265/`) and `openstudio-necb/test/
+test_legacy_archetype_e2e.rb:214-218` (thermalConductance vs the JSON
+overall value). The commit's gate list covered only openstudio-envelope's
+own tests; the slow cross-package E2E gates surfaced it ~2 weeks later
+during the clarity-review verification pass. Root-caused numerically
+(0.2759464705596722 = 1/(1/0.265 − 0.14969 film R); printed Table 3.2.2.2
+zone-5 wall = 0.265 OVERALL — the code is right). Both tests migrated to
+the D-23 convention (the loads regex to the construction-only name; the
+umbrella test converts measured→overall via `Constructions.film_r` and
+stays data-driven). Lesson recorded: a convention flip's gate list must
+include every OTHER package's tests that pin the convention.
 
 ## D-24 — Envelope scope: unconditioned spaces out, interzone assemblies in
 
@@ -3514,3 +3531,32 @@ when that subsystem is next touched.
 sweeps get a ~12 h window.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+## D-66 — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed)
+
+The 2026-08 clarity review's magic-number citation pass found the ONLY two
+values in the builder gem that both differ from legacy and have no traced
+source, both in the CBECS `evap_cooler` family:
+
+- cooler design effectiveness **0.85** vs legacy 0.90 (`model_add_evap_cooler`,
+  Prototype.hvac_systems.rb:4501, basc.pnnl.gov-cited);
+- the supply setpoint manager: already wet-bulb-following, but with a **0.0**
+  approach offset and a 15.5/30.0 °C clamp vs legacy's +3 °R approach clamped
+  at 70/78 °F (Prototype.hvac_systems.rb:4427-4432, :4451-4457).
+
+**Decision:** align both to legacy — the gem is a parity port and an
+unsourced deviation in a parity port is a defect by default. Implemented
+with the SI values computed through the same `OpenStudio.convert` calls
+legacy makes (21.111…/25.556 °C, 1.6667 K), so the fields are bit-identical
+to legacy output rather than hand-rounded. Legacy's EMS cooling-load
+availability program remains NOT replicated — that is the family's
+pre-existing, documented simplification, unchanged here.
+
+**Blast radius:** CBECS-only family; no NECB archetype builds it; no test
+pinned the old values. Gates: `test_cbecs_families.rb` 7/41,
+`test_costing_coverage.rb`, and a scratchpad E+ sizing run of
+`'Direct evap coolers with no heat'` (0 Severe, 0 Fatal, field values
+asserted).
+
+- **Who/when:** Fable under D-10, 2026-08-09 (executed by an opus subagent,
+  reviewed by Fable).

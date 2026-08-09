@@ -461,8 +461,8 @@ module OpenStudioNECB
       # Mapping -> model-derived areas -> HARD applicability (refuse outside
       # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a
       # determination) -> Table 8.4.4.2 conformance -> normalize if needed.
-      resolved = Archetypes.resolve!(proposed, archetypes, audit: audit)
-      Archetypes.applicability!(resolved, hdd: hdd, audit: audit)
+      resolved = Archetypes.resolve(proposed, archetypes, audit: audit)
+      Archetypes.verify_applicability!(resolved, hdd: hdd, audit: audit)
       check = Archetypes.conformance(proposed, resolved, vintage: vintage, audit: audit)
       Archetypes.normalize!(proposed, resolved, vintage: vintage, audit: audit) unless check[:conformant]
       audit.building = nil # BET derivation + verdicts are comparisons, not model work
@@ -1044,7 +1044,7 @@ module OpenStudioNECB
       opts = options.transform_keys(&:to_sym)
       mapping = opts[:archetypes] or
         raise(ArgumentError, 'eui_supplement requires archetypes: {archetype => :all | [space names]}')
-      resolved = Archetypes.resolve!(proposed, mapping, audit: audit)
+      resolved = Archetypes.resolve(proposed, mapping, audit: audit)
       problems = Archetypes.applicability_problems(resolved, hdd: hdd, audit: audit)
       unless problems.empty?
         audit.warn(:compliance, 'EUI supplement NOT COMPUTED — outside 8.4.4 applicability', article: '8.4.4.1.(1)',
@@ -1062,7 +1062,7 @@ module OpenStudioNECB
       elsif opts[:run_normalized]
         normalized = proposed.clone(true).to_Model
         audit.with_building('proposed building (EUI-normalized)') do
-          Archetypes.normalize!(normalized, Archetypes.resolve!(normalized, mapping, audit: audit),
+          Archetypes.normalize!(normalized, Archetypes.resolve(normalized, mapping, audit: audit),
                                 vintage: vintage, audit: audit)
         end
         eui_results = {}

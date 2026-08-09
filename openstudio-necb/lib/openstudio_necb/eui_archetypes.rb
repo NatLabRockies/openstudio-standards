@@ -69,7 +69,7 @@ module OpenStudioNECB
     #     total_area_m2: Float }
     # @raise [ArgumentError] on unknown archetypes, unknown space names,
     #   double-mapped spaces, or more than one :all archetype
-    def resolve!(model, mapping, audit:)
+    def resolve(model, mapping, audit:)
       table = Tiers.eui_data['archetype_eui_kwh_per_m2']
       unknown = mapping.keys.map(&:to_s) - table.keys
       raise(ArgumentError, "unknown 2025 EUI archetype(s) #{unknown.join('; ')} (#{table.keys.join('; ')})") unless unknown.empty?
@@ -119,7 +119,7 @@ module OpenStudioNECB
     # proportionally among the listed archetypes so the BET areas sum to the
     # model's total. Over-assignment is impossible by construction (areas come
     # from disjoint space sets).
-    # @param resolved [Hash] resolve! output
+    # @param resolved [Hash] resolve output
     # @param audit [AuditLog]
     # @return [Hash{String => Float}] archetype name => BET floor area in m2
     def bet_areas(resolved, audit:)
@@ -138,20 +138,24 @@ module OpenStudioNECB
     # used" at >=90% coverage; the Table note bounds HDD < 9000. On the pure
     # :eui path these REFUSE (a verdict outside applicability is not a
     # determination); the supplement instead reports not-computed.
-    # @param resolved [Hash] resolve! output
+    # @param resolved [Hash] resolve output
     # @param hdd [Numeric] heating degree-days below 18 degC
     # @param audit [AuditLog]
     # @return [void]
     # @raise [ArgumentError] when the 8.4.4 EUI path is not applicable
-    def applicability!(resolved, hdd:, audit:)
+    def verify_applicability!(resolved, hdd:, audit:)
       problems = applicability_problems(resolved, hdd: hdd, audit: audit)
       return if problems.empty?
 
       raise(ArgumentError, "the 8.4.4 EUI path is NOT applicable: #{problems.join('; ')}")
     end
 
-    # Non-raising form of applicability!.
-    # @param resolved [Hash] resolve! output
+    # deprecated aliases (2026-08); prefer resolve / verify_applicability!
+    singleton_class.send(:alias_method, :resolve!, :resolve)
+    singleton_class.send(:alias_method, :applicability!, :verify_applicability!)
+
+    # Non-raising form of verify_applicability!.
+    # @param resolved [Hash] resolve output
     # @param hdd [Numeric] heating degree-days below 18 degC
     # @param audit [AuditLog]
     # @return [Array<String>] human-readable problems (empty when applicable)
@@ -223,7 +227,7 @@ module OpenStudioNECB
     # letter's NECB schedules. Conservative: anything not comparable is a
     # mismatch (worst case is an unnecessary second run, never a wrong verdict).
     # @param model [OpenStudio::Model::Model] the proposed model
-    # @param resolved [Hash] resolve! output
+    # @param resolved [Hash] resolve output
     # @param vintage [String] NECB vintage (schedule targets come from its data)
     # @param audit [AuditLog]
     # @return [Hash] { conformant: Boolean, mismatches: Array<String> }
@@ -254,7 +258,7 @@ module OpenStudioNECB
     # zone thermostats from the archetype letter. Lighting power, lighting
     # operation, OA and unmapped spaces are left as modeled (see module doc).
     # @param model [OpenStudio::Model::Model] an already-cloned model (rewritten in place)
-    # @param resolved [Hash] resolve! output FOR THIS model (space objects must belong to it)
+    # @param resolved [Hash] resolve output FOR THIS model (space objects must belong to it)
     # @param vintage [String] NECB vintage (schedule source)
     # @param audit [AuditLog]
     # @return [OpenStudio::Model::Model] the normalized model

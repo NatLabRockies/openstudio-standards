@@ -51,7 +51,7 @@
         "article": "8.4.4.1.",
         "title": "General (Energy Use Intensity path)",
         "status": "implemented",
-        "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve!: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for \"conditioned\"); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage >= 90% and the Table-note HDD < 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise."
+        "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for \"conditioned\"); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage >= 90% and the Table-note HDD < 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise."
       },
       {
         "article": "8.4.4.2.",

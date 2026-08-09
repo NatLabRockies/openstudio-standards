@@ -1,7 +1,7 @@
 # The renderer is a layered stack — each file has one job:
 #   svg.rb         geometric primitives (bars, axes, legends) -> inline SVG
 #   charts.rb      proposed-vs-reference comparison charts, built on svg
-#   html.rb        escaping, tags, tables, badges, the shared CSS ('H')
+#   html.rb        escaping, tags, tables, badges, the shared CSS ('Html')
 #   checklist.rb   audit entries -> article-sorted checklist rows
 #   model_query.rb SDK models -> plain hashes (with report.rb, the ONLY
 #                  SDK-touching part of the renderer; never raises)
@@ -69,8 +69,8 @@ module OpenStudioNECB
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>NECB #{H.esc(report['vintage'])} Compliance Report#{options[:project_name] ? " — #{H.esc(options[:project_name])}" : ''}</title>
-        <style>#{H::CSS}#{OpenStudioHVAC::CatalogReport::DIAGRAM_CSS}</style>
+        <title>NECB #{Html.esc(report['vintage'])} Compliance Report#{options[:project_name] ? " — #{Html.esc(options[:project_name])}" : ''}</title>
+        <style>#{Html::CSS}#{OpenStudioHVAC::CatalogReport::DIAGRAM_CSS}</style>
         </head>
         <body>
         #{OpenStudioHVAC.hvac_icon_defs}

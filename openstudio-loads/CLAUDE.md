@@ -43,7 +43,7 @@ deliberately EXCLUDED** (openstudio-shw owns it) — do not add them back here.
   OptionalDouble depending on SDK version — unwrap before `.round`.
 - **The umbrella's EUI normalization consumes `Apply.apply_people` /
   `apply_equipment` / `apply_schedule_set` / `apply_thermostat` directly with
-  SYNTHETIC Table 8.4.4.2 records** (openstudio-necb `archetypes.rb`) — the
+  SYNTHETIC Table 8.4.4.2 records** (openstudio-necb `eui_archetypes.rb`) — the
   record field names/units (occupancy_per_area per 1000 ft², W/ft², schedule
   name shapes `NECB-<letter>-…`) are a cross-gem contract; changing them
   breaks the umbrella's round-trip test.

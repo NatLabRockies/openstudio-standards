@@ -26,13 +26,13 @@ module OpenStudioNECB
         out = [SVG.open_svg(WIDTH, height, label)]
         y = 5
         rows.each do |row_label, proposed, reference|
-          out << SVG.bar_row(y, row_label, proposed || 0, max, H::PROPOSED_COLOR,
+          out << SVG.bar_row(y, row_label, proposed || 0, max, Html::PROPOSED_COLOR,
                              label_w: LABEL_W, plot_w: PLOT_W, bar_h: BAR_H,
-                             value_text: "#{H.fmt(proposed, prec: prec)} #{unit}")
+                             value_text: "#{Html.fmt(proposed, prec: prec)} #{unit}")
           if has_ref
-            out << SVG.bar_row(y + BAR_H + PAIR_GAP, '', reference || 0, max, H::REFERENCE_COLOR,
+            out << SVG.bar_row(y + BAR_H + PAIR_GAP, '', reference || 0, max, Html::REFERENCE_COLOR,
                                label_w: LABEL_W, plot_w: PLOT_W, bar_h: BAR_H,
-                               value_text: "#{H.fmt(reference, prec: prec)} #{unit}")
+                               value_text: "#{Html.fmt(reference, prec: prec)} #{unit}")
           end
           y += group_h + GROUP_GAP
         end
@@ -53,16 +53,16 @@ module OpenStudioNECB
         out = [SVG.open_svg(WIDTH, height, label)]
         y = 5
         rows.each_with_index do |(row_label, value), i|
-          color = i.zero? ? H::PROPOSED_COLOR : H::REFERENCE_COLOR
+          color = i.zero? ? Html::PROPOSED_COLOR : Html::REFERENCE_COLOR
           out << SVG.bar_row(y, row_label, value, max, color,
                              label_w: LABEL_W, plot_w: PLOT_W, bar_h: BAR_H,
-                             value_text: "#{H.fmt(value, prec: 0)} #{unit}")
+                             value_text: "#{Html.fmt(value, prec: 0)} #{unit}")
           y += BAR_H + GROUP_GAP
         end
         targets.each_with_index do |(t_label, t_value), i|
           x = LABEL_W + (t_value / max) * PLOT_W
           out << SVG.line(x, 0, x, y, '#b02a37', stroke_dasharray: '5,4', stroke_width: 2)
-          out << SVG.text(x + 4, y + 12 + (i * 12), "#{t_label}: #{H.fmt(t_value, prec: 0)} #{unit}", fill: '#b02a37')
+          out << SVG.text(x + 4, y + 12 + (i * 12), "#{t_label}: #{Html.fmt(t_value, prec: 0)} #{unit}", fill: '#b02a37')
         end
         out << SVG.close_svg
         out.join

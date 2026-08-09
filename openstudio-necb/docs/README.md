@@ -59,6 +59,11 @@ Terms that recur across the seven gems' code, docs and decision register:
   (reference-grade) building *as the proposed* and expect ~100% of its own
   target. Deviations locate defects in either the legacy archetypes or our
   reference generation.
+- **archetype (two senses)** — (1) the NECB 2025 8.4.4 *building archetypes*
+  (Table 8.4.4.1 EUI targets; implemented in
+  `lib/openstudio_necb/eui_archetypes.rb`); (2) the project's 17 legacy NECB
+  prototype buildings used as the validation fleet (the "fleet"). Reading code
+  or docs, check which sense is live.
 - **fleet** — the 17 legacy NECB archetype buildings used for sweep
   validation (the "fleet sweep" is the merge gate for energy-affecting
   changes).
