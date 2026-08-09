@@ -479,6 +479,13 @@
       "kind": "runtime_unwired",
       "articles": [],
       "summary": "The evap-cooler builder's design effectiveness and supply setpoint-manager offset and clamps were the only builder values that both differed from the legacy implementation and had no traced source. Both now mirror legacy exactly: effectiveness 0.90 per the PNNL-cited legacy value, and a wet-bulb-following supply setpoint at a 3 Rankine approach clamped between 70 and 78 Fahrenheit, converted through the same SDK calls the legacy code uses so the resulting fields are bit-identical. This is a CBECS-only family that no NECB archetype builds, and no audit entry cites this id because the builder logs no entries for these fields."
+    },
+    {
+      "id": "D-67",
+      "title": "Clarity restructure: aliased public renames + the openstudio-audit gem",
+      "kind": "process",
+      "articles": [],
+      "summary": "The restructure pass renamed four public surfaces with back-compat aliases - the reference-ASHP catalog marker (heat_source ashp, replacing a DX heating-coil misnomer), the geometry facade's storeys vocabulary, the single daylighting placement selector with option as a deprecated alias, and the extraction of the shared audit log and coverage emitter into the openstudio-audit gem, retiring six synchronized copies. Every rename was proof-gated: canonical names and built model objects byte-identical, the selection golden green including the full matrix, and the coverage-emitter unification shown behavior-neutral by an empty before-and-after citation-count diff."
     }
   ]
 }

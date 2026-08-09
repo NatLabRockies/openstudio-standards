@@ -96,6 +96,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-64** — The SmallHotel reference's unmet-heating gate failure is morning setback-recovery lag in four micro-zones - a characteristic, not a build defect _(process)_
 - **D-65** — The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open _(process)_
 - **D-66** — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed) _(runtime_unwired)_
+- **D-67** — Clarity restructure: aliased public renames + the openstudio-audit gem _(process)_
 
 <!-- TOC END -->
 
@@ -3560,3 +3561,46 @@ asserted).
 
 - **Who/when:** Fable under D-10, 2026-08-09 (executed by an opus subagent,
   reviewed by Fable).
+
+## D-67 — Clarity restructure: aliased public renames + the openstudio-audit gem
+
+The 2026-08-09 restructure pass (phylroy's rulings: all renames with
+back-compat aliases; extract the audit gem) changed four public surfaces,
+every one alias-preserved and proof-gated:
+
+- **`heat_source: 'ashp'`** replaces `heating_coil_type: 'DX'` on the 8
+  reference-ASHP catalog rows (a heating coil "type" of DX was the catalog's
+  worst misnomer); legacy spelling still accepted. Proofs: 97 canonical
+  names byte-identical; 30,064-line model-object dump identical across all
+  8 rows × bare/staged; D-58 selection golden green incl. FULL_MATRIX. A
+  frozen per-family key-allowlist lint (test_catalog_schema.rb) now guards
+  the whole schema, and scripts/regenerate_catalog.rb documents the
+  build-artifact path (the SYSTEM_CATALOG files are gitignored build
+  output, not committed data).
+- **`storeys:` / `below_grade_storeys:`** are the geometry facade's
+  canonical vocabulary (aliases normalized before the unknown-param raise;
+  ambiguous alias+engine-name pairs raise); the ported wizard internals
+  keep their spellings. Corrected en route: aspect_ratio never supported
+  below-grade (README overclaim), and string-keyed params used to bypass
+  the unknown-check silently.
+- **`placement:`** is the single daylighting selector (:all | :necb2020 |
+  :necb2011, :necb_default normalized in one place); `option:` is a
+  deprecated, audit-warned alias reproducing the old truth table exactly.
+  The reference-daylighting audit entry that recorded the option STRING
+  under the `placement:` key now records the real enum.
+- **openstudio-audit (gem #8)** holds the ONE AuditLog class and the ONE
+  coverage-emitter loop; the six per-gem copies became three-line aliases
+  (same constants, same paths), the drifted emitter variants unified
+  (hvac's 8.4-only citation regex proven behavior-neutral by an empty
+  before/after decisions_citing diff), and the copy-sync test machinery
+  retired in favour of alias-identity assertions.
+
+Also in this pass (no public surface): archetypes.rb → eui_archetypes.rb
+disambiguating the two senses of "archetype" (glossary entry added);
+resolve!/applicability! → resolve/verify_applicability! with deprecated
+aliases; H → Html in the report renderer; small_systems.rb split per
+family; the energy-recovery and legacy-2011-daylighting blocks moved to
+their own files (verbatim, constant paths unchanged).
+
+- **Who/when:** Fable under D-10 per phylroy's three rulings, 2026-08-09;
+  executed by tiered subagents (sonnet/opus), every diff Fable-reviewed.

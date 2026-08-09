@@ -1,4 +1,7 @@
-# Code clarity & organization review — the seven-gem family
+3. **✅ Renames — DONE** (D-67): `heat_source: 'ashp'` in systems.json
+   (aliased); geometry facade `storeys:` unification (aliased); lighting
+   `option:`/`placement:` collapse (deprecated alias); `H` → `Html`
+   (aliased); sprint-named test files renamed.# Code clarity & organization review — the seven-gem family
 
 **Date:** 2026-08-09. **Scope:** all seven domain gems + the openstudio-necb
 umbrella (~25,000 lines, 110 files). **Reviewed by:** three independent
@@ -84,11 +87,11 @@ runtime data JSONs all carry provenance blocks (exemplary).
 | 🟠 | `systems/small_systems.rb` holds six unrelated system families (Furnace, EvapCooler, Wshp, Vrf, ZoneErvs, Doas) — named for a code-size property, not a domain one; `UnitHeaters` hides in `zone_terminal.rb` | `small_systems.rb` | ✅ split per family + `unit_heaters.rb` (follow-up pass) |
 | 🟠 | Oversizing-cap sentinels 1.3/1.1/1.0 hardcoded in Ruby duplicate `data/sizing.json` — the 8.4.4.8 cap silently stops working if the JSON changes | `reference.rb:1437-1444` | ✅ named constants citing the JSON |
 | 🟠 | 20-line block of uncited VRF constants (`COP 4.0`, `26.2 °C`, `-0.00019231`); similar bare numbers in `small_systems.rb`, `hp_plant_fancoils.rb`, `zone_terminal.rb`; `vav_reheat.rb:151`'s only justification is the undefined token "T11" | `components/ecm_air.rb:223-242` etc. | ✅ source note per line |
-| 🟠 | `systems.json` config vocabulary: three ways to say heating, two for cooling, three for ventilation, case-inconsistent values, and `heating_coil_type: 'DX'` semantically meaning "this is an ASHP" | 30 distinct keys, no schema doc | ✅ schema README; 🔶 key renames |
+| 🟠 | `systems.json` config vocabulary: three ways to say heating, two for cooling, three for ventilation, case-inconsistent values, and `heating_coil_type: 'DX'` semantically meaning "this is an ASHP" | 30 distinct keys, no schema doc | ✅ schema README + frozen schema lint; ✅ `heat_source: 'ashp'` rename (aliased, D-67) |
 | 🟠 | YARD coverage ~15%; near-zero in exactly the two files that implement the code (`reference.rb` 2/51, `efficiency.rb` 9/56); the flagship `to_html` docstring is attached to a constant, not the method | measured per file | ✅ tag public surface + fix orphan |
 | 🟡 | ~~Sprint-named test files: `test_thin_tail.rb` (contains the VRF/ERV/GSHP tests), `test_cbecs_backlog.rb`~~ — renamed to `test_vrf_erv_gshp_composites.rb` / `test_cbecs_families.rb` | `test/` | ✅ renamed |
 | 🟡 | `family_guess` holds either a real mapping (String) or an actual guess (Symbol) — "the name lies half the time"; `loop_` trailing-underscore workaround ×47; `row` = string label in one method, table hash in another | `classify.rb`, `efficiency.rb:451` | 🔶 |
-| 🟡 | 2.6 MB generated `SYSTEM_CATALOG.html` (+ .csv/.txt) committed at gem root, unexplained; gemspec ships a nonexistent `LICENSE*` | gem root | 🔶 |
+| 🟡 | 2.6 MB generated `SYSTEM_CATALOG.html` (+ .csv/.txt) at gem root, unexplained (correction: they are GITIGNORED build output, not committed); gemspec ships a nonexistent `LICENSE*` | gem root | ✅ regeneration script + README line; LICENSE handled in the gemspec pass |
 
 **Also good:** the facade file is a genuinely good API index; `Catalog.resolve`
 raises with closest-match suggestions; `teardown.rb`'s numbered-steps style is
@@ -156,7 +159,7 @@ narrative order, each stating what it does and what it deliberately doesn't.
 | 🟠 | Broken indentation: the last 5 method defs sit at column 0 inside the module — folding, grep, and scanning all break at line 815 | `bar.rb:815-1536` | ✅ re-indented |
 | 🟠 | The 3D renderer (215 lines + facade method + 5 tests) is invisible from the README — "Two engines" | `render.rb`, `README.md:5` | ✅ README section |
 | 🟠 | `create_bar` is 517 lines with zero internal markers; `create_sliced_bar_simple_polygons` 307 | `bar.rb:10-526` | ✅ step banners |
-| 🟠 | Four spellings of one concept in one facade (`storys`/`stories`/`storey`/`storeys`) and two parameter vocabularies for the same idea across `create` vs `bar` | `openstudio_geometry.rb:37` vs `:102` | 🔶 standardize facade on `storeys` w/ aliases |
+| 🟠 | Four spellings of one concept in one facade (`storys`/`stories`/`storey`/`storeys`) and two parameter vocabularies for the same idea across `create` vs `bar` | `openstudio_geometry.rb:37` vs `:102` | ✅ facade standardized on `storeys:`/`below_grade_storeys:` (aliased; ambiguity raises) |
 | 🟡 | README overclaims below-grade support for all seven wizards (only rectangle/aspect_ratio have it); CLAUDE.md lists an "E" shape that doesn't exist and omits aspect_ratio | `wizards.rb:186`, `CLAUDE.md:3-4` | ✅ |
 | 🟡 | `helpers.rb` loads only as a side effect of `wizards.rb`; pseudo-keyword `length = length` anti-pattern in the aspect_ratio wrapper | `openstudio_geometry.rb:3-7`, `wizards.rb:218-225` | ✅ require; 🔶 arg cleanup |
 
@@ -269,5 +272,6 @@ genuinely called cross-file or named in its docs).
    `option:`/`placement:` collapse; `H` → `Html`; sprint-named test files.
 4. **🔶 License/homepage reconciliation** (envelope BSD + NatLabRockies vs
    LGPL + NREL elsewhere) — a legal/ownership decision.
-5. **🔶 Extract shared `AuditLog` + `emit_article_coverage`** into a small
-   `openstudio-audit` gem, retiring the six-copy sync machinery.
+5. **✅ DONE — `openstudio-audit` (gem #8)** now holds the one AuditLog and
+   the one coverage-emitter loop; six copies became three-line aliases; the
+   copy-sync machinery is retired (D-67).
