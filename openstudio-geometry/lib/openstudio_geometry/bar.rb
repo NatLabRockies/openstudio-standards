@@ -8,6 +8,7 @@ module OpenStudioGeometry
   # OpenStudioGeometry.bar (see openstudio_geometry.rb).
   module Bar
     def self.create_bar(model, bar_hash)
+      # ---- 1. Inputs, warnings, and story flattening ----
       # make custom story hash when number of stories below grade > 0
       # @todo update this so have option basements are not below 0? (useful for simplifying existing model and maintaining z position relative to site shading)
       story_hash = {}
@@ -63,6 +64,7 @@ module OpenStudioGeometry
         end
       end
 
+      # ---- 2. Build story_hash: origin z, height, and multiplier per story ----
       if bar_hash[:num_stories_below_grade] > 0
 
         # add in below grade levels (may want to add below grade multipliers at some point if we start running deep basements)
@@ -98,6 +100,7 @@ module OpenStudioGeometry
         story_hash['ground'] = { space_origin_z: footprint_origin_point.z, space_height: typical_story_height, multiplier: 1 }
       end
 
+      # ---- 3. Create footprint polygons per bar division method ----
       # create footprints
       if bar_hash[:bar_division_method] == 'Multiple Space Types - Simple Sliced'
         footprints = []
@@ -152,9 +155,11 @@ module OpenStudioGeometry
 
       end
 
+      # ---- 4. Make spaces and stories from polygons ----
       # make spaces from polygons
       new_spaces = Bar.create_spaces_from_polygons(model, footprints, bar_hash[:floor_height], bar_hash[:num_stories], bar_hash[:center_of_footprint], story_hash)
 
+      # ---- 5. Surface cleanup, intersection, and matching ----
       # put all of the spaces in the model into a vector for intersection and surface matching
       spaces = OpenStudio::Model::SpaceVector.new
       model.getSpaces.sort.each do |space|
@@ -293,6 +298,7 @@ module OpenStudioGeometry
         end
       end
 
+      # ---- 6. Boundary conditions: below-grade ground and mid-story adiabatic walls ----
       # set boundary conditions if not already set when geometry was created
       # @todo update this to use space original z value vs. story name
       if bar_hash[:num_stories_below_grade] > 0
@@ -380,6 +386,7 @@ module OpenStudioGeometry
         end
       end
 
+      # ---- 7. Party walls and window-to-wall ratios by story and facade ----
       # sort stories (by name for now but need better way)
       sorted_stories = {}
       new_spaces.each do |space|
@@ -492,6 +499,7 @@ module OpenStudioGeometry
         end
       end
 
+      # ---- 8. Report wwr overrides and final floor area ----
       # report space types with custom wwr values
       space_type_wwr_overrides.each do |space_type, wwr|
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "For #{space_type.name} the default building wwr was replaced with a space type specfic value of #{wwr}")
@@ -780,41 +788,16 @@ module OpenStudioGeometry
       end
     end
 
-    # create bar from arguments and building type hash
+    # create core and perimeter polygons for a rectangular single-story footprint
     #
-    # @param args [Hash] user arguments
-    # @option args [Double] :single_floor_area (0.0) Single floor area in ft^2. Non-zero value will fix the single floor area, overriding a user entry for total_bldg_floor_area
-    # @option args [Double] :total_bldg_floor_area (10000.0) Total building floor area in ft^2
-    # @option args [Double] :floor_height (0.0) Typical floor to floor height. Selecting a typical floor height of 0 will trigger a smart building type default.
-    # @option args [Boolean] :custom_height_bar (true) This is argument value is only relevant when smart default floor to floor height is used for a building type that has spaces with custom heights.
-    # @option args [Integer] :num_stories_above_grade (1) Number of stories above grade
-    # @option args [Integer] :num_stories_below_grade (0) Number of stories below grade
-    # @option args [Double] :building_rotation (0.0) Building rotation. Set Building Rotation off of North (positive value is clockwise). Rotation applied after geometry generation. Values greater than +/- 45 will result in aspect ratio and party wall orientations that do not match cardinal directions of the inputs.
-    # @option args [Double] :ns_to_ew_ratio (0.0) Ratio of North/South facade length relative to east/west facade length. Selecting an aspect ratio of 0 will trigger a smart building type default. Aspect ratios less than one are not recommended for sliced bar geometry, instead rotate building and use a greater than 1 aspect ratio.
-    # @option args [Double] :perim_mult (0.0) Perimeter multiplier. Selecting a value of 0 will trigger a smart building type default. This represents a multiplier for the building perimeter relative to the perimeter of a rectangular building that meets the area and aspect ratio inputs. Other than the smart default of 0.0 this argument should have a value of 1.0 or higher and is only applicable Multiple Space Types - Individual Stories Sliced division method.
-    # @option args [Double] :bar_width (0.0) Bar Width. Non-zero value will fix the building width, overriding user entry for Perimeter Multiplier. NS/EW Aspect Ratio may be limited based on target width.
-    # @option args [Double] :bar_sep_dist_mult (10.0) Bar separation distance multiplier. Multiplier of separation between bar elements relative to building height.
-    # @option args [Double] :wwr (0.0) Window to wall ratio. Selecting a window to wall ratio of 0 will trigger a smart building type default.
-    # @option args [Double] :party_wall_fraction (0.0) fraction of exterior wall area with an adjacent structure
-    # @option args [Integer] :party_wall_stories_north (0) Number of North facing stories with party wall
-    # @option args [Integer] :party_wall_stories_south (0) Number of South facing stories with party wall
-    # @option args [Integer] :party_wall_stories_east (0) Number of East facing stories with party wall
-    # @option args [Integer] :party_wall_stories_west (0) Number of West facing stories with party wall
-    # @option args [Boolean] :bottom_story_ground_exposed_floor (true) Is the bottom story exposed to the ground
-    # @option args [Boolean] :top_story_exterior_exposed_roof (true) Is the top story an exterior roof
-    # @option args [String] :story_multiplier_method ('Basements Ground Mid Top') Calculation method for story multiplier. Options are 'None' and 'Basements Ground Mid Top'
-    # @option args [Boolean] :make_mid_story_surfaces_adiabatic (true) Make mid story floor surfaces adiabatic. If set to true, this will skip surface intersection and make mid story floors and celings adiabatic, not just at multiplied gaps.
-    # @option args [String] :bar_division_method ('Multiple Space Types - Individual Stories Sliced') Division method for bar space types. Options are 'Multiple Space Types - Simple Sliced', 'Multiple Space Types - Individual Stories Sliced', 'Single Space Type - Core and Perimeter'
-    # @option args [String] :double_loaded_corridor ('Primary Space Type') Method for double loaded corridor. Add double loaded corridor for building types that have a defined circulation space type, to the selected space types. Options are 'None' and 'Primary Space Type'
-    # @option args [String] :space_type_sort_logic ('Building Type > Size') Space type sorting method. Options are 'Size' and 'Building Type > Size'
-    # @option args [String] :template ('90.1-2013') target standard
-    # @param building_type_hash [Array<Hash>] array of building type hashes
-    # @option building_type_hash [Double] :frac_bldg_area fraction of building area
-    # @option building_type_hash [Hash] :space_types hash of space types data
-    # @return [Boolean] returns true if successful, false if not
-def self.create_core_and_perimeter_polygons(length, width,
-                                                footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                                perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+    # @param length [Double] length of building in meters
+    # @param width [Double] width of building in meters
+    # @param footprint_origin_point [OpenStudio::Point3d] Optional OpenStudio Point3d object for the new origin
+    # @param perimeter_zone_depth [Double] Optional perimeter zone depth in meters
+    # @return [Hash] Hash of point vectors that define the space geometry for each direction
+    def self.create_core_and_perimeter_polygons(length, width,
+                                                    footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
+                                                    perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
       # key is name, value is a hash, one item of which is polygon. Another could be space type.
       hash_of_point_vectors = {}
 
@@ -909,7 +892,7 @@ def self.create_core_and_perimeter_polygons(length, width,
     # @param story_hash [Hash] A hash of building story information including space origin z value and space height
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
 
-def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash)
+    def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash)
       # total building floor area to calculate ratios from space type floor areas
       total_floor_area = 0.0
       target_per_space_type = {}
@@ -1053,9 +1036,10 @@ def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_
     # @param perimeter_zone_depth [Double] Optional perimeter zone depth in meters
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
 
-def self.create_sliced_bar_simple_polygons(space_types, length, width,
-                                               footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                               perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+    def self.create_sliced_bar_simple_polygons(space_types, length, width,
+                                                   footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
+                                                   perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+      # ---- 1. Setup: slice direction, perimeter depth, and bar corner points ----
       hash_of_point_vectors = {} # key is name, value is a hash, one item of which is polygon. Another could be space type
 
       reverse_slice = false
@@ -1079,6 +1063,7 @@ def self.create_sliced_bar_simple_polygons(space_types, length, width,
       # used when length is less than width
       se_point = OpenStudio::Point3d.new(x_delta + length, y_delta, z)
 
+      # ---- 2. Space type areas, sort order, and bar-end sizing rules ----
       # total building floor area to calculate ratios from space type floor areas
       total_floor_area = 0.0
       space_types.each do |space_type, space_type_hash|
@@ -1095,6 +1080,7 @@ def self.create_sliced_bar_simple_polygons(space_types, length, width,
       min_bar_end_multiplier = 0.75
       max_bar_end_multiplier = 1.5
 
+      # ---- 3. Per space type: slice widths and double-loaded corridor data ----
       # sort_by results in arrays with two items , first is key, second is hash value
       re_apply_largest_space_type_at_end = false
       max_reduction = nil # used when looping through section_hash_for_space_type if first space type needs to also be at far end of bar
@@ -1188,6 +1174,7 @@ def self.create_sliced_bar_simple_polygons(space_types, length, width,
           end_b_double_loaded_corridor = false
         end
 
+        # ---- 4. Generate polygons for each section (perimeter/core, both slice directions) ----
         # loop through sections for space type (main and possibly one or two end perimeter sections)
         section_hash_for_space_type.each do |k, slice|
           # need to use different space type for end_b
@@ -1360,9 +1347,9 @@ def self.create_sliced_bar_simple_polygons(space_types, length, width,
     #  If blank, this method will default to using information in the story_hash.
     # @return [Array<OpenStudio::Model::Space>] Array of OpenStudio Space objects
 
-def self.create_spaces_from_polygons(model, footprints, typical_story_height, effective_num_stories,
-                                         footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                         story_hash = {})
+    def self.create_spaces_from_polygons(model, footprints, typical_story_height, effective_num_stories,
+                                             footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
+                                             story_hash = {})
       # default story hash is for three stories with mid-story multiplier, but user can pass in custom versions
       if story_hash.empty?
         if effective_num_stories > 2
@@ -1492,7 +1479,7 @@ def self.create_spaces_from_polygons(model, footprints, typical_story_height, ef
     # @option options [Double] :floor_to_floor_height floor to floor height in meters, defaults to 10 ft.
     # @return [OpenStudio::Model::Space] OpenStudio Space object
 
-def self.create_space_from_polygon(model, space_origin, point_3d_vector, options = {})
+    def self.create_space_from_polygon(model, space_origin, point_3d_vector, options = {})
       # set defaults to use if user inputs not passed in
       defaults = {
         'name' => nil,

@@ -151,20 +151,23 @@ class TestNecbWaterEconomizer < Minitest::Test
     assert_equal ['DifferentialEnthalpy'], kinds.uniq
   end
 
-  # 8.4.4.12 stays PARTIAL — the DX staging clauses 5.2.2.8.(4)-(5) are still open, and
-  # test_necb_energy_recovery.rb:174 asserts the coverage entry remains a warning.
-  def test_8_4_4_12_remains_partial_and_still_warns
+  # 8.4.4.12 is IMPLEMENTED since D-62 closed the 5.2.2.8.(4)-(5) DX staging
+  # floor (this pin previously asserted 'partial' and was missed when
+  # test_necb_energy_recovery.rb's twin pin moved with the D-62 commit —
+  # caught by the 2026-08 clarity-review verification pass).
+  def test_8_4_4_12_is_implemented_and_no_longer_warns
     %w[2020 2025].each do |vintage|
       prefix = vintage == '2020' ? '8.4.4' : '8.4.5'
       entry = OpenStudioHVAC::NECB.rules(vintage)['article_coverage']['articles']
                                   .find { |a| a['article'] == "#{prefix}.12." }
-      assert_equal 'partial', entry['status']
-      assert_match(/5\.2\.2\.8\.\(4\)-\(5\)/, entry['gaps'], 'the open DX staging clauses are still declared')
+      assert_equal 'implemented', entry['status']
+      refute_match(/5\.2\.2\.8\.\(4\)-\(5\)/, entry['gaps'].to_s,
+                   'the DX staging clauses are closed (D-62) — no longer declared as gaps')
     end
     _, audit = sys2_reference
     coverage = audit.entries.find { |e| e[:step] == :coverage && e[:article] == '8.4.4.12.' }
     refute_nil coverage
-    assert_equal :warning, coverage[:level]
+    assert_equal :info, coverage[:level]
   end
 
   # ---- the QAQC checker must stop contradicting the builder ----

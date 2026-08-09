@@ -54,8 +54,16 @@ module OpenStudioNECB
 
     # mapping: {archetype_name => :all | [space names]}. At most one archetype
     # may be :all (every counted space not claimed by an explicit list).
-    # Returns {archetypes: {name => {spaces:, area_m2:}}, unmapped: {spaces:, area_m2:},
-    #          total_area_m2:}. Raises on unknown archetypes/spaces/double-mapping.
+    # @param model [OpenStudio::Model::Model] the proposed model (areas computed from it)
+    # @param mapping [Hash{String => Symbol, Array<String>}] archetype name =>
+    #   :all (or 'all') or an explicit list of space names
+    # @param audit [AuditLog]
+    # @return [Hash] the resolved mapping —
+    #   { archetypes: { archetype name => { spaces: [OpenStudio::Model::Space], area_m2: Float } },
+    #     unmapped: { spaces: [OpenStudio::Model::Space], area_m2: Float },
+    #     total_area_m2: Float }
+    # @raise [ArgumentError] on unknown archetypes, unknown space names,
+    #   double-mapped spaces, or more than one :all archetype
     def resolve!(model, mapping, audit:)
       table = Tiers.eui_data['archetype_eui_kwh_per_m2']
       unknown = mapping.keys.map(&:to_s) - table.keys
@@ -106,6 +114,9 @@ module OpenStudioNECB
     # proportionally among the listed archetypes so the BET areas sum to the
     # model's total. Over-assignment is impossible by construction (areas come
     # from disjoint space sets).
+    # @param resolved [Hash] resolve! output
+    # @param audit [AuditLog]
+    # @return [Hash{String => Float}] archetype name => BET floor area in m2
     def bet_areas(resolved, audit:)
       base = resolved[:archetypes].transform_values { |v| v[:area_m2] }
       mapped = base.values.sum
@@ -122,6 +133,11 @@ module OpenStudioNECB
     # used" at >=90% coverage; the Table note bounds HDD < 9000. On the pure
     # :eui path these REFUSE (a verdict outside applicability is not a
     # determination); the supplement instead reports not-computed.
+    # @param resolved [Hash] resolve! output
+    # @param hdd [Numeric] heating degree-days below 18 degC
+    # @param audit [AuditLog]
+    # @return [void]
+    # @raise [ArgumentError] when the 8.4.4 EUI path is not applicable
     def applicability!(resolved, hdd:, audit:)
       problems = applicability_problems(resolved, hdd: hdd, audit: audit)
       return if problems.empty?
@@ -129,6 +145,11 @@ module OpenStudioNECB
       raise(ArgumentError, "the 8.4.4 EUI path is NOT applicable: #{problems.join('; ')}")
     end
 
+    # Non-raising form of applicability!.
+    # @param resolved [Hash] resolve! output
+    # @param hdd [Numeric] heating degree-days below 18 degC
+    # @param audit [AuditLog]
+    # @return [Array<String>] human-readable problems (empty when applicable)
     def applicability_problems(resolved, hdd:, audit:)
       rules = Tiers.eui_data['applicability']
       problems = []
@@ -196,6 +217,11 @@ module OpenStudioNECB
     # PROFILES hourly over the year (SCHEDULE_TOL) against the archetype
     # letter's NECB schedules. Conservative: anything not comparable is a
     # mismatch (worst case is an unnecessary second run, never a wrong verdict).
+    # @param model [OpenStudio::Model::Model] the proposed model
+    # @param resolved [Hash] resolve! output
+    # @param vintage [String] NECB vintage (schedule targets come from its data)
+    # @param audit [AuditLog]
+    # @return [Hash] { conformant: Boolean, mismatches: Array<String> }
     def conformance(model, resolved, vintage:, audit:)
       mismatches = []
       scratch = OpenStudio::Model::Model.new
@@ -222,6 +248,11 @@ module OpenStudioNECB
     # space type per (original type x archetype), SWH flows per occupant, and
     # zone thermostats from the archetype letter. Lighting power, lighting
     # operation, OA and unmapped spaces are left as modeled (see module doc).
+    # @param model [OpenStudio::Model::Model] an already-cloned model (rewritten in place)
+    # @param resolved [Hash] resolve! output FOR THIS model (space objects must belong to it)
+    # @param vintage [String] NECB vintage (schedule source)
+    # @param audit [AuditLog]
+    # @return [OpenStudio::Model::Model] the normalized model
     def normalize!(model, resolved, vintage:, audit:)
       apply = OpenStudioLoads::NECB::Apply
       clones = {}
@@ -522,5 +553,14 @@ module OpenStudioNECB
     end
 
     def fmt(value, precision = 4) = format("%.#{precision}f", value)
+
+    # ---- internals (not API) ----
+    private_class_method :defaults_for, :synthetic_record, :counted_spaces, :area_of,
+                         :check_space_values, :check_outdoor_air,
+                         :check_space_schedules, :check_zone_setpoints,
+                         :inherited_schedule, :target_schedules,
+                         :schedules_equivalent?, :year_days, :archetype_dsoa,
+                         :swh_target_m3s, :space_swh_flow_m3s, :normalize_swh!,
+                         :force_zone_thermostats!, :within?, :fmt
   end
 end

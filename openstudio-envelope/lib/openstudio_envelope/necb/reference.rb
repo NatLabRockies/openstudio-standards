@@ -359,7 +359,7 @@ module OpenStudioEnvelope
           entry[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 }
         end
         coverage['articles'].each do |art|
-          applied = cited.select { |a, _| a.start_with?(art['article'].sub(/\.\z/, '')) }.values.sum
+          applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
           inputs = { status: art['status'], decisions_citing: applied }
           inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
           if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
@@ -378,6 +378,11 @@ module OpenStudioEnvelope
           end
         end
       end
+
+      # ---- internals (not API) ----
+      private_class_method :scale_fenestration_to_limits, :apply_roof_absorptance,
+                           :strip_shading, :apply_lightweight_construction,
+                           :emit_article_coverage
     end
 
     # Facade: reference envelope IN PLACE on the caller's clone.

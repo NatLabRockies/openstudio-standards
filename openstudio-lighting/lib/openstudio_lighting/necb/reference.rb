@@ -92,6 +92,9 @@ module OpenStudioLighting
         audit.decision(:lighting_reference, "dwelling units modeled at #{lpd} W/m2",
                        inputs: { lights_instances: changed }, article: "#{prefix}.5.(2)")
       end
+
+      # ---- internals (not API) ----
+      private_class_method :apply_dwelling_rule
     end
 
     def self.reference_lighting(model, **kwargs)

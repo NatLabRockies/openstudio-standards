@@ -417,6 +417,12 @@ module OpenStudioLighting
         end
         overlap
       end
+
+      # ---- internals (not API) ----
+      private_class_method :visible_transmittance, :vertical?, :horizontal?,
+                           :sidelit_polygons, :toplit_polygon, :set_z_zero, :join,
+                           :join_failures, :subtract, :dedupe, :total_area,
+                           :overlap_area
     end
   end
 end

@@ -33,7 +33,7 @@ module OpenStudioSHW
         cited = Hash.new(0)
         audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
         coverage['articles'].each do |article|
-          applied = cited.select { |a, _| a.start_with?(article['article'].to_s.sub(/\.\z/, '').sub(/\(\d+\).*/, '')) }.values.sum
+          applied = cited.select { |a, _| a.start_with?(article['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
           inputs = { status: article['status'], decisions_citing: applied }
           inputs[:gap_owner] = article['gap_owner'] if article['gap_owner']
           if %w[implemented satisfied_by_clone host_scope].include?(article['status'])
@@ -52,6 +52,9 @@ module OpenStudioSHW
           end
         end
       end
+
+      # ---- internals (not API) ----
+      private_class_method :emit_article_coverage
     end
 
     def self.reference_shw(model, **kwargs)

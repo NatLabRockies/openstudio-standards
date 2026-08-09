@@ -534,6 +534,12 @@ module OpenStudioLighting
         { xmin: points.map(&:x).min, xmax: points.map(&:x).max,
           ymin: points.map(&:y).min, ymax: points.map(&:y).max, zmin: lowest_z }
       end
+
+      # ---- internals (not API) ----
+      private_class_method :dist, :triangle_height, :wall_point_distance,
+                           :zone_fraction, :necb2020_spaces, :necb_default_spaces,
+                           :lowest_floor_area, :daylighted?, :illuminance_setpoint,
+                           :lowest_floor_bounds
     end
 
     def self.add_daylighting_controls(model, **kwargs)

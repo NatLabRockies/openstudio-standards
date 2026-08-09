@@ -163,12 +163,6 @@ module OpenStudioHVAC
 
     # ------------------------------------------------------------------ public
 
-    # Build every catalog system on the fixture, extract its topology, and render
-    # the whole catalog as one self-contained HTML string.
-    #
-    # @param path [String, nil] if given, the HTML is also written here
-    # @param fixture [String] the seed .osm (default: bundled 5ZoneNoHVAC)
-    # @return [String] the self-contained HTML document
     # Families whose systems are packaged/per-zone (one unit or air loop PER
     # zone): building them across all fixture zones just replicates identical
     # loops, so a single zone is the succinct, representative diagram. Every
@@ -176,6 +170,12 @@ module OpenStudioHVAC
     # zones, so it keeps the full zone set to show that.
     SINGLE_ZONE_FAMILIES = %w[psz zone_terminal baseboards unit_heaters furnace evap_cooler vrf].freeze
 
+    # Build every catalog system on the fixture, extract its topology, and render
+    # the whole catalog as one self-contained HTML string.
+    #
+    # @param path [String, nil] if given, the HTML is also written here
+    # @param fixture [String] the seed .osm (default: bundled 5ZoneNoHVAC)
+    # @return [String] the self-contained HTML document
     def to_html(path = nil, fixture: FIXTURE)
       rows = Catalog.rows
       # Load + thermostat the fixture ONCE, then clone it per system. Reloading
@@ -789,6 +789,9 @@ module OpenStudioHVAC
     # -------------------------------------------------------------- SVG utils
     # Minimal inline-SVG primitives (mirrors necb Report::SVG). No external assets.
 
+    # HTML-escape a value for attribute/text interpolation.
+    # @param value [Object] stringified with #to_s
+    # @return [String] with &, <, > and " escaped
     def esc(value)
       value.to_s.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').gsub('"', '&quot;')
     end
@@ -830,6 +833,7 @@ module OpenStudioHVAC
     # add ~40 tiny <use> tags, not ~40 fat data-URIs. See THIRD_PARTY_NOTICES.md.
 
     # The hidden master defs: one <symbol> per icon, the data-URI embedded once.
+    # @return [String] a zero-size inline <svg> defs block to embed once per page
     def icon_defs
       syms = ICON_DATA.map do |stem, info|
         %(<symbol id="icon-#{stem}" viewBox="0 0 #{info[:w]} #{info[:h]}" ) +
@@ -1675,5 +1679,27 @@ module OpenStudioHVAC
         * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       }
     CSS
+
+    # ---- internals (not API) ----
+    private_class_method :loop_display_label, :prepared_base, :build_card, :load_model,
+                         :extract, :air_loops, :plant_loops, :plant_kind, :decomp_cells,
+                         :air_demand, :zone_terminal, :terminal_label, :zone_hvac_equipment,
+                         :demand_cell, :demand_spec, :zone_or_group, :zone_of, :component_name,
+                         :real?, :decompose_side, :real_cells, :decompose_supply_plant,
+                         :decompose_demand_plant, :decompose_air_supply, :supply_columns,
+                         :demand_branch_lists, :classify_component, :classify,
+                         :component_label, :boiler_label, :chiller_label, :clean_idd,
+                         :component_tooltip, :component_attrs, :add_opt_attr, :add_flag_attr,
+                         :fan_type, :zone_equipment, :zone_equipment_label, :open_svg,
+                         :svg_rect, :svg_line, :svg_text, :r, :icon_use, :component_mark,
+                         :glyph, :loop_diagram_svg, :air_loop_diagram, :plant_loop_diagram,
+                         :render_cascade, :measure_supply, :supply_col_dims, :draw_supply,
+                         :draw_supply_parallel, :supply_cell, :cell, :measure_demand,
+                         :draw_demand, :air_demand_branches, :plant_demand_branches,
+                         :plant_branch_cell, :zone_container_rows, :zone_cell, :center_band,
+                         :band_label, :closing_risers, :tap_dot, :row_glyph, :node_dot,
+                         :setpoint_tick, :flow_arrow, :zone_equipment_svg, :truncate,
+                         :wrap_label, :assemble, :topbar, :legend, :sidebar, :detail_html,
+                         :tabs_html, :footer, :script
   end
 end

@@ -43,9 +43,20 @@ module OpenStudioNECB
     #   period cannot determine code compliance and is flagged in the report
     # @param costing [Boolean] cost BOTH models (HVAC via openstudio-hvac + envelope
     #   via openstudio-envelope) into the same audit
+    # @param city [String, nil] costing location (with province_state); nil = derived
+    #   from the model's site, warning when underivable
+    # @param province_state [String, nil] costing location — ALSO gates the NECB 2025
+    #   Part 11 operational-GHG determination (provincial emission factors); a 2025
+    #   annual run without it silently skips the GHG level
+    # @param costs_csv [String, nil] path to the licensed RS-Means costs CSV —
+    #   runtime injection only, never committed (falls back to
+    #   OPENSTUDIO_COSTING_DIR, then the public vendored sheets)
     # @param thermal_bridging [String, Hash, nil] TBD PSI set for the envelope transforms
+    # @param actual_roof_absorptance_used [Boolean] declare that the proposed models
+    #   its ACTUAL roof solar absorptance — the reference's roof absorptance is then
+    #   set to 0.7 per 8.4.4.3.(1)/(2); when false (default) the reference keeps the
+    #   proposed's value
     # @param audit [AuditLog, nil]
-    # @return [ComplianceResult]
     # @param max_capacity_iterations [Integer] 8.4.1.2.(5) bound: how many times a
     #   failing building's capacities may be incrementally increased (0 disables)
     # @param capacity_step [Float] multiplier for a zone's (or, on fallback, the
@@ -75,6 +86,19 @@ module OpenStudioNECB
     #   requires the photocontrols, so a reference without them is
     #   non-conformant and sets a target more lenient than the code. Pass false
     #   to opt out — the run then warns that (9)-(12) went unevaluated.
+    # @param eui_supplement [Hash, nil] 2025 reference-path runs only: ALSO compute
+    #   the 8.4.4 archetype-EUI verdict alongside the reference comparison. Keys:
+    #   archetypes: {archetype => :all | [space names]} (required),
+    #   run_normalized: true to clone-normalize-rerun when the proposed does not
+    #   conform to Table 8.4.4.2 (default: report not-computed with the mismatch
+    #   list rather than silently doubling the simulation cost)
+    # @param report_html [Boolean] write run_dir/compliance_report.html (the
+    #   self-contained AHJ report)
+    # @param report_options [Hash] report header fields — project_name:, address:,
+    #   permit_number:, prepared_by:, date:, professional_of_record:
+    # @return [ComplianceResult] Struct of (proposed_model, reference_model,
+    #   report, audit, compliant, run_dir); compliant is nil unless
+    #   simulate: :annual with a full-year run period
     def performance_compliance(model, vintage: '2020', weather: {}, building: nil,
                                hdd: nil, run_dir:, simulate: :annual, run_period: nil,
                                costing: false, city: nil, province_state: nil,
@@ -100,6 +124,8 @@ module OpenStudioNECB
       FileUtils.mkdir_p(run_dir)
       report = {}
       begin
+      # 1. load + validate the input model (on-ramp for bare geometry, then the
+      #    simulate-ability gates and the NECB space-type pre-flight)
       proposed = nil
       audit.with_building('input model') do
         proposed = load_model(model, audit: audit)
@@ -122,6 +148,7 @@ module OpenStudioNECB
                      inputs: { vintage: vintage, simulate: simulate, costing: costing },
                      article: '8.4.1.2.(1)')
 
+      # 2. attach weather, resolve heating degree-days
       audit.building = 'proposed building'
       if simulate != :none
         %i[epw ddy].each do |key|
@@ -134,7 +161,7 @@ module OpenStudioNECB
       hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
       raise(ArgumentError, 'HDD unresolvable: pass hdd: or weather with a recognized site') if hdd.nil?
 
-      # 1. size the PROPOSED building (selection thresholds + efficiencies + costing
+      # 3. size the PROPOSED building (selection thresholds + efficiencies + costing
       #    all need capacities; the domain gems never simulate)
       if simulate == :none
         audit.warn(:compliance, 'proposed is UNSIZED (simulate: :none) — data-centre kW thresholds ' \
@@ -159,7 +186,7 @@ module OpenStudioNECB
       report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
                  'proposed' => {}, 'reference' => {} }
 
-      # 1b. the proposed ANNUAL run — BEFORE the reference build (D-52). The
+      # 4. the proposed ANNUAL run — BEFORE the reference build (D-52). The
       # proposed annual depends on nothing downstream (the reference is a
       # clone; every later use of the proposed is read-only), so running it
       # here costs zero extra simulations and hands the reference builder the
@@ -181,7 +208,8 @@ module OpenStudioNECB
         proposed_annual_data = heating_election_data(proposed, inventory, audit) if hp_present
       end
 
-      # 2. reference building: HVAC then envelope on ONE clone, same audit
+      # 5. reference building: HVAC, envelope, lighting (+ photocontrols) and
+      #    SHW transforms on ONE clone, same audit
       reference = nil
       lighting_prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       audit.with_building('reference building') do
@@ -226,8 +254,9 @@ module OpenStudioNECB
                  'space-use data).',
                  article: '8.4.3.2.(1)-(2)')
 
-      # 3. size the reference, then re-apply efficiencies on sized equipment
-      #    (the openstudio-hvac contract: efficiency rows are capacity-binned)
+      # 6. size the reference, then re-apply efficiencies on sized equipment
+      #    (the openstudio-hvac contract: efficiency rows are capacity-binned),
+      #    plus the post-sizing determinations (5.2.10.1 ERV, 5.2.2.7 economizers)
       if simulate != :none
         audit.with_building('reference building') do
           # Loops COPIED from the proposed (the Table -A residential identity,
@@ -254,9 +283,9 @@ module OpenStudioNECB
 
       compliant = nil
 
-      # 4. the energy comparison (8.4.1.2.(2)-(4)) with the sentence-(5) capacity
-      #    iteration loop. The PROPOSED annual already ran in step 1b (D-52);
-      #    only the reference's annual is new here.
+      # 7. the reference ANNUAL run, then the energy comparison (8.4.1.2.(2)-(4))
+      #    with the sentence-(5) capacity iteration loop. The PROPOSED annual
+      #    already ran in step 4 (D-52); only the reference's annual is new here.
       if simulate == :annual
         # Stamp the reference's first annual — step 4 sits outside the earlier
         # with_building blocks and its run entry was landing unattributed.
@@ -272,7 +301,7 @@ module OpenStudioNECB
                                 'no energy comparison performed (compliance undetermined)')
       end
 
-      # NECB 2025 Part 11: operational GHG performance level (needs a province)
+      # 8. NECB 2025 Part 11: operational GHG performance level (needs a province)
       if vintage.to_s == '2025' && simulate == :annual && province_state
         proposed_ghg = Tiers.operational_ghg_kg(report['proposed'], province_state)
         reference_ghg = Tiers.operational_ghg_kg(report['reference'], province_state)
@@ -283,11 +312,11 @@ module OpenStudioNECB
         end
       end
 
-      # 5. unified costing of BOTH models (same audit)
+      # 9. optional: unified costing of BOTH models (same audit)
       cost_models(proposed, reference, report, city: city, province_state: province_state,
                   costs_csv: costs_csv, audit: audit) if costing
 
-      # eui_supplement (2025): the 8.4.4 archetype-EUI verdict alongside the
+      # 10. optional (2025): the 8.4.4 archetype-EUI verdict alongside the
       # reference-path run. The two paths simulate DIFFERENT proposed
       # buildings — as-specified (8.4.3.2) vs normalized to Table 8.4.4.2
       # (8.4.4.2.(1)) — so the reference-path annual result serves the EUI
@@ -300,6 +329,8 @@ module OpenStudioNECB
                                                     run_period, vintage, audit)
       end
 
+      # 11. emit article coverage; write report.json / audit.json / audit.txt
+      #     (+ the optional HTML compliance report)
       emit_article_coverage(vintage, audit)
       report['compliant'] = compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
@@ -607,19 +638,19 @@ module OpenStudioNECB
       status = unmet_status(report, vintage)
       audit.decision(:compliance,
                      status[:heating_ok] ? 'unmet heating hours within 100 h for both buildings' : 'unmet heating hours EXCEED 100 h',
-                     inputs: { proposed_h: status[:heat_p], reference_h: status[:heat_r], limit_h: 100 },
+                     inputs: { proposed_h: status[:proposed_heating_h], reference_h: status[:reference_heating_h], limit_h: 100 },
                      article: '8.4.1.2.(3)')
       if status[:cooling_vacuous]
         audit.decision(:compliance,
                        'sentence (4) is vacuous — the proposed building has no mechanical cooling ' \
                        '(the clause applies to thermal blocks "for which mechanical cooling is provided"; ' \
                        'explicit in the 2025 wording, applied consistently for 2020)',
-                       inputs: { proposed_h: status[:cool_p], reference_h: status[:cool_r] },
+                       inputs: { proposed_h: status[:proposed_cooling_h], reference_h: status[:reference_cooling_h] },
                        article: '8.4.1.2.(4)')
       else
         audit.decision(:compliance,
                        status[:cooling_ok] ? 'unmet cooling hours within the allowance over reference' : 'unmet cooling hours EXCEED the allowance',
-                       inputs: { proposed_h: status[:cool_p], reference_h: status[:cool_r],
+                       inputs: { proposed_h: status[:proposed_cooling_h], reference_h: status[:reference_cooling_h],
                                  allowance_h: status[:allowance].round(1) },
                        article: '8.4.1.2.(4)')
       end
@@ -640,31 +671,31 @@ module OpenStudioNECB
     # (4): 2020 wording is +10% of reference; 2025's 8.4.5 path allows +10% or
     # 20 h, whichever is greater.
     def unmet_status(report, vintage)
-      heat_p = report['proposed'].dig('unmet_occupied_hours', 'heating')
-      heat_r = report['reference'].dig('unmet_occupied_hours', 'heating')
-      cool_p = report['proposed'].dig('unmet_occupied_hours', 'cooling')
-      cool_r = report['reference'].dig('unmet_occupied_hours', 'cooling')
+      proposed_heating_h = report['proposed'].dig('unmet_occupied_hours', 'heating')
+      reference_heating_h = report['reference'].dig('unmet_occupied_hours', 'heating')
+      proposed_cooling_h = report['proposed'].dig('unmet_occupied_hours', 'cooling')
+      reference_cooling_h = report['reference'].dig('unmet_occupied_hours', 'cooling')
 
-      allowance = cool_r.to_f * 0.10
+      allowance = reference_cooling_h.to_f * 0.10
       allowance = [allowance, 20.0].max if vintage.to_s == '2025'
-      heating_p_ok = !heat_p.nil? && heat_p <= HEATING_UNMET_LIMIT_H
-      heating_r_ok = !heat_r.nil? && heat_r <= HEATING_UNMET_LIMIT_H
+      proposed_heating_ok = !proposed_heating_h.nil? && proposed_heating_h <= HEATING_UNMET_LIMIT_H
+      reference_heating_ok = !reference_heating_h.nil? && reference_heating_h <= HEATING_UNMET_LIMIT_H
 
       # Sentence (4) applies to thermal blocks "for which mechanical cooling is
       # provided" (explicit in the 2025 wording; applied consistently for 2020) —
       # a proposed building without mechanical cooling accrues passive-overheating
       # "unmet cooling" hours that are NOT a cooling-capacity shortfall.
       cooling_vacuous = report['proposed']['mechanical_cooling'] == false
-      cooling_ok = cooling_vacuous || (!cool_p.nil? && !cool_r.nil? && cool_p <= cool_r + allowance)
-      indeterminate = [heat_p, heat_r].any?(&:nil?) ||
-                      (!cooling_vacuous && [cool_p, cool_r].any?(&:nil?))
+      cooling_ok = cooling_vacuous || (!proposed_cooling_h.nil? && !reference_cooling_h.nil? && proposed_cooling_h <= reference_cooling_h + allowance)
+      indeterminate = [proposed_heating_h, reference_heating_h].any?(&:nil?) ||
+                      (!cooling_vacuous && [proposed_cooling_h, reference_cooling_h].any?(&:nil?))
 
-      { heat_p: heat_p, heat_r: heat_r, cool_p: cool_p, cool_r: cool_r,
+      { proposed_heating_h: proposed_heating_h, reference_heating_h: reference_heating_h, proposed_cooling_h: proposed_cooling_h, reference_cooling_h: reference_cooling_h,
         allowance: allowance, indeterminate: indeterminate,
-        heating_p_ok: heating_p_ok, heating_r_ok: heating_r_ok,
-        heating_ok: heating_p_ok && heating_r_ok,
+        proposed_heating_ok: proposed_heating_ok, reference_heating_ok: reference_heating_ok,
+        heating_ok: proposed_heating_ok && reference_heating_ok,
         cooling_ok: cooling_ok, cooling_vacuous: cooling_vacuous,
-        all_ok: heating_p_ok && heating_r_ok && cooling_ok }
+        all_ok: proposed_heating_ok && reference_heating_ok && cooling_ok }
     end
 
     # Any mechanical cooling in the model? (cooling coils, chillers, evaporative
@@ -716,8 +747,8 @@ module OpenStudioNECB
 
         iteration = index + 1
         bumps = {}
-        bumps['proposed'] = { heating: !status[:heating_p_ok], cooling: !status[:cooling_ok] }
-        bumps['reference'] = { heating: !status[:heating_r_ok], cooling: false }
+        bumps['proposed'] = { heating: !status[:proposed_heating_ok], cooling: !status[:cooling_ok] }
+        bumps['reference'] = { heating: !status[:reference_heating_ok], cooling: false }
         record = { 'iteration' => iteration, 'bumped' => {} }
 
         { 'proposed' => proposed, 'reference' => reference }.each do |label, model|
@@ -774,9 +805,9 @@ module OpenStudioNECB
         # fails for equipment that does not exist) — iterating further is futile.
         after = unmet_status(report, vintage)
         improvements = []
-        improvements << (status[:heat_p].to_f - after[:heat_p].to_f) if bumps['proposed'][:heating]
-        improvements << (status[:cool_p].to_f - after[:cool_p].to_f) if bumps['proposed'][:cooling]
-        improvements << (status[:heat_r].to_f - after[:heat_r].to_f) if bumps['reference'][:heating]
+        improvements << (status[:proposed_heating_h].to_f - after[:proposed_heating_h].to_f) if bumps['proposed'][:heating]
+        improvements << (status[:proposed_cooling_h].to_f - after[:proposed_cooling_h].to_f) if bumps['proposed'][:cooling]
+        improvements << (status[:reference_heating_h].to_f - after[:reference_heating_h].to_f) if bumps['reference'][:heating]
         next if after[:all_ok] || improvements.any? { |i| i >= 1.0 }
 
         audit.warn(:compliance,
@@ -956,7 +987,7 @@ module OpenStudioNECB
       cited = Hash.new(0)
       audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
       coverage['articles'].each do |art|
-        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\.\z/, '').sub(/\(\d+\).*/, '')) }.values.sum
+        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
         inputs = { status: art['status'], decisions_citing: applied }
         inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
         if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
@@ -997,6 +1028,18 @@ module OpenStudioNECB
 
     # The 8.4.4 supplement verdict on a reference-path run. Returns the
     # report['eui_path'] hash. See the call site for the check-first contract.
+    # @param proposed [OpenStudio::Model::Model] the proposed model (after its annual run)
+    # @param options [Hash] eui_supplement options — archetypes: (required),
+    #   run_normalized: [Boolean], process_loads_kwh: [Numeric]
+    # @param hdd [Numeric] heating degree-days below 18 degC
+    # @param report [Hash] the in-progress compliance report (proposed results read from it)
+    # @param run_dir [String] run directory (normalized annual runs land under it)
+    # @param run_period [Object, nil] optional shortened run period (passed to run_annual)
+    # @param vintage [String] NECB vintage ('2025' — the EUI path is 2025-only)
+    # @param audit [AuditLog]
+    # @return [Hash] the report['eui_path'] hash — 'computed' => false with
+    #   'reason'/'mismatches', or 'computed' => true with 'bet_kwh', 'compliant',
+    #   'basis', 'lines' and the energy-tier fields
     def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period, vintage, audit)
       opts = options.transform_keys(&:to_sym)
       mapping = opts[:archetypes] or
@@ -1111,6 +1154,9 @@ module OpenStudioNECB
     # types, best three. Suggestion ONLY — auto-resolution was rejected because
     # 12 catalog pairs differ solely by a size threshold no string metric can
     # choose between.
+    # @param name [String] the unresolvable standardsSpaceType from the model
+    # @param catalog [Array<Hash>] NECB space-type records (each with 'space_type')
+    # @return [Array<String>] up to three catalog names, each single-quoted
     def suggest_space_types(name, catalog)
       tokens = name.downcase.scan(/[a-z0-9]+/) - %w[m2 sch]
       return [] if tokens.empty?
@@ -1122,5 +1168,14 @@ module OpenStudioNECB
              .max_by(3) { |cand, score| [score, -cand.length] }
              .map { |cand, _| "'#{cand}'" }
     end
+
+    # ---- internals (not API) ----
+    private_class_method :load_model, :validate_input_model!, :eui_compliance,
+                         :apply_necb_loads, :run_annual, :heating_election_data,
+                         :evaluate, :evaluate_unmet, :unmet_status,
+                         :mechanical_cooling?, :iterate_capacities, :bump_capacities,
+                         :failing_zone_targets, :next_sizing_factor,
+                         :bump_sizing_factors, :cost_models, :emit_article_coverage,
+                         :write_outputs, :flush_on_failure, :validate_space_types!
   end
 end

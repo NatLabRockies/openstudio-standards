@@ -332,6 +332,11 @@ module OpenStudioEnvelope
                        target: c.nameString, inputs: { target_u: target.round(4) }, article: 'Table 3.2.2.3.')
         c
       end
+
+      # ---- internals (not API) ----
+      private_class_method :assign_interzone_envelope, :target_conductance,
+                           :assign_surface, :assign_ground_floor, :apply_ground_strip,
+                           :assign_subsurface, :subsurface_target_construction
     end
 
     # Facade

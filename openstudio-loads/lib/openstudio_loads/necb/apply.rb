@@ -299,7 +299,7 @@ module OpenStudioLoads
         cited = Hash.new(0)
         audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
         coverage['articles'].each do |article|
-          applied = cited.select { |a, _| a.start_with?(article['article'].sub(/\.\z/, '')) }.values.sum
+          applied = cited.select { |a, _| a.start_with?(article['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
           inputs = { status: article['status'], decisions_citing: applied }
           inputs[:gap_owner] = article['gap_owner'] if article['gap_owner']
           if %w[implemented satisfied_by_clone host_scope].include?(article['status'])
@@ -371,6 +371,12 @@ module OpenStudioLoads
         end
         schedule
       end
+
+      # ---- internals (not API) ----
+      private_class_method :apply_to_space_type, :apply_ventilation,
+                           :apply_infiltration, :assign_zone_thermostats,
+                           :emit_article_coverage, :single_instance,
+                           :set_fractions, :comfort_schedule
     end
 
     # Facade: apply NECB loads to every tagged space type.

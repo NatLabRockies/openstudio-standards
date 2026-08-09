@@ -81,6 +81,9 @@ module OpenStudioLighting
                         inputs: { design_w: watts.to_f.round(1) }, article: '4.2.3.1.')
         lights
       end
+
+      # ---- internals (not API) ----
+      private_class_method :data, :sum_rows
     end
   end
 end

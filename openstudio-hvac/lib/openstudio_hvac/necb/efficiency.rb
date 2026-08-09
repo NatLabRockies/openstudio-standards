@@ -33,6 +33,7 @@ module OpenStudioHVAC
       # The efficiency vintage to actually apply: the requested vintage when its tables
       # are vendored, else the fallback its rules file declares (e.g. NECB 2025 falls
       # back to 2020 until the restructured Table 5.2.12.1 series is transcribed).
+      # @param vintage [String] requested NECB vintage (e.g. '2020', '2025')
       # @return [Array(String, String or nil)] [effective vintage, fallback reason or nil]
       def effective_vintage(vintage)
         return [vintage.to_s, nil] if File.exist?(File.join(RULES_DIR, "efficiencies_#{vintage}.json"))
@@ -48,6 +49,9 @@ module OpenStudioHVAC
       # @param model [OpenStudio::Model::Model] sized model
       # @param vintage [String] e.g. '2020'
       # @param audit [AuditLog, nil]
+      # @param proposed [OpenStudio::Model::Model, nil] SIZED proposed model,
+      #   enabling the 8.4.4.14.(1)-(3) pump power transfer
+      # @return [true]
       def apply(model, vintage: '2020', audit: nil, proposed: nil)
         requested_vintage = vintage.to_s
         vintage, fallback_reason = effective_vintage(vintage)
@@ -109,6 +113,11 @@ module OpenStudioHVAC
       # hard-set a stage capacity: hard-sized equipment stops responding to the
       # 8.4.1.2.(5) capacity iteration.
       #
+      # @param model [OpenStudio::Model::Model] sized model (modified in place)
+      # @param rules [Hash] the reference ruleset (dx_staging / furnace_staging /
+      #   economizer_dx_staging blocks)
+      # @param vintage [String] NECB vintage ('2020' or '2025')
+      # @param audit [AuditLog, nil]
       # @return [Hash{String => Float}] coil handle -> the TOTAL capacity measured
       #   before re-staging. Growing a coil appends a stage EnergyPlus has never
       #   sized, so the new top stage reads back nil and shrinking one leaves a
@@ -248,6 +257,11 @@ module OpenStudioHVAC
       # at the new k/N increments. An unchanged count is left untouched — the
       # stages are already autosized from the build, and re-autosizing would
       # wipe the 8.4.4.13.(2)(c) heating=cooling pinning a previous pass applied.
+      # @param coil [OpenStudio::Model::CoilCoolingDXMultiSpeed,
+      #   OpenStudio::Model::CoilHeatingDXMultiSpeed,
+      #   OpenStudio::Model::CoilHeatingGasMultiStage] staged coil
+      # @param stages [Integer] target stage count (1..MAX_STAGES)
+      # @return [void]
       def resize_stages(coil, stages)
         model = coil.model
         before = coil.stages.size
@@ -853,6 +867,9 @@ module OpenStudioHVAC
 
       # ---------------- capacities ----------------
 
+      # Unwrap an SDK optional numeric to a Float, or nil when uninitialized.
+      # @param value [OpenStudio::OptionalDouble, Numeric, nil]
+      # @return [Float, nil]
       def optional_f(value)
         return nil if value.nil?
         return value.to_f unless value.respond_to?(:is_initialized)
@@ -1344,12 +1361,38 @@ module OpenStudioHVAC
         end
         true
       end
+
+      # ---- internals (not API) ----
+      private_class_method :data, :apply_stage_flow_ratios, :stage_multispeed_coil,
+                           :economizer_stage_floor, :top_stage_capacity,
+                           :audit_electric_resistance_heating, :audit_staging_skips,
+                           :apply_fan_power_curve, :apply_pump_rules,
+                           :apply_pump_power_cap, :pump_cap_basis, :swh_loop?,
+                           :reconcile_pump_head, :transfer_pump_power,
+                           :proposed_pump_stats, :align_heat_pump_heating_capacity,
+                           :align_staged_heat_pump, :find_row, :in_capacity_range?,
+                           :numeric?, :date_ok?, :parse_date, :seer_to_cop_no_fan,
+                           :hspf_to_cop_no_fan, :kw_per_ton_to_cop,
+                           :afue_to_thermal_eff, :combustion_eff_to_thermal_eff,
+                           :cop_heating_to_cop_heating_no_fan, :eer_to_cop_no_fan,
+                           :w_to_btu_per_hr, :w_to_kbtu_per_hr, :w_to_tons, :curve,
+                           :set_limits, :apply_boiler, :boiler_thermal_efficiency,
+                           :apply_chiller, :apply_tower_rules, :apply_dx_cooling,
+                           :apply_dx_cooling_multi, :dx_cooling_cop,
+                           :apply_dx_heating_multi, :dx_heating_cop, :apply_gas_multi,
+                           :apply_dx_heating, :apply_gas_coil, :paired_with_dx_heating?,
+                           :containing_unitary, :electric_or_no_heating?
     end
 
     # Facade: apply NECB minimum efficiencies to a sized model. Pass the sized
     # PROPOSED model via proposed: to enable the 8.4.4.14.(1)-(3) pump power
     # transfer (combined W/(L/s) by loop type); without it the Table 8.4.4.14
     # curves still apply and the skip is noted in the audit.
+    # @param model [OpenStudio::Model::Model] sized model (modified in place)
+    # @param vintage [String] NECB vintage ('2020' or '2025')
+    # @param audit [AuditLog, nil]
+    # @param proposed [OpenStudio::Model::Model, nil] SIZED proposed model for the pump transfer
+    # @return [true]
     def self.apply_efficiencies(model, vintage: '2020', audit: nil, proposed: nil)
       Efficiency.apply(model, vintage: vintage, audit: audit, proposed: proposed)
     end
@@ -1369,6 +1412,8 @@ module OpenStudioHVAC
     #
     # Call this before EVERY re-sizing run of a model that has already been
     # through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
+    # @param model [OpenStudio::Model::Model] efficiency-applied model (modified in place)
+    # @param audit [AuditLog, nil]
     # @return [Integer] pumps released
     def self.prepare_for_resizing(model, audit: nil)
       pumps = model.getPumpVariableSpeeds.reject { |p| p.ratedPowerConsumption.empty? } +

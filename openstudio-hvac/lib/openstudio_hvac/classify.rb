@@ -31,6 +31,11 @@ module OpenStudioHVAC
       'sys_4' => 'psz', 'sys_5' => 'fan_coils', 'sys_6' => 'vav_reheat'
     }.freeze
 
+    # Characterize a model's HVAC into the neutral facts hash (schema above).
+    # @param model [OpenStudio::Model::Model] any model (gem-built or foreign)
+    # @param audit [AuditLog, nil]
+    # @return [Hash] facts — { built_by_gem:, zone_groups: [...], plants: [...],
+    #   purchased_energy: { heating:, cooling: } } (see the module docstring)
     def self.characterize(model, audit: nil)
       plants = model.getPlantLoops.sort_by(&:nameString).map { |loop| plant_facts(loop, audit) }
       plant_by_name = plants.to_h { |p| [p[:name], p] }
@@ -471,6 +476,7 @@ module OpenStudioHVAC
     # with the proposed annual run's SQL sums (this gem never simulates) and
     # hands the joined data back to reference_hvac as `proposed_annual:`.
     #
+    # @param model [OpenStudio::Model::Model] the PROPOSED model
     # @return [Hash]
     #   :loops — { air loop name => { hp: [coil names], aux: [{name:, fuel:}] } }
     #   :zones — { zone name => [{name:, fuel:, variable:, role: :aux | :hp}] }
@@ -736,5 +742,18 @@ module OpenStudioHVAC
       end
     end
 
+    # ---- internals (not API) ----
+    private_class_method :plant_facts, :defined_district_heating_water?, :heating_loop?,
+                         :air_loop_group, :recognize_gem_name, :base_group,
+                         :outdoor_air_facts, :scan_heating_component,
+                         :record_plant_heat_pump, :zonal_water_heating_coil,
+                         :record_heat_pump, :external_source_loop?,
+                         :water_to_air_hp_source, :annotate_heat_pump_plants,
+                         :scan_cooling_component, :hydronic_fuels, :optional_kw,
+                         :aux_coil_entry, :zonal_heating_entries, :zonal_heating_coils,
+                         :terminal_facts, :merge_zonal_equipment, :terminal_like?,
+                         :zonal_hp_kind, :zonal_hp_coil, :zonal_fuels,
+                         :add_zonal_cooling_capacity, :zonal_group,
+                         :structural_family_guess
   end
 end

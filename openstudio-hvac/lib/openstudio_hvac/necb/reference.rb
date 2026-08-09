@@ -8,6 +8,9 @@ module OpenStudioHVAC
   module NECB
     RULES_DIR = File.expand_path('../data/necb', __dir__)
 
+    # Load (and memoize) the vendored NECB reference ruleset for a vintage.
+    # @param vintage [String] NECB vintage ('2020' or '2025')
+    # @return [Hash] parsed data/necb/reference_rules_<vintage>.json
     def self.rules(vintage)
       @rules ||= {}
       @rules[vintage.to_s] ||= begin
@@ -538,6 +541,9 @@ module OpenStudioHVAC
     # types are not re-derivable here). POST-SIZING pass, umbrella-called
     # alongside apply_energy_recovery: strips economizers from loops below
     # the trigger, loudly.
+    # @param model [OpenStudio::Model::Model] sized reference model (modified in place)
+    # @param audit [AuditLog, nil] audit to append to (a new one is created if nil)
+    # @return [AuditLog] the audit carrying every keep/strip decision
     def self.apply_economizer_thresholds(model, audit: nil)
       audit ||= AuditLog.new
       model.getAirLoopHVACs.sort_by(&:nameString).each do |air_loop|
@@ -705,7 +711,7 @@ module OpenStudioHVAC
       end
 
       coverage['articles'].each do |art|
-        applied = cited.select { |a, _| a.start_with?(art['article']) }.values.sum
+        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
         inputs = { status: art['status'], decisions_citing: applied }
         inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
         if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
@@ -741,6 +747,9 @@ module OpenStudioHVAC
       info
     end
 
+    # NECB standardsSpaceType per thermal zone (majority space type of the zone).
+    # @param model [OpenStudio::Model::Model]
+    # @return [Hash{String => String}] zone name => NECB space type ('' when untagged)
     def self.zone_space_types(model)
       model.getThermalZones.to_h do |zone|
         type = zone.spaces.filter_map do |space|
@@ -1139,6 +1148,7 @@ module OpenStudioHVAC
     # NOT copied: those determine the peak ventilation rate, which is sentence
     # (1)'s subject, and the reference realizes (1) through the cloned
     # DesignSpecification:OutdoorAir under ZoneSum.
+    # ==================== 8.4.4.15: demand-controlled ventilation follows the proposed ====================
     DCV_METHODS = %w[IndoorAirQualityProcedure IndoorAirQualityProcedureGenericContaminant
                      IndoorAirQualityProcedureCombined ProportionalControlBasedOnOccupancySchedule
                      ProportionalControlBasedOnDesignOccupancy ProportionalControlBasedOnDesignOARate].freeze
@@ -1206,6 +1216,7 @@ module OpenStudioHVAC
                  target: air_loop.nameString, article: article, ruling: 'D-54')
     end
 
+    # ==================== 8.4.4.18: reference fan specifications ====================
     # 8.4.4.18.(3): systems 1/3/4/5 -> supply fan 640 Pa @ 40% combined efficiency, no
     # return fan. 8.4.4.18.(4): system 6 -> supply 1000 Pa @ 55%, return 250 Pa @ 30%.
     def self.apply_fan_rules(air_loops, reference_system, ruleset, audit)
@@ -1240,6 +1251,7 @@ module OpenStudioHVAC
       end
     end
 
+    # ==================== 8.4.4.13.(2)(d): heat-pump heating cutoff ====================
     # 8.4.4.13.(2)(d): the reference heat pump shall not operate in heating mode below -10degC.
     def self.apply_heat_pump_limits(air_loops, ruleset, audit)
       cutoff = ruleset.fetch('heat_pump_reference')['heating_cutoff_oat_c']
@@ -1257,6 +1269,7 @@ module OpenStudioHVAC
       end
     end
 
+    # ==================== 8.4.4.19 / 5.2.10.1: energy recovery (post-sizing) ====================
     # 8.4.4.19 (2020) / 8.4.5.19 (2025): where Subsection 5.2.10 applies, the
     # reference system shall be modeled with energy recovery, used to preheat
     # the outside air — via NECB 2020/2025 Tables 5.2.10.1.-A/-B: the
@@ -1267,6 +1280,11 @@ module OpenStudioHVAC
     # it matters: a small high-%OA system is "R (required at all flow rates)"
     # under 2020 while the 2011 formula waves it through (permissive).
     # Idempotent: loops already carrying an HX are skipped.
+    # @param model [OpenStudio::Model::Model] SIZED model (needs supply/OA flows; modified in place)
+    # @param vintage [String] NECB vintage ('2020' or '2025')
+    # @param hdd [Numeric] heating degree-days below 18 degC for the location
+    # @param audit [AuditLog, nil] audit to append to (a new one is created if nil)
+    # @return [AuditLog] the audit carrying the per-loop 5.2.10.1 determinations
     def self.apply_energy_recovery(model, vintage: '2020', hdd:, audit: nil)
       audit ||= AuditLog.new
       rule = NECB.rules(vintage)['energy_recovery']
@@ -1322,6 +1340,12 @@ module OpenStudioHVAC
     # Table row by HDD, band by %OA. Cells: 'R' = required at all flow rates,
     # 'NR' = never, numeric = required at/above that supply flow (L/s).
     # Below the smallest band (<10% OA) is outside the Tables entirely -> NR.
+    # @param rule [Hash] the ruleset's 'energy_recovery' block
+    # @param mode [String] 'continuous' or 'non_continuous' operation
+    # @param hdd [Numeric] heating degree-days below 18 degC
+    # @param oa_pct [Numeric] minimum outdoor air as a percentage of supply (0-100)
+    # @param supply_l_s [Numeric] design supply flow in L/s
+    # @return [Array(Boolean, String)] [required?, threshold description]
     def self.erv_threshold_verdict(rule, mode, hdd, oa_pct, supply_l_s)
       bands = rule['oa_bands_pct']
       return [false, 'below 10% OA (outside Tables 5.2.10.1.-A/-B)'] if oa_pct < bands.first
@@ -1339,6 +1363,8 @@ module OpenStudioHVAC
     # (>= 8000 h/yr = continuously operating per the Table notes). Constant
     # schedules (incl. the SDK's Always On) count directly; rulesets are summed
     # hourly across the year; anything else is not computable (nil).
+    # @param air_loop [OpenStudio::Model::AirLoopHVAC]
+    # @return [Integer, nil] annual availability hours, or nil when not computable
     def self.annual_availability_hours(air_loop)
       schedule = air_loop.availabilitySchedule
       constant = schedule.to_ScheduleConstant
@@ -1353,6 +1379,9 @@ module OpenStudioHVAC
       days.sum { |d| (1..24).count { |h| d.getValue(OpenStudio::Time.new(0, h, 0, 0)).positive? } }
     end
 
+    # Unwrap an SDK optional numeric (flow, capacity, ...) to a value or nil.
+    # @param value [OpenStudio::OptionalDouble, Numeric, nil] SDK optional or plain numeric
+    # @return [Numeric, nil] the contained value, or nil when uninitialized
     def self.optional_flow(value)
       return value unless value.respond_to?(:is_initialized)
 
@@ -1413,6 +1442,18 @@ module OpenStudioHVAC
       erv
     end
 
+    # ==================== 8.4.4.8: oversizing caps + D-52 (2)(b) ====================
+    # The builders' GENERIC per-zone sizing factors. These sentinels MUST match
+    # the zone_heating/zone_cooling_sizing_factor values the sizing blocks in
+    # data/sizing.json stamp on generic systems (1.3/1.1) and on the HP builds
+    # (cooling 1.0, required "without oversizing" by 8.4.4.13.(2)(b)) — if
+    # sizing.json changes, change these WITH it, or the 8.4.4.8 cap below
+    # silently stops clearing the zone stamps (zone factors override the
+    # global Sizing:Parameters).
+    GENERIC_ZONE_HEATING_FACTOR = 1.3
+    GENERIC_ZONE_COOLING_FACTOR = 1.1
+    HP_ZONE_COOLING_FACTOR = 1.0
+
     # 8.4.4.8: reference oversizing = the lesser of the proposed oversizing and the cap
     # (30% heating / 10% cooling), applied via the model-wide sizing factors.
     def self.apply_oversizing_caps(proposed, reference, ruleset, audit)
@@ -1434,14 +1475,14 @@ module OpenStudioHVAC
       cleared = 0
       hp_pinned = 0
       reference.getSizingZones.each do |sz|
-        if (sz.zoneHeatingSizingFactor.get - 1.3).abs < 1e-9
+        if (sz.zoneHeatingSizingFactor.get - GENERIC_ZONE_HEATING_FACTOR).abs < 1e-9
           sz.resetZoneHeatingSizingFactor
           cleared += 1
         end
-        if (sz.zoneCoolingSizingFactor.get - 1.1).abs < 1e-9
+        if (sz.zoneCoolingSizingFactor.get - GENERIC_ZONE_COOLING_FACTOR).abs < 1e-9
           sz.resetZoneCoolingSizingFactor
           cleared += 1
-        elsif (sz.zoneCoolingSizingFactor.get - 1.0).abs < 1e-9
+        elsif (sz.zoneCoolingSizingFactor.get - HP_ZONE_COOLING_FACTOR).abs < 1e-9
           hp_pinned += 1 # the HP builders' deliberate 1.0 — preserved
         end
       rescue StandardError
@@ -1468,6 +1509,7 @@ module OpenStudioHVAC
                      article: '8.4.4.13.(2)(b)', ruling: 'D-52')
     end
 
+    # ==================== 8.4.4.13.(2)(g): the HP auxiliary-fuel election (D-52) ====================
     # 8.4.4.13.(2)(g)/(h) — the reference heat pump's terminal/auxiliary heating
     # energy type (D-52). The election is ANNUAL-ENERGY-based: among the energy
     # types used for terminal or auxiliary heating of the thermal blocks the
@@ -1488,6 +1530,14 @@ module OpenStudioHVAC
     # :external (water/ground), so (h) is only ever AFFIRMATIVELY established
     # for a source-less detection — which keeps the proxy instead, with the
     # inapplicability recorded, rather than guessing.
+    # @param group [Hash] one Classify.characterize group (the heat-pump system)
+    # @param facts [Hash] the full Classify.characterize output
+    # @param hp_rules [Hash, nil] the ruleset's heat-pump rules block (threshold source)
+    # @param annual [Hash, nil] proposed-annual delivered-heat data
+    #   ({loops: {name => {hp_j:, aux: [{fuel:, j:}]}}, zones: {name => [{role:, fuel:, j:}]}})
+    # @param audit [AuditLog, nil]
+    # @return [String, nil] elected reference energy-type variant (e.g. 'gas',
+    #   'electric'), or nil when sentence (g) does not elect (proxy applies)
     def self.heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit)
       threshold = (hp_rules || {})['aux_energy_type_threshold_fraction'] || 0.33
       if annual.nil?
@@ -1608,5 +1658,25 @@ module OpenStudioHVAC
                   target: group[:zones].join(','), article: '8.4.4.9.(4)')
       'electric'
     end
+
+    # ---- internals (not API) ----
+    private_class_method :category_for, :audit_museum_row, :assign, :condition_met?,
+                         :residential_assignment, :heat_pump_redirects?,
+                         :residential_compatible_cooling?, :finalize,
+                         :audit_terminal_secondary_split, :apply_zone_fan_rules,
+                         :purge_orphaned_ems, :apply_unitary_operating_schedule,
+                         :apply_operating_schedules, :emit_article_coverage,
+                         :clone_model, :building_info, :apply_economizers,
+                         :apply_water_economizer, :chilled_water_loops,
+                         :condenser_loop_for, :build_water_economizer,
+                         :reset_condenser_setpoint, :humidifier_kind,
+                         :air_loop_humidifier, :capture_humidification,
+                         :humidifier_energy_source, :scheduled_humidity_setpoint,
+                         :rebuild_humidification, :build_reference_humidifier,
+                         :elect_humidifier_kind, :attach_humidity_control,
+                         :apply_dcv, :audit_dcv_caveats, :apply_fan_rules,
+                         :set_fan_total_efficiency, :apply_heat_pump_limits,
+                         :add_energy_recovery, :apply_oversizing_caps,
+                         :election_scope, :energy_type_variant, :reference_energy_type
   end
 end

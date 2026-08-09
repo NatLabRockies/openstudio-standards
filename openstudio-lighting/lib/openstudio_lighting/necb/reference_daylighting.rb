@@ -137,6 +137,9 @@ module OpenStudioLighting
                        'reference interior visible reflectances set: floor 0.15 / walls 0.50 / ceiling 0.80',
                        inputs: { surfaces: changed }, article: "#{prefix}.5.(10)(b)")
       end
+
+      # ---- internals (not API) ----
+      private_class_method :set_reference_reflectances
     end
 
     def self.reference_daylighting(reference, **kwargs)

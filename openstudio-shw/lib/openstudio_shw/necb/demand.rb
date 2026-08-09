@@ -260,6 +260,10 @@ module OpenStudioSHW
         schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
         schedule
       end
+
+      # ---- internals (not API) ----
+      private_class_method :auto_size, :wrap_heat_pump, :build_loop,
+                           :add_water_use, :constant_schedule
     end
   end
 end

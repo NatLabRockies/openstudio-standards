@@ -14,6 +14,22 @@ module OpenStudioSHW
     module Efficiency
       module_function
 
+      # Table 6.2.2.1 storage-row boundaries (litres / watts). NOTE ON THE
+      # DATA SPLIT: the formula strings inside shw_rules_{2020,2025}.json are
+      # PROVENANCE DOCUMENTATION ONLY — the live coefficients are transcribed
+      # here (and in the formulas below), matching the legacy port this file
+      # declares. Editing the JSON strings changes nothing at runtime.
+      INSTANTANEOUS_MAX_L = 7.6         # gas instantaneous bound (Vr <= 7.6 L)
+      ELECTRIC_SL_BREAK_L = 270.0       # electric standby-loss formula switch
+      UEF_SMALL_MAX_W = 22_000          # <= 22 kW UEF rows
+      UEF_MEDIUM_MAX_W = 30_500         # the 22-30.5 kW UEF row
+      UEF_BIN1_MIN_L = 76.0             # 76-208 L UEF bin
+      UEF_BIN2_MIN_L = 208.0            # 208-380 L UEF bin
+      UEF_BIN2_MAX_L = 380.0
+      UEF_MEDIUM_MAX_L = 454.0          # volume cap on the 22-30.5 kW row
+      UA_DELTA_T_F = 70                 # tank-to-ambient design dT (deg F) in the
+                                        # standby-loss -> efficiency identity
+
       def apply_efficiency(water_heater, vintage: '2020', audit: nil)
         audit ||= AuditLog.new
         rules = NECB.rules(vintage)['efficiency']
@@ -36,7 +52,7 @@ module OpenStudioSHW
         # bounds gas instantaneous at Vr <= 7.6 L — treat tanks at/below that (or
         # named instantaneous) as tankless: UEF/Et applied as thermal efficiency,
         # zero standby UA.
-        if volume_l <= 7.6 || water_heater.nameString =~ /instantaneous/i
+        if volume_l <= INSTANTANEOUS_MAX_L || water_heater.nameString =~ /instantaneous/i
           return apply_instantaneous(water_heater, rules, fuel, capacity, audit)
         end
 
@@ -45,7 +61,7 @@ module OpenStudioSHW
           electric = rules['electric']
           efficiency = electric['thermal_efficiency'].to_f
           sl_w = if capacity_btu_hr <= OpenStudio.convert(electric['small_max_kw'], 'kW', 'Btu/hr').get
-                   volume_l < 270 ? 40 + 0.2 * volume_l : 0.472 * volume_l - 33.5
+                   volume_l < ELECTRIC_SL_BREAK_L ? 40 + 0.2 * volume_l : 0.472 * volume_l - 33.5
                  else
                    0.3 + 102.2 / volume_l
                  end
@@ -54,11 +70,11 @@ module OpenStudioSHW
         when 'NaturalGas', 'FuelOilNo2'
           fuel_rules = rules['fuel_fired']
           fhr = 0.7 * volume_l + 151.0
-          if capacity <= 22_000 && volume_l >= 76 && volume_l < 208
+          if capacity <= UEF_SMALL_MAX_W && volume_l >= UEF_BIN1_MIN_L && volume_l < UEF_BIN2_MIN_L
             efficiency, ua_btu_hr_f, evidence = uef_path(fuel_rules, 'uef_bins_76_to_208_l', fhr, volume_l, capacity_btu_hr)
-          elsif capacity <= 22_000 && volume_l >= 208 && volume_l < 380
+          elsif capacity <= UEF_SMALL_MAX_W && volume_l >= UEF_BIN2_MIN_L && volume_l < UEF_BIN2_MAX_L
             efficiency, ua_btu_hr_f, evidence = uef_path(fuel_rules, 'uef_bins_208_to_380_l', fhr, volume_l, capacity_btu_hr)
-          elsif capacity > 22_000 && capacity <= 30_500 && volume_l <= 454
+          elsif capacity > UEF_SMALL_MAX_W && capacity <= UEF_MEDIUM_MAX_W && volume_l <= UEF_MEDIUM_MAX_L
             bin = fuel_rules['uef_22_to_30_5_kw_max_454_l']
             uef = bin['intercept'] + bin['slope'] * volume_l
             draw = draw_gal(fuel_rules['uef_bins_76_to_208_l'], fhr)
@@ -70,7 +86,7 @@ module OpenStudioSHW
             sl_w = 0.84 * (1.25 * (capacity / 1000.0) + 16.57 * Math.sqrt(volume_l))
             sl_btu_hr = OpenStudio.convert(sl_w, 'W', 'Btu/hr').get
             ua_btu_hr_f = sl_btu_hr * et / large['ua_divisor_f'].to_f
-            efficiency = (ua_btu_hr_f * 70 + capacity_btu_hr * et) / capacity_btu_hr
+            efficiency = (ua_btu_hr_f * UA_DELTA_T_F + capacity_btu_hr * et) / capacity_btu_hr
             evidence = "large equipment: Et #{et}, SL #{sl_w.round(1)} W"
           end
         else
@@ -316,6 +332,10 @@ module OpenStudioSHW
                         inputs: { collectors: collectors.size },
                         article: spec['article'], ruling: 'D-63')
       end
+
+      # ---- internals (not API) ----
+      private_class_method :apply_instantaneous, :uef_path, :draw_gal,
+                           :maguire_roberts, :apply_part_load_curve, :optional
     end
 
     def self.apply_water_heater_efficiency(water_heater, **kwargs)

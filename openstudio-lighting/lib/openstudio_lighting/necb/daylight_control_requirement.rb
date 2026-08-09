@@ -380,6 +380,12 @@ module OpenStudioLighting
         t = [[t, 0.0].max, 1.0].min
         Math.sqrt(((point_x - (ax + (t * dx)))**2) + ((point_y - (ay + (t * dy)))**2))
       end
+
+      # ---- internals (not API) ----
+      private_class_method :base_name, :evaluate_sidelighting, :evaluate_toplighting,
+                           :column_state, :standards_space_type, :general_lighting_lpd,
+                           :site_latitude, :obstruction_ratio, :plan_distance,
+                           :segment_distance
     end
   end
 end
