@@ -150,11 +150,14 @@ class TestDecisionsRegistry < Minitest::Test
     assert_nil Decisions.lookup('D-99')
   end
 
-  # -- the six AuditLog copies stay in sync --------------------------------
+  # -- one AuditLog, aliased everywhere ------------------------------------
 
-  # The `ruling:` axis had to be added to all six; they are verbatim copies that
-  # differ ONLY on the module line. Nothing else keeps them honest.
-  AUDIT_LOG_COPIES = {
+  # The class itself now lives in openstudio-audit; each family gem's
+  # `audit_log.rb` is a three-line ALIAS of it. That alias is the compatibility
+  # mechanism for every existing call site, so what has to stay true is not
+  # "the copies are byte-identical" (there are no copies any more) but "every
+  # gem's constant IS the shared class".
+  AUDIT_LOG_ALIASES = {
     'openstudio-hvac' => %w[openstudio_hvac OpenStudioHVAC],
     'openstudio-envelope' => %w[openstudio_envelope OpenStudioEnvelope],
     'openstudio-geometry' => %w[openstudio_geometry OpenStudioGeometry],
@@ -163,33 +166,41 @@ class TestDecisionsRegistry < Minitest::Test
     'openstudio-shw' => %w[openstudio_shw OpenStudioSHW]
   }.freeze
 
-  def test_audit_log_copies_are_byte_identical_modulo_the_module_name
-    normalized = AUDIT_LOG_COPIES.filter_map do |gem, (dir, mod)|
-      path = File.join(MONOREPO, gem, 'lib', dir, 'audit_log.rb')
-      next unless File.exist?(path)
+  # The umbrella pulls in every domain gem except geometry (it sits upstream of
+  # the pipeline), so load whatever is not already resolved from disk.
+  def load_family_gem(gem, dir, mod)
+    return true if Object.const_defined?(mod)
 
-      source = File.read(path)
-      assert_includes source, "module #{mod}\n", "#{gem}: expected module #{mod}"
-      [gem, source.sub(/^module \S+$/, 'module MODULE')]
-    end
-    skip 'sibling gems not on disk' if normalized.size < 2
+    facade = File.join(MONOREPO, gem, 'lib', "#{dir}.rb")
+    return false unless File.exist?(facade)
 
-    assert_equal AUDIT_LOG_COPIES.size, normalized.size, 'an audit_log.rb copy is missing'
-    reference_gem, reference = normalized.first
-    normalized.each do |gem, source|
-      assert_equal reference, source,
-                   "#{gem}/audit_log.rb has DIVERGED from #{reference_gem}'s — the six copies are verbatim"
-    end
+    require facade
+    Object.const_defined?(mod)
   end
 
-  def test_every_copy_supports_the_ruling_kwarg
-    AUDIT_LOG_COPIES.each do |gem, (dir, _mod)|
-      path = File.join(MONOREPO, gem, 'lib', dir, 'audit_log.rb')
-      next unless File.exist?(path)
+  def test_every_gem_aliases_the_one_shared_audit_log
+    resolved = AUDIT_LOG_ALIASES.filter_map do |gem, (dir, mod)|
+      next unless load_family_gem(gem, dir, mod)
 
-      source = File.read(path)
-      assert_includes source, 'ruling: nil', "#{gem}: ruling kwarg missing"
-      assert_includes source, 'ruling #{e[:ruling]}', "#{gem}: to_s does not render the ruling"
+      assert_same OpenStudioAudit::AuditLog, Object.const_get(mod)::AuditLog,
+                  "#{mod}::AuditLog is not the shared OpenStudioAudit::AuditLog — " \
+                  'the alias is the compatibility mechanism; a second copy would drift'
+      gem
     end
+    skip 'sibling gems not on disk' if resolved.size < 2
+
+    assert_equal AUDIT_LOG_ALIASES.size, resolved.size, 'a family gem did not resolve its AuditLog alias'
+    assert_same OpenStudioAudit::AuditLog, OpenStudioNECB::AuditLog, 'the umbrella aliases it too'
+  end
+
+  def test_the_shared_audit_log_supports_the_ruling_kwarg
+    audit = OpenStudioAudit::AuditLog.new
+    audit.decision(:build, 'reference system operates on the proposed operating schedule',
+                   article: '8.4.4.7.(1)', ruling: 'D-19 D-21')
+    entry = audit.entries.first
+    assert_equal 'D-19 D-21', entry[:ruling], 'ruling is read back from the TOP LEVEL of the entry'
+    refute entry.key?(:inputs), 'ruling never leaks into inputs'
+    assert_equal %w[D-19 D-21], Decisions.ids_in(entry[:ruling]), 'and the registry parse recovers both ids'
+    assert_includes audit.to_s, '| ruling D-19 D-21'
   end
 end

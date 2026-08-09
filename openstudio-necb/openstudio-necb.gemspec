@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md']
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'openstudio-audit'
   spec.add_dependency 'openstudio-envelope'
   spec.add_dependency 'openstudio-hvac'
   spec.add_dependency 'openstudio-lighting'

@@ -10,8 +10,8 @@ deliberately EXCLUDED** (openstudio-shw owns it) — do not add them back here.
 - Pure OpenStudio SDK; no openstudio-standards; never simulates.
 - One AuditLog schema `{step, target, action, inputs, value, article,
   evidence, building, level}`; warnings never silent; `building:` stamp via
-  `audit.with_building`. `audit_log.rb` is a verbatim copy of
-  openstudio-hvac's — regenerate from there on schema changes.
+  `audit.with_building`. `audit_log.rb` aliases the shared class in
+  **openstudio-audit** — schema changes happen there, never as a local copy.
 - Audit text: violations SHOUTED, passes lowercase.
 - `article_coverage` manifest in `loads_rules_*.json`; partial/not_implemented
   warn every run.

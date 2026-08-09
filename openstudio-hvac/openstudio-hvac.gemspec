@@ -24,6 +24,9 @@ Gem::Specification.new do |spec|
   # provided by an OpenStudio installation rather than rubygems, so they are not declared
   # as a gem dependency here; `require 'openstudio'` must succeed in the host environment.
 
+  # openstudio-audit: the shared AuditLog + article-coverage emitter.
+  spec.add_dependency 'openstudio-audit'
+
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'rake', '~> 13.0'
 end

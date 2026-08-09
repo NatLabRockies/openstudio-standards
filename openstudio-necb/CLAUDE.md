@@ -83,8 +83,8 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   explanation.
 - **Adding a `## D-XX` heading means adding a registry entry**, and a
   `kind: runtime` entry must be cited by ≥1 `ruling:` tag.
-  `test/test_decisions_registry.rb` enforces both directions (and that the six
-  `audit_log.rb` copies stay byte-identical modulo their module line).
+  `test/test_decisions_registry.rb` enforces both directions (and that every
+  family gem's `AuditLog` resolves to the shared `OpenStudioAudit::AuditLog`).
 - `report/sections.rb#rulings_appendix` renders the decisions that FIRED in the
   run (id, title, summary, fire count, anchor to the first audit entry). It is
   ALWAYS rendered — the TOC link is unconditional and `test_report_html.rb`
@@ -142,7 +142,8 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   with a loud warning.
 - A shortened `run_period:` computes the same arithmetic but flags NOT
   code-compliant (`report['annual'] = false` + warning + report strip).
-- `AuditLog` here is an alias of `OpenStudioHVAC::AuditLog`.
+- `AuditLog` here is an alias of `OpenStudioAudit::AuditLog` (as every family
+  gem's is — the class lives in the openstudio-audit gem).
 - **Cloning a SpaceType for load overrides? Clone its DefaultScheduleSet
   too** — a fresh set severs Lights schedule inheritance and EnergyPlus
   FATALS on schedule-less Lights (found by the E+ battery, invisible to
@@ -163,7 +164,7 @@ ruby test/test_compliance.rb          # pipeline modes + capacity iteration + pr
 ruby test/test_archetypes.rb          # 8.4.4 mapping/check/normalize (round-trip pinned)
 ruby test/test_tiers_eui.rb           # tiers, 8.4.4 EUI path, GHG
 ruby test/test_report_units.rb        # SDK-free renderer units + goldens
-ruby test/test_decisions_registry.rb  # D-XX registry drift + audit_log six-copy sync
+ruby test/test_decisions_registry.rb  # D-XX registry drift + AuditLog alias resolution
 ruby test/test_report_model_query.rb  # SDK extraction
 ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 ```

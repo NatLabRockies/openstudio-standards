@@ -9,9 +9,9 @@ numbering), climate/HDD resolution, and envelope + thermal-bridging costing.
 - Pure OpenStudio SDK; no openstudio-standards, no measures; never simulates.
 - One AuditLog schema `{step, target, action, inputs, value, article,
   evidence, building, level}`; warnings never silent; `building:` stamp via
-  `audit.with_building`. `necb/audit_log.rb` aliases the local class; the
-  class itself (`audit_log.rb`) is a verbatim copy of openstudio-hvac's —
-  regenerate from there, never hand-edit divergently.
+  `audit.with_building`. `necb/audit_log.rb` aliases the gem constant, which
+  (`audit_log.rb`) aliases the shared class in **openstudio-audit** — schema
+  changes happen there, never as a local copy.
 - Audit text: violations SHOUTED, passes lowercase (report checklist parses
   case-sensitively).
 - `article_coverage` manifest in each vintage rules JSON; partial/

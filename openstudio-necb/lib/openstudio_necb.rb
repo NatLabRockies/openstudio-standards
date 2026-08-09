@@ -1,5 +1,13 @@
 require 'openstudio'
 
+# The shared audit machinery (AuditLog + article-coverage emitter) the whole
+# family writes to. Installed as a gem, or a monorepo sibling during incubation.
+begin
+  require 'openstudio_audit'
+rescue LoadError
+  require File.expand_path('../../openstudio-audit/lib/openstudio_audit', __dir__)
+end
+
 # The domain gems: installed as gems, or monorepo siblings during incubation.
 begin
   require 'openstudio_hvac'
@@ -50,9 +58,9 @@ require_relative 'openstudio_necb/report'
 # and ONE AuditLog across everything. The seventh family gem,
 # openstudio-geometry, sits UPSTREAM: it creates the model you feed in here.
 module OpenStudioNECB
-  # The shared audit class (openstudio-hvac's and openstudio-envelope's are
-  # schema-identical; one instance flows through both).
-  AuditLog = OpenStudioHVAC::AuditLog
+  # The shared audit class, now owned by openstudio-audit: every family gem
+  # aliases the SAME class, so one instance flows through all of them.
+  AuditLog = OpenStudioAudit::AuditLog
 
   # Simulation execution now lives in the lowest-level family gem,
   # openstudio-simulation (SDK+CLI, no compliance layer). Alias it so

@@ -16,11 +16,12 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   anything skipped/unknown lands in the log. `audit.building=` /
   `audit.with_building(name) {}` stamps entries with WHICH model they concern
   (`'input model'` / `'proposed building'` / `'reference building'`; nil =
-  cross-building verdict). The six sibling `audit_log.rb` files are **verbatim
-  copies** — change hvac's, then regenerate the others with a sed module-name
-  swap (`sed 's/^module OpenStudioHVAC$/module <Mod>/'`; note `OpenStudioSHW`,
-  not `OpenStudioShw`). `test_decisions_registry.rb` in the umbrella fails if
-  they ever diverge. Do NOT touch the 9-line `necb/audit_log.rb` alias files.
+  cross-building verdict). The class itself lives in **openstudio-audit**
+  (`OpenStudioAudit::AuditLog`); every gem's `audit_log.rb` is a three-line
+  ALIAS of it (`AuditLog = OpenStudioAudit::AuditLog`) — change the schema
+  THERE, never re-copy it here. `test_decisions_registry.rb` in the umbrella
+  fails if a gem stops resolving to the shared class. Do NOT touch the 9-line
+  `necb/audit_log.rb` alias files.
 - **`ruling:` — the second citation axis (D-44).** `article:` cites the CODE
   that mandates a value; `ruling:` cites the adjudicated DECISION that says how
   we read it (`openstudio-necb/docs/necb_decisions.md`). Rules:

@@ -29,6 +29,8 @@ Gem::Specification.new do |spec|
   # (thermal bridging) calculations. It is lazily required: everything except
   # thermal-bridging derating works without it, and its absence produces explicit
   # audit warnings rather than silent clear-field results.
+  # openstudio-audit: the shared AuditLog + article-coverage emitter.
+  spec.add_dependency 'openstudio-audit'
   spec.add_dependency 'tbd'
 
   spec.add_development_dependency 'minitest', '~> 5.0'

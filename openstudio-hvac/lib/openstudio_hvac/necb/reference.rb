@@ -703,33 +703,7 @@ module OpenStudioHVAC
     # unimplemented or partially-implemented articles surface as warnings, so a missed
     # requirement is visible in every log rather than discovered by review.
     def self.emit_article_coverage(ruleset, audit)
-      coverage = ruleset['article_coverage']
-      return if coverage.nil?
-
-      cited = Hash.new(0)
-      audit.entries.each do |entry|
-        entry[:article].to_s.scan(/8\.4\.\d+\.\d+\./) { |a| cited[a] += 1 }
-      end
-
-      coverage['articles'].each do |art|
-        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
-        inputs = { status: art['status'], decisions_citing: applied }
-        inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
-        if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
-          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}#{art['how'] ? ": #{art['how']}" : ''}",
-                     inputs: inputs, article: art['article'])
-        elsif art['gap_owner'] == 'modeller' # scope note, not a warning (D-09)
-          audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}, modeller scope" \
-                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
-                                "#{art['gaps'] ? ". Modeller's responsibility: #{art['gaps']}" : ''}",
-                     inputs: inputs, article: art['article'])
-        else # partial / not_implemented
-          audit.warn(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}" \
-                                "#{art['how'] ? ". Applied: #{art['how']}" : ''}" \
-                                "#{art['gaps'] ? ". Gaps: #{art['gaps']}" : ''}",
-                     inputs: inputs, article: art['article'])
-        end
-      end
+      OpenStudioAudit::Coverage.emit(ruleset['article_coverage'], audit)
     end
 
     def self.clone_model(model)

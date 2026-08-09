@@ -293,30 +293,7 @@ module OpenStudioLoads
       end
 
       def emit_article_coverage(vintage, audit)
-        coverage = NECB.rules(vintage)['article_coverage']
-        return if coverage.nil?
-
-        cited = Hash.new(0)
-        audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
-        coverage['articles'].each do |article|
-          applied = cited.select { |a, _| a.start_with?(article['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum  # strip ' (slice label)'/'(N)' suffixes + trailing dot — keep the SIX copies of this line identical
-          inputs = { status: article['status'], decisions_citing: applied }
-          inputs[:gap_owner] = article['gap_owner'] if article['gap_owner']
-          if %w[implemented satisfied_by_clone host_scope].include?(article['status'])
-            audit.info(:coverage, "#{article['title']} — #{article['status'].tr('_', ' ')}#{article['how'] ? ": #{article['how']}" : ''}",
-                       inputs: inputs, article: article['article'])
-          elsif article['gap_owner'] == 'modeller' # scope note, not a warning (D-09)
-            audit.info(:coverage, "#{article['title']} — #{article['status'].tr('_', ' ')}, modeller scope" \
-                                  "#{article['how'] ? ". Applied: #{article['how']}" : ''}" \
-                                  "#{article['gaps'] ? ". Modeller's responsibility: #{article['gaps']}" : ''}",
-                       inputs: inputs, article: article['article'])
-          else
-            audit.warn(:coverage, "#{article['title']} — #{article['status'].tr('_', ' ')}" \
-                                  "#{article['how'] ? ". Applied: #{article['how']}" : ''}" \
-                                  "#{article['gaps'] ? ". Gaps: #{article['gaps']}" : ''}",
-                       inputs: inputs, article: article['article'])
-          end
-        end
+        OpenStudioAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
       end
 
       def single_instance(instances, audit)

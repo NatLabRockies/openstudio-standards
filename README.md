@@ -12,14 +12,15 @@ openstudio-standards previously supported making the DOE/PNNL prototype building
 
 ## The NECB gem family (incubating in this repository)
 
-Seven standalone, SDK-only gems implementing the NECB 2020/2025 Part 8
+Standalone, SDK-only gems implementing the NECB 2020/2025 Part 8
 performance path live as siblings at the repository root. Dependency flow:
-geometry → loads → (lighting, shw) and hvac/envelope stand alone; the
-umbrella composes the five domain gems and runs EnergyPlus via
+audit ← everything; geometry → loads → (lighting, shw) and hvac/envelope stand
+alone; the umbrella composes the five domain gems and runs EnergyPlus via
 openstudio-simulation.
 
 | Gem | One line |
 |---|---|
+| [openstudio-audit](openstudio-audit) | the shared AuditLog + article-coverage emitter every other gem writes to |
 | [openstudio-geometry](openstudio-geometry) | model creation: seven footprint wizards, the bar-by-shape engine, a 3D viewer |
 | [openstudio-loads](openstudio-loads) | NECB space types, space-use loads, schedules (the bare-geometry on-ramp) |
 | [openstudio-lighting](openstudio-lighting) | Part 4 LPD allowances, daylighting controls, exterior lighting, fixture costing |
