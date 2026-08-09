@@ -13,6 +13,8 @@ module OpenStudioHVAC
   module Canonical
     FUEL_WORDS = {
       'NaturalGas' => 'gas', 'Gas' => 'gas', 'Electricity' => 'electric', 'Electric' => 'electric',
+      # 'DX' is the LEGACY spelling of the reference-ASHP marker (now `heat_source: 'ashp'`);
+      # kept so an out-of-tree row still written that way reads as ASHP rather than as 'dx'.
       'Hot Water' => 'hot water', 'HotWater' => 'hot water', 'DX' => 'ASHP', 'None' => nil, nil => nil
     }.freeze
 
@@ -37,7 +39,10 @@ module OpenStudioHVAC
       when 'baseboards'
         row['baseboard_type'] == 'Hot Water' ? 'hot water baseboards' : 'electric baseboards'
       when 'psz'
-        heat = row['heating_coil_type'] == 'DX' ? "ASHP heat with #{fuel(row['supp_htg_fuel'])} backup" : "#{fuel(row['heating_coil_type'])} heat"
+        # Reference-ASHP marker: `heat_source: 'ashp'`, with the legacy
+        # `heating_coil_type: 'DX'` spelling accepted as an alias (see data/README.md).
+        ashp = row['heat_source'] == 'ashp' || row['heating_coil_type'] == 'DX'
+        heat = ashp ? "ASHP heat with #{fuel(row['supp_htg_fuel'])} backup" : "#{fuel(row['heating_coil_type'])} heat"
         base = "packaged single-zone DX with #{heat}"
         base += ', one unit per zone' if row['per_zone']
         base += ', with exhaust' if row['sys_abbr'] == 'sys_4'

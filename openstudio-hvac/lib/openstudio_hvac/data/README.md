@@ -24,7 +24,8 @@ warts are called out rather than papered over.
 | `sizing` | 68 | which `sizing.json` block the build stamps |
 | `origin` | 53 | provenance tag: `cbecs` / `generic` / `necb_ecm` / `necb_reference_hp` |
 | `comment` | 54 | human note carried from the source vocabulary |
-| `heating_coil_type` | 38 | the air-loop heating coil: `Gas` / `Electric` / `Hot Water` / **`DX` — WART: `DX` here means "this is a reference ASHP build"** (`psz.rb` reads `reference_hp = heating_coil_type == 'DX'`); a `heat_source` key would say it better, kept for stability |
+| `heating_coil_type` | 30 | the air-loop heating coil, and nothing else: `Gas` / `Electric` / `Hot Water`. (Historically `DX` also appeared here meaning "this is a reference ASHP build" — that is now `heat_source: 'ashp'`; the old spelling is still ACCEPTED as an alias by `psz.rb`/`canonical.rb`, but no row uses it and `test_catalog_schema.rb` fails if one comes back.) |
+| `heat_source` | 8 | `ashp` — marks a reference air-source-heat-pump build (psz sys3/sys4 `necb_reference_hp` rows): DX heat + DX cool with `_ashp` coil names, plus the `supp_htg_fuel` supplemental coil. Legacy alias: `heating_coil_type: 'DX'` |
 | `heating_type` | 5 | zone-terminal heat: `Gas` / `Electric` / `None` (zone_terminal + unit_heaters families — a SECOND heating vocabulary, historical) |
 | `heating` | 1 | bare boolean on one composite part (third vocabulary; avoid in new rows) |
 | `baseboard_type` | 55 | `Hot Water` / `Electric` / `None` |
@@ -37,7 +38,7 @@ warts are called out rather than papered over.
 | `boiler_fuel` | 9 | `NaturalGas` / `Electricity` |
 | `air_eqpt` | 7 | ECM DOAS coil set: `ashp` / `ccashp` / `hydronic` (lowercase — ECM dialect) |
 | `unit_type` | 4 | zone_terminal: `ptac` / `pthp` / `window_ac` |
-| `reference_hp` | 4 | marks the Table 8.4.4.13 reference heat-pump variants |
+| `reference_hp` | 4 | marks the Table 8.4.4.13 reference heat-pump variants — the `mau_ptac` family's own marker (a second spelling of the same idea as `heat_source`, deliberately left alone: different family, different builder) |
 | `plant_type` | 3 | ecm_hp_fancoils: `gshp` / `cawhp` |
 | `vent_type`, `ventilation`, `zone_ventilation` | 2/2/1 | THREE ventilation vocabularies (historical): `vent_type: 'doas'` selects a DOAS part; the booleans toggle terminal OA |
 | `hw_source` | 1 | `district` — baseboards on a district loop, no boiler |
@@ -48,3 +49,8 @@ Value-case conventions differ by source vocabulary (`'Gas'` vs `'dx'` vs
 `'ashp'`) — they are exact-match strings; copy an existing row rather than
 guessing case. New rows should prefer the majority spellings
 (`heating_coil_type`, `mau_cooling_type`, `vent_type`).
+
+`test/test_catalog_schema.rb` freezes this schema: every row's keys must be in
+its family's allowlist and every closed vocabulary above is enum-checked, so a
+typo'd or invented key fails the suite. Adding a key is a conscious act — add it
+to the test's allowlist AND to this table (with its row count).

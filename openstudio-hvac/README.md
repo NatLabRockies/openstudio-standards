@@ -20,6 +20,9 @@ gem** — one schematic diagram per catalog row (air loops, plants, zone
 equipment), with names, families, and config. If you are a mechanical
 engineer deciding whether the system you need exists, open that file first.
 
+`ruby scripts/regenerate_catalog.rb` rebuilds the gem-root artifacts
+(`SYSTEM_CATALOG.html` / `.csv` / `.txt`) — run it after any `systems.json` edit.
+
 The public entry points, one line each:
 
 | Call | What it does |
@@ -184,7 +187,7 @@ unnecessary because the supplemental/reheat fuel is **encoded in the name** (e.g
 
 | Name pattern | Family | Notes |
 |---|---|---|
-| `PSZ RTU [with exhaust] ASHP with {Gas,Electric} and ASHP with {Gas,Electric} Supp. Heat Coils and {Hot Water,Electric} Baseboard` | `psz` (`heating_coil_type: 'DX'`) | sys3/sys4 ASHP: DX heat/cool (`_ashp` names, −10 °C compressor cutoff) + supplemental coil, DX sizing factors 1.0/1.3 |
+| `PSZ RTU [with exhaust] ASHP with {Gas,Electric} and ASHP with {Gas,Electric} Supp. Heat Coils and {Hot Water,Electric} Baseboard` | `psz` (`heat_source: 'ashp'`) | sys3/sys4 ASHP: DX heat/cool (`_ashp` names, −10 °C compressor cutoff) + supplemental coil, DX sizing factors 1.0/1.3 |
 | `PSZ RTU ASHP with {Gas,Electric} and ASHP Coils and {Hot Water,Electric} Baseboard with {Gas,Electric} Reheat` | `mau_ptac` (`reference_hp: true`) | sys1 ASHP: 100% OA MAU with ASHP DX coils, warmest SPM 13–20 °C, Total-load sizing, CAV reheat terminals + baseboards |
 
 sys6's reference-HP variant remains out (the legacy catalog has no descriptions for it;

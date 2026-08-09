@@ -35,7 +35,13 @@ module OpenStudioHVAC
 
       def build_unit(model, zones, control_zone, namer:, hw_loop:)
         always_on = model.alwaysOnDiscreteSchedule
-        heating_coil_type = config['heating_coil_type']
+        # The reference-ASHP marker is `heat_source: 'ashp'`. The legacy spelling —
+        # `heating_coil_type: 'DX'`, which meant "this is a reference ASHP build"
+        # rather than naming a heating coil — is still ACCEPTED as an alias so
+        # out-of-tree configs keep working; internally it normalizes to 'DX' so the
+        # build below is byte-for-byte the one the old catalog rows produced.
+        reference_hp = config['heat_source'] == 'ashp' || config['heating_coil_type'] == 'DX'
+        heating_coil_type = reference_hp ? 'DX' : config['heating_coil_type']
         baseboard_type = config['baseboard_type']
 
         # --- air handler ---
@@ -46,7 +52,6 @@ module OpenStudioHVAC
         fan.setName("#{config['sys_abbr']} Supply Fan")
 
         # Coil names are load-bearing for host efficiency dispatch (NECB '_dx'/'_ashp' selectors).
-        reference_hp = heating_coil_type == 'DX'
         # 8.4.4.9.(7)/8.4.4.10.(8) staged coils: set ONLY by the NECB reference
         # ruleset (system_definitions config), so catalog defaults, proposed
         # models and CBECS builds keep the bare single-speed topology.
