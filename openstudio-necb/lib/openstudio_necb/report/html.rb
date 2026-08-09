@@ -10,39 +10,47 @@ module OpenStudioNECB
       PROPOSED_COLOR = '#1a5276'.freeze
       REFERENCE_COLOR = '#7f8c8d'.freeze
 
+      # HTML-escape any value (safe default for all text).
       def esc(value)
         value.to_s.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').gsub('"', '&quot;')
       end
 
+      # Mark a pre-built HTML fragment as safe to embed unescaped.
       def raw(html)
         Raw.new(html)
       end
 
+      # Render a table-cell value: Raw fragments pass through, all else escapes.
       def cell(value)
         value.is_a?(Raw) ? value.html : esc(value)
       end
 
+      # One HTML element; underscores in attribute names become dashes.
       def tag(name, content = nil, **attrs)
         attr_string = attrs.map { |k, v| %( #{k.to_s.tr('_', '-')}="#{esc(v)}") }.join
         content.nil? ? "<#{name}#{attr_string}>" : "<#{name}#{attr_string}>#{cell(content)}</#{name}>"
       end
 
+      # A top-level report <section> with its <h2> (id anchors the TOC link).
       def section(id, title, body, page_break: false)
         klass = page_break ? 'page-break' : nil
         %(<section id="#{id}"#{klass ? %( class="#{klass}") : ''}><h2>#{esc(title)}</h2>#{body}</section>)
       end
 
+      # A full <table> from a header row + array-of-arrays body.
       def table(headers, rows, css: nil)
         head = headers.map { |h| "<th>#{cell(h)}</th>" }.join
         body = rows.map { |r| "<tr>#{r.map { |c| "<td>#{cell(c)}</td>" }.join}</tr>" }.join
         %(<table#{css ? %( class="#{css}") : ''}><thead><tr>#{head}</tr></thead><tbody>#{body}</tbody></table>)
       end
 
+      # Two-column key/value table (project header, summary blocks).
       def kv_table(pairs)
         rows = pairs.map { |k, v| "<tr><th>#{esc(k)}</th><td>#{cell(v)}</td></tr>" }.join
         %(<table class="kv">#{rows}</table>)
       end
 
+      # Verdict pill; kind selects the CSS class (pass/fail/warn/tier/ghg).
       def badge(text, kind)
         %(<span class="badge badge-#{kind}">#{esc(text)}</span>)
       end
@@ -50,11 +58,15 @@ module OpenStudioNECB
       GLYPHS = { pass: %w[✓ pass], fail: %w[✗ fail], warning: %w[▲ warn],
                  info: %w[● info], na: %w[○ na] }.freeze
 
+      # Checklist status glyph (pass/fail/warning/info/na).
       def glyph(kind)
         symbol, klass = GLYPHS.fetch(kind, GLYPHS[:na])
         %(<span class="glyph glyph-#{klass}">#{symbol}</span>)
       end
 
+      # Format a number for display: nil -> em-dash, thousands separators,
+      # `prec:` decimal places (default 1; integers drop the trailing .0),
+      # optional `unit:` suffix. THE number formatter — used ~60x in sections.
       def fmt(value, unit: nil, prec: 1)
         return '—' if value.nil?
 
@@ -81,10 +93,12 @@ module OpenStudioNECB
         %(<span class="bldg #{klass}">#{esc(name.to_s.sub(/ building\z/, ''))}</span>)
       end
 
+      # Native collapsible block (the report's only interactivity — no scripts).
       def details(summary, body, open: false)
         %(<details#{open ? ' open' : ''}><summary>#{esc(summary)}</summary>#{body}</details>)
       end
 
+      # Proposed/Reference color-chip legend for charts.
       def legend
         %(<span class="chip" style="background:#{PROPOSED_COLOR}"></span> Proposed
           <span class="chip" style="background:#{REFERENCE_COLOR}"></span> Reference)

@@ -148,7 +148,12 @@ module OpenStudioHVAC
           end
           terminal.setMaximumReheatAirTemperature(sizing['zone_vav_max_reheat_temp']) if sizing['zone_vav_max_reheat_temp']
           terminal.setDamperHeatingAction(sizing['zone_vav_damper_action']) if sizing['zone_vav_damper_action']
-          terminal.setMaximumFlowFractionDuringReheat(0.5) # T11: legacy parity (heating-mode airflow cap)
+          # Legacy NECB sys6 hard-sets max-flow-fraction-during-reheat to 0.5: with the
+          # 'Single Maximum' damper action, a VAV box in reheat may open to at most half
+          # its cooling design flow (air_loop_hvac_apply_vav_damper_action,
+          # necb/NECB2011/hvac_systems.rb:466). T11: legacy parity (T11 = 2026-07-25 audit
+          # register item; see openstudio-necb/docs/README.md).
+          terminal.setMaximumFlowFractionDuringReheat(0.5)
         end
 
         # NOTE parts order: sys6 legacy emits sys_htg BEFORE sys_clg (insertion order).

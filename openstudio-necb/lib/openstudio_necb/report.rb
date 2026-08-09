@@ -1,9 +1,17 @@
+# The renderer is a layered stack — each file has one job:
+#   svg.rb         geometric primitives (bars, axes, legends) -> inline SVG
+#   charts.rb      proposed-vs-reference comparison charts, built on svg
+#   html.rb        escaping, tags, tables, badges, the shared CSS ('H')
+#   checklist.rb   audit entries -> article-sorted checklist rows
+#   model_query.rb SDK models -> plain hashes (with report.rb, the ONLY
+#                  SDK-touching part of the renderer; never raises)
+#   sections.rb    composes the document sections from plain data
+#   report.rb      (this file) assembles the full HTML document
 require_relative 'report/html'
 require_relative 'report/svg'
 require_relative 'report/charts'
 require_relative 'report/checklist'
 require_relative 'report/model_query'
-require_relative 'report/diagrams'
 require_relative 'report/sections'
 
 module OpenStudioNECB
@@ -36,10 +44,11 @@ module OpenStudioNECB
       reference_data = reference_model ? ModelQuery.extract(reference_model) : nil
 
       # HVAC diagrams are drawn by openstudio-hvac's loop-diagram engine, driven
-      # DIRECTLY off the SDK models here (report.rb is the only SDK-touching
-      # place — the section modules stay SDK-free). Each is a plain hash of
-      # inline-SVG strings; the engine never raises. The icon <defs> they
-      # reference are embedded ONCE below.
+      # DIRECTLY off the SDK models here. report.rb and model_query.rb are the
+      # ONLY renderer files that touch the SDK — everything else under report/
+      # consumes plain hashes. Each diagram is a plain hash of inline-SVG
+      # strings; the engine never raises. The icon <defs> they reference are
+      # embedded ONCE below.
       proposed_hvac = proposed_model ? OpenStudioHVAC.model_hvac_diagrams(proposed_model) : nil
       reference_hvac = reference_model ? OpenStudioHVAC.model_hvac_diagrams(reference_model) : nil
 

@@ -10,9 +10,12 @@ require_relative 'openstudio_envelope/climate'
 # generated/verified offline via the building-codes MCP — zero MCP dependency at
 # runtime). SDK-only model manipulation; never executes simulations.
 #
-# Phased build-out (see plan): P1 data (this commit) -> P2 lookups + HDD ->
-# P3 prescriptive application + FDWR/SRR -> P3b thermal bridging (TBD) ->
-# P4 reference envelope (8.4.4.3/.4).
+# What's in this gem:
+#   necb/            — rules lookups, prescriptive Section 3.2 application,
+#                      thermal bridging (TBD), reference-envelope transform
+#   costing/         — envelope assembly costing + thermal-bridging costing
+#   climate.rb       — HDD18 resolution (Table C-1 / .stat) + climate zones
+#   constructions.rb / geometry.rb — construction retargeting + surface math
 module OpenStudioEnvelope
   module NECB
     RULES_DIR = File.expand_path('openstudio_envelope/data/necb', __dir__)
@@ -46,10 +49,30 @@ require_relative 'openstudio_envelope/costing/thermal_bridging_costs'
 require_relative 'openstudio_envelope/costing/report'
 
 module OpenStudioEnvelope
+  # ---- the public API, in one place ----------------------------------------
+  # (Delegators; the implementations live in the files above.)
+
   # Cost a model's envelope (+ thermal bridging when a TBD result / tallies are
   # given). See Costing.cost for options. Shares the AuditLog schema with
   # openstudio-hvac so one audit spans compliance + HVAC costing + envelope costing.
   def self.cost(model, **kwargs)
     Costing.cost(model, **kwargs)
+  end
+
+  # Apply the prescriptive Section 3.2 maximums (U-values, FDWR/SRR by HDD)
+  # to a model in place. See NECB::Prescriptive.
+  def self.apply_prescriptive(model, **kwargs)
+    NECB.apply_prescriptive(model, **kwargs)
+  end
+
+  # The performance-path reference-envelope transform (8.4.4.3/.4; 2025:
+  # 8.4.5.x) — runs IN PLACE on the caller's clone. See NECB::Reference.
+  def self.reference_envelope(model, **kwargs)
+    NECB.reference_envelope(model, **kwargs)
+  end
+
+  # Resolve heating degree-days (explicit -> Table C-1 -> .stat). See Climate.
+  def self.hdd18(model, **kwargs)
+    Climate.hdd18(model, **kwargs)
   end
 end

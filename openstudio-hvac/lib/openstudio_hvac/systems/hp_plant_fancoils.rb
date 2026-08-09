@@ -106,6 +106,8 @@ module OpenStudioHVAC
       end
 
       def build_hw_plant(model, plant_type, boiler_fuels)
+        # 60.0 C setpoint / 5.0 K deltaT: legacy parity — hs14 add_plantloop args
+        # (ECMS/hvac_systems.rb:1834-1835) and hs15 (:2146-2147).
         loop = base_plant_loop(model, 'HW PlantLoop', 'Heating', 60.0, 5.0)
         if plant_type == 'gshp'
           hp = OpenStudio::Model::HeatPumpWaterToWaterEquationFitHeating.new(model)
@@ -113,6 +115,10 @@ module OpenStudioHVAC
           hp.setHeatingCapacityCurve(Curves.build(model, 'HEATPUMP_WATERTOWATER_HCAPF'))
           hp.setHeatingCompressorPowerCurve(Curves.build(model, 'HEATPUMP_WATERTOWATER_HPOWERF'))
         else
+          # Heating-HP settings: legacy parity with add_ecm_hs15_cawhp_fancoils
+          # (ECMS/hvac_systems.rb:2149-2156) — min source inlet -15.0 C (:2150,
+          # air-source low-ambient cutoff), reference COP 3.0 (:2151),
+          # min PLR 0.2 (:2156). The legacy source carries the values bare.
           hp = OpenStudio::Model::HeatPumpPlantLoopEIRHeating.new(model)
           hp.setName('HeatPumpPlantLoopEIRHeating')
           hp.setCondenserType('AirSource')   # legacy 'AirSoure' typo corrected
@@ -132,6 +138,7 @@ module OpenStudioHVAC
         hp_outlet = hp.supplyOutletModelObject.get.to_Node.get
         add_series_boilers(model, hp_outlet, boiler_fuels)
         unless plant_type == 'gshp'
+          # 60.0 C SPM at the HP outlet: legacy parity, hs15 (ECMS/hvac_systems.rb:2173-2177).
           sch = OpenStudio::Model::ScheduleConstant.new(model)
           sch.setValue(60.0)
           spm = OpenStudio::Model::SetpointManagerScheduled.new(model, sch)
@@ -142,6 +149,8 @@ module OpenStudioHVAC
       end
 
       def build_chw_plant(model, plant_type, hw_hp)
+        # 7.0 C setpoint / 6.0 K deltaT: legacy parity — hs14 add_plantloop args
+        # (ECMS/hvac_systems.rb:1871-1872) and hs15 (:2185-2186).
         loop = base_plant_loop(model, 'CHW PlantLoop', 'Cooling', 7.0, 6.0)
         if plant_type == 'gshp'
           chiller = OpenStudio::Model::ChillerElectricEIR.new(model)
@@ -153,6 +162,9 @@ module OpenStudioHVAC
           sec.setName('ChillerAirCooled')
           [loop, chiller]
         else
+          # Cooling-HP settings: legacy parity with add_ecm_hs15_cawhp_fancoils
+          # (ECMS/hvac_systems.rb:2188-2193) — reference COP 3.0 (:2190),
+          # min PLR 0.2 (:2193).
           hp = OpenStudio::Model::HeatPumpPlantLoopEIRCooling.new(model)
           hp.setName('HeatPumpPlantLoopEIRCooling')
           hp.setCondenserType('AirSource')
@@ -171,6 +183,8 @@ module OpenStudioHVAC
       # Ground-loop heat exchanger modeled as district heating + cooling in series
       # (the legacy hs14 GLHX pattern), serving the W2W HP and the water-cooled chiller.
       def build_glhx_loop(model, hw_hp, chiller)
+        # 10.0 K condenser deltaT: legacy parity — hs14 GLHX add_plantloop arg
+        # (ECMS/hvac_systems.rb:1890).
         loop = base_plant_loop(model, 'Condenser PlantLoop GLHX', 'Condenser', nil, 10.0)
         district_htg = model.version < OpenStudio::VersionString.new('3.7.0') ? OpenStudio::Model::DistrictHeating.new(model) : OpenStudio::Model::DistrictHeatingWater.new(model)
         district_htg.setName('DistrictHeating GLHX')
@@ -183,6 +197,8 @@ module OpenStudioHVAC
         district_clg.setName('DistrictCooling GLHX')
         district_clg.addToNode(htg_outlet)
 
+        # 5.0 C heating-side / 25.0 C cooling-side setpoints (the ground-loop supply-temp
+        # proxy band): legacy parity — hs14 (ECMS/hvac_systems.rb:1896 and :1899).
         htg_sch = OpenStudio::Model::ScheduleConstant.new(model)
         htg_sch.setValue(5.0)
         OpenStudio::Model::SetpointManagerScheduled.new(model, htg_sch).addToNode(htg_outlet)

@@ -12,6 +12,11 @@ module OpenStudioNECB
                  hvac lighting loads shw costing coverage_appendix rulings_appendix
                  audit_appendix declarations].freeze
 
+      # CONTRACT: maps each per-domain report section to the audit `step:`
+      # names (substring match) whose entries it renders as notes. A NEW audit
+      # step name introduced in any gem must be added here, or its entries
+      # silently drop out of that domain's section (they still appear in the
+      # full audit trail appendix).
       DOMAIN_STEPS = {
         envelope: %w[envelope reference_envelope thermal_bridging fdwr srr],
         hvac: %w[selection build efficiency reference_hvac economizer fan_power
@@ -25,7 +30,7 @@ module OpenStudioNECB
         ORDER.map { |name| send(name, ctx) }.join("\n")
       end
 
-      # -- 1 -----------------------------------------------------------------
+      # -- header --------------------------------------------------------
       def header(ctx)
         report = ctx[:report]
         options = ctx[:options]
@@ -55,7 +60,7 @@ module OpenStudioNECB
         HTML
       end
 
-      # -- 2 -----------------------------------------------------------------
+      # -- verdict_banner ------------------------------------------------
       def verdict_banner(ctx)
         report = ctx[:report]
         badges = []
@@ -121,7 +126,7 @@ module OpenStudioNECB
           #{badges.join(' ')}<span>#{numbers.join(' &nbsp;•&nbsp; ')}</span></div>#{strip}</section>)
       end
 
-      # -- 3 -----------------------------------------------------------------
+      # -- path_declaration ----------------------------------------------
       def path_declaration(ctx)
         report = ctx[:report]
         eui_primary = report.dig('reference', 'method').to_s.include?('archetype')
@@ -157,7 +162,7 @@ module OpenStudioNECB
         end
       end
 
-      # -- 4 -----------------------------------------------------------------
+      # -- checklist -----------------------------------------------------
       def checklist(ctx)
         rows = ctx[:checklist_rows]
         return H.section('checklist', 'Compliance checklist', '<p>No audited compliance decisions recorded.</p>') if rows.empty?
@@ -178,7 +183,7 @@ module OpenStudioNECB
         H.section('checklist', 'Compliance checklist', body)
       end
 
-      # -- 5 -----------------------------------------------------------------
+      # -- energy --------------------------------------------------------
       def energy(ctx)
         report = ctx[:report]
         proposed = report['proposed'] || {}
@@ -241,7 +246,7 @@ module OpenStudioNECB
         H.section('energy', 'Energy results', body, page_break: true)
       end
 
-      # -- 5b: NECB 2025 Part 11 operational GHG ------------------------------
+      # -- NECB 2025 Part 11 operational GHG -----------------------------
       def ghg(ctx)
         report = ctx[:report]
         proposed_ghg = report.dig('proposed', 'ghg_kg_co2e')
@@ -266,7 +271,7 @@ module OpenStudioNECB
         H.section('ghg', 'Operational GHG emissions (NECB 2025 Part 11)', body)
       end
 
-      # -- 6 -----------------------------------------------------------------
+      # -- envelope ------------------------------------------------------
       def envelope(ctx)
         proposed = ctx[:proposed]&.dig(:envelope)
         reference = ctx[:reference]&.dig(:envelope)
@@ -294,7 +299,7 @@ module OpenStudioNECB
         H.section('envelope', 'Building envelope', body, page_break: true)
       end
 
-      # -- 7 -----------------------------------------------------------------
+      # -- hvac ----------------------------------------------------------
       # HVAC systems are drawn with openstudio-hvac's OpenStudio-App-style
       # loop-diagram engine (the same one behind the system catalog), so the
       # PROPOSED and REFERENCE buildings show faithful supply/demand topology with
@@ -368,13 +373,14 @@ module OpenStudioNECB
           %(<div class="loop-view">#{panels}</div></div>)
       end
 
-      # -- 8 -----------------------------------------------------------------
+      # -- lighting ------------------------------------------------------
       def lighting(ctx)
         body = space_type_table(ctx, :lpd_w_per_m2, 'Lighting power density (W/m²)')
         body << domain_audit_notes(ctx, :lighting)
         H.section('lighting', 'Lighting', body)
       end
 
+      # -- loads ---------------------------------------------------------
       def loads(ctx)
         body = +''
         if (types = ctx[:proposed]&.dig(:space_types)) && !types.empty?
@@ -390,13 +396,14 @@ module OpenStudioNECB
         H.section('loads', 'Internal loads (occupancy and receptacle)', body)
       end
 
+      # -- shw -----------------------------------------------------------
       def shw(ctx)
         notes = domain_audit_notes(ctx, :shw)
         body = notes.empty? ? '<p>No service water heating decisions recorded for this run.</p>' : notes
         H.section('shw', 'Service water heating', body)
       end
 
-      # -- 9 -----------------------------------------------------------------
+      # -- costing -------------------------------------------------------
       def costing(ctx)
         report = ctx[:report]
         p_cost = report.dig('proposed', 'cost')
@@ -415,7 +422,7 @@ module OpenStudioNECB
         H.section('costing', 'Costing summary', body)
       end
 
-      # -- 10 ----------------------------------------------------------------
+      # -- coverage_appendix ---------------------------------------------
       def coverage_appendix(ctx)
         all = ctx[:audit_entries]
         entries = all.each_with_index.select { |e, _| e[:step].to_s == 'coverage' }
@@ -468,7 +475,7 @@ module OpenStudioNECB
         end
       end
 
-      # -- 10b ---------------------------------------------------------------
+      # -- rulings_appendix ----------------------------------------------
       # The DECISIONS axis of the audit trail. Where the coverage appendix
       # reports which CODE ARTICLES this run acted on, this one reports which of
       # the project's adjudicated interpretations actually fired — the "why did
@@ -505,7 +512,7 @@ module OpenStudioNECB
         H.section('rulings', 'Decisions and assumptions applied', body + note, page_break: true)
       end
 
-      # -- 11 ----------------------------------------------------------------
+      # -- audit_appendix ------------------------------------------------
       def audit_appendix(ctx)
         rows = ctx[:audit_entries].map.with_index do |e, i|
           level = e[:level].to_s
@@ -529,7 +536,7 @@ module OpenStudioNECB
         parts.join(' | ')[0, 220]
       end
 
-      # -- 12 ----------------------------------------------------------------
+      # -- declarations --------------------------------------------------
       def declarations(ctx)
         options = ctx[:options]
         <<~HTML

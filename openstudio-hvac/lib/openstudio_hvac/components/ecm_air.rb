@@ -10,6 +10,8 @@ module OpenStudioHVAC
       when 'ashp'
         coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
         coil.setName('CoilCoolingDxSingleSpeed_ASHP')
+        # 1.0e-6 ~ zero: legacy-parity near-zero (E+ rejects or special-cases a hard 0 on
+        # these fields); used throughout this file.
         coil.setCrankcaseHeaterCapacity(1.0e-6)
         coil
       when 'ccashp'
@@ -94,6 +96,11 @@ module OpenStudioHVAC
       supp_coil.addToNode(air_loop.supplyOutletNode) if supp_coil
       fan.addToNode(air_loop.supplyOutletNode)
 
+      # Setpoint temps are legacy parity with ECMS create_air_sys_spm
+      # (necb/ECMS/hvac_systems.rb:674-696): 'scheduled' = constant 20.0 C neutral DOAS
+      # supply; 'single_zone_reheat' = 13.0 C min / 43.0 C max supply (43 C is the NECB
+      # warm-air heating design supply temperature, cf. add_zone_eqpt's 43.0 C zone
+      # heating design supply at hvac_systems.rb:991); 'warmest' = 13.0/22.0 C band.
       spm =
         case spm_type
         when 'scheduled'
@@ -140,7 +147,7 @@ module OpenStudioHVAC
         when 'single_duct_vav_reheat'
           reheat = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
           d = OpenStudio::Model::AirTerminalSingleDuctVAVReheat.new(model, always_on, reheat)
-          d.setMaximumReheatAirTemperature(43.0)
+          d.setMaximumReheatAirTemperature(43.0) # legacy parity: ECMS create_zone_diffuser (hvac_systems.rb:850)
           d.setDamperHeatingAction('Normal')
           d
         end
@@ -216,22 +223,31 @@ module OpenStudioHVAC
 
     # Outdoor VRF unit with the ECM hs08 settings (port of add_outdoor_vrf_unit, minus the
     # defrost-EIR curve lookup — curve application is the host efficiency pass's job).
+    #
+    # SOURCE: every numeric below is verbatim legacy parity with ECMS add_outdoor_vrf_unit
+    # (necb/ECMS/hvac_systems.rb:266-314, verified 2026-08). The legacy source carries the
+    # values bare (no derivation given there either); the ECM models a
+    # 'Mitsubishi_Hyper_Heating_VRF_Outdoor_Unit', so the odd-looking constants are
+    # manufacturer-flavoured performance settings.
     def self.add_outdoor_vrf_unit(model, condenser_type: 'AirCooled')
       unit = OpenStudio::Model::AirConditionerVariableRefrigerantFlow.new(model)
       unit.setName('VRF Outdoor Unit')
       unit.setHeatPumpWasteHeatRecovery(true)
-      unit.setRatedHeatingCOP(4.0)
-      unit.setGrossRatedCoolingCOP(4.0)
-      unit.setMinimumOutdoorTemperatureinHeatingMode(-25.0)
+      unit.setRatedHeatingCOP(4.0)          # legacy hvac_systems.rb:272
+      unit.setGrossRatedCoolingCOP(4.0)     # legacy hvac_systems.rb:276
+      unit.setMinimumOutdoorTemperatureinHeatingMode(-25.0)   # cold-climate cutoff, legacy :278
       unit.setHeatingPerformanceCurveOutdoorTemperatureType('WetBulbTemperature')
       unit.setMasterThermostatPriorityControlType('ThermostatOffsetPriority')
       unit.setDefrostControl('OnDemand')
       unit.setDefrostStrategy('ReverseCycle')
       unit.autosizeResistiveDefrostHeaterCapacity
+      # -0.00019231 piping height correction: legacy verbatim (:284-285), no derivation
+      # given in the legacy source (~ -1/5200 per metre of height).
       unit.setPipingCorrectionFactorforHeightinHeatingModeCoefficient(-0.00019231)
       unit.setPipingCorrectionFactorforHeightinCoolingModeCoefficient(-0.00019231)
-      unit.setMinimumOutdoorTemperatureinHeatRecoveryMode(-5.0)
-      unit.setMaximumOutdoorTemperatureinHeatRecoveryMode(26.2)
+      unit.setMinimumOutdoorTemperatureinHeatRecoveryMode(-5.0)   # legacy :286
+      unit.setMaximumOutdoorTemperatureinHeatRecoveryMode(26.2)   # legacy verbatim :287, no derivation given there
+      # Heat-recovery startup fractions/time constants: legacy verbatim :288-294.
       unit.setInitialHeatRecoveryCoolingCapacityFraction(0.5)
       unit.setHeatRecoveryCoolingCapacityTimeConstant(0.15)
       unit.setInitialHeatRecoveryCoolingEnergyFraction(1.0)
@@ -239,10 +255,10 @@ module OpenStudioHVAC
       unit.setInitialHeatRecoveryHeatingCapacityFraction(1.0)
       unit.setHeatRecoveryHeatingCapacityTimeConstant(0.15)
       unit.setInitialHeatRecoveryHeatingEnergyFraction(1.0)
-      unit.setMinimumHeatPumpPartLoadRatio(0.5)
+      unit.setMinimumHeatPumpPartLoadRatio(0.5)   # legacy :296
       unit.setCondenserType(condenser_type)
       unit.setCrankcaseHeaterPowerperCompressor(1.0e-6)
-      unit.setMinimumOutdoorTemperatureinCoolingMode(-10)
+      unit.setMinimumOutdoorTemperatureinCoolingMode(-10)   # legacy :299
       unit
     end
   end

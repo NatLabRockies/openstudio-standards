@@ -17,5 +17,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'openstudio-envelope'
   spec.add_dependency 'openstudio-hvac'
+  spec.add_dependency 'openstudio-lighting'
+  spec.add_dependency 'openstudio-loads'
+  spec.add_dependency 'openstudio-shw'
   spec.add_dependency 'openstudio-simulation'
 end

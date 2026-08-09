@@ -2,6 +2,7 @@ require 'openstudio'
 
 require_relative 'openstudio_geometry/version'
 require_relative 'openstudio_geometry/audit_log'
+require_relative 'openstudio_geometry/helpers'
 require_relative 'openstudio_geometry/wizards'
 require_relative 'openstudio_geometry/bar'
 require_relative 'openstudio_geometry/render'

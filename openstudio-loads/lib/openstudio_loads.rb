@@ -9,9 +9,9 @@ require_relative 'openstudio_loads/audit_log'
 # vendored, article-tagged data (NECB 8.4.3.2; generated/verified offline via the
 # building-codes MCP, zero MCP dependency at runtime). SDK-only; never simulates.
 #
-# Deliberate boundaries (sibling gems): lighting power/controls (Part 4) ->
-# openstudio-lighting (future); service water heating (Part 6) -> openstudio-shw
-# (future); HVAC systems -> openstudio-hvac; envelope -> openstudio-envelope.
+# Deliberate boundaries (sibling gems): Part 4 LPD allowances + daylighting ->
+# openstudio-lighting; Part 6 SHW demand + efficiencies -> openstudio-shw;
+# HVAC systems -> openstudio-hvac; envelope -> openstudio-envelope.
 module OpenStudioLoads
   module NECB
     DATA_DIR = File.expand_path('openstudio_loads/data/necb', __dir__)
@@ -48,9 +48,16 @@ module OpenStudioLoads
   def self.assign_space_types(model, map, vintage: '2020', audit: nil)
     NECB::Apply.assign_space_types(model, map, vintage: vintage, audit: audit)
   end
+
+  # THE gem's verb: apply the NECB space-use loads (people, equipment,
+  # ventilation OA, infiltration, schedules, thermostats) to every tagged
+  # space type. Deliberately excludes lighting (openstudio-lighting) and SHW
+  # (openstudio-shw). See NECB::Apply.apply_loads.
+  def self.apply_loads(model, vintage: '2020', audit: nil)
+    NECB.apply_loads(model, vintage: vintage, audit: audit)
+  end
 end
 
 require_relative 'openstudio_loads/necb/space_types'
-# P2/P3 (phased build-out): schedules builder + apply layer
-require_relative 'openstudio_loads/schedules' if File.exist?(File.join(__dir__, 'openstudio_loads/schedules.rb'))
-require_relative 'openstudio_loads/necb/apply' if File.exist?(File.join(__dir__, 'openstudio_loads/necb/apply.rb'))
+require_relative 'openstudio_loads/schedules'
+require_relative 'openstudio_loads/necb/apply'

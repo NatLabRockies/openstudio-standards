@@ -16,5 +16,8 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md']
   spec.require_paths = ['lib']
 
+  # openstudio-hvac: the costing engine (Database/Ledger/Geometry) costing.rb
+  # builds on — required at load time, not just in the monorepo.
+  spec.add_dependency 'openstudio-hvac'
   spec.add_dependency 'openstudio-loads'
 end

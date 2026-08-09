@@ -60,6 +60,9 @@ module OpenStudioHVAC
 
           evap = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, always_on)
           evap.setName("#{air_loop.nameString} Evap Media")
+          # NOT legacy: model_add_evap_cooler uses 0.90 (Prototype.hvac_systems.rb:4501,
+          # citing basc.pnnl.gov); the 0.85 here has no traced source —
+          # source unverified — flagged in code-clarity review 2026-08.
           evap.setCoolerDesignEffectiveness(0.85)
 
           supply_inlet_node = air_loop.supplyInletNode
@@ -67,6 +70,10 @@ module OpenStudioHVAC
           evap.addToNode(supply_inlet_node)
           build_oa_system(model).addToNode(supply_inlet_node)
 
+          # NOT legacy: model_add_evap_cooler tracks OAT wet-bulb + a 3 R (1.67 K) approach
+          # offset, clamped 21.1-25.6 C (70/78 F, Prototype.hvac_systems.rb:4430-4457);
+          # the 0.0 offset and 15.5/30.0 C clamp here have no traced source —
+          # source unverified — flagged in code-clarity review 2026-08.
           spm = OpenStudio::Model::SetpointManagerFollowOutdoorAirTemperature.new(model)
           spm.setReferenceTemperatureType('OutdoorAirWetBulb')
           spm.setOffsetTemperatureDifference(0.0)
@@ -131,10 +138,15 @@ module OpenStudioHVAC
 
         loop = OpenStudio::Model::PlantLoop.new(model)
         loop.setName('Heat Pump Loop')
+        # 10/35 C loop limits: legacy parity with model_add_hp_loop
+        # (Prototype.hvac_systems.rb:794-795).
         loop.setMinimumLoopTemperature(10.0)
         loop.setMaximumLoopTemperature(35.0)
         sizing = loop.sizingPlant
         sizing.setLoopType('Heating')
+        # 30.0 C exit is NOT the legacy default (model_add_hp_loop sizes at 102.2 F =
+        # 39.0 C): gem choice — sized inside the loop's own 10-35 C operating band.
+        # 11.0 K deltaT IS legacy parity (the 19.8 R default, converted).
         sizing.setDesignLoopExitTemperature(30.0)
         sizing.setLoopDesignTemperatureDifference(11.0)
 
@@ -161,7 +173,7 @@ module OpenStudioHVAC
         else # fluid_cooler
           cooler = OpenStudio::Model::EvaporativeFluidCoolerSingleSpeed.new(model)
           cooler.setName("#{loop.nameString} Fluid Cooler")
-          cooler.setDesignSprayWaterFlowRate(0.002208)
+          cooler.setDesignSprayWaterFlowRate(0.002208) # legacy parity: model_add_hp_loop (Prototype.hvac_systems.rb:870, "Based on HighRiseApartment")
           cooler.setPerformanceInputMethod('UFactorTimesAreaAndDesignWaterFlowRate')
           loop.addSupplyBranchForComponent(cooler)
         end
@@ -169,6 +181,8 @@ module OpenStudioHVAC
         loop.addSupplyBranchForComponent(OpenStudio::Model::PipeAdiabatic.new(model))
         OpenStudio::Model::PipeAdiabatic.new(model).addToNode(loop.supplyOutletNode)
 
+        # Dual-setpoint 35/10 C reuses the loop max/min above; NOT the legacy defaults
+        # (model_add_hp_loop uses 87/67 F = 30.6/19.4 C) — gem choice.
         spm = OpenStudio::Model::SetpointManagerScheduledDualSetpoint.new(model)
         spm.setName("#{loop.nameString} Scheduled Dual Setpoint")
         spm.setHighSetpointSchedule(Schedules.constant_ruleset(model, 'HP Loop High Temp', 35.0))

@@ -16,10 +16,11 @@ module OpenStudioLighting
     #   of the modeled lights; this port detects the ACTUAL Lights definitions
     #   ('- LED lighting' suffix) and only falls back to the template assumption
     #   when a type cannot be detected — deviation audited;
-    # - daylighting-sensor costing is NOT ported (it derives sensor counts from
-    #   the 8.4.4.5 daylighting-area geometry this gem family does not model):
-    #   models WITHOUT daylighting controls cost $0 there exactly like legacy;
-    #   models WITH controls get a LOUD warning instead of a silent zero.
+    # - daylighting-sensor costing IS ported (see SENSOR_BOM + daylighting_note
+    #   below — the legacy per-sensor BOM driven by the daylighted-area rule);
+    #   an earlier version of this header said otherwise, from before the
+    #   sensor port landed. Models without daylighting controls cost $0 there
+    #   exactly like legacy.
     module Fixtures
       module_function
 

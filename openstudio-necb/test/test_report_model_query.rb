@@ -1,8 +1,8 @@
 require_relative 'test_helper'
 
-# ModelQuery: the only SDK-touching renderer file. Verifies component-chain
-# classification, envelope aggregation (incl. the SimpleGlazing uFactor
-# fallback), and nil-safety.
+# ModelQuery: SDK -> plain hashes for the renderer (one of the two
+# SDK-touching renderer files, with report.rb). Verifies envelope aggregation
+# (incl. the SimpleGlazing uFactor fallback) and nil-safety.
 class TestReportModelQuery < Minitest::Test
   include FixtureHelper
   MQ = OpenStudioNECB::Report::ModelQuery
@@ -11,27 +11,7 @@ class TestReportModelQuery < Minitest::Test
     assert_nil MQ.extract(nil)
   end
 
-  def test_air_loop_chain_sequence
-    model = proposed_with_hvac('PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard')
-    data = MQ.extract(model)
-    refute_empty data[:air_loops]
-    kinds = data[:air_loops].first[:chain].map { |c| c[:kind] }
-    assert_includes kinds, :oa
-    assert_includes kinds, :cooling_coil
-    assert_includes kinds, :heating_coil
-    assert_includes kinds, :fan
-    assert_operator data[:air_loops].first[:zone_count], :>=, 1
-  end
 
-  def test_plant_loop_chain_sequence
-    model = proposed_with_hvac # Baseboard gas boiler
-    data = MQ.extract(model)
-    refute_empty data[:plant_loops]
-    kinds = data[:plant_loops].first[:chain].map { |c| c[:kind] }
-    assert_includes kinds, :boiler
-    assert_includes kinds, :pump
-    assert_operator data[:plant_loops].first[:demand_count], :>=, 1
-  end
 
   def test_envelope_aggregation
     model = load_fixture
@@ -57,9 +37,4 @@ class TestReportModelQuery < Minitest::Test
     assert_in_delta 2.4, u, 0.2, 'SimpleGlazing constructions fall back to uFactor'
   end
 
-  def test_classify_unmatched_returns_nil
-    assert_nil MQ.classify('OS_Node')
-    assert_equal :fan, MQ.classify('OS_Fan_VariableVolume')
-    assert_equal :water_heater, MQ.classify('OS_WaterHeater_Mixed')
-  end
 end

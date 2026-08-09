@@ -23,6 +23,10 @@ module OpenStudioHVAC
         zones.sort_by(&:nameString).each do |zone|
           apply_zone_sizing(zone)
           sz = zone.sizingZone
+          # 0.008 kg/kg design supply humidity ratios: legacy parity with the prototype
+          # zone-terminal creators — model_add_ptac (Prototype.hvac_systems.rb:4067-4068)
+          # and model_add_pthp (:4179-4180) set the same pair (also the common E+ sizing
+          # default neighbourhood; legacy carries it bare).
           sz.setZoneCoolingDesignSupplyAirHumidityRatio(0.008)
           sz.setZoneHeatingDesignSupplyAirHumidityRatio(0.008)
 

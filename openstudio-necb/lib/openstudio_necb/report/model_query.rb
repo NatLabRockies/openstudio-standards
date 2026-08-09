@@ -1,31 +1,12 @@
 module OpenStudioNECB
   module Report
-    # The ONLY renderer file that touches the OpenStudio SDK. Extracts plain
-    # hashes up front so every other module (charts, sections, checklist) is
-    # SDK-free and unit-testable. Never raises on odd models — unmatched
-    # component types map to :other and missing data maps to nil.
+    # SDK -> plain hashes. With report.rb (which drives the openstudio-hvac
+    # diagram engine), this is one of the only TWO renderer files that touch
+    # the OpenStudio SDK; every other module (charts, sections, checklist) is
+    # SDK-free and unit-testable. Never raises on odd models — missing data
+    # maps to nil and any extraction error collapses to an {error:} hash.
     module ModelQuery
       module_function
-
-      COMPONENT_KINDS = [
-        [:oa,           /AirLoopHVAC_OutdoorAirSystem/],
-        [:hx,           /HeatExchanger/],
-        [:cooling_coil, /Coil_Cooling|CoilSystem_Cooling|EvaporativeCooler/],
-        [:heating_coil, /Coil_Heating|Humidifier/],
-        [:fan,          /^OS_Fan/],
-        [:boiler,       /Boiler/],
-        [:water_heater, /WaterHeater/],
-        [:chiller,      /Chiller/],
-        [:tower,        /CoolingTower|FluidCooler/],
-        [:pump,         /Pump/]
-      ].freeze
-
-      KIND_LABELS = {
-        oa: 'Outdoor air', hx: 'Heat recovery', cooling_coil: 'Cooling coil',
-        heating_coil: 'Heating coil', fan: 'Fan', boiler: 'Boiler',
-        water_heater: 'Water heater', chiller: 'Chiller', tower: 'Cooling tower',
-        pump: 'Pump', other: 'Component'
-      }.freeze
 
       # @return [Hash, nil] plain-data snapshot of one model, nil if model nil
       def extract(model)
@@ -33,9 +14,7 @@ module OpenStudioNECB
 
         {
           envelope: envelope(model),
-          space_types: space_types(model),
-          air_loops: air_loops(model),
-          plant_loops: plant_loops(model)
+          space_types: space_types(model)
         }
       rescue StandardError => e
         { error: "model extraction failed: #{e.message}" }
@@ -111,28 +90,6 @@ module OpenStudioNECB
         end
       end
 
-      def air_loops(model)
-        model.getAirLoopHVACs.sort_by(&:nameString).map do |loop|
-          chain = expand_unitary(loop.supplyComponents).filter_map do |component|
-            kind = classify(component.iddObjectType.valueName)
-            kind && { kind: kind, name: component.nameString } || nil
-          end
-          { name: loop.nameString, chain: dedupe_adjacent(chain),
-            zone_count: loop.thermalZones.size }
-        end
-      end
-
-      def plant_loops(model)
-        model.getPlantLoops.sort_by(&:nameString).map do |loop|
-          chain = loop.supplyComponents.filter_map do |component|
-            kind = classify(component.iddObjectType.valueName)
-            kind && { kind: kind, name: component.nameString } || nil
-          end
-          { name: loop.nameString, chain: dedupe_adjacent(chain),
-            demand_count: loop.demandComponents.count { |c| c.iddObjectType.valueName =~ /Coil|WaterUse/ } }
-        end
-      end
-
       # Density getters return a plain double or an OptionalDouble depending on
       # SDK version — normalize to Float or nil.
       def unwrap(value)
@@ -142,29 +99,6 @@ module OpenStudioNECB
         nil
       end
 
-      # A staged NECB reference system (8.4.4.9.(7)/8.4.4.10.(8)) puts its fan and
-      # coils INSIDE an AirLoopHVACUnitarySystem, which is what the air loop
-      # reports as its supply component — expand it so the rendered supply chain
-      # still shows the fan and coils rather than an empty path.
-      def expand_unitary(components)
-        components.flat_map do |component|
-          unitary = component.to_AirLoopHVACUnitarySystem
-          next [component] unless unitary.is_initialized
-
-          unitary = unitary.get
-          [unitary.supplyFan, unitary.coolingCoil, unitary.heatingCoil, unitary.supplementalHeatingCoil]
-            .filter_map { |opt| opt.is_initialized ? opt.get : nil }
-        end
-      end
-
-      def classify(idd_name)
-        COMPONENT_KINDS.each { |kind, regex| return kind if idd_name =~ regex }
-        nil
-      end
-
-      def dedupe_adjacent(chain)
-        chain.chunk_while { |a, b| a[:kind] == b[:kind] && a[:name] == b[:name] }.map(&:first)
-      end
     end
   end
 end
