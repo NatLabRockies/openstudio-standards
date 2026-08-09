@@ -59,6 +59,16 @@ report = OpenStudioSHW.cost(model, city: 'TORONTO', province_state: 'ONTARIO', a
   HE-only-gas buildings get no fuel line; the port uses regular + HE.
   Distribution costing was never enabled in legacy — same here.
 
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value
+(e.g. `6.2.2.1.`); `ruling: 'D-nn'` = the adjudicated reading of it (e.g.
+`D-63` = the solar/pool apply-when-present minimums). The registry is
+[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror.
+Family glossary:
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+
 ## Testing
 
 ```bash

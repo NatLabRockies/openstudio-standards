@@ -27,10 +27,45 @@ Everything else here is generated or reference material:
 `rake necb:coverage_doc`) and `necb_rule_verification.md` (the evidence-tier
 rules those coverage claims must satisfy).
 
-## Open review debt
+## Review debt: none
 
-`pending_review.md` — the 2026-07-29 reference-generation backlog was
-implemented with its review pass DEFERRED. While that file exists and has
-unticked boxes, the post-backlog fleet numbers are NOT validated and the D-46
-full-annual table remains the last validated baseline. Delete the file once
-the checklist is complete.
+`pending_review.md` — CLOSED 2026-08-02: the deferred review of the
+2026-07-29 backlog was executed in full (see the dated entry in
+`necb_decisions.md`); the consolidated fleet baseline there is reviewed, not
+just swept.
+
+## Family glossary (the house dialect, defined once)
+
+Terms that recur across the seven gems' code, docs and decision register:
+
+- **on-ramp** — the `necb_loads:` option: apply NECB space types, loads,
+  lighting and (optionally) SHW/HVAC to bare geometry *before* the compliance
+  pipeline, so a geometry-only model becomes a valid proposed building.
+- **gate** — a pass/fail test. Usually one of the 8.4.1.2 sentence-(3)/(4)
+  unmet-hours limits; also used for test-suite checks that block a merge.
+- **bump** — one 8.4.1.2.(5) capacity increase: multiplying a thermal block's
+  (or the building's) heating/cooling sizing factor by `capacity_step`.
+- **secant** — how later bumps are sized: extrapolating the next sizing factor
+  from the zone's own (factor, unmet-hours) history, aiming just past the
+  100 h limit instead of stepping blindly.
+- **iteration modes `zonal` / `global` / `mixed`** — how a bump was attributed:
+  per failing thermal block (`zonal`), whole-building fallback (`global`), or
+  a facility-level failure with no single failing zone (`mixed`). Recorded in
+  `report['capacity_iterations']`.
+- **stamp / building-stamp** — the `building:` field every audit entry
+  carries (`'input model'` / `'proposed building'` / `'reference building'`;
+  absent = cross-building verdict), set by the pipeline at phase boundaries.
+- **fixed point** — the cross-validation premise: run a code-minimum
+  (reference-grade) building *as the proposed* and expect ~100% of its own
+  target. Deviations locate defects in either the legacy archetypes or our
+  reference generation.
+- **fleet** — the 17 legacy NECB archetype buildings used for sweep
+  validation (the "fleet sweep" is the merge gate for energy-affecting
+  changes).
+- **TTW** — through-the-wall: the Table 8.4.4.7.-A residential row that
+  assigns packaged through-the-wall units (vs the identical-copy rule).
+- **thermal block** — NECB's normative zoning unit (8.4.1.1); in the facts
+  schema and code it is a `zone_group`.
+- **vintage** — the NECB edition (`'2020'` / `'2025'`); the API word
+  everywhere. (`template` appears only inside vendored legacy 90.1 rows and
+  costing CSV columns.)

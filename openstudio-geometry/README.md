@@ -2,13 +2,16 @@
 
 Parametric building geometry — the **authoring on-ramp** for the openstudio-*
 NECB gem family (and the intended MCP tool surface). SDK-only; shared AuditLog
-schema. Two engines, both verbatim ports from openstudio-standards:
+schema. Three engines: the footprint wizards and the bar engine (verbatim ports
+from openstudio-standards) plus a 3D viewer (ported from canmet-energy/campus):
 
 ## Footprint wizards
 
 `OpenstudioStandards::Geometry.create_shape_*` ported whole (rectangle,
 aspect-ratio with rotation, courtyard, H, L, T, U): perimeter/core zoning per
-storey, below-grade storeys with Ground boundary conditions, matched surfaces.
+storey, matched surfaces. Rectangle (and the aspect-ratio wrapper that
+delegates to it) supports below-grade storeys with Ground boundary conditions;
+the other shapes do not.
 
 ```ruby
 model = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
@@ -39,6 +42,27 @@ model = OpenStudioGeometry.bar(
 Slicing is ratio-true (verified to 1%), WWR is honored per facade, party-wall
 storeys go adiabatic, below-grade surfaces go Ground.
 
+## The 3D viewer (campus port)
+
+`OpenStudioGeometry.render(model_or_path, path:, height:)` — a port of
+canmet-energy/campus `geometry_view.py`: the SDK `GltfForwardTranslator`
+produces glTF, embedded as a base64 data URI in a Google `<model-viewer>` HTML
+fragment (a complete standalone page is also written when `path:` is given).
+Every export runs in a child process (`render_worker.rb`) because the C++
+translator can SEGFAULT on un-triangulatable surfaces; the campus fallback
+ladder then retries — full model → sub-surfaces removed (massing shell) →
+binary-search removal of crashing base surfaces. Unrenderable models return
+`''` (audited, never raises).
+
+```ruby
+OpenStudioGeometry.render(model, path: 'building_3d.html')
+```
+
+Trade-off carried from campus: the `<model-viewer>` SCRIPT loads from the
+Google CDN at view time (the caption says so); the geometry itself is fully
+embedded. A CSP that blocks external hosts (e.g. Artifacts) will not run this
+viewer.
+
 ## Composing with the family
 
 Bar/wizard output carries **no constructions** — downstream envelope work
@@ -52,12 +76,22 @@ geometry → `OpenStudioLoads.apply_loads` → `OpenStudioLighting.apply_lights`
 (proposed + reference + costing, one audit) — pinned by
 `test/test_bar.rb#test_full_family_composition_from_bar`.
 
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value;
+`ruling: 'D-nn'` = the adjudicated reading of it. The registry is
+[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror;
+`L-nn` cites the legacy findings register. The family glossary lives in
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+
 ## Testing
 
 ```bash
 cd openstudio-geometry
 ruby test/test_wizards.rb   # shape census, matching, ground BCs, rotation, typo guards
 ruby test/test_bar.rb       # ratio-true slicing + tagging, WWR, party/below-grade, family composition
+ruby test/test_render.rb    # crash-isolated glTF export, fallback ladder, embedded-viewer HTML
 ```
 
 ## Documented future

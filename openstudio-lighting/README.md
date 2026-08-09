@@ -1,10 +1,10 @@
 # openstudio-lighting
 
-NECB Part 4 lighting for OpenStudio models — the fifth domain gem in the family
-(openstudio-hvac, openstudio-envelope, openstudio-loads, openstudio-necb).
-Depends on **openstudio-loads** (the canonical NECB space-type data owner and
-schedule builder). SDK-only; vendored article-tagged data verified offline via
-the codes MCP; shared AuditLog schema + article-coverage manifests.
+NECB Part 4 lighting for OpenStudio models — a domain gem in the seven-gem
+family (see the root README for the family map). Depends on
+**openstudio-loads** (the canonical NECB space-type data owner and schedule
+builder). SDK-only; vendored article-tagged data verified offline via the
+codes MCP; shared AuditLog schema + article-coverage manifests.
 
 Vintages: **2020 and 2025.** The 2025 4.2.1.6 edition diff looked significant
 but is structural — 2025 added a per-space-function **lighting-control
@@ -46,7 +46,9 @@ report = OpenStudioLighting.cost(model, vintage: '2020', city: 'TORONTO',
   NameError and a `select(&false)` TypeError in the height helper.
 - **Reference lighting** (8.4.4.5): allowance LPD, dwelling units 5 W/m²,
   Focc/Fpers via schedule modulation (interpretation audited), fraction
-  identity; daylighting sentences (5)–(12) are a loud gap.
+  identity. Daylighting sentences (5)–(12) are covered by the separate
+  `reference_daylighting` transform (see below); when the caller opts out of
+  it, the gap is shouted.
 - **Exterior allowances**: basic site + tradable + non-tradable by lighting
   zone (Tables 4.2.3.1.-A…-E), per-line evidence, `ExteriorLights` with
   astronomical-clock control.
@@ -72,37 +74,52 @@ Parity: 5 space types × {NECB_Default, LED} match legacy `set_lights: true`
 per-object (W/m², fractions, full schedule signatures incl. synthesized sensor
 rulesets); fixture costing matches legacy `cost_audit_lighting` to the dollar.
 
-## Documented future
-
-Photocontrol energy evaluation and the 8.4.4.5.(5)–(12) reference daylighting
-geometry · exterior-lighting schedules beyond astronomical clock · 2011–2017
-backfill.
-
 ## Daylighting
 
-`OpenStudioLighting.add_daylighting_controls(model, vintage:, option:)` places
-DaylightingControls (stepped ×2, space-type `target_illuminance_setpoint`,
-sensor at the lowest-floor bounding-box centre +0.8 m, zone primary at 1.0):
+`OpenStudioLighting.add_daylighting_controls(model, vintage:, option:, placement:)`
+places DaylightingControls (stepped ×3, space-type
+`target_illuminance_setpoint`, sensor at the lowest-floor bounding-box centre
++0.8 m). Two knobs select the rule:
 
-- `option: 'all'` — every space with exterior fenestration (legacy
-  add_daylighting_controls option).
-- `option: 'NECB_Default'` — only where the 4.2.2 thresholds require sensors,
-  driven by the **ported daylighted-area geometry**: primary sidelighted area
-  (4.2.2.9 — window width + ≤0.6 m side offsets × min(head height, space
-  depth)), daylighted area under skylights (4.2.2.5), and the effective
-  apertures (4.2.2.7/4.2.2.10). Parity-exact vs legacy
-  `get_parameters_sidelighting`/`get_parameters_skylight`. Legacy defects
-  preserved and audited: a space is excepted if it fails ANY single criterion
-  (so window-only spaces are always excepted — their skylight area is 0);
-  skylight-only spaces compute zero area (the accumulator sits inside the
-  window loop); and the ≥25 m² office exemption compares against the 2011-era
-  name `'Office - enclosed'`, which never matches NECB2020 space types (pass
-  `office_match: :any_enclosed_office` for the intent).
+- **`placement: :necb2020` (the DEFAULT, D-57)** — sensors where NECB
+  2020/2025 **4.2.2.1.(10)–(15)** requires them: the Table 4.2.1.6 space-function
+  control matrix gates each space, the input-power tests use
+  `LPD_general × daylighted area` (exact — one LPD per space, no luminaire
+  layout needed), and the daylighted areas come from the **4.2.2.3
+  (primary + secondary sidelighted) and 4.2.2.5 (under skylights)** geometry:
+  one polygon per aperture, flattened, unioned then subtracted (the articles'
+  "without double-counting"), precedence primary > toplit > secondary. The
+  zone's daylight fraction is the **daylighted share of the zone floor area**
+  (not 1.0 — the controls govern the daylighted areas, not the whole room).
+- `placement: :necb2011` (alias `:necb_default`) — the legacy-exact 2011 port,
+  kept ONLY so the parity gate can prove the port faithful. Its preserved,
+  audited defects: a space is excepted if it fails ANY single criterion (so
+  window-only spaces are always excepted — their skylight area is 0);
+  skylight-only spaces compute zero area; and the ≥25 m² office exemption
+  compares against the 2011-era name `'Office - enclosed'`, which never
+  matches NECB2020 space types (`office_match: :any_enclosed_office` restores
+  the intent). Do not build on this path.
+- `option: 'all'` — sensors in every space with exterior fenestration
+  (ignores `placement:`; the legacy blanket option).
+
+**Citation hygiene:** Subsection 4.2.2 of NECB 2020/2025 **ends at article
+4.2.2.6**. Citations to 4.2.2.7–4.2.2.12 are NECB 2011 numbers and are wrong
+in a 2020/2025 context (the code enforces this — see the CITATION HYGIENE
+block in `necb/daylighting.rb`).
 
 Sensor costing uses the legacy daylighted-area rule: per controlled zone,
 fixtures = Σ ceil(ft²/1000 × Fix_1000ft), sensors =
 ceil(ceil(fixtures × area-ratio)/4) per aperture type, each priced with the
 per-sensor BOM (sensor row 407 + 30 ft wiring + 30 ft PVC conduit + box).
+
+### Which file does what
+
+| File | Job |
+|---|---|
+| `necb/daylight_control_requirement.rb` | WHERE controls are required — the 4.2.2.1.(10)–(15) rule over Table 4.2.1.6 |
+| `necb/daylighted_areas.rb` | HOW MUCH area — the 4.2.2.3/.5 union-polygon geometry |
+| `necb/daylighting.rb` | the actuator: places the DaylightingControl objects (+ the quarantined legacy-2011 port, labelled LEGACY-ONLY) |
+| `necb/reference_daylighting.rb` | the 8.4.4.5.(5)–(12) reference-building transform |
 
 ## Reference daylighting (8.4.4.5.(5)–(12))
 
@@ -117,5 +134,21 @@ daylighting is available. Audited interpretation: the analytic
 single-centered-window/skylight AREA convention of sentences (5)–(8) is
 replaced by the ported 4.2.2 threshold geometry on the reference's actual
 FDWR/SRR-scaled fenestration. The comparative E+ gate proves the evaluation is
-live (lighting energy drops when controls are present). Opt into the umbrella
-pipeline with `reference_daylighting: true`.
+live (lighting energy drops when controls are present). The umbrella pipeline
+runs this BY DEFAULT (D-51); `reference_daylighting: false` opts out, loudly.
+
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value;
+`ruling: 'D-nn'` = the adjudicated reading of it (e.g. `D-57` = the 4.2.2.1
+placement rule, `D-51` = reference photocontrols on by default). The registry
+is [openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror;
+`L-nn` cites [legacy_findings.md](../openstudio-necb/docs/legacy_findings.md)
+(e.g. `L-26`, the ANDed sidelighting/toplighting defect). Family glossary:
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+
+## Documented future
+
+Exterior-lighting schedules beyond the astronomical clock · 2011–2017 vintage
+backfill.

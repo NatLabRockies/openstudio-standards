@@ -1,7 +1,7 @@
 # openstudio-loads
 
-NECB space-use loads and schedules for OpenStudio models — the fourth domain gem
-in the family (openstudio-hvac, openstudio-envelope, openstudio-necb):
+NECB space-use loads and schedules for OpenStudio models — a domain gem in the
+seven-gem family (see the root README for the family map):
 
 - **SDK-only.** Pure `openstudio` model manipulation; never simulates.
 - **Vendored, article-tagged data.** The 308 NECB2020 space-type records and 240
@@ -10,8 +10,10 @@ in the family (openstudio-hvac, openstudio-envelope, openstudio-necb):
   and A-8.4.3.2.(2)-A/-B). Zero MCP dependency at runtime. See
   `lib/openstudio_loads/data/necb/README.md`.
 - **AuditLog + article coverage.** Same schema as the sibling gems; every run
-  emits the Subsection 8.4.3 manifest — 8.4.3.2 is honestly **partial** (see
-  boundaries) and warns until the lighting/shw gems exist.
+  emits the Subsection 8.4.3 manifest — 8.4.3.2 is honestly **partial** in
+  THIS gem (lighting and SHW are the sibling gems' scope — apply
+  openstudio-lighting / openstudio-shw after `apply_loads`) and the manifest
+  says so on every run.
 
 Vintages: **2020 and 2025** (2025 verified value-identical via the MCP —
 Article 8.4.3.2 was restructured into clauses and the schedule tables renumbered
@@ -23,8 +25,8 @@ citations). 2011/2015/2017 backfill is a documented future item.
 | Concern | Gem |
 |---|---|
 | People, plug/gas equipment, ventilation OA, modelling infiltration, NECB schedule sets, thermostat set-points | **openstudio-loads (this gem)** |
-| Lighting power, LED, occupancy sensors, atrium rules, exterior lighting (Part 4) | openstudio-lighting (future) |
-| Service water heating — demand and plant (Part 6) | openstudio-shw (future) |
+| Lighting power — Part 4 LPD allowances + daylighting | openstudio-lighting |
+| Service water heating — Part 6 SHW demand + efficiencies | openstudio-shw |
 | HVAC systems, reference systems, efficiencies, HVAC costing | openstudio-hvac |
 | Envelope U-values, FDWR/SRR, thermal bridging, reference envelope, envelope costing | openstudio-envelope |
 | Performance-path composition, simulation, 8.4.1.2 compliance | openstudio-necb |
@@ -35,7 +37,7 @@ citations). 2011/2015/2017 backfill is a documented future item.
 require 'openstudio'
 require_relative 'openstudio-loads/lib/openstudio_loads'
 
-model = OpenStudio::Model::Model.load('geometry_only.osm').get
+model = OpenStudio::Model::Model.load(OpenStudio::Path.new('geometry_only.osm')).get
 audit = OpenStudioLoads::AuditLog.new
 
 # 1. the on-ramp: tag spaces with NECB space types
@@ -83,6 +85,15 @@ days, Hourly change-point insertion — values are MIDNIGHT-FIRST as transcribed
 legacy; Constant rows). Deviation: an unknown schedule name WARNS in the audit
 before the always-on fallback (legacy is silent).
 
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value;
+`ruling: 'D-nn'` = the adjudicated reading of it. The registry is
+[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror;
+`L-nn` cites the legacy findings register. The family glossary lives in
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+
 ## Testing
 
 ```bash
@@ -104,6 +115,6 @@ per-object signatures — 0 mismatches.
 
 ## Documented future (not in scope)
 
-openstudio-lighting (Part 4) · openstudio-shw (Part 6) · 2011–2017 vintage
+2011–2017 vintage
 backfill · ECM load scalers · dwelling/wildcard schedule merging (autozone/HVAC
 territory) · semi-heated set-point-from-specifications (8.4.3.2.(3)).

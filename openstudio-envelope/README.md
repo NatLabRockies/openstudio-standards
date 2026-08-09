@@ -27,7 +27,7 @@ renumbered 8.4.4 → 8.4.5). 2011/2015/2017 backfill is a documented future item
 require 'openstudio'
 require_relative 'openstudio-envelope/lib/openstudio_envelope'
 
-model = OpenStudio::Model::Model.load('proposed.osm').get
+model = OpenStudio::Model::Model.load(OpenStudio::Path.new('proposed.osm')).get
 
 # --- Lookups (Section 3.2, by heating degree-days) ---
 OpenStudioEnvelope::NECB.max_u(vintage: '2020', surface: 'wall',
@@ -150,6 +150,15 @@ To size/run the result, use the pure SDK+CLI recipe from the
 [openstudio-hvac README](../openstudio-hvac/README.md) (ddy design days +
 `DoZoneSizingCalculation`/`DoSystemSizingCalculation`/`DoPlantSizingCalculation` +
 `WorkflowJSON` + `openstudio run -w`).
+
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value;
+`ruling: 'D-nn'` = the adjudicated reading of it. The registry is
+[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror;
+`L-nn` cites the legacy findings register. The family glossary lives in
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
 
 ## Testing
 

@@ -38,6 +38,12 @@ The backend-agnostic steps, if you want them individually:
 - `Runner.clean_run?(run_dir)`
 - `Runner.energy_results(model)` — site energy + end-use breakdown (kWh)
 - `Runner.unmet_occupied_hours(model)` — Facility setpoint-not-met hours
+- `Runner.zone_unmet_occupied_hours(model)` — per-zone unmet occupied hours
+  from the SQL (feeds the umbrella's capacity iteration)
+- `Runner.request_run_period_variables!(model, names)` — idempotent '*'-keyed
+  `OutputVariable` requests at RunPeriod frequency
+- `Runner.run_period_sums(model, variable_name)` — per-KeyValue run-period sums
+  restricted to `EnvironmentType = 3`, so design days are excluded
 - `Runner.openstudio_cli?`
 
 `run_energyplus!` prepares the run directory (sizing flags, run period,
@@ -66,6 +72,15 @@ OpenStudioSimulation.run(model, run_dir: dir,
 Because every backend lands the same two artifacts on local disk, the result
 parsers (`clean_run?`, `energy_results`, `unmet_occupied_hours`) are
 transport-agnostic and work unchanged for local or cloud runs.
+
+## Citation conventions
+
+`article:` in audit entries = the NECB clause that mandates a value;
+`ruling: 'D-nn'` = the adjudicated reading of it. The registry is
+[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+(id-ordered index at the top) + its drift-tested `decisions.json` mirror;
+`L-nn` cites the legacy findings register. The family glossary lives in
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
 
 ## Tests
 

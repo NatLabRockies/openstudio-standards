@@ -78,6 +78,14 @@ class TestDecisionsRegistry < Minitest::Test
 
   # -- (b)/(c) code <-> registry -------------------------------------------
 
+  # The id-ordered TOC at the top of the (chronological) decisions doc is
+  # generated from the registry — regenerate on drift, never hand-edit.
+  def test_decisions_toc_is_current
+    script = File.expand_path('../scripts/generate_decisions_toc.rb', __dir__)
+    assert system(RbConfig.ruby, script, '--check', out: File::NULL, err: File::NULL),
+           'docs/necb_decisions.md TOC is stale — run: ruby scripts/generate_decisions_toc.rb'
+  end
+
   def test_every_cited_id_resolves
     skip 'sibling gems not on disk' if gem_sources.empty?
     unknown = cited_ids - Decisions.ids

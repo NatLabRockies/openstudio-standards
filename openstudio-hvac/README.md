@@ -8,6 +8,36 @@ Incubating inside the openstudio-standards repository as an independent, SDK-onl
 and code-efficiency application are the host application's job (e.g. openstudio-standards,
 whose data-driven efficiency pass applies to any topology, including systems built here).
 
+## Start here: the visual catalog
+
+```ruby
+require 'openstudio_hvac'
+OpenStudioHVAC.catalog_html('catalog.html')
+```
+
+renders a searchable, build-verified HTML catalog of **every system in the
+gem** — one schematic diagram per catalog row (air loops, plants, zone
+equipment), with names, families, and config. If you are a mechanical
+engineer deciding whether the system you need exists, open that file first.
+
+The public entry points, one line each:
+
+| Call | What it does |
+|---|---|
+| `OpenStudioHVAC.systems` | list the catalog (names, families, config) |
+| `OpenStudioHVAC.build_system(model, name, zones, ...)` | build a catalog system's topology on zones |
+| `OpenStudioHVAC.remove_hvac_from_zones(model, zones)` | zone-scoped teardown (incl. orphaned plants) |
+| `OpenStudioHVAC.cost(model, ...)` | capital costing of a SIZED model |
+| `OpenStudioHVAC.characterize(model)` | ANY model's HVAC → neutral facts hash |
+| `OpenStudioHVAC.replace_system(...)` | teardown + build, preserving exhaust fans |
+| `OpenStudioHVAC.catalog_html(path)` / `.model_hvac_diagrams(model)` / `.hvac_icon_defs` | diagrams |
+| `OpenStudioHVAC::NECB.reference_hvac(model, vintage:, ...)` | the 8.4.4 proposed→reference transform |
+| `OpenStudioHVAC::NECB.apply_efficiencies(model, vintage:, ...)` | Table 5.2.12.1 minimums on a sized model |
+| `OpenStudioHVAC::NECB.apply_energy_recovery(model, vintage:, hdd:)` | the 5.2.10.1 ERV determination (post-sizing) |
+| `OpenStudioHVAC::NECB.prepare_for_resizing(model)` | release hard-set pump power before re-sizing |
+| `OpenStudioHVAC::NECB.apply_economizer_thresholds(model)` | 5.2.2.7 economizer triggers (post-sizing) |
+| `OpenStudioHVAC::NECB.check_part5(model, ...)` | warnings-only Part 5 QAQC |
+
 ## Usage
 
 ```ruby
@@ -69,19 +99,49 @@ host efficiency pass remains the alternative and lands cleanly on gem-built coil
 (coil naming is aligned to its dispatch):
 `standard.model_apply_hvac_efficiency_standard(model, 'NECB HDD Method')`.
 
-## Catalog (current)
+## Catalog
 
-| Family | Systems | Origin |
+**97 catalog names across 18 families** — all NECB reference systems sys1–sys6
+including the reference heat-pump variants, the complete NECB ECM set
+(hs08–hs16), and the CBECS descriptive types. The table below is generated
+from `lib/openstudio_hvac/data/systems.json` (regenerate with the one-liner
+under it — never hand-edit the counts):
+
+| Family | Rows | Example |
 |---|---|---|
-| `psz` | `PSZ RTU {Gas,Electric} and DX Coils and {Hot Water,Electric} Baseboard` (+ `with exhaust` variants) | NECB sys3 / sys4, unified into one implementation |
-| `vav_reheat` | `MZ BU RTU {Electric,Hot Water} Heating Coil {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller and {Electric,Hot Water} Baseboard` | NECB sys6: per-story built-up VAV, supply+return fans, CHW/CW plant |
-| `fan_coils` | `{FPFC,TPFC} MAU {DX,Chilled Water} Coils with {Scroll,Centrifugal,Rotary Screw,Reciprocating} Chiller` | NECB sys2/sys5: per-zone fan coils + CV make-up air unit. TPFC names are NEW (the legacy catalog had no sys5 descriptions) |
-| `mau_ptac` | `PSZ MAU {Hot Water,Electric} and DX Coils and {Hot Water,Electric} Baseboard with PTAC` | NECB sys1: 100% OA make-up air unit + per-zone PTAC + baseboards |
+| `baseboards` | 3 | `Baseboard electric` |
+| `composite` | 12 | `DOAS with VRF` |
+| `doas` | 1 | `DOAS ventilation only` |
+| `doas_pthp` | 1 | `hs11_ashp_pthp` |
+| `ecm_ashp_baseboard` | 2 | `hs12_ashp_baseboard` |
+| `ecm_doas_vrf` | 2 | `hs13_ashp_vrf` |
+| `ecm_hp_fancoils` | 3 | `hs14_cgshp_fancoils` |
+| `evap_cooler` | 1 | `Direct evap coolers with no heat` |
+| `fan_coils` | 16 | `FPFC MAU DX Coils with Scroll Chiller` |
+| `furnace` | 1 | `Forced air furnace` |
+| `mau_ptac` | 8 | `PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC` |
+| `psz` | 20 | `PSZ-AC with gas coil` |
+| `unit_heaters` | 2 | `Gas unit heaters` |
+| `vav_reheat` | 18 | `PVAV with gas boiler reheat` |
+| `vrf` | 1 | `VRF` |
+| `wshp` | 1 | `Water source heat pumps` |
+| `zone_ervs` | 1 | `Zone ERVs` |
+| `zone_terminal` | 4 | `PTHP` |
 
-44 catalog names covering all NECB reference systems sys1–sys6 (non-heat-pump). Every family
-is parity-verified against the legacy openstudio-standards NECB builders (object inventory,
-sizing fields, quirks and all — pipe-names byte-identical), and the topology + host-efficiency
-contract is integration-verified (NECB2011 capacity-binned values + reference curves land on
+```bash
+ruby -rjson -e 'rows = JSON.parse(File.read("lib/openstudio_hvac/data/systems.json"))["systems"]
+puts "#{rows.size} rows"; rows.group_by { |r| r["family"] }.sort.each { |f, rs|
+puts "| `#{f}` | #{rs.size} | `#{rs.map { |r| r["name"] }.min_by(&:length)}` |" }'
+```
+
+The NECB core families: `mau_ptac` = sys1 (100% OA make-up air unit +
+per-zone PTAC + baseboards); `fan_coils` = sys2/sys5 (per-zone two/four-pipe
+fan coils + CV make-up air unit); `psz` = sys3/sys4 (packaged single-zone
+rooftop units); `vav_reheat` = sys6 (per-storey built-up VAV, supply+return
+fans, CHW/CW plant). Every NECB family is parity-verified against the legacy
+openstudio-standards builders (object inventory, sizing fields, quirks and
+all — pipe-names byte-identical), and the topology + host-efficiency contract
+is integration-verified (capacity-binned values + reference curves land on
 gem-built coils after the host's sizing/efficiency pass).
 
 ### CBECS names (first increment)
@@ -98,22 +158,18 @@ sizing block — the host's sizing conventions apply):
 | `Window AC with baseboard electric` | `zone_terminal` | cooling-only window units (EER 8.5) + electric baseboards |
 | `Gas unit heaters` / `Electric unit heaters` | `unit_heaters` | per-zone unit heaters, CV fan |
 | `VAV chiller with gas boiler reheat` | `vav_reheat` | central VAV + CHW cooling + gas-boiler HW heat/reheat |
-
 | `Forced air furnace` / `Residential AC with baseboard electric` | `furnace` (+composite) | per-zone CV furnace / cooling-only central AC loops |
 | `Baseboard district hot water` | `baseboards` (`hw_source: 'district'`) | hot-water baseboards on a district-heating loop, no boilers |
 | `PVAV with gas boiler reheat` | `vav_reheat` (`cooling_type: 'dx'`) | packaged VAV: two-speed DX cooling, gas-boiler HW heat/reheat |
 | `Direct evap coolers with baseboard electric` / `... no heat` | `evap_cooler` (+composite) | per-zone direct evap coolers, supply follows outdoor wet-bulb (legacy EMS availability program not replicated — documented) |
-| `DOAS with water source heat pumps fluid cooler with boiler` | `composite` (`doas` + `wshp`) | HP condenser loop (boiler + evaporative fluid cooler) + per-zone water-to-air HPs; DOAS ventilates |
-| `DOAS with fan coil chiller with boiler` | `composite` (`doas` + `fan_coils` `mau: false`) | DOAS ventilates; no-MAU four-pipe fan coils condition |
+| `VRF` / `DOAS with VRF` | `vrf` (+composite) | outdoor VRF unit + zone terminals; standalone terminals self-ventilate, the DOAS composite zeroes terminal OA |
+| `DOAS with water source heat pumps {fluid cooler, cooling tower} with boiler` / `... with ground source heat pump` | `composite` (`doas` + `wshp`) | HP condenser loop + per-zone water-to-air HPs; DOAS ventilates. `heat_rejection`: fluid cooler / cooling tower / vertical ground HX (GSHP — no boiler) |
+| `DOAS with fan coil {chiller, air-cooled chiller, district chilled water} with {boiler, district hot water}` | `composite` (`doas` + `fan_coils` `mau: false`) | DOAS ventilates; no-MAU four-pipe fan coils condition — the full 3×2 matrix via `chw_source` / `hw_source` part configs |
+| `Zone ERVs` | `zone_ervs` | per-zone energy recovery ventilators — the `with ERVs` suffix part for composites |
 
 **Composites**: a `composite` catalog row lists `parts` (other catalog names + config overrides)
 built on the same zones — the mechanism for the whole CBECS `DOAS with <zone system>` matrix;
 additional combinations are catalog data, not code.
-
-| `VRF` / `DOAS with VRF` | `vrf` (+composite) | outdoor VRF unit + zone terminals; standalone terminals self-ventilate, the DOAS composite zeroes terminal OA |
-| `DOAS with water source heat pumps {fluid cooler, cooling tower} with boiler` / `... with ground source heat pump` | `composite` (`doas` + `wshp`) | `heat_rejection`: fluid cooler / cooling tower / vertical ground HX (GSHP — no boiler) |
-| `DOAS with fan coil {chiller, air-cooled chiller, district chilled water} with {boiler, district hot water}` | `composite` | full 3×2 matrix via `chw_source` / `hw_source` part configs |
-| `Zone ERVs` | `zone_ervs` | per-zone energy recovery ventilators — the `with ERVs` suffix part for composites |
 
 Zone partitioning (heated-only zones get unit heaters/baseboards, cooled-only get the system)
 remains the caller's job, exactly as in openstudio-standards `add_cbecs_hvac_system`. Any
@@ -154,9 +210,6 @@ Documented deviations from legacy: the `'AirSoure'` typo (a silently failing con
 set on the hs15 heating HP) is corrected to `'AirSource'`; hs14's destructive
 `model.getOutputVariables.each(&:remove)` is not replicated (the district-rate output
 variables are still added).
-
-Planned extensions: remaining CBECS types (above). NECB reference-heat-pump variants are out
-of scope for now (they require regional standards data; future work via config injection).
 
 ## Canonical names — one consolidated grammar
 
@@ -285,18 +338,20 @@ audit.entries.map { |e| e[:step] }.uniq
   fan specs (8.4.4.18: sys 1/3/4/5 → 640 Pa @ 40%, no return fan; sys 6 → 1000 Pa @ 55%
   supply + 250 Pa @ 30% return), heat-pump −10 °C heating cutoff (8.4.4.13), purchased
   cooling → air-cooled electric chiller (8.4.4.6.(2)), and **energy recovery
-  (8.4.4.19)**: the 5.2.10.1 exhaust-heat-content trigger (>150 kW) is evaluated per
-  reference air loop — specification-based (OA specs × heating setpoints × winter
-  design temperature from the .stat file or `building: {winter_design_temp_c:}`), so no
-  sizing run is needed — and adds the rotary HX @ 50% effectiveness with OA-pretreat
-  control where required. Proposed zone exhaust fans are preserved through
-  `replace_system` (8.4.4.17.(1)).
+  (8.4.4.19)**: a separate **post-sizing** pass —
+  `NECB.apply_energy_recovery(model, vintage:, hdd:)` — evaluates the NECB 2020/2025
+  Table 5.2.10.1.-A/-B airflow thresholds (HDD row × %-outdoor-air band ×
+  continuous/non-continuous operation) per reference air loop and adds the rotary
+  HX @ 50% effectiveness with OA-pretreat control where required. It needs SIZED
+  supply/OA flows, so call it AFTER the reference sizing run (unsized loops warn
+  loudly; the umbrella pipeline sequences this automatically). Proposed zone
+  exhaust fans are preserved through `replace_system` (8.4.4.17.(1)).
 - **Article-coverage accounting**: every audit ends with a `:coverage` section listing
   **all 20 articles** of the reference subsection with a handling status
   (implemented / partial / not-implemented / satisfied-by-clone / host-scope), the
   number of decisions that cited each article in that run, and the declared gaps —
   partial and unimplemented articles surface as **warnings in every log** (e.g.
-  economizers 8.4.4.12, radiant workaround 8.4.4.16), so a missed requirement is
+  ice-plant heat recovery 8.4.4.18, radiant workaround 8.4.4.16), so a missed requirement is
   visible per run rather than discovered in review. The manifest lives in the rules
   JSON and is lint-tested for completeness on both vintages.
 - **Efficiencies** (`apply_efficiencies`): SDK-only port of the NECB pass — boilers
@@ -339,6 +394,27 @@ audit.entries.map { |e| e[:step] }.uniq
   including orphaned plant loops (water-cooled chiller → condenser chains handled via a
   fixpoint), preserving service-hot-water loops and other zones' systems.
 
+## Citation conventions (`article:`, `ruling:`, and the letter registers)
+
+Audit entries and code comments in this gem carry two citation axes:
+
+- **`article:`** — the NECB clause that mandates a value or step
+  (e.g. `8.4.4.7.(4)`).
+- **`ruling: 'D-nn'`** — the adjudicated *reading* of that clause where
+  interpretation was required (e.g. `D-56` = the sys2/sys5 water-side
+  economizer). The registry is
+  [openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+  (human prose, with an id-ordered index at the top) mirrored in
+  `openstudio-necb/lib/openstudio_necb/data/decisions.json`
+  (machine-readable, drift-tested both ways).
+
+Comments may also cite `L-nn` (legacy-implementation findings,
+`openstudio-necb/docs/legacy_findings.md`) and `T-n` / `A-n` (the archived
+2026-07-25 reference-systems audit registers — drained into D-22/D-34…D-45;
+kept as evidence). The family glossary — on-ramp, gate, bump, fleet, TTW and
+friends — lives in
+[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+
 ## Tests
 
 ```bash
@@ -372,9 +448,10 @@ Plain ruby + the OpenStudio SDK bindings — no bundler required.
 - [openstudio-envelope](../openstudio-envelope) — the envelope domain gem
   (prescriptive 3.2, thermal bridging via TBD, the reference-envelope transform,
   envelope + thermal-bridging costing), same AuditLog schema.
-- [openstudio-necb](../openstudio-necb) — the umbrella: composes both domain gems
-  into the full NECB 8.4.1.2 performance-path determination (proposed vs
-  reference, sizing/annual simulation, unified costing, one audit).
+- [openstudio-necb](../openstudio-necb) — the umbrella: composes the five domain
+  gems (this one + envelope, loads, lighting, shw) into the full NECB 8.4.1.2
+  performance-path determination (proposed vs reference, sizing/annual
+  simulation via openstudio-simulation, unified costing, one audit).
 - [openstudio-loads](../openstudio-loads) — NECB space-use loads and schedules
   (people, plug loads, ventilation OA, NECB schedule sets, set-points): the
   bare-geometry on-ramp that makes gem-only proposed buildings possible.

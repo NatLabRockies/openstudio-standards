@@ -1,8 +1,8 @@
 # CLAUDE.md — openstudio-geometry
 
 SDK-only geometry-authoring gem: the seven parametric shape wizards
-(rectangle, L, T, U, H, E, courtyard) and the Goldwasser bar engine, plus tiny
-BTAP helpers. This is the on-ramp for authoring models from nothing (and for
+(rectangle, aspect-ratio, courtyard, H, L, T, U) and the Goldwasser bar
+engine, plus tiny BTAP helpers. This is the on-ramp for authoring models from nothing (and for
 the future MCP server) — its output feeds loads → lighting → shw → hvac →
 envelope.
 

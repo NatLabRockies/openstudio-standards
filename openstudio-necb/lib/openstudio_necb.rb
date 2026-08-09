@@ -39,12 +39,16 @@ require_relative 'openstudio_necb/archetypes'
 require_relative 'openstudio_necb/compliance'
 require_relative 'openstudio_necb/report'
 
-# OpenStudioNECB is the UMBRELLA: it composes the SDK-only domain gems
+# OpenStudioNECB is the UMBRELLA: it composes the five SDK-only domain gems
 # (openstudio-hvac reference systems + efficiencies, openstudio-envelope
-# prescriptive/reference envelope + thermal bridging) into the NECB Part 8
+# prescriptive/reference envelope + thermal bridging, openstudio-loads NECB
+# space-use loads, openstudio-lighting LPD allowances + daylighting,
+# openstudio-shw service-water-heating minimums) into the NECB Part 8
 # performance path — proposed vs reference building energy target (8.4.1.2) —
-# with simulation execution (the one place simulation is allowed; the domain
-# gems never simulate), unified costing, and ONE AuditLog across everything.
+# with simulation execution via openstudio-simulation (the one place
+# simulation is allowed; the domain gems never simulate), unified costing,
+# and ONE AuditLog across everything. The seventh family gem,
+# openstudio-geometry, sits UPSTREAM: it creates the model you feed in here.
 module OpenStudioNECB
   # The shared audit class (openstudio-hvac's and openstudio-envelope's are
   # schema-identical; one instance flows through both).
