@@ -26,6 +26,13 @@ module OpenStudioNECB
     ComplianceResult = Struct.new(:proposed_model, :reference_model, :report, :audit,
                                   :compliant, :run_dir, keyword_init: true)
 
+    # One performance-path run's context: the frozen option hash plus the
+    # mutable state the eleven pipeline phases hand each other (internal —
+    # phases read run.opts and write the five stateful slots).
+    Run = Struct.new(:opts, :proposed, :reference, :report, :audit, :hdd,
+                     :proposed_annual_data, :compliant, keyword_init: true)
+    private_constant :Run
+
     module_function
 
     # @param model [OpenStudio::Model::Model, String] the proposed building (or .osm path)
@@ -122,17 +129,53 @@ module OpenStudioNECB
       end
       audit ||= AuditLog.new
       FileUtils.mkdir_p(run_dir)
-      report = {}
+      # The run context: frozen options + the mutable state the phases hand
+      # each other. `report` starts EMPTY and is rebound after the proposed
+      # sizing (below) — a failure flush before that point deliberately
+      # writes the empty hash (pinned by test_failed_run_still_writes_audit_trail).
+      opts = { model: model, vintage: vintage, weather: weather, building: building,
+               run_dir: run_dir, simulate: simulate, run_period: run_period,
+               costing: costing, city: city, province_state: province_state,
+               costs_csv: costs_csv, thermal_bridging: thermal_bridging,
+               actual_roof_absorptance_used: actual_roof_absorptance_used,
+               max_capacity_iterations: max_capacity_iterations,
+               capacity_step: capacity_step, necb_loads: necb_loads,
+               reference_daylighting: reference_daylighting,
+               eui_supplement: eui_supplement, report_html: report_html,
+               report_options: report_options }.freeze
+      run = Run.new(opts: opts, report: {}, audit: audit, hdd: hdd)
       begin
-      # 1. load + validate the input model (on-ramp for bare geometry, then the
-      #    simulate-ability gates and the NECB space-type pre-flight)
+        load_and_validate!(run)           # 1. input model in, gates passed
+        attach_weather_and_hdd!(run)      # 2. weather + heating degree-days
+        size_proposed!(run)               # 3. proposed sizing run
+        run.report = base_report(run)     #    (the report rebinding — see above)
+        run_proposed_annual!(run)         # 4. proposed annual (D-52: BEFORE the reference)
+        build_reference!(run)             # 5. reference transforms on one clone
+        size_reference!(run)              # 6. reference sizing + post-sizing passes
+        compare_and_iterate!(run)         # 7. 8.4.1.2.(2)-(4) verdicts + sentence-(5) loop
+        score_ghg!(run)                   # 8. 2025 Part 11 GHG (needs province_state)
+        cost_both!(run)                   # 9. optional costing of both models
+        supplement_eui!(run)              # 10. optional 2025 archetype-EUI verdict
+        finalize!(run)                    # 11. coverage + outputs -> ComplianceResult
+      rescue StandardError => e
+        flush_on_failure(run_dir, run.report, audit, e)
+        raise e
+      end
+    end
+
+    # 1. load + validate the input model (on-ramp for bare geometry, then the
+    #    simulate-ability gates and the NECB space-type pre-flight)
+    def load_and_validate!(run)
+      opts = run.opts
+      audit = run.audit
+      vintage = opts[:vintage]
       proposed = nil
       audit.with_building('input model') do
-        proposed = load_model(model, audit: audit)
-        apply_necb_loads(proposed, vintage, necb_loads, audit) if necb_loads
+        proposed = load_model(opts[:model], audit: audit)
+        apply_necb_loads(proposed, vintage, opts[:necb_loads], audit) if opts[:necb_loads]
         # After the on-ramp (it may have added thermostats to bare geometry):
         # the input must be a simulate-able building before any transform.
-        validate_input_model!(proposed, audit, building: building)
+        validate_input_model!(proposed, audit, building: opts[:building])
         # PRE-FLIGHT: every floor-area space type must resolve against the NECB
         # catalog BEFORE any transform runs. The reference is a clone of the
         # proposed, and the per-space-type transforms (lighting LPD, loads, SHW
@@ -141,35 +184,45 @@ module OpenStudioNECB
         # the allowance is waived and the proposed is compared against itself.
         # You cannot certify a building whose reference silently failed to
         # build; fail here, loudly, with the full list (the raise lands inside
-        # the begin, so the audit trail is still flushed to run_dir).
+        # the pipeline rescue, so the audit trail is still flushed to run_dir).
         validate_space_types!(proposed, vintage, audit)
       end
       audit.decision(:compliance, 'performance-path run started',
-                     inputs: { vintage: vintage, simulate: simulate, costing: costing },
+                     inputs: { vintage: vintage, simulate: opts[:simulate], costing: opts[:costing] },
                      article: '8.4.1.2.(1)')
+      run.proposed = proposed
+    end
 
-      # 2. attach weather, resolve heating degree-days
+    # 2. attach weather, resolve heating degree-days
+    def attach_weather_and_hdd!(run)
+      opts = run.opts
+      audit = run.audit
+      weather = opts[:weather]
       audit.building = 'proposed building'
-      if simulate != :none
+      if opts[:simulate] != :none
         %i[epw ddy].each do |key|
-          raise(ArgumentError, "weather[:#{key}] is required when simulate: #{simulate}") unless weather[key]
+          raise(ArgumentError, "weather[:#{key}] is required when simulate: #{opts[:simulate]}") unless weather[key]
         end
-        Runner.attach_weather!(proposed, epw: weather[:epw], ddy: weather[:ddy])
+        Runner.attach_weather!(run.proposed, epw: weather[:epw], ddy: weather[:ddy])
       end
 
       # HDD for the envelope rules (explicit > Table C-1 from the EPW site > .stat)
-      hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
-      raise(ArgumentError, 'HDD unresolvable: pass hdd: or weather with a recognized site') if hdd.nil?
+      run.hdd ||= OpenStudioEnvelope::Climate.hdd18(run.proposed, audit: audit)
+      raise(ArgumentError, 'HDD unresolvable: pass hdd: or weather with a recognized site') if run.hdd.nil?
+    end
 
-      # 3. size the PROPOSED building (selection thresholds + efficiencies + costing
-      #    all need capacities; the domain gems never simulate)
-      if simulate == :none
+    # 3. size the PROPOSED building (selection thresholds + efficiencies + costing
+    #    all need capacities; the domain gems never simulate)
+    def size_proposed!(run)
+      opts = run.opts
+      audit = run.audit
+      if opts[:simulate] == :none
         audit.warn(:compliance, 'proposed is UNSIZED (simulate: :none) — data-centre kW thresholds ' \
                                 'and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 ' \
                                 'energy-recovery determination needs sized flows and is SKIPPED')
       else
         begin
-          Runner.run_energyplus!(proposed, File.join(run_dir, 'proposed_sizing'), sizing_only: true)
+          Runner.run_energyplus!(run.proposed, File.join(opts[:run_dir], 'proposed_sizing'), sizing_only: true)
         rescue RuntimeError => e
           # An E+ failure BEFORE any transform is the INPUT model's fault —
           # frame it that way (SHOUTED, flushed with the audit) instead of
@@ -182,50 +235,65 @@ module OpenStudioNECB
         end
         audit.info(:compliance, 'proposed sizing run complete', target: 'proposed')
       end
+    end
 
-      report = { 'vintage' => vintage, 'hdd' => hdd, 'simulate' => simulate.to_s,
-                 'proposed' => {}, 'reference' => {} }
+    # The determination report skeleton (rebound over the pre-flight {} once
+    # the proposed is sized — the flush-before-this-point contract above).
+    def base_report(run)
+      { 'vintage' => run.opts[:vintage], 'hdd' => run.hdd,
+        'simulate' => run.opts[:simulate].to_s, 'proposed' => {}, 'reference' => {} }
+    end
 
-      # 4. the proposed ANNUAL run — BEFORE the reference build (D-52). The
-      # proposed annual depends on nothing downstream (the reference is a
-      # clone; every later use of the proposed is read-only), so running it
-      # here costs zero extra simulations and hands the reference builder the
-      # annual data the 8.4.4.13.(2)(g) auxiliary-fuel election needs. When
-      # the proposed carries a heat pump, its per-equipment heating energy is
-      # requested first and joined with the SDK inventory after the run.
-      proposed_annual_data = nil
-      if simulate == :annual
-        report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
-        inventory = OpenStudioHVAC::Classify.heating_election_inventory(proposed)
-        hp_present = inventory[:loops].any? { |_, e| e[:hp].any? } ||
-                     inventory[:zones].any? { |_, list| list.any? { |e| e[:role] == :hp } }
-        if hp_present
-          Runner.request_run_period_variables!(
-            proposed, ['Heating Coil Heating Energy', 'Baseboard Total Heating Energy']
-          )
-        end
-        run_annual(proposed, File.join(run_dir, 'proposed_annual'), run_period, report['proposed'], audit: audit)
-        proposed_annual_data = heating_election_data(proposed, inventory, audit) if hp_present
+    # 4. the proposed ANNUAL run — BEFORE the reference build (D-52). The
+    # proposed annual depends on nothing downstream (the reference is a
+    # clone; every later use of the proposed is read-only), so running it
+    # here costs zero extra simulations and hands the reference builder the
+    # annual data the 8.4.4.13.(2)(g) auxiliary-fuel election needs. When
+    # the proposed carries a heat pump, its per-equipment heating energy is
+    # requested first and joined with the SDK inventory after the run.
+    def run_proposed_annual!(run)
+      opts = run.opts
+      audit = run.audit
+      proposed = run.proposed
+      return unless opts[:simulate] == :annual
+
+      run.report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
+      inventory = OpenStudioHVAC::Classify.heating_election_inventory(proposed)
+      hp_present = inventory[:loops].any? { |_, e| e[:hp].any? } ||
+                   inventory[:zones].any? { |_, list| list.any? { |e| e[:role] == :hp } }
+      if hp_present
+        Runner.request_run_period_variables!(
+          proposed, ['Heating Coil Heating Energy', 'Baseboard Total Heating Energy']
+        )
       end
+      run_annual(proposed, File.join(opts[:run_dir], 'proposed_annual'), opts[:run_period],
+                 run.report['proposed'], audit: audit)
+      run.proposed_annual_data = heating_election_data(proposed, inventory, audit) if hp_present
+    end
 
-      # 5. reference building: HVAC, envelope, lighting (+ photocontrols) and
-      #    SHW transforms on ONE clone, same audit
+    # 5. reference building: HVAC, envelope, lighting (+ photocontrols) and
+    #    SHW transforms on ONE clone, same audit
+    def build_reference!(run)
+      opts = run.opts
+      audit = run.audit
+      proposed = run.proposed
+      vintage = opts[:vintage]
       reference = nil
       lighting_prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       audit.with_building('reference building') do
         reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
-                                                               building: building, audit: audit,
-                                                               proposed_annual: proposed_annual_data)
+                                                               building: opts[:building], audit: audit,
+                                                               proposed_annual: run.proposed_annual_data)
         reference = reference_result.model
-        OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: hdd,
-                                                    actual_roof_absorptance_used: actual_roof_absorptance_used,
-                                                    thermal_bridging: thermal_bridging, audit: audit)
+        OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: run.hdd,
+                                                    actual_roof_absorptance_used: opts[:actual_roof_absorptance_used],
+                                                    thermal_bridging: opts[:thermal_bridging], audit: audit)
         # daylighting: tells reference_lighting whether (5)-(12) are covered by
         # the separate daylighting transform below — it shouts the gap only when
         # they are not (Phase 0 truth-up; the warning used to fire either way).
         OpenStudioLighting::NECB.reference_lighting(reference, vintage: vintage,
-                                                    daylighting: reference_daylighting, audit: audit)
-        if reference_daylighting
+                                                    daylighting: opts[:reference_daylighting], audit: audit)
+        if opts[:reference_daylighting]
           audit.decision(:compliance,
                          'reference photocontrols BUILT by default: 4.2.2 requires photocontrols, and ' \
                          "#{lighting_prefix}.5.(9)-(12) requires their effect to be evaluated in the reference — " \
@@ -253,11 +321,18 @@ module OpenStudioNECB
                  "building type remains the modeller's input (see the openstudio-loads gem for NECB " \
                  'space-use data).',
                  article: '8.4.3.2.(1)-(2)')
+      run.reference = reference
+    end
 
-      # 6. size the reference, then re-apply efficiencies on sized equipment
-      #    (the openstudio-hvac contract: efficiency rows are capacity-binned),
-      #    plus the post-sizing determinations (5.2.10.1 ERV, 5.2.2.7 economizers)
-      if simulate != :none
+    # 6. size the reference, then re-apply efficiencies on sized equipment
+    #    (the openstudio-hvac contract: efficiency rows are capacity-binned),
+    #    plus the post-sizing determinations (5.2.10.1 ERV, 5.2.2.7 economizers)
+    def size_reference!(run)
+      opts = run.opts
+      audit = run.audit
+      vintage = opts[:vintage]
+      reference = run.reference
+      if opts[:simulate] != :none
         audit.with_building('reference building') do
           # Loops COPIED from the proposed (the Table -A residential identity,
           # D-58) arrive with the legacy's hard-set pump power; the reference
@@ -267,82 +342,105 @@ module OpenStudioNECB
           # clean references, and the 8.4.4.14 transfer below re-establishes
           # the proposed-equivalent W/(L/s) on the sized flows (D-27 machinery).
           OpenStudioHVAC::NECB.prepare_for_resizing(reference, audit: audit)
-          Runner.run_energyplus!(reference, File.join(run_dir, 'reference_sizing'), sizing_only: true)
+          Runner.run_energyplus!(reference, File.join(opts[:run_dir], 'reference_sizing'), sizing_only: true)
           # proposed: enables the 8.4.4.14.(1)-(3) pump power transfer (the
           # proposed was sized in step 1, so its pump flows/powers are readable)
-          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit, proposed: proposed)
+          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit, proposed: run.proposed)
           # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
           # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
-          OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: hdd, audit: audit)
+          OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: run.hdd, audit: audit)
           # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
           OpenStudioHVAC::NECB.apply_economizer_thresholds(reference, audit: audit)
           audit.info(:compliance, 'reference sized; efficiencies re-applied and the 5.2.10.1 energy-recovery ' \
                                   'determination evaluated on sized flows', target: 'reference')
         end
       end
+    end
 
-      compliant = nil
-
-      # 7. the reference ANNUAL run, then the energy comparison (8.4.1.2.(2)-(4))
-      #    with the sentence-(5) capacity iteration loop. The PROPOSED annual
-      #    already ran in step 4 (D-52); only the reference's annual is new here.
-      if simulate == :annual
+    # 7. the reference ANNUAL run, then the energy comparison (8.4.1.2.(2)-(4))
+    #    with the sentence-(5) capacity iteration loop. The PROPOSED annual
+    #    already ran in step 4 (D-52); only the reference's annual is new here.
+    def compare_and_iterate!(run)
+      opts = run.opts
+      audit = run.audit
+      vintage = opts[:vintage]
+      run.compliant = nil
+      if opts[:simulate] == :annual
         # Stamp the reference's first annual — step 4 sits outside the earlier
         # with_building blocks and its run entry was landing unattributed.
         audit.with_building('reference building') do
-          run_annual(reference, File.join(run_dir, 'reference_annual'), run_period, report['reference'], audit: audit)
+          run_annual(run.reference, File.join(opts[:run_dir], 'reference_annual'), opts[:run_period],
+                     run.report['reference'], audit: audit)
         end
-        iterate_capacities(proposed, reference, report, vintage: vintage, run_dir: run_dir,
-                           run_period: run_period, max_iterations: max_capacity_iterations,
-                           step: capacity_step, audit: audit)
-        compliant = evaluate(report, vintage, run_period, audit)
-      elsif simulate == :sizing
+        iterate_capacities(run.proposed, run.reference, run.report, vintage: vintage,
+                           run_dir: opts[:run_dir], run_period: opts[:run_period],
+                           max_iterations: opts[:max_capacity_iterations],
+                           step: opts[:capacity_step], audit: audit)
+        run.compliant = evaluate(run.report, vintage, opts[:run_period], audit)
+      elsif opts[:simulate] == :sizing
         audit.info(:compliance, 'simulate: :sizing — both models generated and sized; ' \
                                 'no energy comparison performed (compliance undetermined)')
       end
+    end
 
-      # 8. NECB 2025 Part 11: operational GHG performance level (needs a province)
-      if vintage.to_s == '2025' && simulate == :annual && province_state
-        proposed_ghg = Tiers.operational_ghg_kg(report['proposed'], province_state)
-        reference_ghg = Tiers.operational_ghg_kg(report['reference'], province_state)
-        if proposed_ghg && reference_ghg&.positive?
-          report['proposed']['ghg_kg_co2e'] = proposed_ghg
-          report['reference']['ghg_kg_co2e'] = reference_ghg
-          report['ghg'] = Tiers.ghg_level(proposed_ghg, reference_ghg, audit: audit)
-        end
-      end
+    # 8. NECB 2025 Part 11: operational GHG performance level (needs a province)
+    def score_ghg!(run)
+      opts = run.opts
+      report = run.report
+      return unless opts[:vintage].to_s == '2025' && opts[:simulate] == :annual && opts[:province_state]
 
-      # 9. optional: unified costing of BOTH models (same audit)
-      cost_models(proposed, reference, report, city: city, province_state: province_state,
-                  costs_csv: costs_csv, audit: audit) if costing
+      proposed_ghg = Tiers.operational_ghg_kg(report['proposed'], opts[:province_state])
+      reference_ghg = Tiers.operational_ghg_kg(report['reference'], opts[:province_state])
+      return unless proposed_ghg && reference_ghg&.positive?
 
-      # 10. optional (2025): the 8.4.4 archetype-EUI verdict alongside the
-      # reference-path run. The two paths simulate DIFFERENT proposed
-      # buildings — as-specified (8.4.3.2) vs normalized to Table 8.4.4.2
-      # (8.4.4.2.(1)) — so the reference-path annual result serves the EUI
-      # verdict ONLY when the proposed already conforms to the Table. When it
-      # does not: report not-computed with the mismatch list (default — never
-      # silently double the simulation cost), or, with run_normalized: true,
-      # clone-normalize-rerun and compute the verdict from that run.
-      if eui_supplement && vintage.to_s == '2025' && report['proposed']['total_site_kwh']
-        report['eui_path'] = eui_supplement_verdict(proposed, eui_supplement, hdd, report, run_dir,
-                                                    run_period, vintage, audit)
-      end
+      report['proposed']['ghg_kg_co2e'] = proposed_ghg
+      report['reference']['ghg_kg_co2e'] = reference_ghg
+      report['ghg'] = Tiers.ghg_level(proposed_ghg, reference_ghg, audit: run.audit)
+    end
 
-      # 11. emit article coverage; write report.json / audit.json / audit.txt
-      #     (+ the optional HTML compliance report)
-      emit_article_coverage(vintage, audit)
-      report['compliant'] = compliant
+    # 9. optional: unified costing of BOTH models (same audit)
+    def cost_both!(run)
+      opts = run.opts
+      return unless opts[:costing]
+
+      cost_models(run.proposed, run.reference, run.report, city: opts[:city],
+                  province_state: opts[:province_state], costs_csv: opts[:costs_csv], audit: run.audit)
+    end
+
+    # 10. optional (2025): the 8.4.4 archetype-EUI verdict alongside the
+    # reference-path run. The two paths simulate DIFFERENT proposed
+    # buildings — as-specified (8.4.3.2) vs normalized to Table 8.4.4.2
+    # (8.4.4.2.(1)) — so the reference-path annual result serves the EUI
+    # verdict ONLY when the proposed already conforms to the Table. When it
+    # does not: report not-computed with the mismatch list (default — never
+    # silently double the simulation cost), or, with run_normalized: true,
+    # clone-normalize-rerun and compute the verdict from that run.
+    def supplement_eui!(run)
+      opts = run.opts
+      return unless opts[:eui_supplement] && opts[:vintage].to_s == '2025' &&
+                    run.report['proposed']['total_site_kwh']
+
+      run.report['eui_path'] = eui_supplement_verdict(run.proposed, opts[:eui_supplement], run.hdd,
+                                                      run.report, opts[:run_dir], opts[:run_period],
+                                                      opts[:vintage], run.audit)
+    end
+
+    # 11. emit article coverage; write report.json / audit.json / audit.txt
+    #     (+ the optional HTML compliance report). Shared by both compliance
+    #     paths (the EUI path has no reference model).
+    def finalize!(run)
+      opts = run.opts
+      report = run.report
+      audit = run.audit
+      emit_article_coverage(opts[:vintage], audit)
+      report['compliant'] = run.compliant
       report['warnings'] = audit.warnings.map { |w| w[:action] }
-      write_outputs(run_dir, report, audit)
-      result = ComplianceResult.new(proposed_model: proposed, reference_model: reference,
-                                    report: report, audit: audit, compliant: compliant, run_dir: run_dir)
-      Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
+      write_outputs(opts[:run_dir], report, audit)
+      result = ComplianceResult.new(proposed_model: run.proposed, reference_model: run.reference,
+                                    report: report, audit: audit, compliant: run.compliant,
+                                    run_dir: opts[:run_dir])
+      Report.write_html(result, File.join(opts[:run_dir], 'compliance_report.html'), opts[:report_options]) if opts[:report_html]
       result
-      rescue StandardError => e
-        flush_on_failure(run_dir, report, audit, e)
-        raise e
-      end
     end
 
     def load_model(model, audit: nil)
@@ -505,24 +603,19 @@ module OpenStudioNECB
 
       if costing
         audit.with_building('proposed building') do
-          hvac_cost = OpenStudioHVAC.cost(proposed, city: city, province_state: province_state,
-                                          costs_csv: costs_csv, audit: audit)
-          envelope_cost = OpenStudioEnvelope.cost(proposed, city: hvac_cost.city,
-                                                  province_state: hvac_cost.province_state,
-                                                  costs_csv: costs_csv, audit: audit)
+          hvac_cost, envelope_cost = cost_single_model(proposed, city: city, province_state: province_state,
+                                                       costs_csv: costs_csv, audit: audit)
           report['proposed']['cost'] = { 'hvac' => hvac_cost.total, 'envelope' => envelope_cost.total,
                                          'total' => (hvac_cost.total + envelope_cost.total).round(2) }
         end
       end
 
-      emit_article_coverage(vintage, audit)
-      report['compliant'] = compliant
-      report['warnings'] = audit.warnings.map { |w| w[:action] }
-      write_outputs(run_dir, report, audit)
-      result = ComplianceResult.new(proposed_model: proposed, reference_model: nil,
-                                    report: report, audit: audit, compliant: compliant, run_dir: run_dir)
-      Report.write_html(result, File.join(run_dir, 'compliance_report.html'), report_options) if report_html
-      result
+      # shared epilogue (coverage + outputs + optional HTML) — no reference
+      # model on this path.
+      finalize!(Run.new(opts: { vintage: vintage, run_dir: run_dir, report_html: report_html,
+                                report_options: report_options }.freeze,
+                        proposed: proposed, reference: nil, report: report,
+                        audit: audit, compliant: compliant))
       rescue StandardError => e
         flush_on_failure(run_dir, report, audit, e)
         raise e
@@ -947,12 +1040,21 @@ module OpenStudioNECB
       result
     end
 
+    # Cost ONE model (HVAC + envelope, same audit) — the shared computation
+    # behind both compliance paths' costing blocks (each path formats its own
+    # report hash; the eui path deliberately omits the location keys).
+    def cost_single_model(model, city:, province_state:, costs_csv:, audit:)
+      hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
+                                 costs_csv: costs_csv, audit: audit)
+      envelope = OpenStudioEnvelope.cost(model, city: hvac.city, province_state: hvac.province_state,
+                                         costs_csv: costs_csv, audit: audit)
+      [hvac, envelope]
+    end
+
     def cost_models(proposed, reference, report, city:, province_state:, costs_csv:, audit:)
       { 'proposed' => proposed, 'reference' => reference }.each do |label, model|
         audit.with_building("#{label} building") do
-          hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
-                                     costs_csv: costs_csv, audit: audit)
-          envelope = OpenStudioEnvelope.cost(model, city: hvac.city, province_state: hvac.province_state,
+          hvac, envelope = cost_single_model(model, city: city, province_state: province_state,
                                              costs_csv: costs_csv, audit: audit)
           report[label]['cost'] = {
             'hvac' => hvac.total, 'envelope' => envelope.total,
@@ -1152,7 +1254,12 @@ module OpenStudioNECB
                          :evaluate, :evaluate_unmet, :unmet_status,
                          :mechanical_cooling?, :iterate_capacities, :bump_capacities,
                          :failing_zone_targets, :next_sizing_factor,
-                         :bump_sizing_factors, :cost_models, :emit_article_coverage,
-                         :write_outputs, :flush_on_failure, :validate_space_types!
+                         :bump_sizing_factors, :cost_models, :cost_single_model, :emit_article_coverage,
+                         :write_outputs, :flush_on_failure, :validate_space_types!,
+                         # the eleven pipeline phases (decomposition, 2026-08)
+                         :load_and_validate!, :attach_weather_and_hdd!,
+                         :size_proposed!, :base_report, :run_proposed_annual!,
+                         :build_reference!, :size_reference!, :compare_and_iterate!,
+                         :score_ghg!, :cost_both!, :supplement_eui!, :finalize!
   end
 end

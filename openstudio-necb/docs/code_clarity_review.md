@@ -56,8 +56,8 @@ are discoverability problems, and most were cheap to fix.
 | 🔴 | README's pipeline order is pre-D-52: it puts the annual runs after the reference build; the code runs the proposed annual FIRST. Three conflicting numbered pipelines exist (README, CLAUDE.md, code comments) | `README.md` step 7 vs `compliance.rb` step 1b | ✅ one canonical numbering |
 | 🔴 | README says the umbrella composes "two domain gems"; it composes six. The gemspec declares only three — an installed-gem (non-monorepo) build fails to load | `README.md:3-11`, `openstudio-necb.gemspec` | ✅ README + gemspec |
 | 🟠 | The second compliance path (`path: :eui`, NECB 2025 8.4.4) appears nowhere in the README | grep `path:` → 0 hits | ✅ |
-| 🟠 | `performance_compliance`: 238 lines, 24 kwargs, **7 undocumented** — including `province_state` (gates the whole Part 11 GHG determination) and `eui_supplement` (gates the second path); `@return` sits mid-parameter-list | `compliance.rb:78-315` | ✅ options table + YARD; ⏳ decomposition into named phase methods (see below) |
-| 🟠 | The `begin`/`rescue` wrapper is invisible: `begin` at `:102`, body deliberately un-indented for 208 lines, `rescue` at `:311` | `compliance.rb` | ⏳ fixed by the decomposition |
+| 🟠 | `performance_compliance`: 238 lines, 24 kwargs, **7 undocumented** — including `province_state` (gates the whole Part 11 GHG determination) and `eui_supplement` (gates the second path); `@return` sits mid-parameter-list | `compliance.rb:78-315` | ✅ options table + YARD; ✅ decomposed into 11 named phase methods (A/B byte-identical on two buildings) |
+| 🟠 | The `begin`/`rescue` wrapper is invisible: `begin` at `:102`, body deliberately un-indented for 208 lines, `rescue` at `:311` | `compliance.rb` | ✅ fixed by the decomposition (normal indentation, rescue visible) |
 | 🟠 | Zero `private` markers: `Compliance` publishes 30 methods, 1 is the entry point | whole gem | ✅ private_class_method |
 | 🟠 | `report/diagrams.rb` (54 lines) is dead code — zero callers; still `require`d | `report.rb:6` | ✅ deleted |
 | 🟠 | Contradictory claims about which report files touch the SDK (`model_query.rb:3` "the ONLY" vs `report.rb:39` "the only") | both headers | ✅ stated once, correctly |
@@ -66,7 +66,7 @@ are discoverability problems, and most were cheap to fix.
 | 🟡 | `sections.rb` hand-numbered `# -- N` markers drifted vs `ORDER`; helpers interleaved | `sections.rb:28-532` | ✅ |
 | 🟡 | `archetypes.rb` bang methods: `resolve!`/`applicability!` don't mutate; `normalize!` does | `archetypes.rb:59,125,225` | ✅ renamed `resolve`/`verify_applicability!` (aliased); file → `eui_archetypes.rb` disambiguating the two senses of "archetype" |
 | 🟡 | `H` single-letter module used ~150× in the renderer | `report/html.rb:5` | ✅ renamed `Html` (`H` aliased) |
-| 🟡 | `eui_compliance` duplicates ~40 lines of load/validate/weather/report scaffolding | `compliance.rb:405-499` | ⏳ shared scaffold in decomposition |
+| 🟡 | `eui_compliance` duplicates ~40 lines of load/validate/weather/report scaffolding | `compliance.rb:405-499` | ✅ shared finalize! epilogue + unified cost computation (per-path shapes preserved) |
 
 **Also good:** the Modes table and the 8.4.1.2 sentence-by-sentence intro in
 the README are the best explanation of the determination anywhere in the
@@ -259,11 +259,12 @@ genuinely called cross-file or named in its docs).
 
 ## Awaiting your call (⏳ / 🔶 highlights)
 
-1. **⏳ Decompose `performance_compliance`** (238 lines → ~15-line sequence of
-   named phase methods, fixes the invisible begin/rescue, lets
-   `eui_compliance` share scaffolding). Test-covered (umbrella suite + report
-   goldens + fleet baselines for A/B) but the highest-churn edit — say go and
-   it happens with a one-building before/after report.json diff as the gate.
+1. **✅ DONE — `performance_compliance` decomposed** into a ~15-line
+   orchestrator over 11 named phase methods on a Run context; the rescue is
+   visible; `eui_compliance` shares the epilogue + the costing computation.
+   Gate: TWO buildings' week-run determinations (baseboard + ASHP/2(g))
+   byte-identical before/after (audits exactly, report.json modulo the run
+   root); umbrella 12/195 green.
 2. **🔶 File splits**: `small_systems.rb` → one file per family;
    `energy_recovery.rb` out of reference.rb; lighting's legacy area math →
    `daylighted_areas_legacy_2011.rb`. Pure moves, but they touch requires.
