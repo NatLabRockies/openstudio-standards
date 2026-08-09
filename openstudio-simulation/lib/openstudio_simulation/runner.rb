@@ -29,7 +29,11 @@ module OpenStudioSimulation
     # UA autosizing ("Bad starting values for UA" — found by the LargeOffice
     # archetype, the only proposed with a tower).
     def attach_weather!(model, epw:, ddy:)
-      epw_file = OpenStudio::EpwFile.new(OpenStudio::Path.new(epw))
+      # Absolute path: the model's WeatherFile object stores this string, and
+      # the CLI later resolves it from the RUN directory — a caller-relative
+      # epw ('fixtures/x.epw') would not be found there. Found by running the
+      # umbrella README quick-start verbatim.
+      epw_file = OpenStudio::EpwFile.new(OpenStudio::Path.new(File.expand_path(epw)))
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       workspace = OpenStudio::EnergyPlus.loadAndTranslateIdf(ddy)
       raise(ArgumentError, "could not parse design days from #{ddy}") if workspace.empty?
@@ -76,7 +80,11 @@ module OpenStudioSimulation
       end
       model.save("#{dir}/in.osm", true)
       osw = OpenStudio::WorkflowJSON.new
-      osw.setSeedFile("#{dir}/in.osm")
+      # Absolute seed path: the CLI resolves a relative seed against the OSW's
+      # own directory, so a caller-relative `dir` ('runs/x') would double up
+      # ('runs/x/runs/x/in.osm') and fail. Found by running the README
+      # quick-start verbatim.
+      osw.setSeedFile(File.expand_path("#{dir}/in.osm"))
       osw.saveAs("#{dir}/in.osw")
 
       backend.execute(dir)
