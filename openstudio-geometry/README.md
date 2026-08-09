@@ -9,17 +9,21 @@ from openstudio-standards) plus a 3D viewer (ported from canmet-energy/campus):
 
 `OpenstudioStandards::Geometry.create_shape_*` ported whole (rectangle,
 aspect-ratio with rotation, courtyard, H, L, T, U): perimeter/core zoning per
-storey, matched surfaces. Rectangle (and the aspect-ratio wrapper that
-delegates to it) supports below-grade storeys with Ground boundary conditions;
-the other shapes do not.
+storey, matched surfaces. Rectangle supports below-grade storeys with Ground
+boundary conditions; the other shapes do not (the aspect-ratio wrapper
+delegates to rectangle but fixes below-grade storeys at 0).
 
 ```ruby
 model = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
-                                  above_ground_storys: 3, under_ground_storys: 1,
+                                  storeys: 3, below_grade_storeys: 1,
                                   perimeter_zone_depth: 4.0, audit: audit)
-OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, num_floors: 2)
+OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, storeys: 2)
 ```
 
+`storeys:`/`below_grade_storeys:` are the canonical spellings across the
+facade; the engines' own names (`above_ground_storys`, `under_ground_storys`,
+`num_floors`, `num_stories_above_grade`, `num_stories_below_grade`) remain
+accepted, but passing a canonical name and its engine name together raises.
 Unknown parameters raise (typos never silently fall to defaults).
 
 ## The bar engine (Goldwasser lineage)
@@ -35,8 +39,8 @@ step** — geometry arrives already standards-tagged for
 model = OpenStudioGeometry.bar(
   space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
                        ['Space Function', 'Corridor/Transition area other-sch-A'] => 0.3 },
-  length: 50.0, width: 20.0, num_stories_above_grade: 3, wwr: 0.4,
-  party_wall_stories_north: 2, num_stories_below_grade: 1)
+  length: 50.0, width: 20.0, storeys: 3, wwr: 0.4,
+  party_wall_stories_north: 2, below_grade_storeys: 1)
 ```
 
 Slicing is ratio-true (verified to 1%), WWR is honored per facade, party-wall

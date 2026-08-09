@@ -59,6 +59,27 @@ class TestBar < Minitest::Test
     assert_operator adiabatic, :>=, 1, 'party walls adiabatic'
   end
 
+  # storeys:/below_grade_storeys: are the canonical names; num_stories_*_grade
+  # (the engine's own spelling, used by the tests above) still works, and the
+  # two together are ambiguous.
+  def test_storey_aliases
+    audit = OpenStudioGeometry::AuditLog.new
+    canonical = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
+                                       storeys: 2, below_grade_storeys: 1, wwr: 0.3, audit: audit)
+    legacy = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
+                                    num_stories_above_grade: 2, num_stories_below_grade: 1, wwr: 0.3)
+    assert_equal legacy.getSpaces.size, canonical.getSpaces.size, 'old names produce the same geometry'
+    assert_in_delta legacy.getSpaces.sum(&:floorArea), canonical.getSpaces.sum(&:floorArea), 0.01
+    inputs = audit.entries.find { |e| e[:step] == :geometry }[:inputs]
+    assert_equal 2, inputs[:storeys_above]
+    assert_equal 1, inputs[:storeys_below]
+
+    assert_raises(ArgumentError) do
+      OpenStudioGeometry.bar(space_type_ratios: RATIOS, storeys: 2, num_stories_above_grade: 3)
+    end
+    assert_raises(ArgumentError) { OpenStudioGeometry.bar(space_type_ratios: RATIOS, storeyz: 2) }
+  end
+
   def test_full_family_composition_from_bar
     %w[loads lighting shw hvac envelope].each do |gem_name|
       path = File.expand_path("../../openstudio-#{gem_name}/lib/openstudio_#{gem_name}", __dir__)

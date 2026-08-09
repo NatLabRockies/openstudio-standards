@@ -27,6 +27,15 @@ envelope.
 - `helpers.rb` — `match_surfaces` / `rotate_model` / `set_boundary_condition`.
 - Facade: `OpenStudioGeometry.create(shape:, **params)` and
   `OpenStudioGeometry.bar(space_type_ratios: {[building_type, space_type] => fraction}, ...)`.
+- **Facade storeys vocabulary is `storeys:` / `below_grade_storeys:`** on BOTH
+  entry points; audit inputs are `storeys_above:`/`storeys_below:`. The engines
+  keep their upstream spellings, so the aliases are normalized per entry point
+  before dispatch (`CREATE_ALIASES` → rectangle's
+  `above_ground_storys`/`under_ground_storys`, everything else `num_floors`;
+  `resolve_alias` → bar's `num_stories_*_grade`) — never inside `ordered`,
+  whose unknown-key raise must keep firing for real typos. Old names still
+  work; alias + engine name together raises (ambiguous);
+  `below_grade_storeys:` on a non-rectangle shape raises.
 
 ## Key facts / traps
 

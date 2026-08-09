@@ -9,7 +9,7 @@ class TestWizards < Minitest::Test
   def test_rectangle_census_and_matching
     audit = OpenStudioGeometry::AuditLog.new
     model = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
-                                      above_ground_storys: 2, under_ground_storys: 1,
+                                      storeys: 2, below_grade_storeys: 1,
                                       floor_to_floor_height: 3.6, perimeter_zone_depth: 4.0,
                                       audit: audit)
     assert_equal 15, model.getSpaces.size, '5 spaces (4 perimeter + core) x 3 storeys'
@@ -28,6 +28,41 @@ class TestWizards < Minitest::Test
     assert_in_delta 40.0 * 25.0 * 3, total_area, 0.5, 'floor area = footprint x storeys'
     decision = audit.entries.find { |e| e[:step] == :geometry }
     assert_equal 15, decision[:inputs][:spaces]
+    assert_equal 2, decision[:inputs][:storeys_above]
+    assert_equal 1, decision[:inputs][:storeys_below]
+  end
+
+  # The canonical facade vocabulary is storeys:/below_grade_storeys:; the
+  # engines' own spellings stay accepted, mixing the two raises, and the
+  # unknown-parameter guard still fires for a real typo.
+  def test_storey_aliases_and_guards
+    canonical = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+                                          storeys: 2, below_grade_storeys: 1, perimeter_zone_depth: 4.0)
+    legacy = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+                                       above_ground_storys: 2, under_ground_storys: 1, perimeter_zone_depth: 4.0)
+    assert_equal legacy.getSpaces.size, canonical.getSpaces.size, 'old names produce the same geometry'
+    assert_equal legacy.getBuildingStorys.size, canonical.getBuildingStorys.size
+    assert_in_delta legacy.getSpaces.sum(&:floorArea), canonical.getSpaces.sum(&:floorArea), 0.01
+    assert_equal legacy.getSurfaces.map { |s| [s.surfaceType, s.outsideBoundaryCondition] }.tally,
+                 canonical.getSurfaces.map { |s| [s.surfaceType, s.outsideBoundaryCondition] }.tally
+
+    # non-rectangle shapes: storeys: -> num_floors, no below-grade support
+    aliased = OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, storeys: 2)
+    assert_equal OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, num_floors: 2).getSpaces.size,
+                 aliased.getSpaces.size
+    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'l', storeys: 2, below_grade_storeys: 1) }
+
+    # alias + target together is ambiguous
+    assert_raises(ArgumentError) do
+      OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0, storeys: 2, above_ground_storys: 3)
+    end
+    assert_raises(ArgumentError) do
+      OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+                                below_grade_storeys: 1, under_ground_storys: 0)
+    end
+
+    # and a genuine typo still raises rather than silently defaulting
+    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'rectangle', storeyz: 2) }
   end
 
   def test_every_shape_builds

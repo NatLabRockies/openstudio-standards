@@ -19,17 +19,34 @@ require_relative 'openstudio_geometry/render'
 module OpenStudioGeometry
   SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
 
+  # Canonical facade vocabulary (`storeys:` / `below_grade_storeys:`) mapped to
+  # the spellings the verbatim-ported engines actually take. The engines keep
+  # their upstream names, so the mapping differs per entry point: `create`'s
+  # rectangle path takes above/under_ground_storys, every other shape takes a
+  # single num_floors, and the bar engine takes num_stories_*_grade. Aliases are
+  # resolved BEFORE `ordered`'s unknown-parameter check; the old names keep
+  # working unchanged, and passing an alias together with its target raises.
+  CREATE_ALIASES = { 'rectangle' => { storeys: :above_ground_storys,
+                                      below_grade_storeys: :under_ground_storys } }.freeze
+  CREATE_ALIASES_DEFAULT = { storeys: :num_floors }.freeze
+
   # Keyword-friendly facade over the wizards. Returns the model (a fresh one is
   # created when none is given); every call is audited with the full parameter
   # set so downstream QAQC can reproduce the massing.
   #
   #   OpenStudioGeometry.create(shape: 'rectangle', length: 40, width: 25,
-  #                             above_ground_storys: 3, audit: audit)
+  #                             storeys: 3, below_grade_storeys: 1, audit: audit)
+  #
+  # `storeys:`/`below_grade_storeys:` are the canonical spellings; the engines'
+  # own names (above_ground_storys, under_ground_storys, num_floors) are still
+  # accepted. Only the rectangle shape has below-grade storeys.
   def self.create(shape:, model: nil, audit: nil, **params)
     audit ||= AuditLog.new
     model ||= OpenStudio::Model::Model.new
     shape = shape.to_s.downcase
     raise(ArgumentError, "unknown shape '#{shape}' (#{SHAPES.join(', ')})") unless SHAPES.include?(shape)
+
+    params = normalize_storey_aliases(params, shape)
 
     result = case shape
              when 'rectangle'
@@ -77,10 +94,14 @@ module OpenStudioGeometry
              end
     raise(ArgumentError, "#{shape} wizard rejected the parameters (see the OpenStudio log)") if result.nil?
 
+    # defaults mirror the per-shape defaults arrays above
+    storeys_above = params.fetch(:above_ground_storys) { params.fetch(:num_floors, 3) }
+    storeys_below = params.fetch(:under_ground_storys) { shape == 'rectangle' ? 1 : 0 }
     audit.decision(:geometry, "#{shape} massing created",
                    inputs: params.merge(shape: shape,
                                         spaces: model.getSpaces.size,
-                                        storeys: model.getBuildingStorys.size))
+                                        storeys_above: storeys_above,
+                                        storeys_below: storeys_below))
     model
   end
 
@@ -93,14 +114,17 @@ module OpenStudioGeometry
   #   OpenStudioGeometry.bar(
   #     space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
   #                          ['Space Function', 'Corridor/Transition area other-sch-A'] => 0.3 },
-  #     length: 50.0, width: 20.0, num_stories_above_grade: 3, wwr: 0.4)
+  #     length: 50.0, width: 20.0, storeys: 3, wwr: 0.4)
   #
   # @param space_type_ratios [Hash{Array(String,String)=>Numeric}] (building_type,
   #   space_type) pairs => floor-area ratios (normalized internally)
+  # @param storeys [Integer] canonical spelling of num_stories_above_grade (3)
+  # @param below_grade_storeys [Integer] canonical spelling of num_stories_below_grade (0)
   # @param division_method ['Multiple Space Types - Simple Sliced',
   #   'Multiple Space Types - Individual Stories Sliced', 'Single Space Type - Core and Perimeter']
   def self.bar(space_type_ratios:, model: nil, length: 50.0, width: 20.0,
-               num_stories_above_grade: 3, num_stories_below_grade: 0,
+               storeys: nil, below_grade_storeys: nil,
+               num_stories_above_grade: nil, num_stories_below_grade: nil,
                floor_height: 3.8, wwr: 0.4,
                division_method: 'Multiple Space Types - Simple Sliced',
                story_multiplier_method: 'None',
@@ -114,6 +138,10 @@ module OpenStudioGeometry
     audit ||= AuditLog.new
     model ||= OpenStudio::Model::Model.new
     raise(ArgumentError, 'space_type_ratios must not be empty') if space_type_ratios.empty?
+
+    num_stories_above_grade = resolve_alias(:storeys, storeys, :num_stories_above_grade, num_stories_above_grade, 3)
+    num_stories_below_grade = resolve_alias(:below_grade_storeys, below_grade_storeys,
+                                            :num_stories_below_grade, num_stories_below_grade, 0)
 
     num_stories = num_stories_below_grade + num_stories_above_grade
     total_area = length * width * num_stories
@@ -147,7 +175,7 @@ module OpenStudioGeometry
 
     audit.decision(:geometry, 'sliced bar massing created with NECB space types assigned by ratio',
                    inputs: { length: length, width: width, wwr: wwr,
-                             stories_above: num_stories_above_grade, stories_below: num_stories_below_grade,
+                             storeys_above: num_stories_above_grade, storeys_below: num_stories_below_grade,
                              division_method: division_method,
                              space_types: space_type_ratios.keys.map { |bt, st| "#{bt}|#{st}" },
                              spaces: model.getSpaces.size })
@@ -170,6 +198,37 @@ module OpenStudioGeometry
                        "style=\"font-family:system-ui,sans-serif;margin:24px\">#{fragment}</body></html>")
     end
     fragment
+  end
+
+  # Rewrites the canonical storey names to the spellings the shape's wizard
+  # takes, so `ordered`'s unknown-parameter check below still sees only real
+  # wizard keys (and still raises for genuine typos).
+  def self.normalize_storey_aliases(params, shape)
+    params = params.transform_keys(&:to_sym)
+    aliases = CREATE_ALIASES.fetch(shape, CREATE_ALIASES_DEFAULT)
+    if params.key?(:below_grade_storeys) && !aliases.key?(:below_grade_storeys)
+      raise(ArgumentError, "below_grade_storeys: is only supported by the 'rectangle' shape — " \
+                           "the #{shape} wizard has no below-grade storeys " \
+                           '(aspect_ratio delegates to rectangle but fixes them at 0)')
+    end
+
+    aliases.each do |alias_key, target|
+      next unless params.key?(alias_key)
+      raise(ArgumentError, "pass either #{alias_key}: or #{target}:, not both — they set the same value") if params.key?(target)
+
+      params[target] = params.delete(alias_key)
+    end
+    params
+  end
+
+  # Alias resolution for keyword entry points (bar): nil means "not given", so
+  # an alias and its target supplied together are ambiguous and raise.
+  def self.resolve_alias(alias_key, alias_value, target_key, target_value, default)
+    if !alias_value.nil? && !target_value.nil?
+      raise(ArgumentError, "pass either #{alias_key}: or #{target_key}:, not both — they set the same value")
+    end
+
+    alias_value || target_value || default
   end
 
   # Positional-argument adapter: the wizards keep their upstream positional
