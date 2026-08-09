@@ -109,7 +109,14 @@ module OpenStudioEnvelope
     # fallback when the non-insulation layers alone exceed the target resistance.
     def opaque_at_conductance(model, construction, conductance)
       base = construction.nameString.sub(/:.*\z/, '')
-      name = "#{base}:U-#{conductance}"
+      # Names are keys for humans and legacy costing matchers; the full-precision
+      # value lives in the material (setConductance below uses the unrounded
+      # `conductance` arg). Rounding only the display string is safe here because
+      # every caller feeds discrete NECB table U-values (see necb/prescriptive.rb),
+      # which are separated by far more than 1e-4 W/(m2.K) even after the
+      # include_films transform — two distinct table entries colliding at 4dp is
+      # not plausible with the current call sites.
+      name = "#{base}:U-#{conductance.round(4)}"
       existing = model.getConstructionByName(name)
       return existing.get unless existing.empty?
 

@@ -85,7 +85,10 @@ class TestE2ERun < Minitest::Test
     refute_empty model.getPlantLoops.to_a, 'HVAC built on the loaded model'
     refute_empty model.getPeoples.to_a, 'loads present'
     wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
-    assert_match(/:U-0\.265/, wall.construction.get.nameString, 'prescriptive envelope applied (HDD 3890 wall target)')
+    # D-23: table 0.265 is OVERALL U (incl. films) — constructions are named by
+    # the construction-only conductance 1/(1/0.265 - R_films) = 0.2759.
+    assert_match(/:U-0\.2759/, wall.construction.get.nameString,
+                 'prescriptive CONSTRUCTION-ONLY target for the 0.265 overall table value (HDD 3890 wall target)')
     entries = JSON.parse(audit.to_json)
     assert_operator entries.size, :>, 20, 'ONE audit spans loads + envelope decisions'
     assert(audit.entries.any? { |e| e[:step] == :loads } && audit.entries.any? { |e| e[:step] == :prescriptive })

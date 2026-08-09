@@ -30,6 +30,9 @@ require_relative 'openstudio-envelope/lib/openstudio_envelope'
 model = OpenStudio::Model::Model.load(OpenStudio::Path.new('proposed.osm')).get
 
 # --- Lookups (Section 3.2, by heating degree-days) ---
+# Table values are OVERALL transmittance (air films included, per 1.4.1.2) --
+# apply_prescriptive's default include_films: true solves the CONSTRUCTION to
+# 1/(1/U - R_films) (D-23), so a 0.265 wall target is named e.g. `:U-0.2759...`.
 OpenStudioEnvelope::NECB.max_u(vintage: '2020', surface: 'wall',
                                boundary: 'outdoors', hdd: 3890)  # => 0.265 W/(m2.K)
 OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: 3890)    # => 0.40
@@ -182,10 +185,15 @@ Parity gates (0 mismatches vs `Standard.build('NECB2020')`): U-value lookups acr
 
 ## Conventions inherited from legacy (deliberate)
 
-- **Construction-only conductance by default** (air films excluded), matching BTAP —
-  legacy costing keys off construction names like `Base:U-0.265` and
-  `Base:U=0.19 SHGC=0.4`, which this gem reproduces. Pass `include_films: true`
-  for code-correct overall transmittance; the choice is audited either way.
+- **Overall (with-films) transmittance by default** (D-23): table U is the
+  OVERALL value per the 1.4.1.2 definition, so `include_films: true` (the
+  default) solves the CONSTRUCTION to `1/(1/U - R_films)` and names it off
+  that construction-only conductance, e.g. `Base:U-0.2759...` for a 0.265
+  wall target (`Base:U=0.19 SHGC=0.4` fenestration naming is unaffected,
+  since SimpleGlazing's `uFactor` is already the with-films value). Pass
+  `include_films: false` for the OLD legacy BTAP convention (table value
+  applied as construction-only conductance directly, e.g. `Base:U-0.265`) —
+  kept for mechanism-parity tests; the choice is audited either way.
 - HDD via Table C-1 nearest city (haversine, 500 km tolerance) before falling back
   to the `.stat` file's 18 °C base line — same precedence as `get_necb_hdd18`.
 

@@ -212,10 +212,16 @@ class TestLegacyArchetypeE2E < Minitest::Test
     wall = reference.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     refute_nil wall, 'reference model has at least one above-ground exterior wall'
     got_wall_u = wall.construction.get.to_Construction.get.thermalConductance.to_f
+    # D-23: envelope_rules table values are OVERALL U (incl. films, per 1.4.1.2);
+    # the applied construction is CONSTRUCTION-ONLY conductance. Convert to overall
+    # before comparing (mirrors openstudio-envelope/test/test_prescriptive.rb:135-138).
+    r_films = OpenStudioEnvelope::Constructions.film_r('wall', 'outdoors')
+    got_overall_u = 1.0 / ((1.0 / got_wall_u) + r_films)
     puts "[RAN] (a) reference exterior wall U-value: expected #{expected_wall_u} W/m2K " \
-         "(NECB 2020 Table 3.2.2.2, HDD=#{hdd} -> bin #{wall_bins.sort_by { |k, _| k.to_i }.find { |k, _| hdd < k.to_i }.first}), got #{got_wall_u.round(6)}"
-    assert_in_delta expected_wall_u, got_wall_u, 1e-3,
-                    'reference exterior wall U-value does not match the NECB 2020 Table 3.2.2.2 HDD-bin value'
+         "(NECB 2020 Table 3.2.2.2, HDD=#{hdd} -> bin #{wall_bins.sort_by { |k, _| k.to_i }.find { |k, _| hdd < k.to_i }.first}), " \
+         "got construction-only #{got_wall_u.round(6)} -> overall #{got_overall_u.round(6)}"
+    assert_in_delta expected_wall_u, got_overall_u, 1e-3,
+                    'reference exterior wall OVERALL U-value does not match the NECB 2020 Table 3.2.2.2 HDD-bin value'
 
     # ---- (b) reference LPD for 'Office enclosed <= 25 m2' vs catalog (W/ft2 -> W/m2) ----
     catalog = JSON.parse(File.read(File.join(
