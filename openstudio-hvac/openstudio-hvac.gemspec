@@ -3,8 +3,7 @@ require_relative 'lib/openstudio_hvac/version'
 Gem::Specification.new do |spec|
   spec.name          = 'openstudio-hvac'
   spec.version       = OpenStudioHVAC::VERSION
-  spec.authors       = ['Phylroy Lopez']
-  spec.email         = ['phylroy.lopez@gmail.com']
+  spec.authors       = ['NRCan / openstudio-standards contributors']
 
   spec.summary       = 'Build HVAC system topologies on OpenStudio thermal zones by descriptive name.'
   spec.description   = 'A standards-agnostic library that applies complete HVAC system ' \
@@ -13,11 +12,11 @@ Gem::Specification.new do |spec|
                        'using descriptive, fuel-encoding system names. Topology only: sizing ' \
                        'runs and code efficiency application are left to the host application ' \
                        '(e.g. openstudio-standards).'
-  spec.homepage      = 'https://github.com/NatLabRockies/openstudio-standards'
-  spec.license       = 'BSD-3-Clause'
+  spec.homepage      = 'https://github.com/NREL/openstudio-standards'
+  spec.license       = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2.0'
 
-  spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE*']
+  spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE*', 'THIRD_PARTY_NOTICES.md']
   spec.require_paths = ['lib']
 
   # The OpenStudio SDK ruby bindings are the ONLY runtime dependency. They are typically

@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.license = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2'
 
-  spec.files = Dir['lib/**/*', 'README.md']
+  spec.files = Dir['lib/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
 
   spec.add_dependency 'openstudio-audit'

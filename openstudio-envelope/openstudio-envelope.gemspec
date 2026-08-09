@@ -3,8 +3,7 @@ require_relative 'lib/openstudio_envelope/version'
 Gem::Specification.new do |spec|
   spec.name          = 'openstudio-envelope'
   spec.version       = OpenStudioEnvelope::VERSION
-  spec.authors       = ['Phylroy Lopez']
-  spec.email         = ['phylroy.lopez@gmail.com']
+  spec.authors       = ['NRCan / openstudio-standards contributors']
 
   spec.summary       = 'NECB building-envelope prescriptive rules and reference-envelope transforms for OpenStudio models.'
   spec.description   = 'Applies NECB envelope requirements to OpenStudio models from vendored, ' \
@@ -14,8 +13,8 @@ Gem::Specification.new do |spec|
                        'SDK-only model manipulation; never executes simulations. Thermal ' \
                        'bridging (3.1.1.7 effective transmittance) integrates the tbd gem when ' \
                        'available and degrades loudly, never silently, without it.'
-  spec.homepage      = 'https://github.com/NatLabRockies/openstudio-standards'
-  spec.license       = 'BSD-3-Clause'
+  spec.homepage      = 'https://github.com/NREL/openstudio-standards'
+  spec.license       = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2.0'
 
   spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE*']
