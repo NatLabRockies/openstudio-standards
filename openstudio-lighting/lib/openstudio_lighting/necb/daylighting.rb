@@ -1,8 +1,16 @@
 module OpenStudioLighting
   module NECB
-    # Daylighting controls. Two selection rules live here, chosen by `placement:`:
+    # Daylighting controls. ONE knob selects who gets a sensor — `placement:`
+    # (the older `option:` is a deprecated alias for it, mapped and audited in
+    # Daylighting.resolve_placement):
     #
-    #   :necb2020 (DEFAULT) — NECB 2020/2025 Article 4.2.2.1., sentences
+    #   :all (DEFAULT for add_controls) — every space with exterior
+    #     fenestration gets a sensor regardless of any threshold (the legacy
+    #     'add_daylighting_controls' blanket option). ReferenceDaylighting.apply
+    #     defaults to :necb2020 instead, because the reference building must be
+    #     built to the code rule.
+    #
+    #   :necb2020 — NECB 2020/2025 Article 4.2.2.1., sentences
     #     (10)-(15): photocontrols where the Table 4.2.1.6. column for the space
     #     type requires them AND the general-lighting input POWER inside the
     #     daylighted areas crosses 150 W / 300 W (sidelighting) or 150 W
@@ -15,10 +23,7 @@ module OpenStudioLighting
     #     'NECB_Default' selection, defects and all, kept reachable so
     #     test_daylighting_parity.rb can still prove the port faithful. It applies
     #     NECB 2011 criteria (areas and effective apertures, ANDed) and is WRONG
-    #     for 2020/2025 — that is L-26.
-    #
-    #   :all — every space with exterior fenestration gets a sensor regardless of
-    #     any threshold (the legacy 'add_daylighting_controls' option).
+    #     for 2020/2025 — that is L-26. (:necb_default is an accepted alias.)
     #
     # Sensor hardware, all paths: ONE DaylightingControl at the centre of the
     # space's lowest floor bounding box, 0.8 m above the floor, illuminance
@@ -42,212 +47,22 @@ module OpenStudioLighting
       STEPPED_STEPS = 2 # legacy paths: the NECB 2011 minimum
       STEPPED_STEPS_2020 = 3 # 4.2.2.1.(11)(a)(i) / (14)(a)(i): 67% / 33% / off
 
-      # ---- Daylighted-area geometry (verbatim ports of legacy
-      # get_parameters_sidelighting / get_parameters_skylight) -------------------
-      #
-      # LEGACY-ONLY. These two methods exist to be diffed against legacy by
-      # test_daylighting_parity.rb; the 2020/2025 rule uses DaylightedAreas
-      # instead, because these SUM per-window areas with no union and so
-      # double-count overlaps, contrary to 4.2.2.3.(1)/(5), 4.2.2.4.(1) and
-      # 4.2.2.5.(1) ("the combined ... areas without double-counting overlapping
-      # areas"), and they compute no secondary sidelighted area at all.
+      # MOVED: the verbatim legacy NECB 2011 daylighted-area math —
+      # sidelighting_parameters / skylight_parameters + the dist / triangle_height /
+      # wall_point_distance helpers — now lives in necb/daylighted_areas_legacy_2011.rb,
+      # which reopens this module, so every constant path here is unchanged.
 
-      # Legacy "primary sidelighted area" (its own comment cites NECB 2011
-      # 4.2.2.9., an article that does not exist in 2020/2025): per exterior-wall
-      # window at floor level, depth = min(window head height, space depth), width
-      # = window width + min(distance to each side wall, 0.6 m). NECB 2020
-      # 4.2.2.3.(3)-(4) instead specify HALF the window head height on each side,
-      # bounded by the distance to any vertical obstruction >= 1.5 m high.
-      # @return [Hash] { area_m2:, vt_handle:, window_area_m2: } (vt_handle =
-      #   sum(window area x VT), for the legacy 2011 effective aperture)
-      def sidelighting_parameters(space, audit: nil)
-        floor_surface = nil
-        floor_area = 0.0
-        floor_vertices = []
-        space.surfaces.sort_by(&:nameString).each do |surface|
-          next unless surface.surfaceType == 'Floor'
-
-          floor_surface = surface
-          floor_area += surface.netArea
-          floor_vertices << surface.vertices
-        end
-        return { area_m2: 0.0, vt_handle: 0.0, window_area_m2: 0.0 } if floor_surface.nil?
-
-        area = 0.0
-        vt_handle = 0.0
-        window_area_sum = 0.0
-        space.surfaces.sort_by(&:nameString).each do |surface|
-          next unless surface.outsideBoundaryCondition == 'Outdoors' && surface.surfaceType == 'Wall'
-
-          begin
-            surface_z_min = surface.vertices.map(&:z).min
-            next unless surface_z_min == floor_vertices[0][0].z
-
-            wall_x = []
-            wall_y = []
-            surface.vertices.each do |vertex|
-              next unless vertex.z == surface_z_min
-
-              wall_x << vertex.x
-              wall_y << vertex.y
-            end
-            next if wall_x.size < 2
-
-            opposite_x = []
-            opposite_y = []
-            floor_vertices[0].each do |vertex|
-              if (vertex.x != wall_x[0] && vertex.y != wall_y[0]) || (vertex.x != wall_x[1] && vertex.y != wall_y[1])
-                opposite_x << vertex.x
-                opposite_y << vertex.y
-              end
-            end
-            width_wall = Math.sqrt((wall_x[0] - wall_x[1])**2 + (wall_y[0] - wall_y[1])**2)
-            width_opposite = Math.sqrt((opposite_x[0] - opposite_x[1])**2 + (opposite_y[0] - opposite_y[1])**2)
-            depth = 2 * floor_area / (width_wall + width_opposite)
-
-            surface.subSurfaces.sort_by(&:nameString).each do |sub|
-              next unless %w[FixedWindow OperableWindow].include?(sub.subSurfaceType)
-
-              vt = sub.visibleTransmittance.get
-              window_area = sub.netArea
-              window_area_sum += window_area
-              vt_handle += window_area * vt
-              v = sub.vertices
-              window_width = if v[0].z.round(2) == v[1].z.round(2)
-                               Math.sqrt((v[0].x - v[1].x)**2 + (v[0].y - v[1].y)**2)
-                             else
-                               Math.sqrt((v[1].x - v[2].x)**2 + (v[1].y - v[2].y)**2)
-                             end
-              head_height = v.map(&:z).max.round(2)
-              area_depth = [head_height, depth].min
-              projected = v.map { |vertex| floor_surface.plane.project(vertex) }
-              side1 = [Math.sqrt((wall_x[0] - projected[0].x)**2 + (wall_y[0] - projected[0].y)**2),
-                       Math.sqrt((wall_x[0] - projected[2].x)**2 + (wall_y[0] - projected[2].y)**2), 0.6].min
-              side2 = [Math.sqrt((wall_x[1] - projected[0].x)**2 + (wall_y[1] - projected[0].y)**2),
-                       Math.sqrt((wall_x[1] - projected[2].x)**2 + (wall_y[1] - projected[2].y)**2), 0.6].min
-              area += area_depth * (side1 + window_width + side2)
-            end
-          rescue StandardError => e
-            audit&.warn(:daylighting, "sidelighting geometry failed on #{surface.nameString} (#{e.class}) — surface skipped")
-          end
-        end
-        { area_m2: area, vt_handle: vt_handle, window_area_m2: window_area_sum }
-      end
-
-      # Legacy "daylighted area under skylights" + VT sums for the legacy 2011
-      # skylight effective aperture (its comment cites 4.2.2.7., which does not
-      # exist in 2020/2025). LEGACY DEFECT preserved for parity (audited by the
-      # caller): the area accumulation sits INSIDE the exterior-window
-      # re-calculation loop, so spaces with skylights but NO exterior windows
-      # always compute ZERO daylighted area.
-      def skylight_parameters(space, audit: nil)
-        area = 0.0
-        vt_handle = 0.0
-        skylight_area_sum = 0.0
-        roof_vertices = nil
-        space.surfaces.sort_by(&:nameString).each do |surface|
-          roof_vertices = surface.vertices if surface.outsideBoundaryCondition == 'Outdoors' && surface.surfaceType == 'RoofCeiling'
-
-          surface.subSurfaces.sort_by(&:nameString).each do |sub|
-            next unless sub.subSurfaceType == 'Skylight'
-
-            begin
-              vt = sub.visibleTransmittance.get
-              s = sub.vertices
-              skylight_area_sum += sub.netArea
-              vt_handle += sub.netArea * vt
-              skylight_width = Math.sqrt((s[0].x - s[1].x)**2 + (s[0].y - s[1].y)**2)
-              skylight_length = Math.sqrt((s[0].x - s[3].x)**2 + (s[0].y - s[3].y)**2)
-              ceiling_height = s[0].z
-              r = roof_vertices
-              next if r.nil?
-
-              lengths = [dist(r[0], r[1]), dist(r[1], r[2]), dist(r[2], r[3]), dist(r[3], r[0])]
-              closest0 = s.min_by { |p| dist(r[0], p) }
-              closest2 = s.min_by { |p| dist(r[2], p) }
-              d1 = triangle_height(closest0, r[0], r[1], lengths[0])
-              d2 = triangle_height(closest0, r[0], r[3], lengths[3])
-              d3 = triangle_height(closest2, r[2], r[1], lengths[1])
-              d4 = triangle_height(closest2, r[2], r[3], lengths[2])
-
-              width = skylight_width + [0.7 * ceiling_height, d1].min + [0.7 * ceiling_height, d4].min
-              length = skylight_length + [0.7 * ceiling_height, d2].min + [0.7 * ceiling_height, d3].min
-
-              space.surfaces.sort_by(&:nameString).each do |wall|
-                next unless wall.outsideBoundaryCondition == 'Outdoors' && wall.surfaceType == 'Wall'
-
-                w = wall.vertices
-                wall_x = []
-                wall_y = []
-                if w[0].z == w[1].z
-                  wall_x = [w[0].x, w[1].x]
-                  wall_y = [w[0].y, w[1].y]
-                elsif w[0].z == w[3].z
-                  wall_x = [w[0].x, w[3].x]
-                  wall_y = [w[0].y, w[3].y]
-                end
-                next if wall_x.size < 2
-
-                head_height = s.map(&:z).max.round(2)
-                wall_length = Math.sqrt((wall_x[0] - wall_x[1])**2 + (wall_y[0] - wall_y[1])**2)
-                sv0 = wall_point_distance(wall_x, wall_y, s[0], wall_length)
-                sv1 = wall_point_distance(wall_x, wall_y, s[1], wall_length)
-                sv3 = wall_point_distance(wall_x, wall_y, s[3], wall_length)
-
-                wall.subSurfaces.sort_by(&:nameString).each do |window|
-                  next unless %w[FixedWindow OperableWindow].include?(window.subSurfaceType)
-
-                  window_head = window.vertices.map(&:z).max.round(2)
-                  if sv0 == sv1 # skylight edge 0-1 parallel to the wall
-                    if sv0.round(2) == d2.round(2)
-                      length = skylight_length + [0.7 * ceiling_height, d2, d2 - window_head].min + [0.7 * ceiling_height, d3].min
-                    elsif sv0.round(2) == d3.round(2)
-                      length = skylight_length + [0.7 * ceiling_height, d2].min + [0.7 * ceiling_height, d3, d3 - window_head].min
-                    end
-                  elsif sv0 == sv3 # skylight edge 0-3 parallel to the wall
-                    if sv0.round(2) == d1.round(2)
-                      width = skylight_width + [0.7 * ceiling_height, d1, d1 - window_head].min + [0.7 * ceiling_height, d4].min
-                    elsif sv0.round(2) == d4.round(2)
-                      width = skylight_width + [0.7 * ceiling_height, d1].min + [0.7 * ceiling_height, d4, d4 - window_head].min
-                    end
-                  end
-                  # LEGACY DEFECT: accumulation only happens here (inside the
-                  # window loop) — skylight-only spaces accumulate nothing
-                  area += length * width
-                  _ = head_height
-                end
-              end
-            rescue StandardError => e
-              audit&.warn(:daylighting, "skylight geometry failed on #{sub.nameString} (#{e.class}) — skylight skipped")
-            end
-          end
-        end
-        { area_m2: area, vt_handle: vt_handle, skylight_area_m2: skylight_area_sum }
-      end
-
-      def dist(a, b)
-        Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
-      end
-
-      def triangle_height(point, v_a, v_b, base_length)
-        area = 0.5 * (((point.x - v_b.x) * (point.y - v_a.y)) - ((point.x - v_a.x) * (point.y - v_b.y))).abs
-        2.0 * area / base_length
-      end
-
-      def wall_point_distance(wall_x, wall_y, point, wall_length)
-        area = 0.5 * (((wall_x[0] - wall_x[1]) * (wall_y[0] - point.y)) -
-                      ((wall_x[0] - point.x) * (wall_y[0] - wall_y[1]))).abs
-        2.0 * area / wall_length
-      end
-
-      # @param option ['all', 'NECB_Default'] 'all' = every daylighted space gets a
-      #   sensor (legacy add_daylighting_controls option); 'NECB_Default' = only
-      #   spaces where 4.2.2 requires photocontrols — which RULE decides that is
-      #   `placement:`
-      # @param placement [:necb2020, :necb2011] the 'NECB_Default' selection rule.
-      #   :necb2020 (default) = Article 4.2.2.1.(10)-(15) on unioned daylighted
-      #   areas (D-57); :necb2011 = the legacy-exact 2011 port, defects included,
-      #   kept reachable for the parity gate
+      # @param placement [:all, :necb2020, :necb2011] THE selection knob — which
+      #   spaces get a sensor. :all (DEFAULT) = every space with exterior
+      #   fenestration, no threshold (the legacy blanket option); :necb2020 =
+      #   Article 4.2.2.1.(10)-(15) on unioned daylighted areas (D-57);
+      #   :necb2011 (alias :necb_default) = the legacy-exact 2011 port, defects
+      #   included, kept reachable for the parity gate
+      # @param option ['all', 'NECB_Default', nil] DEPRECATED alias for
+      #   `placement:`, kept so existing callers keep working: 'all' forces
+      #   placement :all; 'NECB_Default' selects the code rule, i.e. the given
+      #   `placement:` when it names one (:necb2011), else :necb2020. Passing it
+      #   logs an audit info entry. Prefer `placement:` alone.
       # @param office_match [:legacy, :any_enclosed_office] :necb2011 ONLY — the
       #   >=25 m2 office exemption matcher. :legacy preserves the exact string
       #   'Office - enclosed', which does NOT exist in the NECB2020 space-type
@@ -257,17 +72,19 @@ module OpenStudioLighting
       #   ONLY — what to assume when the Table 4.2.1.6. column cannot be resolved
       #   for a space type. Always warns; see DaylightControlRequirement#evaluate
       # @return [Integer] number of controls created
-      def add_controls(model, vintage: '2020', option: 'all', placement: :necb2020,
+      def add_controls(model, vintage: '2020', placement: nil, option: nil,
                        office_match: :legacy, unknown_control_requirement: :required, audit: nil)
         audit ||= AuditLog.new
+        placement = resolve_placement(placement, option, audit)
         data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
         created = 0
         fractions = {}
 
-        if option == 'NECB_Default' && placement == :necb2011
+        case placement
+        when :necb2011
           eligible = necb_default_spaces(model, office_match, audit)
           rule = 'NECB 2011 (legacy-exact)'
-        elsif option == 'NECB_Default'
+        when :necb2020
           eligible, fractions = necb2020_spaces(model, audit, unknown_control_requirement)
           rule = 'NECB 2020/2025 4.2.2.1.(10)-(15)'
         else
@@ -327,10 +144,51 @@ module OpenStudioLighting
         # D-57 governs WHICH rule this method just used — including the choice to
         # keep the legacy 2011 path reachable — so every path cites it.
         audit.decision(:daylighting, "daylighting controls added by the #{rule} rule",
-                       inputs: { controls: created, option: option, placement: placement },
+                       inputs: { controls: created, placement: placement },
                        article: '4.2.2.1.',
                        ruling: 'D-57')
         created
+      end
+
+      PLACEMENTS = %i[all necb2020 necb2011].freeze
+
+      # ONE selector. `placement:` is it; `option:` is the deprecated alias that
+      # used to share the job (and used to win, silently ignoring `placement:`).
+      # The mapping reproduces the old truth table exactly:
+      #   option 'all'          -> :all                (whatever placement said)
+      #   option 'NECB_Default' -> :necb2011 if placement named it, else :necb2020
+      #   option nil            -> placement, defaulting to :all
+      # @return [Symbol] one of PLACEMENTS
+      def resolve_placement(placement, option, audit)
+        given = placement.nil? ? nil : normalize_placement(placement)
+        return given || :all if option.nil?
+
+        resolved = case option.to_s
+                   when 'NECB_Default' then given == :necb2011 ? :necb2011 : :necb2020
+                   else :all # 'all', and anything unrecognized, as the legacy branch did
+                   end
+        audit&.info(:daylighting,
+                    "the `option:` argument is DEPRECATED — `placement:` is now the single selector; " \
+                    "option: #{option.inspect} was read as placement: #{resolved.inspect}",
+                    inputs: { option: option, placement_given: placement, placement_used: resolved },
+                    article: '4.2.2.1.',
+                    ruling: 'D-57')
+        resolved
+      end
+
+      # PUBLIC (deliberately): the one place that knows the placement vocabulary,
+      # so callers that must branch on the rule (ReferenceDaylighting) resolve the
+      # :necb_default alias here instead of keeping a second copy of the mapping.
+      # @return [Symbol] :all | :necb2020 | :necb2011
+      def normalize_placement(placement)
+        value = placement.to_sym
+        value = :necb2011 if value == :necb_default
+        unless PLACEMENTS.include?(value)
+          raise ArgumentError, "unknown placement: #{placement.inspect} (expected one of " \
+                               "#{PLACEMENTS.map(&:inspect).join(', ')}, or :necb_default for :necb2011)"
+        end
+
+        value
       end
 
       # The daylighted share of the ZONE's floor area that this space's control
@@ -536,7 +394,9 @@ module OpenStudioLighting
       end
 
       # ---- internals (not API) ----
-      private_class_method :dist, :triangle_height, :wall_point_distance,
+      # (dist / triangle_height / wall_point_distance are declared private in
+      # necb/daylighted_areas_legacy_2011.rb, where they are now defined.)
+      private_class_method :resolve_placement,
                            :zone_fraction, :necb2020_spaces, :necb_default_spaces,
                            :lowest_floor_area, :daylighted?, :illuminance_setpoint,
                            :lowest_floor_bounds
@@ -547,7 +407,8 @@ module OpenStudioLighting
     end
   end
 
-  # Facade: add NECB daylighting controls (all-daylighted-spaces option).
+  # Facade: add NECB daylighting controls (placement: :all by default — every
+  # daylighted space; pass placement: :necb2020 for the code rule).
   def self.add_daylighting_controls(model, **kwargs)
     NECB.add_daylighting_controls(model, **kwargs)
   end

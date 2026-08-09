@@ -51,7 +51,11 @@ module OpenStudioLighting
                 office_match: :any_enclosed_office, unknown_control_requirement: :required, audit: nil)
         audit ||= AuditLog.new
         prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
-        placement = :necb2011 if placement == :necb_default
+        # `placement:` is the single selector; Daylighting owns its vocabulary
+        # (including the :necb_default alias), so normalize through IT rather
+        # than keeping a second copy of the mapping here, then pass it straight
+        # through. The normalized value is only used locally to say which rule ran.
+        placement = Daylighting.normalize_placement(placement)
 
         set_reference_reflectances(reference, prefix, audit)
 
@@ -62,9 +66,8 @@ module OpenStudioLighting
           proposed_setpoints[control.space.get.nameString] = control.illuminanceSetpoint
         end
 
-        option = placement == :all ? 'all' : 'NECB_Default'
-        created = Daylighting.add_controls(reference, vintage: vintage, option: option,
-                                           placement: placement, office_match: office_match,
+        created = Daylighting.add_controls(reference, vintage: vintage, placement: placement,
+                                           office_match: office_match,
                                            unknown_control_requirement: unknown_control_requirement,
                                            audit: audit)
 
@@ -84,7 +87,7 @@ module OpenStudioLighting
                        'objects on the reference\'s FDWR/SRR-scaled fenestration) — the sentence-(12) ' \
                        'FDL-factor fallback is unnecessary for models that can do detailed daylighting',
                        inputs: { controls: created, setpoints_from_proposed: overridden,
-                                 placement: option, office_match: office_match },
+                                 placement: placement, office_match: office_match },
                        article: "#{prefix}.5.(9); #{prefix}.5.(11); #{prefix}.5.(12)")
         audit.info(:lighting_reference,
                    'fenestration VT identical to proposed by construction (the envelope reference transform ' \

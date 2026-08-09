@@ -76,12 +76,17 @@ rulesets); fixture costing matches legacy `cost_audit_lighting` to the dollar.
 
 ## Daylighting
 
-`OpenStudioLighting.add_daylighting_controls(model, vintage:, option:, placement:)`
+`OpenStudioLighting.add_daylighting_controls(model, vintage:, placement:)`
 places DaylightingControls (stepped ×3, space-type
 `target_illuminance_setpoint`, sensor at the lowest-floor bounding-box centre
-+0.8 m). Two knobs select the rule:
++0.8 m). ONE knob selects the rule — `placement:`:
 
-- **`placement: :necb2020` (the DEFAULT, D-57)** — sensors where NECB
+- `placement: :all` — **the default for this entry point**: sensors in every
+  space with exterior fenestration, no threshold (the legacy blanket option),
+  zone fraction 1.0 and the 2-step control. The reference-building transform
+  (`reference_daylighting`) defaults to `:necb2020` instead, because the
+  reference must be built to the code rule.
+- **`placement: :necb2020` (D-57)** — sensors where NECB
   2020/2025 **4.2.2.1.(10)–(15)** requires them: the Table 4.2.1.6 space-function
   control matrix gates each space, the input-power tests use
   `LPD_general × daylighted area` (exact — one LPD per space, no luminaire
@@ -99,8 +104,12 @@ places DaylightingControls (stepped ×3, space-type
   compares against the 2011-era name `'Office - enclosed'`, which never
   matches NECB2020 space types (`office_match: :any_enclosed_office` restores
   the intent). Do not build on this path.
-- `option: 'all'` — sensors in every space with exterior fenestration
-  (ignores `placement:`; the legacy blanket option).
+
+`option:` is **deprecated** — it used to be a second, overlapping selector that
+silently won over `placement:`. It still works and still lands on the rule it
+always did (`'all'` → `:all`; `'NECB_Default'` → `:necb2011` when `placement:`
+names it, else `:necb2020`), and passing it now writes an audit info entry
+saying so. Pass `placement:` alone.
 
 **Citation hygiene:** Subsection 4.2.2 of NECB 2020/2025 **ends at article
 4.2.2.6**. Citations to 4.2.2.7–4.2.2.12 are NECB 2011 numbers and are wrong
@@ -118,7 +127,8 @@ per-sensor BOM (sensor row 407 + 30 ft wiring + 30 ft PVC conduit + box).
 |---|---|
 | `necb/daylight_control_requirement.rb` | WHERE controls are required — the 4.2.2.1.(10)–(15) rule over Table 4.2.1.6 |
 | `necb/daylighted_areas.rb` | HOW MUCH area — the 4.2.2.3/.5 union-polygon geometry |
-| `necb/daylighting.rb` | the actuator: places the DaylightingControl objects (+ the quarantined legacy-2011 port, labelled LEGACY-ONLY) |
+| `necb/daylighting.rb` | the actuator: places the DaylightingControl objects |
+| `necb/daylighted_areas_legacy_2011.rb` | QUARANTINE: the verbatim legacy NECB 2011 area math (`Daylighting.sidelighting_parameters` / `.skylight_parameters`), parity-pinned defects and all — do not build on it |
 | `necb/reference_daylighting.rb` | the 8.4.4.5.(5)–(12) reference-building transform |
 
 ## Reference daylighting (8.4.4.5.(5)–(12))

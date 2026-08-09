@@ -5,7 +5,8 @@ module OpenStudioLighting
     # (under SKYLIGHTS) — the areas that 4.2.2.1.(10) and (13) test lighting
     # power against.
     #
-    # WHY THIS EXISTS instead of Daylighting.sidelighting_parameters: each of
+    # WHY THIS EXISTS instead of Daylighting.sidelighting_parameters (the legacy
+    # NECB 2011 port, quarantined in daylighted_areas_legacy_2011.rb): each of
     # 4.2.2.3.(1), 4.2.2.3.(5), 4.2.2.4.(1) and 4.2.2.5.(1) defines its total as
     # "the combined ... areas WITHOUT DOUBLE-COUNTING OVERLAPPING AREAS", and
     # 4.2.2.5.(2)(b) and 4.2.2.4.(2)(a)(iii) additionally clip toplit area at the

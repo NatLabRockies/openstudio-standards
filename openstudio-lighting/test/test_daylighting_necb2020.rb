@@ -347,7 +347,7 @@ class TestDaylightingNecb2020 < Minitest::Test
   def test_controls_are_placed_with_a_daylighted_area_fraction_not_1_0
     model, space = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
     audit = OpenStudioLighting::AuditLog.new
-    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', option: 'NECB_Default',
+    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', placement: :necb2020,
                                                           audit: audit)
     assert_equal 1, created
     zone = space.thermalZone.get
@@ -367,7 +367,7 @@ class TestDaylightingNecb2020 < Minitest::Test
   def test_legacy_2011_placement_is_still_reachable_and_shouts
     model, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
     audit = OpenStudioLighting::AuditLog.new
-    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', option: 'NECB_Default',
+    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020',
                                                           placement: :necb2011, audit: audit)
     assert_equal 0, created, 'the 2011 criteria cannot qualify a window-only space (L-26)'
     assert(audit.warnings.any? { |w| w[:action].include?('LEGACY NECB 2011 THRESHOLD EVALUATION IN USE') })
@@ -390,10 +390,54 @@ class TestDaylightingNecb2020 < Minitest::Test
   def test_unevaluated_1500_hour_exception_is_declared_every_run
     model, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
     audit = OpenStudioLighting::AuditLog.new
-    OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', option: 'NECB_Default', audit: audit)
+    OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', placement: :necb2020, audit: audit)
     assert(audit.warnings.any? { |w| w[:action].include?('4.2.2.1.(15)(a) EXCEPTION IS NOT EVALUATED') },
            'the un-modellable exception is declared, not hidden')
     assert(audit.entries.any? { |e| e[:action].include?('ROOF') && e[:action].include?('MONITORS') },
            'roof monitors being undetectable is declared')
+  end
+
+  # --- the deprecated `option:` alias -------------------------------------
+  # `placement:` is the single selector now; `option:` still works (callers
+  # exist in the wild) and must land on the SAME rule it used to, loudly.
+
+  def test_deprecated_option_alias_still_selects_the_same_rule
+    # option: 'NECB_Default' == placement: :necb2020, end to end
+    model, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
+    audit = OpenStudioLighting::AuditLog.new
+    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020', option: 'NECB_Default',
+                                                          audit: audit)
+    assert_equal 1, created
+    assert_equal 3, model.getThermalZones.first.primaryDaylightingControl.get.numberofSteppedControlSteps,
+                 'the 2020 rule ran, not the blanket one'
+    deprecation = audit.entries.find { |e| e[:action].include?('`option:` argument is DEPRECATED') }
+    refute_nil deprecation, 'passing the deprecated kwarg is audited'
+    assert_equal :necb2020, deprecation[:inputs][:placement_used]
+
+    # option: 'NECB_Default' + placement: :necb2011 still reaches the legacy rule
+    legacy, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
+    assert_equal 0, OpenStudioLighting.add_daylighting_controls(legacy, vintage: '2020', option: 'NECB_Default',
+                                                                placement: :necb2011)
+
+    # option: 'all' wins over placement:, exactly as it silently used to
+    blanket, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
+    blanket_audit = OpenStudioLighting::AuditLog.new
+    assert_equal 1, OpenStudioLighting.add_daylighting_controls(blanket, vintage: '2020', option: 'all',
+                                                                placement: :necb2011, audit: blanket_audit)
+    assert_equal 2, blanket.getThermalZones.first.primaryDaylightingControl.get.numberofSteppedControlSteps
+    assert_in_delta 1.0, blanket.getThermalZones.first.fractionofZoneControlledbyPrimaryDaylightingControl, 1e-9,
+                    'the blanket path controls the whole zone'
+    assert(blanket_audit.entries.any? { |e| e[:inputs] && e[:inputs][:placement_used] == :all })
+  end
+
+  def test_placement_default_is_the_blanket_rule_and_unknowns_raise
+    model, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
+    created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020')
+    assert_equal 1, created
+    assert_equal 2, model.getThermalZones.first.primaryDaylightingControl.get.numberofSteppedControlSteps,
+                 'bare add_daylighting_controls is still the legacy blanket behaviour (placement: :all)'
+
+    other, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
+    assert_raises(ArgumentError) { OpenStudioLighting.add_daylighting_controls(other, placement: :necb2050) }
   end
 end

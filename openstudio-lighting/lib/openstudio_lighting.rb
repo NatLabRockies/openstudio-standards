@@ -63,6 +63,9 @@ require_relative 'openstudio_lighting/necb/reference'
 require_relative 'openstudio_lighting/necb/daylighted_areas'
 require_relative 'openstudio_lighting/necb/daylight_control_requirement'
 require_relative 'openstudio_lighting/necb/daylighting'
+# Reopens Daylighting with the quarantined verbatim legacy-2011 area math, so it
+# must load after daylighting.rb (which owns the module and the live 2020 rule).
+require_relative 'openstudio_lighting/necb/daylighted_areas_legacy_2011'
 require_relative 'openstudio_lighting/necb/reference_daylighting'
 require_relative 'openstudio_lighting/costing/database'
 require_relative 'openstudio_lighting/costing/fixtures'

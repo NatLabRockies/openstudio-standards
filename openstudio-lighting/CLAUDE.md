@@ -29,13 +29,21 @@ lighting fixture costing.
   catalog: `'NECB_Default'` or LED. Data:
   `lpd_space_functions_2025.json` / `lpd_building_types_2025.json` /
   `led_lighting_2020.json`.
-- `necb/daylighting.rb` — daylighting controls/sensors. `placement:` picks the
-  rule: **`:necb2020` (DEFAULT)** = NECB 2020/2025 4.2.2.1.(10)-(15) (D-57);
-  `:necb2011` = the legacy-exact 2011 port, defects preserved, kept reachable so
-  `test_daylighting_parity.rb` still proves the port faithful (`:necb_default`
-  is an alias for it); `option: 'all'` = sensors everywhere. Also still hosts
-  the VERBATIM legacy `sidelighting_parameters` / `skylight_parameters` — those
-  exist ONLY to be diffed against legacy; do not build on them.
+- `necb/daylighting.rb` — daylighting controls/sensors. `placement:` is the
+  ONLY selector: `:all` (**the default of `add_controls`**) = sensors
+  everywhere there is exterior fenestration; `:necb2020` = NECB 2020/2025
+  4.2.2.1.(10)-(15) (D-57) and the default of `reference_daylighting`;
+  `:necb2011` (alias `:necb_default`) = the legacy-exact 2011 port, defects
+  preserved, kept reachable so `test_daylighting_parity.rb` still proves the
+  port faithful. An unknown placement raises. `option:` is a DEPRECATED alias
+  (`'all'`→`:all`, `'NECB_Default'`→`:necb2011` if placement says so else
+  `:necb2020`) that audits an info entry when used — `Daylighting.resolve_placement`
+  owns the mapping, `Daylighting.normalize_placement` (public) owns the
+  vocabulary, and nothing else may keep a second copy of either.
+- `necb/daylighted_areas_legacy_2011.rb` — QUARANTINE. Reopens `Daylighting` to
+  hold the VERBATIM legacy `sidelighting_parameters` / `skylight_parameters`
+  (constant paths unchanged) — they exist ONLY to be diffed against legacy by
+  `test_daylighting_parity.rb`; do not build on them.
 - `necb/daylighted_areas.rb` — the 2020/2025 daylighted-area geometry per
   4.2.2.3. (primary + **secondary** sidelighted) and 4.2.2.5. (under skylights),
   adapted from openstudio-standards' `space_daylighted_areas`: one polygon per
@@ -80,7 +88,8 @@ lighting fixture costing.
 - Zone daylight fraction on the `:necb2020` path is the **daylighted share of
   the zone floor area**, not 1.0 — (10)/(13) control the lighting in the
   daylighted areas, not the whole room. The legacy paths still use 1.0.
-- `sidelighting_parameters` / `skylight_parameters` in `daylighting.rb` are a
+- `sidelighting_parameters` / `skylight_parameters` in
+  `daylighted_areas_legacy_2011.rb` are a
   verbatim legacy port — do NOT "clean them up"; parity tests pin them to legacy
   output, including its defects (no union, no secondary area, skylight-only
   spaces compute zero).
