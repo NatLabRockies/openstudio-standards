@@ -3290,7 +3290,16 @@ the `coils.rb` staged-airflow work and L-9/#2127).
 
 - Who/when: Fable under D-10 delegation, 2026-08-03.
 
-### CURRENT VALIDATED FLEET BASELINE (consolidated 2026-08-03)
+### FLEET BASELINE (consolidated 2026-08-03) — ⚠ STALE-PENDING-REFRESH since D-68
+
+> **⚠ D-68 (2026-08-10): this full-annual table is STALE.** The nrcan merge
+> brought #2119's legacy fixes in-tree; regenerated archetypes differ
+> (corrected SHW tank sizing + daylighting controls now actually created),
+> so these percentages no longer describe the current proposeds. The
+> post-merge WEEK sweep with attribution is the D-68 amendment below; the
+> full-annual 17×2 refresh is a ruled later follow-up (needs the ~12 h
+> Hospital/Outpatient window). Until then, cite this table only for
+> pre-merge history.
 
 The single current table — full-annual (8760 h), Toronto CWEC2020,
 Electricity, legacy NECB2020 proposeds. Assembled at report precision from
@@ -3643,3 +3652,45 @@ defect fixes) and #2120's BTAP restructure. Decisions taken absorbing it:
 
 - **Who/when:** Fable under D-10 per phylroy's merge instruction,
   2026-08-10; executed with tiered subagents, every diff Fable-reviewed.
+
+**Amendment — post-merge week sweep (2026-08-10): 17/17 PASS, every mover attributed.**
+Week mode, Electricity/Toronto/2020, archetypes REGENERATED under the merged
+legacy (SHA-keyed cache). Percent-of-target vs the pre-merge week table:
+
+| Building | pre | post | | Building | pre | post |
+|---|---|---|---|---|---|---|
+| SmallOffice | 94 | **90** | | QuickServiceRestaurant | 93 | 93 |
+| MediumOffice | 109 | **106** | | HighriseApartment | 100 | 100 |
+| LargeOffice | 116 | **113** | | LowriseApartment | 99 | 99 |
+| PrimarySchool | 101 | 101 | | MidriseApartment | 100 | 100 |
+| SecondarySchool | 104 | 104 | | SmallHotel | 93 | 93 |
+| RetailStandalone | 106 | 106 | | LargeHotel | 93 | 93 |
+| RetailStripmall | 106 | 106 | | Hospital | 113 | 113 |
+| Warehouse | 107 | **106** | | Outpatient | 95 | 95 |
+| FullServiceRestaurant | 95 | 95 | | | | |
+
+Three mechanisms, all traced to #2119 hunks with end-use evidence from the
+kept pre-merge run dirs:
+
+1. **Daylighting controls now created in the proposeds** (pre-registered):
+   proposed interior lighting fell SmallOffice −29%, MediumOffice −19%,
+   LargeOffice −14% while their references barely moved (reference
+   photocontrols were ALREADY built by our D-51 transform — the legacy fix
+   only adds them to the proposed side). Drives the −4/−3/−3 moves.
+2. **SHW tank resizing** (pre-registered): tiny — water-systems energy moved
+   ≤ +3 kWh/wk everywhere (the corrected tanks change capacity/standby only
+   marginally at fleet scale). No percentage effect.
+3. **Height-predicate fix raises installed LPD in tall spaces** (NOT
+   pre-registered — found by attribution): legacy's
+   `get_max_space_height_for_space_type` predicate was broken
+   (`select(&:surfaceType == 'Wall')`); fixed, real space heights reach the
+   height-dependent LPD rows, so GENERATED tall-space archetypes carry more
+   installed lighting: RetailStandalone interior lighting +83% on BOTH
+   sides (absolute totals +4%, ratio preserved → percent unchanged at 106);
+   Warehouse proposed +56% vs reference +13% (height-LPD up both sides,
+   proposed partly offset by new skylight daylighting controls) → net −1.
+
+13 of 17 buildings unchanged; the four movers all move toward compliance
+(daylighting) or stay ratio-neutral (height LPD). The legacy e2e suite is
+green on a fresh SHA-keyed cache (3/17). The FULL-ANNUAL 17×2 table above
+remains STALE-PENDING-REFRESH.
