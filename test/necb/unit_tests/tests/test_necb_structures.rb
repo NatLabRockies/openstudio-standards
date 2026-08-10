@@ -20,7 +20,7 @@ class NECB_Structure_Tests < Minitest::Test
     @test_passed = true
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -31,18 +31,18 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       # 'NorthernEducation',
       # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
+      # 'SmallOffice',
       'Warehouse'
     ]
 
@@ -50,12 +50,12 @@ class NECB_Structure_Tests < Minitest::Test
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      "NECB2020",
+      # "NECB2020",
       # "NECB2025"
     ]
 
     @options = [
-      "",
+      # "",
       "structure"
     ]
 

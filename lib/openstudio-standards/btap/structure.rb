@@ -521,7 +521,6 @@ module BTAP
         id     = @spaces.keys.first
         sp     = @spaces.values.first
         espace = model.getSpaceByName(id).get
-        ezone  = espace.thermalZone.get
 
         first             = {}
         first[:spaces   ] = [espace]
@@ -529,13 +528,12 @@ module BTAP
         first[:framing  ] = sp[:framing]
         first[:cladding ] = sp[:cladding]
         first[:finish   ] = sp[:finish]
-        first[:m2       ] = sp[:m2] * espace.multiplier * ezone.multiplier
+        first[:m2       ] = sp[:m2] * espace.multiplier
         custom           << first
 
         @spaces.each do |id, sp|
           match = false
           space = model.getSpaceByName(id).get
-          zone  = space.thermalZone.get
           next if space == espace
 
           custom.each do |csp|
@@ -546,7 +544,7 @@ module BTAP
                sp[:cladding ] == sp[:cladding  ] &&
                sp[:finish   ] == sp[:finish    ]
               csp[:spaces] << space
-              csp[:m2    ] += sp[:m2] * space.multiplier * zone.multiplier
+              csp[:m2    ] += sp[:m2] * space.multiplier
               match = true
             end
           end
@@ -558,7 +556,7 @@ module BTAP
             spx[:framing  ] = sp[:framing]
             spx[:cladding ] = sp[:cladding]
             spx[:finish   ] = sp[:finish]
-            spx[:m2       ] = sp[:m2] * space.multiplier * zone.multiplier
+            spx[:m2       ] = sp[:m2] * space.multiplier
             custom         << spx
           end
         end

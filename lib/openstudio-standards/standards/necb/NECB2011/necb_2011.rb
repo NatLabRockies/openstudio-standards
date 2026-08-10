@@ -990,7 +990,7 @@ class NECB2011 < Standard
   # with "btap_uo" in the model, the fallback is to instead target all outdoor-
   # facing, above-grade layered constructions. In case of latter scenario,
   # AdditionalProperties "btap_uo", "btap_ut", "btap_id", "btap_type" &
-  # "btap_area"are added. All constructions having (or inherting) a "btap_uo"
+  # "btap_area" are added. All constructions having (or inherting) a "btap_uo"
   # property are adjusted to match the specified Uo (factoring in "btap_film").
   #
   # @author: denis@rd2.ca

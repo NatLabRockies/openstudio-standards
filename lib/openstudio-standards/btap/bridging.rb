@@ -1725,6 +1725,8 @@ module BTAP
 
       # Initialize.
       @tally = {edges: {}}
+      model  = @model[:osm]
+      bldg   = @model[:osm].getBuilding
 
       # TBD/BTAP track a wider range of thermal bridge types than BTAP costing
       # currently supports. Current BTAP-costed, linear thermal bridge types:
@@ -1763,13 +1765,35 @@ module BTAP
         next unless data[cID][quality].key?(type)
         next unless data[cID][quality][:id] == pID
 
+        # Determine multiplier(s).
+        puts e[:surfaces]
+        mSb = 1
+        mSp = 1
+
+        # SubSurface multiplier.
+        e[:surfaces].each do |srf|
+          if type == :fenestration
+            unless model.getSubSurfaceByName(srf).empty?
+              mlt = model.getSubSurfaceByName(srf).get.multiplier
+              mSb = mlt if mlt > mSb
+            end
+          end
+
+          next if model.getSurfaceByName(srf).empty?
+          next if model.getSurfaceByName(srf).get.space.empty?
+
+          # Space multiplier.
+          mlt = model.getSurfaceByName(srf).get.space.get.multiplier
+          mSp = mlt if mlt > mSp
+        end
+
+        puts "mSb: #{mSb}, mSp: #{mSp}"
+        puts
+
         @tally[:edges][type]       = {} unless @tally[:edges].key?(type)
         @tally[:edges][type][pID]  = 0  unless @tally[:edges][type].key?(pID)
-        @tally[:edges][type][pID] += e[:length]
+        @tally[:edges][type][pID] += e[:length] * mSb * mSp
       end
-
-      model = @model[:osm]
-      bldg  = @model[:osm].getBuilding
 
       addprop(bldg, "psi_quality", @model[:quality])
 
@@ -1836,7 +1860,7 @@ module BTAP
         bCP  = @model[:building][stypes][:compliant]
         bID  = @model[:building][stypes][:id]
         lg   = "  - "
-        lg  += bCP ? "Compliant " : "Non-compliant "
+        lg  += bCP ? " Compliant " : " Non-compliant "
         lg  += "BUILDING: Ut #{bUt} W/m2.K "
         lg  += "(Uo #{bUo} W/m2.K, #{bID})"
         lg  += " - #{@model[:quality]}" if stypes == :walls
@@ -1848,7 +1872,7 @@ module BTAP
           aCP  = @model[:attic][stypes][:compliant]
           aID  = @model[:attic][stypes][:id]
           lg   = "  - "
-          lg  += aCP ? "Compliant " : "Non-compliant "
+          lg  += aCP ? " Compliant " : " Non-compliant "
           lg  += "ATTIC: Ut #{aUt} W/m2.K "
           lg  += "(Uo #{aUo} W/m2.K, #{aID})"
           lg  += " - #{@model[:quality]}" if stypes == :walls
@@ -1862,11 +1886,37 @@ module BTAP
           sID  = sp[stypes][:id]
           sQY  =
           lg   = "  - "
-          lg  += sCP ? "Compliant " : "Non-compliant "
+          lg  += sCP ? " Compliant " : " Non-compliant "
           lg  += "SPACE #{id}: Ut #{sUt} W/m2.K "
           lg  += "(Uo #{sUo} W/m2.K, #{sID})"
           lg  += " - #{@model[:quality]}" if stypes == :walls
           lgs << lg
+        end
+      end
+
+      # Report on edges (as linear thermal bridges).
+      lgs << "Edges (i.e. linear thermal bridges):"
+
+      @tally[:edges].each do |type, edge|
+        edge.each.with_index(1) do |(pID, m), i|
+          next if m < 0.025
+
+          lgs << " #{type}: ".rjust(15) + pID.ljust(37) + " #{m.round(1)} m".rjust(9)
+
+          # LargeOffice (without factoring space/subsurface multipliers):
+          #      fenestration: BTAP-ExteriorWall-SteelFramed-2 good  1802.1 m
+          #             grade: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
+          #          rimjoist: BTAP-ExteriorWall-SteelFramed-2 good   487.4 m
+          #           parapet: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
+          #            corner: BTAP-ExteriorWall-SteelFramed-2 good    47.6 m
+
+          # LargeOffice (without factoring space/subsurface multipliers):
+          #     fenestration: BTAP-ExteriorWall-SteelFramed-2 good  51058.8 m
+          #            grade: BTAP-ExteriorWall-SteelFramed-2 good    243.7 m
+          #         rimjoist: BTAP-ExteriorWall-SteelFramed-2 good  24612.8 m
+          #          parapet: BTAP-ExteriorWall-SteelFramed-2 good    243.7 m
+          #           corner: BTAP-ExteriorWall-SteelFramed-2 good   1617.0 m
+
         end
       end
 

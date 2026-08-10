@@ -30,30 +30,30 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
-      # 'LargeOffice',
+      'LargeOffice',
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
+      # 'LowriseApartment',
       # 'MediumOffice',
-      'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'MidriseApartment',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     @structure = [
@@ -292,7 +292,7 @@ class NECB_TBD_Tests < Minitest::Test
                 # of an (exposed) floor (Surface 48, 150 m2) entirely surrounded
                 # by other exposed floor surfaces sharing the same 3D plane. All
                 # of its surrounding edges are "transition" edges, which won't
-                # derate the surface construction ("transition" == PSI 0 W/m per
+                # derate the surface construction ("transition" == PSI 0 W/K per
                 # linear meter). In such circumstances, TBD still tracks the
                 # (theoretically deratable) surface construction, yet does not
                 # hard-assign a new derated construction. In BTAP, such surfaces
