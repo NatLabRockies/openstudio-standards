@@ -39,6 +39,13 @@ begin
 rescue LoadError
   require File.expand_path('../../openstudio-simulation/lib/openstudio_simulation', __dir__)
 end
+# openstudio-geometry: consumed by the AHJ report's floor-plan section (the
+# gem is otherwise upstream — it creates models rather than transforming them).
+begin
+  require 'openstudio_geometry'
+rescue LoadError
+  require File.expand_path('../../openstudio-geometry/lib/openstudio_geometry', __dir__)
+end
 
 require_relative 'openstudio_necb/version'
 require_relative 'openstudio_necb/tiers'
@@ -56,7 +63,8 @@ require_relative 'openstudio_necb/report'
 # with simulation execution via openstudio-simulation (the one place
 # simulation is allowed; the domain gems never simulate), unified costing,
 # and ONE AuditLog across everything. The seventh family gem,
-# openstudio-geometry, sits UPSTREAM: it creates the model you feed in here.
+# openstudio-geometry, sits mostly UPSTREAM (it creates the model you feed
+# in here) — the AHJ report also consumes its floor-plan engine.
 module OpenStudioNECB
   # The shared audit class, now owned by openstudio-audit: every family gem
   # aliases the SAME class, so one instance flows through all of them.

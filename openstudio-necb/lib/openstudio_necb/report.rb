@@ -52,6 +52,12 @@ module OpenStudioNECB
       proposed_hvac = proposed_model ? OpenStudioHVAC.model_hvac_diagrams(proposed_model) : nil
       reference_hvac = reference_model ? OpenStudioHVAC.model_hvac_diagrams(reference_model) : nil
 
+      # Floor plans come from openstudio-geometry's plan engine, PROPOSED model
+      # only — the reference's spaces/zones are identical by construction (the
+      # reference is a clone; no transform renames or rezones). Same contract
+      # as the HVAC diagrams: a plain hash bundle, never raises.
+      floor_plans = proposed_model ? OpenStudioGeometry::Plan.diagrams(proposed_model) : nil
+
       ctx = {
         report: report,
         audit_entries: audit_entries,
@@ -60,6 +66,7 @@ module OpenStudioNECB
         reference: reference_data,
         proposed_hvac: proposed_hvac,
         reference_hvac: reference_hvac,
+        floor_plans: floor_plans,
         options: options
       }
       body = Sections.render_all(ctx)

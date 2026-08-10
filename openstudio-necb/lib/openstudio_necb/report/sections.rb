@@ -8,7 +8,7 @@ module OpenStudioNECB
     module Sections
       module_function
 
-      ORDER = %i[header verdict_banner path_declaration checklist energy ghg envelope
+      ORDER = %i[header verdict_banner path_declaration floor_plans checklist energy ghg envelope
                  hvac lighting loads shw costing coverage_appendix rulings_appendix
                  audit_appendix declarations].freeze
 
@@ -52,7 +52,7 @@ module OpenStudioNECB
             #{Html.kv_table(project)}
             <nav class="toc">
               <a href="#verdict">Summary</a><a href="#paths">Compliance paths</a><a href="#checklist">Checklist</a>
-              <a href="#energy">Energy</a>#{ctx[:report].dig('proposed', 'ghg_kg_co2e') ? '<a href="#ghg">GHG</a>' : ''}<a href="#envelope">Envelope</a><a href="#hvac">HVAC</a>
+              <a href="#floor-plans">Floor plans</a><a href="#energy">Energy</a>#{ctx[:report].dig('proposed', 'ghg_kg_co2e') ? '<a href="#ghg">GHG</a>' : ''}<a href="#envelope">Envelope</a><a href="#hvac">HVAC</a>
               <a href="#lighting">Lighting</a><a href="#loads">Loads</a><a href="#shw">SHW</a>
               <a href="#coverage">Coverage</a><a href="#rulings">Decisions</a><a href="#audit">Audit trail</a>
             </nav>
@@ -160,6 +160,37 @@ module OpenStudioNECB
         when false then Html.raw("#{Html.glyph(:fail)} Does not comply")
         else 'Not used / not determined'
         end
+      end
+
+      # -- floor_plans ---------------------------------------------------
+      # Per-storey plan views from openstudio-geometry's plan engine (PROPOSED
+      # model; the reference's spaces/zones are identical by clone — stated in
+      # the section). ctx[:floor_plans] is the never-raise bundle
+      # {storeys: [{name:, svg:}], legend_svg:, empty:, inferred_storeys:,
+      # error:}; absent/empty/error all render as a one-line note.
+      def floor_plans(ctx)
+        plans = ctx[:floor_plans]
+        return Html.section('floor-plans', 'Floor plans',
+                            '<p class="meta">No model was available to draw floor plans from.</p>') if plans.nil?
+        if plans[:error] || plans[:empty] || plans[:storeys].empty?
+          note = plans[:error] ? "floor-plan extraction failed: #{Html.esc(plans[:error])}" :
+                                 'the model contains no floor surfaces to draw'
+          return Html.section('floor-plans', 'Floor plans', %(<p class="meta">#{note}</p>))
+        end
+
+        body = +%(<p class="meta">Space and thermal-zone names of the PROPOSED model, one plan per
+          storey (polygons tinted per thermal zone; hover a space for its space type and area).
+          The reference building's spaces and zones are identical by construction — the reference
+          is a clone and no transform renames or rezones.</p>)
+        if plans[:inferred_storeys]
+          body << %(<p class="warnstrip">&#9650; the model carries no BuildingStory objects — storeys
+            were INFERRED from floor elevations (&#177;0.01 m bins).</p>)
+        end
+        body << %(<div class="page-break">#{plans[:legend_svg]}</div>) if plans[:legend_svg]
+        plans[:storeys].each do |storey|
+          body << %(<div class="page-break"><h3>#{Html.esc(storey[:name])}</h3>#{storey[:svg]}</div>)
+        end
+        Html.section('floor-plans', 'Floor plans', body)
       end
 
       # -- checklist -----------------------------------------------------
