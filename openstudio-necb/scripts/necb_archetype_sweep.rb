@@ -59,8 +59,18 @@ ECM = ENV['ECM'] # legacy ecm_system_name, nil = NECB_Default
 
 # The proposed-OSM cache is vintage-independent (always the legacy NECB2020
 # archetype); run dirs and result files carry the vintage.
+#
+# LEGACY_SHA keys the cache to the legacy library that GENERATES the
+# archetypes: any commit touching lib/openstudio-standards invalidates every
+# cached OSM automatically. Before this key existed, the nrcan merge of
+# 2026-08-10 (upstream #2119: SHW tank sizing + daylighting-control fixes,
+# both of which change generated archetypes) would have silently reused
+# stale pre-merge OSMs — existence was the only check.
+LEGACY_SHA = `git -C #{ROOT} rev-parse --short HEAD:lib/openstudio-standards`.strip
+raise('cannot resolve the legacy-subtree SHA for cache keying') if LEGACY_SHA.empty?
+
 GEN_VARIANT = [FUEL == 'Electricity' ? nil : FUEL.downcase, LOC == 'toronto' ? nil : LOC,
-               ECM&.downcase].compact.join('_')
+               ECM&.downcase, LEGACY_SHA].compact.join('_')
 SUFFIX = GEN_VARIANT.empty? ? '' : "_#{GEN_VARIANT}"
 RUN_VARIANT = [GEN_VARIANT.empty? ? nil : GEN_VARIANT, VINTAGE == '2020' ? nil : "v#{VINTAGE}"].compact.join('_')
 RUN_SUFFIX = RUN_VARIANT.empty? ? '' : "_#{RUN_VARIANT}"

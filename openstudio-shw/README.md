@@ -37,11 +37,13 @@ report = OpenStudioSHW.cost(model, city: 'TORONTO', province_state: 'ONTARIO', a
 - **Demand + tank sizing** (legacy-exact port of `auto_size_shw_capacity` /
   `model_add_swh`): per-space peaks (US gal/hr/ft² × area × scale), the weekly
   demand profile from the NECB SWH schedules, the peak-hour tank rule with the
-  next-hour top-up, capacity/parasitic arithmetic, per-space
-  WaterUseEquipment. **Legacy defect preserved for parity and warned in every
-  audit**: the "next hour after peak" lookup indexes the unsorted hourly array
-  with a *sorted*-array position, so the top-up volume is generally not the
-  true next-hour demand — true adjacency would size tanks materially larger.
+  next-hour top-up (TRUE hour adjacency), capacity/parasitic arithmetic,
+  per-space WaterUseEquipment. History (D-68): legacy's "next hour after
+  peak" lookup originally indexed the unsorted hourly array with a
+  *sorted*-array position (arbitrary hour, smaller tanks) — the gem preserved
+  that defect for parity until upstream PR #2119 (merged 2026-07-15) fixed
+  it; both sides now size by true adjacency and the parity gate compares
+  live.
 - **Water-heater performance** (Table 6.2.2.1, NECB2020 UEF procedure):
   electric standby-loss formulas → UA; gas/oil storage UEF ladders (first-hour
   rating = 0.7·V + 151 rule of thumb) with the Maguire-Roberts recovery/UA

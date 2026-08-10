@@ -97,6 +97,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-65** — The Hospital reference's slow annual run is the ventilation floor meeting the per-stage flow band, plus thirty required energy-recovery wheels - inherent cost, one small lead left open _(process)_
 - **D-66** — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed) _(runtime_unwired)_
 - **D-67** — Clarity restructure: aliased public renames + the openstudio-audit gem _(process)_
+- **D-68** — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches _(process)_
 
 <!-- TOC END -->
 
@@ -3604,3 +3605,41 @@ their own files (verbatim, constant paths unchanged).
 
 - **Who/when:** Fable under D-10 per phylroy's three rulings, 2026-08-09;
   executed by tiered subagents (sonnet/opus), every diff Fable-reviewed.
+
+## D-68 — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches
+
+origin/nrcan merged into phylroy_dnd (d0a2fc993, conflict-free): 4 commits
+including our merged PR #2119 (BTAP costing + hs15 + SHW + daylighting
+defect fixes) and #2120's BTAP restructure. Decisions taken absorbing it:
+
+- **SHW tank sizing flipped to true hour adjacency.** The gem's
+  deliberately-preserved sorted-array defect (the "next hour after peak"
+  lookup; fixture effect 0.0757 → 0.1239 m³) is retired now that legacy is
+  fixed — the parity gate compares live and is green on the corrected side
+  (2/24). The legacy ACCUMULATION loop's sorted iteration is harmless
+  (indices used consistently) and stays unmirrored. The audit's
+  LEGACY-DEFECT warning is deleted; this entry records the history.
+- **The quarantined legacy-2011 daylighting port tracks legacy AS FIXED.**
+  Its purpose is to be diffed against legacy, so the three #2119 hunks were
+  mirrored (window/skylight criterion gating — the L-26 defect; skylight
+  accumulation out of the window loop; office-name regex). L-26 marked
+  FIXED UPSTREAM; the parity test now asserts control-name and sensor-
+  position equality against live legacy (stronger than the old count-only
+  check). The :necb2020 path is untouched (26/533 unchanged).
+- **Archetype caches are now keyed by the legacy-subtree SHA**
+  (`git rev-parse HEAD:lib/openstudio-standards`) in both the sweep script
+  and the e2e test — before this, cache invalidation was existence-only and
+  the merge would have silently reused stale pre-#2119 OSMs. All cached
+  OSMs cleared; result JSONs kept for before/after.
+- **Parity harness repairs** for #2120's renames (BTAP::Costing /
+  BTAP::Database / paths.rb); deviation notes that #2119 made two-sided
+  (hs15 AirSoure, shw gas fuel line, lighting Nil-fixture) retired or
+  annotated; the hvac hydronic-AHU misclassification claim KEPT (verified
+  still true — only the hard-sized branch was fixed upstream).
+- **Fleet consequence:** regenerated archetypes differ (SHW tanks + legacy
+  daylighting controls now actually created) — the week sweep below is the
+  merge gate with pre-registered attribution; the 17×2 FULL-ANNUAL baseline
+  table is STALE-PENDING-REFRESH (ruled: full refresh is a later follow-up).
+
+- **Who/when:** Fable under D-10 per phylroy's merge instruction,
+  2026-08-10; executed with tiered subagents, every diff Fable-reviewed.

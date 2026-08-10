@@ -14,10 +14,11 @@ module OpenStudioSHW
   # 10 ft-per-pump tank piping BOM. Distribution costing was never enabled in
   # legacy (shw_distribution_costing exists but is not called) — same here.
   #
-  # LEGACY DEFECT (fixed, audited): legacy gates the gas fuel-line branch on
-  # `num_reg_gas_tanks + num_reg_gas_tanks` (the same variable twice), so
-  # buildings whose ONLY gas tanks are high-efficiency get no fuel line; the
-  # port uses regular + high-efficiency as intended.
+  # LEGACY DEFECT (fixed, audited; also fixed upstream by #2119): legacy gated the
+  # gas fuel-line branch on `num_reg_gas_tanks + num_reg_gas_tanks` (the same
+  # variable twice), so buildings whose ONLY gas tanks are high-efficiency got no
+  # fuel line; both this port and the upstream legacy fix now use regular +
+  # high-efficiency as intended, so behavior matches on both sides.
   module Costing
     Report = Struct.new(:total, :shw, :warnings, :city, :province_state, :audit, keyword_init: true)
 
@@ -145,7 +146,7 @@ module OpenStudioSHW
         quantifier.add('Vent_pvc_elbow', 6, %w[SHW], 'SHW PVC flue elbow', count: he_fuel.to_f)
       end
 
-      gas = counts[:reg_gas] + counts[:he_gas] # legacy defect fixed: HE-only gas got no fuel line
+      gas = counts[:reg_gas] + counts[:he_gas] # legacy defect fixed (both sides since #2119): HE-only gas got no fuel line
       oil = counts[:reg_oil] + counts[:he_oil]
       if gas.positive?
         quantifier.add('GasLine', nil, %w[SHW], 'SHW fuel line', count: util * gas)

@@ -71,9 +71,17 @@ class TestLegacyArchetypeE2E < Minitest::Test
     @legacy_available = File.exist?(LEGACY_ENTRY) && system('bundle -v > /dev/null 2>&1')
   end
 
+  # The legacy-subtree SHA keys the cache to the LIBRARY that generates the
+  # archetype — without it, a legacy change (e.g. the #2119 SHW/daylighting
+  # fixes merged 2026-08-10) silently reuses a stale pre-change OSM, because
+  # the script text and its arguments don't change when the library does.
+  def self.legacy_sha
+    @legacy_sha ||= `git -C #{REPO_ROOT} rev-parse --short HEAD:lib/openstudio-standards`.strip
+  end
+
   def self.cache_key
     @cache_key ||= Digest::SHA256.hexdigest(
-      [GEN_SCRIPT, TEMPLATE, BUILDING_TYPE, GEN_EPW_BASENAME].join('|')
+      [GEN_SCRIPT, TEMPLATE, BUILDING_TYPE, GEN_EPW_BASENAME, legacy_sha].join('|')
     )[0, 24]
   end
 

@@ -71,20 +71,19 @@ module OpenStudioSHW
                    'loop_peak_flow_si' => 0, 'parasitic_loss_w' => 0, 'spaces_w_dhw' => [] }
         end
 
-        # the hour AFTER the peak hour(s) with the highest demand — LEGACY-EXACT,
-        # including a legacy DEFECT preserved for parity: legacy iterates the
-        # SORTED hourly array (`day_peak_sched[1].sort.each_with_index`) but uses
-        # the sorted position to index the UNSORTED array for the "next hour", so
-        # the value it reads is generally NOT the hour after the peak. The intent
-        # (true hour adjacency) yields materially larger tanks; the defect is
-        # recorded in the audit below.
+        # the hour AFTER the peak hour(s) with the highest demand — LEGACY-EXACT.
+        # Hours are iterated in HOUR ORDER (true adjacency). Legacy history: the
+        # original auto_size_shw_capacity iterated the SORTED hourly array while
+        # indexing the UNSORTED one for "next hour" (an arbitrary hour, smaller
+        # tanks); upstream PR #2119 (merged 2026-07-15) fixed it to hour order,
+        # and this gem flipped with it (D-68) — the parity gate compares live.
         next_hour_flow = 0.0
         DAY_KEYS.each do |day|
-          weekly[day].sort.each_with_index do |flow, sorted_index|
+          weekly[day].each_with_index do |flow, hour_index|
             next unless flow == peak_sched
 
-            next_day = sorted_index == 23 ? NEXT_DAY[day] : day
-            next_hour = sorted_index == 23 ? 0 : sorted_index + 1
+            next_day = hour_index == 23 ? NEXT_DAY[day] : day
+            next_hour = hour_index == 23 ? 0 : hour_index + 1
             candidate = weekly[next_day][next_hour]
             next_hour_flow = candidate if candidate > next_hour_flow
           end
@@ -105,11 +104,6 @@ module OpenStudioSHW
         room_c = OpenStudio.convert(rules['ambient_f'], 'F', 'C').get
         parasitic = rules['tank_u_w_per_m2k'] * area * (max_temp - room_c)
 
-        audit&.warn(:shw, 'LEGACY DEFECT preserved for parity: the tank "next hour after peak" lookup ' \
-                          'indexes the unsorted hourly array with a SORTED-array position (legacy ' \
-                          "auto_size_shw_capacity's day_peak_sched[1].sort.each_with_index), so the added " \
-                          'volume is generally not the true next-hour demand — true adjacency would size ' \
-                          'this tank larger')
         audit&.decision(:shw, 'SHW plant auto-sized from space-type demand (legacy tank rule: peak hour ' \
                               '+ next hour when recovery time is short)',
                         inputs: { spaces_with_dhw: spaces.size,

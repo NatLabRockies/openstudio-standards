@@ -29,11 +29,13 @@ pump and instantaneous water heaters), the reference transform, and costing.
 
 ## Key facts / traps
 
-- **Legacy tank-sizing sorted-array defect is DELIBERATELY PRESERVED for
-  parity** (0.0757 vs 0.1239 m³ — reads the wrong element of a sorted array)
-  — it warns in the audit here and is FIXED on the PR branch
-  (`fix/btap-costing-defects`, PR #2119 on NatLabRockies/openstudio-standards).
-  Do not "fix" it here without breaking the parity gate knowingly.
+- **The tank-sizing "next hour after peak" lookup iterates in HOUR ORDER**
+  (true adjacency; on the fixture 0.1239 m³ vs the old defect's 0.0757 m³).
+  History (D-68): legacy's sorted-array defect was preserved here for parity
+  until PR #2119 merged upstream (2026-07-15, in-tree since the nrcan
+  merge); both sides are now fixed and `test_shw_parity.rb` compares live.
+  The ACCUMULATION loop's sorted iteration in legacy is harmless (indices
+  used consistently) — don't "align" the gem to it.
 - SHW lives HERE, not in openstudio-loads (deliberate split); the umbrella
   on-ramp only builds SHW when `shw_fuel:` is passed.
 - Demand needs space-type TAGS (standardsSpaceType) — bare models must go
