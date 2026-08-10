@@ -20,10 +20,14 @@ module OpenStudioLighting
     #     DaylightControlRequirement. See D-57.
     #
     #   :necb2011 — the legacy-exact port of model_add_daylighting_controls'
-    #     'NECB_Default' selection, defects and all, kept reachable so
-    #     test_daylighting_parity.rb can still prove the port faithful. It applies
-    #     NECB 2011 criteria (areas and effective apertures, ANDed) and is WRONG
-    #     for 2020/2025 — that is L-26. (:necb_default is an accepted alias.)
+    #     'NECB_Default' selection, mirroring legacy AS FIXED BY #2119 (merged
+    #     2026-07-15, in tree since the origin/nrcan merge), kept reachable so
+    #     test_daylighting_parity.rb can still prove the port faithful. It
+    #     applies NECB 2011 criteria (areas and effective apertures, ANDed
+    #     within the fenestration type a space actually has) and is WRONG for
+    #     2020/2025 — that is L-26. What is left between the two is a RULE
+    #     difference between the editions, not a defect.
+    #     (:necb_default is an accepted alias.)
     #
     # Sensor hardware, all paths: ONE DaylightingControl at the centre of the
     # space's lowest floor bounding box, 0.8 m above the floor, illuminance
@@ -47,7 +51,8 @@ module OpenStudioLighting
       STEPPED_STEPS = 2 # legacy paths: the NECB 2011 minimum
       STEPPED_STEPS_2020 = 3 # 4.2.2.1.(11)(a)(i) / (14)(a)(i): 67% / 33% / off
 
-      # MOVED: the verbatim legacy NECB 2011 daylighted-area math —
+      # MOVED: the legacy NECB 2011 daylighted-area math (pinned to legacy as
+      # fixed by #2119) —
       # sidelighting_parameters / skylight_parameters + the dist / triangle_height /
       # wall_point_distance helpers — now lives in necb/daylighted_areas_legacy_2011.rb,
       # which reopens this module, so every constant path here is unchanged.
@@ -64,10 +69,13 @@ module OpenStudioLighting
       #   `placement:` when it names one (:necb2011), else :necb2020. Passing it
       #   logs an audit info entry. Prefer `placement:` alone.
       # @param office_match [:legacy, :any_enclosed_office] :necb2011 ONLY — the
-      #   >=25 m2 office exemption matcher. :legacy preserves the exact string
-      #   'Office - enclosed', which does NOT exist in the NECB2020 space-type
-      #   names, so the exemption never fires on 2020 models (defect, audited);
-      #   :any_enclosed_office matches the intent (/office enclosed/i)
+      #   >=25 m2 office exemption matcher. Both values now BEHAVE IDENTICALLY:
+      #   #2119 replaced legacy's exact `== 'Office - enclosed'` (a 2011-era
+      #   name that never matched the NECB2015+/2020 'Office enclosed <= 25 m2'
+      #   / '> 25 m2' names) with /office\s*-?\s*enclosed/i, which is what
+      #   :any_enclosed_office already meant. Both stay accepted; :legacy is the
+      #   value pinned to whatever legacy does, so if legacy's matcher moves
+      #   again only :legacy follows it.
       # @param unknown_control_requirement [:required, :not_required] :necb2020
       #   ONLY — what to assume when the Table 4.2.1.6. column cannot be resolved
       #   for a space type. Always warns; see DaylightControlRequirement#evaluate
@@ -294,34 +302,55 @@ module OpenStudioLighting
         [selected, controlled]
       end
 
-      # The legacy NECB_Default selection, defects preserved and audited. It is
-      # NECB 2011 machinery: a space is EXCEPTED (no sensor) if it fails ANY
-      # single criterion — primary sidelighted area <= 100 m2, sidelighting
-      # effective aperture <= 0.1, daylighted area under skylights <= 400 m2 or
-      # skylight effective aperture <= 0.006 — unless it is an office >= 25 m2.
+      # The legacy NECB_Default selection, MIRRORING LEGACY AS FIXED BY #2119
+      # (merged 2026-07-15). It is NECB 2011 machinery: a space is EXCEPTED (no
+      # sensor) if it fails ANY single APPLICABLE criterion — primary
+      # sidelighted area <= 100 m2 or sidelighting effective aperture <= 0.1
+      # (applied ONLY to spaces WITH exterior windows), daylighted area under
+      # skylights <= 400 m2 or skylight effective aperture <= 0.006 (applied
+      # ONLY to spaces WITH skylights) — unless it is an office >= 25 m2.
       # (Legacy cites 4.2.2.4./4.2.2.7./4.2.2.8./4.2.2.10. for these; those are
       # 2011 numbers. NECB 2020/2025 Subsection 4.2.2 ends at 4.2.2.6., so
       # 4.2.2.7.-4.2.2.10. do not exist there, and 4.2.2.4. means something else
-      # entirely — roof monitors.) CONSEQUENCES (legacy behavior): window-only
-      # spaces are ALWAYS excepted (their skylight area is 0 <= 400); skylight-
-      # only spaces likewise (the skylight-area accumulator only runs inside the
-      # window loop). With :legacy office matching on 2020 models the office
-      # exemption never fires ('Office - enclosed' is a 2011-era name).
+      # entirely — roof monitors.)
+      #
+      # The pre-#2119 defects are gone from both sides: a window-only space is
+      # no longer auto-excepted by a skylight criterion it cannot meet (its
+      # skylight area was 0 <= 400), a skylight-only space likewise, and the
+      # >=25 m2 office exemption now matches the 2015+/2020 space-type names.
+      # What is left is a 2011-vs-2020 RULE difference: these thresholds are
+      # ANDed area/aperture tests, where 4.2.2.1.(10)/(13) are INDEPENDENT
+      # input-POWER tests (L-26, D-57).
       def necb_default_spaces(model, office_match, audit)
         daylight_spaces = model.getSpaces.sort_by(&:nameString).select { |s| daylighted?(s) }
+        # #2119 made legacy's office test a regex — `== 'Office - enclosed'`
+        # became `=~ /office\s*-?\s*enclosed/i` — so :legacy and
+        # :any_enclosed_office now COINCIDE. Both stay accepted (callers and
+        # docs name either), and :legacy is still the one pinned to legacy: if
+        # legacy's matcher ever changes again, only the :legacy branch moves.
         offices = daylight_spaces.select do |space|
           next false if space.spaceType.empty? || space.spaceType.get.standardsSpaceType.empty?
 
           name = space.spaceType.get.standardsSpaceType.get
-          matches = office_match == :legacy ? name == 'Office - enclosed' : name =~ /office\s*-?\s*enclosed/i
-          matches && lowest_floor_area(space) >= 25.0
+          (name =~ /office\s*-?\s*enclosed/i) && lowest_floor_area(space) >= 25.0
         end.map(&:nameString)
 
-        if office_match == :legacy && offices.empty? &&
-           daylight_spaces.any? { |s| s.spaceType.is_initialized && s.spaceType.get.standardsSpaceType.to_s =~ /office/i }
-          audit.warn(:daylighting,
-                     "office >=25 m2 exemption matched NOTHING: legacy compares to the 2011-era name 'Office - enclosed', " \
-                     "which does not exist in the NECB2020 space-type names — pass office_match: :any_enclosed_office for the intent")
+        # Which criteria even apply, per #2119: window criteria to spaces with
+        # exterior windows, skylight criteria to spaces with skylights.
+        with_windows = []
+        with_skylights = []
+        daylight_spaces.each do |space|
+          space.surfaces.sort_by(&:nameString).each do |surface|
+            surface.subSurfaces.sort_by(&:nameString).each do |sub|
+              next unless sub.outsideBoundaryCondition == 'Outdoors'
+
+              if %w[FixedWindow OperableWindow].include?(sub.subSurfaceType)
+                with_windows << space.nameString
+              elsif sub.subSurfaceType == 'Skylight'
+                with_skylights << space.nameString
+              end
+            end
+          end
         end
 
         excepted = []
@@ -333,17 +362,23 @@ module OpenStudioLighting
           sky_ea = 0.85 * sky[:skylight_area_m2] * (sky[:vt_handle] / sky[:skylight_area_m2]) * 0.9 / sky[:area_m2]
           metrics[space.nameString] = { sidelighted_m2: side[:area_m2].round(2), side_ea: side_ea.round(4),
                                         skylight_m2: sky[:area_m2].round(2), sky_ea: sky_ea.round(5) }
-          office = offices.include?(space.nameString)
-          excepted << space.nameString if !office &&
-                                          (side[:area_m2] <= 100.0 || (side_ea <= 0.1) ||
-                                           sky[:area_m2] <= 400.0 || (sky_ea <= 0.006))
+          next if offices.include?(space.nameString)
+
+          windowed = with_windows.include?(space.nameString)
+          skylit = with_skylights.include?(space.nameString)
+          excepted << space.nameString if (windowed && side[:area_m2] <= 100.0) ||
+                                          (windowed && side_ea <= 0.1) ||
+                                          (skylit && sky[:area_m2] <= 400.0) ||
+                                          (skylit && sky_ea <= 0.006)
         end
         audit.warn(:daylighting,
-                   'LEGACY NECB 2011 THRESHOLD EVALUATION IN USE (placement: :necb2011): any single failed ' \
-                   'criterion excepts a space, so a window-only space NEVER gets photocontrols. This is not ' \
-                   'the 2020/2025 requirement — 4.2.2.1.(10) and (13) are independent input-POWER tests. The ' \
-                   'path exists only to keep the legacy parity gate callable (L-26, D-57)',
-                   inputs: { daylighted: daylight_spaces.size, excepted: excepted.size, offices_exempt: offices.size },
+                   'LEGACY NECB 2011 THRESHOLD EVALUATION IN USE (placement: :necb2011): the applicable ' \
+                   'area/aperture criteria are ANDed, so any single failed criterion excepts a space. This is ' \
+                   'not the 2020/2025 requirement — 4.2.2.1.(10) and (13) are INDEPENDENT input-POWER tests. ' \
+                   'The path exists only to keep the legacy parity gate callable (L-26, D-57)',
+                   inputs: { daylighted: daylight_spaces.size, excepted: excepted.size, offices_exempt: offices.size,
+                             with_windows: with_windows.uniq.size, with_skylights: with_skylights.uniq.size,
+                             office_match: office_match },
                    evidence: metrics.first(5).map { |k, v| "#{k}: #{v}" }.join('; '),
                    article: 'NECB 2011 4.2.2.4./4.2.2.7./4.2.2.8./4.2.2.10. (articles that DO NOT EXIST in NECB 2020/2025, whose Subsection 4.2.2 ends at 4.2.2.6.)',
                    ruling: 'D-57')

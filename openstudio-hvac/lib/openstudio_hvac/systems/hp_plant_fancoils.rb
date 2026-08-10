@@ -14,9 +14,10 @@ module OpenStudioHVAC
     #   CAWHP performance biquadratics are part of the equipment definition (curves.json).
     #
     # Deviations from legacy (documented): the legacy 'AirSoure' typo (a silently failing
-    # setCondenserType on the heating HP) is corrected to 'AirSource'; legacy hs14's
-    # destructive `model.getOutputVariables.each(&:remove)` is NOT replicated (the two
-    # district-rate output variables are still added).
+    # setCondenserType on the heating HP), since fixed upstream by #2119 — the gem always
+    # wrote 'AirSource'. Live deviation: legacy hs14's destructive
+    # `model.getOutputVariables.each(&:remove)` is NOT replicated (the two
+    # district-rate output variables are still added) — this was NOT fixed upstream.
     class HpPlantFanCoils < BaseSystem
       def build(model, zones, control_zone: nil, namer: :default, hw_loop: nil, chw_loop: nil)
         plant_type = config.fetch('plant_type', 'cawhp')
@@ -121,7 +122,7 @@ module OpenStudioHVAC
           # min PLR 0.2 (:2156). The legacy source carries the values bare.
           hp = OpenStudio::Model::HeatPumpPlantLoopEIRHeating.new(model)
           hp.setName('HeatPumpPlantLoopEIRHeating')
-          hp.setCondenserType('AirSource')   # legacy 'AirSoure' typo corrected
+          hp.setCondenserType('AirSource')   # legacy 'AirSoure' typo corrected (also fixed upstream by #2119)
           hp.setMinimumSourceInletTemperature(-15.0)
           hp.setReferenceCoefficientofPerformance(3.0)
           hp.setHeatPumpSizingMethod('CoolingCapacity')

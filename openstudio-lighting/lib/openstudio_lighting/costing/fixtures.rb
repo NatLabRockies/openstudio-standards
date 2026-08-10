@@ -20,7 +20,12 @@ module OpenStudioLighting
     #   below — the legacy per-sensor BOM driven by the daylighted-area rule);
     #   an earlier version of this header said otherwise, from before the
     #   sensor port landed. Models without daylighting controls cost $0 there
-    #   exactly like legacy.
+    #   exactly like legacy;
+    # - the legacy per-zone `total_with_region` initialization (which made
+    #   'Nil'-fixture spaces report the previous space's cost) was fixed
+    #   upstream by #2119 to a per-space reset — this gem always did the
+    #   per-space equivalent (`zero_line`), so the two now agree; previously
+    #   this was an undocumented divergence.
     module Fixtures
       module_function
 

@@ -50,7 +50,7 @@ class TestHpPlantFanCoils < Minitest::Test
     assert_equal 1, htg_hps.size
     assert_equal 1, clg_hps.size
     hp = htg_hps.first
-    assert_equal 'AirSource', hp.condenserType, "legacy 'AirSoure' typo corrected"
+    assert_equal 'AirSource', hp.condenserType, "condenser type correct (legacy 'AirSoure' typo, fixed both sides since #2119)"
     assert_in_delta(-15.0, hp.minimumSourceInletTemperature, 1e-6)
     assert hp.companionCoolingHeatPump.is_initialized
     assert_equal 'CAWHP-HS15-HCAPFT', hp.capacityModifierFunctionofTemperatureCurve.nameString

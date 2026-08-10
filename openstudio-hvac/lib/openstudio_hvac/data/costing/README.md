@@ -1,6 +1,7 @@
 # Costing data — provenance and licensing
 
-Vendored from openstudio-standards `btap/common_resources/` + `btap/costing/` (public repo).
+Vendored from openstudio-standards `btap/common/` + `btap/costing/` (public repo;
+`btap/common/` renamed from `btap/common_resources/` by #2120).
 
 - **Schema is RS-Means-derived** (line-item ids, city cost-index localization structure —
   RS-Means is a proprietary Gordian dataset).

@@ -97,9 +97,10 @@ class TestDaylightingParity < Minitest::Test
     end
   end
 
-  def test_skylight_area_parity_including_window_defect
+  def test_skylight_area_parity
     std = legacy
-    # skylight + window: the accumulator runs (per legacy, inside the window loop)
+    # skylight + window: the window loop re-computes the width/length, then the
+    # area is accumulated ONCE (#2119 moved the accumulation out of that loop).
     model, space, = build_case(window: [2.0, 6.0, 0.8, 2.5], skylight: [4.0, 6.0, 3.0, 5.0])
     legacy_area, legacy_vt, legacy_sum = std.get_parameters_skylight(
       daylight_space: space, skylight_area_weighted_vt_handle: 0.0,
@@ -109,21 +110,26 @@ class TestDaylightingParity < Minitest::Test
     assert_in_delta legacy_vt, gem[:vt_handle], 1e-9
     assert_in_delta legacy_sum, gem[:skylight_area_m2], 1e-9
 
-    # skylight only: LEGACY DEFECT — zero area (accumulator inside the window loop)
+    # skylight only, NO exterior window: this used to compute ZERO on both sides
+    # (the accumulator sat inside the exterior-window loop). #2119 fixed legacy;
+    # the quarantine port mirrors it, so both are now NONZERO and equal.
     model2, space2, = build_case(skylight: [4.0, 6.0, 3.0, 5.0])
-    legacy_area2, = std.get_parameters_skylight(
+    legacy_area2, legacy_vt2, legacy_sum2 = std.get_parameters_skylight(
       daylight_space: space2, skylight_area_weighted_vt_handle: 0.0,
       skylight_area_sum: 0.0, daylighted_under_skylight_area: 0.0)
     gem2 = OpenStudioLighting::NECB::Daylighting.skylight_parameters(space2)
-    assert_equal 0.0, legacy_area2, 'legacy defect premise'
-    assert_equal 0.0, gem2[:area_m2], 'defect preserved for parity'
+    assert_operator legacy_area2, :>, 0.0, 'post-#2119 legacy: a skylight-only space has a real daylighted area'
+    assert_in_delta legacy_area2, gem2[:area_m2], 1e-9, 'skylight-only daylighted area tracks fixed legacy'
+    assert_in_delta legacy_vt2, gem2[:vt_handle], 1e-9
+    assert_in_delta legacy_sum2, gem2[:skylight_area_m2], 1e-9
   end
 
   def test_necb_default_selection_parity_on_fixture
     std = legacy
-    # office-tagged fixture with windows: under legacy NECB_Default + NECB2020
-    # names, EVERY window-only space is excepted (skylight area 0 <= 400) and the
-    # office exemption never fires ('Office - enclosed' is a 2011-era name)
+    # office-tagged fixture with windows. Post-#2119 legacy: the skylight
+    # criteria no longer apply to window-only spaces, and the >=25 m2 office
+    # exemption matches the NECB2020 name — so controls ARE created. The gate is
+    # equality with whatever legacy produces, never a hardcoded count.
     legacy_model = load_fixture
     map = legacy_model.getSpaces.to_h { |s| [s.nameString, ['Space Function', 'Office enclosed > 25 m2']] }
     OpenStudioLoads.assign_space_types(legacy_model, map, vintage: '2020')
@@ -140,10 +146,32 @@ class TestDaylightingParity < Minitest::Test
     created = OpenStudioLighting.add_daylighting_controls(gem_model, vintage: '2020',
                                                           placement: :necb2011, audit: audit)
 
-    assert_equal legacy_model.getDaylightingControls.size, gem_model.getDaylightingControls.size,
-                 'same control count (both zero: the any-single-criterion exception defect)'
-    assert_equal 0, created
-    assert(audit.warnings.any? { |w| w[:action].include?("'Office - enclosed'") },
-           'the 2020 office-name drift is audited loudly')
+    legacy_controls = legacy_model.getDaylightingControls
+    gem_controls = gem_model.getDaylightingControls
+
+    assert_operator legacy_controls.size, :>, 0,
+                    'post-#2119 legacy premise: the 2011 criteria DO place controls on this fixture'
+    assert_equal legacy_controls.size, gem_controls.size, 'same control count as legacy'
+    assert_equal legacy_controls.size, created, 'every legacy control is one the gem reports creating'
+
+    # Same spaces, same sensor positions (legacy puts one sensor at the centre
+    # of the lowest-floor bounding box, 0.8 m up).
+    assert_equal legacy_controls.map(&:nameString).sort, gem_controls.map(&:nameString).sort,
+                 'controls land on the same spaces'
+    legacy_pos = legacy_controls.to_h { |c| [c.nameString, [c.positionXCoordinate, c.positionYCoordinate, c.positionZCoordinate]] }
+    gem_controls.each do |control|
+      expected = legacy_pos[control.nameString]
+      %w[x y z].each_with_index do |axis, i|
+        actual = [control.positionXCoordinate, control.positionYCoordinate, control.positionZCoordinate][i]
+        assert_in_delta expected[i], actual, 1e-9, "#{control.nameString}: sensor #{axis} position"
+      end
+      assert_equal 'Stepped', control.lightingControlType
+    end
+
+    # #2119 replaced legacy's exact 'Office - enclosed' comparison with
+    # /office\s*-?\s*enclosed/i, so the office-name-drift warning must NOT fire
+    # any more — the exemption matches the NECB2020 names on both sides.
+    refute(audit.warnings.any? { |w| w[:action].include?("'Office - enclosed'") },
+           'the 2020 office-name drift warning is obsolete: #2119 made the legacy matcher a regex')
   end
 end

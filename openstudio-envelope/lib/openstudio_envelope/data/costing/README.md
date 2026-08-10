@@ -1,6 +1,7 @@
 # Envelope costing data — provenance and licensing
 
-Vendored from openstudio-standards `btap/common_resources/` (public repo), same policy
+Vendored from openstudio-standards `btap/common/` (public repo; renamed from
+`btap/common_resources/` by #2120), same policy
 as the openstudio-hvac gem's `data/costing/README.md`.
 
 Files vendored here (all UNPRICED):

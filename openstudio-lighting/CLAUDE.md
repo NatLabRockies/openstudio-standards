@@ -33,17 +33,23 @@ lighting fixture costing.
   ONLY selector: `:all` (**the default of `add_controls`**) = sensors
   everywhere there is exterior fenestration; `:necb2020` = NECB 2020/2025
   4.2.2.1.(10)-(15) (D-57) and the default of `reference_daylighting`;
-  `:necb2011` (alias `:necb_default`) = the legacy-exact 2011 port, defects
-  preserved, kept reachable so `test_daylighting_parity.rb` still proves the
-  port faithful. An unknown placement raises. `option:` is a DEPRECATED alias
+  `:necb2011` (alias `:necb_default`) = the legacy-exact 2011 port, **mirroring
+  legacy as fixed by #2119** (merged 2026-07-15, in tree since the origin/nrcan
+  merge), kept reachable so `test_daylighting_parity.rb` still proves the port
+  faithful. `office_match: :legacy` and `:any_enclosed_office` now behave
+  identically (#2119 made legacy's matcher the same regex); both stay accepted,
+  and `:legacy` is the value pinned to whatever legacy does. An unknown
+  placement raises. `option:` is a DEPRECATED alias
   (`'all'`→`:all`, `'NECB_Default'`→`:necb2011` if placement says so else
   `:necb2020`) that audits an info entry when used — `Daylighting.resolve_placement`
   owns the mapping, `Daylighting.normalize_placement` (public) owns the
   vocabulary, and nothing else may keep a second copy of either.
 - `necb/daylighted_areas_legacy_2011.rb` — QUARANTINE. Reopens `Daylighting` to
-  hold the VERBATIM legacy `sidelighting_parameters` / `skylight_parameters`
-  (constant paths unchanged) — they exist ONLY to be diffed against legacy by
-  `test_daylighting_parity.rb`; do not build on them.
+  hold the legacy `sidelighting_parameters` / `skylight_parameters` (constant
+  paths unchanged) — they exist ONLY to be diffed against legacy by
+  `test_daylighting_parity.rb`, so they must track legacy **as fixed by #2119**;
+  do not build on them, and change them only to mirror a change in
+  `necb_2011.rb`.
 - `necb/daylighted_areas.rb` — the 2020/2025 daylighted-area geometry per
   4.2.2.3. (primary + **secondary** sidelighted) and 4.2.2.5. (under skylights),
   adapted from openstudio-standards' `space_daylighted_areas`: one polygon per
@@ -80,8 +86,10 @@ lighting fixture costing.
   `power = LPD_general x daylighted_area` exactly. "General" excludes the
   separately named `Additional Lights` (the 4.2.1.6. specialty allowance).
 - **Sidelighting and toplighting are INDEPENDENT** — never AND them. ANDing them
-  (with the 2011 area/aperture criteria) is L-26: a window-only space could never
-  qualify, so 10 of 17 archetypes got no reference photocontrols at all.
+  (with the 2011 area/aperture criteria) is L-26, and it is what keeps
+  `:necb2011` from being usable as a 2020/2025 rule even after #2119 fixed the
+  implementation defects: 10 of 17 archetypes got no reference photocontrols at
+  all under the old (pre-#2119, pre-D-57) behaviour.
 - **Subsection 4.2.2 of NECB 2020/2025 ENDS AT ARTICLE 4.2.2.6.** Any citation to
   4.2.2.7.-4.2.2.12. is a NECB 2011 leftover and is wrong; 4.2.2.2. is "Lighting
   Controls in Storage Garages", not occupancy controls.
@@ -89,10 +97,11 @@ lighting fixture costing.
   the zone floor area**, not 1.0 — (10)/(13) control the lighting in the
   daylighted areas, not the whole room. The legacy paths still use 1.0.
 - `sidelighting_parameters` / `skylight_parameters` in
-  `daylighted_areas_legacy_2011.rb` are a
-  verbatim legacy port — do NOT "clean them up"; parity tests pin them to legacy
-  output, including its defects (no union, no secondary area, skylight-only
-  spaces compute zero).
+  `daylighted_areas_legacy_2011.rb` are a legacy port — do NOT "clean them up";
+  parity tests pin them to legacy output. Since #2119 that output is DIFFERENT:
+  skylight-only spaces no longer compute zero and multi-window spaces no longer
+  double-count. The pre-#2119 defects are gone from both sides; what is still
+  pinned is the 2011 RULE (no union, no secondary area).
 - **Do not regenerate `daylighting_controls_4_2_1_6.json` from one MCP call.**
   Both the 2020 and 2025 Table 4.2.1.6 extractions are corrupted, differently,
   and disagree on 38 of 91 rows. See the data README.

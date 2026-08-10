@@ -1,8 +1,8 @@
 # data/costing — lighting fixture costing sheets
 
 Three CSVs ported from the legacy BTAP costing database
-(`lib/openstudio-standards/btap/common_resources/`), consumed by
-`costing/fixtures.rb`:
+(`lib/openstudio-standards/btap/common/`, renamed from `btap/common_resources/`
+by #2120), consumed by `costing/fixtures.rb`:
 
 - `lighting_sets.csv` — template × building_type × space_type × CFL/LED →
   fixture-type selection by average-ceiling-height bin. The `template`

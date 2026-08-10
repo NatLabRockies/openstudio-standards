@@ -80,8 +80,11 @@ class TestCosting < Minitest::Test
     begin
       require legacy_root
       legacy_dir = File.expand_path('../../lib/openstudio-standards/btap', __dir__)
-      require File.join(legacy_dir, 'common_paths')
-      require File.join(legacy_dir, 'costing/btap_database')
+      # PR #2120 renamed these: btap/common_paths -> btap/paths,
+      # btap/costing/btap_database -> btap/costing/database, and the classes
+      # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
+      require File.join(legacy_dir, 'paths')
+      require File.join(legacy_dir, 'costing/database')
       require File.join(legacy_dir, 'costing/btap_costing')
       require File.join(legacy_dir, 'costing/lighting_costing')
       require File.join(legacy_dir, 'costing/led_lighting_costing')
@@ -101,8 +104,8 @@ class TestCosting < Minitest::Test
     model = costed_fixture_model(lights_type: 'LED') # NECB2020 template => legacy forces LED
     model.getBuilding.setStandardsTemplate('NECB2020')
 
-    coster = BTAPCosting.allocate
-    coster.instance_variable_set(:@costing_database, BTAPDatabase.instance)
+    coster = BTAP::Costing.allocate
+    coster.instance_variable_set(:@costing_database, BTAP::Database.instance)
     coster.instance_variable_set(:@costing_report,
                                  { 'province_state' => PROVINCE, 'city' => CITY,
                                    'lighting' => {} })

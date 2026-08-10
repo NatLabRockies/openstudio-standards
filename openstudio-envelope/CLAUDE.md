@@ -70,8 +70,11 @@ numbering), climate/HDD resolution, and envelope + thermal-bridging costing.
   first.
 - Test windows need SimpleGlazing constructions or legacy parity comparisons
   raise 'Optional not initialized' (visibleTransmittance).
-- Legacy `BTAPCosting` parity requires `BTAPCosting.allocate` plus
-  monkeypatched `getThermalZonesSorted`/`getSpacesSorted`.
+- Legacy costing parity requires `BTAP::Costing.allocate` +
+  `BTAP::Database.instance` (#2120 renamed `BTAPCosting`/`BTAPDatabase` and
+  moved `common_paths`→`paths`, `costing/btap_database`→`costing/database`)
+  plus `getThermalZonesSorted`/`getSpacesSorted` (survive in
+  `btap/attributes.rb`).
 
 ## Facade
 

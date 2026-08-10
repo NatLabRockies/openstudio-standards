@@ -209,10 +209,11 @@ ship in `curves.json`.
 | `hs14_cgshp_fancoils` | `ecm_hp_fancoils` | Ground-source W2W HP + boiler backup, water/air-cooled chillers, district-modeled GLHX loop, DOAS + 4-pipe fan coils |
 | `hs15_cawhp_fancoils` / `hs16_ashp_cawhp_fancoils` | `ecm_hp_fancoils` | Central air-to-water plant-loop-EIR HP companion pair + boiler backup; hs16 adds an ASHP DX DOAS |
 
-Documented deviations from legacy: the `'AirSoure'` typo (a silently failing condenser-type
-set on the hs15 heating HP) is corrected to `'AirSource'`; hs14's destructive
+Documented deviations from legacy: the legacy `'AirSoure'` typo (a silently failing
+condenser-type set on the hs15 heating HP), since fixed upstream by #2119; the gem always
+wrote `'AirSource'`. Live deviation: hs14's destructive
 `model.getOutputVariables.each(&:remove)` is not replicated (the district-rate output
-variables are still added).
+variables are still added) — this was NOT fixed upstream.
 
 ## Canonical names — one consolidated grammar
 
@@ -294,7 +295,10 @@ report.audit          # AuditLog: classification, selection math, per-item decis
   `hvac_vent_ahu` assembly row (dropping the heating-coil valve-piping set), omitting the
   mech-room-to-roof HW line, and never costing the air-loop HW heating coil. The gem costs
   the correct HW assembly and roof line (the HW coil itself is uncostable from E+ output in
-  both implementations — the gem warns, legacy is silent).
+  both implementations — the gem warns, legacy is silent). Note this **28/28 ... to the
+  dollar** snapshot predates #2119, which also corrected several legacy ledger-selection
+  defects (`min_by` typos, an assignment-as-comparison) elsewhere in `BTAPCosting`; re-running
+  the legacy comparison today would show legacy's own numbers have moved.
 - **Documented deferrals (explicit warnings):** district energy connection costs;
   evaporative-cooler media (no unit-cost data exists — legacy never costed it either);
   fan-coil MAU ventilation (matches legacy sys-2 handling).

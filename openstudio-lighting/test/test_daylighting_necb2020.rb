@@ -117,13 +117,16 @@ class TestDaylightingNecb2020 < Minitest::Test
 
   def test_skylight_only_space_gets_toplighted_area
     # 2 x 2 skylight, 3 m ceiling: extension 0.7 x 3 = 2.1 m each way -> 6.2 x 6.2.
-    # The LEGACY port returns ZERO here (its accumulator sits inside the exterior-
-    # window loop), which is half of why L-26's conjunctive test never fires.
+    # The LEGACY port used to return ZERO here (its accumulator sat inside the
+    # exterior-window loop); #2119 moved it out, and the quarantine port mirrors
+    # that. For ONE skylight in a windowless box the two rules coincide — they
+    # diverge once there are several apertures for 4.2.2.5. to union.
     _model, space = box(skylights: [[4.0, 6.0, 3.0, 5.0]])
     areas = DA.areas(space)
     assert_in_delta 6.2 * 6.2, areas[:toplighted_m2], 0.05, '4.2.2.5.(2)(a): 70% of ceiling height'
     legacy = OpenStudioLighting::NECB::Daylighting.skylight_parameters(space)
-    assert_in_delta 0.0, legacy[:area_m2], 1e-9, 'the legacy port still returns zero (defect preserved)'
+    assert_operator legacy[:area_m2], :>, 0.0,
+                    'the legacy port tracks legacy as fixed by #2119: a skylight-only space is no longer zero'
   end
 
   def test_necb_precedence_primary_beats_toplit_and_secondary_loses_to_both
@@ -369,7 +372,12 @@ class TestDaylightingNecb2020 < Minitest::Test
     audit = OpenStudioLighting::AuditLog.new
     created = OpenStudioLighting.add_daylighting_controls(model, vintage: '2020',
                                                           placement: :necb2011, audit: audit)
-    assert_equal 0, created, 'the 2011 criteria cannot qualify a window-only space (L-26)'
+    # Post-#2119: the skylight criteria no longer apply to a window-only space,
+    # and the >=25 m2 enclosed-office exemption now matches the 2020 name, so
+    # the legacy rule qualifies it. L-26 survives as a RULE difference (2011
+    # ANDs area/aperture tests; 2020 tests input power independently), which is
+    # why this path still shouts.
+    assert_equal 1, created, 'the fixed 2011 criteria qualify a >=25 m2 enclosed office with full-wall glazing'
     assert(audit.warnings.any? { |w| w[:action].include?('LEGACY NECB 2011 THRESHOLD EVALUATION IN USE') })
   end
 
@@ -380,11 +388,15 @@ class TestDaylightingNecb2020 < Minitest::Test
     assert_equal 1, model.getDaylightingControls.size,
                  'the reference now gets photocontrols where 4.2.2.1.(10) requires them'
     assert(audit.entries.any? { |e| e[:ruling].to_s.include?('D-57') && e[:level] == :decision })
-    # the 2011 alias still reaches the legacy rule for the parity gate
+    # the 2011 alias still reaches the legacy rule for the parity gate — which,
+    # post-#2119, places a control here too. What still separates the rules is
+    # the step count and the zone fraction, asserted above for :necb2020.
     legacy_model, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
     OpenStudioLighting::NECB.reference_daylighting(legacy_model, vintage: '2020', placement: :necb_default,
                                                   office_match: :legacy)
-    assert_equal 0, legacy_model.getDaylightingControls.size
+    assert_equal 1, legacy_model.getDaylightingControls.size
+    assert_equal 2, legacy_model.getThermalZones.first.primaryDaylightingControl.get.numberofSteppedControlSteps,
+                   'the legacy 2011 rule ran, not the 2020 one (its minimum is two steps)'
   end
 
   def test_unevaluated_1500_hour_exception_is_declared_every_run
@@ -415,9 +427,13 @@ class TestDaylightingNecb2020 < Minitest::Test
     assert_equal :necb2020, deprecation[:inputs][:placement_used]
 
     # option: 'NECB_Default' + placement: :necb2011 still reaches the legacy rule
+    # (which, post-#2119, qualifies this space — the two-step control proves it
+    # was the 2011 rule and not the 2020 one that ran)
     legacy, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')
-    assert_equal 0, OpenStudioLighting.add_daylighting_controls(legacy, vintage: '2020', option: 'NECB_Default',
+    assert_equal 1, OpenStudioLighting.add_daylighting_controls(legacy, vintage: '2020', option: 'NECB_Default',
                                                                 placement: :necb2011)
+    assert_equal 2, legacy.getThermalZones.first.primaryDaylightingControl.get.numberofSteppedControlSteps,
+                 'the legacy 2011 rule ran, not the 2020 one'
 
     # option: 'all' wins over placement:, exactly as it silently used to
     blanket, = box(windows: [[0.0, 10.0, 0.0, 3.0]], space_type: 'Office enclosed > 25 m2')

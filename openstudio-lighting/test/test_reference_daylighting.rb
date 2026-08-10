@@ -56,9 +56,15 @@ class TestReferenceDaylighting < Minitest::Test
     OpenStudioLighting::NECB.reference_daylighting(reference, vintage: '2020',
                                                    placement: :necb_default,
                                                    office_match: :legacy, audit: audit)
-    assert_equal 0, reference.getDaylightingControls.size,
-                 'legacy threshold semantics: window-only spaces are excepted'
-    assert(audit.warnings.any? { |w| w[:action].include?("'Office - enclosed'") })
+    # Post-#2119 legacy threshold semantics: the skylight criteria no longer
+    # except a window-only space, and the >=25 m2 office exemption matches the
+    # NECB2020 space-type names, so the legacy path DOES place controls.
+    assert_operator reference.getDaylightingControls.size, :>, 0,
+                    'legacy threshold semantics (as fixed by #2119): window-only spaces are no longer auto-excepted'
+    assert(audit.warnings.any? { |w| w[:action].include?('LEGACY NECB 2011 THRESHOLD EVALUATION IN USE') },
+           'the 2011 rule still shouts that it is not the 2020/2025 requirement')
+    refute(audit.warnings.any? { |w| w[:action].include?("'Office - enclosed'") },
+           'the office-name-drift warning is obsolete: #2119 made the legacy matcher a regex')
   end
 
   def test_photocontrols_reduce_lighting_energy

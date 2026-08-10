@@ -2,24 +2,31 @@ module OpenStudioLighting
   module NECB
     # QUARANTINE FILE. Nothing here is NECB 2020/2025 geometry.
     #
-    # This is the VERBATIM legacy NECB 2011 daylighted-area math — the ports of
+    # This is the legacy NECB 2011 daylighted-area math — the ports of
     # openstudio-standards' get_parameters_sidelighting /
-    # get_parameters_skylight — lifted out of `necb/daylighting.rb` by a pure
-    # code move, byte-for-byte unchanged. It reopens `Daylighting`, so every
+    # get_parameters_skylight, tracking legacy behaviour statement for
+    # statement. It reopens `Daylighting`, so every
     # constant path is exactly what it always was
     # (`OpenStudioLighting::NECB::Daylighting.sidelighting_parameters` /
     # `.skylight_parameters`); there are no delegators and no call site moved.
     # The FILENAME is the whole point: it labels the code as legacy so the
     # 2020/2025 geometry in `daylighted_areas.rb` is never confused with it.
     #
-    # PARITY-PINNED — DEFECTS DELIBERATELY PRESERVED. `test_daylighting_parity.rb`
-    # diffs these two methods against the legacy openstudio-standards
-    # implementation, so their output must not change, including where it is
-    # wrong: per-window areas are SUMMED with no union (overlaps double-counted,
-    # contrary to 4.2.2.3.(1)/(5), 4.2.2.4.(1) and 4.2.2.5.(1)), no secondary
-    # sidelighted area is computed at all, and the skylight-area accumulator
-    # sits inside the exterior-window loop so a skylight-only space always
-    # computes zero. Do NOT "clean this up", refactor it, or fix a defect here.
+    # PARITY-PINNED — MIRRORS LEGACY AS FIXED BY #2119 (merged 2026-07-15, in
+    # tree since the origin/nrcan merge). `test_daylighting_parity.rb` diffs
+    # these two methods against the legacy openstudio-standards implementation,
+    # so their output must track it EXACTLY — which now means carrying #2119's
+    # fix: the skylight-area accumulation happens ONCE PER SKYLIGHT, outside
+    # the exterior-window loop, so a skylight-only space no longer computes
+    # zero and multi-window spaces no longer double-count. The pre-#2119
+    # defects are gone from BOTH sides.
+    #
+    # What remains here are 2011-vs-2020 RULE differences, not defects:
+    # per-window areas are SUMMED with no union (2011 had no "without
+    # double-counting overlapping areas" language; 4.2.2.3.(1)/(5), 4.2.2.4.(1)
+    # and 4.2.2.5.(1) do) and no secondary sidelighted area is computed (a 2020
+    # concept). Do NOT "clean this up" or refactor it — any change must mirror
+    # a change in legacy `necb_2011.rb`, or the parity gate is meaningless.
     #
     # DO NOT BUILD ON IT. Production callers are the legacy `placement: :necb2011`
     # selection in `daylighting.rb` and the legacy sensor-count rule in
@@ -30,15 +37,16 @@ module OpenStudioLighting
     module Daylighting
       module_function
 
-      # ---- Daylighted-area geometry (verbatim ports of legacy
+      # ---- Daylighted-area geometry (ports of legacy, post-#2119,
       # get_parameters_sidelighting / get_parameters_skylight) -------------------
       #
-      # LEGACY-ONLY. These two methods exist to be diffed against legacy by
-      # test_daylighting_parity.rb; the 2020/2025 rule uses DaylightedAreas
-      # instead, because these SUM per-window areas with no union and so
-      # double-count overlaps, contrary to 4.2.2.3.(1)/(5), 4.2.2.4.(1) and
-      # 4.2.2.5.(1) ("the combined ... areas without double-counting overlapping
-      # areas"), and they compute no secondary sidelighted area at all.
+      # LEGACY-ONLY. These two methods exist to be diffed against legacy (as
+      # fixed by #2119) by test_daylighting_parity.rb; the 2020/2025 rule uses
+      # DaylightedAreas instead, because these SUM per-window areas with no
+      # union and so double-count overlaps, contrary to 4.2.2.3.(1)/(5),
+      # 4.2.2.4.(1) and 4.2.2.5.(1) ("the combined ... areas without
+      # double-counting overlapping areas"), and they compute no secondary
+      # sidelighted area at all — 2011-vs-2020 RULE differences, not defects.
 
       # Legacy "primary sidelighted area" (its own comment cites NECB 2011
       # 4.2.2.9., an article that does not exist in 2020/2025): per exterior-wall
@@ -124,10 +132,10 @@ module OpenStudioLighting
 
       # Legacy "daylighted area under skylights" + VT sums for the legacy 2011
       # skylight effective aperture (its comment cites 4.2.2.7., which does not
-      # exist in 2020/2025). LEGACY DEFECT preserved for parity (audited by the
-      # caller): the area accumulation sits INSIDE the exterior-window
-      # re-calculation loop, so spaces with skylights but NO exterior windows
-      # always compute ZERO daylighted area.
+      # exist in 2020/2025). Mirrors legacy AS FIXED BY #2119: the area is
+      # accumulated once per skylight, AFTER the exterior-wall/window
+      # re-calculation loops, so a space with skylights but no exterior windows
+      # gets a real area and multi-window spaces do not double-count.
       def skylight_parameters(space, audit: nil)
         area = 0.0
         vt_handle = 0.0
@@ -199,12 +207,17 @@ module OpenStudioLighting
                       width = skylight_width + [0.7 * ceiling_height, d1].min + [0.7 * ceiling_height, d4, d4 - window_head].min
                     end
                   end
-                  # LEGACY DEFECT: accumulation only happens here (inside the
-                  # window loop) — skylight-only spaces accumulate nothing
-                  area += length * width
                   _ = head_height
                 end
               end
+              # #2119: accumulate ONCE per skylight, here — OUTSIDE the
+              # exterior-wall/window loops. Before the fix the accumulation sat
+              # inside the innermost window loop, so a skylight-only space
+              # computed ZERO and each extra exterior window double-counted the
+              # whole area. Mirrors necb_2011.rb's `daylighted_under_skylight_area
+              # += daylighted_under_skylight_length * daylighted_under_skylight_width`
+              # now placed after the `daylight_space.surfaces.sort.each` block.
+              area += length * width
             rescue StandardError => e
               audit&.warn(:daylighting, "skylight geometry failed on #{sub.nameString} (#{e.class}) — skylight skipped")
             end

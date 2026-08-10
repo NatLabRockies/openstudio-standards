@@ -13,13 +13,16 @@ class TestCostingParity < Minitest::Test
     @legacy ||= begin
       require File.expand_path('../../lib/openstudio-standards', __dir__)
       legacy_dir = File.expand_path('../../lib/openstudio-standards/btap', __dir__)
-      require File.join(legacy_dir, 'common_paths')
-      require File.join(legacy_dir, 'costing/btap_database')
+      # PR #2120 renamed these: btap/common_paths -> btap/paths,
+      # btap/costing/btap_database -> btap/costing/database, and the classes
+      # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
+      require File.join(legacy_dir, 'paths')
+      require File.join(legacy_dir, 'costing/database')
       require File.join(legacy_dir, 'costing/btap_costing')
       require File.join(legacy_dir, 'costing/envelope_costing')
       require File.join(legacy_dir, 'linear_regression')
-      coster = BTAPCosting.allocate
-      coster.instance_variable_set(:@costing_database, BTAPDatabase.instance)
+      coster = BTAP::Costing.allocate
+      coster.instance_variable_set(:@costing_database, BTAP::Database.instance)
       coster
     rescue LoadError, StandardError => e
       warn "legacy costing parity skipped: #{e.class}: #{e.message[0, 100]}"
