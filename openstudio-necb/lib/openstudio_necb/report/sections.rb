@@ -186,7 +186,8 @@ module OpenStudioNECB
           body << %(<p class="warnstrip">&#9650; the model carries no BuildingStory objects — storeys
             were INFERRED from floor elevations (&#177;0.01 m bins).</p>)
         end
-        body << %(<div class="page-break">#{plans[:legend_svg]}</div>) if plans[:legend_svg]
+        # zone legend deliberately not rendered (too small to read; the zone
+        # names are on the plans themselves) — the bundle still carries it.
         plans[:storeys].each do |storey|
           body << %(<div class="page-break"><h3>#{Html.esc(storey[:name])}</h3>#{storey[:svg]}</div>)
         end

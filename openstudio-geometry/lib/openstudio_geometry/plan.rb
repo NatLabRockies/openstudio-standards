@@ -48,7 +48,9 @@ module OpenStudioGeometry
       end
 
       storeys = data[:storeys].map do |storey|
-        { name: storey[:name], svg: PlanSvg.storey_svg(storey, bounds: data[:bounds]) }
+        { name: storey[:name],
+          svg: PlanSvg.storey_svg(storey, bounds: data[:bounds],
+                                  north_axis: data[:north_axis_deg].to_f) }
       end
       zones = data[:storeys].flat_map { |storey| storey[:spaces].map { |space| space[:zone] } }.uniq
       { storeys: storeys,
@@ -135,7 +137,9 @@ module OpenStudioGeometry
         body << '<p class="warnstrip">No floor plans: the model has no space with a Floor surface.</p>'
       else
         body << toc(bundle)
-        body << bundle[:legend_svg].to_s
+        # No zone legend on the page (phylroy, 2026-08-10): too small to read
+        # and redundant with the per-storey space inventory below; the bundle
+        # still carries legend_svg for hosts that want it.
         bundle[:storeys].each_with_index do |storey, index|
           body << storey_section(storey, index, detail)
         end

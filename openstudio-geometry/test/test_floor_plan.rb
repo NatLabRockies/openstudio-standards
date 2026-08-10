@@ -268,7 +268,10 @@ class TestFloorPlan < Minitest::Test
       assert_equal 3, bundle[:storeys].size
       html = File.read(path)
       assert html.start_with?('<!DOCTYPE html>')
-      assert_equal 4, html.scan('<svg').size, 'three storey plans + the zone legend'
+      assert_equal 3, html.scan('<svg').size,
+                   'three storey plans and NOTHING else (the zone legend is deliberately not on the page)'
+      refute_includes html, 'Thermal zones', 'no zone legend on the page (redundant with the space inventory)'
+      assert_equal 3, html.scan('class="north-arrow"').size, 'a north arrow on every storey plan'
       assert_equal 2, html.scan('class="storey page-break"').size,
                    'a page break before every storey but the first'
       assert_includes html, 'break-inside: avoid'
@@ -338,5 +341,26 @@ class TestFloorPlan < Minitest::Test
     assert_equal 'no SVG rasterizer found — PNG not produced', warning[:action]
   ensure
     ENV['PATH'] = original
+  end
+
+  def test_north_arrow_rotation_follows_the_building_north_axis
+    storey = { name: 'L1', z: 0.0,
+               spaces: [{ name: 'S', zone: 'Z', space_type: nil, area_m2: 100.0,
+                          centroid: [5.0, 5.0], polygons: [[[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]]] }] }
+    plain = Svg.storey_svg(storey)
+    assert_includes plain, 'class="north-arrow"'
+    assert_includes plain, 'rotate(-0.0)', 'no building rotation: north is straight up'
+
+    rotated = Svg.storey_svg(storey, north_axis: 90.0)
+    assert_includes rotated, 'rotate(-90.0)',
+                    'north axis 90 (building y faces east) points true north LEFT on the plan'
+  end
+
+  def test_bundle_threads_the_model_north_axis_into_every_storey_svg
+    model = zone_every_space!(wizard_model)
+    model.getBuilding.setNorthAxis(30.0)
+    bundle = OpenStudioGeometry::Plan.diagrams(model)
+    refute_empty bundle[:storeys]
+    bundle[:storeys].each { |storey| assert_includes storey[:svg], 'rotate(-30.0)' }
   end
 end

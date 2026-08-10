@@ -13,6 +13,7 @@ module OpenStudioGeometry
   #                            polygons: [[[x, y], ...], ...],
   #                            centroid: [x, y], area_m2: Float, z: Float }] }],
   #     bounds: { min_x:, min_y:, max_x:, max_y: } | nil,
+  #     north_axis_deg: Float (Building North Axis, degrees clockwise from true north),
   #     inferred_storeys: Boolean,
   #     error: String (only on failure — then storeys is empty) }
   #
@@ -39,10 +40,11 @@ module OpenStudioGeometry
       storeys, inferred = group_storeys(model, pairs, audit: audit)
       { storeys: storeys,
         bounds: bounds(model, pairs.map(&:first)),
+        north_axis_deg: model.getBuilding.northAxis,
         inferred_storeys: inferred }
     rescue StandardError => e
       audit&.warn(:plan, "floor-plan extraction failed — no plans produced (#{e.message})")
-      { storeys: [], bounds: nil, inferred_storeys: false, error: e.message }
+      { storeys: [], bounds: nil, north_axis_deg: 0.0, inferred_storeys: false, error: e.message }
     end
 
     # ------------------------------------------------------------- per space

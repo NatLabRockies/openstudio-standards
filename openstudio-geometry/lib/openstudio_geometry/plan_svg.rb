@@ -102,7 +102,7 @@ module OpenStudioGeometry
     # @param storey [Hash] { name:, z:, spaces: [...] }
     # @param bounds [Hash, nil] { min_x:, min_y:, max_x:, max_y: }
     # @return [String] a complete <svg> element
-    def storey_svg(storey, bounds: nil, width: WIDTH)
+    def storey_svg(storey, bounds: nil, width: WIDTH, north_axis: 0.0)
       bounds ||= derive_bounds(storey[:spaces])
       return empty_svg(storey[:name], width) if bounds.nil?
 
@@ -113,7 +113,25 @@ module OpenStudioGeometry
        rect(0, 0, width, height, '#ffffff'),
        body,
        scale_bar(scale, width, height),
+       north_arrow(width, north_axis),
        close_svg].join
+    end
+
+    # True-north arrow, top-right. Building coordinates put "building north" up
+    # the page; the Building North Axis is the building y-axis's CLOCKWISE
+    # rotation from true north, so true north on screen is the up-arrow
+    # rotated by -north_axis (SVG rotate is clockwise-positive on the flipped
+    # y axis; sanity case: north_axis 90 = building y faces east = true north
+    # points LEFT on the plan).
+    def north_arrow(width, north_axis)
+      cx = width - PAD - 12
+      cy = PAD + 12
+      arrow = [line(0, 10, 0, -8, '#111', stroke_width: 1.5),
+               %(<polygon points="0,-12 -4,-4 4,-4" fill="#111"/>),
+               text(0, -15, 'N', text_anchor: 'middle', fill: '#111',
+                    font_size: 10, font_weight: 'bold')].join
+      %(<g class="north-arrow" transform="translate(#{cx.round(1)},#{cy.round(1)}) ) +
+        %(rotate(#{(-north_axis.to_f).round(1)})">#{arrow}</g>)
     end
 
     # Building coords (metres, y up) -> viewBox coords (y DOWN, hence flipped).
