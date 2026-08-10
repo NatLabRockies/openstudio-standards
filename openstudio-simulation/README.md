@@ -82,6 +82,12 @@ transport-agnostic and work unchanged for local or cloud runs.
 `L-nn` cites the legacy findings register. The family glossary lives in
 [openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
 
+## Remote execution (planned)
+
+`Remote` is a documented stub today; the approved implementation plan
+(when a variant-matrix or CI trigger fires) is
+[docs/remote_backend_plan.md](docs/remote_backend_plan.md).
+
 ## Tests
 
 ```bash

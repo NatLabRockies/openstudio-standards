@@ -17,9 +17,12 @@ simulate** — the domain gems are SDK-only by contract.
   and an unfiltered sum silently mixes them in). Both exist for the NECB
   8.4.4.13.(2)(g) aux-fuel election (D-52).
 - `backends.rb` — `Backend` seam. `Local` runs `openstudio run -w in.osw`.
-  `Remote` is a documented stub whose docstring mirrors the real hbix
+  `Remote` is a documented stub whose docstring mirrors the real
   AWS-Batch service (upload_model → presigned S3 PUT → submit_simulation →
-  poll → get_simulation_results).
+  poll → get_simulation_results). The READY-TO-EXECUTE wiring plan —
+  triggers, transport design, version guard, fidelity gate — is
+  `docs/remote_backend_plan.md` (phylroy-approved 2026-08-10); implement
+  from it, don't re-derive.
 
 ## Key facts / traps
 
