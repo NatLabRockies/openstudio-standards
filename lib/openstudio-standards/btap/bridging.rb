@@ -1766,7 +1766,6 @@ module BTAP
         next unless data[cID][quality][:id] == pID
 
         # Determine multiplier(s).
-        puts e[:surfaces]
         mSb = 1
         mSp = 1
 
@@ -1786,9 +1785,6 @@ module BTAP
           mlt = model.getSurfaceByName(srf).get.space.get.multiplier
           mSp = mlt if mlt > mSp
         end
-
-        puts "mSb: #{mSb}, mSp: #{mSp}"
-        puts
 
         @tally[:edges][type]       = {} unless @tally[:edges].key?(type)
         @tally[:edges][type][pID]  = 0  unless @tally[:edges][type].key?(pID)
@@ -1910,12 +1906,12 @@ module BTAP
           #           parapet: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
           #            corner: BTAP-ExteriorWall-SteelFramed-2 good    47.6 m
 
-          # LargeOffice (without factoring space/subsurface multipliers):
-          #     fenestration: BTAP-ExteriorWall-SteelFramed-2 good  51058.8 m
-          #            grade: BTAP-ExteriorWall-SteelFramed-2 good    243.7 m
-          #         rimjoist: BTAP-ExteriorWall-SteelFramed-2 good  24612.8 m
-          #          parapet: BTAP-ExteriorWall-SteelFramed-2 good    243.7 m
-          #           corner: BTAP-ExteriorWall-SteelFramed-2 good   1617.0 m
+          # LargeOffice (with factoring space/subsurface multipliers):
+          #      fenestration: BTAP-ExteriorWall-SteelFramed-2 good  6280.0 m
+          #             grade: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
+          #          rimjoist: BTAP-ExteriorWall-SteelFramed-2 good  2680.6 m
+          #           parapet: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
+          #            corner: BTAP-ExteriorWall-SteelFramed-2 good   190.2 m
 
         end
       end
