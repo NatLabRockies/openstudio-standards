@@ -155,6 +155,9 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   `ModelQuery.unwrap`).
 - Licensing: `costs_csv:` runtime injection only; the report embeds cost
   TOTALS only, never line-item licensed prices. NEVER stage `.mcp.json`.
+- The legacy-parity ORACLE is pinned: `legacy_pin/REF` names the exact
+  openstudio-standards fork revision the parity gates compare against; bump
+  it deliberately (see `legacy_pin/README.md`).
 
 ## Tests
 
@@ -171,3 +174,10 @@ ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 
 E+ tests skip without the CLI; annual tests use week runs (~1 min each).
 Fixtures shared from `../openstudio-hvac/test/fixtures`.
+
+`test_legacy_archetype_e2e.rb` generates/caches the 17-building legacy
+archetype fleet against the in-tree `lib/openstudio-standards` NECB
+implementation; it currently runs under the repo bundle
+(`BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile`), not the pinned
+oracle — moving it onto `legacy_pin` is a gated later phase (see
+`legacy_pin/README.md` for the pinning philosophy).

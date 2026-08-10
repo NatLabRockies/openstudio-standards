@@ -78,7 +78,7 @@ cd openstudio-shw
 ruby test/test_shw.rb            # rules lint, loop+demand, efficiency bins, reference
 ruby test/test_costing_e2e.rb    # costing (gas/electric/none), E+ water-systems energy,
                                  # family composition (loads+shw+hvac+envelope, ONE audit)
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_shw_parity.rb
+BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_shw_parity.rb
 ```
 
 Parity: tank volume/capacity/parasitic/fuel and every per-space water-use

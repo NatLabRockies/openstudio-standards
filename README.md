@@ -31,7 +31,9 @@ openstudio-simulation.
 | [openstudio-necb](openstudio-necb) | **the umbrella**: the full 8.4.1.2 proposed-vs-reference determination, one audit, the AHJ HTML report |
 
 Each gem's README is its API guide; `openstudio-necb/docs/README.md` carries
-the family glossary and the decision-register guide.
+the family glossary and the decision-register guide. Each gem's legacy-parity
+suites compare against a PINNED revision of this repository's legacy NECB/BTAP
+implementation — see `legacy_pin/README.md` for the pinning mechanism.
 
 ## Overview of Main Features
 If you are looking for a high-level overview of the features of this library, see the [Features](docs/Features.md) page.

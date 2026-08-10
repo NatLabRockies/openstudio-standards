@@ -493,6 +493,13 @@
       "kind": "process",
       "articles": [],
       "summary": "Merging the upstream branch brought our own defect-fix pull request into the legacy tree, so the gem family's deliberate legacy-parity concessions flipped: the water-heater tank sizing now uses the true hour after the peak (the preserved sorted-array defect is retired and the live parity gate passes on the corrected side), the quarantined 2011 daylighting port mirrors legacy as fixed (the any-single-criterion, skylight-accumulation and office-name defects are gone from both sides), and the archetype generation caches are now keyed by the legacy-subtree revision so library changes invalidate them automatically instead of silently reusing stale models. The full-annual fleet baseline is stale pending a refresh because regenerated archetypes now carry corrected tanks and daylighting controls."
+    },
+    {
+      "id": "D-69",
+      "title": "The legacy-parity oracle is pinned to a revision (legacy_pin)",
+      "kind": "process",
+      "articles": [],
+      "summary": "The parity gates now compare against a bundler-pinned checkout of the fork at an explicit revision, with a committed lockfile, instead of the in-tree working copy. The published RubyGems release is never the pin because it is the upstream release line rather than the fork's NECB and BTAP state; the default remote is the local repository to avoid multi-gigabyte clones; the tbd, osut and topolys triplet is pinned to the oracle-era resolution because a floating osut changes generated insulation materials; legacy's undeclared runtime dependencies are declared in the pin Gemfile; and a required-mode environment flag turns missing-oracle skips into failures so a parity gate can never pass vacuously. Bumping the revision is a deliberate, attributed event."
     }
   ]
 }

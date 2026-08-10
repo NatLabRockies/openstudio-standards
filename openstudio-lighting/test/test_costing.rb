@@ -75,11 +75,10 @@ class TestCosting < Minitest::Test
   end
 
   def test_legacy_parity_led_2020
-    legacy_root = File.expand_path('../../lib/openstudio-standards', __dir__)
-    skip 'openstudio-standards not present' unless File.exist?("#{legacy_root}.rb")
     begin
-      require legacy_root
-      legacy_dir = File.expand_path('../../lib/openstudio-standards/btap', __dir__)
+      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
+      legacy_dir = File.join(Gem.loaded_specs['openstudio-standards'].full_gem_path,
+                             'lib/openstudio-standards/btap')
       # PR #2120 renamed these: btap/common_paths -> btap/paths,
       # btap/costing/btap_database -> btap/costing/database, and the classes
       # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
@@ -90,7 +89,8 @@ class TestCosting < Minitest::Test
       require File.join(legacy_dir, 'costing/led_lighting_costing')
       require File.join(legacy_dir, 'costing/daylighting_sensor_control_costing')
     rescue LoadError, StandardError => e
-      skip "legacy not loadable: #{e.message[0, 60]}"
+      msg = "legacy oracle not bundled (run under BUNDLE_GEMFILE=legacy_pin/Gemfile): #{e.message[0, 60]}"
+      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
     end
 
     # legacy needs the sorted-accessor monkeypatches from attributes.rb

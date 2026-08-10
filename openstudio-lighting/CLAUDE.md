@@ -19,6 +19,9 @@ lighting fixture costing.
   via `costs_csv:` (resolution: args → `OPENSTUDIO_COSTING_DIR` →
   openstudio-hvac's public CSVs).
 - Vintages 2020 + 2025 only.
+- The legacy-parity ORACLE is pinned: `legacy_pin/REF` names the exact
+  openstudio-standards fork revision the parity gates compare against; bump
+  it deliberately (see `legacy_pin/README.md`).
 
 ## Architecture
 
@@ -127,4 +130,6 @@ apply_exterior_lights`.
 
 `cd openstudio-lighting && ruby test/test_XX.rb`. Fixtures shared from
 `../openstudio-hvac/test/fixtures`. `*_parity.rb` needs
-`BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby ...`.
+`BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby ...`,
+the PINNED legacy oracle (see legacy_pin/README.md); `LEGACY_PIN_REQUIRED=1`
+turns a missing oracle into a failure.

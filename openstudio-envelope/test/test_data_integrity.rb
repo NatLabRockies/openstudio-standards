@@ -77,10 +77,15 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_2020_matches_legacy_surface_thermal_transmittance
-    legacy_path = File.expand_path(
-      '../../lib/openstudio-standards/standards/necb/NECB2020/data/surface_thermal_transmittance.json', __dir__
-    )
-    skip 'legacy openstudio-standards data not present' unless File.exist?(legacy_path)
+    rel = 'lib/openstudio-standards/standards/necb/NECB2020/data/surface_thermal_transmittance.json'
+    # Prefer the PINNED oracle checkout (legacy_pin/Gemfile) when bundled;
+    # fall back to the in-tree copy so this data lint still runs bare.
+    pinned = Gem.loaded_specs['openstudio-standards']&.full_gem_path
+    legacy_path = pinned ? File.join(pinned, rel) : File.expand_path("../../#{rel}", __dir__)
+    unless File.exist?(legacy_path)
+      msg = "legacy data not present at #{legacy_path}"
+      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
+    end
 
     legacy = JSON.parse(File.read(legacy_path))['tables']['surface_thermal_transmittance']['table']
     gem_u = OpenStudioEnvelope::NECB.rules('2020')['u_values']

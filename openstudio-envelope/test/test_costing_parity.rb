@@ -11,8 +11,11 @@ class TestCostingParity < Minitest::Test
 
   def self.legacy
     @legacy ||= begin
-      require File.expand_path('../../lib/openstudio-standards', __dir__)
-      legacy_dir = File.expand_path('../../lib/openstudio-standards/btap', __dir__)
+      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
+      # BTAP sub-files are required BY PATH inside the oracle — resolve the
+      # oracle's own root (the pinned checkout), never this repo's lib/.
+      legacy_root = Gem.loaded_specs['openstudio-standards'].full_gem_path
+      legacy_dir = File.join(legacy_root, 'lib/openstudio-standards/btap')
       # PR #2120 renamed these: btap/common_paths -> btap/paths,
       # btap/costing/btap_database -> btap/costing/database, and the classes
       # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
@@ -32,7 +35,10 @@ class TestCostingParity < Minitest::Test
 
   def legacy
     coster = self.class.legacy
-    skip 'openstudio-standards not loadable — parity gate runs from the monorepo' if coster == :unavailable
+    if coster == :unavailable
+      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
+      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
+    end
     coster
   end
 
@@ -131,7 +137,7 @@ class TestCostingParity < Minitest::Test
     assert_equal legacy_quantities.keys.sort, gem_quantities.keys.sort
   rescue NameError
     # BridgingData needs the tbd-dependent bridging.rb; load it explicitly
-    require File.expand_path('../../lib/openstudio-standards/btap/bridging', __dir__)
+    require File.join(Gem.loaded_specs['openstudio-standards'].full_gem_path, 'lib/openstudio-standards/btap/bridging')
     retry
   end
 end

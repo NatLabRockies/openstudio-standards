@@ -124,12 +124,11 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_structural_equality_vs_legacy_merged_tables
-    legacy_root = File.expand_path('../../lib/openstudio-standards', __dir__)
-    skip 'openstudio-standards not present' unless File.exist?("#{legacy_root}.rb")
     begin
-      require legacy_root
+      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
     rescue LoadError => e
-      skip "legacy not loadable: #{e.message[0, 60]}"
+      msg = "legacy oracle not bundled (run under BUNDLE_GEMFILE=legacy_pin/Gemfile): #{e.message[0, 60]}"
+      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
     end
     legacy = Standard.build('NECB2020').standards_data
     assert_equal legacy['tables']['space_types']['table'], space_types,

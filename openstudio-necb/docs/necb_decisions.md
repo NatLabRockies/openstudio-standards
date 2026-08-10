@@ -98,6 +98,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-66** — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed) _(runtime_unwired)_
 - **D-67** — Clarity restructure: aliased public renames + the openstudio-audit gem _(process)_
 - **D-68** — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches _(process)_
+- **D-69** — The legacy-parity oracle is pinned to a revision (legacy_pin) _(process)_
 
 <!-- TOC END -->
 
@@ -3694,3 +3695,50 @@ kept pre-merge run dirs:
 (daylighting) or stay ratio-neutral (height LPD). The legacy e2e suite is
 green on a fresh SHA-keyed cache (3/17). The FULL-ANNUAL 17×2 table above
 remains STALE-PENDING-REFRESH.
+
+## D-69 — The legacy-parity oracle is PINNED to a revision (legacy_pin/)
+
+The parity gates now compare against a bundler-pinned checkout of the
+NatLabRockies fork — `legacy_pin/REF` (full SHA, initially the merged
+nrcan tip f01da13a6...) + a committed lockfile — instead of "whatever sits
+in the in-tree lib/openstudio-standards working copy". Decisions:
+
+- **The published RubyGems openstudio-standards release is NEVER the pin**
+  — that is NREL's line; the NECB/BTAP oracle lives on the fork.
+- **The default remote is the local repository** (bundler hardlink-clones
+  from disk — the fork's .git is 4.9 GB, so a GitHub-sourced first install
+  is a deliberate off-monorepo choice via LEGACY_PIN_REMOTE).
+- **The tbd/osut/topolys triplet is pinned to the oracle-era resolution**
+  (tbd 3.5.2 / osut 0.8.2 / topolys 0.6.2). Proven necessary twice: left
+  floating, bundler takes tbd 3.6.0/osut 0.9.1 (the April-2026 releases
+  brgix cites on #2130), and even with tbd pinned, tbd's `osut ~> 0`
+  floats osut to 0.9.1 — which CHANGES generated insulation conductivities
+  (SmallOffice generation A/B caught OSut:K material drift). Bumping the
+  triplet is part of a deliberate REF bump, never incidental.
+- **Legacy's undeclared runtime deps are declared here**: parallel,
+  rubyzip, deep_merge (the gemspec never declares them; the repo bundle
+  supplied them via dev-dependencies).
+- **Skips can be forbidden**: LEGACY_PIN_REQUIRED=1 turns "oracle not
+  bundled" from a silent skip into a failure — verification runs and CI
+  set it, closing the green-but-vacuous-parity hazard.
+- **Bump workflow** (legacy_pin/README.md): edit REF → bundle install →
+  all parity + regeneration gates with LEGACY_PIN_REQUIRED=1 → attribute
+  every flip (the D-68 discipline) → commit REF + lock together.
+
+Evidence: the full 11-suite equivalence matrix is green under the pin with
+identical tallies to the in-tree oracle (and the loads data-integrity
+legacy comparison, previously a silent skip, now actually runs).
+SmallOffice generation A/B: after the osut pin, the pin-generated,
+fresh-in-tree-generated and sweep-cached products are IDENTICAL as
+normalized object sets (handles/timestamps/EPW-path aside). Two real
+findings from the proof: (1) the floating osut (0.9.1 vs 0.8.2) changed
+generated insulation conductivities — the triplet pin closed it; (2)
+legacy's OSM save has run-to-run OBJECT-ORDER jitter (a 20-object ERV
+TableLookup block lands at different file positions between identical
+runs) — pre-existing, oracle-independent, and why generation equivalence
+must be judged order-insensitively. Generation/cache re-keying to REF is a
+gated follow-up (after the running full-annual chain completes) so the
+in-flight sweep's cache is not orphaned mid-run.
+
+- **Who/when:** Fable under D-10 per phylroy's "plan and do it",
+  2026-08-10.

@@ -1,0 +1,38 @@
+# The gems' legacy-parity oracle, PINNED to one revision of the
+# NatLabRockies/openstudio-standards fork. See README.md in this directory
+# for the bump workflow. NEVER swap this for the published RubyGems
+# openstudio-standards release — that is NREL's line, not the NECB/BTAP
+# oracle the parity gates compare against.
+source 'https://rubygems.org'
+
+ref = File.read(File.expand_path('REF', __dir__)).strip
+
+# Default remote is THIS repository (bundler git-clones from the local path
+# — hardlinked on the same filesystem, fast, offline). Off-monorepo / CI:
+#   LEGACY_PIN_REMOTE=https://github.com/NatLabRockies/openstudio-standards.git
+# (the first install then clones the full history — a one-time cost).
+remote = ENV.fetch('LEGACY_PIN_REMOTE', File.expand_path('..', __dir__))
+
+gem 'openstudio-standards', git: remote, ref: ref
+
+# The tbd/osut/topolys TRIPLET is pinned to the ORACLE-ERA resolution (what
+# the repo bundle runs). Left floating, bundler resolves tbd 3.6.0 /
+# osut 0.9.1 — the April-2026 releases carrying interzone/film fixes — and
+# even with tbd pinned, tbd's own `osut ~> 0` constraint floats osut to
+# 0.9.1, which CHANGES generated insulation conductivities (proven by a
+# SmallOffice generation A/B: OSut:K material drift). Bump the triplet
+# DELIBERATELY, alongside a REF bump, with the gates run.
+gem 'tbd', '3.5.2'
+gem 'osut', '0.8.2'
+gem 'topolys', '0.6.2'
+
+# Undeclared legacy runtime deps: the gemspec never declares these, but
+# lib code requires them at load (Standards.Model.rb:3 requires 'parallel');
+# the repo bundle supplied them via development dependencies.
+gem 'parallel', '~> 1.27'
+gem 'rubyzip', '~> 3.2'      # required as 'zip' by necb_2011.rb (EPW download path)
+gem 'deep_merge', '~> 1.2'   # required by the NECB standards data loaders
+
+# The parity TEST process needs minitest itself (the repo bundle used to
+# provide it via the gemspec's development dependencies).
+gem 'minitest', '~> 5.26'

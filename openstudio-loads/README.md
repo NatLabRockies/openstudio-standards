@@ -103,9 +103,9 @@ ruby test/test_schedules.rb        # builder semantics + loud fallback
 ruby test/test_apply_loads.rb      # golden application assertions
 ruby test/test_e2e_run.rb          # bare geometry -> clean E+ week run + 3-gem composition
 
-# Parity gates need the repo bundle:
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_schedules_parity.rb
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_apply_parity.rb
+# Parity gates need the PINNED legacy oracle (legacy_pin/Gemfile):
+BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_schedules_parity.rb
+BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_apply_parity.rb
 ```
 
 Parity: all 86 schedule names build identically to legacy `model_add_schedule`

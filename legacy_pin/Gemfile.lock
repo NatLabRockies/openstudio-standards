@@ -1,0 +1,46 @@
+GIT
+  remote: /workspaces/openstudio-standards
+  revision: f01da13a6b89e45761d1ede481fedb1c1aeb6ea0
+  ref: f01da13a6b89e45761d1ede481fedb1c1aeb6ea0
+  specs:
+    openstudio-standards (0.8.6)
+      tbd (~> 3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
+    deep_merge (1.2.2)
+    json-schema (4.3.1)
+      addressable (>= 2.8)
+    matrix (0.4.3)
+    minitest (5.27.0)
+    oslg (0.4.0)
+    osut (0.8.2)
+      oslg (>= 0.4.0)
+    parallel (1.28.0)
+    public_suffix (7.0.5)
+    rubyzip (3.4.1)
+    tbd (3.5.2)
+      json-schema (~> 4)
+      osut (~> 0)
+      topolys (~> 0)
+    topolys (0.6.2)
+      matrix
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  deep_merge (~> 1.2)
+  minitest (~> 5.26)
+  openstudio-standards!
+  osut (= 0.8.2)
+  parallel (~> 1.27)
+  rubyzip (~> 3.2)
+  tbd (= 3.5.2)
+  topolys (= 0.6.2)
+
+BUNDLED WITH
+   2.4.10

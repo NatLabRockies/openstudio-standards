@@ -61,6 +61,9 @@ its `AuditLog` is the canonical copy the umbrella aliases.
   other gems' costing resolves to as a fallback (explicit args →
   `OPENSTUDIO_COSTING_DIR` → these). Other gems vendor only UNPRICED sheets.
 - **Vintages:** 2020 + 2025 only. 2011–2017 backfills are user-deferred.
+- **The legacy-parity ORACLE is pinned:** `legacy_pin/REF` names the exact
+  openstudio-standards fork revision the parity gates compare against; bump
+  it deliberately (see `legacy_pin/README.md`).
 
 ## Architecture
 
@@ -213,7 +216,9 @@ apply_efficiencies / check_part5 / rules`.
 (5ZoneNoHVAC.osm + Toronto CWEC2020 epw/ddy/stat) are shared by the whole
 family — do not duplicate them. E+-dependent tests skip without the
 `openstudio` CLI. Parity tests against legacy openstudio-standards need
-`BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby ...`.
+`BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby ...`,
+the PINNED legacy oracle (see legacy_pin/README.md); `LEGACY_PIN_REQUIRED=1`
+turns a missing oracle into a failure.
 
 ## A-list rulings (D-34..D-40, 2026-07-28) — behavior pins
 

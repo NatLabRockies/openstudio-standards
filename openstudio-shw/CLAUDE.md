@@ -15,6 +15,9 @@ pump and instantaneous water heaters), the reference transform, and costing.
 - `article_coverage` manifest in `shw_rules_*.json`; partial/not_implemented
   warn every run.
 - Vintages 2020 + 2025 only.
+- The legacy-parity ORACLE is pinned: `legacy_pin/REF` names the exact
+  openstudio-standards fork revision the parity gates compare against; bump
+  it deliberately (see `legacy_pin/README.md`).
 
 ## Architecture
 
@@ -69,4 +72,6 @@ apply_water_heater_efficiency`.
 
 `cd openstudio-shw && ruby test/test_XX.rb`. Fixtures shared from
 `../openstudio-hvac/test/fixtures`. `test_shw_parity.rb` needs
-`BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby ...`.
+`BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby ...`,
+the PINNED legacy oracle (see legacy_pin/README.md); `LEGACY_PIN_REQUIRED=1`
+turns a missing oracle into a failure.

@@ -17,7 +17,7 @@ class TestLightsParity < Minitest::Test
 
   def self.legacy
     @legacy ||= begin
-      require File.expand_path('../../lib/openstudio-standards', __dir__)
+      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
       Standard.build('NECB2020')
     rescue LoadError, StandardError => e
       warn "legacy parity skipped: #{e.class}: #{e.message[0, 80]}"
@@ -27,7 +27,10 @@ class TestLightsParity < Minitest::Test
 
   def legacy
     std = self.class.legacy
-    skip 'openstudio-standards not loadable — parity gate runs from the monorepo' if std == :unavailable
+    if std == :unavailable
+      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
+      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
+    end
     std
   end
 

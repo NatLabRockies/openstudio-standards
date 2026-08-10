@@ -173,10 +173,13 @@ ruby test/test_prescriptive.rb        # per-surface application, FDWR/SRR mutato
 ruby test/test_reference_envelope.rb  # reference transform + composition + E+ run
 ruby test/test_e2e_run.rb             # prescriptive E2E EnergyPlus gate
 
-# Legacy-parity + TBD suites need the repo bundle (tbd + openstudio-standards):
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_lookup_parity.rb
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_prescriptive_parity.rb
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile bundle exec ruby test/test_thermal_bridging.rb
+# Legacy-parity suites need the PINNED legacy oracle (legacy_pin/Gemfile):
+BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_lookup_parity.rb
+BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_prescriptive_parity.rb
+
+# tbd is a declared dependency of this gem itself, so the TBD suite runs
+# under the gem's own bundle (no legacy oracle needed):
+bundle exec ruby test/test_thermal_bridging.rb
 ```
 
 Parity gates (0 mismatches vs `Standard.build('NECB2020')`): U-value lookups across
