@@ -2564,13 +2564,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0044-000000000001},  !- Handle
-  28gal Electricity Water Heater - 19kBtu/hr 1 Therm Eff Supply Inlet Water Node, !- Name
+  46gal Electricity Water Heater - 31kBtu/hr 1 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000082},  !- Inlet Port
   {00000000-0000-0000-0014-000000000091};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0044-000000000002},  !- Handle
-  28gal Electricity Water Heater - 19kBtu/hr 1 Therm Eff Supply Outlet Water Node, !- Name
+  46gal Electricity Water Heater - 31kBtu/hr 1 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0014-000000000092},  !- Inlet Port
   {00000000-0000-0000-0014-000000000093};  !- Outlet Port
 
@@ -6869,32 +6869,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0084-000000000001},  !- Handle
-  28gal Electricity Water Heater - 19kBtu/hr 1 Therm Eff, !- Name
-  0.105773176025519,                       !- Tank Volume {m3}
+  46gal Electricity Water Heater - 31kBtu/hr 1 Therm Eff, !- Name
+  0.17308337895085,                        !- Tank Volume {m3}
   {00000000-0000-0000-0056-000000000016},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  5526.64844733339,                        !- Heater Maximum Capacity {W}
+  9043.6065501819,                         !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   Electricity,                             !- Heater Fuel Type
   1,                                       !- Heater Thermal Efficiency
   ,                                        !- Part Load Factor Curve Name
-  21.6672081859205,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  30.0877355178746,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   Electricity,                             !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  21.6672081859205,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  30.0877355178746,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   Electricity,                             !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0056-000000000017},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  1.57254776241695,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  1.91871452031866,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  1.57254776241695,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  1.91871452031866,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name

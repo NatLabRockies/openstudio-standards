@@ -1,11 +1,11 @@
+# BTAP Attributes
+#
 # This file extends some of the OpenStudio classes to add some new methods
 # and parameters for convenience. Additionally, it also houses methods
 # involving the pre-processing of an OpenStudio model for shared use in one
 # of BTAP's facilities, for now BTAP Costing and BTAP Carbon. Currently,
 # this pre-processing involves retrieving the correct constructions for
 # envelopes and a few attributes for thermal bridging.
-
-require "openstudio"
 
 module BTAP
   class OpenStudio::Model::Model
@@ -67,7 +67,7 @@ module BTAP
       @use_tbd              = use_tbd
       @building_performance = building_performance
       @tbd_edge_tallies     = tbd_edge_tallies
-      @costing_database     = BTAPDatabase.instance
+      @costing_database     = Database.instance
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [
@@ -212,14 +212,14 @@ module BTAP
       # in the Surface and SubSurfaces classes. Here are a list of parameters
       # of the hash:
       #
-      # @param name        [String]
-      # @param description [String]
-      # @param type        [String] Material type, either "opaque" or "glazing".
-      # @param id_layers   [Array[Integer]]
-      # @param rsi         [Float]
-      # @param fenestration_number_of_panes [String] ExteriorWindow only.
-      # @param frame_material               [String] ExteriorWindow only.
-      # @param fenestration_type            [String] ExteriorWindow only.
+      # name        [String]
+      # description [String]
+      # type        [String] Material type, either "opaque" or "glazing".
+      # id_layers   [Array[Integer]]
+      # rsi         [Float]
+      # fenestration_number_of_panes [String] ExteriorWindow only.
+      # frame_material               [String] ExteriorWindow only.
+      # fenestration_type            [String] ExteriorWindow only.
       construction_candidates.each do |construction_rsi, construction_hash|
 
         # Store all candidate constructions for reference when doing linear
@@ -254,7 +254,7 @@ module BTAP
           if space.spaceType.empty? or
              space.spaceType.get.standardsSpaceType.empty? or
              space.spaceType.get.standardsBuildingType.empty?
-            raise ("Error: Space type not defined for #{space.name.get}")
+            raise("Error: Space type not defined for #{space.name.get}")
           end
           zone    << space
           @spaces << space

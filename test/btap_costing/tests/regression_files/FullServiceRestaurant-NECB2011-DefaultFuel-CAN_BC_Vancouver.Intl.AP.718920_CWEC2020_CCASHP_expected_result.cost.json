@@ -215,7 +215,21 @@
     "total_envelope_cost": 643880.73
   },
   "lighting": {
-    "daylighting_sensor_control": [],
+    "daylighting_sensor_control": [
+      {
+        "zone": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+        "zone_area": 371.74807149,
+        "zone_multiplier": 1,
+        "number_of_fixtures_required_without_considering_daylighted_area_under_sidelighting_and_skylights": 29.0,
+        "primary_sidelighted_area": 110.20717199999999,
+        "primary_sidelighted_number_fixtures": 9,
+        "primary_sidelighted_number_sensors": 3,
+        "skylights_daylighted_area": 0.0,
+        "skylights_number_fixtures": 0,
+        "skylights_number_sensors": 0,
+        "daylighting_sensor_control_cost_for_this_zone": 3415.6821
+      }
+    ],
     "led_lighting": [],
     "fixture_report": [
       {
@@ -286,7 +300,7 @@
         "note": ""
       }
     ],
-    "total_lighting_cost": 163505.12
+    "total_lighting_cost": 166920.8
   },
   "heating_and_cooling": {
     "plant_equipment": [
@@ -419,18 +433,18 @@
       {
         "sys_type": 3,
         "name": "sys_3|mixed|shr>none|sc>ccashp|sh>ccashp|ssf>cv|zh>b-e|zc>none|srf>none| 1",
-        "airloop_flow_m3_per_s": 0.314,
+        "airloop_flow_m3_per_s": 0.309,
         "num_rooftop_units": 1,
         "ind_ahu_max_airflow_l_per_s": 1000,
         "base_ahu_cost": 82532.43,
-        "revised_base_ahu_cost": 25875.52,
+        "revised_base_ahu_cost": 25502.83,
         "hrv": {},
         "equipment_info": [
           {
             "eq_category": "Coil_Heating_Electric",
             "heating_fuel": "elec",
             "cooling_type": "none",
-            "total_modeled_capacity_kw": 14.94,
+            "total_modeled_capacity_kw": 14.825,
             "cost": 11024.05
           },
           {
@@ -468,9 +482,9 @@
         {
           "Floor": "Building Story 1",
           "Predominant_space_type": "Dining - family space",
-          "SupplyDuctSize_in": 28.65,
+          "SupplyDuctSize_in": 28.63,
           "SupplyDuctLength_m": 28.0,
-          "ReturnDuctSize_in": 28.65,
+          "ReturnDuctSize_in": 28.63,
           "ReturnDuctLength_m": 28.0,
           "TotalDuctCost": 65267.23,
           "Multiplier": 1.0
@@ -510,7 +524,7 @@
               "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
               "ducting_direction": "Supply",
               "tz_mult": 1.0,
-              "airflow_m3ps": 0.314,
+              "airflow_m3ps": 0.309,
               "num_diff": 4,
               "ducting_lbs": 225,
               "duct_insulation_ft2": 196,
@@ -522,7 +536,7 @@
               "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
               "ducting_direction": "Return",
               "tz_mult": 1.0,
-              "airflow_m3ps": 0.314,
+              "airflow_m3ps": 0.309,
               "num_diff": 4,
               "ducting_lbs": 225,
               "duct_insulation_ft2": 196,
@@ -550,11 +564,11 @@
   "totals": {
     "envelope": 643881,
     "thermal_bridging": 0,
-    "lighting": 163505,
+    "lighting": 166921,
     "heating_and_cooling": 20624,
     "shw": 11332,
-    "ventilation": 937114,
+    "ventilation": 936741,
     "renewables": 0,
-    "grand_total": 1776456
+    "grand_total": 1779499
   }
 }

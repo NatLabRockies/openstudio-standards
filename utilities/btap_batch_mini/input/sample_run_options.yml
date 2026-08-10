@@ -1,0 +1,17 @@
+---
+:analysis_name: sample_test
+:output_variables: []
+:output_meters: []
+:enable_costing: true
+:enable_carbon: true
+:run_annual_simulation: true
+:options:
+  :building_type:
+    - FullServiceRestaurant
+  :template:
+    - NECB2011
+    - NECB2020
+  :epw_file:
+    - CAN_QC_Montreal.Intl.AP.716270_CWEC2020.epw
+  :primary_heating_fuel:
+    - Electricity

@@ -1,4 +1,5 @@
-require_relative '../coverage_helper'
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/necb_helper'
 
 # Tests automatic thermal zone creation and grouping per NECB rules
 class TestNECBAutozone < Minitest::Test

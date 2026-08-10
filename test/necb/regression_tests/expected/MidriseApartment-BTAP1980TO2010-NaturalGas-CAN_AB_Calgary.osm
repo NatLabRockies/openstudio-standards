@@ -10597,13 +10597,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0051-000000000001},  !- Handle
-  120gal NaturalGas Water Heater - 81kBtu/hr 0.813 Therm Eff Supply Inlet Water Node, !- Name
+  193gal NaturalGas Water Heater - 130kBtu/hr 0.81 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000464},  !- Inlet Port
   {00000000-0000-0000-0018-000000000473};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0051-000000000002},  !- Handle
-  120gal NaturalGas Water Heater - 81kBtu/hr 0.813 Therm Eff Supply Outlet Water Node, !- Name
+  193gal NaturalGas Water Heater - 130kBtu/hr 0.81 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0018-000000000474},  !- Inlet Port
   {00000000-0000-0000-0018-000000000475};  !- Outlet Port
 
@@ -22826,32 +22826,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0096-000000000001},  !- Handle
-  120gal NaturalGas Water Heater - 81kBtu/hr 0.813 Therm Eff, !- Name
-  0.455848049288581,                       !- Tank Volume {m3}
+  193gal NaturalGas Water Heater - 130kBtu/hr 0.81 Therm Eff, !- Name
+  0.72935687886173,                        !- Tank Volume {m3}
   {00000000-0000-0000-0066-000000000018},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  23818.0605753284,                        !- Heater Maximum Capacity {W}
+  38108.8969205254,                        !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   NaturalGas,                              !- Heater Fuel Type
-  0.812882360171906,                       !- Heater Thermal Efficiency
+  0.810393830530423,                       !- Heater Thermal Efficiency
   {00000000-0000-0000-0026-000000000054},  !- Part Load Factor Curve Name
-  57.3807199906729,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  78.4957207896331,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  57.3807199906729,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  78.4957207896331,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0066-000000000019},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  7.88998718385368,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  10.1853621332561,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  7.88998718385368,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  10.1853621332561,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name

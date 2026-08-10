@@ -8746,6 +8746,102 @@ OS:Curve:Quadratic,
 
 OS:Daylighting:Control,
   {00000000-0000-0000-0026-000000000001},  !- Handle
+  Library_Media_Center_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000015},  !- Space Name
+  9.5,                                     !- Position X-Coordinate {m}
+  10.5,                                    !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  500,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000002},  !- Handle
+  Mult_Class_1_Pod_1_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000019},  !- Space Name
+  26.5,                                    !- Position X-Coordinate {m}
+  4.5,                                     !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  400,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000003},  !- Handle
+  Mult_Class_1_Pod_2_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000020},  !- Space Name
+  26.5,                                    !- Position X-Coordinate {m}
+  4.5,                                     !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  400,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000004},  !- Handle
+  Mult_Class_1_Pod_3_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000021},  !- Space Name
+  26.5,                                    !- Position X-Coordinate {m}
+  4.5,                                     !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  400,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000005},  !- Handle
+  Mult_Class_2_Pod_1_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000022},  !- Space Name
+  26.5,                                    !- Position X-Coordinate {m}
+  4.5,                                     !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  400,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000006},  !- Handle
+  Mult_Class_2_Pod_2_ZN_1_FLR_1 daylighting control, !- Name
+  {00000000-0000-0000-0084-000000000023},  !- Space Name
+  26.5,                                    !- Position X-Coordinate {m}
+  4.5,                                     !- Position Y-Coordinate {m}
+  0.8,                                     !- Position Z-Coordinate {m}
+  ,                                        !- Psi Rotation Around X-Axis {deg}
+  ,                                        !- Theta Rotation Around Y-Axis {deg}
+  ,                                        !- Phi Rotation Around Z-Axis {deg}
+  400,                                     !- Illuminance Setpoint {lux}
+  Stepped,                                 !- Lighting Control Type
+  ,                                        !- Minimum Input Power Fraction for Continuous Dimming Control
+  ,                                        !- Minimum Light Output Fraction for Continuous Dimming Control
+  2;                                       !- Number of Stepped Control Steps
+
+OS:Daylighting:Control,
+  {00000000-0000-0000-0026-000000000007},  !- Handle
   Offices_ZN_1_FLR_1 daylighting control,  !- Name
   {00000000-0000-0000-0084-000000000025},  !- Space Name
   10.5,                                    !- Position X-Coordinate {m}
@@ -9253,41 +9349,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000001},  !- Handle
   ems_sys_3_mixed_shr_none_sc_dx_sh_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__7_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {80268f07-fb23-4409-88b6-c7d13063e20a}<23.9 && {80268f07-fb23-4409-88b6-c7d13063e20a}>1.7, !- Program Line 1
-  SET {886a16ad-efe0-4557-b573-aa8093c235b5} = 29.4, !- Program Line 2
-  SET {6aebc138-cdb9-4a44-a4fb-a5516cd3efaf} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {80268f07-fb23-4409-88b6-c7d13063e20a}<23.9 && {80268f07-fb23-4409-88b6-c7d13063e20a}>1.7, !- Program Line 4
-  SET {886a16ad-efe0-4557-b573-aa8093c235b5} = 29.4, !- Program Line 5
-  SET {6aebc138-cdb9-4a44-a4fb-a5516cd3efaf} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {80268f07-fb23-4409-88b6-c7d13063e20a}<23.9 && {80268f07-fb23-4409-88b6-c7d13063e20a}>1.7, !- Program Line 7
-  SET {886a16ad-efe0-4557-b573-aa8093c235b5} = 29.4, !- Program Line 8
-  SET {6aebc138-cdb9-4a44-a4fb-a5516cd3efaf} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {80268f07-fb23-4409-88b6-c7d13063e20a}<23.9 && {80268f07-fb23-4409-88b6-c7d13063e20a}>1.7, !- Program Line 10
-  SET {886a16ad-efe0-4557-b573-aa8093c235b5} = 29.4, !- Program Line 11
-  SET {6aebc138-cdb9-4a44-a4fb-a5516cd3efaf} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}<23.9 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}>1.7, !- Program Line 1
+  SET {27005378-9018-4b0e-ba9a-e0dd9cb78c01} = 29.4, !- Program Line 2
+  SET {e0443107-997e-4b86-8cff-a75c138da642} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}<23.9 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}>1.7, !- Program Line 4
+  SET {27005378-9018-4b0e-ba9a-e0dd9cb78c01} = 29.4, !- Program Line 5
+  SET {e0443107-997e-4b86-8cff-a75c138da642} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}<23.9 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}>1.7, !- Program Line 7
+  SET {27005378-9018-4b0e-ba9a-e0dd9cb78c01} = 29.4, !- Program Line 8
+  SET {e0443107-997e-4b86-8cff-a75c138da642} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}<23.9 && {d31a62a6-8fb5-407b-a6d6-ede23136ef28}>1.7, !- Program Line 10
+  SET {27005378-9018-4b0e-ba9a-e0dd9cb78c01} = 29.4, !- Program Line 11
+  SET {e0443107-997e-4b86-8cff-a75c138da642} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {886a16ad-efe0-4557-b573-aa8093c235b5} = NULL, !- Program Line 14
-  SET {6aebc138-cdb9-4a44-a4fb-a5516cd3efaf} = NULL, !- Program Line 15
+  SET {27005378-9018-4b0e-ba9a-e0dd9cb78c01} = NULL, !- Program Line 14
+  SET {e0443107-997e-4b86-8cff-a75c138da642} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0035-000000000002},  !- Handle
   ems_sys_3_mixed_shr_none_sc_dx_sh_c_g_ssf_cv_zh_b_hw_zc_none_srf_none__9_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}<23.9 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}>1.7, !- Program Line 1
-  SET {18425384-2f70-4986-bc1d-1bf4a3bc1932} = 29.4, !- Program Line 2
-  SET {fc2b779c-eb0c-43f1-a4b8-bf410a96d5ba} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}<23.9 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}>1.7, !- Program Line 4
-  SET {18425384-2f70-4986-bc1d-1bf4a3bc1932} = 29.4, !- Program Line 5
-  SET {fc2b779c-eb0c-43f1-a4b8-bf410a96d5ba} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}<23.9 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}>1.7, !- Program Line 7
-  SET {18425384-2f70-4986-bc1d-1bf4a3bc1932} = 29.4, !- Program Line 8
-  SET {fc2b779c-eb0c-43f1-a4b8-bf410a96d5ba} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}<23.9 && {cdfaf55f-3094-4fe0-b4bb-8ba67c6abbc7}>1.7, !- Program Line 10
-  SET {18425384-2f70-4986-bc1d-1bf4a3bc1932} = 29.4, !- Program Line 11
-  SET {fc2b779c-eb0c-43f1-a4b8-bf410a96d5ba} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {c152eddf-0126-43ac-b1a8-a91737f196d3}<23.9 && {c152eddf-0126-43ac-b1a8-a91737f196d3}>1.7, !- Program Line 1
+  SET {18fdb202-8b2b-4159-9804-22e352869715} = 29.4, !- Program Line 2
+  SET {c6ba8a44-6bf8-473b-a0d3-f9ca8a9dec5d} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {c152eddf-0126-43ac-b1a8-a91737f196d3}<23.9 && {c152eddf-0126-43ac-b1a8-a91737f196d3}>1.7, !- Program Line 4
+  SET {18fdb202-8b2b-4159-9804-22e352869715} = 29.4, !- Program Line 5
+  SET {c6ba8a44-6bf8-473b-a0d3-f9ca8a9dec5d} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {c152eddf-0126-43ac-b1a8-a91737f196d3}<23.9 && {c152eddf-0126-43ac-b1a8-a91737f196d3}>1.7, !- Program Line 7
+  SET {18fdb202-8b2b-4159-9804-22e352869715} = 29.4, !- Program Line 8
+  SET {c6ba8a44-6bf8-473b-a0d3-f9ca8a9dec5d} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {c152eddf-0126-43ac-b1a8-a91737f196d3}<23.9 && {c152eddf-0126-43ac-b1a8-a91737f196d3}>1.7, !- Program Line 10
+  SET {18fdb202-8b2b-4159-9804-22e352869715} = 29.4, !- Program Line 11
+  SET {c6ba8a44-6bf8-473b-a0d3-f9ca8a9dec5d} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {18425384-2f70-4986-bc1d-1bf4a3bc1932} = NULL, !- Program Line 14
-  SET {fc2b779c-eb0c-43f1-a4b8-bf410a96d5ba} = NULL, !- Program Line 15
+  SET {18fdb202-8b2b-4159-9804-22e352869715} = NULL, !- Program Line 14
+  SET {c6ba8a44-6bf8-473b-a0d3-f9ca8a9dec5d} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -11001,13 +11097,13 @@ OS:ModelObjectList,
 
 OS:Node,
   {00000000-0000-0000-0051-000000000001},  !- Handle
-  232gal NaturalGas Water Heater - 157kBtu/hr 0.81 Therm Eff Supply Inlet Water Node, !- Name
+  378gal NaturalGas Water Heater - 255kBtu/hr 0.808 Therm Eff Supply Inlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000556},  !- Inlet Port
   {00000000-0000-0000-0016-000000000565};  !- Outlet Port
 
 OS:Node,
   {00000000-0000-0000-0051-000000000002},  !- Handle
-  232gal NaturalGas Water Heater - 157kBtu/hr 0.81 Therm Eff Supply Outlet Water Node, !- Name
+  378gal NaturalGas Water Heater - 255kBtu/hr 0.808 Therm Eff Supply Outlet Water Node, !- Name
   {00000000-0000-0000-0016-000000000566},  !- Inlet Port
   {00000000-0000-0000-0016-000000000567};  !- Outlet Port
 
@@ -26094,8 +26190,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000053},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000043},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000054},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000005},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26117,8 +26213,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000056},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000044},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000057},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000006},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26255,8 +26351,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000041},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000039},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000042},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000002},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26278,8 +26374,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000044},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000040},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000045},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000004},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26324,8 +26420,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000050},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000042},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000051},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000003},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26439,8 +26535,8 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000026},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000034},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000027},  !- Zone Return Air Port List
-  ,                                        !- Primary Daylighting Control Name
-  ,                                        !- Fraction of Zone Controlled by Primary Daylighting Control
+  {00000000-0000-0000-0026-000000000001},  !- Primary Daylighting Control Name
+  1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
   ,                                        !- Illuminance Map Name
@@ -26485,7 +26581,7 @@ OS:ThermalZone,
   {00000000-0000-0000-0058-000000000038},  !- Zone Air Exhaust Port List
   {00000000-0000-0000-0016-000000000038},  !- Zone Air Node Name
   {00000000-0000-0000-0058-000000000039},  !- Zone Return Air Port List
-  {00000000-0000-0000-0026-000000000001},  !- Primary Daylighting Control Name
+  {00000000-0000-0000-0026-000000000007},  !- Primary Daylighting Control Name
   1,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                        !- Secondary Daylighting Control Name
   ,                                        !- Fraction of Zone Controlled by Secondary Daylighting Control
@@ -27152,32 +27248,32 @@ OS:Version,
 
 OS:WaterHeater:Mixed,
   {00000000-0000-0000-0096-000000000001},  !- Handle
-  232gal NaturalGas Water Heater - 157kBtu/hr 0.81 Therm Eff, !- Name
-  0.879828026653508,                       !- Tank Volume {m3}
+  378gal NaturalGas Water Heater - 255kBtu/hr 0.808 Therm Eff, !- Name
+  1.42994150440773,                        !- Tank Volume {m3}
   {00000000-0000-0000-0066-000000000034},  !- Setpoint Temperature Schedule Name
   2,                                       !- Deadband Temperature Difference {deltaC}
   60,                                      !- Maximum Temperature Limit {C}
   Cycle,                                   !- Heater Control Type
-  45971.0143926458,                        !- Heater Maximum Capacity {W}
+  74714.443605304,                         !- Heater Maximum Capacity {W}
   ,                                        !- Heater Minimum Capacity {W}
   ,                                        !- Heater Ignition Minimum Flow Rate {m3/s}
   ,                                        !- Heater Ignition Delay {s}
   NaturalGas,                              !- Heater Fuel Type
-  0.809552909300906,                       !- Heater Thermal Efficiency
+  0.807708935657346,                       !- Heater Thermal Efficiency
   {00000000-0000-0000-0024-000000000006},  !- Part Load Factor Curve Name
-  88.9510586042936,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
+  122.960260362509,                        !- Off Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- Off Cycle Parasitic Fuel Type
   0.8,                                     !- Off Cycle Parasitic Heat Fraction to Tank
-  88.9510586042936,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
+  122.960260362509,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
   NaturalGas,                              !- On Cycle Parasitic Fuel Type
   0,                                       !- On Cycle Parasitic Heat Fraction to Tank
   Schedule,                                !- Ambient Temperature Indicator
   {00000000-0000-0000-0066-000000000035},  !- Ambient Temperature Schedule Name
   ,                                        !- Ambient Temperature Thermal Zone Name
   ,                                        !- Ambient Temperature Outdoor Air Node Name
-  11.2926067962064,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
+  14.8106272738539,                        !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- Off Cycle Loss Fraction to Thermal Zone
-  11.2926067962064,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
+  14.8106272738539,                        !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
   ,                                        !- On Cycle Loss Fraction to Thermal Zone
   ,                                        !- Peak Use Flow Rate {m3/s}
   ,                                        !- Use Flow Rate Fraction Schedule Name
