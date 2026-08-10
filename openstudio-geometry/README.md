@@ -2,8 +2,9 @@
 
 Parametric building geometry — the **authoring on-ramp** for the openstudio-*
 NECB gem family (and the intended MCP tool surface). SDK-only; shared AuditLog
-schema. Three engines: the footprint wizards and the bar engine (verbatim ports
-from openstudio-standards) plus a 3D viewer (ported from canmet-energy/campus):
+schema. Four engines: the footprint wizards and the bar engine (verbatim ports
+from openstudio-standards), a 3D viewer (ported from canmet-energy/campus) and
+a per-storey 2D floor-plan renderer:
 
 ## Footprint wizards
 
@@ -67,6 +68,46 @@ Google CDN at view time (the caption says so); the geometry itself is fully
 embedded. A CSP that blocks external hosts (e.g. Artifacts) will not run this
 viewer.
 
+## Floor plans (per-storey 2D)
+
+`OpenStudioGeometry.floor_plans(model_or_path, path:, png_dir:, audit:)` — the
+2D counterpart to the 3D viewer, for the everyday question *"what are the
+spaces and zones in this model called?"*. One inline-SVG plan per storey: space
+footprints in **world coordinates** (`space.transformation * surface.vertices`,
+so rotated buildings draw rotated), filled by thermal zone from a deterministic
+palette, labelled with space name + zone name at the centroid, and every
+polygon carries a `space | zone | space type | area` hover tooltip — plus a
+shared zone legend and a metric scale bar.
+
+```ruby
+bundle = OpenStudioGeometry.floor_plans(model, path: 'floor_plans.html')
+bundle[:storeys].map { |s| s[:name] }        # => ["Story 0", "Story 1", "Story 2"]
+bundle[:storeys].first[:svg]                 # inline <svg> string, embeddable anywhere
+bundle[:legend_svg]                          # the shared thermal-zone legend
+```
+
+The returned bundle — `{ storeys: [{name:, svg:}], legend_svg:, empty:,
+inferred_storeys:, error: }` — is the same never-raises shape
+`OpenStudioHVAC::CatalogReport.model_diagrams` returns, so a host report (the
+NECB AHJ compliance report) can embed the plans and degrade to a one-line note
+on an empty or unreadable model. Layering: `plan_query.rb` is the only
+SDK-touching file (plain hashes out), `plan_svg.rb` and `plan.rb` are SDK-free.
+
+The standalone page written to `path:` is **fully self-contained** — inline CSS
+and SVG, native `<details>`, no scripts and no external references at all (one
+`break-inside: avoid` section per storey, page-broken so printing gives a plan
+per page). Unlike the 3D viewer, it renders under a strict CSP.
+
+`png_dir:` additionally rasterizes one PNG per storey, if a system converter is
+installed (`rsvg-convert` → `cairosvg` → `magick`); when none is, the audit gets
+a loud warning and no PNG is written — PNGs are never a required output.
+
+Storeys come from `BuildingStory` objects, ordered by minimum world z. A model
+without them (or with unassigned spaces) falls back to binning floor elevations
+at ±0.01 m into synthesized `Level N` storeys, flagged `inferred_storeys: true`
+plus an audit warning. Spaces with no `Floor` surface are warned and skipped;
+a space with floors at several elevations is cut at the lowest one.
+
 ## Composing with the family
 
 Bar/wizard output carries **no constructions** — downstream envelope work
@@ -96,6 +137,7 @@ cd openstudio-geometry
 ruby test/test_wizards.rb   # shape census, matching, ground BCs, rotation, typo guards
 ruby test/test_bar.rb       # ratio-true slicing + tagging, WWR, party/below-grade, family composition
 ruby test/test_render.rb    # crash-isolated glTF export, fallback ladder, embedded-viewer HTML
+ruby test/test_floor_plan.rb # world-coordinate extraction, storey grouping, SVG layer, self-contained page
 ```
 
 ## Documented future

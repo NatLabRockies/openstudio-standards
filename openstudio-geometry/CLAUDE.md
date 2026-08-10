@@ -25,6 +25,19 @@ envelope.
   the CreateTypical/Standard-coupled arg pipeline and is deliberately
   excluded) + a 5-helper closure from `create.rb`.
 - `helpers.rb` — `match_surfaces` / `rotate_model` / `set_boundary_condition`.
+- **Floor plans** (`plan_query.rb` → `plan_svg.rb` → `plan.rb`, facade
+  `OpenStudioGeometry.floor_plans(model_or_path, path:, png_dir:)`): per-storey
+  2D plans. `plan_query.rb` is the ONLY SDK-touching file (plain hashes out,
+  never raises — the necb `report/model_query.rb` boundary); `plan_svg.rb`
+  holds a LOCAL COPY of necb's `report/svg.rb` primitives (fit-to-width
+  viewBox, no width/height attrs) plus polygon/group/`<title>` — copied, never
+  required upward (catalog_report.rb:29-32 precedent). `Plan.diagrams` returns
+  the `model_diagrams`-shaped bundle `{storeys:[{name:,svg:}], legend_svg:,
+  empty:, inferred_storeys:, error:}` a host report embeds; `Plan.html_report`
+  writes a page that PASSES the family self-containment assertions (no
+  scripts, no external references) — which the 3D `render` deliberately
+  cannot. `Plan.png`/`Plan.pngs` are optional (rsvg-convert → cairosvg →
+  magick; loud warn + nil when absent).
 - Facade: `OpenStudioGeometry.create(shape:, **params)` and
   `OpenStudioGeometry.bar(space_type_ratios: {[building_type, space_type] => fraction}, ...)`.
 - **Facade storeys vocabulary is `storeys:` / `below_grade_storeys:`** on BOTH
@@ -50,7 +63,15 @@ envelope.
 - The verbatim ports must stay verbatim: when re-extracting legacy chunks, the
   LAST chunk swallows the module-closing `end`s — strip trailing low-indent
   `end` lines.
-- `rotate_model` sign convention: +45° produces +π/4 in atan2 terms.
+- `rotate_model` sign convention: +45° produces +π/4 in atan2 terms. It uses
+  `changeTransformation`, which re-expresses each space in a rotated LOCAL
+  frame and leaves the building where it stands — world coordinates are
+  INVARIANT under it (pinned by `test_floor_plan.rb`). Anything reading
+  geometry must go through `space.transformation * surface.vertices`; the
+  `space.xOrigin + local vertex` shortcut (legacy costing/geometry.rb:233) is
+  rotation-blind and produces garbage after a `rotate_model` call.
+- Floor-plan zone colors hash zone names with a local djb2, NOT `String#hash`
+  (Ruby seeds that per process — colors would change every run).
 - Bar honors WWR, party walls become adiabatic, below-grade surfaces get
   Ground boundary conditions.
 - Full-family composition is pinned by test: bar geometry → loads → lighting
@@ -59,7 +80,8 @@ envelope.
 
 ## Tests
 
-`cd openstudio-geometry && ruby test/test_wizards.rb test/test_bar.rb`.
+`cd openstudio-geometry && ruby test/test_wizards.rb test/test_bar.rb`
+(`test/test_render.rb`, `test/test_floor_plan.rb` for the two renderers).
 Fixtures shared from `../openstudio-hvac/test/fixtures`.
 
 ## 3D renderer (campus port)

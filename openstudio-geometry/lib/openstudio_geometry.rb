@@ -6,6 +6,9 @@ require_relative 'openstudio_geometry/helpers'
 require_relative 'openstudio_geometry/wizards'
 require_relative 'openstudio_geometry/bar'
 require_relative 'openstudio_geometry/render'
+require_relative 'openstudio_geometry/plan_query'
+require_relative 'openstudio_geometry/plan_svg'
+require_relative 'openstudio_geometry/plan'
 
 # OpenStudioGeometry creates parametric building geometry — the authoring
 # on-ramp for the gem family (and the future MCP surface): footprint wizards
@@ -198,6 +201,52 @@ module OpenStudioGeometry
                        "style=\"font-family:system-ui,sans-serif;margin:24px\">#{fragment}</body></html>")
     end
     fragment
+  end
+
+  # Per-storey floor plans (the 2D counterpart to `render`): Model or .osm path
+  # in, a plain-hash bundle of inline SVG strings out — one plan per storey plus
+  # a shared thermal-zone legend. Spaces are drawn in world coordinates, tinted
+  # by thermal zone, labelled with space + zone name, and every polygon carries
+  # a `space | zone | space type | area` hover tooltip. Never raises: an
+  # unreadable or floor-less model comes back as an empty bundle carrying
+  # `error:`, so a host report can degrade gracefully.
+  #
+  #   bundle = OpenStudioGeometry.floor_plans(model, path: 'plans.html')
+  #   bundle[:storeys].map { |s| s[:name] }   # => ["Story 0", "Story 1", ...]
+  #
+  # Unlike `render`, the standalone page written to `path:` is FULLY
+  # self-contained — inline CSS and SVG, native <details>, no scripts and no
+  # external references at all.
+  #
+  # @param model_or_path [OpenStudio::Model::Model, String] model or .osm path
+  # @param path [String, nil] write the standalone HTML page here
+  # @param png_dir [String, nil] rasterize one PNG per storey into this
+  #   directory (optional — needs rsvg-convert, cairosvg or magick on PATH;
+  #   audited warning and no files when none is installed)
+  # @param audit [AuditLog, nil] audit sink; step `:plan`
+  # @return [Hash] { storeys: [{ name:, svg: }], legend_svg:, empty:,
+  #   inferred_storeys:, error: (only on failure) }
+  def self.floor_plans(model_or_path, path: nil, png_dir: nil, audit: nil)
+    audit ||= AuditLog.new
+    detail = Plan.extract_for(model_or_path, audit: audit)
+    bundle = Plan.bundle_from(detail)
+    if path
+      File.write(path, Plan.page(bundle, source: Plan.source_label(model_or_path), detail: detail))
+    end
+    pngs = png_dir ? Plan.pngs(bundle, png_dir, audit: audit) : []
+
+    if bundle[:error]
+      audit.warn(:plan, 'no floor plans produced', inputs: { error: bundle[:error] })
+    else
+      audit.decision(:plan, 'per-storey floor plans rendered',
+                     target: Plan.source_label(model_or_path),
+                     inputs: { storeys: bundle[:storeys].size,
+                               spaces: detail[:storeys].sum { |s| s[:spaces].size },
+                               inferred_storeys: bundle[:inferred_storeys],
+                               html: path, pngs: pngs.size },
+                     value: bundle[:storeys].map { |s| s[:name] }.join(', '))
+    end
+    bundle
   end
 
   # Rewrites the canonical storey names to the spellings the shape's wizard
