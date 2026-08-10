@@ -36,7 +36,23 @@ require 'openstudio'
 ROOT = File.expand_path('../..', __dir__)
 require File.join(ROOT, 'openstudio-necb', 'lib', 'openstudio_necb')
 
-TYPES = ARGV.empty? ? %w[Warehouse FullServiceRestaurant HighriseApartment PrimarySchool RetailStandalone] : ARGV
+# The routine fleet (phylroy 2026-08-10, D-70): Hospital and Outpatient are
+# EXCLUDED from routine sweeps — their capacity-iterated full-annual chains
+# (up to 8 runs of 40-60 min each) dominate wall-clock as the least
+# sensitive instruments. Run them EXPLICITLY BY NAME when a baseline or
+# investigation needs them; week-mode remains cheap enough to include them
+# by name too.
+FLEET = %w[SmallOffice MediumOffice LargeOffice PrimarySchool SecondarySchool
+           RetailStandalone RetailStripmall Warehouse FullServiceRestaurant
+           QuickServiceRestaurant HighriseApartment LowriseApartment
+           MidriseApartment SmallHotel LargeHotel].freeze
+TYPES = if ARGV.empty?
+          %w[Warehouse FullServiceRestaurant HighriseApartment PrimarySchool RetailStandalone]
+        elsif ARGV == ['fleet']
+          FLEET
+        else
+          ARGV
+        end
 CACHE_DIR = '/tmp/openstudio_necb_legacy_archetype_e2e'
 FUEL = ENV.fetch('FUEL', 'Electricity')
 LOC = ENV.fetch('LOC', 'toronto')

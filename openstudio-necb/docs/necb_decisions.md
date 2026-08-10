@@ -99,6 +99,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-67** — Clarity restructure: aliased public renames + the openstudio-audit gem _(process)_
 - **D-68** — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches _(process)_
 - **D-69** — The legacy-parity oracle is pinned to a revision (legacy_pin) _(process)_
+- **D-70** — Hospital and Outpatient removed from routine sweeps _(process)_
 
 <!-- TOC END -->
 
@@ -3742,3 +3743,33 @@ in-flight sweep's cache is not orphaned mid-run.
 
 - **Who/when:** Fable under D-10 per phylroy's "plan and do it",
   2026-08-10.
+
+## D-70 — Hospital and Outpatient removed from routine sweeps (phylroy)
+
+**Ruling (phylroy, 2026-08-10): "lets remove hospital and outpatient from
+the sweep.. they just take way too long."** Implemented as a tiering, not a
+deletion:
+
+- The sweep script gains a `FLEET` constant (15 buildings, invoked as
+  `... necb_archetype_sweep.rb fleet`); Hospital and Outpatient run only
+  when named explicitly. Their in-flight 2020 full-annual chains were
+  killed at ruling time (Hospital ~3.5 h into its reference annual;
+  Outpatient on its EIGHTH full-year run, reference iteration 2) — the
+  recorded ERROR rows in that sweep are the kill, not a model defect.
+- Why they cost so much: 40–60 min per 8760 h simulation at their zone
+  counts, × a minimum 4-run chain, × up to 3 capacity iterations each
+  re-running annuals, all sequential — the pair alone stretched a ~2 h
+  15-building sweep toward 12 h, while being the least sensitive
+  instruments in the fleet (their percentages move mostly through
+  iteration-path differences).
+- **Coverage consequence, stated honestly:** the routine gates lose the
+  fleet's only hospital-scale exercise of high-%OA ERV determinations
+  (30 of ~60 fleet ERVs), humidification, the Health-care selection rows,
+  and the D-65 staged-coil churn territory. Mitigation discussed and
+  PARKED by phylroy ("lets consider this later"): a small synthetic
+  stress-fixture suite exercising those paths in week-mode minutes. Until
+  it exists, changes touching those paths should run the pair BY NAME.
+- The 17×2 full-annual baseline becomes 15×2 going forward; the pair's
+  last valid full-annual numbers remain in the pre-merge table as history.
+
+- **Who/when:** phylroy's ruling, implemented by Fable, 2026-08-10.
