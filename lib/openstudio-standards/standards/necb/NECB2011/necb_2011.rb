@@ -245,6 +245,7 @@ class NECB2011 < Standard
   # This method is a wrapper to create the 16 archetypes easily. # 55 args
   def model_create_prototype_model(template:,
                                    building_type:,
+                                   construction_opt: '',
                                    epw_file:,
                                    custom_weather_folder: nil,
                                    debug: false,
@@ -316,6 +317,7 @@ class NECB2011 < Standard
                                    oerd_utility_pricing: nil)
     model = load_building_type_from_library(building_type: building_type)
     return model_apply_standard(model: model,
+                                construction_opt: construction_opt,
                                 tbd_option: tbd_option,
                                 tbd_interpolate: tbd_interpolate,
                                 epw_file: epw_file,
@@ -400,6 +402,7 @@ class NECB2011 < Standard
   # Created this method so that additional methods can be addded for bulding the prototype model in later
   # code versions without modifying the build_protoype_model method or copying it wholesale for a few changes.
   def model_apply_standard(model:,
+                           construction_opt: '',
                            tbd_option: 'none',
                            tbd_interpolate: true,
                            epw_file:,
@@ -496,6 +499,7 @@ class NECB2011 < Standard
     fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
     srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
     srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
+    construction_opt         = convert_arg_to_string(variable: construction_opt, default: '')
     tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
     tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
     necb_hdd                 = convert_arg_to_bool(variable: necb_hdd, default: true)
@@ -503,6 +507,8 @@ class NECB2011 < Standard
     boiler_cap_ratio         = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
     swh_fuel                 = convert_arg_to_string(variable: swh_fuel, default: nil)
     airloop_fancoils_heating = convert_arg_to_bool(variable: airloop_fancoils_heating, default: false)
+
+    massive = construction_opt == 'structure'
 
     # Check if custom systems are assigned to dwelling units, washrooms, corridors, and storage rooms.  If they are, set
     # them to be the same as the primary system type.  If no primary system type is defined then set them to be nil.
@@ -525,8 +531,8 @@ class NECB2011 < Standard
 
     output_meters = check_output_meters(output_meters: output_meters) if oerd_utility_pricing
 
-    assign_building_activity(model: model)
-    assign_building_structure(model: model, activity: @activity)
+    assign_building_activity(model: model, option: construction_opt)
+    assign_building_structure(model: model, activity: @activity, massive: massive)
     apply_loads(model: model,
                 lights_type: lights_type,
                 lights_scale: lights_scale,
@@ -534,8 +540,7 @@ class NECB2011 < Standard
                 electrical_loads_scale: electrical_loads_scale,
                 oa_scale: oa_scale)
     apply_envelope(model: model,
-                   bldg_category: @activity.category,
-                   bldg_structure: @structure.structure,
+                   construction_opt: construction_opt,
                    ext_wall_cond: ext_wall_cond,
                    ext_floor_cond: ext_floor_cond,
                    ext_roof_cond: ext_roof_cond,
@@ -557,6 +562,7 @@ class NECB2011 < Standard
                                srr_set: srr_set,
                                srr_opt: srr_opt,
                                necb_hdd: necb_hdd)
+    set_construction_air_film_resistances(model: model)
     apply_thermal_bridging(model: model,
                            necb_hdd: necb_hdd,
                            structure: @structure,
@@ -569,7 +575,7 @@ class NECB2011 < Standard
                       sizing_run_dir: sizing_run_dir,
                       lights_type: lights_type,
                       lights_scale: lights_scale)
-    apply_kiva_foundation(model)
+    apply_kiva_foundation(model, massive)
     apply_systems_and_efficiencies(model: model,
                                    sizing_run_dir: sizing_run_dir,
                                    hvac_system_primary: hvac_system_primary,
@@ -818,8 +824,7 @@ class NECB2011 < Standard
   end
 
   def apply_envelope(model:,
-                     bldg_category: '',
-                     bldg_structure: '',
+                     construction_opt: '',
                      ext_wall_cond: nil,
                      ext_floor_cond: nil,
                      ext_roof_cond: nil,
@@ -844,29 +849,97 @@ class NECB2011 < Standard
     model.getInsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
     model.getOutsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
 
-    bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
-    bldg_structure   = bldg_structure.to_s.downcase.to_sym
-    bldg_structures  = @structure.data[:structure].keys
+    construction_opt = '' unless construction_opt.respond_to?(:to_sym)
+    construction_opt = construction_opt.to_s.downcase
 
-    if bldg_structures.include?(bldg_structure)
-      argh            = {}
-      argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
-      argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
-      argh[:eRoofU  ] = ext_roof_cond          if ext_roof_cond
-      argh[:gWallU  ] = ground_wall_cond       if ground_wall_cond
-      argh[:gFloorU ] = ground_floor_cond      if ground_floor_cond
-      argh[:gRoofU  ] = ground_roof_cond       if ground_roof_cond
-      argh[:doorU   ] = door_construction_cond if door_construction_cond
-      argh[:fenU    ] = fixed_window_cond      if fixed_window_cond
-      argh[:skyU    ] = skylight_solar_trans   if skylight_solar_trans
-      argh[:doorSHGC] = glass_door_solar_trans if glass_door_solar_trans
-      argh[:fenSHGC ] = fixed_wind_solar_trans if fixed_wind_solar_trans
-      argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
+    if construction_opt == 'structure'
+      argh             = {}
+      argh[:eWallU   ] = ext_wall_cond          if ext_wall_cond
+      argh[:eFloorU  ] = ext_floor_cond         if ext_floor_cond
+      argh[:eRoofU   ] = ext_roof_cond          if ext_roof_cond
+      argh[:gWallU   ] = ground_wall_cond       if ground_wall_cond
+      argh[:gFloorU  ] = ground_floor_cond      if ground_floor_cond
+      argh[:gRoofU   ] = ground_roof_cond       if ground_roof_cond
+      argh[:doorU    ] = door_construction_cond if door_construction_cond
+      argh[:fenU     ] = fixed_window_cond      if fixed_window_cond
+      argh[:skyU     ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:fenSHGC  ] = fixed_wind_solar_trans if fixed_wind_solar_trans
+      argh[:skySHGC  ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:category ] = @activity.category
+      argh[:structure] = @structure.structure
+      argh[:framing  ] = @structure.framing
+      argh[:cladding ] = @structure.cladding
+      argh[:finish   ] = @structure.finish
 
-      assign_contruction_to_adiabatic_surfaces(model)
-      ok = add_construction_sets(model, necb_hdd, argh)
+      # Add default BUILDING construction sets.
+      unless add_construction_sets(model.getSpaces, true, necb_hdd, argh)
+        raise('NECB: Failed to assign default BUILDING construction sets')
+      end
 
-      raise('NECB2011: Failed to assign default construction sets') unless ok
+      # Add default construction sets to customized spaces. Group spaces along
+      # customized STRUCTURE, FRAMING, CLADDING and/or FINISH.
+      unless @structure.spaces.empty?
+        custom = []
+        id     = @structure.spaces.keys.first
+        sp     = @structure.spaces.values.first
+        espace = model.getSpaceByName(id)
+
+        unless espace.empty?
+          espace = espace.get
+
+          first             = {}
+          first[:spaces   ] = [espace]
+          first[:structure] = sp[:structure]
+          first[:framing  ] = sp[:framing]
+          first[:cladding ] = sp[:cladding]
+          first[:finish   ] = sp[:finish]
+          custom           << first
+
+          # Group spaces when sharing common attributes.
+          @structure.spaces.each do |id, sp|
+            space = model.getSpaceByName(id)
+            next if space.empty?
+
+            match = false
+            space = space.get
+            next if space == espace
+
+            custom.each do |csp|
+              break if match
+
+              if sp[:structure] == csp[:structure] &&
+                 sp[:framing  ] == csp[:framing  ] &&
+                 sp[:cladding ] == csp[:cladding ] &&
+                 sp[:finish   ] == csp[:finish   ]
+
+                 csp[:spaces] << space
+                 match = true
+              end
+            end
+
+            unless match
+              spx             = {}
+              spx[:spaces   ] = [space]
+              spx[:structure] = sp[:structure]
+              spx[:framing  ] = sp[:framing]
+              spx[:cladding ] = sp[:cladding]
+              spx[:finish   ] = sp[:finish]
+              custom         << spx
+            end
+          end
+
+          custom.each do |csp|
+            argh[:structure] = csp[:structure]
+            argh[:framing  ] = csp[:framing]
+            argh[:cladding ] = csp[:cladding]
+            argh[:finish   ] = csp[:finish]
+
+            unless add_construction_sets(csp[:spaces], false, necb_hdd, argh)
+              raise('NECB: Failed to assign (custom) SPACE construction sets')
+            end
+          end
+        end
+      end
     else
       model_add_constructions(model)
       apply_standard_construction_properties(model: model,
@@ -890,9 +963,153 @@ class NECB2011 < Standard
     model_create_thermal_zones(model, @space_multiplier_map)
   end
 
+  ##
+  # Assign surface area-weighted air film resistances (in m2.K/W) to insulated
+  # (opaque) layered constructions (as AdditionalProperty "btap_film"), as well
+  # as the (net) area of surfaces referencing each construction. The solution
+  # initially targets constructions having a valid AdditionalProperty "btap_uo"
+  # (auto-generated with option "structure"). If no constructions are tagged
+  # with "btap_uo" in the model, the fallback is to instead target all outdoor-
+  # facing, above-grade layered constructions. In case of latter scenario,
+  # AdditionalProperties "btap_uo", "btap_ut", "btap_id", "btap_type" &
+  # "btap_area" are added. All constructions having (or inherting) a "btap_uo"
+  # property are adjusted to match the specified Uo (factoring in "btap_film").
+  #
+  # @author: denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Boolean] true if successful
+  def set_construction_air_film_resistances(model: nil)
+    return false unless model.is_a?(OpenStudio::Model::Model)
+
+    ok  = false
+    hdd = get_necb_hdd18(model: model, necb_hdd: true)
+
+    model.getLayeredConstructions.each do |lc|
+      next unless lc.additionalProperties.hasFeature("btap_uo")
+
+      ok = true
+      lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      lc.additionalProperties.setFeature("btap_area", lc.getNetArea)
+    end
+
+    # No "btap_uo" AdditionalProperty?
+    model.getSurfaces.each do |surface|
+      break if ok
+
+      tp = surface.surfaceType.downcase
+      bc = surface.outsideBoundaryCondition.downcase
+      next unless bc == "outdoors"
+
+      lc = surface.construction
+      next if lc.empty?
+
+      lc = lc.get.to_LayeredConstruction
+      next if lc.empty?
+
+      lc = lc.get
+      m2 = lc.getNetArea
+      next unless m2 > 0
+
+      uo = max_u_necb(tp, bc, hdd)
+      ty = case tp
+           when "wall"  then :walls
+           when "floor" then :floors
+           else              :roofs
+           end
+
+      unless lc.additionalProperties.hasFeature("btap_film")
+        lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_area")
+        lc.additionalProperties.setFeature("btap_area", m2)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_type")
+        lc.additionalProperties.setFeature("btap_type", ty.to_s)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_uo")
+        lc.additionalProperties.setFeature("btap_uo", uo)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_ut")
+        lc.additionalProperties.setFeature("btap_ut", uo)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_id")
+        argh           = {}
+        argh[:perform] = :lp
+        argh[:stype  ] = ty
+        argh[:uo     ] = uo
+        id = BTAP::Bridging.costed_assembly(argh)
+        lc.additionalProperties.setFeature("btap_id", id)
+      end
+    end
+
+    # Isolate building default exterior wall construction.
+    wlc = nil
+    set = model.getBuilding.defaultConstructionSet
+
+    unless set.empty?
+      ext = set.get.defaultExteriorSurfaceConstructions
+
+      unless ext.empty?
+        wlc = ext.get.wallConstruction
+        wlc = wlc.empty? ? nil : wlc.get
+      end
+    end
+
+    # Adjust tagged insulated constructions.
+    model.getLayeredConstructions.each do |lc|
+      id = lc.additionalProperties.getFeatureAsString("btap_id")
+      uo = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+      ut = lc.additionalProperties.getFeatureAsDouble("btap_ut")
+      fr = lc.additionalProperties.getFeatureAsDouble("btap_film")
+      ty = lc.additionalProperties.getFeatureAsString("btap_type")
+      m2 = lc.additionalProperties.getFeatureAsString("btap_area")
+      next if id.empty?
+      next if uo.empty?
+      next if ut.empty?
+      next if fr.empty?
+      next if ty.empty?
+      next if m2.empty?
+
+      id = id.get
+      uo = uo.get
+      ut = ut.get
+      fr = fr.get
+      ty = ty.get
+      m2 = m2.get
+      il = TBD.insulatingLayer(lc)
+      next unless il[:index]
+
+      TBD.resetUo(lc, fr, il[:index], uo)
+
+      # Add default exterior wall construction tags to building.
+      if lc == wlc
+        next unless ty == "walls"
+
+        model.getBuilding.additionalProperties.setFeature("btap_id", id)
+        model.getBuilding.additionalProperties.setFeature("btap_uo", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_ut", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_film", fr)
+        model.getBuilding.additionalProperties.setFeature("btap_type", ty)
+        model.getBuilding.additionalProperties.setFeature("btap_area", m2)
+      end
+    end
+
+    true
+  end
+
   # Apply Kiva foundation model to floors/walls with ground boundary condition.
-  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca), denis@rd2.ca
-  def apply_kiva_foundation(model)
+  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
+  # 'massive' edit: denis@rd2.ca
+  #
+  # @param massive [Boolean] whether opaque materials are standard (not massless)
+  def apply_kiva_foundation(model, massive = false)
     # define a Kiva model for the whole bldg that's used for the first floor in contact with ground in each zone
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
@@ -920,11 +1137,20 @@ class NECB2011 < Standard
             kiva_model.setWallDepthBelowSlab(0.0)
             zone_kiva_models << kiva_model
           end
-          # Kiva model only works with standard materials.
-          c = gfloor.construction.get.to_LayeredConstruction.get
-          gfloor.setOutsideBoundaryCondition('Foundation')
-          gfloor.setAdjacentFoundation(zone_kiva_models.last)
-          gfloor.setConstruction(c)
+          # Kiva model only works with standard materials. Replace constructions
+          # massless materials with standard ones.
+          # Kiva model only works with standard materials. Replace constructions
+          # massless materials with standard ones. Skip check if 'massive'.
+          if massive
+            c = gfloor.construction.get.to_LayeredConstruction.get
+            gfloor.setOutsideBoundaryCondition('Foundation')
+            gfloor.setAdjacentFoundation(zone_kiva_models.last)
+            gfloor.setConstruction(c)
+          else
+            replace_massless_material_with_std_material(model,gfloor)
+            gfloor.setOutsideBoundaryCondition('Foundation')
+            gfloor.setAdjacentFoundation(zone_kiva_models.last)
+          end
 
           # Set the exposed perimeter for space floors in contact with the ground.
           floor_exp_per = 0.0
@@ -938,10 +1164,16 @@ class NECB2011 < Standard
           # contact with the space floor in contact with ground 'gfloor'
           space_ground_walls.each do |gwall|
             if surfaces_are_in_contact?(gfloor,gwall)
-              c = gwall.construction.get.to_LayeredConstruction.get
-              gwall.setOutsideBoundaryCondition('Foundation')
-              gwall.setAdjacentFoundation(zone_kiva_models.last)
-              gwall.setConstruction(c)
+              if massive
+                c = gwall.construction.get.to_LayeredConstruction.get
+                gwall.setOutsideBoundaryCondition('Foundation')
+                gwall.setAdjacentFoundation(zone_kiva_models.last)
+                gwall.setConstruction(c)
+              else
+                replace_massless_material_with_std_material(model,gwall)
+                gwall.setOutsideBoundaryCondition('Foundation')
+                gwall.setAdjacentFoundation(zone_kiva_models.last)
+              end
             end
           end
         end
@@ -1136,25 +1368,27 @@ class NECB2011 < Standard
   # Initiates a BTAP building ACTIVITY.
   #
   # @param model [OpenStudio::Model::Model] a model
+  # @param option ["", "structure"] construction option
   #
   # @return [BTAP::Activity] a BTAP building ACTIVITY (see logs if failed)
-  def assign_building_activity(model: nil)
-    @activity = BTAP::Activity.new(model)
+  def assign_building_activity(model: nil, option: "")
+    @activity = BTAP::Activity.new(model, option)
   end
 
   # Initiates a BTAP building STRUCTURE.
   #
   # @param model [OpenStudio::Model::Model] a model
   # @param activity [BTAP::Activity] a BTAP building ACTIVITY object
+  # @param massive [Boolean] whether requesting internal mass generation
   #
   # @return [BTAP::Structure] a BTAP building STRUCTURE (see logs if failed)
-  def assign_building_structure(model: nil, activity: nil)
-    @structure = BTAP::Structure.new(model, activity)
+  def assign_building_structure(model: nil, activity: nil, massive: true)
+    @structure = BTAP::Structure.new(model, activity, massive)
   end
 
   ##
   # (Optionally) uprates - then derates - envelope surface constructions due to
-  # MAJOR thermal bridges (e.g. roof parapets, corners, fenestration
+  # linear thermal bridges (e.g. roof parapets, corners, fenestration
   # perimeters). See lib/openstudio-standards/btap/bridging.rb, which relies on
   # the Thermal Bridging & Derating (TBD) gem.
   #
@@ -1171,14 +1405,14 @@ class NECB2011 < Standard
   def apply_thermal_bridging(model: nil,
                              necb_hdd: true,
                              structure: nil,
-                             option: 'none',
+                             option: "none",
                              interpolate: false,
                              wallU: nil,
                              floorU: nil,
                              roofU: nil)
     necb_hdd = true unless [true, false].include?(necb_hdd)
     return true unless option.respond_to?(:to_sym)
-    return true if option.to_s.downcase == 'none'
+    return true if option.to_s.downcase == "none"
 
     hdd    = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
     wallU  = wallU  ? wallU  : max_u_necb("wall", "outdoors", hdd)
@@ -1191,19 +1425,19 @@ class NECB2011 < Standard
     argh[:floors   ] = { uo: floorU }
     argh[:roofs    ] = { uo: roofU  }
 
-    case option.downcase
-    when 'uprate'
-      argh[:walls  ][:ut] = wallU
-      argh[:floors ][:ut] = floorU
-      argh[:roofs  ][:ut] = roofU
-    when 'good'
+    case option.to_s.downcase
+    when "uprate"
+      argh[:walls ][:ut] = wallU
+      argh[:floors][:ut] = floorU
+      argh[:roofs ][:ut] = roofU
+    when "good"
       argh[:quality] = :good
     else
       argh[:quality] = :bad
     end
 
     argh[:interpolate] = interpolate
-    argh[:interpolate] = false unless [true, false].include?(interpolate)
+    argh[:interpolate] = false unless argh[:interpolate] == true
 
     @tbd = BTAP::Bridging.new(model, argh)
 
