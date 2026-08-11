@@ -292,6 +292,7 @@ class NECB2011 < Standard
                                    scale_x: nil,
                                    scale_y: nil,
                                    scale_z: nil,
+                                   footprint_aspect_ratio: nil,
                                    pv_ground_type: nil,
                                    pv_ground_total_area_pv_panels_m2: nil,
                                    pv_ground_tilt_angle: nil,
@@ -364,6 +365,7 @@ class NECB2011 < Standard
                                 scale_x: scale_x,
                                 scale_y: scale_y,
                                 scale_z: scale_z,
+                                footprint_aspect_ratio: footprint_aspect_ratio,
                                 pv_ground_type: pv_ground_type, # Two options: (1) nil/none/false/'NECB_Default', (2) 'add_pv_ground'
                                 pv_ground_total_area_pv_panels_m2: pv_ground_total_area_pv_panels_m2, # Options: (1) nil/none/false, (2) 'NECB_Default' (i.e. building footprint), (3) area value (e.g. 50)
                                 pv_ground_tilt_angle: pv_ground_tilt_angle, # Options: (1) nil/none/false, (2) 'NECB_Default' (i.e. latitude), (3) tilt angle value (e.g. 20)
@@ -447,6 +449,7 @@ class NECB2011 < Standard
                            scale_x: nil,
                            scale_y: nil,
                            scale_z: nil,
+                           footprint_aspect_ratio: nil,
                            nv_type: nil,
                            nv_opening_fraction: nil,
                            nv_temp_out_min: nil,
@@ -480,7 +483,12 @@ class NECB2011 < Standard
     primary_heating_fuel = validate_primary_heating_fuel(primary_heating_fuel: primary_heating_fuel, model: model)
     self.fuel_type_set = SystemFuels.new()
     self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: primary_heating_fuel)
-    clean_and_scale_model(model: model, rotation_degrees: rotation_degrees, scale_x: scale_x, scale_y: scale_y, scale_z: scale_z)
+    clean_and_scale_model(model: model,
+                rotation_degrees: rotation_degrees,
+                scale_x: scale_x,
+                scale_y: scale_y,
+                scale_z: scale_z,
+                footprint_aspect_ratio: footprint_aspect_ratio)
 
     ext_floor_cond           = convert_arg_to_f(variable: ext_floor_cond, default: nil)
     ext_roof_cond            = convert_arg_to_f(variable: ext_roof_cond, default: nil)
@@ -607,7 +615,7 @@ class NECB2011 < Standard
   end
 
   # This method cleans the model of any existing HVAC systems and applies any desired ratation or scaling to the model.
-  def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil)
+  def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil, footprint_aspect_ratio: nil)
     # clean model..
     BTAP::Resources::Envelope::remove_all_envelope_information(model)
     model = OpenstudioStandards::HVAC.remove_all_hvac(model)
@@ -631,9 +639,6 @@ class NECB2011 < Standard
     model.getSpaces.sort.each { |space| space.designSpecificationOutdoorAir(&:remove) }
     model.getThermostatSetpointDualSetpoints.each(&:remove)
 
-    scale_x = 1.0
-    scale_y = 1.0
-    scale_z = 1.0
     # Rotate to model if requested
     rotation_degrees = convert_arg_to_f(variable: rotation_degrees, default: 0.0)
     BTAP::Geometry.rotate_building(model: model, degrees: rotation_degrees) unless rotation_degrees == 0.0
@@ -642,9 +647,10 @@ class NECB2011 < Standard
     scale_x = convert_arg_to_f(variable: scale_x, default: 1.0)
     scale_y = convert_arg_to_f(variable: scale_y, default: 1.0)
     scale_z = convert_arg_to_f(variable: scale_z, default: 1.0)
-    return unless scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
+    BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z) if scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
 
-    BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z)
+    footprint_aspect_ratio = convert_arg_to_f(variable: footprint_aspect_ratio, default: nil)
+    BTAP::Geometry.set_footprint_aspect_ratio(model, footprint_aspect_ratio) unless footprint_aspect_ratio.nil?
   end
 
   def apply_systems_and_efficiencies(model:,
