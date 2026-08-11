@@ -154,6 +154,7 @@ module BTAP
             scale_x: @options[:scale_x],
             scale_y: @options[:scale_y],
             scale_z: @options[:scale_z],
+            footprint_aspect_ratio: @options[:footprint_aspect_ratio],
             pv_ground_type: @options[:pv_ground_type],
             pv_ground_total_area_pv_panels_m2: @options[:pv_ground_total_area_pv_panels_m2],
             pv_ground_tilt_angle: @options[:pv_ground_tilt_angle],

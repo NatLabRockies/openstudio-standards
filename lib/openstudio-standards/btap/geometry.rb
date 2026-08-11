@@ -58,6 +58,45 @@ module BTAP
       return model
     end
 
+    def self.model_horizontal_dimensions(model)
+      bounding_box = OpenStudio::BoundingBox.new
+      model.getSpaces.each do |space|
+        space.surfaces.each do |surface|
+          bounding_box.addPoints(space.transformation * surface.vertices)
+        end
+      end
+
+      raise ArgumentError, 'Cannot calculate footprint dimensions for a model without space geometry.' if bounding_box.isEmpty
+
+      x_dimension = bounding_box.maxX.get - bounding_box.minX.get
+      y_dimension = bounding_box.maxY.get - bounding_box.minY.get
+      if x_dimension <= 0.0 || y_dimension <= 0.0
+        raise ArgumentError, 'Building footprint dimensions must be greater than zero.'
+      end
+
+      return x_dimension, y_dimension
+    end
+
+    def self.set_footprint_aspect_ratio(model, target_aspect_ratio)
+      target_aspect_ratio = target_aspect_ratio.to_f
+      unless target_aspect_ratio.finite? && target_aspect_ratio >= 1.0
+        raise ArgumentError, 'Footprint aspect ratio must be a finite number greater than or equal to 1.0.'
+      end
+
+      x_dimension, y_dimension = model_horizontal_dimensions(model)
+      current_aspect_ratio = [x_dimension, y_dimension].max / [x_dimension, y_dimension].min
+      major_axis_scale = Math.sqrt(target_aspect_ratio / current_aspect_ratio)
+      minor_axis_scale = 1.0 / major_axis_scale
+
+      if x_dimension >= y_dimension
+        scale_model(model, major_axis_scale, minor_axis_scale, 1.0)
+      else
+        scale_model(model, minor_axis_scale, major_axis_scale, 1.0)
+      end
+
+      return model
+    end
+
     def self.get_fwdr(model)
       outdoor_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Outdoors")
       outdoor_walls = BTAP::Geometry::Surfaces::filter_by_surface_types(outdoor_surfaces, "Wall")
