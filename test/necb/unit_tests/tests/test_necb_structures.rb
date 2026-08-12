@@ -20,7 +20,7 @@ class NECB_Structure_Tests < Minitest::Test
     @test_passed = true
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -31,18 +31,18 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',
-      # 'NorthernHealthCare',
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
+      'SmallOffice',
       'Warehouse'
     ]
 
@@ -55,7 +55,7 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @options = [
-      # "",
+      "",
       "structure"
     ]
 
@@ -381,6 +381,7 @@ class NECB_Structure_Tests < Minitest::Test
 
                     if tP == "walls"
                       wall_m2 += m2
+                      err_msg = "BTAP wall construction Uo (#{cas})"
                       assert_equal(uo.round(3), 0.210, err_msg)
                       err_msg = "BTAP wall construction ID (#{cas})"
                       refute_empty(xd, err_msg)
@@ -388,6 +389,7 @@ class NECB_Structure_Tests < Minitest::Test
                       assert_includes(xds, xd.get, err_msg)
                     else # roofs
                       roof_m2 += m2
+                      err_msg = "BTAP roof construction Uo (#{cas})"
                       assert_equal(uo.round(3), 0.162, err_msg)
                     end
                   else

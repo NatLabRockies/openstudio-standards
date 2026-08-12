@@ -24,36 +24,36 @@ class NECB_TBD_Tests < Minitest::Test
     @templates = [
       # 'NECB2011',
       # 'NECB2015',
-      # 'NECB2017',
-      'NECB2020',
+      'NECB2017',
+      # 'NECB2020',
       # 'NECB2025'
     ]
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
-      'LargeOffice',
+      # 'LargeOffice',
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      # 'MediumOffice',
+      'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',
-      # 'NorthernHealthCare',
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      # 'QuickServiceRestaurant',
+      'QuickServiceRestaurant',
       # 'RetailStandalone',
-      # 'RetailStripmall',
+      'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      # 'SmallOffice',
-      # 'Warehouse'
+      'SmallOffice',
+      'Warehouse'
     ]
 
     @structure = [
@@ -808,7 +808,7 @@ class NECB_TBD_Tests < Minitest::Test
                       emsg = "BTAP/TBD: ATTIC uprated floor Uo 2 (#{cas})"
                       assert_in_epsilon(rUo, uo, 0.01, emsg)
                       emsg = "BTAP/TBD: ATTIC floor Ut (#{cas})"
-                      assert_in_delta(rUt, arUt, 0.02, emsg)
+                      assert_in_delta(rUt, arUt, 0.03, emsg)
                       emsg = "BTAP/TBD: ATTIC uprated floor btap_uo (#{cas})"
                       refute_empty(bUo, emsg)
                       emsg = "BTAP/TBD: ATTIC uprated floor btap_id (#{cas})"

@@ -17,8 +17,6 @@
 # *  Foundation Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 # **************************************************************************** /
 
-require "csv"
-
 module BTAP
   module ActivityData
     ##
@@ -517,7 +515,6 @@ module BTAP
     def spaceActivities(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Model
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"
@@ -606,7 +603,6 @@ module BTAP
     def buildingActivity(model = nil)
       lgs = @feedback[:logs]
       mth = "BTAP::Activity::#{__callee__}"
-      cl  = OpenStudio::Model::Model
 
       unless model.is_a?(OpenStudio::Model::Model)
         lgs << "Invalid or empty OpenStudio model (#{mth})"

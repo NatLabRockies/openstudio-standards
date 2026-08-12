@@ -16,9 +16,6 @@ class NECB2011 < Standard
   attr_accessor :space_multiplier_map
   attr_accessor :fuel_type_set
 
-  # New BTAP::Defaults instance - see 'defaults.rb' & 'necb_defaults.csv'.
-  attr_accessor :defaults
-
   # This is a helper method to convert arguments to float.
   #   If variable undefined set to the default
   #   If already a numeric then return it
@@ -173,22 +170,6 @@ class NECB2011 < Standard
     # puts "loaded these tables..."
     # puts @standards_data.keys.size
     # raise("tables not all loaded in parent #{}") if @standards_data.keys.size < 24
-  end
-
-  ##
-  # Overrides BTAP/NECB defaults with custom ones. This could also be set at
-  # initialization ...
-  #
-  # @param [BTAP::Defaults] BTAP/NECB core parameters - see defaults.rb
-  #
-  # @return [Boolean] true if successful.
-  def set_defaults(defaults = nil)
-    return false unless defaults.is_a?(BTAP::Defaults)
-    # @todo: 'BTAP::Defaults.valid?' method to check user-customized defaults.
-
-    @defaults = defaults
-
-    true
   end
 
   def get_all_spacetype_names
@@ -494,6 +475,7 @@ class NECB2011 < Standard
                            airloop_fancoils_heating: nil,
                            oerd_utility_pricing: nil)
 
+    oerd_utility_pricing = false
     apply_weather_data(model: model,
                        epw_file: epw_file,
                        custom_weather_folder: custom_weather_folder,
@@ -1554,10 +1536,8 @@ class NECB2011 < Standard
   end
 
   def apply_loop_pump_power(model:, sizing_run_dir:)
-    # Remove duplicate materials and constructions
-    # Note For NECB2015 This is the 2nd time this method is bieng run.
-    # First time it ran in the super() within model_apply_standard() method
-    # model = return BTAP::FileIO::remove_duplicate_materials_and_constructions(model)
+    # Note For NECB2015 This is the 2nd time this method is being run.
+    # First time it ran in the super() within model_apply_standard() method.
     return model
   end
 
@@ -1596,7 +1576,6 @@ class NECB2011 < Standard
   # This method will validate that the space types in the model are indeed the correct NECB spacetypes names.
   def validate_and_upate_space_types(model)
     space_type_vintage = determine_spacetype_vintage(model)
-
     if space_type_vintage.nil?
       message = "These some of the spacetypes in the model are not part of any necb standard.\n  Please ensure all spacetype in model are correct."
       puts "Error: #{message}"
@@ -1614,7 +1593,6 @@ class NECB2011 < Standard
       st_target_vintage_string = "#{self.class.name}_space_type"
       bt_target_vintage_string = "#{self.class.name}_building_type"
       space_type_upgrade_map = @standards_data['space_type_upgrade_map']
-
       model.getSpaceTypes.sort.each do |st|
         space_type_map = space_type_upgrade_map.detect { |row| (row[st_model_vintage_string] == st.standardsSpaceType.get.to_s) && (row[bt_model_vintage_string] == st.standardsBuildingType.get.to_s) }
         st.setStandardsBuildingType(space_type_map[bt_target_vintage_string].to_s.strip)

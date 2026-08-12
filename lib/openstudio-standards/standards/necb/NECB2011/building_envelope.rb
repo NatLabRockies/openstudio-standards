@@ -1182,38 +1182,47 @@ class NECB2011
 
   def apply_standard_construction_properties(model:,
                                              runner: nil,
-                                             # ext surfaces
+
+                                             # Exterior surfaces
                                              ext_wall_cond: nil,
                                              ext_floor_cond: nil,
                                              ext_roof_cond: nil,
-                                             # ground surfaces
+
+                                             # Ground surfaces
                                              ground_wall_cond: nil,
                                              ground_floor_cond: nil,
                                              ground_roof_cond: nil,
-                                             # fixed Windows
+
+                                             # Fixed windows
                                              fixed_window_cond: nil,
                                              fixed_wind_solar_trans: nil,
                                              fixed_wind_vis_trans: nil,
-                                             # operable windows
+
+                                             # Operable windows
                                              operable_wind_solar_trans: nil,
                                              operable_window_cond: nil,
                                              operable_wind_vis_trans: nil,
-                                             # glass doors
+
+                                             # Glass doors
                                              glass_door_cond: nil,
                                              glass_door_solar_trans: nil,
                                              glass_door_vis_trans: nil,
-                                             # opaque doors
+
+                                             # Opaque doors
                                              door_construction_cond: nil,
                                              overhead_door_cond: nil,
-                                             # skylights
+
+                                             # Skylights
                                              skylight_cond: nil,
                                              skylight_solar_trans: nil,
                                              skylight_vis_trans: nil,
-                                             # tubular daylight dome
+
+                                             # Tubular daylight domes
                                              tubular_daylight_dome_cond: nil,
                                              tubular_daylight_dome_solar_trans: nil,
                                              tubular_daylight_dome_vis_trans: nil,
-                                             # tubular daylight diffuser
+
+                                             # Tubular daylight diffusers
                                              tubular_daylight_diffuser_cond: nil,
                                              tubular_daylight_diffuser_solar_trans: nil,
                                              tubular_daylight_diffuser_vis_trans: nil,
@@ -1226,12 +1235,12 @@ class NECB2011
         BTAP.runner_register('Error', 'Weather file is not defined. Please ensure the weather file is defined and exists.', runner)
         return false
       end
-
-      # hdd required in scope for eval function.
       hdd = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
-      # Lambdas are preferred over methods in methods for small utility methods.
-      correct_cond = lambda do |conductivity, surface_type|
-        return conductivity.nil? || conductivity.to_f <= 0.0 || conductivity == 'NECB_Default' ? eval(model_find_objects(@standards_data['surface_thermal_transmittance'], surface_type)[0]['formula']) : conductivity.to_f
+      correct_cond = lambda do |conductivity, surface_type, boundary_condition|
+        return conductivity.nil? ||
+               conductivity.to_f <= 0.0 ||
+               conductivity == 'NECB_Default' ?
+               max_u_necb(surface_type, boundary_condition, hdd) : conductivity.to_f
       end
 
       # Converts trans and vis to nil if requesting default.. or casts the string to a float.
@@ -1239,45 +1248,54 @@ class NECB2011
         return value.nil? || value.to_f <= 0.0 || value == 'NECB_Default' ? nil : value.to_f
       end
 
-      BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set!(model: model,
-                                                                                              name: "#{default_surface_construction_set.name.get} at hdd = #{get_necb_hdd18(model: model, necb_hdd: necb_hdd)}",
-                                                                                              default_surface_construction_set: default_surface_construction_set,
-                                                                                              # ext surfaces
-                                                                                              ext_wall_cond: correct_cond.call(ext_wall_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Wall'),
-                                                                                              ext_floor_cond: correct_cond.call(ext_floor_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Floor'),
-                                                                                              ext_roof_cond: correct_cond.call(ext_roof_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'RoofCeiling'),
-                                                                                              # ground surfaces
-                                                                                              ground_wall_cond: correct_cond.call(ground_wall_cond, 'boundary_condition' => 'Ground', 'surface' => 'Wall'),
-                                                                                              ground_floor_cond: correct_cond.call(ground_floor_cond, 'boundary_condition' => 'Ground', 'surface' => 'Floor'),
-                                                                                              ground_roof_cond: correct_cond.call(ground_roof_cond, 'boundary_condition' => 'Ground', 'surface' => 'RoofCeiling'),
-                                                                                              # fixed Windows
-                                                                                              fixed_window_cond: correct_cond.call(fixed_window_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              fixed_wind_solar_trans: correct_vis_trans.call(fixed_wind_solar_trans),
-                                                                                              fixed_wind_vis_trans: correct_vis_trans.call(fixed_wind_vis_trans),
-                                                                                              # operable windows
-                                                                                              operable_wind_solar_trans: correct_vis_trans.call(operable_wind_solar_trans),
-                                                                                              operable_window_cond: correct_cond.call(fixed_window_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              operable_wind_vis_trans: correct_vis_trans.call(operable_wind_vis_trans),
-                                                                                              # glass doors
-                                                                                              glass_door_cond: correct_cond.call(glass_door_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              glass_door_solar_trans: correct_vis_trans.call(glass_door_solar_trans),
-                                                                                              glass_door_vis_trans: correct_vis_trans.call(glass_door_vis_trans),
-                                                                                              # opaque doors
-                                                                                              door_construction_cond: correct_cond.call(door_construction_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Door'),
-                                                                                              overhead_door_cond: correct_cond.call(overhead_door_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Door'),
-                                                                                              # skylights
-                                                                                              skylight_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              skylight_solar_trans: correct_vis_trans.call(skylight_solar_trans),
-                                                                                              skylight_vis_trans: correct_vis_trans.call(skylight_vis_trans),
-                                                                                              # tubular daylight dome
-                                                                                              tubular_daylight_dome_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              tubular_daylight_dome_solar_trans: correct_vis_trans.call(tubular_daylight_dome_solar_trans),
-                                                                                              tubular_daylight_dome_vis_trans: correct_vis_trans.call(tubular_daylight_dome_vis_trans),
-                                                                                              # tubular daylight diffuser
-                                                                                              tubular_daylight_diffuser_cond: correct_cond.call(skylight_cond, 'boundary_condition' => 'Outdoors', 'surface' => 'Window'),
-                                                                                              tubular_daylight_diffuser_solar_trans: correct_vis_trans.call(tubular_daylight_diffuser_solar_trans),
-                                                                                              tubular_daylight_diffuser_vis_trans: correct_vis_trans.call(tubular_daylight_diffuser_vis_trans))
+      BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set!(
+        model: model,
+        name: "#{default_surface_construction_set.name.get} at hdd = #{hdd}",
+        default_surface_construction_set: default_surface_construction_set,
+
+        # Exterior surfaces
+        ext_wall_cond: correct_cond.call(ext_wall_cond, 'wall', 'outdoors'),
+        ext_floor_cond: correct_cond.call(ext_floor_cond, 'floor', 'outdoors'),
+        ext_roof_cond: correct_cond.call(ext_roof_cond, 'roofceiling', 'outdoors'),
+
+        # Ground surfaces
+        ground_wall_cond: correct_cond.call(ground_wall_cond, 'wall', 'ground'),
+        ground_floor_cond: correct_cond.call(ground_floor_cond, 'floor', 'ground'),
+        ground_roof_cond: correct_cond.call(ground_roof_cond, 'roofceiling', 'ground'),
+        fixed_window_cond: correct_cond.call(fixed_window_cond, 'window', 'outdoors'),
+        fixed_wind_solar_trans: correct_vis_trans.call(fixed_wind_solar_trans),
+        fixed_wind_vis_trans: correct_vis_trans.call(fixed_wind_vis_trans),
+
+        # Operable windows
+        operable_wind_solar_trans: correct_vis_trans.call(operable_wind_solar_trans),
+        operable_window_cond: correct_cond.call(fixed_window_cond, 'window', 'outdoors'),
+        operable_wind_vis_trans: correct_vis_trans.call(operable_wind_vis_trans),
+
+        # Glass doors
+        glass_door_cond: correct_cond.call(glass_door_cond, 'window', 'outdoors'),
+        glass_door_solar_trans: correct_vis_trans.call(glass_door_solar_trans),
+        glass_door_vis_trans: correct_vis_trans.call(glass_door_vis_trans),
+
+        # Opaque doors
+        door_construction_cond: correct_cond.call(door_construction_cond, 'door', 'outdoors'),
+        overhead_door_cond: correct_cond.call(overhead_door_cond, 'door', 'outdoors'),
+
+        # Skylights
+        skylight_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        skylight_solar_trans: correct_vis_trans.call(skylight_solar_trans),
+        skylight_vis_trans: correct_vis_trans.call(skylight_vis_trans),
+
+        # Tubular daylight domes
+        tubular_daylight_dome_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        tubular_daylight_dome_solar_trans: correct_vis_trans.call(tubular_daylight_dome_solar_trans),
+        tubular_daylight_dome_vis_trans: correct_vis_trans.call(tubular_daylight_dome_vis_trans),
+
+        # Tubular daylight diffusers
+        tubular_daylight_diffuser_cond: correct_cond.call(skylight_cond, 'window', 'outdoors'),
+        tubular_daylight_diffuser_solar_trans: correct_vis_trans.call(tubular_daylight_diffuser_solar_trans),
+        tubular_daylight_diffuser_vis_trans: correct_vis_trans.call(tubular_daylight_diffuser_vis_trans))
     end
+
     # sets all surfaces to use default constructions sets except adiabatic, where it does a hard assignment of the interior wall construction type.
     model.getPlanarSurfaces.sort.each(&:resetConstruction)
     # if the default construction set is defined..try to assign the interior wall to the adiabatic surfaces
@@ -1621,7 +1639,26 @@ class NECB2011
   #           like exterior walls). The method returns a building 'gross roof area' (see attr_reader :osut), which
   #           excludes the area of attic roof overhangs.
   def apply_max_srr_nrcan(model:, srr_lim:, srr_opt: '')
+    # Check if default construction set exists
+    unless model.getBuilding.defaultConstructionSet.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No default construction set defined. Cannot apply SRR.')
+      return false
+    end
+
     construct_set = model.getBuilding.defaultConstructionSet.get
+
+    # Check if skylight construction exists
+    unless construct_set.defaultExteriorSubSurfaceConstructions.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No default exterior subsurface constructions defined. Cannot apply SRR.')
+      return false
+    end
+
+    ext_subsurface = construct_set.defaultExteriorSubSurfaceConstructions.get
+    unless ext_subsurface.skylightConstruction.is_initialized
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.model.Model', 'No skylight construction defined. Cannot apply SRR.')
+      return false
+    end
+
     skylight_construct_set = construct_set.defaultExteriorSubSurfaceConstructions.get.skylightConstruction.get
 
     unless srr_opt.to_s.downcase == 'osut' # OPTION A
