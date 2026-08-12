@@ -295,21 +295,270 @@ class NECB2011
   ##
   # Returns NECB-required U-factor, based on surface type, outside boundary
   # condition, heating-degree-days (18C) and NECB edition (template). The bulk
-  # of this should be a CSV file.
+  # of this should be a CSV, JSON or YAML file.
   #
   # @author denis@rd2.ca
   #
   # @param stype [#to_s] surface type, e.g. "roofceiling"
-  # @param condition [#to_s] outside boundary condition, e.g. "outdoors"
+  # @param bc [#to_s] outside boundary condition, e.g. "outdoors"
   # @param hdd [#to_f] heating-degree-days 18C
   #
   # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
-  def max_u_necb(stype = "roofceiling", condition = "outdoors", hdd = 8000)
+  def max_u_necb(stype = "roofceiling", bc = "outdoors", hdd = 8000)
+    data = {}
+    hdd  = hdd.respond_to?(:to_f) ? hdd.to_f : 8000
+
+    # Admissible surface types.
+    stypes = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
+    stype  = stype.respond_to?(:to_sym) ? stype.to_s.downcase : "roofceiling"
+    stype  = stypes.include?(stype) ? stype : "roofceiling"
+
+    # Admissible outside boundary conditions.
+    bcs = ["outdoors", "ground"]
+    bc  = bc.respond_to?(:to_sym) ? bc.to_s.downcase : "outdoors"
+    bc  = bcs.include?(bc) ? bc : "outdoors"
+
+    templates = ["NECB2011", "NECB2015", "NECB2017", "NECB2020", "NECB2025"]
+
+    # Initialize data.
+    templates.each do |tp|
+      data[tp] = {}
+
+      bcs.each do |cd|
+        data[tp][cd] = {}
+
+        stypes.each { |st| data[tp][cd][st] = {} }
+      end
+    end
+
+    # From NECB Part 3 tables. Moving away from BTAP formulas.
+    data["NECB2011"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2011"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2011"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2011"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2011"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2011"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][3000] = 0.227
+    data["NECB2011"]["outdoors"]["roofceiling"][4000] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][5000] = 0.183
+    data["NECB2011"]["outdoors"]["roofceiling"][6000] = 0.162
+    data["NECB2011"]["outdoors"]["roofceiling"][7000] = 0.162
+    data["NECB2011"]["outdoors"]["roofceiling"][9999] = 0.142
+    data["NECB2011"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2011"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2011"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2011"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2011"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2011"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2011"]["outdoors"]["window"     ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["window"     ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["window"     ][9999] = 1.600
+    data["NECB2011"]["outdoors"]["skylight"   ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["skylight"   ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["skylight"   ][9999] = 1.600
+    data["NECB2011"]["outdoors"]["door"       ][3000] = 2.400
+    data["NECB2011"]["outdoors"]["door"       ][4000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][5000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][6000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][7000] = 2.200
+    data["NECB2011"]["outdoors"]["door"       ][9999] = 1.600
+    data["NECB2011"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2011"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2011"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2011"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2011"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2011"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2011"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2011"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2011"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2011"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2015"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2015"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2015"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2015"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2015"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2015"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][3000] = 0.227
+    data["NECB2015"]["outdoors"]["roofceiling"][4000] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][5000] = 0.183
+    data["NECB2015"]["outdoors"]["roofceiling"][6000] = 0.162
+    data["NECB2015"]["outdoors"]["roofceiling"][7000] = 0.162
+    data["NECB2015"]["outdoors"]["roofceiling"][9999] = 0.142
+    data["NECB2015"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2015"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2015"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2015"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2015"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2015"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2015"]["outdoors"]["window"     ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["window"     ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["window"     ][9999] = 1.600
+    data["NECB2015"]["outdoors"]["skylight"   ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["skylight"   ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["skylight"   ][9999] = 1.600
+    data["NECB2015"]["outdoors"]["door"       ][3000] = 2.400
+    data["NECB2015"]["outdoors"]["door"       ][4000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][5000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][6000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][7000] = 2.200
+    data["NECB2015"]["outdoors"]["door"       ][9999] = 1.600
+    data["NECB2015"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2015"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2015"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2015"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2015"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2015"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2015"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2015"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2015"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2015"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2017"]["outdoors"]["wall"       ][3000] = 0.315
+    data["NECB2017"]["outdoors"]["wall"       ][4000] = 0.278
+    data["NECB2017"]["outdoors"]["wall"       ][5000] = 0.247
+    data["NECB2017"]["outdoors"]["wall"       ][6000] = 0.210
+    data["NECB2017"]["outdoors"]["wall"       ][7000] = 0.210
+    data["NECB2017"]["outdoors"]["wall"       ][9999] = 0.183
+    data["NECB2017"]["outdoors"]["roofceiling"][3000] = 0.193
+    data["NECB2017"]["outdoors"]["roofceiling"][4000] = 0.156
+    data["NECB2017"]["outdoors"]["roofceiling"][5000] = 0.156
+    data["NECB2017"]["outdoors"]["roofceiling"][6000] = 0.138
+    data["NECB2017"]["outdoors"]["roofceiling"][7000] = 0.138
+    data["NECB2017"]["outdoors"]["roofceiling"][9999] = 0.121
+    data["NECB2017"]["outdoors"]["floor"      ][3000] = 0.227
+    data["NECB2017"]["outdoors"]["floor"      ][4000] = 0.183
+    data["NECB2017"]["outdoors"]["floor"      ][5000] = 0.183
+    data["NECB2017"]["outdoors"]["floor"      ][6000] = 0.162
+    data["NECB2017"]["outdoors"]["floor"      ][7000] = 0.162
+    data["NECB2017"]["outdoors"]["floor"      ][9999] = 0.142
+    data["NECB2017"]["outdoors"]["window"     ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["window"     ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["window"     ][9999] = 1.400
+    data["NECB2017"]["outdoors"]["skylight"   ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["skylight"   ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["skylight"   ][9999] = 1.400
+    data["NECB2017"]["outdoors"]["door"       ][3000] = 2.100
+    data["NECB2017"]["outdoors"]["door"       ][4000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][5000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][6000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][7000] = 1.900
+    data["NECB2017"]["outdoors"]["door"       ][9999] = 1.400
+    data["NECB2017"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2017"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2017"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2017"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2017"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2017"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2017"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2017"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2017"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2017"]["ground"  ]["floor"      ][9999] = 0.379
+
+    data["NECB2020"]["outdoors"]["wall"       ][3000] = 0.290
+    data["NECB2020"]["outdoors"]["wall"       ][4000] = 0.265
+    data["NECB2020"]["outdoors"]["wall"       ][5000] = 0.240
+    data["NECB2020"]["outdoors"]["wall"       ][6000] = 0.215
+    data["NECB2020"]["outdoors"]["wall"       ][7000] = 0.190
+    data["NECB2020"]["outdoors"]["wall"       ][9999] = 0.165
+    data["NECB2020"]["outdoors"]["roofceiling"][3000] = 0.164
+    data["NECB2020"]["outdoors"]["roofceiling"][4000] = 0.156
+    data["NECB2020"]["outdoors"]["roofceiling"][5000] = 0.138
+    data["NECB2020"]["outdoors"]["roofceiling"][6000] = 0.121
+    data["NECB2020"]["outdoors"]["roofceiling"][7000] = 0.117
+    data["NECB2020"]["outdoors"]["roofceiling"][9999] = 0.110
+    data["NECB2020"]["outdoors"]["floor"      ][3000] = 0.193
+    data["NECB2020"]["outdoors"]["floor"      ][4000] = 0.175
+    data["NECB2020"]["outdoors"]["floor"      ][5000] = 0.156
+    data["NECB2020"]["outdoors"]["floor"      ][6000] = 0.138
+    data["NECB2020"]["outdoors"]["floor"      ][7000] = 0.121
+    data["NECB2020"]["outdoors"]["floor"      ][9999] = 0.117
+    data["NECB2020"]["outdoors"]["window"     ][3000] = 1.900
+    data["NECB2020"]["outdoors"]["window"     ][4000] = 1.900
+    data["NECB2020"]["outdoors"]["window"     ][5000] = 1.730
+    data["NECB2020"]["outdoors"]["window"     ][6000] = 1.730
+    data["NECB2020"]["outdoors"]["window"     ][7000] = 1.440
+    data["NECB2020"]["outdoors"]["window"     ][9999] = 1.440
+    data["NECB2020"]["outdoors"]["skylight"   ][3000] = 2.690
+    data["NECB2020"]["outdoors"]["skylight"   ][4000] = 2.690
+    data["NECB2020"]["outdoors"]["skylight"   ][5000] = 2.410
+    data["NECB2020"]["outdoors"]["skylight"   ][6000] = 2.410
+    data["NECB2020"]["outdoors"]["skylight"   ][7000] = 2.010
+    data["NECB2020"]["outdoors"]["skylight"   ][9999] = 2.010
+    data["NECB2020"]["outdoors"]["door"       ][3000] = 2.120
+    data["NECB2020"]["outdoors"]["door"       ][4000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][5000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][6000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][7000] = 1.900
+    data["NECB2020"]["outdoors"]["door"       ][9999] = 1.440
+    data["NECB2020"]["ground"  ]["wall"       ][3000] = 0.568
+    data["NECB2020"]["ground"  ]["wall"       ][4000] = 0.379
+    data["NECB2020"]["ground"  ]["wall"       ][5000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][6000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][7000] = 0.284
+    data["NECB2020"]["ground"  ]["wall"       ][9999] = 0.210
+    data["NECB2020"]["ground"  ]["roofceiling"][3000] = 0.568
+    data["NECB2020"]["ground"  ]["roofceiling"][4000] = 0.379
+    data["NECB2020"]["ground"  ]["roofceiling"][5000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][6000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][7000] = 0.284
+    data["NECB2020"]["ground"  ]["roofceiling"][9999] = 0.210
+    data["NECB2020"]["ground"  ]["floor"      ][3000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][4000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][5000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][6000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][7000] = 0.757
+    data["NECB2020"]["ground"  ]["floor"      ][9999] = 0.379
 
     # Return required U-factor if provided HDD < stored HDD.
-    @standards_data["surface_thermal_transmittance"][condition][stype].transform_keys(&:to_i).each { |hdd18, u|
-      return u if hdd < hdd18 }
-    return 0.110
+    tplate = @template
+    tplate = "NECB2020" if tplate == "NECB2025"
+
+    data[tplate][bc][stype].each { |hdd18, u| return u if hdd < hdd18 }
+
+    0.110
   end
 
   ##

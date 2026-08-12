@@ -42,7 +42,13 @@ class NECB_Dimensions_Tests < Minitest::Test
 
       err_msg = "BTAP/Dimensions: empty space '#{id}' (#{cas})?"
       refute_empty(space, err_msg)
-      space  = space.get
+      space = space.get
+
+      # Un-initialized AdditionalProperties.
+      err_msg = "BTAP/Dimensions: height property '#{id}' (#{cas})!"
+      refute(space.additionalProperties.hasFeature("space_height"), err_msg)
+      err_msg = "BTAP/Dimensions: width property '#{id}' (#{cas})!"
+      refute(space.additionalProperties.hasFeature("space_width"), err_msg)
 
       height = BTAP::Geometry::Spaces.space_height(space)
       width  = BTAP::Geometry::Spaces.space_width(space)
@@ -65,6 +71,24 @@ class NECB_Dimensions_Tests < Minitest::Test
       assert_in_delta(height, hauteur, 0.01, err_msg)
       err_msg = "BTAP/Dimensions: width '#{id}' (#{cas})?"
       assert_in_delta(width, largeur, 0.01, err_msg)
+
+      # Initialized AdditionalProperties.
+      err_msg = "BTAP/Dimensions: height property '#{id}' (#{cas})?"
+      assert(space.additionalProperties.hasFeature("space_height"), err_msg)
+      err_msg = "BTAP/Dimensions: width property '#{id}' (#{cas})?"
+      assert(space.additionalProperties.hasFeature("space_width"), err_msg)
+
+      hgt = space.additionalProperties.getFeatureAsDouble("space_height")
+      wdt = space.additionalProperties.getFeatureAsDouble("space_width")
+      err_msg = "BTAP/Dimensions: height feature '#{id}' (#{cas})?"
+      refute_empty(hgt, err_msg)
+      err_msg = "BTAP/Dimensions: width feature '#{id}' (#{cas})?"
+      refute_empty(wdt, err_msg)
+
+      err_msg = "BTAP/Dimensions: height '#{id}' (#{cas})!"
+      assert_in_delta(height, hgt.get, 0.01, err_msg)
+      err_msg = "BTAP/Dimensions: width '#{id}' (#{cas})!"
+      assert_in_delta(width, wdt.get, 0.01, err_msg)
 
       # Higher level feedback.
       fdback << "#{cas} : #{id} : height = #{height.round(2)} : width = #{width.round(2)}"

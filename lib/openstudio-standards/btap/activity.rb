@@ -34,8 +34,8 @@ module BTAP
     #   the repair or servicing of such vehicles.
     #
     # This mismatch, and other related issues of a similar nature, make it
-    # challenging to cross-compare NECB editions, for instance. The 'exact' NECB
-    # labels shouldn't matter - they almost always reference the same
+    # challenging to cross-compare NECB editions for instance. The 'exact' NECB
+    # spacetype strings shouldn't matter - they almost always reference the same
     # building 'activity' (e.g. a facility where vehicles are parked/stored).
     # BTAP should instead rely on abstract 'activity' designations, e.g.
     # 'parking'. This requires module/class methods to extract specific keywords
@@ -50,6 +50,7 @@ module BTAP
     # & large-scale "housing"). See lib/openstudio-standards/btap/structure.rb.
     @@data = {bldg: {}, space: {}, ancillaries: [], auxiliaries: []}
 
+    # Hard setting path for both files (temporary @todo).
     @@data[:bldg ][:file      ] = Paths::NECB_BUILDING_TYPES_PATH
     @@data[:space][:file      ] = Paths::NECB_SPACE_TYPES_PATH
     @@data[:bldg ][:table     ] = nil
@@ -221,7 +222,7 @@ module BTAP
       # share many features (e.g. sleeping, showers), yet each remains specific
       # to an NECB space type entry (as required).
       table.each do |row|
-        key = row[0]
+        key = row[0].to_s
         str = key.split("::")
 
         activity = str[0].to_s
@@ -415,16 +416,16 @@ module BTAP
   class BTAP::Activity
     extend ActivityData
 
-    # @return [String] assigned or inferred building ACTIVITY (e.g. "warehouse")
+    # @return [String] assigned or inferred building ACTIVITY, e.g. "warehouse"
     attr_reader :activity
 
-    # @return [Hash] collection of space ACTIVITIES (e.g. "bulk::warehouse")
+    # @return [Hash] collection of space ACTIVITIES, e.g. "bulk::warehouse"
     attr_reader :activities
 
-    # @return [String] building type CATEGORY (e.g. "industry")
+    # @return [String] building type CATEGORY, e.g. "industry"
     attr_reader :category
 
-    # @return [Float] expected non-occupant liveload (e.g. 90 kg/m2)
+    # @return [Float] expected non-occupant liveload, e.g. 90 kg/m2
     attr_reader :liveload
 
     # @return [Hash] logged messages
