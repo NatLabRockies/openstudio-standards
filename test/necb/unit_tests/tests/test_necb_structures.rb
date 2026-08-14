@@ -50,7 +50,7 @@ class NECB_Structure_Tests < Minitest::Test
       # "NECB2011",
       "NECB2015",
       # "NECB2017",
-      # "NECB2020",
+      "NECB2020",
       # "NECB2025"
     ]
 
@@ -475,7 +475,7 @@ class NECB_Structure_Tests < Minitest::Test
               # NECB2015: No uprating (Uo == NECB prescriptive requirements).
               if template == "NECB2015"
                 slab_m2  = 0
-                floor_m2 = 0 # insulated attic 'floors' - no uninsulated 'roofs'
+                floor_m2 = 0 # insulated attic 'floors' - no insulated 'roofs'
 
                 cs.each do |c|
                   id = c.nameString

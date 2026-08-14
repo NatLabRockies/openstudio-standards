@@ -24,8 +24,8 @@ class NECB_TBD_Tests < Minitest::Test
     @templates = [
       # 'NECB2011',
       # 'NECB2015',
-      'NECB2017',
-      # 'NECB2020',
+      # 'NECB2017',
+      'NECB2020',
       # 'NECB2025'
     ]
 
