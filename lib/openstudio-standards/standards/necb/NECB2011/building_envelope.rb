@@ -294,8 +294,7 @@ class NECB2011
 
   ##
   # Returns NECB-required U-factor, based on surface type, outside boundary
-  # condition, heating-degree-days (18C) and NECB edition (template). The bulk
-  # of this should be a CSV, JSON or YAML file.
+  # condition and heating-degree-days (18C).
   #
   # @author nicholas.pneumaticos@nrcan-rncan.gc.ca
   #
