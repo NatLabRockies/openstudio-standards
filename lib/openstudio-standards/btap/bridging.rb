@@ -669,9 +669,7 @@ module BTAP
         TBD.process(mdl, args)
 
         # If uprating is successful, TBD 'args' hash holds (new) uprated Uo
-        # keys/values for :walls, :floors and/or :roofs. In most cases, uprating
-        # tends to fail for walls rather than roofs or floors, due to the
-        # typically larger density of linear thermal bridging per surface area.
+        # keys/values for :walls, :floors and/or :roofs.
         complies = true
 
         # Even if all constructions were successfully uprated by TBD, BTAP
@@ -741,15 +739,15 @@ module BTAP
               end
             end
           end
-
-          complies = false unless comply[stypes]
         end
 
         # Skip if first iteration fails.
         next if i.zero? && complies == false
 
+        # Reset compliance flag.
+
         @model[:stypes].each do |stypes, u|
-          comply[stypes] = true
+          # comply[stypes] = true
 
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
@@ -775,6 +773,7 @@ module BTAP
             else
               bUo = lowest_uo(bID)
               comply[stypes] = false
+              complies = false
 
               # Fallback.
               @model[:building][stypes][:compliant] = false
@@ -789,7 +788,7 @@ module BTAP
                       end
 
               aOPTs         = {} # attic
-              aOPTs[:id   ] = @model[:attic][stypes][:id]
+              aOPTs[:id   ] = @model[:attic][types][:id]
               aOPTs[:stype] = types
               aOPTs[:uo   ] = target
               aID = costed_assembly(aOPTs)
@@ -805,7 +804,8 @@ module BTAP
                 @model[:attic][types][:uo       ] = aUo
               else
                 aUo = lowest_uo(aID)
-                comply[stypes] = false
+                comply[types] = false
+                complies = false
 
                 # Fallback.
                 @model[:attic][types][:compliant] = false
@@ -832,6 +832,7 @@ module BTAP
               else
                 sUo = lowest_uo(sID)
                 comply[stypes] = false
+                complies = false
 
                 # Fallback.
                 sp[stypes][:compliant] = false
@@ -840,6 +841,7 @@ module BTAP
             end
           else
             comply[stypes] = false
+            complies = false
 
             bID = @model[:building][stypes][:id]
             bUo = lowest_uo(bID)
@@ -909,8 +911,8 @@ module BTAP
         bUo  = @model[:building][stypes][:uo]
         bRSI = TBD.resetUo(bLC, bFr, bIx, bUo)
 
-        # Re/set to each construction the following AdditionalProperties:
-        bLC.additionalProperties.setFeature("btap_uo", bUo)
+        # Re/set Uo as AdditionalProperty:
+        addprop(bLC, "btap_uo", bUo)
 
         # Repeat for attics (if applicable).
         unless @model[:attic][stypes].empty?
@@ -926,8 +928,8 @@ module BTAP
           aUo  = @model[:attic][types][:uo]
           aRSI = TBD.resetUo(aLC, aFr, aIx, aUo)
 
-          # Re/set to each construction the following AdditionalProperties:
-          aLC.additionalProperties.setFeature("btap_uo", aUo)
+          # Re/set Uo as AdditionalProperty:
+          addprop(aLC, "btap_uo", aUo)
         end
 
         # Repeat for customized spaces (if applicable).
@@ -938,8 +940,8 @@ module BTAP
           sUo = sp[stypes][:uo]
           sRSI = TBD.resetUo(sLC, sFr, sIx, sUo)
 
-          # Re/set to each construction the following AdditionalProperties:
-          sLC.additionalProperties.setFeature("btap_uo", sUo)
+          # Re/set Uo as AdditionalProperty:
+          addprop(sLC, "btap_uo", sUo)
         end
       end
 
@@ -1385,11 +1387,11 @@ module BTAP
           @model[:attic][:roofs ][:film] = rFR
           @model[:attic][:floors][:film] = fFR
           @model[:attic][:walls ][:ut  ] = wUt
-          @model[:attic][:roofs ][:ut  ] = rUt
-          @model[:attic][:floors][:ut  ] = fUt
+          @model[:attic][:roofs ][:ut  ] = fUt
+          @model[:attic][:floors][:ut  ] = rUt
           @model[:attic][:walls ][:uo  ] = wUo
-          @model[:attic][:roofs ][:uo  ] = rUo
-          @model[:attic][:floors][:uo  ] = fUo
+          @model[:attic][:roofs ][:uo  ] = fUo
+          @model[:attic][:floors][:uo  ] = rUo
         end
       end
 
@@ -1800,7 +1802,7 @@ module BTAP
 
           tag = "PSI" + type.to_s + i.to_s
           val = "#{pID} #{m.round(2)}"
-          bldg.additionalProperties.setFeature(tag, val)
+          addprop(bldg, tag, val)
         end
       end
 
@@ -1863,10 +1865,16 @@ module BTAP
         lgs << lg
 
         unless @model[:attic][stypes].empty?
-          aUt  = format("%.3f", @model[:attic][stypes][:ut])
-          aUo  = format("%.3f", @model[:attic][stypes][:uo])
-          aCP  = @model[:attic][stypes][:compliant]
-          aID  = @model[:attic][stypes][:id]
+          types = case stypes
+                  when :roofs  then :floors
+                  when :floors then :roofs
+                  else              :walls
+                  end
+
+          aUt  = format("%.3f", @model[:attic][types][:ut])
+          aUo  = format("%.3f", @model[:attic][types][:uo])
+          aCP  = @model[:attic][types][:compliant]
+          aID  = @model[:attic][types][:id]
           lg   = "  - "
           lg  += aCP ? " Compliant " : " Non-compliant "
           lg  += "ATTIC: Ut #{aUt} W/m2.K "
@@ -1912,7 +1920,6 @@ module BTAP
           #          rimjoist: BTAP-ExteriorWall-SteelFramed-2 good  2680.6 m
           #           parapet: BTAP-ExteriorWall-SteelFramed-2 good   243.7 m
           #            corner: BTAP-ExteriorWall-SteelFramed-2 good   190.2 m
-
         end
       end
 
