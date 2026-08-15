@@ -744,11 +744,7 @@ module BTAP
         # Skip if first iteration fails.
         next if i.zero? && complies == false
 
-        # Reset compliance flag.
-
         @model[:stypes].each do |stypes, u|
-          # comply[stypes] = true
-
           stype_uo = "#{stypes.to_s.chop}_uo".to_sym
           target   = args.key?(stype_uo) ? args[stype_uo] : nil
 
