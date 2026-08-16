@@ -507,6 +507,41 @@
       "kind": "process",
       "articles": [],
       "summary": "The two largest archetypes are excluded from the routine sweep fleet by the owner's ruling because their capacity-iterated full-annual chains dominated the sweep's wall-clock while moving least; they remain runnable by name. The routine full-annual baseline becomes fifteen buildings by two vintages. The acknowledged coverage loss - hospital-scale outdoor-air and energy-recovery determinations, humidification, the health-care selection rows - is to be recovered later by a small synthetic stress-fixture suite; until then, changes touching those paths should run the pair explicitly."
+    },
+    {
+      "id": "D-71",
+      "title": "Measured-footprint massing lands in openstudio-geometry",
+      "kind": "process",
+      "articles": [],
+      "summary": "Turning a real building outline into a model belongs in the geometry gem, as a peer of the shape-wizard entry point rather than an eighth member of its shape enum, because a coordinate ring is not the set of positional scalars that enum dispatches. The gem stays offline and SDK-only: projection, winding and spike normalisation, decimation, mitred core-perimeter offsetting and storey stacking landed, while fetching records, choosing a storey height and mapping a building class to space types remain the caller's job. Storey height is a facade parameter with an audit entry, never a constant - the same measured tower yields twenty-seven, twenty-four or twenty-two storeys depending on the height assumed, a twelve percent floor-area spread. Perimeter depth and decimation tolerance both default to automatic, and core-perimeter viability is decided by wall-run length against the offset depth rather than by vertex count or concavity."
+    },
+    {
+      "id": "D-72",
+      "title": "The building-stock adapter is a script, not a gem file",
+      "kind": "process",
+      "articles": [],
+      "summary": "The networked fetch adapter lives in the geometry gem's scripts directory, which no gem packages because every file manifest covers only the library directory, so the adapter sits beside its only consumer while the gem itself stays offline and the massing code never learns where a ring came from. Credentials are never hardcoded: the endpoint and key resolve at runtime from environment variables, falling back to the ignored local server configuration, and the key is never printed, cached, or stamped onto a model. Provenance is written to the building's additional properties rather than to the standards building type, so a measured massing never masquerades as a tagged archetype."
+    },
+    {
+      "id": "D-73",
+      "title": "Perimeter zones merge by orientation via zone membership",
+      "kind": "runtime_unwired",
+      "articles": [],
+      "summary": "Perimeter spaces stay one per wall run so geometry, areas and surface matching are untouched, but each joins the thermal zone for its compass bin, so a storey presents north, east, south, west and core regardless of how many edges the outline has. A true polygon union was rejected because same-facing walls are frequently non-contiguous - an L-shaped plan has two separate north faces - so a union yields multi-part polygons the SDK cannot extrude, and clipping would mean a dependency the family contract forbids. The outward-normal azimuth convention is the SDK's own, pinned against the azimuth the SDK reports for a rectangle's four walls."
+    },
+    {
+      "id": "D-74",
+      "title": "Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope",
+      "kind": "process",
+      "articles": ["3.2.1.4."],
+      "summary": "There is no data to set a window-to-wall ratio by building class or vintage: the code gives a maximum driven by heating degree-days alone, vintage in the legacy library is a binary of whether that limit applies at all, the commercial energy survey carries no glazing table, and the footprint records carry no window fields. The geometry gem therefore cuts openings to a ratio the caller chooses, accepting either a single value or per-orientation bins, with no default and no code data in a gem whose contract forbids carrying any. The prescriptive maximum already existed in the envelope gem and was deliberately not rebuilt."
+    },
+    {
+      "id": "D-75",
+      "title": "Correction to D-74: thermostats gate the envelope pass, not construction seeding",
+      "kind": "process",
+      "articles": [],
+      "summary": "The earlier claim that the envelope pass cannot seed itself, and that missing constructions caused a measured massing to gain zero windows, was wrong. The actual gate is the conditioned-space predicate, which requires both that a space count toward floor area and that its thermal zone carry a dual-setpoint thermostat; measured massing has zones but no thermostats, so the exposed-wall census returned nothing and the fenestration pass exited on its minimum-area guard before touching anything. Adding thermostats and changing nothing else took the same model from zero to sixty subsurfaces carrying sixty window constructions, having begun with neither. The ruling of D-74 stands; only its justification is withdrawn."
     }
   ]
 }

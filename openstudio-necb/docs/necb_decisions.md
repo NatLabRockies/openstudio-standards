@@ -100,6 +100,11 @@ audit are drained and archived — see `docs/README.md`.
 - **D-68** — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches _(process)_
 - **D-69** — The legacy-parity oracle is pinned to a revision (legacy_pin) _(process)_
 - **D-70** — Hospital and Outpatient removed from routine sweeps _(process)_
+- **D-71** — Measured-footprint massing lands in openstudio-geometry _(process)_
+- **D-72** — The building-stock adapter is a script, not a gem file _(process)_
+- **D-73** — Perimeter zones merge by orientation via zone membership _(runtime_unwired)_
+- **D-74** — Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope _(process)_
+- **D-75** — Correction to D-74: thermostats gate the envelope pass, not construction seeding _(process)_
 
 <!-- TOC END -->
 
@@ -3773,3 +3778,324 @@ deletion:
   last valid full-annual numbers remain in the pre-merge table as history.
 
 - **Who/when:** phylroy's ruling, implemented by Fable, 2026-08-10.
+
+## D-71 — Measured-footprint massing lands in openstudio-geometry (Claude, delegated)
+
+**Question:** real building outlines are now reachable (NRCan footprints via
+the `building-stock` MCP: GeoJSON ring + measured height + area + class +
+climate zone). Where do the methods that turn one into an OpenStudio model
+live?
+
+**Ruling: in `openstudio-geometry`, as `footprint.rb` +
+`OpenStudioGeometry.create_from_footprint`.** Three sub-rulings worth pinning:
+
+- **Peer of `create`, NOT an eighth `SHAPES` member.** `create(shape:)`
+  dispatches positional scalars (length, width, …) through `ordered`; a
+  coordinate ring is not that shape, and forcing `'polygon'` into the enum
+  would break its uniformity for the sake of one caller. Both entry points get
+  listed on the eventual MCP surface regardless.
+- **The gem stays SDK-only and offline.** Only the pure part landed:
+  projection, winding/spike normalization, decimation, mitred core/perimeter,
+  storey stacking. Fetching building-stock records, choosing a storey height,
+  and mapping `building_class` → space types are the caller's — a network
+  dependency in this gem would break the family contract.
+- **This is the gem's FIRST non-verbatim file**, a deliberate departure from
+  its "SCRIPTED verbatim ports of legacy `create_shape.rb`" convention. There
+  is no upstream equivalent to port: legacy
+  `Geometry.create_spaces_from_polygons` assumes polygons that are already
+  clean and correctly wound, which is precisely what a measured ring is not.
+
+**Why this gem and not a caller-side script:** its own gemspec calls it "the
+authoring on-ramp for the openstudio-* NECB gem family", and measured outlines
+were the one on-ramp missing. The decisive argument is the AuditLog contract —
+audits exist here "so downstream QAQC can reproduce the massing", and a
+MEASURED massing is only reproducible if the provenance is recorded
+(`feature_id`, dataset, which height field, the storey height assumed, the
+decimation tolerance, and the zoning actually achieved). That belongs where the
+audit contract lives, not re-implemented by every caller.
+
+**Storey height is an input, never a constant.** The same 82.65 m tower gives
+27 storeys at 10 ft (3.048 m, the openstudio-standards
+`create_space_from_polygon` default), 24 at 3.5 m (which is what NRCan's own
+`estimated_floors = round(height / 3.5)` implies — verified against 5 records,
+where `estimated_gfa_m2` is exactly `building_area_m2 × estimated_floors`), and
+22 at the gem-wide 3.8 m default. That is a 12% GFA spread between the first
+two, so the value is a facade parameter with a recorded audit entry.
+
+**Verification:** 13 tests / 71 assertions green
+(`ruby test/test_footprint.rb`), built against a real record rather than a
+synthetic outline; `test_wizards.rb` (6/41) and `test_floor_plan.rb` (19/158)
+still green. Beyond the unit tests, a 40-record batch (one MCP query, every
+class from `accessory` to `high_rise_commercial`) built **40/40 with zero
+failures**, and the derived storey count matched NRCan's own `estimated_floors`
+on all 40 at 3.5 m — independent confirmation of the reverse-engineered
+formula. Projection reproduces the publisher's own area to 0.16%. Rubocop could
+not be run — the repo's inherited remote config is stale (`Metrics/LineLength`
+moved to `Layout/LineLength`) and fails identically on untouched files.
+
+**Two defects the batch caught that the single fixture did not, both now
+fixed:**
+
+- A FIXED decimation tolerance cannot serve a whole building stock. At a flat
+  2 m the batch lost up to **14.8%** of a small house's floor area (mean
+  1.60%): 2 m is mild on a 5,000 m² tower and destroys a 100 m² house. The
+  default is now `:auto` — `sqrt(area)/25` clamped to [0.25, 3.0] — giving
+  2.87% worst / 0.67% mean.
+- The rejection message originally advised "raise decimate_tolerance", which
+  measurement showed to be the WRONG lever, and "noisy outline" was the wrong
+  diagnosis. Correlating 40 records against their geometry, vertex count and
+  reflex fraction barely separate success from failure (12 vs 14 vertices;
+  0.33 vs 0.36 reflex). **The criterion is wall-run length against the offset
+  depth**: an inward offset eats `D/tan(t/2)` off both ends of a run, so edge i
+  survives only while `L > D*(cot(t_i/2) + cot(t_i+1/2))`. Reflex corners
+  contribute a NEGATIVE term, so concavity per se is harmless. This separates
+  the 40 perfectly (accepted ≥ +2.03 m margin, rejected all negative), so it is
+  now `Footprint.max_perimeter_depth` and a first-class pre-check that quotes
+  the outline's own ceiling. The real lever is therefore
+  `perimeter_zone_depth`, which costs no area at all: 6/40 at 15 ft, 15/40 at
+  9.8 ft, 24/40 at 6.6 ft — against 15/40 for decimation at 4 m and 25/40 at a
+  destructive 10 m. **Stated plainly: at the 15 ft default the single-zone
+  fallback is the common case on auto-extracted stock — the median NRCan
+  outline's ceiling is 2.59 m.** The mitred offset is exact on clean outlines
+  (a 50×30 rectangle tiles to 1500.0000 m² and its ceiling is exactly half the
+  short side, 15.00 m). Doing better needs real polygon clipping, not worth a
+  boost dependency in an SDK-only gem until someone needs per-orientation zones
+  on measured stock.
+- **`perimeter_zone_depth:` therefore also defaults to `:auto`** — raised as a
+  judgement call (it lets a default run produce a non-conventional perimeter
+  band) and **confirmed by phylroy, 2026-08-10: "auto should be default."** It
+  is `min(15 ft, 0.95 × the outline's ceiling)`, taking the batch from 6/40 to
+  14/40 zoned with 6 keeping the full 15 ft (median depth 3.22 m). Asked
+  whether depth could instead scale with footprint SIZE, the answer is
+  measured NO: `corr(sqrt(area), ceiling) = +0.198`, log-log +0.069, and
+  outlines under 15 m across had a HIGHER median ceiling (2.88 m) than 30–50 m
+  ones (1.66 m). The ceiling is a local feature — the shortest wall run — so a
+  size-based depth would be guessing. Because a narrowed band is no longer the
+  code's daylit zone, any reduction below 15 ft emits a `warn` naming both
+  numbers.
+- **Sliver guard, `MIN_CORE_FRACTION` = 4%.** Geometrically viable is not
+  useful: a 50×30 rectangle still offsets at 14.9 m but leaves a 0.27% core.
+  The 4% is not invented — the ported `create_shape_rectangle` already refuses
+  core/perimeter unless both plan dimensions exceed 2.5× the depth, which for a
+  square is exactly a 4% core. Same convention, generalized to arbitrary
+  outlines.
+- Adding the pre-check also exposed a flaw in the ORIGINAL validation, which is
+  why it is a gate and not just a diagnostic: it had been accepting outlines
+  with one marginally-negative wall run (the fixture at 4 m decimation, ceiling
+  4.46 m vs the 4.57 m default, margin −0.29 m). Those produce a slightly
+  self-intersecting perimeter zone that the absolute-value area and tiling
+  tests could not see.
+
+**Not built (caller's side, still open):** the building-stock fetch adapter,
+WWR from `building_class` + vintage, and the `create_typical` hand-off. Also
+note the MCP's `nrcan-buildings` dataset currently reports `record_count: 200`
+/ `build_version: 0.1.0-test`, not the ~10M its description advertises.
+
+- **Who/when:** Claude under the D-delegation, 2026-08-10.
+
+## D-72 — The building-stock adapter is a SCRIPT, not a gem file (Claude, delegated)
+
+**Question:** where does the NRCan fetch live, given D-71 froze
+`openstudio-geometry` as SDK-only and offline?
+
+**Ruling: `openstudio-geometry/scripts/building_stock.rb`.** `spec.files` is
+`lib/**/*`, so `scripts/` ships in NO gem — the networked adapter sits beside
+its only consumer while the gem stays offline, and `Footprint` still never
+learns where a ring came from. Precedent: `openstudio-necb/scripts/` already
+holds networked fetchers on exactly these terms.
+
+**Auth reconciles two family precedents that look contradictory.**
+`openstudio-simulation`'s `Remote` backend deliberately ships as a STUB because
+"the raw REST endpoints + auth headers behind [an agent-facing MCP] are not
+ours to hardcode", while `fetch_necb_8_4_text.rb` calls its MCP happily. The
+rule that satisfies both is HARDCODE NOTHING, RESOLVE AT RUNTIME:
+`BUILDING_STOCK_MCP_URL` / `BUILDING_STOCK_API_KEY`, else `.mcp.json` (which is
+gitignored). The key is never printed, never written into the cache, never
+stamped on a model. `--cache` / `--from-cache` keeps builds reproducible and
+lets CI run with no MCP at all.
+
+**Record attributes ride on the model, not in a side file:**
+`Adapter.stamp` writes `nrcan_*` features to `building.additionalProperties`
+(class, vintage, FSA, climate zone, published area/height/floors) so the next
+stage reads them off the model. Explicitly NOT `setStandardsBuildingType` —
+`building_class` is NRCan's own heuristic, and conflating it with a standards
+building type would silently mis-tag every model.
+
+**`multiplier:` defaults to `:mid` in the adapter**, unlike the gem facade,
+because stock work is bulk: a 28-storey record is 336 real spaces at `:none`
+and 36 at `:mid` for identical loads and envelope.
+
+**A defect the adapter exposed, now fixed in the gem:** `:auto` depth will
+shrink to fit ANY outline, which quietly defeated the wizards' 2.5x-plan-dim
+convention (that rule presumes a fixed depth). At the old 1 m floor a **55 m²
+single-family house was given core-and-perimeter zoning** — it is all perimeter
+in reality. `MIN_USEFUL_DEPTH` is now 3.0 m (~10 ft, the thinnest band that
+still reads as a daylit perimeter): the smallest zoned outline becomes 104 m²
+and the median depth returns to the full 15 ft. On a 12-record K1P batch this
+cut total spaces from ~600 to 153 while making every individual answer more
+defensible.
+
+**Verification:** live fetch against the real server, 12/12 built from an FSA
+query and 12/12 rebuilt offline from cache; a written .osm reloaded cold with
+15 spaces / 90 surfaces / 0 degenerate, correct site lat-lon, provenance intact,
+and floor area within 0.9% of the publisher's `estimated_gfa_m2`.
+
+**Known limitation, NOT fixed:** perimeter zoning is one zone per outline edge,
+so a 19-edge outline gives 19 perimeter zones per storey (median 13 across the
+batch). Modellers normally want N/E/S/W + core. Merging perimeter zones by
+orientation is the obvious next step and is deliberately not attempted here.
+
+- **Who/when:** Claude under the D-delegation, 2026-08-10.
+
+## D-73 — Perimeter zones merge by ORIENTATION, via zone membership not polygons (Claude, delegated)
+
+**Question (phylroy, 2026-08-10): "merge perimeter zones by orientation into
+N/E/S/W plus core."** The D-72 limitation: perimeter zoning was one zone per
+outline edge, so a 19-edge outline gave 19 perimeter zones per storey (median
+13 across the batch) where modellers expect 4 + core.
+
+**Ruling: merge THERMAL ZONE MEMBERSHIP, keep spaces one-per-edge.** Each
+perimeter space still stands on exactly one wall run — geometry unchanged,
+areas exact, surface matching untouched — but the zone it joins is its compass
+bin. A storey now presents `North/East/South/West/Core ZN` regardless of edge
+count.
+
+**Why not a real polygon union.** Merging the QUADS would need genuine polygon
+clipping: same-facing walls are frequently NON-CONTIGUOUS (an L-shaped plan has
+two separate north faces), so a union yields multi-part polygons that
+`Space.fromFloorPrint` cannot extrude. OpenStudio thermal zones may legally
+contain disjoint spaces, so zone membership expresses the intent exactly, with
+no new dependency and no geometric approximation. This also keeps the D-71
+promise that the gem stays SDK-only (a clipper would mean boost).
+
+**The azimuth convention is the SDK's, not ours.** `Footprint.edge_azimuth`
+returns the outward-normal azimuth in degrees clockwise from north — derived
+from the same "interior lies to the right of a clockwise ring" rule
+`offset_edge` already depended on, then PINNED against `Surface#azimuth`, which
+reports 270/0/90/180 for a rectangle's four walls. Bins are 45-degree
+boundaries with North wrapping through 0.
+
+**Verification:** on a rectangle, each zone's exterior walls report exactly the
+one azimuth its name claims and the core has none at all. On the 69-vertex
+Ottawa fixture, 63 spaces collapse to 15 zones (5 per storey x 3) with zone
+multipliers [1, 22] intact. Across all 46 records: **max 5 zones per storey
+(was up to 20) and ZERO misfiled exterior walls**. 18 tests / 107 assertions
+green, plus wizards 6/41, bar 4/32, floor_plan 19/158; a written .osm reloads
+cold with the merged zones intact. The adapter manifest now reports
+`thermal_zones` and `zones_per_storey` alongside `spaces`.
+
+- **Who/when:** phylroy's request, implemented by Claude, 2026-08-10.
+
+## D-74 — WWR is a caller input; NECB FDWR stays in openstudio-envelope (phylroy)
+
+**Question: "how do you determine WWR by class/vintage?"** Investigated before
+building, and the honest answer is that **the class/vintage framing I had
+proposed was not supportable** — there is no data for either axis:
+
+- **NECB 3.2.1.4 (verified via codes MCP)** gives FDWR by **HDD only** —
+  `0.40` for HDD ≤ 4000, `(2000 − 0.2×HDD)/3000` between, `0.20` at ≥ 7000 —
+  and it is a **maximum**, not an observed value. Neither class nor vintage
+  appears in it.
+- **Vintage in openstudio-standards is a BINARY, not a ratio**: at the default
+  `fdwr_set: -1`, `BTAPPRE1980` returns without touching windows while
+  `NECB2011+` applies the max. "By vintage" means "does the code apply", not
+  "what WWR".
+- **SCIEU-2019** has 35 tables (vintage, floors, fuels, EUI) and **no glazing
+  table**. **ComStock/ResStock** are advertised in the MCP blurb but absent from
+  `list_building_datasets` (`comstock-2024` → "No tables found"). **NRCan
+  footprint records carry no window fields.**
+- The only WWR-by-type table in the repo is `prm_wwr_bldg_type.json` — 16 **US**
+  90.1-PRM-2019 types, 0.06–0.40, **no vintage axis**. Mapping NRCan's 7
+  heuristic classes onto it would be a fabricated correspondence, and D-71
+  already put class→type mapping outside this gem.
+
+**Ruling (phylroy, 2026-08-10): caller parameter, no default.**
+`OpenStudioGeometry.apply_wwr(model, ratio)` cuts openings to a ratio the
+caller chose — pure geometry, no NECB data in a gem whose contract forbids it.
+Accepts a Float or per-orientation bins (`'South' => 0.4`), the companion to
+D-73's orientation-merged zoning.
+
+**The NECB half already existed and was NOT rebuilt.**
+`openstudio-envelope` owns `NECB.max_fdwr(vintage:, hdd:)` (rules JSON, by
+vintage) and `apply_prescriptive(..., apply_fdwr: true)`. Verified correct:
+HDD 4500 → 0.3667, matching `(2000 − 0.2×4500)/3000` by hand; HDD 8000 → 0.20.
+Note the vintage keys are `'2020'`/`'2025'`, NOT `'NECB2020'`.
+
+**The real gap, found by running it rather than reasoning about it:** the
+envelope pass **cannot seed itself**. It retargets EXISTING subsurface
+constructions, so on measured massing — zero windows, zero constructions —
+`apply_prescriptive(apply_fdwr: true)` silently yielded **0 subsurfaces and
+FDWR 0.0**. With `apply_wwr` cutting the openings first, the NECB pass holds
+0.3667 in and out. **The construction half remains open**: the same run logs 81
+`surface has no layered construction — skipped` plus 60 for subsurfaces — the
+seed-construction helper openstudio-envelope's notes already list as future
+work. It warns loudly, so it is not silent.
+
+**Verification:** 23 tests / 129 assertions green; wizards 6/41, bar 4/32,
+floor_plan 19/158 unaffected. Per-orientation verified exact (South 0.500,
+North 0.150, omitted bins 0.000).
+
+**Correction to the record:** the `nrcan-buildings` dataset is
+**12,070,204 records** (per `list_building_datasets`, build 2026-07-17), not
+the 200 that `get_dataset_info` reports — that count is stale on that code
+path. D-71/D-72's "200-record test sample" caveat is withdrawn.
+
+- **Who/when:** phylroy's ruling, implemented by Claude, 2026-08-10.
+
+## D-75 — CORRECTION to D-74: thermostats gate the envelope pass, not construction seeding
+
+**D-74 claimed "the envelope pass cannot seed itself" and attributed the
+0-subsurface result on measured massing to missing constructions. That
+diagnosis was WRONG**, and the correction matters because it points at a
+different fix.
+
+**What actually happens.** `OpenStudioEnvelope::Geometry.conditioned?` requires
+`space.partofTotalFloorArea` AND a thermal zone carrying a
+`thermostatSetpointDualSetpoint`. `exposed_walls` / `exposed_roofs` filter every
+surface through it. Measured massing has thermal zones but **no thermostats**,
+so the census returned 0 of 63 spaces conditioned and 0 exposed walls, and
+`Geometry.apply_fdwr` bailed on its `wall_area_m2 < 0.1` guard before doing
+anything. Nothing to do with constructions.
+
+**Verified by adding thermostats and changing nothing else:**
+
+| | before | after |
+|---|---|---|
+| conditioned spaces | 0/63 | 63/63 |
+| exposed walls | 0 | 60 |
+| subsurfaces after `apply_fdwr: true` | 0 | **60 at FDWR 0.3667** |
+| window constructions assigned | 0 | **60/60** |
+
+— on a model that started with zero windows and zero constructions.
+
+**So openstudio-envelope DOES seed fenestration constructions.**
+`subsurface_target_construction` (private; invoked automatically by
+`apply_fdwr:`/`apply_srr:`) creates a SimpleGlazing construction at the
+prescriptive U from nothing, exactly as its comment claims: "when the model has
+no existing subsurface of that class to derive one from ... needed by the
+FDWR/SRR rebuild on windowless models."
+
+**What is genuinely missing is an OPAQUE seed.** All three opaque paths require
+a pre-existing construction: `Prescriptive.assign_surface` warns "surface has no
+layered construction — skipped"; `Constructions.opaque_at_conductance(model,
+construction, conductance)` deep-copies a base the caller supplies; and
+`Reference` does `next if surface.construction.empty?` then reads `conductance`
+off the original. Measured massing therefore still gets no U-values on walls,
+roofs or floors (81 surfaces skipped). `Reference`'s own lightweight rebuild —
+one `StandardOpaqueMaterial` calibrated to the Note A-8.4.4.4.(1) wood-frame
+mass at a target conductance — is the obvious recipe for that seed.
+
+**Consequence for D-74:** the RULING stands (WWR is a caller input; NECB FDWR
+stays in openstudio-envelope) and `apply_wwr` remains useful — it is pure
+geometry, takes a ratio the caller chose, supports per-orientation bins, and
+needs neither thermostats nor NECB data. But its stated justification ("the
+envelope pass cannot seed itself") was wrong and is withdrawn.
+
+**Method note:** this was caught only by READING `geometry.rb` end-to-end after
+the user asked whether a construction-adding function exists — the earlier
+conclusion had been inferred from warning text ("no layered construction —
+skipped") without checking what filtered the surfaces upstream. Warning
+messages describe a symptom, not necessarily the cause. Cf. [[verify-before-asserting]].
+
+- **Who/when:** Claude, 2026-08-12, prompted by phylroy asking whether
+  openstudio-envelope has a construction-adding function.

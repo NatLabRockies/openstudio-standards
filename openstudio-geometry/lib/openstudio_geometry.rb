@@ -3,6 +3,7 @@ require 'openstudio'
 require_relative 'openstudio_geometry/version'
 require_relative 'openstudio_geometry/audit_log'
 require_relative 'openstudio_geometry/helpers'
+require_relative 'openstudio_geometry/footprint'
 require_relative 'openstudio_geometry/wizards'
 require_relative 'openstudio_geometry/bar'
 require_relative 'openstudio_geometry/render'
@@ -106,6 +107,142 @@ module OpenStudioGeometry
                                         storeys_above: storeys_above,
                                         storeys_below: storeys_below))
     model
+  end
+
+  # Measured-footprint entry: a real building outline plus a measured height in,
+  # zoned massing out. A peer of `create`, deliberately NOT a member of SHAPES —
+  # `create` dispatches positional scalars (length, width, ...) through
+  # `ordered`, and a coordinate ring is not that shape.
+  #
+  #   OpenStudioGeometry.create_from_footprint(
+  #     geojson: record['geometry_geojson'], height_m: record['height_max_m'],
+  #     floor_to_floor_height: OpenStudioGeometry::Footprint::TEN_FEET,
+  #     source: { feature_id: record['feature_id'], dataset: 'nrcan-buildings' })
+  #
+  # Storey count is derived from the measured height unless `storeys:` is given.
+  # Because a measured massing is only reproducible if you record what it was
+  # measured from, the audit entry carries the full provenance: `source:`, which
+  # height went in, the storey height assumed, the decimation tolerance, and the
+  # zoning that was actually achieved (`core_perimeter` degrades to `single`
+  # with a warning when the outline cannot carry a core).
+  #
+  # @param geojson [Hash, String, Array, nil] GeoJSON Polygon/MultiPolygon or [[lon, lat], ...] ring
+  # @param points [Array<OpenStudio::Point3d>, nil] already-projected metres (skips projection)
+  # @param height_m [Float, nil] measured height; required unless `storeys:` is given
+  # @param storeys [Integer, nil] explicit storey count, overriding the measured height
+  # @param floor_to_floor_height [Float] metres (3.8 gem-wide default; see
+  #   Footprint::TEN_FEET 3.048 and Footprint::NRCAN_IMPLIED 3.5)
+  # @param zoning [Symbol] :core_perimeter (default) or :single
+  # @param perimeter_zone_depth [Float, :auto] metres. :auto (default) keeps the
+  #   15 ft convention wherever the outline can carry it and reduces it only
+  #   where it cannot, warning whenever it does. Footprint SIZE is deliberately
+  #   NOT an input — measured, it does not predict what an outline can carry
+  # @param decimate_tolerance [Float, :auto] Douglas-Peucker tolerance in metres;
+  #   0 disables. :auto (default) scales it to the outline's own size — a fixed
+  #   tolerance either leaves towers noisy or destroys small buildings
+  # @param multiplier [Symbol] :none (every storey real) or :mid (ground/mid/top)
+  # @param origin [Array(Float, Float), nil] [lat, lon] tangent point; defaults to the ring centroid
+  # @param source [Hash] free-form provenance recorded verbatim in the audit
+  # @return [OpenStudio::Model::Model]
+  def self.create_from_footprint(geojson: nil, points: nil, height_m: nil, storeys: nil,
+                                 floor_to_floor_height: 3.8, zoning: :core_perimeter,
+                                 perimeter_zone_depth: :auto, decimate_tolerance: :auto,
+                                 multiplier: :none, origin: nil, source: {},
+                                 model: nil, audit: nil)
+    audit ||= AuditLog.new
+    model ||= OpenStudio::Model::Model.new
+    raise(ArgumentError, 'pass either geojson: or points:, not both') if geojson && points
+    raise(ArgumentError, 'a footprint needs geojson: or points:') if geojson.nil? && points.nil?
+    raise(ArgumentError, 'pass height_m: or storeys:') if height_m.nil? && storeys.nil?
+    unless %i[core_perimeter single].include?(zoning)
+      raise(ArgumentError, "unknown zoning '#{zoning}' (core_perimeter, single)")
+    end
+    unless %i[none mid].include?(multiplier)
+      raise(ArgumentError, "unknown multiplier '#{multiplier}' (none, mid)")
+    end
+
+    if geojson
+      ring = Footprint.ring_from_geojson(geojson)
+      centroid_lat = origin ? origin[0] : ring.sum { |_lon, lat| lat } / ring.size.to_f
+      centroid_lon = origin ? origin[1] : ring.sum { |lon, _lat| lon } / ring.size.to_f
+      points = Footprint.project(ring, lat0: centroid_lat, lon0: centroid_lon)
+      model.getSite.setLatitude(centroid_lat)
+      model.getSite.setLongitude(centroid_lon)
+    end
+
+    raw_vertices = points.size
+    outline = Footprint.normalize(points)
+    if decimate_tolerance == :auto
+      decimate_tolerance = Footprint.auto_tolerance(Footprint.area(outline)).round(2)
+    end
+    outline = Footprint.decimate(outline, decimate_tolerance)
+    footprint_area = Footprint.area(outline)
+
+    storeys ||= Footprint.storeys_for(height_m, floor_to_floor_height)
+    raise(ArgumentError, 'storeys must be at least 1') if storeys < 1
+
+    if perimeter_zone_depth == :auto
+      perimeter_zone_depth = (Footprint.auto_perimeter_depth(outline) || Footprint::MIN_USEFUL_DEPTH).round(2)
+      if zoning == :core_perimeter && perimeter_zone_depth < Footprint::CONVENTIONAL_DEPTH
+        # Never silently: a reduced band is no longer the code's daylit zone.
+        audit.warn(:geometry, 'perimeter zone depth reduced below the 15 ft convention to fit the outline',
+                   inputs: { perimeter_zone_depth: perimeter_zone_depth,
+                             conventional_depth: Footprint::CONVENTIONAL_DEPTH,
+                             outline_ceiling_m: Footprint.max_perimeter_depth(outline).round(2) }.merge(source))
+      end
+    end
+
+    plan = zoning == :core_perimeter ? Footprint.core_and_perimeter(outline, perimeter_zone_depth) : nil
+    if plan && plan[:rejected]
+      audit.warn(:geometry, 'core-and-perimeter zoning not viable for this outline — single zone per storey',
+                 inputs: { reason: plan[:rejected], perimeter_zone_depth: perimeter_zone_depth,
+                           vertices: outline.size, decimate_tolerance: decimate_tolerance,
+                           footprint_area_m2: footprint_area.round(1) }.merge(source))
+      plan = nil
+    end
+    achieved_zoning = plan ? :core_perimeter : :single
+
+    spaces = Footprint.build_massing(model, plan, outline, storeys, floor_to_floor_height, multiplier: multiplier)
+
+    audit.decision(:geometry, 'measured-footprint massing created',
+                   inputs: { vertices_raw: raw_vertices, vertices_used: outline.size,
+                             decimate_tolerance: decimate_tolerance,
+                             footprint_area_m2: footprint_area.round(1),
+                             height_m: height_m, floor_to_floor_height: floor_to_floor_height,
+                             storeys_above: storeys, storeys_below: 0,
+                             modelled_height_m: (storeys * floor_to_floor_height).round(2),
+                             zoning: achieved_zoning, requested_zoning: zoning,
+                             # nil when no perimeter zoning happened — reporting the
+                             # depth that was tried and rejected reads as if it applied
+                             perimeter_zone_depth: achieved_zoning == :core_perimeter ? perimeter_zone_depth : nil,
+                             multiplier: multiplier, spaces: spaces.size }.merge(source),
+                   value: "#{footprint_area.round(1)} m2 x #{storeys} storeys")
+    model
+  end
+
+  # Cut windows into every exterior wall to a caller-chosen window-to-wall
+  # ratio. There is NO default and no code knowledge — see Footprint.apply_wwr.
+  #
+  #   OpenStudioGeometry.apply_wwr(model, 0.35)
+  #   OpenStudioGeometry.apply_wwr(model, 'South' => 0.4, 'North' => 0.2)
+  #
+  # For the NECB maximum use openstudio-envelope, which owns the rule:
+  #
+  #   limit = OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: hdd)
+  #   OpenStudioGeometry.apply_wwr(model, limit)
+  #
+  # @param model [OpenStudio::Model::Model]
+  # @param wwr [Float, Hash{String=>Float}] ratio(s) in [0, 1), optionally per
+  #   compass bin ('North'/'East'/'South'/'West')
+  # @return [Hash] { walls:, glazed:, refused:, fdwr: }
+  # `bins` catches the brace-less hash form: with an `audit:` keyword in the
+  # signature Ruby 3 parses `apply_wwr(model, 'South' => 0.4)` as keywords, not
+  # as a positional Hash, so accepting both spellings avoids a silent ArgumentError.
+  def self.apply_wwr(model, wwr = nil, audit: nil, **bins)
+    ratio = wwr.nil? && !bins.empty? ? bins : wwr
+    raise(ArgumentError, 'pass a window-to-wall ratio: a Float, or per-orientation bins') if ratio.nil?
+
+    Footprint.apply_wwr(model, ratio, audit: audit || AuditLog.new)
   end
 
   # The family-native bar entry: sliced bar massing with NECB space types
