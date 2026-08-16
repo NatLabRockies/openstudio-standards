@@ -321,6 +321,8 @@ class NECB_TBD_Tests < Minitest::Test
                   next unless m2 > 0
                   next unless area
 
+                  emsg = "BTAP/TBD: BLDG #{stypes} #{id} area (#{cas})?"
+                  refute_nil(area, emsg)
                   emsg = "BTAP/TBD: BLDG #{stypes} #{id} Uo (#{cas})?"
                   refute_nil(uo, emsg)
                   emsg = "BTAP/TBD: BLDG #{stypes} #{id} Ut (#{cas})?"
@@ -354,7 +356,7 @@ class NECB_TBD_Tests < Minitest::Test
                   attics << space if TBD.unconditioned?(space)
                 end
 
-                # No unconditioned attics with "structure" option.
+                # Unconditioned attics only with "structure" option.
                 if structure != "structure"
                   emsg = "BTAP/TBD: attics (#{cas})?"
                   assert_empty(attics, emsg)
@@ -440,8 +442,6 @@ class NECB_TBD_Tests < Minitest::Test
                     next unless m2 > 0
                     next unless area
 
-                    emsg = "BTAP/TBD: #{name} #{stypes} #{id} Uo (#{cas})?"
-                    refute_nil(uo, emsg)
                     emsg = "BTAP/TBD: #{name} #{stypes} #{id} Ut (#{cas})?"
                     refute_nil(ut, emsg)
                     emsg = "BTAP/TBD: #{name} #{stypes} #{id} film (#{cas})?"
@@ -894,6 +894,71 @@ class NECB_TBD_Tests < Minitest::Test
                       assert(st.tbd.data.key?(bID), emsg)
                     end
                   end
+                end
+
+                if option == "uprate" && inter == true && structure == "structure"
+                  wUt = 0
+                  wUA = 0
+                  wM2 = 0
+                  rUt = 0
+                  rUA = 0
+                  rM2 = 0
+
+                  model.getSurfaces.each do |surface|
+                    id = surface.nameString
+                    bc = surface.outsideBoundaryCondition.downcase
+                    ty = surface.surfaceType.downcase
+                    lc = surface.construction
+                    next if ty == "floor" && bc == "outdoors"
+
+                    type = case bc
+                           when "surface"
+                             ty == "wall" ? :partition : :ceiling
+                           when "outdoors"
+                             ty == "wall" ? :wall : :roof
+                           else
+                             next
+                           end
+
+                    emsg = "BTAP/TBD: #{id} construction (#{cas})"
+                    refute_empty(lc, emsg)
+                    lc   = lc.get.to_LayeredConstruction
+                    emsg = "BTAP/TBD: #{id} layered construction (#{cas})"
+                    refute_empty(lc, emsg)
+                    lc   = lc.get
+                    next unless lc.additionalProperties.hasFeature("btap_uo")
+
+                    emsg = "BTAP/TBD: #{id} Ut W/m2.K (#{cas})"
+                    assert(lc.additionalProperties.hasFeature("btap_ut"), emsg)
+                    ut   = lc.additionalProperties.getFeatureAsDouble("btap_ut")
+                    emsg = "BTAP/TBD: #{id} empty Ut W/m2.K (#{cas})"
+                    refute_empty(ut, emsg)
+                    ut   = ut.get
+                    fR   = TBD.filmResistances(type, surface.tilt)
+                    rsi  = TBD.rsi(lc, fR)
+                    emsg = "BTAP/TBD: #{id} RSi > 0 m2.K/W (#{cas})"
+                    assert(rsi > 0, emsg)
+                    u    = 1 / rsi
+
+                    if type == :wall || type == :partition
+                      wUA += u * surface.netArea
+                      wM2 += surface.netArea
+                      wUt  = [wUt, ut].max
+                    else
+                      rUA += u * surface.netArea
+                      rM2 += surface.netArea
+                      rUt  = [rUt, ut].max
+                    end
+                  end
+
+                  emsg = "BTAP/TBD: wall/partition net area (#{cas})"
+                  assert(wM2 > 0, emsg)
+                  emsg = "BTAP/TBD: roof/ceiling net area (#{cas})"
+                  assert(rM2 > 0, emsg)
+                  emsg = "BTAP/TBD: wall Ut (#{cas})"
+                  assert_in_epsilon(wUt, wUA/wM2, 0.04, emsg)
+                  emsg = "BTAP/TBD: roof Ut (#{cas})"
+                  assert_in_epsilon(rUt, rUA/rM2, 0.04, emsg)
                 end
 
                 # Thermal bridges (edges), specific to each model, are tallied/
