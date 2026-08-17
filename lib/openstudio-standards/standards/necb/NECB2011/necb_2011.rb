@@ -575,7 +575,7 @@ class NECB2011 < Standard
                       sizing_run_dir: sizing_run_dir,
                       lights_type: lights_type,
                       lights_scale: lights_scale)
-    apply_kiva_foundation(model, massive)
+    apply_kiva_foundation(model)
     apply_systems_and_efficiencies(model: model,
                                    sizing_run_dir: sizing_run_dir,
                                    hvac_system_primary: hvac_system_primary,
@@ -1105,81 +1105,79 @@ class NECB2011 < Standard
   end
 
   # Apply Kiva foundation model to floors/walls with ground boundary condition.
-  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
-  # 'massive' edit: denis@rd2.ca
   #
-  # @param massive [Boolean] whether opaque materials are standard (not massless)
-  def apply_kiva_foundation(model, massive = false)
-    # define a Kiva model for the whole bldg that's used for the first floor in contact with ground in each zone
+  # @author kamel.haddad@nrcan-rncan.gc.ca
+  # @author denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [OpenStudio::Model::FoundationKivaSettings] KIVA settings
+  def apply_kiva_foundation(model)
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
     bldg_kiva_model.setWallHeightAboveGrade(0.0)
     bldg_kiva_model.setWallDepthBelowSlab(0.0)
+
     model.getThermalZones.sort.each do |zone|
       zone_kiva_models = [bldg_kiva_model]
       zone_grd_flr_counter = 0
+
       zone.spaces.sort.each do |space|
-        # store space floors and walls in contact with ground and exterior walls
+        # Store space floors and walls in contact with ground and exterior walls.
         space_ground_floors = []
         space_ground_walls = []
         space_ext_walls = []
         space_ground_floors += space.surfaces.select {|surf| surf.surfaceType.downcase == 'floor' && surf.isGroundSurface }
         space_ground_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.isGroundSurface }
         space_ext_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.outsideBoundaryCondition.downcase == 'outdoors'}
-        # loop through space floors in contact with ground and assing a Kiva model for each
+
+        # Loop through space floors in contact with ground and assign a Kiva
+        # model for each.
         space_ground_floors.each do |gfloor|
           zone_grd_flr_counter += 1
+
+          # A new Kiva model is needed for each additional floor in contact with
+          # the ground in the zone.
           if zone_grd_flr_counter > 1
-            # a new Kiva model is needed for each additional floor in contact with the ground in the zone
             kiva_model = OpenStudio::Model::FoundationKiva.new(model)
             kiva_model.setName("#{gfloor.name.to_s} Kiva Foundation")
             kiva_model.setWallHeightAboveGrade(0.0)
             kiva_model.setWallDepthBelowSlab(0.0)
             zone_kiva_models << kiva_model
           end
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones.
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones. Skip check if 'massive'.
-          if massive
-            c = gfloor.construction.get.to_LayeredConstruction.get
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-            gfloor.setConstruction(c)
-          else
-            replace_massless_material_with_std_material(model,gfloor)
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-          end
+
+          c = gfloor.construction.get.to_LayeredConstruction.get
+          gfloor.setOutsideBoundaryCondition('Foundation')
+          gfloor.setAdjacentFoundation(zone_kiva_models.last)
+          gfloor.setConstruction(c)
 
           # Set the exposed perimeter for space floors in contact with the ground.
           floor_exp_per = 0.0
+
           if !space_ground_walls.empty?
             floor_exp_per += get_surface_exp_per(gfloor,space_ground_walls)
           elsif !space_ext_walls.empty?
             floor_exp_per += get_surface_exp_per(gfloor,space_ext_walls)
           end
+
           gfloor.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter',floor_exp_per)
-          # specify a foundation boundary condition for space walls in contact with the ground and in
-          # contact with the space floor in contact with ground 'gfloor'
+
+          # Specify a foundation boundary condition for space walls in contact
+          # with the ground and in contact with the space floor in contact with
+          # ground 'gfloor'.
           space_ground_walls.each do |gwall|
             if surfaces_are_in_contact?(gfloor,gwall)
-              if massive
-                c = gwall.construction.get.to_LayeredConstruction.get
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-                gwall.setConstruction(c)
-              else
-                replace_massless_material_with_std_material(model,gwall)
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-              end
+              c = gwall.construction.get.to_LayeredConstruction.get
+              gwall.setOutsideBoundaryCondition('Foundation')
+              gwall.setAdjacentFoundation(zone_kiva_models.last)
+              gwall.setConstruction(c)
             end
           end
         end
       end
     end
-    kiva_settings = model.getFoundationKivaSettings if !model.getFoundationKivas.empty?
+
+    model.getFoundationKivaSettings
   end
 
   # check if two surfaces are in contact. For every two consecutive vertices on surface 1,
@@ -1230,7 +1228,7 @@ class NECB2011 < Standard
   # with the name: 'Insulation: Expanded polystyrene - extruded (smooth skin surface) (HCFC-142b exp.)'.
   # The thickness of the new material is based on the thermal resistance of the massless material it replaces.
   # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
-  def replace_massless_material_with_std_material(model,surf)
+  def replace_massless_material_with_std_material(model, surf)
     std_const_name = "#{surf.construction.get.name.to_s}_std"
     std_const = model.getLayeredConstructions.select {|const| const.name.to_s == std_const_name}
     new_const = nil

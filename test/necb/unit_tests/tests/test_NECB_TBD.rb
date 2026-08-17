@@ -57,7 +57,7 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @structure = [
-      # '',
+      '',
       'structure'
     ]
 
