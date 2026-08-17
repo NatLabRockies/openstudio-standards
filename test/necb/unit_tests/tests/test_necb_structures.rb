@@ -30,7 +30,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
+      'LowriseApartment',
       'MediumOffice',
       # 'MidriseApartment',
       'NorthernEducation',

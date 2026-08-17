@@ -1113,6 +1113,8 @@ class NECB2011 < Standard
   #
   # @return [OpenStudio::Model::FoundationKivaSettings] KIVA settings
   def apply_kiva_foundation(model)
+    hdd = get_necb_hdd18(model: model, necb_hdd: true)
+
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
     bldg_kiva_model.setWallHeightAboveGrade(0.0)
@@ -1131,6 +1133,29 @@ class NECB2011 < Standard
         space_ground_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.isGroundSurface }
         space_ext_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.outsideBoundaryCondition.downcase == 'outdoors'}
 
+        # Add perimeter insulation to initial building KIVA foundation, if at
+        # least one exterior wall (XPS insulation, thickness: 1-1/2").
+        unless space_ext_walls.empty?
+          if hdd < 7000
+            xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
+
+            if xps38.empty?
+              xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+              xps38.setName("XPS 38mm")
+              xps38.setRoughness("Smooth")
+              xps38.setThickness(0.038)
+              xps38.setConductivity(0.029)
+              xps38.setDensity(28)
+              xps38.setSpecificHeat(1450)
+            else
+              xps38 = xps38.get
+            end
+
+            zone_kiva_models.last.setInteriorHorizontalInsulationMaterial(xps38)
+            zone_kiva_models.last.setInteriorHorizontalInsulationWidth(1.2)
+          end
+        end
+
         # Loop through space floors in contact with ground and assign a Kiva
         # model for each.
         space_ground_floors.each do |gfloor|
@@ -1143,6 +1168,28 @@ class NECB2011 < Standard
             kiva_model.setName("#{gfloor.name.to_s} Kiva Foundation")
             kiva_model.setWallHeightAboveGrade(0.0)
             kiva_model.setWallDepthBelowSlab(0.0)
+
+            unless space_ext_walls.empty?
+              if hdd < 7000
+                xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
+
+                if xps38.empty?
+                  xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+                  xps38.setName("XPS 38mm")
+                  xps38.setRoughness("Smooth")
+                  xps38.setThickness(0.038)
+                  xps38.setConductivity(0.029)
+                  xps38.setDensity(28)
+                  xps38.setSpecificHeat(1450)
+                else
+                  xps38 = xps38.get
+                end
+
+                kiva_model.setInteriorHorizontalInsulationMaterial(xps38)
+                kiva_model.setInteriorHorizontalInsulationWidth(1.2)
+              end
+            end
+
             zone_kiva_models << kiva_model
           end
 
@@ -1155,18 +1202,18 @@ class NECB2011 < Standard
           floor_exp_per = 0.0
 
           if !space_ground_walls.empty?
-            floor_exp_per += get_surface_exp_per(gfloor,space_ground_walls)
+            floor_exp_per += get_surface_exp_per(gfloor, space_ground_walls)
           elsif !space_ext_walls.empty?
-            floor_exp_per += get_surface_exp_per(gfloor,space_ext_walls)
+            floor_exp_per += get_surface_exp_per(gfloor, space_ext_walls)
           end
 
-          gfloor.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter',floor_exp_per)
+          gfloor.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', floor_exp_per)
 
           # Specify a foundation boundary condition for space walls in contact
           # with the ground and in contact with the space floor in contact with
           # ground 'gfloor'.
           space_ground_walls.each do |gwall|
-            if surfaces_are_in_contact?(gfloor,gwall)
+            if surfaces_are_in_contact?(gfloor, gwall)
               c = gwall.construction.get.to_LayeredConstruction.get
               gwall.setOutsideBoundaryCondition('Foundation')
               gwall.setAdjacentFoundation(zone_kiva_models.last)
