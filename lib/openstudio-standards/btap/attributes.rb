@@ -61,7 +61,8 @@ module BTAP
     # @param use_tbd              [Boolean]
     # @param building_performance [String]
     # @param tbd_edge_tallies     [Hash]
-    def initialize(model, standard, use_tbd, building_performance, tbd_edge_tallies)
+    def initialize(model:, standard:, use_tbd:, building_performance:, tbd_edge_tallies:)
+
       @model                = model
       @standard             = standard
       @use_tbd              = use_tbd

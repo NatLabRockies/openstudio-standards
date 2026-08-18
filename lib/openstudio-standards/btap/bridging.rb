@@ -1933,23 +1933,15 @@ module BTAP
       true
     end
 
-    # Retrieve the material quantities for the values in the tbd.edges
-    # parameter.
-    # @return [Hash] IDs mapped to their quantities in feet.
-    def get_material_quantities_for_edges
-      cp                  = CommonPaths.instance
-      csv                 = CSV.read(cp.thermal_bridging_path, headers: true)
+    def self.get_material_quantities_for_edges(edge_tallies)
+      csv                 = CSV.read(Paths::THERMAL_BRIDGING_PATH, headers: true)
       material_quantities = {}
 
-      # The "convex/concave" suffix on tally edges can be safely ignored since
-      # they currently aren't relevant to any NECB standard, but they are to
-      # ASHRAE 90.1.
-      tally_edges = @tally[:edges].transform_keys { |key| key.to_s.gsub(/concave|convex/, '') }
-      tally_edges.each do |edge_type, value|
+      edge_tallies.each do |edge_type, value|
         value.each do |wall_reference_and_quality, quantity|
 
-          # "transition" edges aren't considered.
-          if edge_type == "transition"
+          # "transition" or "ceiling" edges aren't considered.
+          if edge_type == "transition" || edge_type == "ceiling"
             next
 
           # "jamb", "sill", and "head" may all be grouped under fenestration
@@ -1965,8 +1957,8 @@ module BTAP
           end
 
           if result.nil?
-            puts("Wall with type #{edge_type} and reference #{wall_reference_and_quality}" \
-                 " could not be found in the thermal bridging database")
+            raise("Entry with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
+                  " could not be found in the thermal bridging database.")
             next
           end
 

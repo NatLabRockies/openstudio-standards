@@ -262,10 +262,6 @@ module BTAP
             puts "Wrote File qaqc.json in #{Dir.pwd} "
           end
 
-          # Write cache files to be able to re-run this analysis without an annual
-          # simulation.
-          post_analysis.write_cache(File.join(@dp_temp_folder, 'btap_cache.json')) if post_analysis
-
           self.output_hourly_data(model,@dp_temp_folder, @options[:datapoint_id])
           self.output_timestep_data(model,@dp_temp_folder, @options[:datapoint_id])
         end
