@@ -1976,23 +1976,6 @@ module BTAP
 
       return material_quantities
     end
-
-    # Remove most instance variables from the TBD object. This is a temporary
-    # workaround for getting caching to work since the TBD object is very deeply
-    # nested with member attributes. A bug exists in ruby which causes the
-    # `inspect` method to hang for such objects:
-    # https://bugs.ruby-lang.org/issues/6783
-
-    # This prevents inspecting the object in an interactive debug shell without
-    # a file pager and prevents writing the object to a file.
-    def shorten_instance_variables
-      self.instance_variables.filter { |variable| variable != :@tally and variable != :@model }.each do |variable|
-        remove_instance_variable(variable)
-      end
-      @model.keys.filter { |value| value != :perform }.each do |value|
-        @model.delete(value)
-      end
-    end
   end
 end
 
