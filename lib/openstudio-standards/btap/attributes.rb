@@ -373,7 +373,7 @@ module BTAP
 
       # Uninsulated surfaces are not derated by TBD. These surfaces will not
       # have a stored U-value. In those cases, use the fallback method.
-      if @use_tbd and surface.additionalProperties.getFeatureAsDouble("uprated_Uo").is_initialized
+      if @use_tbd and surface.additionalProperties.hasFeature("uprated_Uo")
         return 1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
       else
         return TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
