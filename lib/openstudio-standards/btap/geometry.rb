@@ -165,6 +165,54 @@ module BTAP
 
         wdt
       end
+
+      ##
+      # Return ground slab perimeter (insulation) area for one or more spaces.
+      #
+      # @param spaces [Set<OpenStudio::Model::Space>] target spaces
+      # @param w [Numeric] perimeter width
+      #
+      # @return [Numeric] perimeter area (0 if failure)
+      def self.perimeter_m2(spaces = [], w = 1.2)
+        slabs  = []
+        slabs += TBD.facets(spaces, "foundation", "floor")
+        slabs += TBD.facets(spaces, "ground", "floor")
+        return 0 if slabs.empty?
+        return 0 unless w.is_a?(Numeric)
+        return 0 if w < 0.1
+
+        area  = slabs.sum(&:grossArea)
+        slabs = slabs.sort_by(&:grossArea).reverse
+        slab  = slabs.first
+        plane = slab.plane
+        t     = OpenStudio::Transformation.alignFace(slab.vertices)
+        polyg = TBD.poly(slab, false, true, true, t, :ulc).to_a.reverse
+
+        if slabs.size > 1
+          slabs = slabs.select { |slb| plane.equal(slb.plane, 0.001) }
+
+          if slabs.size > 1
+            polygs = slabs.map     { |slb| TBD.poly(slb, false, true, true, t, :ulc) }
+            polygs = polygs.reject { |plg| plg.empty? }
+            polygs = polygs.map    { |plg| plg.to_a.reverse }
+
+            union = OpenStudio.joinAll(polygs, 0.01).first
+            polyg = TBD.poly(union, false, true, true)
+            return 0 if polyg.empty?
+          end
+        end
+
+        offset = OpenStudio.buffer(polyg, -w, 0.01)
+        return 0 if offset.empty?
+
+        m2 = OpenStudio.getArea(offset.get)
+
+        puts area
+        puts m2
+        puts
+
+        m2.empty? ? 0 : area - m2.get
+      end
     end
 
     module Surfaces

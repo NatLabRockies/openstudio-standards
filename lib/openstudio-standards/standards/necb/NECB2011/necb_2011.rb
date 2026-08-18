@@ -1115,6 +1115,10 @@ class NECB2011 < Standard
   def apply_kiva_foundation(model)
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
+    puts
+    puts BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2)
+    puts
+
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
     bldg_kiva_model.setWallHeightAboveGrade(0.0)
