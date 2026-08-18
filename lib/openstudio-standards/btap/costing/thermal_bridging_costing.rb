@@ -4,7 +4,33 @@ module BTAP
     # @param prototype_creator [Standard]
     def cost_audit_thermal_bridging(prototype_creator)
       total_tbd_cost      = 0.0
-      material_quantities = BTAP::Bridging::get_material_quantities_for_edges(@attributes.tbd_edge_tallies)
+      csv                 = CSV.read(Paths::THERMAL_BRIDGING_PATH, headers: true)
+      material_quantities = {}
+
+      @attributes.tbd_edge_tallies.each do |edge_type, value|
+        value.each do |wall_reference_and_quality, quantity|
+          result = csv.find do |row|
+            row["edge_type"]      == edge_type &&
+            row["wall_reference"] == wall_reference_and_quality
+          end
+
+          if result.nil?
+            raise("Entry with type \"#{edge_type}\" and reference \"#{wall_reference_and_quality}\"" \
+                  " could not be found in the thermal bridging database.")
+            next
+          end
+
+          material_opaque_id_layers = result['material_opaque_id_layers'].split(",")
+          id_layers_quantity_multipliers = result['id_layers_quantity_multipliers'].split(",")
+          material_opaque_id_layers.zip(id_layers_quantity_multipliers).each do |id, scale|
+            if material_quantities[id].nil?
+              material_quantities[id] = 0.0
+            end
+
+            material_quantities[id] = material_quantities[id] + scale.to_f * quantity
+          end
+        end
+      end
 
       # Calculate the cost associated from each of the ID-quantity pairs.
       # Note that no localization facors are used. This is because thermal
