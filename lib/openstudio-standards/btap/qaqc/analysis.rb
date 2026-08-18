@@ -75,17 +75,21 @@ module BTAP
       # additional properties and format them into a hash.
       if use_tbd
         ["fenestration", "grade", "parapet", "corner", "rimjoist"].each do |edge_type|
-          edge_key = "PSI#{edge_type}1"
-          if model.getBuilding.additionalProperties.hasFeature(edge_key)
-            tbd_edge_tallies[edge_type] = {}
-            wall_reference, quantity =
-              model.getBuilding.additionalProperties.getFeatureAsString(edge_key).get.split(/\s(?=\d)/)
+          (1..model.getConstructions.length).each do |id|
+            edge_key = "PSI#{edge_type}#{id}"
+            keep_looking = false
+            if model.getBuilding.additionalProperties.hasFeature(edge_key)
+              keep_looking = true
+              tbd_edge_tallies[edge_type] = {}
+              wall_reference, quantity =
+                model.getBuilding.additionalProperties.getFeatureAsString(edge_key).get.split(/\s(?=\d)/)
 
-            tbd_edge_tallies[edge_type][wall_reference] = quantity.to_f
+              tbd_edge_tallies[edge_type][wall_reference] = quantity.to_f
+            end
+            break unless keep_looking
           end
         end
       end
-
       return use_tbd, building_performance, tbd_edge_tallies
     end
   end
