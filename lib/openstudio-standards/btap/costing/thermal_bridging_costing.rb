@@ -4,7 +4,7 @@ module BTAP
     # @param prototype_creator [Standard]
     def cost_audit_thermal_bridging(prototype_creator)
       total_tbd_cost      = 0.0
-      material_quantities = BTAP::BridgingData::get_material_quantities_for_edges(@attributes.tbd_edge_tallies)
+      material_quantities = BTAP::Bridging::get_material_quantities_for_edges(@attributes.tbd_edge_tallies)
 
       # Calculate the cost associated from each of the ID-quantity pairs.
       # Note that no localization facors are used. This is because thermal

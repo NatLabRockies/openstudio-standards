@@ -29,7 +29,7 @@ module BTAP
       cost_result, _ = costing.cost_audit_all(
         model: @model,
         prototype_creator: @standard,
-        template_type: @cache.data["template"])
+        template_type: @model.getBuilding.standardsTemplate.get)
 
       if not @qaqc.nil?
         @qaqc[:costing_information] = cost_result
@@ -60,11 +60,33 @@ module BTAP
       return carbon_result
     end
 
-    # Write the cache by interfacing with the BTAP::Cache attribute.
-    #
-    # @param file [String] File path to save to.
-    def write_cache(path)
-      @cache.write_cache(path)
+    # @param model [OpenStudio::Model::Model]
+    def self.get_tbd_attributes(model:)
+
+      # The "psi_quality" additional property is only initialized when TBD
+      # is run, used as a marker here to determine the "use_tbd" attribute.
+      use_tbd = model.getBuilding.additionalProperties.hasFeature("psi_quality")
+      building_performance = use_tbd ?
+        model.getBuilding.additionalProperties.getFeatureAsString("psi_quality").get : nil
+
+      tbd_edge_tallies = {}
+
+      # Process the thermal bridging edge tallies out of the building's
+      # additional properties and format them into a hash.
+      if use_tbd
+        ["fenestration", "grade", "parapet", "corner", "rimjoist"].each do |edge_type|
+          edge_key = "PSI#{edge_type}1"
+          if model.getBuilding.additionalProperties.hasFeature(edge_key)
+            tbd_edge_tallies[edge_type] = {}
+            wall_reference, quantity =
+              model.getBuilding.additionalProperties.getFeatureAsString(edge_key).get.split(/\s(?=\d)/)
+
+            tbd_edge_tallies[edge_type][wall_reference] = quantity.to_f
+          end
+        end
+      end
+
+      return use_tbd, building_performance, tbd_edge_tallies
     end
   end
 
@@ -82,8 +104,6 @@ module BTAP
   # @param model_path      [String] The path of the OSM file for a model.
   # @param sql_file_path   [String] SQL file of the model required for hourly
   #                                 data.
-  # @param cache_file_path [String] More attributes required for simulation. See
-  #                                 the `write_cache` function.
   # @param output_folder   [String]
   # @param template        [String]
   # @param datapoint_id    [String]
@@ -92,25 +112,25 @@ module BTAP
     def initialize(
       model_path:,
       sql_file_path:,
-      cache_file_path:,
       output_folder:,
       datapoint_id:,
       analysis_id: SecureRandom.uuid)
 
-      @cache = BTAP::Cache.load_cache(cache_file_path)
       super(output_folder: output_folder)
       @model    = BTAP::FileIO.load_osm(model_path)
-      @standard = Standard.build(@cache.data["template"])
+      @standard = Standard.build(@model.getBuilding.standardsTemplate.get)
       @standard.assign_building_activity(model: @model)
       @standard.assign_building_structure(model: @model, activity: @standard.activity)
       @datapoint_id = datapoint_id
       @analysis_id  = analysis_id
+
+      use_tbd, building_performance, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
       @attributes   = BTAP::Attributes.new(
-        @model,
-        @standard,
-        @cache.data["use_tbd"],
-        @cache.data["building_performance"],
-        @cache.data["tbd_edge_tallies"])
+        model: @model,
+        standard: @standard,
+        use_tbd: use_tbd,
+        building_performance: building_performance,
+        tbd_edge_tallies: tbd_edge_tallies)
       @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
       @qaqc = BTAP::Datapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
     end
@@ -127,62 +147,17 @@ module BTAP
   class DatapointAnalysis < Analysis
     def initialize(model:, output_folder:, standard:, qaqc:)
       super(output_folder: output_folder)
-      @model      = model
-      @standard   = standard
-      @qaqc       = qaqc
-      @cache      = BTAP::Cache.new(@standard)
-      @attributes = BTAP::Attributes.new(
-        @model,
-        @standard,
-        @cache.data["use_tbd"],
-        @cache.data["building_performance"],
-        @cache.data["tbd_edge_tallies"])
-    end
-  end
+      @model    = model
+      @standard = standard
+      @qaqc     = qaqc
 
-  # BTAP Cache
-  #
-  # Interface for storing and loading useful data members not found in either
-  # the OSM or SQL file that are required for further analysis.
-  class Cache
-    attr_reader :data
-
-    # @param standard [Standard]
-    def initialize(standard)
-
-      @data = {}
-      data["template"] = standard.template
-      data["use_tbd"]  = !(standard.tbd.nil?)
-      if data["use_tbd"]
-        data["building_performance"] = standard.tbd.model[:perform]
-
-        # The "convex/concave" suffix on tally edges can be safely ignored since
-        # they currently aren't relevant to any NECB standard, but they are to
-        # ASHRAE 90.1.
-        data["tbd_edge_tallies"] = standard.tbd.tally[:edges].transform_keys { |key|
-          key.to_s.gsub(/concave|convex/, '') }
-      end
-    end
-
-    # @param path [String]
-    def write_cache(path)
-      File.open(path, "w") do |file|
-        file.write(JSON.pretty_generate(@data))
-      end
-    end
-
-    # @param path [String]
-    def self.load_cache(path)
-      cache = File.open(path, "r") { |file| JSON.load(file) }
-      cache["building_performance"] = cache["building_performance"].to_sym unless cache["building_performance"].nil?
-      return LoadedCache.new(cache)
-    end
-  end
-
-  class LoadedCache < Cache
-    def initialize(data)
-      @data = data
-      return
+      use_tbd, building_performance, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
+      @attributes   = BTAP::Attributes.new(
+        model: @model,
+        standard: @standard,
+        use_tbd: use_tbd,
+        building_performance: building_performance,
+        tbd_edge_tallies: tbd_edge_tallies)
     end
   end
 end
