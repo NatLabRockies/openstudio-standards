@@ -210,6 +210,37 @@ module BTAP
         puts area
         puts m2
         puts
+        # Prototype                 slab  union?     cutout   perimeter OK?
+        # FullServiceRestaurant   511.15     OK     408.39      102.76  OK
+        # HighriseApartment       783.65     OK     637.63      146.02
+        # HighriseApartmentMult   783.65     OK     637.63      146.02
+        # Hospital               3739.35     OK    3448.84      290.51  OK
+        # LargeHotel             1978.83     OK    1721.97      256.86  OK
+        # LargeOffice            3563.11     OK    3276.44      286.67
+        # LEEPMidriseApartment    787.84     OK     647.41      140.42
+        # LEEPMultTower          2814.72     OK    2434.49      380.23
+        # LEEPPointTower          676.95     OK     556.43      120.52
+
+        # LowriseApartment        587.74            469.51      118.23
+        # MediumOffice           1660.73     OK    1466.85      193.88  OK
+        # MidriseApartment        783.65     OK     637.63      146.02
+        # Outpatient             1373.29     OK    1164.31      208.98
+        # PrimarySchool          6871.00     OK    6123.16      747.84
+        # QuickServiceRestaurant  232.34     OK     164.94       67.41  OK
+        # RetailStandalone       2293.99     OK    2068.06      225.94
+        # RetailStripmall        2090.32     OK    1821.76      268.56  OK
+        # SecondarySchool       11902.00     OK   11012.56      889.44
+        # SmallHotel             1003.40     OK     833.59      169.81 OK
+        # SmallOffice             511.16     OK     406.16      105.00 OK
+        # Warehouse              4598.25     OK    4252.90      345.35 OK
+        #
+        # SPECIAL CASES:
+        #
+        # LEEPTownHouse1          466.15            364.44      101.71  ... (1st pavillion)
+        # LEEPTownHouse2          699.22            563.52      135.70  ... (2nd pavillion)
+        #
+        # NortherEducation   (no ground-facing floors ... facing outdoors)
+        # NorthernHealthCare (no ground-facing floors ... facing outdoors)
 
         m2.empty? ? 0 : area - m2.get
       end
