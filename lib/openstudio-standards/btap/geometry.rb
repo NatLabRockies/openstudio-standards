@@ -220,7 +220,6 @@ module BTAP
         # LEEPMidriseApartment    787.84     OK     647.41      140.42
         # LEEPMultTower          2814.72     OK    2434.49      380.23
         # LEEPPointTower          676.95     OK     556.43      120.52
-
         # LowriseApartment        587.74            469.51      118.23
         # MediumOffice           1660.73     OK    1466.85      193.88  OK
         # MidriseApartment        783.65     OK     637.63      146.02
