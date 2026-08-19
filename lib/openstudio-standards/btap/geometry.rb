@@ -230,9 +230,9 @@ module BTAP
         # RetailStandalone       2293.99     OK    2068.06      225.94
         # RetailStripmall        2090.32     OK    1821.76      268.56  OK
         # SecondarySchool       11902.00     OK   11012.56      889.44
-        # SmallHotel             1003.40     OK     833.59      169.81 OK
-        # SmallOffice             511.16     OK     406.16      105.00 OK
-        # Warehouse              4598.25     OK    4252.90      345.35 OK
+        # SmallHotel             1003.40     OK     833.59      169.81  OK
+        # SmallOffice             511.16     OK     406.16      105.00  OK
+        # Warehouse              4598.25     OK    4252.90      345.35  OK
         #
         # SPECIAL CASES:
         #
