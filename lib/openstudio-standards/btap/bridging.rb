@@ -383,6 +383,17 @@ module BTAP
     # --- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- --- #
 
     ##
+    # Returns current BTAP list of admissible edges (i.e. linear thermal
+    # bridges), as Symbols. These are key for 'gen_tallies' & BTAP costing (TBD
+    # tracks a wider range of thermal bridge types than BTAP costing currently
+    # supports). This may be updated in the future.
+    #
+    # @return [Array] admissible BTAP-costed edge types (Symbols)
+    def admissible_edges
+      [:rimjoist, :parapet, :fenestration, :corner, :grade]
+    end
+
+    ##
     # Returns paired low-performance (LP) & high-performance (HP) BTAP-costed
     # wall assembly identifiers, based on user-provided assembly ID. If valid,
     # solution returns a Hash holding 2 keys (:lp and :hp).
@@ -1728,7 +1739,7 @@ module BTAP
 
       # TBD/BTAP track a wider range of thermal bridge types than BTAP costing
       # currently supports. Current BTAP-costed, linear thermal bridge types:
-      @model[:bridges] = [:rimjoist, :parapet, :fenestration, :corner, :grade]
+      @model[:bridges] = admissible_edges
 
       @model[:io][:edges].each do |e|
         pID = e[:psi]
