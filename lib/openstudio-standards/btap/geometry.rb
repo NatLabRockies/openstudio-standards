@@ -147,76 +147,62 @@ module BTAP
     end
 
     module Spaces
-
       ##
-      # Fetch a space's full height.
+      # Fetch a space's full height, maybe stored as an AdditionalProperty -
+      # search for AdditionalProperty feature "space_height".
       #
       # @param space [OpenStudio::Model::Space] a space
       #
       # @return [Float] full height of space (0 if invalid input)
       def self.space_height(space = nil)
-        return 0 unless space.is_a?(OpenStudio::Model::Space)
+        hgt = 0.00
+        tag = "space_height"
+        return hgt unless space.is_a?(OpenStudio::Model::Space)
 
-        minZ =  10000
-        maxZ = -10000
-
-        space.surfaces.each do |surface|
-          minZ = [surface.vertices.min_by(&:z).z, minZ].min
-          maxZ = [surface.vertices.max_by(&:z).z, maxZ].max
+        if space.additionalProperties.hasFeature(tag)
+          if space.additionalProperties.getFeatureAsDouble(tag).empty?
+            space.additionalProperties.resetFeature(tag)
+            hgt = TBD.spaceHeight(space)
+            space.additionalProperties.setFeature(tag, hgt)
+            return hgt
+          else
+            return space.additionalProperties.getFeatureAsDouble(tag).get
+          end
         end
 
-        maxZ < minZ ? 0 : maxZ - minZ
+        hgt = TBD.spaceHeight(space)
+        space.additionalProperties.setFeature(tag, hgt)
+
+        hgt
       end
 
       ##
-      # Fetch a space's width.
+      # Fetch a space's width, maybe stored as an AdditionalProperty -
+      # search for AdditionalProperty feature "space_width".
       #
       # @param space [OpenStudio::Model::Space] a space
       #
       # @return [Float] width of a space (0 if invalid input)
       def self.space_width(space = nil)
-        return 0 unless space.is_a?(OpenStudio::Model::Space)
+        wdt = 0.00
+        tag = "space_width"
+        return wdt unless space.is_a?(OpenStudio::Model::Space)
 
-        floors = facets(space, "all", "Floor")
-        return 0 if floors.empty?
-
-        # Automatically determining a space's "width" is not straightforward:
-        #   - a space may hold multiple floor surfaces at various Z-axis levels
-        #   - a space may hold multiple floor surfaces, with unique "widths"
-        #   - a floor surface may expand/contract (in "width") along its length.
-        #
-        # First, attempt to merge all floor surfaces together as 1x polygon:
-        #   - select largest floor surface (in area)
-        #   - determine its 3D plane
-        #   - retain only other floor surfaces sharing same 3D plane
-        #   - recover potential union between floor surfaces
-        #   - fall back to largest floor surface if invalid union
-        #   - return width of largest bounded box
-        floors = floors.sort_by(&:grossArea).reverse
-        floor  = floors.first
-        plane  = floor.plane
-        t      = OpenStudio::Transformation.alignFace(floor.vertices)
-        polyg  = poly(floor, false, true, true, t, :ulc).to_a.reverse
-        return 0 if polyg.empty?
-
-        if floors.size > 1
-          floors = floors.select { |flr| plane.equal(flr.plane, 0.001) }
-
-          if floors.size > 1
-            polygs = floors.map    { |flr| poly(flr, false, true, true, t, :ulc) }
-            polygs = polygs.reject { |plg| plg.empty? }
-            polygs = polygs.map    { |plg| plg.to_a.reverse }
-            union  = OpenStudio.joinAll(polygs, 0.01).first
-            polyg  = poly(union, false, true, true)
-            return 0 if polyg.empty?
+        if space.additionalProperties.hasFeature(tag)
+          if space.additionalProperties.getFeatureAsDouble(tag).empty?
+            space.additionalProperties.resetFeature(tag)
+            wdt = TBD.spaceWidth(space)
+            space.additionalProperties.setFeature(tag, wdt)
+            return wdt
+          else
+            return space.additionalProperties.getFeatureAsDouble(tag).get
           end
         end
 
-        res = realignedFace(polyg.to_a.reverse)
-        return 0 if res[:box].nil?
+        wdt = TBD.spaceWidth(space)
+        space.additionalProperties.setFeature(tag, wdt)
 
-        # A bounded box's 'height', at its narrowest, is its 'width'.
-        height(res[:box])
+        wdt
       end
     end
 
