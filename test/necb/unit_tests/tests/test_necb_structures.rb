@@ -40,10 +40,10 @@ class NECB_Structure_Tests < Minitest::Test
       # 'QuickServiceRestaurant',
       # 'RetailStandalone',
       # 'RetailStripmall',
-      'SecondarySchool',
+      # 'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
-      # 'Warehouse'
+      'Warehouse'
     ]
 
     @templates = [

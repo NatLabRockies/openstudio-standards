@@ -167,81 +167,114 @@ module BTAP
       end
 
       ##
-      # Return ground slab perimeter (insulation) area for one or more spaces.
+      # Return slab-on-grade perimeter (insulation) area for one or more spaces.
+      # Solution returns 0 if full basement. Relies on OpenStudio's BOOST-based
+      # 'joinAll' & 'buffer'. Boost methods have strict requirements when
+      # processing polygons. The solution will yield incorrect estimates with
+      # poorly-developed OpenStudio models.
       #
       # @param spaces [Set<OpenStudio::Model::Space>] target spaces
       # @param w [Numeric] perimeter width
       #
       # @return [Numeric] perimeter area (0 if failure)
       def self.perimeter_m2(spaces = [], w = 1.2)
-        slabs  = []
-        slabs += TBD.facets(spaces, "foundation", "floor")
-        slabs += TBD.facets(spaces, "ground", "floor")
+        slabs = []
+
+        # Fetch slabs-on-grade.
+        spaces.each do |space|
+          t = space.siteTransformation
+
+          wlls  = []
+          wlls += TBD.facets(space, "ground", "wall")
+          wlls += TBD.facets(space, "foundation", "wall")
+          next unless wlls.empty?
+
+          slbs  = []
+          slbs += TBD.facets(space, "foundation", "floor")
+          slbs += TBD.facets(space, "ground", "floor")
+          next if slbs.empty?
+
+          slbs.each { |slb| slabs << t * slb.vertices }
+        end
+
         return 0 if slabs.empty?
         return 0 unless w.is_a?(Numeric)
         return 0 if w < 0.1
 
-        area  = slabs.sum(&:grossArea)
-        slabs = slabs.sort_by(&:grossArea).reverse
-        slab  = slabs.first
-        plane = slab.plane
-        t     = OpenStudio::Transformation.alignFace(slab.vertices)
-        polyg = TBD.poly(slab, false, true, true, t, :ulc).to_a.reverse
+        # Slab surfaces might not site perfectly at Z-axis '0'. Flatten.
+        slabs = slabs.map { |slab| TBD.flatten(slab) }
+        ctr   = 0
 
-        if slabs.size > 1
-          slabs = slabs.select { |slb| plane.equal(slb.plane, 0.001) }
+        # OpenStudio's 'joinAll' is sensitive to the order/sequence of polygons.
+        # A model may hold 20 slabs: a first call to 'joinAll' may successfully
+        # merge all 20 into 3 groups. A follow-up call may finally unite all.
+        while slabs.size != 1
+          break if ctr > 100
 
-          if slabs.size > 1
-            polygs = slabs.map     { |slb| TBD.poly(slb, false, true, true, t, :ulc) }
-            polygs = polygs.reject { |plg| plg.empty? }
-            polygs = polygs.map    { |plg| plg.to_a.reverse }
-
-            union = OpenStudio.joinAll(polygs, 0.01).first
-            polyg = TBD.poly(union, false, true, true)
-            return 0 if polyg.empty?
-          end
+          slabs = OpenStudio.joinAll(slabs.shuffle, 0.01)
+          ctr  += 1
         end
 
-        offset = OpenStudio.buffer(polyg, -w, 0.01)
-        return 0 if offset.empty?
+        total = 0
 
-        m2 = OpenStudio.getArea(offset.get)
+        # If multiple unions, possibly dealing with separate pavillions. Add up.
+        slabs.each do |slab|
+          polyg = TBD.poly(slab, false, true, true, true, :cw)
+          next if polyg.empty?
 
-        puts area
-        puts m2
-        puts
-        # Prototype                 slab  union?     cutout   perimeter OK?
+          offset = OpenStudio.buffer(polyg, -w, 0.1)
+          next if offset.empty?
+
+          offset = offset.get
+          area   = OpenStudio.getArea(polyg)
+          m2     = OpenStudio.getArea(offset)
+          next if m2.empty?
+          next if area.empty?
+
+          total += area.get - m2.get
+        end
+
+        # Prototype                 slab  union?    cutout    perimeter OK?
+        # ---------------------- ------- ------- ---------- ---------------
         # FullServiceRestaurant   511.15     OK     408.39      102.76  OK
-        # HighriseApartment       783.65     OK     637.63      146.02
-        # HighriseApartmentMult   783.65     OK     637.63      146.02
+        # HighriseApartment       783.65     OK     637.63      146.02  OK
+        # HighriseApartmentMult   783.65     OK     637.63      146.02  OK
         # Hospital               3739.35     OK    3448.84      290.51  OK
         # LargeHotel             1978.83     OK    1721.97      256.86  OK
-        # LargeOffice            3563.11     OK    3276.44      286.67
-        # LEEPMidriseApartment    787.84     OK     647.41      140.42
-        # LEEPMultTower          2814.72     OK    2434.49      380.23
-        # LEEPPointTower          676.95     OK     556.43      120.52
-        # LowriseApartment        587.74            469.51      118.23
+        # LEEPMidriseApartment    787.84     OK     647.41      140.42  OK
+        # LEEPPointTower          676.95     OK     556.43      120.52  OK
+        # LowriseApartment        587.74     OK     469.51      118.23  OK
         # MediumOffice           1660.73     OK    1466.85      193.88  OK
-        # MidriseApartment        783.65     OK     637.63      146.02
-        # Outpatient             1373.29     OK    1164.31      208.98
-        # PrimarySchool          6871.00     OK    6123.16      747.84
+        # MidriseApartment        783.65     OK     637.63      146.02  OK
+        # PrimarySchool          6871.00     OK    6123.16      747.84  OK
         # QuickServiceRestaurant  232.34     OK     164.94       67.41  OK
-        # RetailStandalone       2293.99     OK    2068.06      225.94
+        # RetailStandalone       2293.99     OK    2068.06      225.94  OK
         # RetailStripmall        2090.32     OK    1821.76      268.56  OK
-        # SecondarySchool       11902.00     OK   11012.56      889.44
+        # SecondarySchool       11902.00     OK   11012.56      889.44  OK
         # SmallHotel             1003.40     OK     833.59      169.81  OK
         # SmallOffice             511.16     OK     406.16      105.00  OK
         # Warehouse              4598.25     OK    4252.90      345.35  OK
         #
-        # SPECIAL CASES:
+        # LEEPTownHouse1          466.15     OK     364.44      101.71  OK (Pavillion 1)
+        # LEEPTownHouse2          699.22     OK     563.52      135.70  OK (Pavillion 2)
+        # ---------------------- ------- ------- ---------- ---------------
+        # LEEPTownHouse TOTAL    1165.37     OK     927.96      237.41  OK
         #
-        # LEEPTownHouse1          466.15            364.44      101.71  ... (1st pavillion)
-        # LEEPTownHouse2          699.22            563.52      135.70  ... (2nd pavillion)
         #
-        # NortherEducation   (no ground-facing floors ... facing outdoors)
-        # NorthernHealthCare (no ground-facing floors ... facing outdoors)
+        # SKIPPED CASES (expected):
+        # ----------------------------------------------------------------------
+        # LargeOffice        : full basement
+        # NortherEducation   : no ground-facing floors
+        # NorthernHealthCare : no ground-facing floors
+        #
+        #
+        # PROBLEM CASES (Boost feedback: "union has inner loops"):
+        # ----------------------------------------------------------------------
+        # Prototype          slab         union?          cutout
+        # LEEPMultiTower  2814.72 (2441)  2434.49 (2043)  380.23 (397) 
+        # Outpatient      1373.29 (1199)  1164.31 ( 875)  208.98 (324)
 
-        m2.empty? ? 0 : area - m2.get
+        total
       end
     end
 
