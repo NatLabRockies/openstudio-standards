@@ -197,17 +197,19 @@ module BTAP
         end
 
         # Fetch slabs-on-grade.
-        spaces.sort.each do |space|
+        spaces.each do |space|
           t = space.siteTransformation
 
           wlls  = []
           wlls += TBD.facets(space, "ground", "wall")
           wlls += TBD.facets(space, "foundation", "wall")
+          wlls += TBD.facets(space, "othersidecoefficients", "wall")
           next unless wlls.empty?
 
           slbs  = []
-          slbs += TBD.facets(space, "foundation", "floor")
           slbs += TBD.facets(space, "ground", "floor")
+          slbs += TBD.facets(space, "foundation", "floor")
+          slbs += TBD.facets(space, "othersidecoefficients", "floor")
           next if slbs.empty?
 
           slbs.each { |slb| slabs << t * slb.vertices }
@@ -228,7 +230,7 @@ module BTAP
         while slabs.size != 1
           break if ctr > 100
 
-          slabs = OpenStudio.joinAll(slabs.shuffle, 0.01)
+          slabs = OpenStudio.joinAll(slabs.shuffle, 0.001)
           ctr  += 1
         end
 
