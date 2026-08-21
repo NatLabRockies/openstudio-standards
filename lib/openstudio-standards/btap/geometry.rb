@@ -181,7 +181,7 @@ module BTAP
         slabs = []
 
         # Fetch slabs-on-grade.
-        spaces.each do |space|
+        spaces.sort.each do |space|
           t = space.siteTransformation
 
           wlls  = []
@@ -233,46 +233,6 @@ module BTAP
 
           total += area.get - m2.get
         end
-
-        # Prototype                 slab  union?    cutout    perimeter OK?
-        # ---------------------- ------- ------- ---------- ---------------
-        # FullServiceRestaurant   511.15     OK     408.39      102.76  OK
-        # HighriseApartment       783.65     OK     637.63      146.02  OK
-        # HighriseApartmentMult   783.65     OK     637.63      146.02  OK
-        # Hospital               3739.35     OK    3448.84      290.51  OK
-        # LargeHotel             1978.83     OK    1721.97      256.86  OK
-        # LEEPMidriseApartment    787.84     OK     647.41      140.42  OK
-        # LEEPPointTower          676.95     OK     556.43      120.52  OK
-        # LowriseApartment        587.74     OK     469.51      118.23  OK
-        # MediumOffice           1660.73     OK    1466.85      193.88  OK
-        # MidriseApartment        783.65     OK     637.63      146.02  OK
-        # PrimarySchool          6871.00     OK    6123.16      747.84  OK
-        # QuickServiceRestaurant  232.34     OK     164.94       67.41  OK
-        # RetailStandalone       2293.99     OK    2068.06      225.94  OK
-        # RetailStripmall        2090.32     OK    1821.76      268.56  OK
-        # SecondarySchool       11902.00     OK   11012.56      889.44  OK
-        # SmallHotel             1003.40     OK     833.59      169.81  OK
-        # SmallOffice             511.16     OK     406.16      105.00  OK
-        # Warehouse              4598.25     OK    4252.90      345.35  OK
-        #
-        # LEEPTownHouse1          466.15     OK     364.44      101.71  OK (Pavillion 1)
-        # LEEPTownHouse2          699.22     OK     563.52      135.70  OK (Pavillion 2)
-        # ---------------------- ------- ------- ---------- ---------------
-        # LEEPTownHouse TOTAL    1165.37     OK     927.96      237.41  OK
-        #
-        #
-        # SKIPPED CASES (expected):
-        # ----------------------------------------------------------------------
-        # LargeOffice        : full basement
-        # NortherEducation   : no ground-facing floors
-        # NorthernHealthCare : no ground-facing floors
-        #
-        #
-        # PROBLEM CASES (Boost feedback: "union has inner loops"):
-        # ----------------------------------------------------------------------
-        # Prototype          slab         union?          cutout
-        # LEEPMultiTower  2814.72 (2441)  2434.49 (2043)  380.23 (397) 
-        # Outpatient      1373.29 (1199)  1164.31 ( 875)  208.98 (324)
 
         total
       end

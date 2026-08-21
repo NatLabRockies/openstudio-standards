@@ -29,7 +29,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
-      # 'LEEPTownHouse',
+      'LEEPTownHouse',
       # 'LowriseApartment',
       # 'MediumOffice',
       # 'MidriseApartment',
@@ -43,7 +43,7 @@ class NECB_Structure_Tests < Minitest::Test
       # 'SecondarySchool',
       # 'SmallHotel',
       # 'SmallOffice',
-      'Warehouse'
+      # 'Warehouse'
     ]
 
     @templates = [
