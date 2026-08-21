@@ -1111,13 +1111,10 @@ class NECB2011 < Standard
   #
   # @param model [OpenStudio::Model::Model] a model
   #
-  # @return [OpenStudio::Model::FoundationKivaSettings] KIVA settings
+  # @return [Float] slab-on-grade perimeter area (0 if not applicable)
   def apply_kiva_foundation(model)
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
-
-    puts
-    puts BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2)
-    puts
+    slb = false
 
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
@@ -1157,6 +1154,8 @@ class NECB2011 < Standard
 
             zone_kiva_models.last.setInteriorHorizontalInsulationMaterial(xps38)
             zone_kiva_models.last.setInteriorHorizontalInsulationWidth(1.2)
+
+            slb = true
           end
         end
 
@@ -1191,6 +1190,8 @@ class NECB2011 < Standard
 
                 kiva_model.setInteriorHorizontalInsulationMaterial(xps38)
                 kiva_model.setInteriorHorizontalInsulationWidth(1.2)
+
+                slb = true
               end
             end
 
@@ -1228,7 +1229,7 @@ class NECB2011 < Standard
       end
     end
 
-    model.getFoundationKivaSettings
+    slb == true ? BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2) : 0
   end
 
   # check if two surfaces are in contact. For every two consecutive vertices on surface 1,

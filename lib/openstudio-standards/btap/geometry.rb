@@ -178,7 +178,23 @@ module BTAP
       #
       # @return [Numeric] perimeter area (0 if failure)
       def self.perimeter_m2(spaces = [], w = 1.2)
+        tag   = "btap_slab_perimeter_m2"
         slabs = []
+
+        spaces = spaces.is_a?(OpenStudio::Model::Space) ? [spaces] : spaces
+        spaces = spaces.respond_to?(:to_a) ? spaces.to_a : []
+        return [] if spaces.empty?
+
+        bldg = spaces.first.model.getBuilding
+
+        # Check if pre-set as AdditionalProperty.
+        if bldg.additionalProperties.hasFeature(tag)
+          aire = bldg.additionalProperties.getFeatureAsDouble(tag)
+
+          unless aire.empty?
+            return aire.get if aire.get > 0
+          end
+        end
 
         # Fetch slabs-on-grade.
         spaces.sort.each do |space|
@@ -204,6 +220,7 @@ module BTAP
         # Slab surfaces might not site perfectly at Z-axis '0'. Flatten.
         slabs = slabs.map { |slab| TBD.flatten(slab) }
         ctr   = 0
+        total = 0
 
         # OpenStudio's 'joinAll' is sensitive to the order/sequence of polygons.
         # A model may hold 20 slabs: a first call to 'joinAll' may successfully
@@ -214,8 +231,6 @@ module BTAP
           slabs = OpenStudio.joinAll(slabs.shuffle, 0.01)
           ctr  += 1
         end
-
-        total = 0
 
         # If multiple unions, possibly dealing with separate pavillions. Add up.
         slabs.each do |slab|
@@ -232,6 +247,13 @@ module BTAP
           next if area.empty?
 
           total += area.get - m2.get
+        end
+
+        # Add as AdditionalProperty (if missing) for future calls.
+        if total > 0
+          unless bldg.additionalProperties.hasFeature(tag)
+            bldg.additionalProperties.setFeature(tag, total)
+          end
         end
 
         total

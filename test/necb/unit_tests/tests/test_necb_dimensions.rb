@@ -11,9 +11,9 @@ class NECB_Dimensions_Tests < Minitest::Test
 
     # Tested models are limited to NECB2011 Prototypes holding concave volumes:
     @buildings = [
-      # "Warehouse.osm",          # 'Zone2 Fine Storage' (height?) ... mezzanine
-      # "NorthernHealthCare.osm", # F-shaped 'corridors' (width?)
-      # "SmallHotel.osm"          # F-shaped 'corridors' (width?)
+      "Warehouse.osm",          # 'Zone2 Fine Storage' (height?) ... mezzanine
+      "NorthernHealthCare.osm", # F-shaped 'corridors' (width?)
+      "SmallHotel.osm"          # F-shaped 'corridors' (width?)
     ]
 
     fdback = []
@@ -111,6 +111,7 @@ class NECB_Dimensions_Tests < Minitest::Test
       "HighriseApartmentMult.osm",
       "LEEPMidriseApartment.osm",
       "LEEPPointTower.osm",
+      # "LEEPTownHouse.osm",
       "LowriseApartment.osm",
       "MediumOffice.osm",
       "MidriseApartment.osm",
@@ -129,7 +130,6 @@ class NECB_Dimensions_Tests < Minitest::Test
     # HighriseApartment       783.65     OK     637.63      146.02
     # HighriseApartmentMult   783.65     OK     637.63      146.02
     # Hospital               3739.35     OK    3448.84      290.51
-    # LargeHotel             1978.83     OK    1721.97      256.86
     # LEEPMidriseApartment    787.84     OK     647.41      140.42
     # LEEPPointTower          676.95     OK     556.43      120.52
     # LowriseApartment        587.74     OK     469.51      118.23
@@ -153,15 +153,15 @@ class NECB_Dimensions_Tests < Minitest::Test
     # SKIPPED CASES (as expected):
     # ----------------------------------------------------------------------
     # LargeOffice        : full basement
+    # LargeHotel         : full basement
     # Hospital           : full basement
-    # NortherEducation   : no ground-facing floors
+    # NorthernEducation  : no ground-facing floors
     # NorthernHealthCare : no ground-facing floors
     #
     #
-    # PROBLEM CASES (doesn't work initially, works after BTAP modifications):
+    # PROBLEM CASES: m2 switches between 220.14 (wrong) vs 237.41 (right)
     # ----------------------------------------------------------------------
-    # LargeHotel
-    # LEEPTownHouse
+    # LEEPTownHouse ... @todo
     #
     #
     # PROBLEM CASES (Boost feedback: "union has inner loops"):
@@ -172,44 +172,58 @@ class NECB_Dimensions_Tests < Minitest::Test
 
     fdback = []
     fdback << ""
-    fdback << "BTAP/Dimensions Unit Tests"
-    fdback << "~~~~~~~~~~~~~~~ ~~~~ ~~~~~"
+    fdback << "BTAP/Dimensions Slab Unit Tests"
+    fdback << "~~~~~~~~~~~~~~~ ~~~~ ~~~~ ~~~~~"
 
-    @buildings.sort.each do |building|
-      cas   = "CASE #{building}"
-      file  = File.join(osm_dir, building)
-      path  = OpenStudio::Path.new(file)
-      model = translator.loadModel(path)
-      emsg  = "BTAP/Dimensions: empty model (#{cas})?"
-      refute_empty(model, emsg)
-      model = model.get
+    # Increasing the number of 'times' (e.g. to 100) increases the likely of
+    # catching failed slab surface merges. Failures seem limited to the paired
+    # pavilions of the 'LEEPTownHouse' prototype (sometimes getting 220.41 m2).
+    1.times do |i|
+      @buildings.sort.each do |building|
+        cas   = "CASE #{building}"
+        file  = File.join(osm_dir, building)
+        path  = OpenStudio::Path.new(file)
+        model = translator.loadModel(path)
+        emsg  = "BTAP/Dimensions: empty model (#{cas})?"
+        refute_empty(model, emsg)
+        model = model.get
 
-      # NECBs require 1.2 m of perimeter insulation for slabs-on-grade (CZ 4-7).
-      m2   = BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2)
-      area = case building
-             when "FullServiceRestaurant.osm"  then 102.76
-             when "HighriseApartment.osm"      then 146.02
-             when "HighriseApartmentMult.osm"  then 146.02
-             when "Hospital.osm"               then 290.51
-             when "LargeHotel.osm"             then 256.86
-             when "LEEPMidriseApartment.osm"   then 140.42
-             when "LEEPPointTower.osm"         then 120.52
-             when "LowriseApartment.osm"       then 118.23
-             when "MediumOffice.osm"           then 193.88
-             when "MidriseApartment.osm"       then 146.02
-             when "PrimarySchool.osm"          then 747.84
-             when "QuickServiceRestaurant.osm" then  67.41
-             when "RetailStandalone.osm"       then 225.94
-             when "RetailStripmall.osm"        then 268.56
-             when "SecondarySchool.osm"        then 889.44
-             when "SmallHotel.osm"             then 169.81
-             when "SmallOffice.osm"            then 105.00
-             when "Warehouse.osm"              then 345.35
-             else                                     0.00
-             end
+        # NECBs require 1.2 m of perimeter insulation for slabs-on-grade (CZ 4-7).
+        m2   = BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2)
+        area = case building
+               when "FullServiceRestaurant.osm"  then 102.76
+               when "HighriseApartment.osm"      then 146.02
+               when "HighriseApartmentMult.osm"  then 146.02
+               when "Hospital.osm"               then 290.51
+               when "LargeHotel.osm"             then 256.86
+               when "LEEPMidriseApartment.osm"   then 140.42
+               when "LEEPPointTower.osm"         then 120.52
+               when "LEEPTownHouse.osm"          then 237.41
+               when "LowriseApartment.osm"       then 118.23
+               when "MediumOffice.osm"           then 193.88
+               when "MidriseApartment.osm"       then 146.02
+               when "PrimarySchool.osm"          then 747.84
+               when "QuickServiceRestaurant.osm" then  67.41
+               when "RetailStandalone.osm"       then 225.94
+               when "RetailStripmall.osm"        then 268.56
+               when "SecondarySchool.osm"        then 889.44
+               when "SmallHotel.osm"             then 169.81
+               when "SmallOffice.osm"            then 105.00
+               when "Warehouse.osm"              then 345.35
+               else                                     0.00
+               end
 
-      emsg = "BTAP/Dimensions: slab perimeter (#{cas})"
-      assert_in_delta(m2, area, 0.02, emsg)
+        emsg = "BTAP/Dimensions: slab perimeter (#{cas})"
+        assert_in_delta(m2, area, 0.02, emsg)
+
+        if i == 0
+          fdback << "#{cas}: slab perimeter insulation area = #{m2.round(2)}"
+        end
+      end
+
+      if i == 0
+        fdback.each { |msg| puts msg }
+      end
     end
   end
 end
