@@ -1104,6 +1104,7 @@ class NECB2011 < Standard
     true
   end
 
+  ##
   # Apply Kiva foundation model to floors/walls with ground boundary condition.
   #
   # @author kamel.haddad@nrcan-rncan.gc.ca
