@@ -99,6 +99,7 @@ module BTAP
         else
           @standard.model_apply_standard(
             model: model,
+            construction_opt: @options[:construction_opt],
             epw_file: @options[:epw_file],
             custom_weather_folder: weather_folder,
             btap_weather: @options[:btap_weather],
