@@ -55,7 +55,9 @@ module OpenstudioStandards
       end
 
       # add walkin
-      ref_walkin = OpenStudio::Model::RefrigerationWalkIn.new(model, model.alwaysOnDiscreteSchedule)
+      # the second constructor argument is the walkin defrost schedule, not the availability schedule
+      # default to always off so walkins without a scheduled defrost are never in defrost
+      ref_walkin = OpenStudio::Model::RefrigerationWalkIn.new(model, model.alwaysOffDiscreteSchedule)
       ref_walkin.setName(name)
       ref_walkin.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       ref_walkin.setRatedCoilCoolingCapacity(walkins_properties[:rated_capacity])

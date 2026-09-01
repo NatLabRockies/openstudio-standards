@@ -51,7 +51,9 @@ module OpenstudioStandards
       end
 
       # add case
-      ref_case = OpenStudio::Model::RefrigerationCase.new(model, model.alwaysOnDiscreteSchedule)
+      # the second constructor argument is the case defrost schedule, not the availability schedule
+      # default to always off so cases without a scheduled defrost, such as OffCycle, are never in defrost
+      ref_case = OpenStudio::Model::RefrigerationCase.new(model, model.alwaysOffDiscreteSchedule)
       ref_case.setName(case_type)
       case_length_m = case_length.nil? ? case_properties[:unit_length] : case_length
       ref_case.setCaseLength(case_length_m)
