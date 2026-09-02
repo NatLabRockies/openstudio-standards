@@ -270,16 +270,99 @@ class Standard
   # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
   # @return [Boolean] returns true if successful, false if not
   def air_loop_hvac_enable_optimum_start(air_loop_hvac)
+    # Get the heating and cooling setpoint schedules
+    # for all zones on this airloop.
+    htg_clg_schs = []
+    air_loop_hvac.thermalZones.each do |zone|
+      # Skip zones with no thermostat
+      next if zone.thermostatSetpointDualSetpoint.empty?
 
-    avm_os = OpenStudio::Model::AvailabilityManagerOptimumStart.new(air_loop_hvac.model)
-    avm_os.setName("#{air_loop_hvac.name.get} Optimum Start Availability Manager")
-    avm_os.setControlAlgorithm('AdaptiveTemperatureGradient')
-    # these are defaults, but set here for visibility
-    avm_os.setInitialTemperatureGradientduringCooling(2)
-    avm_os.setInitialTemperatureGradientduringHeating(2)
-    avm_os.setNumberofPreviousDays(3)
-    # add availability manager
-    air_loop_hvac.addAvailabilityManager(avm_os)
+      # Get the heating and cooling setpoint schedules
+      tstat = zone.thermostatSetpointDualSetpoint.get
+      htg_sch = nil
+      if tstat.heatingSetpointTemperatureSchedule.is_initialized
+        htg_sch = tstat.heatingSetpointTemperatureSchedule.get
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{zone.name}: Cannot find a heating setpoint schedule for this zone, cannot apply optimum start control.")
+        next
+      end
+      clg_sch = nil
+      if tstat.coolingSetpointTemperatureSchedule.is_initialized
+        clg_sch = tstat.coolingSetpointTemperatureSchedule.get
+      else
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{zone.name}: Cannot find a cooling setpoint schedule for this zone, cannot apply optimum start control.")
+        next
+      end
+      htg_clg_schs << [htg_sch, clg_sch]
+    end
+
+    # Clean name of airloop
+    loop_name_clean = OpenstudioStandards::HVAC.ems_friendly_name(air_loop_hvac.name)
+
+    # Sensors
+    oat_db_c_sen = OpenStudio::Model::EnergyManagementSystemSensor.new(air_loop_hvac.model, 'Site Outdoor Air Drybulb Temperature')
+    oat_db_c_sen.setName('OAT')
+    oat_db_c_sen.setKeyName('Environment')
+
+    # Make a program for each unique set of schedules.
+    # For most air loops, all zones will have the same
+    # pair of schedules.
+    htg_clg_schs.uniq.each_with_index do |htg_clg_sch, i|
+      htg_sch = htg_clg_sch[0]
+      clg_sch = htg_clg_sch[1]
+
+      if htg_sch.to_ScheduleConstant.is_initialized
+        htg_sch_type = 'Schedule:Constant'
+      elsif htg_sch.to_ScheduleCompact.is_initialized
+        htg_sch_type = 'Schedule:Compact'
+      else
+        htg_sch_type = 'Schedule:Year'
+      end
+
+      if clg_sch.to_ScheduleCompact.is_initialized
+        clg_sch_type = 'Schedule:Constant'
+      elsif clg_sch.to_ScheduleCompact.is_initialized
+        clg_sch_type = 'Schedule:Compact'
+      else
+        clg_sch_type = 'Schedule:Year'
+      end
+
+      # Actuators
+      htg_sch_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_sch, htg_sch_type, 'Schedule Value')
+      htg_sch_act.setName("#{loop_name_clean}_HtgSch#{i}")
+
+      clg_sch_act = OpenStudio::Model::EnergyManagementSystemActuator.new(clg_sch, clg_sch_type, 'Schedule Value')
+      clg_sch_act.setName("#{loop_name_clean}_ClgSch#{i}")
+
+      # Programs
+      optstart_prg = OpenStudio::Model::EnergyManagementSystemProgram.new(air_loop_hvac.model)
+      optstart_prg.setName("#{loop_name_clean}_OptimumStartProg#{i}")
+      optstart_prg_body = <<-EMS
+      IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && #{oat_db_c_sen.handle}<23.9 && #{oat_db_c_sen.handle}>1.7
+        SET #{clg_sch_act.handle} = 29.4
+        SET #{htg_sch_act.handle} = 15.6
+      ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && #{oat_db_c_sen.handle}<23.9 && #{oat_db_c_sen.handle}>1.7
+        SET #{clg_sch_act.handle} = 29.4
+        SET #{htg_sch_act.handle} = 15.6
+      ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && #{oat_db_c_sen.handle}<23.9 && #{oat_db_c_sen.handle}>1.7
+        SET #{clg_sch_act.handle} = 29.4
+        SET #{htg_sch_act.handle} = 15.6
+      ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && #{oat_db_c_sen.handle}<23.9 && #{oat_db_c_sen.handle}>1.7
+        SET #{clg_sch_act.handle} = 29.4
+        SET #{htg_sch_act.handle} = 15.6
+      ELSE
+        SET #{clg_sch_act.handle} = NULL
+        SET #{htg_sch_act.handle} = NULL
+      ENDIF
+      EMS
+      optstart_prg.setBody(optstart_prg_body)
+
+      # Program Calling Managers
+      setup_mgr = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(air_loop_hvac.model)
+      setup_mgr.setName("#{loop_name_clean}_OptimumStartCallingManager#{i}")
+      setup_mgr.setCallingPoint('BeginTimestepBeforePredictor')
+      setup_mgr.addProgram(optstart_prg)
+    end
 
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: Optimum start control enabled.")
 
