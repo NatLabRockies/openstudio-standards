@@ -69,65 +69,17 @@ class Standard
   # For example, data from ASHRAE 90.1-2004 will be overridden by
   # data from ComStock ASHRAE 90.1-2004.
   #
+  # Only the list of available tables is built here. Each table's JSON file
+  # is parsed the first time the table is requested from standards_data.
+  #
   # @param data_directories [Array<String>] array of file paths that contain standards data
-  # @return [Hash] a hash of standards data
+  # @return [Standard::LazyStandardsData] the standards data tables, indexed by table name
   def load_standards_database(data_directories = [])
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.standard', "Loading OpenStudio Standards data for #{template}")
-    @standards_data = {}
+    @standards_data = LazyStandardsData.new(self, data_directories)
 
-    # Load the JSON files from each directory
-    data_directories.each do |data_dir|
-      if __dir__[0] == ':' # Running from OpenStudio CLI
-        OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Loading JSON files from OpenStudio CLI embedded directory #{data_dir}")
-        EmbeddedScripting.allFileNamesAsString.split(';').each do |file|
-          # Skip files outside of the specified directory
-          next unless file.start_with?("#{data_dir}/data")
-
-          # Skip files that are not JSON
-          next unless File.basename(file).match(/.*\.json/)
-
-          # Read the JSON file
-          data = JSON.parse(EmbeddedScripting.getFileAsString(file))
-          data.each_pair do |key, objs|
-            # Override the template in inherited files to match the instantiated template
-            objs.each do |obj|
-              if obj.key?('template')
-                obj['template'] = template
-              end
-            end
-            if @standards_data[key].nil?
-              OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Adding #{key} from #{File.basename(file)}")
-            else
-              OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Overriding #{key} with #{File.basename(file)}")
-            end
-            @standards_data[key] = objs
-          end
-        end
-      else
-        OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Loading JSON files from #{data_dir}")
-        files = Dir.glob("#{data_dir}/data/*.json").select { |e| File.file? e }
-        files.each do |file|
-          data = JSON.parse(File.read(file))
-          data.each_pair do |key, objs|
-            # Override the template in inherited files to match the instantiated template
-            objs.each do |obj|
-              if obj.key?('template')
-                obj['template'] = template
-              end
-            end
-            if @standards_data[key].nil?
-              OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Adding #{key} from #{File.basename(file)}")
-            else
-              OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Overriding #{key} with #{File.basename(file)}")
-            end
-            @standards_data[key] = objs
-          end
-        end
-      end
-    end
-
-    # Check that standards data was loaded
-    if @standards_data.keys.empty?
+    # Check that standards data files were found
+    if @standards_data.empty?
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.standard', "OpenStudio Standards JSON data was not loaded correctly for #{template}.")
     end
     return @standards_data
