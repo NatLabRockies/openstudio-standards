@@ -170,6 +170,7 @@ module OpenstudioStandards
 
   ### Standards ###
   # Standards classes
+  require_relative "#{stds}/lazy_standards_data"
   require_relative "#{stds}/standard"
   # NECB2011 Code
   require_relative "#{stds}/necb/NECB2011/system_fuels"
