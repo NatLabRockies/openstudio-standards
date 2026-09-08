@@ -49,33 +49,13 @@ module BTAP
     # NECB2017/2020. See below, and end of this document for additional NOTES.
 
     MASS2      = "BTAP-ExteriorWall-Mass-2"              # LP wall
-    MASS2_BAD  = "BTAP-ExteriorWall-Mass-2 bad"          # LP "bad" PSI factors
-    MASS2_GOOD = "BTAP-ExteriorWall-Mass-2 good"         # LP "good" PSI factors
     MASSB      = "BTAP-ExteriorWall-Mass-2b"             # HP, from @Uo < 0.183
-    MASSB_BAD  = "BTAP-ExteriorWall-Mass-2b bad"         # HP "bad" PSI factors
-    MASSB_GOOD = "BTAP-ExteriorWall-Mass-2b good"        # HP "good" PSI factors
-
     MASS4      = "BTAP-ExteriorWall-Mass-4"
-    MASS4_BAD  = "BTAP-ExteriorWall-Mass-4 bad"
-    MASS4_GOOD = "BTAP-ExteriorWall-Mass-4 good"
     MASS8      = "BTAP-ExteriorWall-Mass-8c"             # HP, from @Uo < 0.183
-    MASS8_BAD  = "BTAP-ExteriorWall-Mass-8c bad"
-    MASS8_GOOD = "BTAP-ExteriorWall-Mass-8c good"
-
     WOOD5      = "BTAP-ExteriorWall-WoodFramed-5"
-    WOOD5_BAD  = "BTAP-ExteriorWall-WoodFramed-5 bad"
-    WOOD5_GOOD = "BTAP-ExteriorWall-WoodFramed-5 good"
     WOOD7      = "BTAP-ExteriorWall-WoodFramed-7"        # HP, from @Uo < 0.183
-    WOOD7_BAD  = "BTAP-ExteriorWall-WoodFramed-7 bad"
-    WOOD7_GOOD = "BTAP-ExteriorWall-WoodFramed-7 good"
-
     STEL1      = "BTAP-ExteriorWall-SteelFramed-1"
-    STEL1_BAD  = "BTAP-ExteriorWall-SteelFramed-1 bad"
-    STEL1_GOOD = "BTAP-ExteriorWall-SteelFramed-1 good"
     STEL2      = "BTAP-ExteriorWall-SteelFramed-2"        # HP from @Uo < 0.278
-    STEL2_BAD  = "BTAP-ExteriorWall-SteelFramed-2 bad"
-    STEL2_GOOD = "BTAP-ExteriorWall-SteelFramed-2 good"
-
     ROOF       = "BTAP-ExteriorRoof-IEAD-4"
     FLOOR      = "BTAP-ExteriorFloor-SteelFramed-1"
 
