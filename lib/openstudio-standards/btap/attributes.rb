@@ -57,6 +57,7 @@ module BTAP
     attr_reader :use_tbd                # [Boolean]
     attr_reader :tbd_edge_tallies       # [Hash]
     attr_reader :surface_types_to_snake # [Hash]
+    attr_reader :constructions          # [Hash]
 
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]
@@ -175,12 +176,6 @@ module BTAP
 
       self.compile_model
       self.compile_constructions
-require 'pry-byebug'; binding.pry; exit;
-    end
-
-    # Helper method which retrieves all compiled constructions.
-    def get_constructions
-      return @constructions.values
     end
 
     def compile_constructions
@@ -261,7 +256,6 @@ require 'pry-byebug'; binding.pry; exit;
           compile_construction_by_type(
             construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
             surface_type: "InterzonalRoof")
-
         end
       end
     end
@@ -284,23 +278,22 @@ require 'pry-byebug'; binding.pry; exit;
       # If the construction isn't already present in the  `@constructions` hash,
       # add it in.
       unless @constructions.key?(assembly_name)
-        btap_construction = {}
-        btap_construction["subsets"] = \
-          @costing_database["constructions"][envelope_type][assembly_name]["usi"] \
-            .transform_keys { |usi| 1 / usi.to_f } \
-            .map { |rsi, hash| hash["rsi"] = rsi; hash }
+        construction_entry = @costing_database["constructions"][envelope_type][assembly_name]
+        construction_btap  = {}
+        construction_btap["type"] = construction_entry["type"]
+        construction_btap["subsets"] = \
+          construction_entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
 
         if underatable
-          btap_construction["rsi"] = TBD.rsi(construction)
+          construction_btap["rsi"] = TBD.rsi(construction)
           unless construction.isOpaque
-            btap_construction["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
+            construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
               construction.to_Construction.get)
-
           end
         else
-          btap_construction["rsi"] = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
+          construction_btap["rsi"] = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
         end
-        @constructions[assembly_name] = btap_construction
+        @constructions[assembly_name] = construction_btap
       end
 
       @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
@@ -311,81 +304,6 @@ require 'pry-byebug'; binding.pry; exit;
         @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = \
           construction.additionalProperties.getFeatureAsDouble("btap_area").get
       end
-    end
-
-    # Compile all the constructions associated with each surface and subsurface.
-    def compile_constructions_old
-
-      # Create a hash of surface types referencing construction type names.
-      # These references are shared across all surfaces of the same type because
-      # the `costed_assembly` method assigns assemblies according to building
-      # categories.
-      @surface_types_to_assembly_names = @surface_types.map { |surface_type|
-        if @surface_types_to_costed_assembly.has_key?(surface_type)
-          assembly = BTAP::Constructions.costed_assembly(
-            @standard.structure,
-            @surface_types_to_costed_assembly[surface_type],
-            @building_performance)
-        else
-          assembly = @surface_types_to_assembly_names[surface_type]
-        end
-        [surface_type, assembly] }.to_h
-
-      @spaces.each do |space|
-        @surface_types.each do |surface_type|
-          space.surfaces_hash[surface_type].each do |surface|
-            compile_surface_construction_old(surface, surface_type)
-          end
-        end
-      end
-    end
-
-    # Get the constructions for each RSI value for a given surface using the
-    # BTAP::Structure and BTAP::Bridging classes. A reference to a hash and
-    # a list of hashes containing construction attributes is assigned to each
-    # surface.
-    #
-    # @param surface      [OpenStudio::Model::Surface]
-    # @param surface_type [String] One of @surface_types
-    def compile_surface_construction_old(surface, surface_type)
-      construction_type = @surface_types_to_envelope_type[surface_type]
-      construction_name  = @surface_types_to_assembly_names[surface_type]
-      btap_constructions = []
-
-      # Construction database entries use U-factors, convert them to R-factors.
-      construction_candidates = \
-        @costing_database["constructions"][construction_type][construction_name]["usi"].transform_keys { |usi|
-          1 / usi.to_f }
-
-      # Process each construction into a hash. This hash will also store the
-      # cost for the construction in `envelope_costing.rb`. Carbon emissions
-      # aren't stored per-construction since they vary per surface due to
-      # window perimeter differences, and this class is stored as a reference
-      # in the Surface and SubSurfaces classes. Here are a list of parameters
-      # of the hash:
-      #
-      # name        [String]
-      # description [String]
-      # type        [String] Material type, either "opaque" or "glazing".
-      # id_layers   [Array[Integer]]
-      # rsi         [Float]
-      # fenestration_number_of_panes [String] ExteriorWindow only.
-      # frame_material               [String] ExteriorWindow only.
-      # fenestration_type            [String] ExteriorWindow only.
-      construction_candidates.each do |construction_rsi, construction_hash|
-
-        # Store all candidate constructions for reference when doing linear
-        # regression for construction takeoffs.
-        unless @constructions.has_key?(construction_hash["id"])
-          construction_hash["name"]               = construction_name
-          construction_hash["rsi"]                = construction_rsi
-          @constructions[construction_hash["id"]] = construction_hash
-        end
-
-        btap_constructions << @constructions[construction_hash["id"]]
-      end
-
-      surface.instance_variable_set(:@btap_constructions, btap_constructions)
     end
 
     # Compile all the pertinent OpenStudio-related data into the data structures

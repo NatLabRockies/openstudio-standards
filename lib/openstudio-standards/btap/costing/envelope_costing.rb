@@ -12,14 +12,14 @@ module BTAP
       end
 
       # Cost all the constructions found by BTAP Attributes.
-      @attributes.get_constructions.each do |construction|
+      @attributes.constructions.each_value do |construction|
         cost_construction(construction, @costing_report['province_state'], @costing_report['city'])
       end
 
       @costing_report["envelope"]["construction_costs"] = []
 
       totEnvCost = 0
-
+      require 'pry-byebug'; binding.pry; exit;
       @attributes.spaces.each do |space|
         @attributes.surface_types.each do |surface_type|
           num_surface_types = 0
@@ -162,36 +162,35 @@ module BTAP
     # @param province_state [String]
     # @param city           [String]
     def cost_construction(construction, province_state, city)
-      material_id = "materials_#{construction["type"]}_id"
+      material_id        = "materials_#{construction["type"]}_id"
       materials_database = @costing_database["raw"]["materials_#{construction["type"]}"]
+      total_with_op      = 0.0
 
-      total_with_op = 0.0
-      material_cost_pairs = []
-      construction["id_layers"].each do |material_index|
-        material = materials_database.find { |data| data[material_id] == material_index }
-        if material.nil?
-          raise("Material ID #{material_index} was not found in the materials_#{construction["type"]} database.")
-        else
-          costing_data = @costing_database['costs'].detect { |data| data['id'] == material['id'] }
-          if costing_data.nil?
-            raise("Material ID #{material_index} was not found in the costing database")
+      construction["subsets"].each do |subset|
+        subset["id_layers"].each do |material_index|
+          material = materials_database.find { |data| data[material_id] == material_index }
+          if material.nil?
+            raise("Material ID #{material_index} was not found in the materials_#{construction["type"]} database.")
           else
-            regional_material, regional_installation = get_regional_cost_factors(province_state, city, material)
+            costing_data = @costing_database['costs'].detect { |data| data['id'] == material['id'] }
+            if costing_data.nil?
+              raise("Material ID #{material_index} was not found in the costing database")
+            else
+              regional_material, regional_installation = get_regional_cost_factors(province_state, city, material)
 
-            # Get cost information from lookup.
-            material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult'].to_f
-            labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult'].to_f
-            equipment_cost = costing_data['baseCosts']['equipmentOpCost']
-            layer_cost     = (((material_cost * regional_material / 100.0) + \
-                             (labour_cost * regional_installation / 100.0) + equipment_cost) * \
-                             material['quantity'].to_f).round(2)
-            material_cost_pairs << {material_id => material_index, 'cost' => layer_cost}
-            total_with_op += layer_cost
+              # Get cost information from lookup.
+              material_cost  = costing_data['baseCosts']['materialOpCost'] * material['material_mult'].to_f
+              labour_cost    = costing_data['baseCosts']['laborOpCost']    * material['labour_mult'].to_f
+              equipment_cost = costing_data['baseCosts']['equipmentOpCost']
+              layer_cost     = (((material_cost * regional_material / 100.0) + \
+                               (labour_cost * regional_installation / 100.0) + equipment_cost) * \
+                               material['quantity'].to_f).round(2)
+              total_with_op += layer_cost
+            end
           end
         end
+        subset["cost"] = total_with_op
       end
-
-      construction["cost"] = total_with_op
     end
   end
 end
