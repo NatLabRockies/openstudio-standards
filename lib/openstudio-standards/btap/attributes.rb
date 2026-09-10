@@ -36,11 +36,13 @@ module BTAP
   # for each U-value in order to perform a linear regression to best estimate
   # the respective cost and carbon emissions per surface. Also, store the
   # R-value of each surface.
+  # TODO: Remove
   class OpenStudio::Model::Surface
     attr_reader :rsi                # [Float]
     attr_reader :btap_constructions # [Array[Hash]]
   end
 
+  # TODO: Remove
   class OpenStudio::Model::SubSurface
     attr_reader :rsi                # [Float]
     attr_reader :btap_constructions # [Array[Hash]]
@@ -106,7 +108,7 @@ module BTAP
       }
 
       # TODO: Temporary default constructions for underatable surface types.
-      @default_surface_constructions_by_type = {
+      @surface_types_to_assembly_names = {
         "ExteriorFixedWindow"             => "BTAP-ExteriorWindow-FixedWindow-1",
         "ExteriorOperableWindow"          => "BTAP-ExteriorWindow-OperableWindow-5b",
         "ExteriorSkylight"                => "BTAP-Skylight-2",
@@ -120,7 +122,13 @@ module BTAP
         "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
       }
 
-      @surface_types_to_construction_sheet = {
+      # Copy of the keys of the initial hash containing only underatable surface
+      # types. The "GroundContactFloor" has additional properties defined so
+      # it's removed.
+      @underatable_surface_types = @surface_types_to_assembly_names.keys.to_set.filter! { |surface_type|
+        surface_type != "GroundContactFloor" }
+
+      @surface_types_to_envelope_type = {
         "ExteriorWall"                    => "wall",
         "ExteriorRoof"                    => "roof",
         "ExteriorFloor"                   => "floor",
@@ -143,15 +151,31 @@ module BTAP
         "GroundContactFloor"              => "slab"
       }
 
-      @glazing_surface_types = Set.new(["door_glass", "skylight", "window"])
+      # Store area, cost, and carbon emission tallies of assemblies by surface
+      # type, stored as hashes as some surface types may have different
+      # assemblies.
+      @surface_types_to_assembly_tallies = @surface_types.to_h { |surface_type| [surface_type, {}] }
 
       @zones         = []
       @spaces        = []
+
+      # Constructions which will be considered in costing/carbon calculation.
+      # Member attributes generated in this hash:
+      # TODO: fix this incorrect
+      # name        [String]
+      # description [String]
+      # type        [String] Material type, either "opaque" or "glazing".
+      # id_layers   [Array[Integer]]
+      # rsi         [Float]
+      # fenestration_number_of_panes [String] ExteriorWindow only.
+      # frame_material               [String] ExteriorWindow only.
+      # fenestration_type            [String] ExteriorWindow only.
       @constructions = {}
 
 
       self.compile_model
       self.compile_constructions
+require 'pry-byebug'; binding.pry; exit;
     end
 
     # Helper method which retrieves all compiled constructions.
@@ -159,10 +183,138 @@ module BTAP
       return @constructions.values
     end
 
-    # Compile all the constructions associated with each surface and subsurface.
-    #
-    # @param use_tbd [Bool] Use TBD takeoffs for surfaces where available.
     def compile_constructions
+
+      # Fetch the additional properties for deratable surface types stored
+      # in the default construction sets and populate the members of the
+      # `@constructions` hash.
+      # TODO: test later with warehouse
+      @model.getDefaultConstructionSets.each do |set|
+        if set.nameString =~ /BLDG$/
+
+          # The following have additional properties defined by TBD:
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "ExteriorWall")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "ExteriorRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "ExteriorFloor")
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "GroundContactFloor")
+
+          # The remaining do not have additional properties defined, they are
+          # contained in the `@underatable_surface_types` variable:
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.fixedWindowConstruction.get,
+            surface_type: "ExteriorFixedWindow")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.operableWindowConstruction.get,
+            surface_type: "ExteriorOperableWindow")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.skylightConstruction.get,
+            surface_type: "ExteriorSkylight")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.tubularDaylightDiffuserConstruction.get,
+            surface_type: "ExteriorTubularDaylightDiffuser")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.tubularDaylightDomeConstruction.get,
+            surface_type: "ExteriorTubularDaylightDome")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.doorConstruction.get,
+            surface_type: "ExteriorDoor")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.glassDoorConstruction.get,
+            surface_type: "ExteriorGlassDoor")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.overheadDoorConstruction.get,
+            surface_type: "ExteriorOverheadDoor")
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "GroundContactWall")
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "GroundContactRoof")
+
+        elsif set.nameString =~ /ATTIC$/
+
+          # Interzonal surfaces also have additional properties defined by TBD:
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "InterzonalSkylightWalls")
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "InterzonalRoof")
+
+        end
+      end
+    end
+
+    # @param construction: [OpenStudio::Model::ConstructionBase]
+    # @param surface_type: [String]
+    def compile_construction_by_type(construction:, surface_type:)
+      underatable   = @underatable_surface_types.include?(surface_type)
+      envelope_type = @surface_types_to_envelope_type[surface_type]
+
+      # TODO: GroundContactFloor is underatable but it is and exception as it
+      # still has U-factors and area defined, otherwise this should instead
+      # check for the `underatable` variable.
+      if construction.additionalProperties.hasFeature("btap_id")
+        assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
+      else
+        assembly_name = @surface_types_to_assembly_names[surface_type]
+      end
+
+      # If the construction isn't already present in the  `@constructions` hash,
+      # add it in.
+      unless @constructions.key?(assembly_name)
+        btap_construction = {}
+        btap_construction["subsets"] = \
+          @costing_database["constructions"][envelope_type][assembly_name]["usi"] \
+            .transform_keys { |usi| 1 / usi.to_f } \
+            .map { |rsi, hash| hash["rsi"] = rsi; hash }
+
+        if underatable
+          btap_construction["rsi"] = TBD.rsi(construction)
+          unless construction.isOpaque
+            btap_construction["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
+              construction.to_Construction.get)
+
+          end
+        else
+          btap_construction["rsi"] = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
+        end
+        @constructions[assembly_name] = btap_construction
+      end
+
+      @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
+      if underatable
+        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = \
+          construction.getNetArea
+      else
+        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = \
+          construction.additionalProperties.getFeatureAsDouble("btap_area").get
+      end
+    end
+
+    # Compile all the constructions associated with each surface and subsurface.
+    def compile_constructions_old
 
       # Create a hash of surface types referencing construction type names.
       # These references are shared across all surfaces of the same type because
@@ -175,14 +327,14 @@ module BTAP
             @surface_types_to_costed_assembly[surface_type],
             @building_performance)
         else
-          assembly = @default_surface_constructions_by_type[surface_type]
+          assembly = @surface_types_to_assembly_names[surface_type]
         end
         [surface_type, assembly] }.to_h
 
       @spaces.each do |space|
         @surface_types.each do |surface_type|
           space.surfaces_hash[surface_type].each do |surface|
-            compile_surface_construction(surface, surface_type)
+            compile_surface_construction_old(surface, surface_type)
           end
         end
       end
@@ -195,15 +347,14 @@ module BTAP
     #
     # @param surface      [OpenStudio::Model::Surface]
     # @param surface_type [String] One of @surface_types
-    def compile_surface_construction(surface, surface_type)
-      construction_sheet = @surface_types_to_construction_sheet[surface_type]
+    def compile_surface_construction_old(surface, surface_type)
+      construction_type = @surface_types_to_envelope_type[surface_type]
       construction_name  = @surface_types_to_assembly_names[surface_type]
-      is_opaque          = !(@glazing_surface_types.include?(construction_sheet))
       btap_constructions = []
 
       # Construction database entries use U-factors, convert them to R-factors.
       construction_candidates = \
-        @costing_database["constructions"][construction_sheet][construction_name]["usi"].transform_keys { |usi|
+        @costing_database["constructions"][construction_type][construction_name]["usi"].transform_keys { |usi|
           1 / usi.to_f }
 
       # Process each construction into a hash. This hash will also store the
@@ -242,6 +393,7 @@ module BTAP
     # adds accessors for zones, spaces, and surfaces while keeping them sorted
     # for future accesses. Also, store the RSI for each surface since retrieving
     # them is different for each category of surfaces.
+    # TODO: Remove RSI storage
     def compile_model
 
       # Iterate through the data structures while also saving their sorted order later for reference.
@@ -369,6 +521,7 @@ module BTAP
     #
     # @param surface [OpenStudio::Model::Surface]
     # @return [Float] The RSI for the surface.
+    # TODO: remove/fix: additional props always added by tbd now regardless of tbd_option
     def get_correct_rsi(surface)
 
       # Uninsulated surfaces are not derated by TBD. These surfaces will not
@@ -380,4 +533,22 @@ module BTAP
       end
     end
   end
+
+  # Only relevant surface-specific tally is window perimeter for BTAP
+  # Carbon. Add surface-specific tallies for underatable surfaces.
+  # Currently only windows have emissions data for frames.
+  def compile_window_perimeter
+    @spaces.each do |space|
+      ["ExteriorFixedWindow", "ExteriorOperableWindow"].each do |surface_type|
+        assembly_name = @surface_types_to_assembly_names[surface_type]
+        @surface_types_to_assembly_tallies[surface_type][assembly_name]["perimeter"] = 0
+        space.surfaces_hash[surface_type].each do |surface|
+          @surface_types_to_assembly_tallies[surface_type][assembly_name]["perimeter"] += \
+            BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
+
+        end
+      end
+    end
+  end
 end
+
