@@ -296,13 +296,13 @@ module BTAP
         @constructions[assembly_name] = construction_btap
       end
 
-      @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
-      if underatable
-        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = \
-          construction.getNetArea
-      else
-        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = \
-          construction.additionalProperties.getFeatureAsDouble("btap_area").get
+      # Only include the assembly in the tallies hash if its area is non-zero.
+      area = underatable ? construction.getNetArea : construction
+        .additionalProperties.getFeatureAsDouble("btap_area").get
+
+      unless area == 0
+        @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
+        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = area
       end
     end
 
