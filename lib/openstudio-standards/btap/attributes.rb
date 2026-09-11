@@ -58,6 +58,7 @@ module BTAP
     attr_reader :tbd_edge_tallies       # [Hash]
     attr_reader :surface_types_to_snake # [Hash]
     attr_reader :constructions          # [Hash]
+    attr_reader :surface_types_to_assembly_tallies # [Hash]
 
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]

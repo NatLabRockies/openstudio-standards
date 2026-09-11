@@ -18,38 +18,32 @@ module BTAP
 
       @costing_report["envelope"]["construction_costs"] = []
 
-      totEnvCost = 0
-      require 'pry-byebug'; binding.pry; exit;
-      @attributes.spaces.each do |space|
-        @attributes.surface_types.each do |surface_type|
-          num_surface_types = 0
-          space.surfaces_hash[surface_type].each do |surface|
-            if surface.btap_constructions.nil?
-              next
-            end
+      total_envelope_cost = 0
+      @attributes.surface_types.each do |surface_type|
+        unless @attributes.surface_types_to_assembly_tallies[surface_type].empty?
+          @attributes.surface_types_to_assembly_tallies[surface_type].each_pair do |assembly_name, tallies|
 
-            num_surface_types += 1
-            surface_is_glazing = surface.btap_constructions.first["type"] == "glazing"
-            construction_name  = surface.btap_constructions.first["name"]
-            cost_range_array   = surface.btap_constructions.map { |construction|
-              [construction["rsi"], construction["cost"]] }
+            # Tallies collect surface areas for all surfaces in a type that
+            # contain the same assembly. More than one assembly can be present
+            # in the case of custom building types.
+            total_area         = tallies["area"]
+            construction       = @attributes.constructions[assembly_name]
+            rsi                = construction["rsi"]
+            surface_is_glazing = construction["type"] == "glazing"
 
             # Use the cost_range_array to interpolate the estimated cost for the
             # RSI of the current surface.
-            cost, notes = BTAP::LinearRegression.interpolate(x_y_array: cost_range_array, x2: surface.rsi)
+            cost_range_array = construction["subsets"].map { |subset| [subset["rsi"], subset["cost"]] }
+            cost, notes = BTAP::LinearRegression.interpolate(x_y_array: cost_range_array, x2: rsi)
 
             # Calculate SHGC/film cost.
             film_cost = 0.0
-            if surface_is_glazing
-
-              # Get SHGC from surface.
-              shgc = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
-                surface.construction.get.to_Construction.get)
+            if construction["type"] == "glazing"
 
               # Get the closest value in materials_glazing sheet of SolarFilms.
               material_row = @costing_database["raw"]["materials_glazing"].select { |row|
                 row['material_type'] == 'Solarfilms' }.min_by {|row|
-                  (shgc.to_f - row['solar_heat_gain_coefficient'].to_f).abs}
+                  (construction["shgc"].to_f - row['solar_heat_gain_coefficient'].to_f).abs}
 
               standard_film_cost = getCost(material_row['description'], material_row, 1.0)
               regional_factors   = get_regional_cost_factors(
@@ -64,42 +58,28 @@ module BTAP
                 cost * region_factor / 100.0 }.inject(0, :+)
             end
 
-            surfArea    = surface.netArea * space.thermalZone.get.multiplier
-            surfAreaft  = (OpenStudio.convert(surfArea, "m^2", "ft^2").get).to_f
-            surfCost    = (cost + film_cost) * surfAreaft
-            totEnvCost += surfCost
-            name        = ""
+            total_area_feet      = (OpenStudio.convert(total_area, "m^2", "ft^2").get).to_f
+            total_cost           = (cost + film_cost) * total_area_feet
+            total_envelope_cost += total_cost
 
-            # Bin the costing by construction standard type and rsi.
-            if surface.btap_constructions.nil?
-              name = "undefined surface construction_#{(1.0 / surface.rsi).round(3)}"
-            else
-              name = "#{construction_name}"
-            end
+            # Bin the costing by construction type and rsi.
             row = @costing_report["envelope"]["construction_costs"].detect { |row|
-              (row['name'] == name) && (row['conductance'].round(3) == ((1.0 / surface.rsi).round(3))) }
+              (row["name"] == assembly_name) && (row["conductance"].round(3) == (rsi.round(3))) }
 
             if row.nil?
               @costing_report["envelope"]["construction_costs"] << {
-                'assembly_name' => name,
+                'assembly_name' => assembly_name,
                 'surface_type'  => surface_type,
-                'surface_name'  => surface.nameString,
-                'conductance'   => (surface.rsi.round(3)),
-                'area'          => (surfArea.round(2)),
-                'cost'          => (surfCost.round(2)),
-                'cost_per_area' => (surfCost / surfArea).round(2),
-                'note'          => "Surf ##{num_surface_types}: #{notes}"
+                'conductance'   => (rsi.round(3)),
+                'area'          => (total_area.round(2)),
+                'cost'          => (total_cost.round(2)),
+                'cost_per_area' => (total_cost / total_area).round(2)
               }
-            else
-              row['area']          = (row['area'] + surfArea).round(2)
-              row['cost']          = (row['cost'] + surfCost).round(2)
-              row['cost_per_area'] = ((row['cost'] / row['area']).to_f.round(2))
-              row['note']         += " / #{num_surface_types}: #{notes}"
             end
 
-            @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost"]    += surfCost
-            @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] += surfArea
-          end # surfaces of surface type
+            @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost"]    += total_cost
+            @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] += total_area
+          end
           @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost_per_m2"] = (
             @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost"] /
             @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"])
@@ -107,8 +87,8 @@ module BTAP
           if @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost_per_m2"].nan?
             @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost_per_m2"] = 0.0
           end
-        end # surface_type
-      end # spaces
+        end
+      end
 
       # Parapets aren't explicitly modeled in an OpenStudio model. If TBD was run,
       # account for parapets by taking the calculated parapet length and multiply
@@ -118,23 +98,23 @@ module BTAP
         wall_cost_per_m2 = @costing_report["envelope"]["exterior_wall_cost_per_m2"]
         parapet_cost = @attributes.tbd_edge_tallies["parapet"].values.first * wall_cost_per_m2
         @costing_report["envelope"]["parapet_cost"] = parapet_cost.round(2)
-        totEnvCost += parapet_cost
+        total_envelope_cost += parapet_cost
       end
 
       # When using thermal bridging it may create too demanding of a model, or
       # when data is insufficient, some R-factors will be outside of the data
       # and BTAP::LinearRegression will refuse to extrapolate beyond its default
-      # range. If that occured, don't raise an error but add a really high number
-      # to the envelope cost to make the user aware of what happened.
+      # range. If that occured, don't raise an error but add a really high
+      # number to the envelope cost to make the user aware of what happened.
       if BTAP::LinearRegression.extrapolation_boundaries_exceeded?
         revolutionary_engineering_technology_fudge_factor = 1000000000000
-        totEnvCost += revolutionary_engineering_technology_fudge_factor
+        total_envelope_cost += revolutionary_engineering_technology_fudge_factor
         @costing_report["envelope"]["unrealistic_assembly_cost"] = revolutionary_engineering_technology_fudge_factor
         @costing_report["unrealistic_assembly_note"] = \
           "Could not extrapolate beyond the given range. The given model might be unrealistic to build because no " \
-          "assemblies exist in the database with the given heat transfer requirements. This could be that the thermal " \
-          "bridging module created too demanding of a model given the performance constraints. Try changing the " \
-          "`tbd_option` parameter in your run options."
+          "assemblies exist in the database with the given heat transfer requirements. This could be that the " \
+          "thermal bridging module created too demanding of a model given the performance constraints. Try changing " \
+          "the `tbd_option` parameter in your run options."
       end
 
       # Round everything at the end.
@@ -147,10 +127,10 @@ module BTAP
           @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost_per_m2"].round(2)
       end
 
-      @costing_report["envelope"]["total_envelope_cost"] = totEnvCost.to_f.round(2)
-      puts "\nEnvelope costing data successfully generated. Total envelope cost is $#{totEnvCost.to_f.round(2)}"
+      @costing_report["envelope"]["total_envelope_cost"] = total_envelope_cost.to_f.round(2)
+      puts "\nEnvelope costing data successfully generated. Total envelope cost is $#{total_envelope_cost.to_f.round(2)}"
 
-      return totEnvCost
+      return total_envelope_cost
     end
 
     # Append the "cost" key-value pair to a construction hash by calculating
