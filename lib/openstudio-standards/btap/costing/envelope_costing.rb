@@ -63,19 +63,15 @@ module BTAP
             total_envelope_cost += total_cost
 
             # Bin the costing by construction type and rsi.
-            row = @costing_report["envelope"]["construction_costs"].detect { |row|
-              (row["name"] == assembly_name) && (row["conductance"].round(3) == (rsi.round(3))) }
-
-            if row.nil?
-              @costing_report["envelope"]["construction_costs"] << {
-                'assembly_name' => assembly_name,
-                'surface_type'  => surface_type,
-                'conductance'   => (rsi.round(3)),
-                'area'          => (total_area.round(2)),
-                'cost'          => (total_cost.round(2)),
-                'cost_per_area' => (total_cost / total_area).round(2)
-              }
-            end
+            @costing_report["envelope"]["construction_costs"] << {
+              "assembly_name" => assembly_name,
+              "surface_type"  => surface_type,
+              "conductance"   => rsi.round(3),
+              "area"          => total_area.round(2),
+              "cost"          => total_cost.round(2),
+              "cost_per_area" => (total_cost / total_area).round(2),
+              "notes"         => notes
+            }
 
             @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_cost"]    += total_cost
             @costing_report["envelope"]["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] += total_area
