@@ -143,6 +143,7 @@ module BTAP
       total_with_op      = 0.0
 
       construction["subsets"].each do |subset|
+        total_with_op = 0
         subset["id_layers"].each do |material_index|
           material = materials_database.find { |data| data[material_id] == material_index }
           if material.nil?
