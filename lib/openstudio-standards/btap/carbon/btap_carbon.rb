@@ -78,52 +78,50 @@ module BTAP
       total_emissions = 0
 
       @attributes.surface_types.each do |surface_type|
-        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = 0.0
-        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]  = 0.0
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"]       = 0.0
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]        = 0.0
+        @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = 0.0
       end
 
       # Calculate emissions for all constructions found by BTAP Attributes.
-      @attributes.get_constructions.each do |construction|
-        construction["carbon"] = emissions_from_construction(construction)
+      @attributes.constructions.each_value do |construction|
+        construction["subsets"].each do |subset|
+          subset["carbon"] = emissions_from_construction(subset, construction["type"])
+        end
       end
 
-      @attributes.spaces.each do |space|
-        @attributes.surface_types.each do |surface_type|
-          space.surfaces_hash[surface_type].each do |surface|
-            if surface.btap_constructions.nil?
-              next
-            end
+      # Calculate window perimeter for frame calculations.
+      @attributes.compile_window_perimeter
 
-            surface_area = surface.netArea * space.thermalZone.get.multiplier
-            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] = \
-              @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"] + surface_area
+      @attributes.surface_types.each do |surface_type|
+        unless @attributes.surface_types_to_assembly_tallies[surface_type].empty?
+          @attributes.surface_types_to_assembly_tallies[surface_type].each_pair do |assembly_name, tallies|
+            total_area         = tallies["area"]
+            construction       = @attributes.constructions[assembly_name]
+            rsi                = construction["rsi"]
+            surface_is_glazing = surface_type =~ /Window/
 
-            surface_is_glazing = surface.btap_constructions.first["type"] == "glazing"
-
-            # Factor in window frame emissions if this is a glazing construction.
+            # Factor in window frame emissions if this is a glazing
+            # construction. Currently we only have data for fixed and operable
+            # windows.
             if surface_is_glazing
-              perimeter          = BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
-              carbon_range_array = surface.btap_constructions.map { |construction|
-                [construction["rsi"], construction["carbon"] + emissions_from_window_frame(construction, perimeter)] }
+              carbon_range_array = construction["subsets"].map { |subset|
+                [subset["rsi"], subset["carbon"] + emissions_from_window_frame(subset, tallies["perimeter"])] }
             else
-              carbon_range_array = surface.btap_constructions.map { |construction|
-                [construction["rsi"], construction["carbon"]] }
+              carbon_range_array = construction["subsets"].map { |subset| [subset["rsi"], subset["carbon"]] }
             end
 
-            emissions, _ = BTAP::LinearRegression.interpolate(x_y_array: carbon_range_array, x2: surface.rsi)
+            emissions, _ = BTAP::LinearRegression.interpolate(x_y_array: carbon_range_array, x2: rsi)
 
-            # Calculate the carbon emissions for the surface and append the result
-            # to the total emissions.
-            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] = \
-              @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] + emissions
-            total_emissions += emissions * surface_area
-          end
-          @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = (
-            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] /
-            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"])
+            # Calculate the carbon emissions for the surface type and append the
+            # result to the total emissions.
+            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"]        = emissions
+            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"]       = total_area
+            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = (
+              @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon"] /
+              @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_area_m2"])
 
-          if @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"].nan?
-            @carbon_report["#{@attributes.surface_types_to_snake[surface_type]}_carbon_per_m2"] = 0.0
+            total_emissions += emissions * total_area
           end
         end
       end
@@ -168,16 +166,15 @@ module BTAP
     # Retrieve the carbon emissions given a construction.
     #
     # @param construction [Hash]
-    # @param vertices     [Array[OpenStudio::Point3d]]
-    # @param surface_area [Float]
+    # @param type [String] either "opaque" or "glazing"
     # @return [Float]
-    def emissions_from_construction(construction)
+    def emissions_from_construction(construction, type)
       total_emissions  = 0.0
-      materials_file   = "materials_#{construction["type"]}"
+      materials_file   = "materials_#{type}"
       id_column        = materials_file + "_id"
 
       construction["id_layers"].each do |material_id|
-        material_entry = get_material_entry(material_id, id_column, construction["type"])
+        material_entry = get_material_entry(material_id, id_column, type)
         next if material_entry.nil?
         material_emissions  = material_entry["Embodied Carbon (A-C)"]
         total_emissions += material_emissions
@@ -193,7 +190,6 @@ module BTAP
     # @param Perimeter    [Float]
     # @return [Float]
     def emissions_from_window_frame(construction, perimeter)
-      materials_file    = "frame"
       fenestration_type = construction["fenestration_type"]
 
       # Skip skylights and doors since we don't have the data for them.
@@ -208,7 +204,7 @@ module BTAP
       fenestration_number_of_panes = construction["fenestration_number_of_panes"]
 
       construction["id_layers"].each do |material_id|
-        material_entry = get_material_entry(material_id, "materials_glazing_id", construction["type"])
+        material_entry = get_material_entry(material_id, "materials_glazing_id", "frame")
         next if material_entry.nil?
         frame_emissions += material_entry["Embodied Carbon (A-C)"]
       end
@@ -222,8 +218,7 @@ module BTAP
     #
     # @param type [String] Name of the hash key.
     def get_material_entry(id, id_column, materials_file)
-      material_entry = @carbon_database[materials_file].find { |row|
-        row[id_column] == id }
+      material_entry = @carbon_database[materials_file].find { |row| row[id_column] == id }
 
       if material_entry.nil?
         # TODO: This will happen a lot because of the new thermal bridging entries
