@@ -90,6 +90,25 @@ module BTAP
         end
       end
 
+      # Bin costs by entire constructions.
+      @attributes.surface_types_to_assembly_tallies.values.filter {|tallies| not tallies.empty?}.each do |entry|
+        entry.each_pair do |assembly_name, tallies|
+          if @costing_report["envelope"]["construction_costs"].has_key?(assembly_name)
+            bin                  = @costing_report["envelope"]["construction_costs"][assembly_name]
+            bin["area"]          = (bin["area"] + tallies["area"]).round(2)
+            bin["cost"]          = (bin["cost"] + tallies["cost"]).round(2)
+            bin["cost_per_area"] = (bin["cost"] / bin["area"]).round(2)
+          else
+            @costing_report["envelope"]["construction_costs"][assembly_name] = {
+              "conductance"   => @attributes.constructions[assembly_name]["rsi"].round(3),
+              "area"          => tallies["area"].round(2),
+              "cost"          => tallies["cost"].round(2),
+              "cost_per_area" => (tallies["cost"] / tallies["area"]).round(2)
+            }
+          end
+        end
+      end
+
       # Parapets aren't explicitly modeled in an OpenStudio model. If TBD was run,
       # account for parapets by taking the calculated parapet length and multiply
       # it by 1m to factor it into the total cost. So, take the cost of the
@@ -115,25 +134,6 @@ module BTAP
           "assemblies exist in the database with the given heat transfer requirements. This could be that the " \
           "thermal bridging module created too demanding of a model given the performance constraints. Try changing " \
           "the `tbd_option` parameter in your run options."
-      end
-
-      # Bin costs by entire constructions.
-      @attributes.surface_types_to_assembly_tallies.values.filter {|tallies| not tallies.empty?}.each do |entry|
-        entry.each_pair do |assembly_name, tallies|
-          if @costing_report["envelope"]["construction_costs"].has_key?(assembly_name)
-            bin                  = @costing_report["envelope"]["construction_costs"][assembly_name]
-            bin["area"]          = (bin["area"] + tallies["area"]).round(2)
-            bin["cost"]          = (bin["cost"] + tallies["cost"]).round(2)
-            bin["cost_per_area"] = (bin["cost"] / bin["area"]).round(2)
-          else
-            @costing_report["envelope"]["construction_costs"][assembly_name] = {
-              "conductance"   => @attributes.constructions[assembly_name]["rsi"].round(3),
-              "area"          => tallies["area"].round(2),
-              "cost"          => tallies["cost"].round(2),
-              "cost_per_area" => (tallies["cost"] / tallies["area"]).round(2)
-            }
-          end
-        end
       end
 
       # Round everything at the end.
