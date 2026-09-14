@@ -315,6 +315,7 @@ module BTAP
     # of this class while also appending to the exisitng OpenStudio ones. This
     # adds accessors for zones, spaces, and surfaces while keeping them sorted
     # for future accesses.
+    # TODO: Remove most of this
     def compile_model
 
       # Iterate through the data structures while also saving their sorted order later for reference.
