@@ -44,6 +44,25 @@ module BTAP
     attr_reader :constructions          # [Hash]
     attr_reader :surface_types_to_assembly_tallies # [Hash]
 
+    class << self
+      attr_reader :surface_types_to_assembly_names   # [Hash]
+    end
+
+    # TODO: Temporary default constructions for underatable surface types.
+    @surface_types_to_assembly_names = {
+      "ExteriorFixedWindow"             => "BTAP-ExteriorWindow-FixedWindow-1",
+      "ExteriorOperableWindow"          => "BTAP-ExteriorWindow-OperableWindow-5b",
+      "ExteriorSkylight"                => "BTAP-Skylight-2",
+      "ExteriorTubularDaylightDiffuser" => "BTAP-Skylight-2",
+      "ExteriorTubularDaylightDome"     => "BTAP-Skylight-2",
+      "ExteriorDoor"                    => "BTAP-ExteriorDoor-Metal-1",
+      "ExteriorGlassDoor"               => "BTAP-ExteriorWindow-GlazedDoor-4",
+      "ExteriorOverheadDoor"            => "BTAP-ExteriorOverheadDoor-Metal-1",
+      "GroundContactWall"               => "BTAP-GroundContactWall-Mass-2",
+      "GroundContactRoof"               => "BTAP-GroundContactRoof-Mass-2",
+      "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
+    }
+
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]
     # @param use_tbd              [Boolean]
@@ -93,23 +112,8 @@ module BTAP
         "InterzonalSkylightWalls" => :walls
       }
 
-      # TODO: Temporary default constructions for underatable surface types.
-      @surface_types_to_assembly_names = {
-        "ExteriorFixedWindow"             => "BTAP-ExteriorWindow-FixedWindow-1",
-        "ExteriorOperableWindow"          => "BTAP-ExteriorWindow-OperableWindow-5b",
-        "ExteriorSkylight"                => "BTAP-Skylight-2",
-        "ExteriorTubularDaylightDiffuser" => "BTAP-Skylight-2",
-        "ExteriorTubularDaylightDome"     => "BTAP-Skylight-2",
-        "ExteriorDoor"                    => "BTAP-ExteriorDoor-Metal-1",
-        "ExteriorGlassDoor"               => "BTAP-ExteriorWindow-GlazedDoor-4",
-        "ExteriorOverheadDoor"            => "BTAP-ExteriorOverheadDoor-Metal-1",
-        "GroundContactWall"               => "BTAP-GroundContactWall-Mass-2",
-        "GroundContactRoof"               => "BTAP-GroundContactRoof-Mass-2",
-        "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
-      }
-
       # Subsurfaces do not have additional properties defined.
-      @subsurfaces = @surface_types_to_assembly_names.keys.to_set.filter { |surface_type|
+      @subsurfaces = self.class.surface_types_to_assembly_names.keys.to_set.filter { |surface_type|
         not surface_type =~ /^Ground/ }
 
       @surface_types_to_envelope_type = {
@@ -166,7 +170,6 @@ module BTAP
       # Fetch the additional properties for deratable surface types stored
       # in the default construction sets and populate the members of the
       # `@constructions` hash.
-      # TODO: test later with warehouse
       @model.getDefaultConstructionSets.each do |set|
 
         if set.nameString =~ /ATTIC$/
@@ -274,7 +277,7 @@ module BTAP
       if construction.additionalProperties.hasFeature("btap_id")
         assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
       else
-        assembly_name = @surface_types_to_assembly_names[surface_type]
+        assembly_name = self.class.surface_types_to_assembly_names[surface_type]
       end
 
       # If the construction isn't already present in the  `@constructions` hash,
@@ -287,7 +290,7 @@ module BTAP
           construction_entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
 
         if is_subsurface
-          construction_btap["rsi"] = TBD.rsi(construction)
+          construction_btap["rsi"] = TBD.rsi(construction.to_LayeredConstruction.get)
           unless construction.isOpaque
             construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
               construction.to_Construction.get)
@@ -421,12 +424,12 @@ module BTAP
     def compile_window_perimeter
       windows = ["ExteriorFixedWindow", "ExteriorOperableWindow"]
       windows.each do |window|
-        @surface_types_to_assembly_tallies[window][@surface_types_to_assembly_names[window]]["perimeter"] = 0
+        @surface_types_to_assembly_tallies[window][self.class.surface_types_to_assembly_names[window]]["perimeter"] = 0
       end
 
       @spaces.each do |space|
         windows.each do |window|
-          assembly_name = @surface_types_to_assembly_names[window]
+          assembly_name = self.class.surface_types_to_assembly_names[window]
           space.surfaces_hash[window].each do |surface|
             @surface_types_to_assembly_tallies[window][assembly_name]["perimeter"] += \
               BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
