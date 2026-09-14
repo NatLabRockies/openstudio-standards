@@ -32,22 +32,6 @@ module BTAP
     attr_reader :surfaces_hash
   end
 
-  # For surfaces and subsurfaces, BTAP Costing requires a list of constructions
-  # for each U-value in order to perform a linear regression to best estimate
-  # the respective cost and carbon emissions per surface. Also, store the
-  # R-value of each surface.
-  # TODO: Remove
-  class OpenStudio::Model::Surface
-    attr_reader :rsi                # [Float]
-    attr_reader :btap_constructions # [Array[Hash]]
-  end
-
-  # TODO: Remove
-  class OpenStudio::Model::SubSurface
-    attr_reader :rsi                # [Float]
-    attr_reader :btap_constructions # [Array[Hash]]
-  end
-
   # Class for accessing and pre-processing model attributes.
   class Attributes
     attr_reader :model                  # [OpenStudio::Model::Model]
@@ -327,9 +311,7 @@ module BTAP
     # Compile all the pertinent OpenStudio-related data into the data structures
     # of this class while also appending to the exisitng OpenStudio ones. This
     # adds accessors for zones, spaces, and surfaces while keeping them sorted
-    # for future accesses. Also, store the RSI for each surface since retrieving
-    # them is different for each category of surfaces.
-    # TODO: Remove RSI storage
+    # for future accesses.
     def compile_model
 
       # Iterate through the data structures while also saving their sorted order later for reference.
@@ -352,10 +334,6 @@ module BTAP
           space.surfaces_hash["InterzonalSkylightWalls"] = []
         end
       end
-
-      # The following surfaces are the ones considered for costing/carbon
-      # analysis. Filter them each into categories by boundary condition and
-      # store their RSI as an instance variable for future reference.
 
       @spaces.each do |space|
         # Exterior Surfaces
@@ -390,13 +368,11 @@ module BTAP
           interzonal_roof_surfaces.each do |surface|
             matched_space = @spaces.find { |matching_space| surface.space.get == matching_space }
             matched_space.surfaces_hash["InterzonalRoof"] << surface
-            surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
 
           interzonal_skylight_wall_surfaces.each do |surface|
             matched_space = @spaces.find { |matching_space| surface.space.get == matching_space }
             matched_space.surfaces_hash["InterzonalSkylightWalls"] << surface
-            surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
           end
         else
 
@@ -406,10 +382,6 @@ module BTAP
             exterior_surfaces, "RoofCeiling").sort
           space.surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
             exterior_surfaces, "Floor").sort
-        end
-
-        exterior_surfaces.each do |surface|
-          surface.instance_variable_set(:@rsi, get_correct_rsi(surface))
         end
 
         # Exterior Subsurfaces
@@ -430,9 +402,6 @@ module BTAP
           exterior_subsurfaces, ["GlassDoor"]).sort
         space.surfaces_hash["ExteriorOverheadDoor"]            = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
           exterior_subsurfaces, ["OverheadDoor"]).sort
-        exterior_subsurfaces.each do |surface|
-          surface.instance_variable_set(:@rsi, TBD.rsi(surface.construction.get.to_LayeredConstruction.get))
-        end
 
         # Ground Surfaces
         ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
@@ -443,29 +412,6 @@ module BTAP
           ground_surfaces, "RoofCeiling").sort
         space.surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(
           ground_surfaces, "Floor").sort
-        ground_surfaces.each do |surface|
-          surface.instance_variable_set(:@rsi, TBD.rsi(
-            surface.construction.get.to_LayeredConstruction.get, surface.filmResistance))
-        end
-      end
-    end
-
-    # Helper method for `compile_model()`. Whether TBD is enabled or not affects
-    # the way the U-value is retrieved for exterior and interzonal surfaces.
-    # If enabled, use the additional property and if not, calculate it with the
-    # TBD.rsi class method.
-    #
-    # @param surface [OpenStudio::Model::Surface]
-    # @return [Float] The RSI for the surface.
-    # TODO: remove/fix: additional props always added by tbd now regardless of tbd_option
-    def get_correct_rsi(surface)
-
-      # Uninsulated surfaces are not derated by TBD. These surfaces will not
-      # have a stored U-value. In those cases, use the fallback method.
-      if @use_tbd and surface.additionalProperties.hasFeature("uprated_Uo")
-        return 1 / surface.additionalProperties.getFeatureAsDouble("uprated_Uo").get
-      else
-        return TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       end
     end
 
