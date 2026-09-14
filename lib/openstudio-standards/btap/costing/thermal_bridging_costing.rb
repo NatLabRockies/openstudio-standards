@@ -7,8 +7,8 @@ module BTAP
       csv                 = CSV.read(Paths::THERMAL_BRIDGING_PATH, headers: true)
       material_quantities = {}
 
-      @attributes.tbd_edge_tallies.each do |edge_type, value|
-        value.each do |wall_reference_and_quality, quantity|
+      @attributes.tbd_edge_tallies.each do |edge_type, tallies|
+        tallies.each do |wall_reference_and_quality, quantity|
           result = csv.find do |row|
             row["edge_type"]      == edge_type &&
             row["wall_reference"] == wall_reference_and_quality

@@ -75,12 +75,12 @@ module BTAP
       # additional properties and format them into a hash.
       if use_tbd
         BTAP::BridgingData.admissible_edges.map(&:to_s).each do |edge_type|
-          (1..model.getConstructions.length).each do |id|
-            edge_key = "PSI#{edge_type}#{id}"
+          (1..model.getDefaultConstructionSets.length).each do |id|
+            edge_key     = "PSI#{edge_type}#{id}"
             keep_looking = false
             if model.getBuilding.additionalProperties.hasFeature(edge_key)
               keep_looking = true
-              tbd_edge_tallies[edge_type] = {}
+              tbd_edge_tallies[edge_type] = {} unless tbd_edge_tallies.has_key?(edge_type)
               wall_reference, quantity =
                 model.getBuilding.additionalProperties.getFeatureAsString(edge_key).get.split(/\s(?=\d)/)
 
