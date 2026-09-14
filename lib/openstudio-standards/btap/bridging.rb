@@ -389,7 +389,7 @@ module BTAP
     # supports). This may be updated in the future.
     #
     # @return [Array] admissible BTAP-costed edge types (Symbols)
-    def admissible_edges
+    def self.admissible_edges
       [:rimjoist, :parapet, :fenestration, :corner, :grade]
     end
 
@@ -1739,7 +1739,7 @@ module BTAP
 
       # TBD/BTAP track a wider range of thermal bridge types than BTAP costing
       # currently supports. Current BTAP-costed, linear thermal bridge types:
-      @model[:bridges] = admissible_edges
+      @model[:bridges] = BTAP::BridgingData.admissible_edges
 
       @model[:io][:edges].each do |e|
         pID = e[:psi]
