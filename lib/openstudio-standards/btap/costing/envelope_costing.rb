@@ -16,7 +16,8 @@ module BTAP
         cost_construction(construction, @costing_report['province_state'], @costing_report['city'])
       end
 
-      @costing_report["envelope"]["construction_costs"] = []
+      @costing_report["envelope"]["surface_type_costs"] = []
+      @costing_report["envelope"]["construction_costs"] = {}
 
       total_envelope_cost = 0
       @attributes.surface_types.each do |surface_type|
@@ -62,8 +63,11 @@ module BTAP
             total_cost           = (cost + film_cost) * total_area_feet
             total_envelope_cost += total_cost
 
+            # Bin the cost to tally it up per-construction later.
+            tallies["cost"] = total_cost
+
             # Bin the costing by construction type and rsi.
-            @costing_report["envelope"]["construction_costs"] << {
+            @costing_report["envelope"]["surface_type_costs"] << {
               "assembly_name" => assembly_name,
               "surface_type"  => surface_type,
               "conductance"   => rsi.round(3),
@@ -111,6 +115,25 @@ module BTAP
           "assemblies exist in the database with the given heat transfer requirements. This could be that the " \
           "thermal bridging module created too demanding of a model given the performance constraints. Try changing " \
           "the `tbd_option` parameter in your run options."
+      end
+
+      # Bin costs by entire constructions.
+      @attributes.surface_types_to_assembly_tallies.values.filter {|tallies| not tallies.empty?}.each do |entry|
+        entry.each_pair do |assembly_name, tallies|
+          if @costing_report["envelope"]["construction_costs"].has_key?(assembly_name)
+            bin                  = @costing_report["envelope"]["construction_costs"][assembly_name]
+            bin["area"]          = (bin["area"] + tallies["area"]).round(2)
+            bin["cost"]          = (bin["cost"] + tallies["cost"]).round(2)
+            bin["cost_per_area"] = (bin["cost"] / bin["area"]).round(2)
+          else
+            @costing_report["envelope"]["construction_costs"][assembly_name] = {
+              "conductance"   => @attributes.constructions[assembly_name]["rsi"].round(3),
+              "area"          => tallies["area"].round(2),
+              "cost"          => tallies["cost"].round(2),
+              "cost_per_area" => (tallies["cost"] / tallies["area"]).round(2)
+            }
+          end
+        end
       end
 
       # Round everything at the end.
