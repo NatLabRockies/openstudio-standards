@@ -468,20 +468,24 @@ module BTAP
         return TBD.rsi(surface.construction.get.to_LayeredConstruction.get, surface.filmResistance)
       end
     end
-  end
 
-  # Only relevant surface-specific tally is window perimeter for BTAP
-  # Carbon. Add surface-specific tallies for underatable surfaces.
-  # Currently only windows have emissions data for frames.
-  def compile_window_perimeter
-    @spaces.each do |space|
-      ["ExteriorFixedWindow", "ExteriorOperableWindow"].each do |surface_type|
-        assembly_name = @surface_types_to_assembly_names[surface_type]
-        @surface_types_to_assembly_tallies[surface_type][assembly_name]["perimeter"] = 0
-        space.surfaces_hash[surface_type].each do |surface|
-          @surface_types_to_assembly_tallies[surface_type][assembly_name]["perimeter"] += \
-            BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
+    # Only relevant surface-specific tally is window perimeter for BTAP
+    # Carbon. Add surface-specific tallies for underatable surfaces.
+    # Currently only windows have emissions data for frames.
+    def compile_window_perimeter
+      windows = ["ExteriorFixedWindow", "ExteriorOperableWindow"]
+      windows.each do |window|
+        @surface_types_to_assembly_tallies[window][@surface_types_to_assembly_names[window]]["perimeter"] = 0
+      end
 
+      @spaces.each do |space|
+        windows.each do |window|
+          assembly_name = @surface_types_to_assembly_names[window]
+          space.surfaces_hash[window].each do |surface|
+            @surface_types_to_assembly_tallies[window][assembly_name]["perimeter"] += \
+              BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
+
+          end
         end
       end
     end
