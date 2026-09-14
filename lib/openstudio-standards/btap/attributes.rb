@@ -124,11 +124,9 @@ module BTAP
         "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
       }
 
-      # Copy of the keys of the initial hash containing only underatable surface
-      # types. The "GroundContactFloor" has additional properties defined so
-      # it's removed.
-      @underatable_surface_types = @surface_types_to_assembly_names.keys.to_set.filter! { |surface_type|
-        surface_type != "GroundContactFloor" }
+      # Subsurfaces do not have additional properties defined.
+      @subsurfaces = @surface_types_to_assembly_names.keys.to_set.filter { |surface_type|
+        not surface_type =~ /^Ground/ }
 
       @surface_types_to_envelope_type = {
         "ExteriorWall"                    => "wall",
@@ -186,7 +184,19 @@ module BTAP
       # `@constructions` hash.
       # TODO: test later with warehouse
       @model.getDefaultConstructionSets.each do |set|
-        if set.nameString =~ /BLDG$/
+
+        if set.nameString =~ /ATTIC$/
+
+          # Interzonal surfaces also have additional properties defined by TBD:
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "InterzonalSkylightWalls")
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "InterzonalRoof")
+
+        elsif set.nameString =~ /BLDG$/
 
           # The following have additional properties defined by TBD:
           compile_construction_by_type(
@@ -205,8 +215,16 @@ module BTAP
             construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
             surface_type: "GroundContactFloor")
 
-          # The remaining do not have additional properties defined, they are
-          # contained in the `@underatable_surface_types` variable:
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "GroundContactWall")
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "GroundContactRoof")
+
+          # The remaining are subsurfaces and do not have additional properties
+          # defined, they are contained in the `@subsurfaces` variable:
           compile_construction_by_type(
             construction: set.defaultExteriorSubSurfaceConstructions.get.fixedWindowConstruction.get,
             surface_type: "ExteriorFixedWindow")
@@ -239,24 +257,24 @@ module BTAP
             construction: set.defaultExteriorSubSurfaceConstructions.get.overheadDoorConstruction.get,
             surface_type: "ExteriorOverheadDoor")
 
+        else
+
+          # Any remaining construction sets will be custom and defined by the
+          # user by manually adding additional properties to spaces and will
+          # only comprise exterior-facing surfaces.
+          # (see NECB2011/building_envelope.rb#add_construction_sets())
           compile_construction_by_type(
-            construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
-            surface_type: "GroundContactWall")
+            construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "ExteriorWall")
 
           compile_construction_by_type(
-            construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
-            surface_type: "GroundContactRoof")
-
-        elsif set.nameString =~ /ATTIC$/
-
-          # Interzonal surfaces also have additional properties defined by TBD:
-          compile_construction_by_type(
-            construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
-            surface_type: "InterzonalSkylightWalls")
+            construction: set.defaultExteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "ExteriorRoof")
 
           compile_construction_by_type(
-            construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
-            surface_type: "InterzonalRoof")
+            construction: set.defaultExteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "ExteriorFloor")
+
         end
       end
     end
@@ -264,12 +282,11 @@ module BTAP
     # @param construction: [OpenStudio::Model::ConstructionBase]
     # @param surface_type: [String]
     def compile_construction_by_type(construction:, surface_type:)
-      underatable   = @underatable_surface_types.include?(surface_type)
+      is_subsurface = @subsurfaces.include?(surface_type)
       envelope_type = @surface_types_to_envelope_type[surface_type]
 
-      # TODO: GroundContactFloor is underatable but it is and exception as it
-      # still has U-factors and area defined, otherwise this should instead
-      # check for the `underatable` variable.
+      # Ground contact and subsurfaces do not have custom IDs since they are
+      # all defaulted to a single common assembly.
       if construction.additionalProperties.hasFeature("btap_id")
         assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
       else
@@ -285,7 +302,7 @@ module BTAP
         construction_btap["subsets"] = \
           construction_entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
 
-        if underatable
+        if is_subsurface
           construction_btap["rsi"] = TBD.rsi(construction)
           unless construction.isOpaque
             construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
@@ -298,7 +315,7 @@ module BTAP
       end
 
       # Only include the assembly in the tallies hash if its area is non-zero.
-      area = underatable ? construction.getNetArea : construction
+      area = is_subsurface ? construction.getNetArea : construction
         .additionalProperties.getFeatureAsDouble("btap_area").get
 
       unless area == 0
