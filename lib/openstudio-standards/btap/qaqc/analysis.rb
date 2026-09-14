@@ -74,7 +74,7 @@ module BTAP
       # Process the thermal bridging edge tallies out of the building's
       # additional properties and format them into a hash.
       if use_tbd
-        ["fenestration", "grade", "parapet", "corner", "rimjoist"].each do |edge_type|
+        BTAP::BridgingData.admissible_edges.map(&:to_s).each do |edge_type|
           (1..model.getConstructions.length).each do |id|
             edge_key = "PSI#{edge_type}#{id}"
             keep_looking = false
