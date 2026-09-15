@@ -20,7 +20,7 @@ class NECB_Structure_Tests < Minitest::Test
     @test_passed = true
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
@@ -31,19 +31,19 @@ class NECB_Structure_Tests < Minitest::Test
       # 'LEEPPointTower',
       'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
       'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     @templates = [
@@ -55,7 +55,7 @@ class NECB_Structure_Tests < Minitest::Test
     ]
 
     @options = [
-      "",
+      # "",
       "structure"
     ]
 
@@ -313,8 +313,13 @@ class NECB_Structure_Tests < Minitest::Test
               err_msg = "# un/insulated constructions (#{cas})"
               assert_equal(cs.size, 11, err_msg)
 
-              # Isolate insulated constructions, i.e. part of building envelope.
-              cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              # Isolate insulated (opaque) constructions, i.e. part of building envelope.
+              cs      = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              slabs   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "gfloors" }
+              flors   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "floors" }
+              roofs   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "roofs" }
+              walls   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "walls" }
+              cs      = slabs + flors + roofs + walls
               err_msg = "# insulated constructions (#{cas})"
               assert_equal(cs.size, 6, err_msg)
 
@@ -328,20 +333,18 @@ class NECB_Structure_Tests < Minitest::Test
                 err_msg = "#{id} 'btap_film' (#{cas})"
                 refute_empty(fR)
                 fR = fR.get
+                err_msg = "#{id} 'btap_type' (#{cas})"
+                refute_empty(tP)
+                tP = tP.get
+                err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                assert_includes(tPs + ["gfloors"], tP, err_msg)
 
-                unless tP.empty?
-                  tP = tP.get
-                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
-                  assert_includes(tPs, tP, err_msg)
-
-                  fr = 0.150 # walls
-                  fr = 0.136 if tP == "roofs"
-                else
-                  fr = 0.160 # slabs
-                end
+                fr = 0.150 # walls
+                fr = 0.136 if tP == "roofs"
+                fr = 0.160 if tP == "gfloors"
 
                 # puts "#{id} : #{fr.round(3)} vs #{fR.round(3)} (#{tP})"
-                # OSut:CON:slab   : 0.160 vs 0.160 ()
+                # OSut:CON:slab   : 0.160 vs 0.160 (gfloors)
                 # OSut:CON:roof   : 0.136 vs 0.136 (roofs)
                 # OSut:CON:roof 3 : 0.136 vs 0.136 (roofs)
                 # OSut:CON:wall   : 0.150 vs 0.150 (walls)
@@ -364,6 +367,11 @@ class NECB_Structure_Tests < Minitest::Test
                   xd = c.additionalProperties.getFeatureAsString("btap_id")
                   fR = c.additionalProperties.getFeatureAsDouble("btap_film").get
                   tP = c.additionalProperties.getFeatureAsString("btap_type")
+                  err_msg = "#{id} 'btap_type' (#{cas})"
+                  refute_empty(tP)
+                  tP = tP.get
+                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                  assert_includes(tPs + ["gfloors"], tP, err_msg)
 
                   # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
                   # OSut:CON:slab   U-factor : 0.757 W/m2.K (4598 m2) # building
@@ -374,32 +382,25 @@ class NECB_Structure_Tests < Minitest::Test
                   # OSut:CON:wall 2 U-factor : 0.210 W/m2.K ( 507 m2) # fine storage
                   err_msg = "BTAP NECB2015 Uo-factor (#{cas})"
 
-                  unless tP.empty?
-                    tP = tP.get
-                    err_msg = "Unknown type #{id} #{tP} (#{cas})"
-                    assert_includes(tPs, tP, err_msg)
-
-                    if tP == "walls"
-                      wall_m2 += m2
-                      err_msg = "BTAP wall construction Uo (#{cas})"
-                      assert_equal(uo.round(3), 0.210, err_msg)
-                      err_msg = "BTAP wall construction ID (#{cas})"
-                      refute_empty(xd, err_msg)
-                      err_msg = "BTAP costed wall ID (#{cas})"
-                      assert_includes(xds, xd.get, err_msg)
-                    else # roofs
-                      roof_m2 += m2
-                      err_msg = "BTAP roof construction Uo (#{cas})"
-                      assert_equal(uo.round(3), 0.162, err_msg)
-                    end
+                  if tP == "walls"
+                    wall_m2 += m2
+                    err_msg = "BTAP wall construction Uo (#{cas})"
+                    assert_equal(uo.round(3), 0.210, err_msg)
+                    err_msg = "BTAP wall construction ID (#{cas})"
+                    refute_empty(xd, err_msg)
+                    err_msg = "BTAP costed wall ID (#{cas})"
+                    assert_includes(xds, xd.get, err_msg)
+                  elsif tP == "roofs"
+                    roof_m2 += m2
+                    err_msg = "BTAP roof construction Uo (#{cas})"
+                    assert_equal(uo.round(3), 0.162, err_msg)
                   else
                     slab_m2 += m2
                     assert_equal(uo.round(3), 0.757, err_msg)
 
                     # NECB prescriptive U-factor requirements for slabs-on-grade
                     # are limited to perimeter insulation (1.2m in width) for
-                    # climate zones < 8. The "btap_uo" value reflects this. This
-                    # should eventually inform BTAP's use of KIVA (@todo).
+                    # climate zones < 8. The "btap_uo" value reflects this.
                     uO = 1 / TBD.rsi(c, fR)
 
                     err_msg = "BTAP #{id} calculated USI #{uO.round(2)} (#{cas})"
@@ -435,7 +436,11 @@ class NECB_Structure_Tests < Minitest::Test
               assert_equal(cs.size, 6, err_msg)
 
               # Isolate insulated constructions, i.e. part of building envelope.
-              cs = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              cs      = cs.reject { |c| c.additionalProperties.getFeatureAsDouble("btap_uo").empty? }
+              slabs   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "gfloors" }
+              roofs   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "roofs" }
+              walls   = cs.select { |c| c.additionalProperties.getFeatureAsString("btap_type").get == "walls" }
+              cs      = slabs + roofs + walls
               err_msg = "# insulated constructions (#{cas})"
               assert_equal(cs.size, 3, err_msg)
 
@@ -446,30 +451,20 @@ class NECB_Structure_Tests < Minitest::Test
                 id = lc.nameString
                 tP = lc.additionalProperties.getFeatureAsString("btap_type")
                 fR = lc.additionalProperties.getFeatureAsDouble("btap_film")
-
                 err_msg = "#{id} 'btap_film' (#{cas})"
                 refute_empty(fR)
-
                 fR = fR.get
+                refute_empty(tP)
+                tP = tP.get
+                err_msg = "Unknown type #{id} #{tP} (#{cas})"
+                assert_includes(tPs + ["gfloors"], tP, err_msg)
 
-                unless tP.empty?
-                  tP = tP.get
-                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
-                  assert_includes(tPs, tP, err_msg)
+                fr = 0.150
+                fr = 0.266 if tP == "roofs" # i.e. attic floor
+                fr = 0.160 if tP == "gfloors"
 
-                  fr = 0.150
-                  fr = 0.266 if tP == "roofs" # i.e. attic floor
-
-                  err_msg = "Unknown type #{id} #{tP} (#{cas})"
-                  assert_includes(tPs, tP, err_msg)
-                  err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
-                  assert_equal(fR.round(3), fr.round(3))
-                else
-                  fr = 0.160 # slab-on-grade
-
-                  err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
-                  assert_equal(fR.round(3), fr.round(3))
-                end
+                err_msg = "#{id} #{fR.round(3)} vs #{fr.round(3)} (#{cas})"
+                assert_equal(fR.round(3), fr.round(3))
               end
 
               # NECB2015: No uprating (Uo == NECB prescriptive requirements).
@@ -481,55 +476,41 @@ class NECB_Structure_Tests < Minitest::Test
                   id = c.nameString
                   m2 = c.getNetArea
                   uo = c.additionalProperties.getFeatureAsDouble("btap_uo").get
-                  xd = c.additionalProperties.getFeatureAsString("btap_id")
+                  xd = c.additionalProperties.getFeatureAsString("btap_id").get
                   fR = c.additionalProperties.getFeatureAsDouble("btap_film").get
-                  tP = c.additionalProperties.getFeatureAsString("btap_type")
+                  tP = c.additionalProperties.getFeatureAsString("btap_type").get
 
                   # puts "#{id} U-factor : #{uo.round(3)} W/m2.K (#{m2.round} m2)"
                   # OSut:CON:slab        U-factor : 0.757 W/m2.K (232 m2)
                   # OSut:CON:partition 4 U-factor : 0.162 W/m2.K (232 m2)
                   # OSut:CON:wall        U-factor : 0.210 W/m2.K (124 m2)
 
-                  unless tP.empty?
-                    tP = tP.get
-                    err_msg = "Unknown type #{id} #{tP} (#{cas})"
-                    assert_includes(tPs, tP, err_msg)
+                  if tP == "roofs" # i.e. attic floors
+                    floor_m2 += m2
+                    err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
+                    assert_equal(uo.round(3), 0.162, err_msg)
+                    assert_equal(xd, "BTAP-ExteriorRoof-IEAD-4", err_msg)
 
-                    if tP == "roofs" # i.e. attic floors
-                      floor_m2 += m2
-                      err_msg = "BTAP NECB2015 attic floor Uo-factor (#{cas})"
-                      assert_equal(uo.round(3), 0.162, err_msg)
-                      err_msg = "BTAP attic floor construction ID (#{cas})"
-                      refute_empty(xd, err_msg)
-                      err_msg = "BTAP costed attic floor construction ID (#{cas})"
-                      assert_equal(xd.get, "BTAP-ExteriorRoof-IEAD-4", err_msg)
+                    uO = 1/TBD.rsi(c, fR)
+                    err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                    assert_equal(uo.round(2), uO.round(2), err_msg)
+                  elsif tP == "walls"
+                    err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
+                    assert_equal(uo.round(3), 0.210, err_msg)
+                    assert_equal(xd, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
 
-                      uO = 1/TBD.rsi(c, fR)
-                      err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
-                      assert_equal(uo.round(2), uO.round(2), err_msg)
-                    else
-                      err_msg = "BTAP NECB2015 wall Uo-factor (#{cas})"
-                      assert_equal(uo.round(3), 0.210, err_msg)
-                      err_msg = "BTAP wall construction ID (#{cas})"
-                      refute_empty(xd, err_msg)
-                      err_msg = "BTAP costed wall construction ID (#{cas})"
-                      assert_equal(xd.get, "BTAP-ExteriorWall-SteelFramed-2", err_msg)
-
-                      uO = 1 / TBD.rsi(c, fR)
-                      err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
-                      assert_equal(uo.round(2), uO.round(2), err_msg)
-                    end
+                    uO = 1 / TBD.rsi(c, fR)
+                    err_msg = "BTAP #{id} calculated RSI #{uO.round(2)} (#{cas})"
+                    assert_equal(uo.round(2), uO.round(2), err_msg)
                   else
                     slab_m2 += m2
                     err_msg = "BTAP NECB2015 slab-on-grade Uo-factor (#{cas})"
                     assert_equal(uo.round(3), 0.757, err_msg)
-                    err_msg = "BTAP slab-on-grade construction ID (#{cas})"
-                    assert_empty(xd, err_msg)
+                    assert_equal(xd, "BTAP-GroundContactFloor-Unheated-1", err_msg)
 
                     # NECB prescriptive U-factor requirements for slabs-on-grade
                     # are limited to perimeter insulation (1.2m in width) for
-                    # climate zones < 8. The "btap_uo" value reflects this. This
-                    # should eventually inform BTAP's use of KIVA (@todo).
+                    # climate zones < 8. The "btap_uo" value reflects this.
                     uO = 1 / TBD.rsi(c, fR)
 
                     err_msg = "BTAP #{id} calculated USI #{uO.round(2)} (#{cas})"

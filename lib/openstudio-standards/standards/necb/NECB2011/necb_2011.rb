@@ -996,7 +996,8 @@ class NECB2011 < Standard
       next unless lc.additionalProperties.hasFeature("btap_uo")
 
       ok = true
-      lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      fR = lc.isFenestration ? 0 : filmR(lc)
+      lc.additionalProperties.setFeature("btap_film", fR)
       lc.additionalProperties.setFeature("btap_area", lc.getNetArea)
     end
 
@@ -1082,6 +1083,7 @@ class NECB2011 < Standard
       next if fr.empty?
       next if ty.empty?
       next if m2.empty?
+      next if lc.isFenestration
 
       id = id.get
       uo = uo.get
@@ -1090,6 +1092,7 @@ class NECB2011 < Standard
       ty = ty.get
       m2 = m2.get
       il = TBD.insulatingLayer(lc)
+      next if id.downcase.chr == "g"
       next unless il[:index]
 
       TBD.resetUo(lc, fr, il[:index], uo)
