@@ -172,9 +172,13 @@ module BTAP
       # `@constructions` hash.
       @model.getDefaultConstructionSets.each do |set|
 
-        if set.nameString =~ /ATTIC$/
+        # Plenum construction sets don't contain any information pertinent to
+        # costing, skip them.
+        if set.nameString =~ /PLENUM$/
+          next
 
-          # Interzonal surfaces also have additional properties defined by TBD:
+        # Attic construction sets concern insulated interzonal surfaces.
+        elsif set.nameString =~ /ATTIC$/
           compile_construction_by_type(
             construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
             surface_type: "InterzonalSkylightWalls")
@@ -183,9 +187,9 @@ module BTAP
             construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
             surface_type: "InterzonalRoof")
 
+        # The following default construction sets concern the surfaces of the
+        # whole building:
         elsif set.nameString =~ /BLDG$/
-
-          # The following have additional properties defined by TBD:
           compile_construction_by_type(
             construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
             surface_type: "ExteriorWall")
@@ -210,8 +214,6 @@ module BTAP
             construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
             surface_type: "GroundContactRoof")
 
-          # The remaining are subsurfaces and do not have additional properties
-          # defined, they are contained in the `@subsurfaces` variable:
           compile_construction_by_type(
             construction: set.defaultExteriorSubSurfaceConstructions.get.fixedWindowConstruction.get,
             surface_type: "ExteriorFixedWindow")
@@ -244,12 +246,11 @@ module BTAP
             construction: set.defaultExteriorSubSurfaceConstructions.get.overheadDoorConstruction.get,
             surface_type: "ExteriorOverheadDoor")
 
+        # Any remaining construction sets will be custom and defined
+        # by the user by manually adding additional properties to
+        # spaces and will only comprise exterior-facing surfaces.
+        # (see NECB2011/building_envelope.rb:add_construction_sets())
         else
-
-          # Any remaining construction sets will be custom and defined by the
-          # user by manually adding additional properties to spaces and will
-          # only comprise exterior-facing surfaces.
-          # (see NECB2011/building_envelope.rb#add_construction_sets())
           compile_construction_by_type(
             construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
             surface_type: "ExteriorWall")
