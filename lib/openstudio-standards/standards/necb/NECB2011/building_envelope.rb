@@ -326,8 +326,8 @@ class NECB2011
     # Tally:
     #   - areas of each surface referencing the construction
     #   - inverse of each surface air film resistances (similar to UA)
-    area  = 0
-    filmA = 0
+    area   = 0
+    filmA  = 0
 
     construction.model.getSurfaces.each do |surface|
       tp = surface.surfaceType.downcase
@@ -593,7 +593,13 @@ class NECB2011
       # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gFloor)
       TBD.assignUniqueMaterial(gFloor, lyr[:index]) if lyr[:index]
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["GroundContactFloor"]
+
       gFloor.additionalProperties.setFeature("btap_uo", gFloorU)
+      gFloor.additionalProperties.setFeature("btap_ut", gFloorU)
+      gFloor.additionalProperties.setFeature("btap_id", id)
+      gFloor.additionalProperties.setFeature("btap_type", "gfloors")
 
       # Insulated basement wall. A more nuanced treatment is necessary for
       # multiple basement stories - no insulation required below 2.4m from grade.
@@ -605,7 +611,13 @@ class NECB2011
       # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gWall)
       TBD.assignUniqueMaterial(gWall, lyr[:index]) if lyr[:index]
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["GroundContactWall"]
+
       gWall.additionalProperties.setFeature("btap_uo", gWallU)
+      gWall.additionalProperties.setFeature("btap_ut", gWallU)
+      gWall.additionalProperties.setFeature("btap_id", id)
+      gWall.additionalProperties.setFeature("btap_type", "gwalls")
 
       # Insulated basement roof. Again, a more nuanced approach is necessary if
       # the basement roof is below 1.2m from grade (e.g. a tunnel).
@@ -619,7 +631,13 @@ class NECB2011
       # Ensure insulating layer uniqueness for each insulated construction.
       lyr = TBD.insulatingLayer(gRoof)
       TBD.assignUniqueMaterial(gRoof, lyr[:index]) if lyr[:index]
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["GroundContactRoof"]
+
       gRoof.additionalProperties.setFeature("btap_uo", gRoofU)
+      gRoof.additionalProperties.setFeature("btap_ut", gRoofU)
+      gRoof.additionalProperties.setFeature("btap_id", id)
+      gRoof.additionalProperties.setFeature("btap_type", "groofs")
 
       # Shading.
       specs        = {}
@@ -630,14 +648,69 @@ class NECB2011
       specs        = {}
       specs[:type] = :door
       specs[:uo  ] = doorU
-      door         = TBD.genConstruction(model, specs)
+      eDoor        = TBD.genConstruction(model, specs)
 
-      # Outdoor-facing, vertical fenestration (including glass doors).
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorDoor"]
+
+      eDoor.additionalProperties.setFeature("btap_uo", doorU)
+      eDoor.additionalProperties.setFeature("btap_ut", doorU)
+      eDoor.additionalProperties.setFeature("btap_id", id)
+      eDoor.additionalProperties.setFeature("btap_type", "doors")
+
+      # Outdoor-facing, overhead doors.
+      specs        = {}
+      specs[:type] = :door
+      specs[:uo  ] = doorU
+      oDoor        = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorOverheadDoor"]
+
+      oDoor.additionalProperties.setFeature("btap_uo", doorU)
+      oDoor.additionalProperties.setFeature("btap_ut", doorU)
+      oDoor.additionalProperties.setFeature("btap_id", id)
+      oDoor.additionalProperties.setFeature("btap_type", "odoors")
+
+      # Outdoor-facing, fixed window.
       specs        = {}
       specs[:type] = :window
       specs[:uo  ] = fenU
       specs[:shgc] = fenSHGC
-      fen          = TBD.genConstruction(model, specs)
+      fWindow      = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorFixedWindow"]
+
+      fWindow.additionalProperties.setFeature("btap_uo", fenU)
+      fWindow.additionalProperties.setFeature("btap_ut", fenU)
+      fWindow.additionalProperties.setFeature("btap_id", id)
+      fWindow.additionalProperties.setFeature("btap_type", "windows")
+
+      # Outdoor-facing, operable window.
+      specs        = {}
+      specs[:type] = :window
+      specs[:uo  ] = fenU
+      specs[:shgc] = fenSHGC
+      oWindow      = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorOperableWindow"]
+
+      oWindow.additionalProperties.setFeature("btap_uo", fenU)
+      oWindow.additionalProperties.setFeature("btap_ut", fenU)
+      oWindow.additionalProperties.setFeature("btap_id", id)
+      oWindow.additionalProperties.setFeature("btap_type", "owindows")
+
+      # Outdoor-facing, glass door.
+      specs        = {}
+      specs[:type] = :window
+      specs[:uo  ] = fenU
+      specs[:shgc] = fenSHGC
+      gDoor        = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorGlassDoor"]
+
+      gDoor.additionalProperties.setFeature("btap_uo", fenU)
+      gDoor.additionalProperties.setFeature("btap_ut", fenU)
+      gDoor.additionalProperties.setFeature("btap_id", id)
+      gDoor.additionalProperties.setFeature("btap_type", "gdoors")
 
       # Outdoor-facing, horizontal skylight.
       specs        = {}
@@ -645,6 +718,41 @@ class NECB2011
       specs[:uo  ] = skyU
       specs[:shgc] = skySHGC
       sky          = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorSkylight"]
+
+      sky.additionalProperties.setFeature("btap_uo", skyU)
+      sky.additionalProperties.setFeature("btap_ut", skyU)
+      sky.additionalProperties.setFeature("btap_id", id)
+      sky.additionalProperties.setFeature("btap_type", "skylights")
+
+      # Outdoor-facing, tubular daylight dome.
+      specs        = {}
+      specs[:type] = :skylight
+      specs[:uo  ] = skyU
+      specs[:shgc] = skySHGC
+      dome         = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorTubularDaylightDome"]
+
+      dome.additionalProperties.setFeature("btap_uo", skyU)
+      dome.additionalProperties.setFeature("btap_ut", skyU)
+      dome.additionalProperties.setFeature("btap_id", id)
+      dome.additionalProperties.setFeature("btap_type", "domes")
+
+      # Tubular daylight diffuser.
+      specs        = {}
+      specs[:type] = :skylight
+      specs[:uo  ] = skyU
+      specs[:shgc] = skySHGC
+      diffuser     = TBD.genConstruction(model, specs)
+
+      id = BTAP::Attributes.surface_types_to_assembly_names["ExteriorTubularDaylightDiffuser"]
+
+      diffuser.additionalProperties.setFeature("btap_uo", skyU)
+      diffuser.additionalProperties.setFeature("btap_ut", skyU)
+      diffuser.additionalProperties.setFeature("btap_id", id)
+      diffuser.additionalProperties.setFeature("btap_type", "diffusers")
 
       # Interzone/partition wall.
       specs          = {}
@@ -679,14 +787,14 @@ class NECB2011
       intSPACE.setWallConstruction(iWall)
       intSPACE.setFloorConstruction(iFloor)
       intSPACE.setRoofCeilingConstruction(iRoof)
-      subSPACE.setFixedWindowConstruction(fen)
-      subSPACE.setOperableWindowConstruction(fen)
-      subSPACE.setGlassDoorConstruction(fen)
+      subSPACE.setFixedWindowConstruction(fWindow)
+      subSPACE.setOperableWindowConstruction(oWindow)
+      subSPACE.setGlassDoorConstruction(gDoor)
       subSPACE.setSkylightConstruction(sky)
-      subSPACE.setTubularDaylightDomeConstruction(sky)
-      subSPACE.setTubularDaylightDiffuserConstruction(sky)
-      subSPACE.setDoorConstruction(door)
-      subSPACE.setOverheadDoorConstruction(door)
+      subSPACE.setTubularDaylightDomeConstruction(dome)
+      subSPACE.setTubularDaylightDiffuserConstruction(diffuser)
+      subSPACE.setDoorConstruction(eDoor)
+      subSPACE.setOverheadDoorConstruction(oDoor)
 
       setSPACE.setName("BTAP construction set BLDG")
       setSPACE.setDefaultGroundContactSurfaceConstructions(solSPACE)
@@ -792,14 +900,14 @@ class NECB2011
       iAtticWall.additionalProperties.setFeature("btap_uo", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_ut", eWallU)
       iAtticWall.additionalProperties.setFeature("btap_id", id)
-      iAtticWall.additionalProperties.setFeature("btap_type", "walls")
+      iAtticWall.additionalProperties.setFeature("btap_type", "iwalls")
 
       # Add default exterior wall construction properties to building or spaces.
       attics.each do |sp|
         sp.additionalProperties.setFeature("btap_uo", eWallU)
         sp.additionalProperties.setFeature("btap_ut", eWallU)
         sp.additionalProperties.setFeature("btap_id", id)
-        sp.additionalProperties.setFeature("btap_type", "walls")
+        sp.additionalProperties.setFeature("btap_type", "iwalls")
       end
 
       # Interzone (insulated) attic 'floors': insulation levels should match
@@ -825,7 +933,7 @@ class NECB2011
       iAtticFloor.additionalProperties.setFeature("btap_uo", eRoofU)
       iAtticFloor.additionalProperties.setFeature("btap_ut", eRoofU)
       iAtticFloor.additionalProperties.setFeature("btap_id", id)
-      iAtticFloor.additionalProperties.setFeature("btap_type", "roofs")
+      iAtticFloor.additionalProperties.setFeature("btap_type", "iroofs")
 
       # Interzone (insulated) attic 'roofs' may be suitable for UNCONDITIONED
       # crawlspaces (with CONDITIONED spaces above). Insulation levels should
@@ -851,7 +959,7 @@ class NECB2011
       iAtticRoof.additionalProperties.setFeature("btap_uo", eFloorU)
       iAtticRoof.additionalProperties.setFeature("btap_ut", eFloorU)
       iAtticRoof.additionalProperties.setFeature("btap_id", id)
-      iAtticRoof.additionalProperties.setFeature("btap_type", "floors")
+      iAtticRoof.additionalProperties.setFeature("btap_type", "ifloors")
 
       intATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)
       solATTIC = OpenStudio::Model::DefaultSurfaceConstructions.new(model)

@@ -40,11 +40,11 @@ class NECB_TBD_Tests < Minitest::Test
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      # 'LowriseApartment',
+      'LowriseApartment',
       'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       'QuickServiceRestaurant',
@@ -401,9 +401,9 @@ class NECB_TBD_Tests < Minitest::Test
 
                   if stypes == :walls
                     emsg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, stypes.to_s, emsg)
+                    assert_includes(type, stypes.to_s, emsg)
                     emsg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, types.to_s, emsg)
+                    assert_includes(type, types.to_s, emsg)
 
                     if option == "uprate"
                       emsg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
@@ -414,9 +414,9 @@ class NECB_TBD_Tests < Minitest::Test
                     end
                   else
                     emsg = "BTAP/TBD: ATTIC #{stypes} #{id} vs #{type} (#{cas})?"
-                    assert_equal(type, stypes.to_s, emsg)
+                    assert_includes(type, stypes.to_s, emsg)
                     emsg = "BTAP/TBD: ATTIC #{types} #{id} vs #{type} (#{cas})?"
-                    refute_equal(type, types.to_s, emsg)
+                    refute_includes(type, types.to_s, emsg)
 
                     if option == "uprate"
                       emsg = "BTAP/TBD: ATTIC #{types} Uo != Ut (#{cas})?"
@@ -973,7 +973,7 @@ class NECB_TBD_Tests < Minitest::Test
                 assert(props.hasFeature("psi_quality"), emsg)
                 qlty = props.getFeatureAsString("psi_quality").get
                 emsg = "BTAP/TBD: BLDG good/bad psi quality (#{cas})"
-                assert(["good", "bad"].include?(qlty), emsg)
+                assert_includes(["good", "bad"], qlty, emsg)
                 emsg = "BTAP/TBD: BLDG model psi quality (#{cas})"
                 assert_equal(qlty.to_sym, st.tbd.model[:quality])
 
