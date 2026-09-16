@@ -165,11 +165,12 @@ module BTAP
       self.compile_constructions
     end
 
+    # Fetch the additional properties in each default construction set which
+    # reflects the attributes of all the surfaces of a type. Populate the
+    # members of the `@constructions` and `@surface_types_to_assembly_tallies`
+    # hashes.
     def compile_constructions
 
-      # Fetch the additional properties for deratable surface types stored
-      # in the default construction sets and populate the members of the
-      # `@constructions` hash.
       @model.getDefaultConstructionSets.each do |set|
 
         # Plenum construction sets don't contain any information pertinent to
@@ -205,6 +206,28 @@ module BTAP
           compile_construction_by_type(
             construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
             surface_type: "GroundContactFloor")
+
+          # From NECB2011 to NECB2025, ground contact floors only need to be
+          # insulated wholly in climate zone 8. Otherwise, they need to be
+          # insulated only for 1.2m about the perimeter. Insulation for the
+          # low-conductnace ground contact floor U-factor variant have been
+          # manually seperated into its own assembly below. Also check for the
+          # presence of the perimeter additional property which denotes that
+          # there are non-basement ground contact floors.
+          if @standard.get_necb_hdd18(model: @model) < 7000 and
+             @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
+
+            isoboard_name = "BTAP-GroundContactFloor-Isoboard"
+            compile_construction_attributes(
+              construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+              name: isoboard_name,
+              entry: @costing_database["constructions"]["slab"][isoboard_name])
+
+            @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name] = {}
+            @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name]["area"] = \
+              @model.getBuilding.additionalProperties.getFeatureAsDouble("btap_slab_perimeter_m2").get
+
+          end
 
           compile_construction_by_type(
             construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
@@ -275,19 +298,10 @@ module BTAP
       # If the construction isn't already present in the  `@constructions` hash,
       # add it in.
       unless @constructions.key?(assembly_name)
-        construction_entry           = \
-          @costing_database["constructions"][@surface_types_to_envelope_type[surface_type]][assembly_name]
-
-        construction_btap            = {}
-        construction_btap["type"]    = construction_entry["type"]
-        construction_btap["rsi"]     = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
-        construction_btap["subsets"] = \
-          construction_entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
-
-        construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
-          construction.to_Construction.get) unless construction.isOpaque
-
-        @constructions[assembly_name] = construction_btap
+        compile_construction_attributes(
+          construction: construction,
+          name: assembly_name,
+          entry: @costing_database["constructions"][@surface_types_to_envelope_type[surface_type]][assembly_name])
       end
 
       # Only include the assembly in the tallies hash if its area is non-zero.
@@ -296,6 +310,20 @@ module BTAP
         @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
         @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = area
       end
+    end
+
+    # @param construction_entry: [Hash]
+    def compile_construction_attributes(construction:, name:, entry:)
+        construction_btap            = {}
+        construction_btap["type"]    = entry["type"]
+        construction_btap["rsi"]     = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
+        construction_btap["subsets"] = \
+          entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
+
+        construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
+          construction.to_Construction.get) unless construction.isOpaque
+
+        @constructions[name] = construction_btap
     end
 
     # Compile all the pertinent OpenStudio-related data into the data structures
