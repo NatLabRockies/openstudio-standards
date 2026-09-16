@@ -807,8 +807,7 @@ class NECB2011
       setSPACE.setInteriorPartitionConstruction(iWall)
 
       model.getSurfaces.each do |surface|
-        bc = surface.outsideBoundaryCondition.downcase
-        next unless ["adiabatic", "othersidecoefficients"].include?(bc)
+        next unless surface.outsideBoundaryCondition.downcase == "adiabatic"
 
         if surface.surfaceType.downcase == "wall"
           surface.setConstruction(iWall)
