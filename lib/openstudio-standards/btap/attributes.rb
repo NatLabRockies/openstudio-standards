@@ -270,42 +270,28 @@ module BTAP
     # @param construction: [OpenStudio::Model::ConstructionBase]
     # @param surface_type: [String]
     def compile_construction_by_type(construction:, surface_type:)
-      is_subsurface = @subsurfaces.include?(surface_type)
-      envelope_type = @surface_types_to_envelope_type[surface_type]
-
-      # Ground contact and subsurfaces do not have custom IDs since they are
-      # all defaulted to a single common assembly.
-      if construction.additionalProperties.hasFeature("btap_id")
-        assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
-      else
-        assembly_name = self.class.surface_types_to_assembly_names[surface_type]
-      end
+      assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
 
       # If the construction isn't already present in the  `@constructions` hash,
       # add it in.
       unless @constructions.key?(assembly_name)
-        construction_entry = @costing_database["constructions"][envelope_type][assembly_name]
-        construction_btap  = {}
-        construction_btap["type"] = construction_entry["type"]
+        construction_entry           = \
+          @costing_database["constructions"][@surface_types_to_envelope_type[surface_type]][assembly_name]
+
+        construction_btap            = {}
+        construction_btap["type"]    = construction_entry["type"]
+        construction_btap["rsi"]     = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
         construction_btap["subsets"] = \
           construction_entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
 
-        if is_subsurface
-          construction_btap["rsi"] = TBD.rsi(construction.to_LayeredConstruction.get)
-          unless construction.isOpaque
-            construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
-              construction.to_Construction.get)
-          end
-        else
-          construction_btap["rsi"] = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
-        end
+        construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
+          construction.to_Construction.get) unless construction.isOpaque
+
         @constructions[assembly_name] = construction_btap
       end
 
       # Only include the assembly in the tallies hash if its area is non-zero.
-      area = is_subsurface ? construction.getNetArea : construction
-        .additionalProperties.getFeatureAsDouble("btap_area").get
-
+      area = construction.additionalProperties.getFeatureAsDouble("btap_area").get
       unless area == 0
         @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
         @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = area
