@@ -25,8 +25,7 @@ class NECB_TBD_Tests < Minitest::Test
       # 'NECB2011',
       # 'NECB2015',
       # 'NECB2017',
-      'NECB2020',
-      # 'NECB2025'
+      'NECB2020'
     ]
 
     @buildings = [
@@ -43,8 +42,8 @@ class NECB_TBD_Tests < Minitest::Test
       'LowriseApartment',
       'MediumOffice',
       # 'MidriseApartment',
-      # 'NorthernEducation',
-      # 'NorthernHealthCare',
+      'NorthernEducation',
+      'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
       'QuickServiceRestaurant',
@@ -896,7 +895,7 @@ class NECB_TBD_Tests < Minitest::Test
                   end
                 end
 
-                if option == "uprate" && inter == true && structure == "structure"
+                if option == "uprate" && cmplies && inter == true && structure == "structure"
                   wUt = 0
                   wUA = 0
                   wM2 = 0
