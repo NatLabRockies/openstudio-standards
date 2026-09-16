@@ -177,34 +177,39 @@ module BTAP
             surface_type: "ExteriorFloor")
 
           compile_construction_by_type(
-            construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
-            surface_type: "GroundContactFloor")
-
-          # From NECB2011 to NECB2025, ground contact floors only need to be
-          # insulated wholly in climate zone 8. Otherwise, they need to be
-          # insulated only for 1.2m about the perimeter. Insulation for the
-          # low-conductnace ground contact floor U-factor variant have been
-          # manually seperated into its own assembly below. Also check for the
-          # presence of the perimeter additional property which denotes that
-          # there are slab on grade ground contact floors.
-          if @standard.get_necb_hdd18(model: @model) < 7000 and
-             @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
-
-            isoboard_name = "BTAP-GroundContactFloor-Isoboard"
-            compile_construction_attributes(
-              construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
-              name: isoboard_name,
-              entry: @costing_database["constructions"]["slab"][isoboard_name])
-
-            @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name] = {}
-            @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name]["area"] = \
-              @model.getBuilding.additionalProperties.getFeatureAsDouble("btap_slab_perimeter_m2").get
-
-          end
-
-          compile_construction_by_type(
             construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
             surface_type: "GroundContactWall")
+
+          # The presence of ground contact walls implies a basement which means
+          # ground contact floors would be uninsulated and such should not be
+          # costed.
+          if @surface_types_to_assembly_tallies["GroundContactWall"].empty?
+            compile_construction_by_type(
+              construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+              surface_type: "GroundContactFloor")
+
+            # From NECB2011 to NECB2025, ground contact floors only need to be
+            # insulated wholly in climate zone 8. Otherwise, they need to be
+            # insulated only for 1.2m about the perimeter. Insulation for the
+            # low-conductnace ground contact floor U-factor variant have been
+            # manually seperated into its own assembly below. Also check for the
+            # presence of the perimeter additional property which denotes that
+            # there are slab on grade ground contact floors.
+            if @standard.get_necb_hdd18(model: @model) < 7000 and
+               @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
+
+              isoboard_name = "BTAP-GroundContactFloor-Isoboard"
+              compile_construction_attributes(
+                construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+                name: isoboard_name,
+                entry: @costing_database["constructions"]["slab"][isoboard_name])
+
+              @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name] = {}
+              @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name]["area"] = \
+                @model.getBuilding.additionalProperties.getFeatureAsDouble("btap_slab_perimeter_m2").get
+
+            end
+          end
 
           compile_construction_by_type(
             construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
