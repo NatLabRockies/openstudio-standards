@@ -404,7 +404,7 @@ class NECB2011 < Standard
   # Created this method so that additional methods can be addded for bulding the prototype model in later
   # code versions without modifying the build_protoype_model method or copying it wholesale for a few changes.
   def model_apply_standard(model:,
-                           construction_opt: '',
+                           construction_opt: 'structure',
                            tbd_option: 'none',
                            tbd_interpolate: true,
                            epw_file:,
@@ -507,7 +507,7 @@ class NECB2011 < Standard
     fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
     srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
     srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
-    construction_opt         = convert_arg_to_string(variable: construction_opt, default: '')
+    construction_opt         = convert_arg_to_string(variable: construction_opt, default: 'structure')
     tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
     tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
     necb_hdd                 = convert_arg_to_bool(variable: necb_hdd, default: true)
