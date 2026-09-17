@@ -84,6 +84,7 @@ module BTAP
         "ExteriorFloor",
         "InterzonalRoof",
         "InterzonalSkylightWalls",
+        "InterzonalFloor",
         "ExteriorFixedWindow",
         "ExteriorOperableWindow",
         "ExteriorSkylight",
@@ -107,6 +108,7 @@ module BTAP
         "ExteriorRoof"                    => "roof",
         "ExteriorFloor"                   => "floor",
         "InterzonalRoof"                  => "roof",
+        "InterzonalFloor"                 => "floor",
 
         # TODO: Although we don't have specific constructions on interzonal
         # skylight walls, using external wall constructions is better than
@@ -151,8 +153,11 @@ module BTAP
         if set.nameString =~ /PLENUM$/
           next
 
-        # Attic construction sets concern insulated interzonal surfaces.
+        # Attic construction sets concern insulated interzonal surfaces. This
+        # also concerns crawlspaces, of which the interzonal floors will be
+        # tallied.
         elsif set.nameString =~ /ATTIC$/
+
           compile_construction_by_type(
             construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
             surface_type: "InterzonalSkylightWalls")
@@ -160,6 +165,10 @@ module BTAP
           compile_construction_by_type(
             construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
             surface_type: "InterzonalRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "InterzonalFloor")
 
         # The following default construction sets concern the surfaces of the
         # whole building:
@@ -195,9 +204,7 @@ module BTAP
             # manually seperated into its own assembly below. Also check for the
             # presence of the perimeter additional property which denotes that
             # there are slab on grade ground contact floors.
-            if @standard.get_necb_hdd18(model: @model) < 7000 and
-               @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
-
+            if @standard.get_necb_hdd18(model: @model) < 7000
               isoboard_name = "BTAP-GroundContactFloor-Isoboard"
               compile_construction_attributes(
                 construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
