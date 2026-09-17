@@ -358,6 +358,45 @@ class NECB2011
   end
 
   ##
+  # Hard-sets basement floor constructions. Ground-facing floors in full-height
+  # basement spaces are outside the scope of the NECBs. A hard set avoids
+  # inheritance conflicts with BTAP default construction sets.
+  #
+  # @author denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Array] collection of (uninsulated) basement floors
+  def set_basement_floor_construction(model = nil)
+    lc   = nil
+    flrs = []
+    return flrs unless model.is_a?(OpenStudio::Model::Model)
+
+    model.getSpaces.each do |space|
+      floors = TBD.facets(space, "all", "floor")
+      floors = floors.select { |floor| floor.isGroundSurface }
+      next if floors.empty?
+
+      walls = TBD.facets(space, "all", "wall")
+      next unless walls.any? { |wall| wall.isGroundSurface }
+
+      if lc.nil?
+        specs         = {}
+        specs[:type ] = :slab
+        specs[:frame] = :none
+        specs[:uo   ] = nil
+        lc            = TBD.genConstruction(model, specs)
+      end
+
+      floors.each { |floor| floor.setConstruction(lc) }
+
+      flrs += floors
+    end
+
+    flrs
+  end
+
+  ##
   # Adds default construction sets to the building (or to selected spaces). The
   # solution is an alternative option to BTAP's 'model_apply_construction' &
   # 'apply_standard_construction_properties'. Parameters are based on previously
@@ -1004,16 +1043,6 @@ class NECB2011
       setPLENUM.setDefaultInteriorSurfaceConstructions(intPLENUM)
 
       plenums.each { |plenum| plenum.setDefaultConstructionSet(setPLENUM) }
-    end
-
-    # Reset surface 'OtherSideCoefficients' boundary conditions to 'Ground'.
-    if bldg
-      model.getSurfaces.each do |surface|
-        bc = surface.outsideBoundaryCondition.downcase
-        next unless bc == "othersidecoefficients"
-
-        surface.setOutsideBoundaryCondition("Ground")
-      end
     end
 
     # The above solution should work well for prototype models distributed with

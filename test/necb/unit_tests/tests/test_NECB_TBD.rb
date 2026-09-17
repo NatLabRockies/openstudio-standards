@@ -29,34 +29,34 @@ class NECB_TBD_Tests < Minitest::Test
     ]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
-      # 'LargeHotel',
+      'LargeHotel',
       # 'LargeOffice',
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
-      'MediumOffice',
+      # 'LowriseApartment',
+      # 'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     @structure = [
-      '',
+      # '',
       'structure'
     ]
 

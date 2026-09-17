@@ -877,6 +877,9 @@ class NECB2011 < Standard
       argh[:cladding ] = @structure.cladding
       argh[:finish   ] = @structure.finish
 
+      # Hard-set (full-height) basement floor constructions.
+      set_basement_floor_construction(model)
+
       # Add default BUILDING construction sets.
       unless add_construction_sets(model.getSpaces, true, necb_hdd, argh)
         raise('NECB: Failed to assign default BUILDING construction sets')

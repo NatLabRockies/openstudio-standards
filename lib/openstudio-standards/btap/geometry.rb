@@ -239,17 +239,15 @@ module BTAP
         spaces.each do |space|
           t = space.siteTransformation
 
-          wlls  = []
-          wlls += TBD.facets(space, "ground", "wall")
-          wlls += TBD.facets(space, "foundation", "wall")
-          wlls += TBD.facets(space, "othersidecoefficients", "wall")
-          next unless wlls.empty?
-
-          slbs  = []
-          slbs += TBD.facets(space, "ground", "floor")
-          slbs += TBD.facets(space, "foundation", "floor")
-          slbs += TBD.facets(space, "othersidecoefficients", "floor")
+          slbs = []
+          slbs = TBD.facets(space, "all", "floor")
+          slbs = slbs.select { |slb| slb.isGroundSurface }
           next if slbs.empty?
+
+          wlls = []
+          wlls = TBD.facets(space, "all", "wall")
+          wlls = wlls.select { |wll| wll.isGroundSurface }
+          next unless wlls.empty?
 
           slbs.each { |slb| slabs << t * slb.vertices }
         end
