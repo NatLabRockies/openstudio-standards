@@ -956,6 +956,11 @@ module BTAP
       @model[:comply  ] = comply   # true/false, specific to surface type
       @model[:complies] = complies # true/false for entire model
 
+      # Log NECB Part 3 prescriptive compliance as AdditionalProperty.
+      if @model[:uprating]
+        model.getBuilding.additionalProperties.setFeature("tbd_compliance", complies)
+      end
+
       # Run "process" TBD one last time, on "model" (not cloned "mdl").
       args = {option: "", io_path: inputs( @model[:quality] )}
       TBD.clean!
