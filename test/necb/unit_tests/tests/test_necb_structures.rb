@@ -20,12 +20,12 @@ class NECB_Structure_Tests < Minitest::Test
     @test_passed = true
 
     @buildings = [
-      # 'FullServiceRestaurant',
+      'FullServiceRestaurant',
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
       # 'Hospital',
       # 'LargeHotel',
-      'LargeOffice',
+      # 'LargeOffice',
       # 'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',

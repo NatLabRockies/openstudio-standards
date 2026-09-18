@@ -992,6 +992,10 @@ class NECB2011 < Standard
   def set_construction_air_film_resistances(model: nil)
     return false unless model.is_a?(OpenStudio::Model::Model)
 
+    # puts
+    # puts model.getConstructionByName("OSut:CON:basement").get.additionalProperties
+    # puts
+
     ok  = false
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
@@ -1147,28 +1151,30 @@ class NECB2011 < Standard
         space_ground_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.isGroundSurface }
         space_ext_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.outsideBoundaryCondition.downcase == 'outdoors'}
 
-        # Add perimeter insulation to initial building KIVA foundation, if at
-        # least one exterior wall (XPS insulation, thickness: 1-1/2").
-        unless space_ext_walls.empty?
-          if hdd < 7000
-            xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
+        # Slab-on-grade (not basement) if no ground-facing walls. Add perimeter
+        # insulation to building KIVA foundation.
+        unless space_ground_floors.empty?
+          if space_ground_walls.empty?
+            if hdd < 7000
+              xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
 
-            if xps38.empty?
-              xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
-              xps38.setName("XPS 38mm")
-              xps38.setRoughness("Smooth")
-              xps38.setThickness(0.038)
-              xps38.setConductivity(0.029)
-              xps38.setDensity(28)
-              xps38.setSpecificHeat(1450)
-            else
-              xps38 = xps38.get
+              if xps38.empty?
+                xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+                xps38.setName("XPS 38mm")
+                xps38.setRoughness("Smooth")
+                xps38.setThickness(0.038)
+                xps38.setConductivity(0.029)
+                xps38.setDensity(28)
+                xps38.setSpecificHeat(1450)
+              else
+                xps38 = xps38.get
+              end
+
+              zone_kiva_models.last.setInteriorHorizontalInsulationMaterial(xps38)
+              zone_kiva_models.last.setInteriorHorizontalInsulationWidth(1.2)
+
+              slb = true
             end
-
-            zone_kiva_models.last.setInteriorHorizontalInsulationMaterial(xps38)
-            zone_kiva_models.last.setInteriorHorizontalInsulationWidth(1.2)
-
-            slb = true
           end
         end
 
@@ -1185,7 +1191,9 @@ class NECB2011 < Standard
             kiva_model.setWallHeightAboveGrade(0.0)
             kiva_model.setWallDepthBelowSlab(0.0)
 
-            unless space_ext_walls.empty?
+            # Slab-on-grade (not basement) if no ground-facing walls. Add
+            # perimeter insulation to building KIVA foundation.
+            if space_ground_walls.empty?
               if hdd < 7000
                 xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
 
