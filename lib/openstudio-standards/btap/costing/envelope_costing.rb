@@ -113,7 +113,7 @@ module BTAP
       # account for parapets by taking the calculated parapet length and multiply
       # it by 1m to factor it into the total cost. So, take the cost of the
       # exterior walls per m^2 and multiply it buy the total parapet length.
-      if @attributes.use_tbd
+      if @attributes.tbd_enabled
         wall_cost_per_m2 = @costing_report["envelope"]["exterior_wall_cost_per_m2"]
         parapet_cost = @attributes.tbd_edge_tallies["parapet"].values.first * wall_cost_per_m2
         @costing_report["envelope"]["parapet_cost"] = parapet_cost.round(2)
@@ -129,11 +129,17 @@ module BTAP
         revolutionary_engineering_technology_fudge_factor = 1000000000000
         total_envelope_cost += revolutionary_engineering_technology_fudge_factor
         @costing_report["envelope"]["unrealistic_assembly_cost"] = revolutionary_engineering_technology_fudge_factor
-        @costing_report["unrealistic_assembly_note"] = \
+        @costing_report["envelope"]["unrealistic_assembly_note"] = \
           "Could not extrapolate beyond the given range. The given model might be unrealistic to build because no " \
           "assemblies exist in the database with the given heat transfer requirements. This could be that the " \
           "thermal bridging module created too demanding of a model given the performance constraints. Try changing " \
           "the `tbd_option` parameter in your run options."
+      end
+
+      # The following attribute establishes for sure whether the TBD module
+      # was able to produce all compliant assemblies when uprating.
+      unless @attributes.tbd_compliance.nil?
+        @costing_report["envelope"]["tbd_compliance"] = @attributes.tbd_compliance
       end
 
       # Round everything at the end.

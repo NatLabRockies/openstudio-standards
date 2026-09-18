@@ -61,19 +61,17 @@ module BTAP
     end
 
     # @param model [OpenStudio::Model::Model]
+    # @return [(Boolean, Hash)]
     def self.get_tbd_attributes(model:)
 
       # The "psi_quality" additional property is only initialized when TBD
-      # is run, used as a marker here to determine the "use_tbd" attribute.
-      use_tbd = model.getBuilding.additionalProperties.hasFeature("psi_quality")
-      building_performance = use_tbd ?
-        model.getBuilding.additionalProperties.getFeatureAsString("psi_quality").get : nil
-
+      # is run, used as a marker here to determine the "tbd_enabled" attribute.
+      tbd_enabled      = model.getBuilding.additionalProperties.hasFeature("psi_quality")
       tbd_edge_tallies = {}
 
       # Process the thermal bridging edge tallies out of the building's
       # additional properties and format them into a hash.
-      if use_tbd
+      if tbd_enabled
         BTAP::BridgingData.admissible_edges.map(&:to_s).each do |edge_type|
           (1..model.getDefaultConstructionSets.length).each do |id|
             edge_key     = "PSI#{edge_type}#{id}"
@@ -90,7 +88,7 @@ module BTAP
           end
         end
       end
-      return use_tbd, building_performance, tbd_edge_tallies
+      return tbd_enabled, tbd_edge_tallies
     end
   end
 
@@ -128,12 +126,11 @@ module BTAP
       @datapoint_id = datapoint_id
       @analysis_id  = analysis_id
 
-      use_tbd, building_performance, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
-      @attributes   = BTAP::Attributes.new(
+      tbd_enabled, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
+      @attributes = BTAP::Attributes.new(
         model: @model,
         standard: @standard,
-        use_tbd: use_tbd,
-        building_performance: building_performance,
+        tbd_enabled: tbd_enabled,
         tbd_edge_tallies: tbd_edge_tallies)
       @model.setSqlFile(OpenStudio::SqlFile.new(sql_file_path))
       @qaqc = BTAP::Datapoint.build_qaqc(@model, @standard, @datapoint_id, @analysis_id)
@@ -155,12 +152,11 @@ module BTAP
       @standard = standard
       @qaqc     = qaqc
 
-      use_tbd, building_performance, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
-      @attributes   = BTAP::Attributes.new(
+      tbd_enabled, tbd_edge_tallies = Analysis.get_tbd_attributes(model: @model)
+      @attributes = BTAP::Attributes.new(
         model: @model,
         standard: @standard,
-        use_tbd: use_tbd,
-        building_performance: building_performance,
+        tbd_enabled: tbd_enabled,
         tbd_edge_tallies: tbd_edge_tallies)
     end
   end

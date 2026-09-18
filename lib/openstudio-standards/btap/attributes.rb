@@ -38,8 +38,9 @@ module BTAP
     attr_reader :zones                  # [Array[OpenStudio::Model::Zone]]
     attr_reader :spaces                 # [Array[OpenStudio::Model::Space]]
     attr_reader :surface_types          # [Array]
-    attr_reader :use_tbd                # [Boolean]
+    attr_reader :tbd_enabled            # [Boolean]
     attr_reader :tbd_edge_tallies       # [Hash]
+    attr_reader :tbd_compliance         # [Boolean]
     attr_reader :surface_types_to_snake # [Hash]
     attr_reader :constructions          # [Hash]
     attr_reader :surface_types_to_assembly_tallies # [Hash]
@@ -65,17 +66,17 @@ module BTAP
 
     # @param model                [OpenStudio::Model::Model]
     # @param standard             [Standard]
-    # @param use_tbd              [Boolean]
-    # @param building_performance [String]
+    # @param tbd_enabled          [Boolean]
     # @param tbd_edge_tallies     [Hash]
-    def initialize(model:, standard:, use_tbd:, building_performance:, tbd_edge_tallies:)
+    def initialize(model:, standard:, tbd_enabled:, tbd_edge_tallies:)
 
-      @model                = model
-      @standard             = standard
-      @use_tbd              = use_tbd
-      @building_performance = building_performance
-      @tbd_edge_tallies     = tbd_edge_tallies
-      @costing_database     = Database.instance
+      @model            = model
+      @standard         = standard
+      @costing_database = Database.instance
+      @tbd_enabled      = tbd_enabled
+      @tbd_edge_tallies = tbd_edge_tallies
+      @tbd_compliance   = @model.getBuilding.additionalProperties.hasFeature("tbd_compliance") ?
+                          @model.getBuilding.additionalProperties.getFeatureAsBoolean("tbd_compliance").get : nil
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [
