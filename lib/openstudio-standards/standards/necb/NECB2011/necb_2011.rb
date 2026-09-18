@@ -991,11 +991,7 @@ class NECB2011 < Standard
   # @return [Boolean] true if successful
   def set_construction_air_film_resistances(model: nil)
     return false unless model.is_a?(OpenStudio::Model::Model)
-
-    # puts
-    # puts model.getConstructionByName("OSut:CON:basement").get.additionalProperties
-    # puts
-
+    
     ok  = false
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
