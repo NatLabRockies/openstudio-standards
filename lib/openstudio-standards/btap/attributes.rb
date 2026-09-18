@@ -206,7 +206,9 @@ module BTAP
             # manually seperated into its own assembly below. Also check for the
             # presence of the perimeter additional property which denotes that
             # there are slab on grade ground contact floors.
-            if @standard.get_necb_hdd18(model: @model) < 7000
+            if @standard.get_necb_hdd18(model: @model) < 7000 and
+               @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
+
               isoboard_name = "BTAP-GroundContactFloor-Isoboard"
               compile_construction_attributes(
                 construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
