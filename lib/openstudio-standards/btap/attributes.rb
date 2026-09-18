@@ -189,13 +189,14 @@ module BTAP
             construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
             surface_type: "GroundContactWall")
 
-          # The presence of ground contact walls implies a basement which means
-          # ground contact floors would be uninsulated and such should not be
-          # costed.
-          if @surface_types_to_assembly_tallies["GroundContactWall"].empty?
-            compile_construction_by_type(
-              construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
-              surface_type: "GroundContactFloor")
+          # Basement ground contact floors are removed from this default
+          # construction set beforehand in prototype creation with the
+          # `NECB2011/building_envelope.rb:set_basement_floor_construction()`
+          # method since they're uninsulated and shouldn't be costed. So this
+          # only tallies slabs on grade.
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "GroundContactFloor")
 
             # From NECB2011 to NECB2025, ground contact floors only need to be
             # insulated wholly in climate zone 8. Otherwise, they need to be
@@ -215,7 +216,6 @@ module BTAP
               @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name]["area"] = \
                 @model.getBuilding.additionalProperties.getFeatureAsDouble("btap_slab_perimeter_m2").get
 
-            end
           end
 
           compile_construction_by_type(
