@@ -5071,8 +5071,8 @@ class Standard
                                                                                            zn_radiant_clg_dsgn_temp_c,
                                                                                            name: "Zone Radiant Loop Cooling Threshold Temperature Schedule - #{zn_radiant_clg_dsgn_temp_f.round(0)}F",
                                                                                            schedule_type_limit: 'Temperature')
-    throttling_range_f = 4.0 # 2 degF on either side of control temperature
-    throttling_range_c = OpenStudio.convert(throttling_range_f, 'F', 'C').get
+    throttling_range_r = 4.0 # 2 degF on either side of control temperature
+    throttling_range_k = OpenStudio.convert(throttling_range_r, 'R', 'K').get
 
     # create preset availability schedule for radiant loop
     radiant_avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
@@ -5171,7 +5171,7 @@ class Standard
       if hot_water_loop
         radiant_loop_htg_coil = OpenStudio::Model::CoilHeatingLowTempRadiantVarFlow.new(model, htg_control_temp_sch)
         radiant_loop_htg_coil.setName("#{zone.name} Radiant Loop Heating Coil")
-        radiant_loop_htg_coil.setHeatingControlThrottlingRange(throttling_range_c)
+        radiant_loop_htg_coil.setHeatingControlThrottlingRange(throttling_range_k)
         hot_water_loop.addDemandBranchForComponent(radiant_loop_htg_coil)
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Radiant loops require a hot water loop, but none was provided.')
@@ -5180,7 +5180,7 @@ class Standard
       if chilled_water_loop
         radiant_loop_clg_coil = OpenStudio::Model::CoilCoolingLowTempRadiantVarFlow.new(model, clg_control_temp_sch)
         radiant_loop_clg_coil.setName("#{zone.name} Radiant Loop Cooling Coil")
-        radiant_loop_clg_coil.setCoolingControlThrottlingRange(throttling_range_c)
+        radiant_loop_clg_coil.setCoolingControlThrottlingRange(throttling_range_k)
         chilled_water_loop.addDemandBranchForComponent(radiant_loop_clg_coil)
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.Model.Model', 'Radiant loops require a chilled water loop, but none was provided.')
