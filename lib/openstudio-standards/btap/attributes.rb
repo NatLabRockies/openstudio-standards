@@ -350,7 +350,9 @@ module BTAP
       @spaces.each do |space|
         windows.each do |window|
           assembly_name = self.class.surface_types_to_assembly_names[window]
-          space.surfaces_hash[window].each do |surface|
+          BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(BTAP::Geometry::Surfaces::filter_by_boundary_condition(
+            space.surfaces, "Outdoors").flat_map(&:subSurfaces), ["FixedWindow", "OperableWindow"]).each do |surface|
+
             @surface_types_to_assembly_tallies[window][assembly_name]["perimeter"] += \
               BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
 
