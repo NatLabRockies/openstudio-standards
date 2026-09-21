@@ -2,12 +2,12 @@
   "city": "CALGARY",
   "province_state": "ALBERTA",
   "envelope": {
-    "exterior_wall_cost": 5075892.28,
+    "exterior_wall_cost": 6078300.14,
     "exterior_wall_area_m2": 7730.22,
-    "exterior_wall_cost_per_m2": 656.63,
-    "exterior_roof_cost": 2596620.67,
+    "exterior_wall_cost_per_m2": 786.3,
+    "exterior_roof_cost": 2597645.58,
     "exterior_roof_area_m2": 3563.11,
-    "exterior_roof_cost_per_m2": 728.75,
+    "exterior_roof_cost_per_m2": 729.04,
     "exterior_floor_cost": 0.0,
     "exterior_floor_area_m2": 0.0,
     "exterior_floor_cost_per_m2": 0.0,
@@ -17,6 +17,9 @@
     "interzonal_skylight_walls_cost": 0.0,
     "interzonal_skylight_walls_area_m2": 0.0,
     "interzonal_skylight_walls_cost_per_m2": 0.0,
+    "interzonal_floor_cost": 0.0,
+    "interzonal_floor_area_m2": 0.0,
+    "interzonal_floor_cost_per_m2": 0.0,
     "exterior_fixed_window_cost": 23760390.35,
     "exterior_fixed_window_area_m2": 3859.32,
     "exterior_fixed_window_cost_per_m2": 6156.63,
@@ -41,468 +44,80 @@
     "exterior_overhead_door_cost": 0.0,
     "exterior_overhead_door_area_m2": 0.0,
     "exterior_overhead_door_cost_per_m2": 0.0,
-    "ground_contact_wall_cost": 272997.85,
+    "ground_contact_wall_cost": 272987.16,
     "ground_contact_wall_area_m2": 594.36,
-    "ground_contact_wall_cost_per_m2": 459.31,
+    "ground_contact_wall_cost_per_m2": 459.3,
     "ground_contact_roof_cost": 0.0,
     "ground_contact_roof_area_m2": 0.0,
     "ground_contact_roof_cost_per_m2": 0.0,
-    "ground_contact_floor_cost": 584084.81,
-    "ground_contact_floor_area_m2": 3563.11,
-    "ground_contact_floor_cost_per_m2": 163.93,
-    "construction_costs": [
+    "ground_contact_floor_cost": 0.0,
+    "ground_contact_floor_area_m2": 0.0,
+    "ground_contact_floor_cost_per_m2": 0.0,
+    "surface_type_costs": [
       {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
+        "assembly_name": "BTAP-ExteriorWall-SteelFramed-2",
         "surface_type": "ExteriorWall",
-        "surface_name": "GroundFloor_Plenum_Wall_East",
         "conductance": 4.651,
-        "area": 59.42,
-        "cost": 39017.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "GroundFloor_Plenum_Wall_North",
-        "conductance": 4.651,
-        "area": 89.13,
-        "cost": 58526.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #2: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "GroundFloor_Plenum_Wall_South",
-        "conductance": 4.651,
-        "area": 89.13,
-        "cost": 58526.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #3: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "GroundFloor_Plenum_West",
-        "conductance": 4.651,
-        "area": 59.42,
-        "cost": 39017.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #4: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "MidFloor_Plenum_Wall_East",
-        "conductance": 4.651,
-        "area": 594.21,
-        "cost": 390179.19,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "MidFloor_Plenum_Wall_North",
-        "conductance": 4.651,
-        "area": 891.32,
-        "cost": 585269.18,
-        "cost_per_area": 656.63,
-        "note": "Surf #2: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "MidFloor_Plenum_Wall_South",
-        "conductance": 4.651,
-        "area": 891.32,
-        "cost": 585269.18,
-        "cost_per_area": 656.63,
-        "note": "Surf #3: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "MidFloor_Plenum_Wall_West",
-        "conductance": 4.651,
-        "area": 594.21,
-        "cost": 390179.19,
-        "cost_per_area": 656.63,
-        "note": "Surf #4: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "TopFloor_Plenum_Wall_East",
-        "conductance": 4.651,
-        "area": 59.42,
-        "cost": 39017.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "TopFloor_Plenum_Wall_North",
-        "conductance": 4.651,
-        "area": 89.13,
-        "cost": 58526.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #2: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "TopFloor_Plenum_Wall_South",
-        "conductance": 4.651,
-        "area": 89.13,
-        "cost": 58526.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #3: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "TopFloor_Plenum_Wall_West",
-        "conductance": 4.651,
-        "area": 59.42,
-        "cost": 39017.92,
-        "cost_per_area": 656.63,
-        "note": "Surf #4: OK"
+        "area": 7730.22,
+        "cost": 6078300.14,
+        "cost_per_area": 786.3,
+        "notes": "OK"
       },
       {
         "assembly_name": "BTAP-ExteriorRoof-IEAD-4",
         "surface_type": "ExteriorRoof",
-        "surface_name": "Building_Roof",
-        "conductance": 8.26,
+        "conductance": 8.264,
         "area": 3563.11,
-        "cost": 2596620.67,
-        "cost_per_area": 728.75,
-        "note": "Surf #1: OK"
+        "cost": 2597645.58,
+        "cost_per_area": 729.04,
+        "notes": "OK"
+      },
+      {
+        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "surface_type": "ExteriorFixedWindow",
+        "conductance": 0.578,
+        "area": 3859.32,
+        "cost": 23760390.35,
+        "cost_per_area": 6156.63,
+        "notes": "OK"
       },
       {
         "assembly_name": "BTAP-GroundContactWall-Mass-2",
         "surface_type": "GroundContactWall",
-        "surface_name": "DataCenter_basement_ZN_6_Wall_North",
         "conductance": 3.521,
-        "area": 39.22,
-        "cost": 18012.55,
-        "cost_per_area": 459.31,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactWall-Mass-2",
-        "surface_type": "GroundContactWall",
-        "surface_name": "DataCenter_basement_ZN_6_Wall_South",
-        "conductance": 3.521,
-        "area": 39.22,
-        "cost": 18013.22,
-        "cost_per_area": 459.31,
-        "note": "Surf #2: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactWall-Mass-2",
-        "surface_type": "GroundContactWall",
-        "surface_name": "DataCenter_basement_ZN_6_Wall_West",
-        "conductance": 3.521,
-        "area": 118.87,
-        "cost": 54599.68,
-        "cost_per_area": 459.31,
-        "note": "Surf #3: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
-        "surface_type": "GroundContactFloor",
-        "surface_name": "DataCenter_basement_ZN_6_Floor",
-        "conductance": 0.426,
-        "area": 783.68,
-        "cost": 128465.23,
-        "cost_per_area": 163.93,
-        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.4262122262916088 precedes the lower bound (1.2928759894459103) for the 2.0% range. Returning the lower bound."
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_bot_ZN_4_Wall_West",
-        "conductance": 4.651,
-        "area": 69.42,
-        "cost": 45580.25,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_bot_ZN_4_Wall_West_FixedWindow",
-        "conductance": 0.578,
-        "area": 64.32,
-        "cost": 396006.34,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_bot_ZN_2_Wall_East",
-        "conductance": 4.651,
-        "area": 69.42,
-        "cost": 45580.25,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_bot_ZN_2_Wall_East_FixedWindow",
-        "conductance": 0.578,
-        "area": 64.32,
-        "cost": 396006.34,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_bot_ZN_3_Wall_North",
-        "conductance": 4.651,
-        "area": 104.12,
-        "cost": 68370.42,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_bot_ZN_3_Wall_North_FixedWindow",
-        "conductance": 0.578,
-        "area": 96.48,
-        "cost": 594009.92,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_bot_ZN_1_Wall_South",
-        "conductance": 4.651,
-        "area": 104.12,
-        "cost": 68370.42,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_bot_ZN_1_Wall_South_FixedWindow",
-        "conductance": 0.578,
-        "area": 96.48,
-        "cost": 594009.92,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_mid_ZN_4_Wall_West",
-        "conductance": 4.651,
-        "area": 694.15,
-        "cost": 455802.51,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_mid_ZN_4_Wall_West_FixedWindow",
-        "conductance": 0.578,
-        "area": 643.22,
-        "cost": 3960063.43,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_mid_ZN_2_Wall_East",
-        "conductance": 4.651,
-        "area": 694.15,
-        "cost": 455802.51,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_mid_ZN_2_Wall_East_FixedWindow",
-        "conductance": 0.578,
-        "area": 643.22,
-        "cost": 3960063.43,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_mid_ZN_1_Wall_South",
-        "conductance": 4.651,
-        "area": 1041.23,
-        "cost": 683704.24,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_mid_ZN_1_Wall_South_FixedWindow",
-        "conductance": 0.578,
-        "area": 964.83,
-        "cost": 5940099.21,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_mid_ZN_3_Wall_North",
-        "conductance": 4.651,
-        "area": 1041.23,
-        "cost": 683704.24,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_mid_ZN_3_Wall_North_FixedWindow",
-        "conductance": 0.578,
-        "area": 964.83,
-        "cost": 5940099.21,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_top_ZN_4_Wall_West",
-        "conductance": 4.651,
-        "area": 69.42,
-        "cost": 45580.25,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_top_ZN_4_Wall_West_FixedWindow",
-        "conductance": 0.578,
-        "area": 64.32,
-        "cost": 396006.34,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_top_ZN_1_Wall_South",
-        "conductance": 4.651,
-        "area": 104.12,
-        "cost": 68370.42,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_top_ZN_1_Wall_South_FixedWindow",
-        "conductance": 0.578,
-        "area": 96.48,
-        "cost": 594009.92,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_top_ZN_2_Wall_East",
-        "conductance": 4.651,
-        "area": 69.42,
-        "cost": 45580.25,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_top_ZN_2_Wall_East_FixedWindow",
-        "conductance": 0.578,
-        "area": 64.32,
-        "cost": 396006.34,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWall-SteelFramed-1",
-        "surface_type": "ExteriorWall",
-        "surface_name": "Perimeter_top_ZN_3_Wall_North",
-        "conductance": 4.651,
-        "area": 104.12,
-        "cost": 68370.42,
-        "cost_per_area": 656.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-ExteriorWindow-FixedWindow-1",
-        "surface_type": "ExteriorFixedWindow",
-        "surface_name": "Perimeter_top_ZN_3_Wall_North_FixedWindow",
-        "conductance": 0.578,
-        "area": 96.48,
-        "cost": 594009.92,
-        "cost_per_area": 6156.63,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactWall-Mass-2",
-        "surface_type": "GroundContactWall",
-        "surface_name": "Basement_Wall_East",
-        "conductance": 3.521,
-        "area": 118.87,
-        "cost": 54599.68,
-        "cost_per_area": 459.31,
-        "note": "Surf #1: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactWall-Mass-2",
-        "surface_type": "GroundContactWall",
-        "surface_name": "Basement_Wall_North",
-        "conductance": 3.521,
-        "area": 139.09,
-        "cost": 63886.36,
-        "cost_per_area": 459.31,
-        "note": "Surf #2: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactWall-Mass-2",
-        "surface_type": "GroundContactWall",
-        "surface_name": "Basement_Wall_South",
-        "conductance": 3.521,
-        "area": 139.09,
-        "cost": 63886.36,
-        "cost_per_area": 459.31,
-        "note": "Surf #3: OK"
-      },
-      {
-        "assembly_name": "BTAP-GroundContactFloor-Unheated-1",
-        "surface_type": "GroundContactFloor",
-        "surface_name": "Basement_Floor",
-        "conductance": 0.426,
-        "area": 2779.43,
-        "cost": 455619.58,
-        "cost_per_area": 163.93,
-        "note": "Surf #1: [BTAP::LinearRegression] Warning: Dependent variable 0.4262122262916088 precedes the lower bound (1.2928759894459103) for the 2.0% range. Returning the lower bound."
+        "area": 594.36,
+        "cost": 272987.16,
+        "cost_per_area": 459.3,
+        "notes": "OK"
       }
     ],
-    "total_envelope_cost": 32289985.96
+    "construction_costs": {
+      "BTAP-ExteriorWall-SteelFramed-2": {
+        "conductance": 4.651,
+        "area": 7730.22,
+        "cost": 6078300.14,
+        "cost_per_area": 786.3
+      },
+      "BTAP-ExteriorRoof-IEAD-4": {
+        "conductance": 8.264,
+        "area": 3563.11,
+        "cost": 2597645.58,
+        "cost_per_area": 729.04
+      },
+      "BTAP-ExteriorWindow-FixedWindow-1": {
+        "conductance": 0.578,
+        "area": 3859.32,
+        "cost": 23760390.35,
+        "cost_per_area": 6156.63
+      },
+      "BTAP-GroundContactWall-Mass-2": {
+        "conductance": 3.521,
+        "area": 594.36,
+        "cost": 272987.16,
+        "cost_per_area": 459.3
+      }
+    },
+    "total_envelope_cost": 32709323.23
   },
   "lighting": {
     "daylighting_sensor_control": [
@@ -1043,13 +658,13 @@
         "ht_roof_ft": 164.0,
         "longest_distance_to_ext_ft": 156.6,
         "wiring_and_gas_connections_distance_ft": 169.2,
-        "equipment_cost": 2683948,
+        "equipment_cost": 2509117,
         "flue_cost": 8598,
         "wiring_and_gas_connections_cost": 2120,
         "pump_cost": 101310,
         "piping_to_pump_cost": 7900,
         "header_distribution_cost": 114167,
-        "total_cost": 2918042
+        "total_cost": 2743211
       },
       {
         "type": "chillers",
@@ -1060,10 +675,10 @@
         "equipment_cost": 1881625,
         "flue_cost": 0,
         "wiring_and_gas_connections_cost": 4240,
-        "pump_cost": 169066,
+        "pump_cost": 133364,
         "piping_to_pump_cost": 7900,
         "header_distribution_cost": 114167,
-        "total_cost": 2176998
+        "total_cost": 2141297
       },
       {
         "type": "ground_loop",
@@ -1071,11 +686,11 @@
         "ht_roof_ft": 164.0,
         "longest_distance_to_ext_ft": 156.6,
         "wiring_and_gas_connections_distance_ft": 169.2,
-        "equipment_cost": 6324162,
+        "equipment_cost": 5878103,
         "wiring_and_gas_connections_cost": 0,
         "pump_cost": 64542,
         "piping_cost": 257121,
-        "total_cost": 6645825
+        "total_cost": 6199765
       }
     ],
     "zonal_systems": [
@@ -1084,37 +699,37 @@
         "zone_number": 4,
         "zone_name": "ALL_ST=Office open plan_FL=Basement Story 0_SCH=A",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 15.0,
-        "cool_capacity(kW)": 6.8,
+        "heat_capacity(kW)": 12.3,
+        "cool_capacity(kW)": 7.8,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 52975,
+        "heatcool_cost": 45802,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 52975
+        "cummultive_zonal_cost": 45802
       },
       {
         "systype": "4FC",
         "zone_number": 5,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 9.5,
-        "cool_capacity(kW)": 18.2,
+        "heat_capacity(kW)": 9.1,
+        "cool_capacity(kW)": 18.3,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 78773,
         "piping_cost": 19048,
         "wiring_cost": 1562,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 152358
+        "cummultive_zonal_cost": 145185
       },
       {
         "systype": "4FC",
         "zone_number": 6,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A 1",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 1.5,
+        "heat_capacity(kW)": 1.4,
         "cool_capacity(kW)": 1.7,
         "heat_cost": 0,
         "cool_cost": 0,
@@ -1122,22 +737,22 @@
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 177330
+        "cummultive_zonal_cost": 170157
       },
       {
         "systype": "4FC",
         "zone_number": 7,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A 2",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 9.2,
-        "cool_capacity(kW)": 16.1,
+        "heat_capacity(kW)": 8.9,
+        "cool_capacity(kW)": 16.5,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 52975,
         "piping_cost": 19048,
         "wiring_cost": 1562,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 250915
+        "cummultive_zonal_cost": 243742
       },
       {
         "systype": "4FC",
@@ -1145,21 +760,21 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A 3",
         "zone_multiple": 1,
         "heat_capacity(kW)": 24.4,
-        "cool_capacity(kW)": 38.9,
+        "cool_capacity(kW)": 39.2,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 137406,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 3.0,
-        "cummultive_zonal_cost": 388321
+        "cummultive_zonal_cost": 381148
       },
       {
         "systype": "4FC",
         "zone_number": 9,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A 4",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 14.0,
+        "heat_capacity(kW)": 13.5,
         "cool_capacity(kW)": 7.4,
         "heat_cost": 0,
         "cool_cost": 0,
@@ -1167,82 +782,82 @@
         "piping_cost": 28572,
         "wiring_cost": 2343,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 465039
+        "cummultive_zonal_cost": 457866
       },
       {
         "systype": "4FC",
         "zone_number": 10,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 1_SCH=A 5",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 14.2,
-        "cool_capacity(kW)": 18.3,
+        "heat_capacity(kW)": 13.6,
+        "cool_capacity(kW)": 18.4,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 78773,
         "piping_cost": 28572,
         "wiring_cost": 2343,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 574727
+        "cummultive_zonal_cost": 567554
       },
       {
         "systype": "4FC",
         "zone_number": 11,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A",
         "zone_multiple": 10,
-        "heat_capacity(kW)": 100.8,
-        "cool_capacity(kW)": 269.8,
+        "heat_capacity(kW)": 94.4,
+        "cool_capacity(kW)": 218.3,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 916040,
         "piping_cost": 190479,
         "wiring_cost": 15623,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 1696868
+        "cummultive_zonal_cost": 1689695
       },
       {
         "systype": "4FC",
         "zone_number": 12,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A 1",
         "zone_multiple": 10,
-        "heat_capacity(kW)": 96.6,
-        "cool_capacity(kW)": 253.5,
+        "heat_capacity(kW)": 90.2,
+        "cool_capacity(kW)": 203.9,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 916040,
+        "heatcool_cost": 787731,
         "piping_cost": 190479,
         "wiring_cost": 15623,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 2819009
+        "cummultive_zonal_cost": 2683527
       },
       {
         "systype": "4FC",
         "zone_number": 13,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A 2",
         "zone_multiple": 10,
-        "heat_capacity(kW)": 146.2,
-        "cool_capacity(kW)": 286.9,
+        "heat_capacity(kW)": 136.2,
+        "cool_capacity(kW)": 239.2,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 1059498,
+        "heatcool_cost": 916040,
         "piping_cost": 285718,
         "wiring_cost": 23434,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 4187660
+        "cummultive_zonal_cost": 3908720
       },
       {
         "systype": "4FC",
         "zone_number": 14,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A 3",
         "zone_multiple": 10,
-        "heat_capacity(kW)": 8.0,
-        "cool_capacity(kW)": 23.7,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 22.6,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 249722,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 4437382
+        "cummultive_zonal_cost": 4158441
       },
       {
         "systype": "4FC",
@@ -1250,29 +865,29 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A 4",
         "zone_multiple": 10,
         "heat_capacity(kW)": 244.0,
-        "cool_capacity(kW)": 596.9,
+        "cool_capacity(kW)": 584.8,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 2118996,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 4.0,
-        "cummultive_zonal_cost": 6556378
+        "cummultive_zonal_cost": 6277438
       },
       {
         "systype": "4FC",
         "zone_number": 16,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 2_SCH=A 5",
         "zone_multiple": 10,
-        "heat_capacity(kW)": 144.1,
-        "cool_capacity(kW)": 111.8,
+        "heat_capacity(kW)": 134.1,
+        "cool_capacity(kW)": 108.2,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 529749,
+        "heatcool_cost": 458020,
         "piping_cost": 285718,
         "wiring_cost": 23434,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 7395280
+        "cummultive_zonal_cost": 7044610
       },
       {
         "systype": "4FC",
@@ -1280,14 +895,14 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A",
         "zone_multiple": 1,
         "heat_capacity(kW)": 17.3,
-        "cool_capacity(kW)": 27.6,
+        "cool_capacity(kW)": 22.2,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 91604,
         "piping_cost": 19048,
         "wiring_cost": 1562,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 7507494
+        "cummultive_zonal_cost": 7156824
       },
       {
         "systype": "4FC",
@@ -1295,14 +910,14 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A 1",
         "zone_multiple": 1,
         "heat_capacity(kW)": 26.5,
-        "cool_capacity(kW)": 29.0,
+        "cool_capacity(kW)": 23.9,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 105950,
+        "heatcool_cost": 91604,
         "piping_cost": 28572,
         "wiring_cost": 2343,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 7644359
+        "cummultive_zonal_cost": 7279343
       },
       {
         "systype": "4FC",
@@ -1310,29 +925,29 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A 2",
         "zone_multiple": 1,
         "heat_capacity(kW)": 17.3,
-        "cool_capacity(kW)": 24.1,
+        "cool_capacity(kW)": 19.1,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 91604,
+        "heatcool_cost": 78773,
         "piping_cost": 19048,
         "wiring_cost": 1562,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 7756573
+        "cummultive_zonal_cost": 7378727
       },
       {
         "systype": "4FC",
         "zone_number": 20,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A 3",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 3.7,
-        "cool_capacity(kW)": 2.5,
+        "heat_capacity(kW)": 3.5,
+        "cool_capacity(kW)": 2.4,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 24972,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 1.0,
-        "cummultive_zonal_cost": 7781545
+        "cummultive_zonal_cost": 7403699
       },
       {
         "systype": "4FC",
@@ -1340,44 +955,44 @@
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A 4",
         "zone_multiple": 1,
         "heat_capacity(kW)": 26.3,
-        "cool_capacity(kW)": 11.7,
+        "cool_capacity(kW)": 11.0,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 91604,
         "piping_cost": 28572,
         "wiring_cost": 2343,
         "num_units": 2.0,
-        "cummultive_zonal_cost": 7904064
+        "cummultive_zonal_cost": 7526218
       },
       {
         "systype": "4FC",
         "zone_number": 22,
         "zone_name": "ALL_ST=Office open plan_FL=Building Story 3_SCH=A 5",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 96.0,
-        "cool_capacity(kW)": 65.3,
+        "heat_capacity(kW)": 90.4,
+        "cool_capacity(kW)": 60.8,
         "heat_cost": 0,
         "cool_cost": 0,
         "heatcool_cost": 317849,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 6.0,
-        "cummultive_zonal_cost": 8221914
+        "cummultive_zonal_cost": 7844067
       },
       {
         "systype": "4FC",
         "zone_number": 23,
         "zone_name": "WILD_ST=Electrical/Mechanical room-sch-A_FL=Basement Story 0_SCH=A",
         "zone_multiple": 1,
-        "heat_capacity(kW)": 48.0,
+        "heat_capacity(kW)": 41.3,
         "cool_capacity(kW)": 10.6,
         "heat_cost": 0,
         "cool_cost": 0,
-        "heatcool_cost": 158925,
+        "heatcool_cost": 137406,
         "piping_cost": 0,
         "wiring_cost": 0,
         "num_units": 3.0,
-        "cummultive_zonal_cost": 8380839
+        "cummultive_zonal_cost": 7981473
       }
     ]
   },
@@ -1493,7 +1108,7 @@
             "eq_category": "Coil_Cooling_Water",
             "heating_fuel": "none",
             "cooling_type": "CHW",
-            "total_modeled_capacity_kw": 24.804,
+            "total_modeled_capacity_kw": 24.825,
             "cost": 25169.18
           },
           {
@@ -1527,7 +1142,7 @@
             "eq_category": "Coil_Cooling_Water",
             "heating_fuel": "none",
             "cooling_type": "CHW",
-            "total_modeled_capacity_kw": 249.044,
+            "total_modeled_capacity_kw": 253.511,
             "cost": 126084.96
           },
           {
@@ -1561,7 +1176,7 @@
             "eq_category": "Coil_Cooling_Water",
             "heating_fuel": "none",
             "cooling_type": "CHW",
-            "total_modeled_capacity_kw": 24.992,
+            "total_modeled_capacity_kw": 25.086,
             "cost": 25169.18
           },
           {
@@ -2161,13 +1776,13 @@
     "pv": []
   },
   "totals": {
-    "envelope": 32289986,
+    "envelope": 32709323,
     "thermal_bridging": 0,
     "lighting": 13953602,
-    "heating_and_cooling": 20121704,
+    "heating_and_cooling": 19065747,
     "shw": 276185,
     "ventilation": 3945722,
     "renewables": 0,
-    "grand_total": 70587200
+    "grand_total": 69950580
   }
 }
