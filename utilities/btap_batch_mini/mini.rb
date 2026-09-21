@@ -17,19 +17,42 @@ OptionParser.new { |opts|
   opts.on('-f FILE', "Path of the parametric YAML input file") { |file| options[:input_file_path] = file }
   opts.on('-r FILE', "Rerun costing using existing simulation files") { |file| options[:batch_path] = file }
   opts.on('-c NUM_CORES', "Number of CPU cores to use") { |num_cores| options[:num_cores] = num_cores.to_i }
+  opts.on('-s NUM_SAMPLES', "Number of randomly sampled permutations (default is parametric") { |num_samples|
+    options[:num_samples] = num_samples.to_i }
 }.parse!
 
 if options[:batch_path].nil?
   raise ("Cannot find input file: #{options[:input_file_path]}") unless File.exist?(options[:input_file_path])
 
-  input_hash   = YAML.load(File.open(options[:input_file_path]).read)
-  keys         = input_hash[:options].keys
-  values       = input_hash[:options].values
-  headers      = input_hash.reject { |k ,v| k == :options }
+  input_hash = YAML.load(File.open(options[:input_file_path]).read)
+  keys       = input_hash[:options].keys
+  values     = input_hash[:options].values
+  headers    = input_hash.reject { |k ,v| k == :options }
   analysis_output_folder       = File.join(output_folder, input_hash[:analysis_name])
   analysis_copied_input_folder = File.join(copied_input_folder, input_hash[:analysis_name])
 
-  combinations = values[0].product(*values[1..-1]).map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+  # Use Latin Hypercube Sampling to sample a subset of the permutations.
+  if options[:num_samples]
+    max_num_samples = values.map { |i| i.length }.reduce(:*)
+    if max_num_samples < options[:num_samples]
+      puts("Clamped number of samples to maximum product value of #{max_num_samples}")
+      num_samples = max_num_samples
+    else
+      num_samples = options[:num_samples]
+    end
+    dims         = values.length
+    permutations = Array.new(dims) { |d| (0...num_samples).map { |i| i % values[d].size }.shuffle }
+    combinations = (0...num_samples).map { |i|
+      (0...dims).map { |j|
+        values[j][permutations[j][i]]
+      }
+    }.map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+
+  # Get the product of all YAML values if no number of samples is provided.
+  else
+    combinations = values[0].product(*values[1..-1]).map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+  end
+
   FileUtils.rm_rf(Dir.glob("#{analysis_output_folder}/*"))       if File.exist?(analysis_output_folder)
   FileUtils.rm_rf(Dir.glob("#{analysis_copied_input_folder}/*")) if File.exist?(analysis_copied_input_folder)
 
