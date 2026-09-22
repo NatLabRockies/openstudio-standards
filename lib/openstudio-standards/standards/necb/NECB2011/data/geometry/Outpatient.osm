@@ -5171,6 +5171,13 @@ OS:Building,
   ,                                       !- Relocatable
   ;                                       !- Nominal Floor to Ceiling Height {m}
 
+OS:AdditionalProperties,
+  {c23ded4b-6f18-4e30-b6db-cc00e1198751}, !- Handle
+  {9e3e5eef-9590-4941-bdaa-4a05a47e12d6}, !- Object Name
+  btap_slab_perimeter_m2,                 !- Feature Name 1
+  Double,                                 !- Feature Data Type 1
+  208.98;                                 !- Feature Value 1
+
 OS:Surface,
   {d6951edf-993a-42ed-8f8e-33db83db849e}, !- Handle
   E1B973,                                 !- Name
@@ -33435,4 +33442,3 @@ OS:Surface,
   -11.8872, 0, 0,                         !- X,Y,Z Vertex 2 {m}
   -15.24, 0, 0,                           !- X,Y,Z Vertex 3 {m}
   -15.24, 0, 3.048;                       !- X,Y,Z Vertex 4 {m}
-

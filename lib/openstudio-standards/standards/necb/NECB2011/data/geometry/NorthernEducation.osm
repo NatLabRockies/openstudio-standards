@@ -16481,7 +16481,7 @@ OS:SpaceType,
   {491d19cf-dff0-4d86-8a19-507575dab903}, !- Design Specification Outdoor Air Object Name
   ,                                       !- Standards Template
   Space Function,                         !- Standards Building Type
-  Hospital - medical supply - occsens;    !- Standards Space Type
+  Hospital - medical supply;              !- Standards Space Type
 
 OS:People:Definition,
   {c27095c5-b216-4f34-82e8-cedfbcd3cf29}, !- Handle
@@ -31387,13 +31387,20 @@ OS:Building,
   ,                                       !- Space Type Name
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
-  ,                                       !- Standards Number of Stories
-  ,                                       !- Standards Number of Above Ground Stories
+  2,                                      !- Standards Number of Stories
+  1,                                      !- Standards Number of Above Ground Stories
   ,                                       !- Standards Template
   ,                                       !- Standards Building Type
   ,                                       !- Standards Number of Living Units
   ,                                       !- Relocatable
   ;                                       !- Nominal Floor to Ceiling Height {m}
+
+OS:AdditionalProperties,
+  {a1022753-85d4-4c39-a5d0-ec702109142f}, !- Handle
+  {4d4f3433-08b7-43cb-8ef9-8580354cc1d7}, !- Object Name
+  btap_building_activity,                 !- Feature Name 1
+  String,                                 !- Feature Data Type 1
+  school;                                 !- Feature Value 1
 
 OS:Rendering:Color,
   {ea304b6c-563b-4617-b4ff-6c4c750cfcfb}, !- Handle
@@ -47584,4 +47591,3 @@ OS:DefaultSubSurfaceConstructions,
   ,                                       !- Skylight Construction Name
   ,                                       !- Tubular Daylight Dome Construction Name
   ;                                       !- Tubular Daylight Diffuser Construction Name
-

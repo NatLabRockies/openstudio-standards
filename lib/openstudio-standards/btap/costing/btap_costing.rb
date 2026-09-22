@@ -37,7 +37,7 @@ module BTAP
                        ventilation_costing: true,
                        zone_system_costing: true,
                        renewables_costing: true,
-                       thermal_bridging_costing: @attributes.use_tbd,
+                       thermal_bridging_costing: @attributes.tbd_enabled,
                        template_type: nil)
 
       @costing_report = {}

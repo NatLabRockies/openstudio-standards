@@ -19301,6 +19301,13 @@ OS:Building,
   ,                                       !- Relocatable
   ;                                       !- Nominal Floor to Ceiling Height {m}
 
+OS:AdditionalProperties,
+  {c23ded4b-6f18-4e30-b6db-cc00e1198751}, !- Handle
+  {f084eff1-38e9-4be3-8e15-08183ba5242e}, !- Object Name
+  btap_slab_perimeter_m2,                 !- Feature Name 1
+  Double,                                 !- Feature Data Type 1
+  237.41;                                 !- Feature Value 1
+
 OS:Rendering:Color,
   {58f21443-17c4-485b-acf9-fde8b6daf60f}, !- Handle
   Rendering Color 1,                      !- Name
@@ -43358,4 +43365,3 @@ OS:StandardsInformation:Construction,
 OS:StandardsInformation:Material,
   {99535bda-b3d3-43ee-bf69-b5d76c0d1e40}, !- Handle
   {a406abaa-5b69-4c39-95c4-ddf1da0c273b}; !- Material Name
-

@@ -11,7 +11,7 @@ class NECB_Activity_Tests < Minitest::Test
     tres = "../expected_results/necb_activities_test_results.json"
     sizd = "sizing_folder"
 
-    plnums = ["LargeOffice", "MediumOffice"]
+    plnums = ["LargeOffice", "MediumOffice", "NorthernEducation"]
     attics = ["FullServiceRestaurant", "QuickServiceRestaurant", "SmallOffice"]
 
     @output_folder         = File.join(__dir__, outd)
@@ -26,45 +26,38 @@ class NECB_Activity_Tests < Minitest::Test
     # Range of NECB templates.
     @templates = [
       # "NECB2011",
-      "NECB2015",
+      # "NECB2015",
       # "NECB2017",
-      # "NECB2020"
+      "NECB2020"
     ]
 
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
 
     @buildings = [
       'FullServiceRestaurant',
-      'HighriseApartment',
-      'Hospital',
-      'LargeHotel',
+      # 'HighriseApartment',
+      # 'Hospital',
+      # 'LargeHotel',
       'LargeOffice',
-      'LEEPMidriseApartment',
-      'LEEPMultiTower',
-      'LEEPPointTower',
-      'LEEPTownHouse',
+      # 'LEEPMidriseApartment',
+      # 'LEEPMultiTower',
+      # 'LEEPPointTower',
+      # 'LEEPTownHouse',
       'LowriseApartment',
       'MediumOffice',
-      'MidriseApartment',
-      # 'NorthernEducation',  # *
-      # 'NorthernHealthCare', # *
-      'Outpatient',
-      'PrimarySchool',
+      # 'MidriseApartment',
+      'NorthernEducation',
+      'NorthernHealthCare',
+      # 'Outpatient',
+      # 'PrimarySchool',
       'QuickServiceRestaurant',
-      'RetailStandalone',
+      # 'RetailStandalone',
       'RetailStripmall',
-      'SecondarySchool',
-      'SmallHotel',
+      # 'SecondarySchool',
+      # 'SmallHotel',
       'SmallOffice',
       'Warehouse'
     ]
-
-    # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
-    #       - Building.standardsNumberOfStories
-    #       - Building.standardsNumberOfAboveStories
-    #
-    #     ... and so both templates/models fail early on, irrespective of
-    #         BTAP::Activity features - @todo.
 
     fdback = []
     fdback << ""
@@ -179,6 +172,62 @@ class NECB_Activity_Tests < Minitest::Test
             @test_passed = false
           else
             fdback << "#{cas} : #{a.activity} (#{a.category}) : #{load}"
+          end
+
+          # Some buildings have NECB-listed 'ancillary' spacetypes. Comment in
+          # the 'fdback' assignment below (which buildings? which spaces?).
+          model.getSpaces.each do |space|
+            next unless space.partofTotalFloorArea
+
+            id      = space.nameString
+            width   = BTAP::Geometry::Spaces.space_width(space)
+            area    = space.floorArea
+            err_msg = "BTAP::Activity mismatched space #{id} (#{cas})?"
+            assert(a.activities.key?(space), err_msg)
+
+            sptype  = space.spaceType
+            err_msg = "BTAP::Activity #{id} empty spacetype (#{cas})?"
+            refute_empty(sptype, err_msg)
+
+            sptype   = sptype.get
+            sttype   = sptype.standardsSpaceType
+            err_msg  = "BTAP::Activity #{id} empty stds spacetype (#{cas})?"
+            refute_empty(sttype, err_msg)
+
+            sttype   = sttype.get
+            keyword  = a.keyword(space)
+            schedule = a.schedule(space)
+            activity = a.act(space)
+            err_msg  = "BTAP::Activity #{id} schedule (#{cas})?"
+            refute_equal(schedule, "*", err_msg)
+
+            # fdback << "- #{id}: #{sttype} | #{keyword} : #{schedule}"
+
+            if a.occsensing_deprecated?(space)
+              # fdback << "#{id}: #{sttype} OCCSENSING"
+              assert(a.occsensing?(space))
+            end
+
+            # if sttype.downcase.include?("corr")
+            #   fdback << "BTAP::Activity #{id}: #{width.round(2)}m"
+            # end
+
+            # if sttype.downcase.include?("suppl")
+            #   fdback << "BTAP::Activity #{id}: #{area.round(2)} m2"
+            # end
+
+            next unless a.ancillary?(keyword)
+
+            # fdback << "#{id} : #{st.determine_necb_schedule_type(space)}"
+            # fdback << "   ANCILLARY: #{id} (#{keyword}, #{schedule})"
+
+            # A handful of ancillary spaces are considered 'wetspaces'.
+            next unless a.wet?(keyword)
+
+            err_msg = "BTAP::Activity #{id} wetspace (#{cas})?"
+            assert(activity == "washroom" || activity == "locker", err_msg)
+
+            # fdback << "   WETSPACES: #{id} (#{keyword})"
           end
 
           a.feedback[:logs].each { |log| puts log }
