@@ -28,10 +28,6 @@ module BTAP
     end
   end
 
-  class OpenStudio::Model::Space
-    attr_reader :surfaces_hash
-  end
-
   # Class for accessing and pre-processing model attributes.
   class Attributes
     attr_reader :model                  # [OpenStudio::Model::Model]
@@ -64,19 +60,18 @@ module BTAP
       "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
     }
 
-    # @param model                [OpenStudio::Model::Model]
-    # @param standard             [Standard]
-    # @param tbd_enabled          [Boolean]
-    # @param tbd_edge_tallies     [Hash]
+    # @param model            [OpenStudio::Model::Model]
+    # @param standard         [Standard]
+    # @param tbd_enabled      [Boolean]
+    # @param tbd_edge_tallies [Hash]
     def initialize(model:, standard:, tbd_enabled:, tbd_edge_tallies:)
-
       @model            = model
       @standard         = standard
       @costing_database = Database.instance
       @tbd_enabled      = tbd_enabled
       @tbd_edge_tallies = tbd_edge_tallies
       @tbd_compliance   = @model.getBuilding.additionalProperties.hasFeature("tbd_compliance") ?
-                          @model.getBuilding.additionalProperties.getFeatureAsBoolean("tbd_compliance").get : nil
+                            @model.getBuilding.additionalProperties.getFeatureAsBoolean("tbd_compliance").get : nil
 
       # Surfaces considered for envelope costing and carbon.
       @surface_types = [
