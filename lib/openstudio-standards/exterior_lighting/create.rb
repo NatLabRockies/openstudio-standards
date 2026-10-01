@@ -178,26 +178,45 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of parking area.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Parking Areas and Drives',
-                                                                                        power: power,
-                                                                                        units: 'W/ft^2',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Parking Areas and Drives',
+                                                                                          power: power,
+                                                                                          units: 'W/ft^2',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of parking area.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for parking area, as power is 0 W/ft^2.")
+        end
       end
 
       # add exterior lights for facades
-      if !area_length_count_hash[:building_facades].nil? && area_length_count_hash[:building_facades] > 0
-        # lighting values
-        multiplier = area_length_count_hash[:building_facades]
-
-        # get power
-        if exterior_lighting_properties.key?('building_facades')
+      if !area_length_count_hash[:building_facades_area].nil? && area_length_count_hash[:building_facades_area] > 0
+        # determine power and multiplier based on available data
+        # use per permimter values if available, otherwise fall back to area based values
+        if exterior_lighting_properties.key?('building_facades_per_perimeter') &&
+           !area_length_count_hash[:building_perimeter].nil? && area_length_count_hash[:building_perimeter] > 0
+          # perimeter-based approach with building-type differentiation
+          perimeter_rates = exterior_lighting_properties['building_facades_per_perimeter']
+          bldg_type = area_length_count_hash[:largest_building_type]
+          power = if !bldg_type.nil? && perimeter_rates.key?(bldg_type)
+                    perimeter_rates[bldg_type]
+                  else
+                    perimeter_rates['default']
+                  end
+          multiplier = area_length_count_hash[:building_perimeter]
+          units = 'W/ft'
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier.round(1)} ft of building perimeter (building type: #{bldg_type}).")
+        elsif exterior_lighting_properties.key?('building_facades')
+          # area-based fallback
           power = exterior_lighting_properties['building_facades']
+          multiplier = area_length_count_hash[:building_facades_area]
+          units = 'W/ft^2'
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of building facade area.")
         else
           search_criteria = {
             'template' => lookup_key,
@@ -207,19 +226,26 @@ module OpenstudioStandards
           }
           exterior_lighting_facade_req = standard.standards_lookup_table_first(table_name: 'exterior_lighting', search_criteria: search_criteria)
           power = exterior_lighting_facade_req['allowance']
+          multiplier = area_length_count_hash[:building_facades_area]
+          units = 'W/ft^2'
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of building facade area.")
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of building facade area.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Building Facades',
-                                                                                        power: power,
-                                                                                        units: 'W/ft^2',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_facade_and_landscape,
-                                                                                        control_option: 'ScheduleNameOnly')
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Building Facades',
+                                                                                          power: power,
+                                                                                          units: units,
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_facade_and_landscape,
+                                                                                          control_option: 'ScheduleNameOnly')
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} #{units} of lighting for #{multiplier} #{units == 'W/ft' ? 'ft perimeter' : 'ft^2 area'} of building facade.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for building facades, as power is 0 #{units}.")
+        end
       end
 
       # add exterior lights for main entries
@@ -250,16 +276,20 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of main entry length.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Main Entries',
-                                                                                        power: power,
-                                                                                        units: 'W/ft',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Main Entries',
+                                                                                          power: power,
+                                                                                          units: 'W/ft',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of main entry length.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for main entries, as power is 0 W/ft.")
+        end
       end
 
       # add exterior lights for other doors
@@ -290,16 +320,20 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of other doors.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Other Doors',
-                                                                                        power: power,
-                                                                                        units: 'W/ft',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Other Doors',
+                                                                                          power: power,
+                                                                                          units: 'W/ft',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of other doors.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for other doors, as power is 0 W/ft.")
+        end
       end
 
       # add exterior lights for entry canopies
@@ -330,16 +364,20 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building entry canopies.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Entry Canopies',
-                                                                                        power: power,
-                                                                                        units: 'W/ft^2',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Entry Canopies',
+                                                                                          power: power,
+                                                                                          units: 'W/ft^2',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building entry canopies.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for entry canopies, as power is 0 W/ft^2.")
+        end
       end
 
       # add exterior lights for emergency canopies
@@ -361,16 +399,20 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building emergency canopies.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Emergency Canopies',
-                                                                                        power: power,
-                                                                                        units: 'W/ft^2',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Emergency Canopies',
+                                                                                          power: power,
+                                                                                          units: 'W/ft^2',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building emergency canopies.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for emergency canopies, as power is 0 W/ft^2.")
+        end
       end
 
       # add exterior lights for drive through windows
@@ -392,16 +434,20 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/drive through window of lighting for #{multiplier} drive through windows.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Drive Through Windows',
-                                                                                        power: power,
-                                                                                        units: 'W/ft^2',
-                                                                                        multiplier: multiplier,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
-        installed_power += power * multiplier
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Drive Through Windows',
+                                                                                          power: power,
+                                                                                          units: 'W/ft^2',
+                                                                                          multiplier: multiplier,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          installed_power += power * multiplier
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/drive through window of lighting for #{multiplier} drive through windows.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for drive through windows, as power is 0 W/ft^2.")
+        end
       end
 
       # add base site allowance
@@ -437,15 +483,19 @@ module OpenstudioStandards
         end
 
         # create exterior lights
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W of non landscape tradable exterior lighting. Will follow occupancy setback reduction.")
-        ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
-                                                                                        name: 'Base Site Allowance',
-                                                                                        power: power,
-                                                                                        units: 'W',
-                                                                                        multiplier: 1.0,
-                                                                                        schedule: ext_lights_sch_other,
-                                                                                        control_option: control_option)
-        exterior_lights << ext_lights
+        if power > 0
+          ext_lights = OpenstudioStandards::ExteriorLighting.model_create_exterior_lights(model,
+                                                                                          name: 'Base Site Allowance',
+                                                                                          power: power,
+                                                                                          units: 'W',
+                                                                                          multiplier: 1.0,
+                                                                                          schedule: ext_lights_sch_other,
+                                                                                          control_option: control_option)
+          exterior_lights << ext_lights
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W of non landscape tradable exterior lighting. Will follow occupancy setback reduction.")
+        else
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No base site allowance lighting added, as power is 0 W.")
+        end
       end
 
       return exterior_lights
