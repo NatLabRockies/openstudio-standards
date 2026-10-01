@@ -87,7 +87,7 @@ class Standard
                              fan_efficiency: 0.62,
                              fan_motor_efficiency: 0.9,
                              fan_pressure_rise: 4.0,
-                             min_sys_airflow_ratio: system['min_sys_airflow_ratio'],
+                             min_sys_airflow_ratio: system['min_sys_airflow_ratio'] || 0.3, # the prototypes pin the ratio
                              vav_sizing_option: system['vav_sizing_option'])
 
       when 'CAV'
@@ -191,7 +191,8 @@ class Standard
                        oa_damper_sch: system['oa_damper_schedule'],
                        electric_reheat: electric_reheat,
                        hot_water_loop: hot_water_loop,
-                       return_plenum: return_plenum)
+                       return_plenum: return_plenum,
+                       min_sys_airflow_ratio: 0.3) # the prototypes pin the ratio
 
       when 'DOAS Cold Supply'
         # Retrieve the existing hot water loop or add a new one if necessary.

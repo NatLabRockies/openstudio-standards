@@ -2227,6 +2227,18 @@ class Standard
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying multizone vav OA sizing.')
   end
 
+  # Raise every VAV terminal's minimum airflow to cover its zone's design outdoor air.
+  # Needs a sizing run first where terminal maximum flows are autosized.
+  # See air_loop_hvac_apply_vav_terminal_minimum_outdoor_air.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @return [Integer] the number of terminals whose minimum was raised
+  def model_apply_vav_terminal_minimum_outdoor_air(model)
+    raised = model.getAirLoopHVACs.sort.sum { |air_loop| air_loop_hvac_apply_vav_terminal_minimum_outdoor_air(air_loop) }
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Raised the minimum airflow of #{raised} VAV terminals to cover their zone outdoor air.") if raised > 0
+    return raised
+  end
+
   # Applies the HVAC parts of the template to all objects in the model using the the template specified in the model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object
@@ -2811,11 +2823,14 @@ class Standard
         end
       end
 
-      # Winter Design Day
+      # Winter Design Day. The setter clones what it is handed, so a day schedule built
+      # here and handed over would be left in the model with no parent, reaching the IDF
+      # with no type limits. As in create_simple_schedule: set from the ruleset's own
+      # getter, take the clone back, clear it, and fill that.
       if day_types.include?('WntrDsn')
-        day_sch = OpenStudio::Model::ScheduleDay.new(model)
-        sch_ruleset.setWinterDesignDaySchedule(day_sch)
+        sch_ruleset.setWinterDesignDaySchedule(sch_ruleset.winterDesignDaySchedule)
         day_sch = sch_ruleset.winterDesignDaySchedule
+        day_sch.clearValues
         day_sch.setName("#{schedule_name} Winter Design Day")
         model_add_vals_to_sch(model, day_sch, sch_type, values)
         if model.version < OpenStudio::VersionString.new('3.8.0')
@@ -2827,9 +2842,9 @@ class Standard
 
       # Summer Design Day
       if day_types.include?('SmrDsn')
-        day_sch = OpenStudio::Model::ScheduleDay.new(model)
-        sch_ruleset.setSummerDesignDaySchedule(day_sch)
+        sch_ruleset.setSummerDesignDaySchedule(sch_ruleset.summerDesignDaySchedule)
         day_sch = sch_ruleset.summerDesignDaySchedule
+        day_sch.clearValues
         day_sch.setName("#{schedule_name} Summer Design Day")
         model_add_vals_to_sch(model, day_sch, sch_type, values)
         if model.version < OpenStudio::VersionString.new('3.8.0')

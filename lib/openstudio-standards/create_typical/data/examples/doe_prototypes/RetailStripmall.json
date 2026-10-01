@@ -1,0 +1,22 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "RetailStripmall (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "RetailStripmall",
+  "space_type_ratios": [
+    {
+      "space_type": "retail",
+      "ratio": 1.0,
+      "default": true
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 22500.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 4.0,
+    "wwr": 0.11,
+    "floor_height": 17.0,
+    "perim_mult": 1.0
+  }
+}

@@ -429,7 +429,7 @@ class Standard
     return true
   end
 
-  # Sets the schedules for the selected internal loads to typical schedules.
+  # Sets the schedules for the selected internal loads to prototype schedules.
   # Get the default schedule set for this space type if one exists or make
   # one if none exists. For each category that is selected, add the typical
   # schedule for this category to the default schedule set.
@@ -442,12 +442,11 @@ class Standard
   # @param set_electric_equipment [Boolean] if true, set the electric schedule schedule
   # @param set_gas_equipment [Boolean] if true, set the gas equipment density
   # @return [Boolean] returns true if successful, false if not
-  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
+  def space_type_apply_standard_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
     # Get the standards data
     space_type_properties = space_type_get_standards_data(space_type)
 
-    # Get the default schedule set
-    # or create a new one if none exists.
+    # Get the default schedule set or create a new one if none exists
     default_sch_set = nil
     if space_type.defaultScheduleSet.is_initialized
       default_sch_set = space_type.defaultScheduleSet.get
@@ -496,6 +495,20 @@ class Standard
     end
 
     return true
+  end
+
+  # @deprecated Renamed to space_type_apply_standard_internal_load_schedules, distinguishing
+  #   the prototype schedules it applies from the parametric schedules built by
+  #   OpenstudioStandards::Schedules.space_type_apply_parametric_internal_load_schedules.
+  #   This alias delegates unchanged and will be removed in a future release.
+  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
+    OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', 'space_type_apply_internal_load_schedules is deprecated; use space_type_apply_standard_internal_load_schedules.')
+    space_type_apply_standard_internal_load_schedules(space_type,
+                                                      set_people: set_people,
+                                                      set_lights: set_lights,
+                                                      set_electric_equipment: set_electric_equipment,
+                                                      set_gas_equipment: set_gas_equipment,
+                                                      set_ventilation: set_ventilation)
   end
 
   # Makes a thermostat for this space type from the schedules listed for the space type.

@@ -2,6 +2,34 @@ module OpenstudioStandards
   # The ServiceWaterHeating module provides methods to create, modify, and get information about service water heating
   module ServiceWaterHeating
     # @!group Create Typical
+
+    # Hot water draw schedule named by a space type's parametric schedule set.
+    #
+    # The schedule set data carries a hot_water_equipment_schedule for the space types that
+    # have one, named '<all-level space type> hot water equipment'. Sourcing the draw profile
+    # from there keeps it consistent with the space type's other load schedules, instead of
+    # inheriting whichever DOE prototype or DEER profile happened to ship alongside the flow
+    # rate.
+    #
+    # @param space_type [OpenStudio::Model::SpaceType] OpenStudio SpaceType object
+    # @return [String, nil] schedule name, or nil when the space type has no schedule set or
+    #   its set defines no hot water schedule
+    def self.space_type_hot_water_schedule_name(space_type)
+      return nil unless space_type.additionalProperties.getFeatureAsString('schedule_set').is_initialized
+
+      schedule_set_name = space_type.additionalProperties.getFeatureAsString('schedule_set').get
+      @parametric_schedule_sets ||= JSON.parse(
+        File.read(File.join(__dir__, '..', 'schedules', 'data', 'default_parametric_schedule_set.json')),
+        symbolize_names: true
+      )
+      record = @parametric_schedule_sets.find { |set| set[:schedule_set_name] == schedule_set_name }
+      return nil if record.nil?
+
+      schedule = record[:hot_water_equipment_schedule]
+      return nil if schedule.nil? || schedule.to_s.empty? || schedule.to_s == 'None'
+
+      schedule
+    end
     # Methods to add typical service water heating depending on space types
 
     # add typical swh demand and supply to model
@@ -13,9 +41,60 @@ module OpenstudioStandards
     #   A nil value will default based on the standards building type
     # @return [Array<OpenStudio::Model::PlantLoop>] array of service hot water loops
     # @todo add support for other loop configurations, such as by space type, space type adjacent, or building type
+    # Fields a service water heating override may set on one water use equipment entry
+    SERVICE_WATER_OVERRIDE_FIELDS = %i[
+      peak_flow_rate_gph peak_flow_rate_gph_per_floor_area_ft2 mixed_water_temperature_f
+      sensible_fraction latent_fraction flow_rate_schedule
+    ].freeze
+
+    # Apply runtime service water heating overrides to a space type's water use equipment.
+    #
+    # A space type carries several pieces of equipment -- a kitchen has a dishwasher booster
+    # at 180 F and a general draw at 120 F -- so an override names the equipment it means, or
+    # uses '*' for all of it. A named entry wins over the wildcard, and the wildcard is the
+    # only way to reach equipment the data leaves unnamed.
+    #
+    # This exists because a per-area flow rate is a property of the building as much as the
+    # space: a restaurant kitchen draws 0.054 gph/ft2 and a hospital kitchen 0.009, six times
+    # less, and the all-level space type 'food preparation' cannot say which. A model whose
+    # kitchen is not a restaurant's states its own rate here.
+    #
+    # @param equipment [Array<Hash>] the record's water use equipment entries
+    # @param space_type [OpenStudio::Model::SpaceType] OpenStudio SpaceType object
+    # @param standards_space_type [String] all-level space type name
+    # @param overrides [Array<Hash>, nil] override entries
+    # @return [Array<Hash>] equipment entries with overrides applied
+    def self.apply_service_water_heating_overrides(equipment, space_type, standards_space_type, overrides)
+      return equipment if overrides.nil? || overrides.empty?
+
+      matched = OpenstudioStandards::CreateTypical.resolve_overrides(overrides, space_type,
+                                                                    section_keys: [:equipment],
+                                                                    extra_names: [standards_space_type])[:equipment]
+      return equipment if matched.nil? || matched.empty?
+
+      equipment.map do |entry|
+        name = entry[:equipment_name]
+        fields = matched[:'*'] || {}
+        fields = fields.merge(matched[name.to_sym]) if name && matched[name.to_sym].is_a?(Hash)
+        next entry if fields.empty?
+
+        applied = fields.select { |key, _| SERVICE_WATER_OVERRIDE_FIELDS.include?(key) }
+        # a rate given one way clears the other, or the record's own value would win: the
+        # expansion prefers an absolute gph and only falls back to the per-area rate
+        applied[:peak_flow_rate_gph] = nil if applied.key?(:peak_flow_rate_gph_per_floor_area_ft2) && !applied.key?(:peak_flow_rate_gph)
+        applied[:peak_flow_rate_gph_per_floor_area_ft2] = nil if applied.key?(:peak_flow_rate_gph) && !applied.key?(:peak_flow_rate_gph_per_floor_area_ft2)
+        entry.merge(applied)
+      end
+    end
+
+    # @param service_water_heating_overrides [Array<Hash>, nil] runtime overrides of the water
+    #   use equipment a space type resolves to. Each entry is keyed by `space_type` (matched
+    #   against the schedule set name or the standards space type) or `"*"`, with an
+    #   `equipment` hash keyed by equipment name or `"*"`.
     def self.create_typical_service_water_heating(model,
                                                   water_heating_fuel: nil,
-                                                  circulating: nil)
+                                                  circulating: nil,
+                                                  service_water_heating_overrides: nil)
       # array of service hot water loops
       swh_systems = []
 
@@ -35,19 +114,47 @@ module OpenstudioStandards
         space_type = space.spaceType.get
 
         next unless space_type.standardsSpaceType.is_initialized
-        next unless space_type.standardsBuildingType.is_initialized
 
         standards_space_type = space_type.standardsSpaceType.get
-        standards_building_type = space_type.standardsBuildingType.get
+        standards_building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
 
         # load typical water use equipment data
         data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_water_use_equipment.json"), symbolize_names: true)
-        space_type_properties = data[:space_types].select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
+
+        # All-level space type is the key. Water use is a property of what happens in the
+        # space, not of the building that contains it, so the building type takes no part in
+        # the lookup: a kitchen is a kitchen.
+        #
+        # This replaces a two-step lookup that keyed first on the DOE prototype
+        # (space_type, building_type) pair and then fell back to the first record tagged with
+        # the all-level name regardless of building type. That fallback selected records by
+        # JSON order: an office resolved to a DEER assembly hall record with 70x the office
+        # flow rate, which inflated service water heating by up to 278x on a large office.
+        space_type_properties = data[:space_types].select do |hash|
+          (hash[:all_level_space_types] || []).include?(standards_space_type)
+        end
+
+        # legacy key, for models still built from DOE prototype space type names
+        if space_type_properties.empty? && !standards_building_type.nil?
+          space_type_properties = data[:space_types].select do |hash|
+            (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type)
+          end
+        end
 
         # skip spaces with no equipment defined
         next if space_type_properties.empty?
 
-        water_use_equipment = space_type_properties[0][:water_use_equipment]
+        if space_type_properties.size > 1
+          flows = space_type_properties.map { |hash| (hash[:water_use_equipment] || [{}]).first[:peak_flow_rate_gph_per_floor_area_ft2] }.compact.uniq
+          if flows.size > 1
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating',
+                               "Space type '#{standards_space_type}' matches #{space_type_properties.size} water use equipment records with differing peak flow rates (#{flows.map { |f| f.round(6) }.join(', ')} gph/ft2). Using the first. Give the all-level space type a single record to make this deterministic.")
+          end
+        end
+
+        water_use_equipment = OpenstudioStandards::ServiceWaterHeating.apply_service_water_heating_overrides(
+          space_type_properties[0][:water_use_equipment], space_type, standards_space_type, service_water_heating_overrides
+        )
 
         # store one per unit equipment
         space_water_use_equipment = []
@@ -74,6 +181,14 @@ module OpenstudioStandards
           is_booster = water_use_name && water_use_name.downcase.include?('booster')
           water_use_name = water_use_name ? "#{space.name} #{water_use_name}" : "#{space.name} Water Use"
           mixed_water_temperature_c = OpenStudio.convert(temperature, 'F', 'C').get
+
+          # Prefer the hot water schedule the space type's own parametric schedule set names,
+          # so the draw profile follows the space type rather than whichever DOE prototype or
+          # DEER record the flow rate came from. Falls back to the record's schedule when the
+          # space type has no schedule set, which is the case for models built from prototype
+          # space type names.
+          schedule_set_schedule = OpenstudioStandards::ServiceWaterHeating.space_type_hot_water_schedule_name(space_type)
+          flow_rate_schedule = schedule_set_schedule unless schedule_set_schedule.nil?
 
           # @todo replace this line once model_add_schedule is refactored to not require a standard
           flow_rate_schedule = std.model_add_schedule(model, flow_rate_schedule)
@@ -148,6 +263,15 @@ module OpenstudioStandards
           # default to 140F
           service_water_loop_temperature_c = OpenStudio.convert(140.0, 'F', 'C').get
 
+          # A dedicated point-of-use heater has no distribution piping, and modelling one here
+          # was delivering ambient-temperature water. These loops carry the fixture's own peak
+          # flow - 0.03 gpm for a strip mall tenant - and a 20 ft insulated Pipe:Indoor sized
+          # from the space's floor area loses everything a trickle like that carries: on the
+          # strip mall the tank sat at 59 C all year while its fixtures received 21 to
+          # 47 C, logged "Target water temperature is greater than the hot water temperature"
+          # 24 million times, and the per-space loops were the second largest warning class
+          # in the fleet. With no pipe the fixtures receive the tank temperature.
+          #
           # add service water loop with water heater
           swh_loop = OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_loop(model,
                                                                                                 system_name: "#{space.name} Service Water Loop",
@@ -158,7 +282,7 @@ module OpenstudioStandards
                                                                                                 water_heater_volume: water_heater_volume_m3,
                                                                                                 water_heater_fuel: dedicated_water_heating_fuel,
                                                                                                 number_of_water_heaters: num_water_heaters,
-                                                                                                add_piping_losses: true,
+                                                                                                add_piping_losses: false,
                                                                                                 floor_area: total_space_floor_area_m2,
                                                                                                 number_of_stories: 1)
 
@@ -205,7 +329,16 @@ module OpenstudioStandards
           service_water_pump_motor_efficiency = 1.0
         end
 
-        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment)
+        # Size the shared water heater on every draw it actually serves, booster draws
+        # included. The booster's heat exchanger goes on THIS loop's demand side below, so the
+        # shared heater preheats every gallon the booster delivers from mains to 140 F and the
+        # booster only adds the last 40 F. Sizing on shared_water_use_equipment alone left the
+        # preheat unaccounted for: on a full service restaurant whose 180 F kitchen draw is
+        # 1.5x its 120 F draw, the shared heater came out 2.5x too small, sat at part load
+        # ratio 1.0 all year, and neither loop ever reached setpoint -- which starved the
+        # booster in turn, since it was sized for a 140 F feed it never received.
+        # Both sets take the same mains-to-140 F rise here, so they size as one population.
+        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment + booster_water_use_equipment)
         water_heater_capacity_w = water_heater_sizing[:water_heater_capacity]
         water_heater_volume_m3 = water_heater_sizing[:water_heater_volume]
 
@@ -225,17 +358,22 @@ module OpenstudioStandards
 
         # Attach all water use equipment to the shared loop
         shared_water_use_equipment.sort.each do |water_use_equip|
-          swh_connection = water_use_equip.waterUseConnections
-          shared_swh_loop.addDemandBranchForComponent(swh_connection.get) if swh_connection.is_initialized
+          OpenstudioStandards::ServiceWaterHeating.attach_water_use_to_loop(water_use_equip, shared_swh_loop)
         end
 
         # Attach booster water heater loop to shared loop
         unless booster_water_use_equipment.empty?
           # find_water_heater_capacity_volume_and_parasitic
+          #
+          # Size over the lift the booster actually performs. create_booster_water_heating_loop
+          # runs the loop a deadband above the 180 F its fixtures target, so the tank's cycling
+          # minimum still delivers 180 F, and the heater has to reach that higher setpoint.
+          booster_setpoint_offset_k = 2.0
+          booster_supply_temperature_f = 180.0 + OpenStudio.convert(booster_setpoint_offset_k, 'K', 'R').get
           booster_water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(booster_water_use_equipment,
                                                                                                                               water_heater_efficiency: 1.0,
                                                                                                                               inlet_temperature: 140.0,
-                                                                                                                              supply_temperature: 180.0)
+                                                                                                                              supply_temperature: booster_supply_temperature_f)
 
           # Note that booster water heaters are always assumed to be electric resistance
           booster_water_loop_temperature_c = OpenStudio.convert(180.0, 'F', 'C').get
@@ -243,6 +381,7 @@ module OpenstudioStandards
                                                                                                         system_name: 'Booster Water Loop',
                                                                                                         water_heater_capacity: booster_water_heater_sizing[:water_heater_capacity],
                                                                                                         service_water_temperature: booster_water_loop_temperature_c,
+                                                                                                        setpoint_offset: booster_setpoint_offset_k,
                                                                                                         service_water_loop: shared_swh_loop)
 
           # Add loop to array
@@ -250,8 +389,7 @@ module OpenstudioStandards
 
           # Attach booster water use equipment to the booster loop
           booster_water_use_equipment.each do |booster_equip|
-            booster_swh_connection = booster_equip.waterUseConnections
-            swh_booster_loop.addDemandBranchForComponent(booster_swh_connection.get) if booster_swh_connection.is_initialized
+            OpenstudioStandards::ServiceWaterHeating.attach_water_use_to_loop(booster_equip, swh_booster_loop)
           end
         end
       end

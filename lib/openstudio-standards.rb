@@ -19,6 +19,7 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/constructions/create'
   require_relative 'openstudio-standards/constructions/information'
   require_relative 'openstudio-standards/constructions/modify'
+  require_relative 'openstudio-standards/constructions/create_construction_set'
   require_relative 'openstudio-standards/constructions/materials/information'
   require_relative 'openstudio-standards/constructions/materials/modify'
 
@@ -33,6 +34,9 @@ module OpenstudioStandards
   # Interior Lighting Module
   require_relative 'openstudio-standards/interior_lighting/create_lights'
   require_relative 'openstudio-standards/interior_lighting/create_typical_interior_lighting'
+
+  # Occupancy Module
+  require_relative 'openstudio-standards/occupancy/create_typical_occupancy'
 
   # Daylighting Module
   require_relative 'openstudio-standards/daylighting/space'
@@ -52,6 +56,7 @@ module OpenstudioStandards
 
   # Schedules Module
   require_relative 'openstudio-standards/schedules/create'
+  require_relative 'openstudio-standards/schedules/create_parametric_schedule'
   require_relative 'openstudio-standards/schedules/modify'
   require_relative 'openstudio-standards/schedules/information'
   require_relative 'openstudio-standards/schedules/parametric'
@@ -73,6 +78,9 @@ module OpenstudioStandards
   # Thermal Zone Module
   require_relative 'openstudio-standards/thermal_zone/information'
   require_relative 'openstudio-standards/thermal_zone/thermostat_schedules'
+
+  # Ventilation Module
+  require_relative 'openstudio-standards/ventilation/create_typical_ventilation'
 
   # HVAC Module
   require_relative 'openstudio-standards/hvac/air_loop/information'
@@ -108,9 +116,12 @@ module OpenstudioStandards
   # CreateTypical Module
   require_relative 'openstudio-standards/create_typical/enumerations'
   require_relative 'openstudio-standards/create_typical/space_type_ratios'
+  require_relative 'openstudio-standards/create_typical/space_type_load_overrides'
   require_relative 'openstudio-standards/create_typical/create_typical'
   require_relative 'openstudio-standards/create_typical/space_type_blend'
   require_relative 'openstudio-standards/create_typical/space_type_information'
+  require_relative 'openstudio-standards/create_typical/spec_validation'
+  require_relative 'openstudio-standards/create_typical/create_custom'
 
   # QAQC Module
   require_relative 'openstudio-standards/qaqc/calibration'

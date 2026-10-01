@@ -97,6 +97,58 @@ module OpenstudioStandards
       return true
     end
 
+    # Whether a refrigeration data row describes a model's space type.
+    #
+    # The building type is part of the key and stays part of it. Unlike exhaust or service water
+    # heating, the quantity of refrigeration a space holds depends on the building as much as on
+    # the space: a school kitchen carries 120 ft2 of walk-in per 1,800 ft2 of kitchen and a
+    # hospital's 360 ft2 per 10,000 ft2, and a supermarket sales floor is refrigerated where a
+    # hotel gift shop's is not. Matching on the space type alone would put display cases in every
+    # retail space in the stock.
+    #
+    # The space type half of the key is now matched two ways: against the all-level space type
+    # name the typical path builds from, and against the DOE prototype or DEER name for models
+    # built from those. The building type is read from standardsBuildingType, which on the typical
+    # path comes from the spec's primary_building_type by way of the Building object -- and which
+    # is the DEER code under a DEER template, so the DEER rows stay reachable.
+    #
+    # A qualified all-level name the data tags nowhere ('retail - supermarket') falls back to
+    # its level-1 name, the way the thermostat and schedule lookups do: the refinement narrows
+    # the space, and the building type already says whether it is refrigerated. A qualified
+    # name the data does tag ('food preparation - primary school') has rows of its own and
+    # never falls back, so a hospital kitchen named for a school reaches nothing rather than
+    # the hospital's generic kitchen row. A grocery that moved its sales floor from 'retail'
+    # to 'retail - supermarket' lost all eight display cases in a validation run
+    # because this matched the name exactly.
+    #
+    # @param record [Hash] a row from typical_refrigerated_cases.csv or typical_refrigerated_walkins.csv
+    # @param standards_space_type [String] the space type's standardsSpaceType
+    # @param standards_building_type [String] the space type's standardsBuildingType
+    # @param tagged_names [Array<String>, nil] every all-level name the data tags, across both
+    #   tables; a qualified name in it is matched exactly, one not in it falls back
+    # @return [Boolean] true if the row applies
+    def self.refrigeration_record_applies?(record, standards_space_type, standards_building_type, tagged_names: nil)
+      return false unless record[:building_type] == standards_building_type
+
+      all_level = record[:all_level_space_type].to_s.split('|').map(&:strip)
+      return true if all_level.include?(standards_space_type)
+
+      name = standards_space_type.to_s
+      if name.include?(' - ') && (tagged_names.nil? || !tagged_names.include?(name))
+        return true if all_level.include?(name.split(' - ').first)
+      end
+
+      record[:space_type] == standards_space_type
+    end
+
+    # Every all-level space type name tagged on the refrigeration rows.
+    #
+    # @param records [Array<Hash>] rows from the cases and walk-ins tables
+    # @return [Array<String>] the tagged names, without duplicates
+    def self.refrigeration_tagged_names(records)
+      records.flat_map { |record| record[:all_level_space_type].to_s.split('|').map(&:strip) }.reject(&:empty?).uniq
+    end
+
     # Returns the typical refrigeration equipment in a model based on space types
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
@@ -119,6 +171,7 @@ module OpenstudioStandards
       end
       walkins_tbl = CSV.table(walkins_csv, encoding: 'ISO8859-1:utf-8')
       walkins_hsh = walkins_tbl.map(&:to_hash)
+      tagged_names = OpenstudioStandards::Refrigeration.refrigeration_tagged_names(cases_hsh + walkins_hsh)
 
       # loop through space types to get collection of cases and walkins
       cases_list = []
@@ -134,7 +187,7 @@ module OpenstudioStandards
         standards_building_type = space_type.standardsBuildingType.get
 
         # create list of cases
-        ref_cases = cases_hsh.select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
+        ref_cases = cases_hsh.select { |hash| OpenstudioStandards::Refrigeration.refrigeration_record_applies?(hash, standards_space_type, standards_building_type, tagged_names: tagged_names) }
         ref_cases.each do |ref_case|
           length_modifier = total_space_floor_area_ft2 / ref_case[:reference_space_type_area_ft2]
           case_length = OpenStudio.convert(ref_case[:length_ft] * length_modifier, 'ft', 'm').get
@@ -142,7 +195,7 @@ module OpenstudioStandards
         end
 
         # create list of walkins
-        ref_walkins = walkins_hsh.select { |hash| (hash[:space_type] == standards_space_type) && (hash[:building_type] == standards_building_type) }
+        ref_walkins = walkins_hsh.select { |hash| OpenstudioStandards::Refrigeration.refrigeration_record_applies?(hash, standards_space_type, standards_building_type, tagged_names: tagged_names) }
         ref_walkins.each do |ref_walkin|
           area_modifier = total_space_floor_area_ft2 / ref_walkin[:reference_space_type_area_ft2]
           # round to the nearest 120 ft2, with a minimum size of 80 ft2 and maximum size of 480 ft2

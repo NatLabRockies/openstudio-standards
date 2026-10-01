@@ -1,0 +1,71 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "Hospital (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "Hospital",
+  "space_type_ratios": [
+    {
+      "space_type": "nurses station",
+      "ratio": 0.3087
+    },
+    {
+      "space_type": "corridor",
+      "ratio": 0.2089,
+      "circ": true
+    },
+    {
+      "space_type": "patient room",
+      "ratio": 0.1153,
+      "default": true
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.0788
+    },
+    {
+      "space_type": "food preparation",
+      "ratio": 0.0497
+    },
+    {
+      "space_type": "exam/treatment",
+      "ratio": 0.0449
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.0373
+    },
+    {
+      "space_type": "office",
+      "ratio": 0.0343
+    },
+    {
+      "space_type": "operating room",
+      "ratio": 0.0328
+    },
+    {
+      "space_type": "laboratory",
+      "ratio": 0.0283
+    },
+    {
+      "space_type": "physical therapy",
+      "ratio": 0.026
+    },
+    {
+      "space_type": "imaging",
+      "ratio": 0.026
+    },
+    {
+      "space_type": "emergency room",
+      "ratio": 0.009
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 241351.0,
+    "num_stories_above_grade": 5,
+    "ns_to_ew_ratio": 1.33,
+    "wwr": 0.16,
+    "floor_height": 14.0,
+    "perim_mult": 1.0
+  }
+}

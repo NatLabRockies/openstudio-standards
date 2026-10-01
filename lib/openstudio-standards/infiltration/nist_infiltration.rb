@@ -215,6 +215,12 @@ module OpenstudioStandards
         off_schedule = OpenstudioStandards::Schedules.create_inverted_schedule_ruleset(hvac_schedule, schedule_name: 'Infiltration HVAC Off Schedule')
       end
 
+      # State the type limits. The infiltration schedule slot does not stamp them, so without
+      # this EnergyPlus reports "Schedule Type Limits Name is empty ... Schedule will not be
+      # validated" for these schedules and every day profile inside them.
+      infiltration_schedule_type_limits = OpenstudioStandards::Schedules.create_schedule_type_limits(model, standard_schedule_type_limit: 'Fractional')
+      [on_schedule, off_schedule].each { |schedule| schedule.setScheduleTypeLimits(infiltration_schedule_type_limits) }
+
       # get climate zone number
       climate_zone_number = OpenstudioStandards::Weather.model_get_ashrae_climate_zone_number(model)
 
@@ -358,6 +364,12 @@ module OpenstudioStandards
         on_schedule.setName('Infiltration HVAC On Schedule')
         off_schedule = OpenstudioStandards::Schedules.create_inverted_schedule_ruleset(hvac_schedule, schedule_name: 'Infiltration HVAC Off Schedule')
       end
+
+      # State the type limits. The infiltration schedule slot does not stamp them, so without
+      # this EnergyPlus reports "Schedule Type Limits Name is empty ... Schedule will not be
+      # validated" for these schedules and every day profile inside them.
+      infiltration_schedule_type_limits = OpenstudioStandards::Schedules.create_schedule_type_limits(model, standard_schedule_type_limit: 'Fractional')
+      [on_schedule, off_schedule].each { |schedule| schedule.setScheduleTypeLimits(infiltration_schedule_type_limits) }
 
 
       model.getSpaceInfiltrationDesignFlowRates.each do |infil|

@@ -1,0 +1,1752 @@
+[
+  {
+    "space_type_name": "atrium",
+    "lighting_space_type_name": "atrium_lighting",
+    "ventilation_space_type_name": "atrium_ventilation",
+    "electric_equipment_space_type_name": "atrium_lt_20_ft_height_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "atrium schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "atrium - > 40 ft height",
+    "lighting_space_type_name": "atrium_lighting",
+    "ventilation_space_type_name": "atrium_ventilation",
+    "electric_equipment_space_type_name": "atrium_gt_40_ft_height_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "atrium - > 40 ft height schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'atrium'; specific value(s): electric_equipment; other values repeated from the 'atrium' level 1 entry"
+  },
+  {
+    "space_type_name": "atrium - >= 20 ft and <= 40 ft height",
+    "lighting_space_type_name": "atrium_lighting",
+    "ventilation_space_type_name": "atrium_ventilation",
+    "electric_equipment_space_type_name": "atrium_gte_20_ft_and_lte_40_ft_in_height_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "atrium - >= 20 ft and <= 40 ft height schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'atrium'; specific value(s): electric_equipment; other values repeated from the 'atrium' level 1 entry"
+  },
+  {
+    "space_type_name": "atrium - first three floors",
+    "lighting_space_type_name": "atrium_lighting",
+    "ventilation_space_type_name": "atrium_ventilation",
+    "electric_equipment_space_type_name": "atrium_first_three_floors_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "atrium - first three floors schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'atrium'; specific value(s): electric_equipment; other values repeated from the 'atrium' level 1 entry"
+  },
+  {
+    "space_type_name": "attic",
+    "lighting_space_type_name": "none_lighting",
+    "ventilation_space_type_name": "attic_ventilation",
+    "electric_equipment_space_type_name": "attic_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "attic schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "audience seating",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "audience seating - auditorium",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_auditorium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - auditorium schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - auditorium - primary school",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_auditorium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - auditorium - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating - auditorium in a primary school building"
+  },
+  {
+    "space_type_name": "audience seating - auditorium - secondary school",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_auditorium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - auditorium - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating - auditorium in a secondary school building"
+  },
+  {
+    "space_type_name": "audience seating - bowling alley",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_bowling_alley_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - bowling alley schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): ventilation; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - convention center",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_convention_center_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - convention center schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - exercise center",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_exercise_center_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - exercise center schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - general seating area",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "seating_area_general_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - general seating area schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - gymnasium",
+    "lighting_space_type_name": "audience_seating_area_for_gymnasium_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_spectator_areas_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_gymnasium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - gymnasium schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'audience seating' level 1 entry; 62.1 'spectator areas' ventilation applied to gymnasium and sports arena seating"
+  },
+  {
+    "space_type_name": "audience seating - gymnasium - primary school",
+    "lighting_space_type_name": "audience_seating_area_for_gymnasium_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_spectator_areas_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_gymnasium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - gymnasium - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating - gymnasium in a primary school building"
+  },
+  {
+    "space_type_name": "audience seating - gymnasium - secondary school",
+    "lighting_space_type_name": "audience_seating_area_for_gymnasium_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_spectator_areas_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_gymnasium_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - gymnasium - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating - gymnasium in a secondary school building"
+  },
+  {
+    "space_type_name": "audience seating - motion picture theater",
+    "lighting_space_type_name": "audience_seating_area_for_motion_picture_theater_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_motion_picture_theater_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - motion picture theater schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting, electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - penitentiary",
+    "lighting_space_type_name": "audience_seating_area_for_penitentiary_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - penitentiary schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - performing arts theater",
+    "lighting_space_type_name": "audience_seating_area_for_performing_arts_theater_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_performing_arts_theater_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - performing arts theater schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting, electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - primary school",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating in a primary school building"
+  },
+  {
+    "space_type_name": "audience seating - religious buildings",
+    "lighting_space_type_name": "audience_seating_area_for_religious_buildings_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_religious_facility_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - religious buildings schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting, electric_equipment; other values repeated from the 'audience seating' level 1 entry"
+  },
+  {
+    "space_type_name": "audience seating - secondary school",
+    "lighting_space_type_name": "audience_seating_lighting",
+    "ventilation_space_type_name": "audience_seating_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "audience seating in a secondary school building"
+  },
+  {
+    "space_type_name": "audience seating - sports arena",
+    "lighting_space_type_name": "audience_seating_area_for_sports_arena_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_spectator_areas_ventilation",
+    "electric_equipment_space_type_name": "audience_seating_sports_arena_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "audience seating - sports arena schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'audience seating'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'audience seating' level 1 entry; 62.1 'spectator areas' ventilation applied to gymnasium and sports arena seating"
+  },
+  {
+    "space_type_name": "banking",
+    "lighting_space_type_name": "banking_lighting",
+    "ventilation_space_type_name": "banking_ventilation",
+    "electric_equipment_space_type_name": "banking_activity_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "banking schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "banking - bank vaults/safe deposit",
+    "lighting_space_type_name": "banking_lighting",
+    "ventilation_space_type_name": "miscellaneous_spaces_bank_vaults_safe_deposit_ventilation",
+    "electric_equipment_space_type_name": "banking_activity_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "banking - bank vaults/safe deposit schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'banking'; specific value(s): ventilation; other values repeated from the 'banking' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "classroom_lecture_training_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "classroom/lecture/training - art classroom",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_art_classroom_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - art classroom schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - classrooms (ages 5-8)",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_classrooms_ages_5-8_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - classrooms (ages 5-8) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - daycare (through age 4)",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_daycare_through_age_4_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - daycare (through age 4) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - lecture classroom",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_lecture_classroom_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - lecture classroom schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - lecture hall (fixed seats)",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_lecture_hall_fixed_seats_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - lecture hall (fixed seats) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - music/theater/dance",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "educational_facilities_music_theater_dance_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - music/theater/dance schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): ventilation; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - penitentiary",
+    "lighting_space_type_name": "classroom_lecture_training_for_penitentiary_lighting",
+    "ventilation_space_type_name": "classroom_lecture_training_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_penitentiary_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - penitentiary schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): lighting, electric_equipment; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "classroom/lecture/training - preschool to 12th grade",
+    "lighting_space_type_name": "classroom_lecture_training_lighting",
+    "ventilation_space_type_name": "classroom_lecture_training_ventilation",
+    "electric_equipment_space_type_name": "classroom_lecture_training_preschool_to_12th_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "classroom/lecture/training - preschool to 12th grade schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'classroom/lecture/training'; specific value(s): electric_equipment; other values repeated from the 'classroom/lecture/training' level 1 entry"
+  },
+  {
+    "space_type_name": "computer room",
+    "lighting_space_type_name": "computer_room_lighting",
+    "ventilation_space_type_name": "computer_room_ventilation",
+    "electric_equipment_space_type_name": "computer_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "computer room schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "computer room - computer (not printing)",
+    "lighting_space_type_name": "computer_room_lighting",
+    "ventilation_space_type_name": "miscellaneous_spaces_computer_not_printing_ventilation",
+    "electric_equipment_space_type_name": "computer_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "computer room - computer (not printing) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'computer room'; specific value(s): ventilation; other values repeated from the 'computer room' level 1 entry"
+  },
+  {
+    "space_type_name": "conference/meeting/multipurpose",
+    "lighting_space_type_name": "conference_meeting_multipurpose_lighting",
+    "ventilation_space_type_name": "conference_meeting_multipurpose_ventilation",
+    "electric_equipment_space_type_name": "conference_meeting_multipurpose_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "conference/meeting/multipurpose schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "conference/meeting/multipurpose - multi-use assembly",
+    "lighting_space_type_name": "conference_meeting_multipurpose_lighting",
+    "ventilation_space_type_name": "educational_facilities_multi-use_assembly_ventilation",
+    "electric_equipment_space_type_name": "conference_meeting_multipurpose_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "conference/meeting/multipurpose - multi-use assembly schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'conference/meeting/multipurpose'; specific value(s): ventilation; other values repeated from the 'conference/meeting/multipurpose' level 1 entry"
+  },
+  {
+    "space_type_name": "confinement cells",
+    "lighting_space_type_name": "confinement_cells_lighting",
+    "ventilation_space_type_name": "confinement_cells_ventilation",
+    "electric_equipment_space_type_name": "confinement_cells_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "confinement cells schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "confinement cells - booking/waiting",
+    "lighting_space_type_name": "confinement_cells_lighting",
+    "ventilation_space_type_name": "correctional_facilities_booking_waiting_ventilation",
+    "electric_equipment_space_type_name": "confinement_cells_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "confinement cells - booking/waiting schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'confinement cells'; specific value(s): ventilation; other values repeated from the 'confinement cells' level 1 entry"
+  },
+  {
+    "space_type_name": "confinement cells - day room",
+    "lighting_space_type_name": "confinement_cells_lighting",
+    "ventilation_space_type_name": "correctional_facilities_day_room_ventilation",
+    "electric_equipment_space_type_name": "confinement_cells_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "confinement cells - day room schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'confinement cells'; specific value(s): ventilation; other values repeated from the 'confinement cells' level 1 entry"
+  },
+  {
+    "space_type_name": "confinement cells - guard stations",
+    "lighting_space_type_name": "confinement_cells_lighting",
+    "ventilation_space_type_name": "correctional_facilities_guard_stations_ventilation",
+    "electric_equipment_space_type_name": "confinement_cells_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "confinement cells - guard stations schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'confinement cells'; specific value(s): ventilation; other values repeated from the 'confinement cells' level 1 entry"
+  },
+  {
+    "space_type_name": "copy/print",
+    "lighting_space_type_name": "copy_print_lighting",
+    "ventilation_space_type_name": "copy_print_ventilation",
+    "electric_equipment_space_type_name": "office_enclosed_lte_250_sf_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "copy/print schedule set",
+    "critical_operation": false,
+    "annotation": "to be revised"
+  },
+  {
+    "space_type_name": "corridor",
+    "lighting_space_type_name": "corridor_lighting",
+    "ventilation_space_type_name": "corridor_ventilation",
+    "electric_equipment_space_type_name": "corridor_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "corridor schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "corridor - hospital",
+    "lighting_space_type_name": "corridor_transition_for_hospital_lighting",
+    "ventilation_space_type_name": "corridor_ventilation",
+    "electric_equipment_space_type_name": "corridor_hospital_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "corridor - hospital schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'corridor'; specific value(s): lighting, electric_equipment; other values repeated from the 'corridor' level 1 entry"
+  },
+  {
+    "space_type_name": "corridor - manufacturing facility",
+    "lighting_space_type_name": "corridor_lighting",
+    "ventilation_space_type_name": "corridor_ventilation",
+    "electric_equipment_space_type_name": "corridor_manufacturing_facility_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "corridor - manufacturing facility schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'corridor'; specific value(s): electric_equipment; other values repeated from the 'corridor' level 1 entry"
+  },
+  {
+    "space_type_name": "corridor - primary school",
+    "lighting_space_type_name": "corridor_lighting",
+    "ventilation_space_type_name": "corridor_ventilation",
+    "electric_equipment_space_type_name": "corridor_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "corridor - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "corridor in a primary school building"
+  },
+  {
+    "space_type_name": "corridor - secondary school",
+    "lighting_space_type_name": "corridor_lighting",
+    "ventilation_space_type_name": "corridor_ventilation",
+    "electric_equipment_space_type_name": "corridor_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "corridor - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "corridor in a secondary school building"
+  },
+  {
+    "space_type_name": "courtroom",
+    "lighting_space_type_name": "courtroom_lighting",
+    "ventilation_space_type_name": "courtroom_ventilation",
+    "electric_equipment_space_type_name": "courtroom_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "courtroom schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "datacenter/high ite",
+    "lighting_space_type_name": "datacenterhighite_lighting",
+    "ventilation_space_type_name": "datacenterhighite_ventilation",
+    "electric_equipment_space_type_name": "datacenter_high_ite_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "datacenter/high ite schedule set",
+    "critical_operation": true,
+    "annotation": "to be revised"
+  },
+  {
+    "space_type_name": "datacenter/low ite",
+    "lighting_space_type_name": "datacenterlowite_lighting",
+    "ventilation_space_type_name": "datacenterlowite_ventilation",
+    "electric_equipment_space_type_name": "datacenter_low_ite_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "datacenter/low ite schedule set",
+    "critical_operation": true,
+    "annotation": "to be revised"
+  },
+  {
+    "space_type_name": "dining",
+    "lighting_space_type_name": "dining_lighting",
+    "ventilation_space_type_name": "dining_ventilation",
+    "electric_equipment_space_type_name": "dining_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "dining - bar/lounge/leisure",
+    "lighting_space_type_name": "dining_bar_lounge_leisure_general_lighting",
+    "ventilation_space_type_name": "food_and_beverage_service_bars_cocktail_lounges_ventilation",
+    "electric_equipment_space_type_name": "dining_bar_lounge_leisure_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - bar/lounge/leisure schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'dining'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'dining' level 1 entry"
+  },
+  {
+    "space_type_name": "dining - cafeteria/fast food",
+    "lighting_space_type_name": "dining_cafeteria_fast_food_general_lighting",
+    "ventilation_space_type_name": "food_and_beverage_service_cafeteria_fast_food_dining_ventilation",
+    "electric_equipment_space_type_name": "dining_cafeteria_fast_food_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - cafeteria/fast food schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'dining'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'dining' level 1 entry"
+  },
+  {
+    "space_type_name": "dining - family dining",
+    "lighting_space_type_name": "dining_area_for_family_dining_lighting",
+    "ventilation_space_type_name": "dining_ventilation",
+    "electric_equipment_space_type_name": "dining_family_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - family dining schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'dining'; specific value(s): lighting, electric_equipment; other values repeated from the 'dining' level 1 entry"
+  },
+  {
+    "space_type_name": "dining - penitentiary",
+    "lighting_space_type_name": "dining_area_for_penitentiary_lighting",
+    "ventilation_space_type_name": "dining_ventilation",
+    "electric_equipment_space_type_name": "dining_penitentiary_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - penitentiary schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'dining'; specific value(s): lighting, electric_equipment; other values repeated from the 'dining' level 1 entry"
+  },
+  {
+    "space_type_name": "dining - primary school",
+    "lighting_space_type_name": "dining_lighting",
+    "ventilation_space_type_name": "food_and_beverage_service_cafeteria_fast_food_dining_ventilation",
+    "electric_equipment_space_type_name": "dining_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "dining in a primary school building; ventilation and occupancy from the cafeteria/fast-food dining category, the code category for a school cafeteria"
+  },
+  {
+    "space_type_name": "dining - secondary school",
+    "lighting_space_type_name": "dining_lighting",
+    "ventilation_space_type_name": "food_and_beverage_service_cafeteria_fast_food_dining_ventilation",
+    "electric_equipment_space_type_name": "dining_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dining - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "dining in a secondary school building; ventilation and occupancy from the cafeteria/fast-food dining category, the code category for a school cafeteria"
+  },
+  {
+    "space_type_name": "dressing room",
+    "lighting_space_type_name": "dressing_room_lighting",
+    "ventilation_space_type_name": "dressing_room_ventilation",
+    "electric_equipment_space_type_name": "performing_arts_dressing_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "dressing room schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "electrical/mechanical",
+    "lighting_space_type_name": "electrical_mechanical_lighting",
+    "ventilation_space_type_name": "electrical_mechanical_ventilation",
+    "electric_equipment_space_type_name": "electrical_mechanical_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "electrical/mechanical schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "emergency room",
+    "lighting_space_type_name": "emergency_room_lighting",
+    "ventilation_space_type_name": "emergency_room_ventilation",
+    "electric_equipment_space_type_name": "emergency_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "emergency room schedule set",
+    "critical_operation": true,
+    "annotation": null
+  },
+  {
+    "space_type_name": "emergency vehicle garage",
+    "lighting_space_type_name": "emergency_vehicle_garage_lighting",
+    "ventilation_space_type_name": "emergency_vehicle_garage_ventilation",
+    "electric_equipment_space_type_name": "emergency_vehicle_garage_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "emergency vehicle garage schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "exam/treatment",
+    "lighting_space_type_name": "exam_treatment_lighting",
+    "ventilation_space_type_name": "exam_treatment_ventilation",
+    "electric_equipment_space_type_name": "exam_treatment_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exam/treatment schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "exercise area",
+    "lighting_space_type_name": "exercise_area_lighting",
+    "ventilation_space_type_name": "exercise_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exercise area schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "exercise area - health club/weight rooms",
+    "lighting_space_type_name": "exercise_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_health_club_weight_rooms_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exercise area - health club/weight rooms schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'exercise area'; specific value(s): ventilation; other values repeated from the 'exercise area' level 1 entry"
+  },
+  {
+    "space_type_name": "exercise area - primary school",
+    "lighting_space_type_name": "exercise_area_lighting",
+    "ventilation_space_type_name": "exercise_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exercise area - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "exercise area in a primary school building"
+  },
+  {
+    "space_type_name": "exercise area - secondary school",
+    "lighting_space_type_name": "exercise_area_lighting",
+    "ventilation_space_type_name": "exercise_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exercise area - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "exercise area in a secondary school building"
+  },
+  {
+    "space_type_name": "exercise area - swimming pool deck",
+    "lighting_space_type_name": "exercise_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_swimming_pool_deck_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_exercise_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exercise area - swimming pool deck schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'exercise area'; specific value(s): ventilation; other values repeated from the 'exercise area' level 1 entry; parent assignment based on judgment"
+  },
+  {
+    "space_type_name": "exhibit",
+    "lighting_space_type_name": "exhibit_lighting",
+    "ventilation_space_type_name": "exhibit_ventilation",
+    "electric_equipment_space_type_name": "museum_exhibit_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exhibit schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "exhibit - children's museum",
+    "lighting_space_type_name": "exhibit_lighting",
+    "ventilation_space_type_name": "public_assembly_spaces_museums_childrens_ventilation",
+    "electric_equipment_space_type_name": "museum_exhibit_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exhibit - children's museum schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'exhibit'; specific value(s): ventilation; other values repeated from the 'exhibit' level 1 entry"
+  },
+  {
+    "space_type_name": "exhibit - convention center",
+    "lighting_space_type_name": "convention_center_exhibit_space_general_lighting",
+    "ventilation_space_type_name": "exhibit_ventilation",
+    "electric_equipment_space_type_name": "exhibit_convention_center_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exhibit - convention center schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'exhibit'; specific value(s): lighting, electric_equipment; other values repeated from the 'exhibit' level 1 entry"
+  },
+  {
+    "space_type_name": "exhibit - museum restoration room",
+    "lighting_space_type_name": "museum_restoration_room_lighting",
+    "ventilation_space_type_name": "exhibit_ventilation",
+    "electric_equipment_space_type_name": "museum_restoration_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "exhibit - museum restoration room schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'exhibit'; specific value(s): lighting, electric_equipment; other values repeated from the 'exhibit' level 1 entry"
+  },
+  {
+    "space_type_name": "food preparation",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "kitchen",
+    "schedule_set_name": "food preparation schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "food preparation - bakery",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "bakery",
+    "schedule_set_name": "food preparation - bakery schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'food preparation'; specific value(s): natural_gas_equipment; other values repeated from the 'food preparation' level 1 entry; grocery service area"
+  },
+  {
+    "space_type_name": "food preparation - deli",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "deli",
+    "schedule_set_name": "food preparation - deli schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'food preparation'; specific value(s): natural_gas_equipment; other values repeated from the 'food preparation' level 1 entry; grocery service area"
+  },
+  {
+    "space_type_name": "food preparation - deli/bakery",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "deli/bakery",
+    "schedule_set_name": "food preparation - deli/bakery schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'food preparation'; specific value(s): natural_gas_equipment; other values repeated from the 'food preparation' level 1 entry; grocery service area"
+  },
+  {
+    "space_type_name": "food preparation - primary school",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "kitchen",
+    "schedule_set_name": "food preparation - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "food preparation in a primary school building"
+  },
+  {
+    "space_type_name": "food preparation - secondary school",
+    "lighting_space_type_name": "food_preparation_lighting",
+    "ventilation_space_type_name": "food_preparation_ventilation",
+    "electric_equipment_space_type_name": "kitchen_electric_equipment",
+    "natural_gas_equipment_space_type_name": "kitchen",
+    "schedule_set_name": "food preparation - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "food preparation in a secondary school building"
+  },
+  {
+    "space_type_name": "guest room",
+    "lighting_space_type_name": "guest_room_lighting",
+    "ventilation_space_type_name": "guest_room_ventilation",
+    "electric_equipment_space_type_name": "guest_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "guest room schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "imaging",
+    "lighting_space_type_name": "imaging_lighting",
+    "ventilation_space_type_name": "imaging_ventilation",
+    "electric_equipment_space_type_name": "imaging_room_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "imaging schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "interior parking",
+    "lighting_space_type_name": "interior_parking_lighting",
+    "ventilation_space_type_name": "interior_parking_ventilation",
+    "electric_equipment_space_type_name": "parking_area_interior_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "interior parking schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "judges chambers",
+    "lighting_space_type_name": "judges_chambers_lighting",
+    "ventilation_space_type_name": "judges_chambers_ventilation",
+    "electric_equipment_space_type_name": "judges_chambers_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "judges chambers schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "laboratory",
+    "lighting_space_type_name": "laboratory_lighting",
+    "ventilation_space_type_name": "laboratory_ventilation",
+    "electric_equipment_space_type_name": "laboratory_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "laboratory schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "laboratory - science laboratories (educational)",
+    "lighting_space_type_name": "laboratory_lighting",
+    "ventilation_space_type_name": "educational_facilities_science_laboratories_ventilation",
+    "electric_equipment_space_type_name": "laboratory_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "laboratory - science laboratories (educational) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'laboratory'; specific value(s): ventilation; other values repeated from the 'laboratory' level 1 entry"
+  },
+  {
+    "space_type_name": "laundry/washing",
+    "lighting_space_type_name": "laundry_washing_lighting",
+    "ventilation_space_type_name": "laundry_washing_ventilation",
+    "electric_equipment_space_type_name": "laundry_washing_electric_equipment",
+    "natural_gas_equipment_space_type_name": "laundry",
+    "schedule_set_name": "laundry/washing schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "laundry/washing - coin-operated laundries",
+    "lighting_space_type_name": "laundry_washing_lighting",
+    "ventilation_space_type_name": "retail_coin-operated_laundries_ventilation",
+    "electric_equipment_space_type_name": "laundry_washing_electric_equipment",
+    "natural_gas_equipment_space_type_name": "laundry",
+    "schedule_set_name": "laundry/washing - coin-operated laundries schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'laundry/washing'; specific value(s): ventilation; other values repeated from the 'laundry/washing' level 1 entry"
+  },
+  {
+    "space_type_name": "library",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "library - cataloging",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_cataloging_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - cataloging schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'library'; specific value(s): electric_equipment; other values repeated from the 'library' level 1 entry"
+  },
+  {
+    "space_type_name": "library - media center",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "educational_facilities_media_center_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - media center schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'library'; specific value(s): ventilation; other values repeated from the 'library' level 1 entry"
+  },
+  {
+    "space_type_name": "library - media center - primary school",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "educational_facilities_media_center_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - media center - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "library - media center in a primary school building"
+  },
+  {
+    "space_type_name": "library - media center - secondary school",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "educational_facilities_media_center_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - media center - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "library - media center in a secondary school building"
+  },
+  {
+    "space_type_name": "library - primary school",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "library in a primary school building"
+  },
+  {
+    "space_type_name": "library - reading area",
+    "lighting_space_type_name": "library_reading_area_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_reading_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - reading area schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'library'; specific value(s): lighting, electric_equipment; other values repeated from the 'library' level 1 entry"
+  },
+  {
+    "space_type_name": "library - secondary school",
+    "lighting_space_type_name": "library_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "library in a secondary school building"
+  },
+  {
+    "space_type_name": "library - stacks",
+    "lighting_space_type_name": "library_stacks_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - stacks schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'library'; specific value(s): lighting; other values repeated from the 'library' level 1 entry"
+  },
+  {
+    "space_type_name": "library - stacks - primary school",
+    "lighting_space_type_name": "library_stacks_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - stacks - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "library - stacks in a primary school building"
+  },
+  {
+    "space_type_name": "library - stacks - secondary school",
+    "lighting_space_type_name": "library_stacks_lighting",
+    "ventilation_space_type_name": "library_ventilation",
+    "electric_equipment_space_type_name": "library_stacks_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "library - stacks - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "library - stacks in a secondary school building"
+  },
+  {
+    "space_type_name": "living quarters",
+    "lighting_space_type_name": "living_quarters_lighting",
+    "ventilation_space_type_name": "living_quarters_ventilation",
+    "electric_equipment_space_type_name": "dormitory_living_quarters_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "living quarters schedule set",
+    "critical_operation": false,
+    "annotation": "living quarters such as in a fire station"
+  },
+  {
+    "space_type_name": "loading dock",
+    "lighting_space_type_name": "loading_dock_lighting",
+    "ventilation_space_type_name": "loading_dock_ventilation",
+    "electric_equipment_space_type_name": "loading_dock_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "loading dock schedule set",
+    "critical_operation": false,
+    "annotation": "to be revised"
+  },
+  {
+    "space_type_name": "lobby",
+    "lighting_space_type_name": "lobby_lighting",
+    "ventilation_space_type_name": "lobby_ventilation",
+    "electric_equipment_space_type_name": "lobby_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "lobby - elevator",
+    "lighting_space_type_name": "lobby_lighting",
+    "ventilation_space_type_name": "lobby_ventilation",
+    "electric_equipment_space_type_name": "lobby_elevator_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - elevator schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'lobby'; specific value(s): electric_equipment; other values repeated from the 'lobby' level 1 entry"
+  },
+  {
+    "space_type_name": "lobby - hotel",
+    "lighting_space_type_name": "lobby_for_hotel_lighting",
+    "ventilation_space_type_name": "hotels_motels_resorts_dormitories_lobbies_prefunction_ventilation",
+    "electric_equipment_space_type_name": "lobby_hotel_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - hotel schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'lobby'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'lobby' level 1 entry"
+  },
+  {
+    "space_type_name": "lobby - motion picture theater",
+    "lighting_space_type_name": "lobby_for_motion_picture_theater_lighting",
+    "ventilation_space_type_name": "public_assembly_spaces_lobbies_ventilation",
+    "electric_equipment_space_type_name": "lobby_motion_picture_theater_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - motion picture theater schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'lobby'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'lobby' level 1 entry; 62.1 'public assembly spaces - lobbies' ventilation applied to theater lobbies"
+  },
+  {
+    "space_type_name": "lobby - performing arts theater",
+    "lighting_space_type_name": "lobby_for_performing_arts_theater_lighting",
+    "ventilation_space_type_name": "public_assembly_spaces_lobbies_ventilation",
+    "electric_equipment_space_type_name": "lobby_performing_arts_theater_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - performing arts theater schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'lobby'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'lobby' level 1 entry; 62.1 'public assembly spaces - lobbies' ventilation applied to theater lobbies"
+  },
+  {
+    "space_type_name": "lobby - primary school",
+    "lighting_space_type_name": "lobby_lighting",
+    "ventilation_space_type_name": "lobby_ventilation",
+    "electric_equipment_space_type_name": "lobby_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "lobby in a primary school building"
+  },
+  {
+    "space_type_name": "lobby - secondary school",
+    "lighting_space_type_name": "lobby_lighting",
+    "ventilation_space_type_name": "lobby_ventilation",
+    "electric_equipment_space_type_name": "lobby_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lobby - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "lobby in a secondary school building"
+  },
+  {
+    "space_type_name": "locker room",
+    "lighting_space_type_name": "locker_room_lighting",
+    "ventilation_space_type_name": "locker_room_ventilation",
+    "electric_equipment_space_type_name": "locker_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "locker room schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "locker room - primary school",
+    "lighting_space_type_name": "locker_room_lighting",
+    "ventilation_space_type_name": "locker_room_ventilation",
+    "electric_equipment_space_type_name": "locker_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "locker room - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "locker room in a primary school building"
+  },
+  {
+    "space_type_name": "locker room - secondary school",
+    "lighting_space_type_name": "locker_room_lighting",
+    "ventilation_space_type_name": "locker_room_ventilation",
+    "electric_equipment_space_type_name": "locker_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "locker room - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "locker room in a secondary school building"
+  },
+  {
+    "space_type_name": "lounge/breakroom",
+    "lighting_space_type_name": "lounge_breakroom_lighting",
+    "ventilation_space_type_name": "lounge_breakroom_ventilation",
+    "electric_equipment_space_type_name": "lounge_breakroom_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lounge/breakroom schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "lounge/breakroom - health care facility",
+    "lighting_space_type_name": "lounge_recreation_for_hospital_lighting",
+    "ventilation_space_type_name": "lounge_breakroom_ventilation",
+    "electric_equipment_space_type_name": "lounge_breakroom_healthcare_facility_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "lounge/breakroom - health care facility schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'lounge/breakroom'; specific value(s): lighting, electric_equipment; other values repeated from the 'lounge/breakroom' level 1 entry"
+  },
+  {
+    "space_type_name": "manufacturing",
+    "lighting_space_type_name": "manufacturing_lighting",
+    "ventilation_space_type_name": "manufacturing_ventilation",
+    "electric_equipment_space_type_name": "manufacturing_low_bay_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "manufacturing schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "manufacturing - detailed manufacturing area",
+    "lighting_space_type_name": "manufacturing_facility_detailed_manufacturing_area_lighting",
+    "ventilation_space_type_name": "manufacturing_ventilation",
+    "electric_equipment_space_type_name": "manufacturing_low_bay_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "manufacturing - detailed manufacturing area schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'manufacturing'; specific value(s): lighting; other values repeated from the 'manufacturing' level 1 entry"
+  },
+  {
+    "space_type_name": "manufacturing - equipment room",
+    "lighting_space_type_name": "manufacturing_facility_equipment_room_lighting",
+    "ventilation_space_type_name": "manufacturing_ventilation",
+    "electric_equipment_space_type_name": "manufacturing_equipment_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "manufacturing - equipment room schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'manufacturing'; specific value(s): lighting, electric_equipment; other values repeated from the 'manufacturing' level 1 entry"
+  },
+  {
+    "space_type_name": "manufacturing - high bay (25-50 ft floor-to-ceiling height)",
+    "lighting_space_type_name": "manufacturing_facility_high_bay_area_25_to_50_ft_ftc_hgt_lighting",
+    "ventilation_space_type_name": "manufacturing_ventilation",
+    "electric_equipment_space_type_name": "manufacturing_low_bay_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "manufacturing - high bay (25-50 ft floor-to-ceiling height) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'manufacturing'; specific value(s): lighting; other values repeated from the 'manufacturing' level 1 entry"
+  },
+  {
+    "space_type_name": "manufacturing - low bay (< 25 ft floor-to-ceiling height)",
+    "lighting_space_type_name": "manufacturing_facility_low_bay_area_lt_25_ft_ftc_hgt_lighting",
+    "ventilation_space_type_name": "manufacturing_ventilation",
+    "electric_equipment_space_type_name": "manufacturing_low_bay_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "manufacturing - low bay (< 25 ft floor-to-ceiling height) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'manufacturing'; specific value(s): lighting; other values repeated from the 'manufacturing' level 1 entry"
+  },
+  {
+    "space_type_name": "medical supply",
+    "lighting_space_type_name": "medical_supply_lighting",
+    "ventilation_space_type_name": "medical_supply_ventilation",
+    "electric_equipment_space_type_name": "pharmacy_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "medical supply schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "multifamily",
+    "lighting_space_type_name": "multifamily_lighting",
+    "ventilation_space_type_name": "multifamily_ventilation",
+    "electric_equipment_space_type_name": "multifamily_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "multifamily schedule set",
+    "critical_operation": false,
+    "annotation": "common areas in a multifamily building/NOT dwelling units; schedule to be revised"
+  },
+  {
+    "space_type_name": "multifamily - dwelling unit",
+    "lighting_space_type_name": "multifamily_lighting",
+    "ventilation_space_type_name": "multifamily_ventilation",
+    "electric_equipment_space_type_name": "dwelling_unit_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "multifamily - dwelling unit schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'multifamily'; specific value(s): electric_equipment; other values repeated from the 'multifamily' level 1 entry; level 1 multifamily entry covers common areas only"
+  },
+  {
+    "space_type_name": "nursery",
+    "lighting_space_type_name": "nursery_lighting",
+    "ventilation_space_type_name": "nursery_ventilation",
+    "electric_equipment_space_type_name": "patient_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "nursery schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "nurses station",
+    "lighting_space_type_name": "nurses_station_lighting",
+    "ventilation_space_type_name": "nurses_station_ventilation",
+    "electric_equipment_space_type_name": "nurses_station_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "nurses station schedule set",
+    "critical_operation": true,
+    "annotation": null
+  },
+  {
+    "space_type_name": "office",
+    "lighting_space_type_name": "office_lighting",
+    "ventilation_space_type_name": "office_ventilation",
+    "electric_equipment_space_type_name": "office_open_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "office schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "office - open plan",
+    "lighting_space_type_name": "office_open_plan_lighting",
+    "ventilation_space_type_name": "office_ventilation",
+    "electric_equipment_space_type_name": "office_open_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "office - open plan schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'office'; specific value(s): lighting; other values repeated from the 'office' level 1 entry"
+  },
+  {
+    "space_type_name": "office/enclosed",
+    "lighting_space_type_name": "office_enclosed_lighting",
+    "ventilation_space_type_name": "office_enclosed_ventilation",
+    "electric_equipment_space_type_name": "office_enclosed_lte_250_sf_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "office/enclosed schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "office/enclosed - > 250 sf",
+    "lighting_space_type_name": "office_enclosed_lighting",
+    "ventilation_space_type_name": "office_enclosed_ventilation",
+    "electric_equipment_space_type_name": "office_enclosed_gt_250_sf_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "office/enclosed - > 250 sf schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'office/enclosed'; specific value(s): electric_equipment; other values repeated from the 'office/enclosed' level 1 entry"
+  },
+  {
+    "space_type_name": "office/enclosed - general",
+    "lighting_space_type_name": "office-enclosed_general_lighting",
+    "ventilation_space_type_name": "office_enclosed_ventilation",
+    "electric_equipment_space_type_name": "office_enclosed_lte_250_sf_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "office/enclosed - general schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'office/enclosed'; specific value(s): lighting; other values repeated from the 'office/enclosed' level 1 entry"
+  },
+  {
+    "space_type_name": "operating room",
+    "lighting_space_type_name": "operating_room_lighting",
+    "ventilation_space_type_name": "operating_room_ventilation",
+    "electric_equipment_space_type_name": "operating_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": "or",
+    "schedule_set_name": "operating room schedule set",
+    "critical_operation": true,
+    "annotation": "natural gas equipment 'or' (operating room) assigned from level_2_natural_gas_equipment"
+  },
+  {
+    "space_type_name": "patient room",
+    "lighting_space_type_name": "patient_room_lighting",
+    "ventilation_space_type_name": "patient_room_ventilation",
+    "electric_equipment_space_type_name": "patient_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "patient room schedule set",
+    "critical_operation": true,
+    "annotation": null
+  },
+  {
+    "space_type_name": "pharmacy",
+    "lighting_space_type_name": "pharmacy_lighting",
+    "ventilation_space_type_name": "pharmacy_ventilation",
+    "electric_equipment_space_type_name": "pharmacy_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "pharmacy schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "physical therapy",
+    "lighting_space_type_name": "physical_therapy_lighting",
+    "ventilation_space_type_name": "physical_therapy_ventilation",
+    "electric_equipment_space_type_name": "physical_therapy_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "physical therapy schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "playing area",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "playing_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "playing area - disco/dance floors",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_disco_dance_floors_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - disco/dance floors schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'playing area'; specific value(s): ventilation; other values repeated from the 'playing area' level 1 entry"
+  },
+  {
+    "space_type_name": "playing area - gambling casinos",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_gambling_casinos_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - gambling casinos schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'playing area'; specific value(s): ventilation; other values repeated from the 'playing area' level 1 entry; parent assignment based on judgment"
+  },
+  {
+    "space_type_name": "playing area - game arcades",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_game_arcades_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - game arcades schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'playing area'; specific value(s): ventilation; other values repeated from the 'playing area' level 1 entry"
+  },
+  {
+    "space_type_name": "playing area - primary school",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "playing_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "playing area in a primary school building"
+  },
+  {
+    "space_type_name": "playing area - secondary school",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "playing_area_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "playing area in a secondary school building"
+  },
+  {
+    "space_type_name": "playing area - stages/studios",
+    "lighting_space_type_name": "playing_area_lighting",
+    "ventilation_space_type_name": "sports_and_entertainment_stages_studios_ventilation",
+    "electric_equipment_space_type_name": "gymnasium_playing_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "playing area - stages/studios schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'playing area'; specific value(s): ventilation; other values repeated from the 'playing area' level 1 entry; parent assignment based on judgment"
+  },
+  {
+    "space_type_name": "plenum",
+    "lighting_space_type_name": "none_lighting",
+    "ventilation_space_type_name": "plenum_ventilation",
+    "electric_equipment_space_type_name": "plenum_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "plenum schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "post office",
+    "lighting_space_type_name": "post_office_lighting",
+    "ventilation_space_type_name": "post_office_ventilation",
+    "electric_equipment_space_type_name": "post_office_sorting_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "post office schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "post office - sorting area",
+    "lighting_space_type_name": "post_office_sorting_area_general_lighting",
+    "ventilation_space_type_name": "post_office_ventilation",
+    "electric_equipment_space_type_name": "post_office_sorting_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "post office - sorting area schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'post office'; specific value(s): lighting; other values repeated from the 'post office' level 1 entry"
+  },
+  {
+    "space_type_name": "recovery",
+    "lighting_space_type_name": "recovery_lighting",
+    "ventilation_space_type_name": "recovery_ventilation",
+    "electric_equipment_space_type_name": "patient_room_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "recovery schedule set",
+    "critical_operation": true,
+    "annotation": null
+  },
+  {
+    "space_type_name": "recreation/common living",
+    "lighting_space_type_name": "recreation_common_living_lighting",
+    "ventilation_space_type_name": "recreation_common_living_ventilation",
+    "electric_equipment_space_type_name": "lounge_breakroom_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "recreation/common living schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "restroom",
+    "lighting_space_type_name": "restroom_lighting",
+    "ventilation_space_type_name": "restroom_ventilation",
+    "electric_equipment_space_type_name": "restroom_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "restroom schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "restroom - primary school",
+    "lighting_space_type_name": "restroom_lighting",
+    "ventilation_space_type_name": "restroom_ventilation",
+    "electric_equipment_space_type_name": "restroom_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "restroom - primary school schedule set",
+    "critical_operation": false,
+    "annotation": "restroom in a primary school building"
+  },
+  {
+    "space_type_name": "restroom - secondary school",
+    "lighting_space_type_name": "restroom_lighting",
+    "ventilation_space_type_name": "restroom_ventilation",
+    "electric_equipment_space_type_name": "restroom_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "restroom - secondary school schedule set",
+    "critical_operation": false,
+    "annotation": "restroom in a secondary school building"
+  },
+  {
+    "space_type_name": "retail",
+    "lighting_space_type_name": "retail_sales_lighting",
+    "ventilation_space_type_name": "retail_sales_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "retail - barber shop",
+    "lighting_space_type_name": "retail_sales_lighting",
+    "ventilation_space_type_name": "retail_barber_shop_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail - barber shop schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'retail'; specific value(s): ventilation; other values repeated from the 'retail' level 1 entry"
+  },
+  {
+    "space_type_name": "retail - beauty and nail salons",
+    "lighting_space_type_name": "retail_sales_lighting",
+    "ventilation_space_type_name": "retail_beauty_and_nail_salons_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail - beauty and nail salons schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'retail'; specific value(s): ventilation; other values repeated from the 'retail' level 1 entry"
+  },
+  {
+    "space_type_name": "retail - mall concourse",
+    "lighting_space_type_name": "retail_mall_concourse_lighting",
+    "ventilation_space_type_name": "retail_sales_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail - mall concourse schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'retail'; specific value(s): lighting; other values repeated from the 'retail' level 1 entry"
+  },
+  {
+    "space_type_name": "retail - pet shops (animal areas)",
+    "lighting_space_type_name": "retail_sales_lighting",
+    "ventilation_space_type_name": "retail_pet_shops_animal_areas_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail - pet shops (animal areas) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'retail'; specific value(s): ventilation; other values repeated from the 'retail' level 1 entry"
+  },
+  {
+    "space_type_name": "retail - supermarket",
+    "lighting_space_type_name": "retail_sales_lighting",
+    "ventilation_space_type_name": "retail_supermarket_ventilation",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "retail - supermarket schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'retail'; specific value(s): ventilation; other values repeated from the 'retail' level 1 entry"
+  },
+  {
+    "space_type_name": "shaft",
+    "lighting_space_type_name": "none_lighting",
+    "ventilation_space_type_name": "shaft_ventilation",
+    "electric_equipment_space_type_name": "shaft_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "shaft schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "sleeping quarters",
+    "lighting_space_type_name": "sleeping_quarters_lighting",
+    "ventilation_space_type_name": "sleeping_quarters_ventilation",
+    "electric_equipment_space_type_name": "firestation_sleeping_quarters_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "sleeping quarters schedule set",
+    "critical_operation": false,
+    "annotation": "sleeping quarters such as in a dormitory"
+  },
+  {
+    "space_type_name": "sports arena",
+    "lighting_space_type_name": "sports_arena_lighting",
+    "ventilation_space_type_name": "sports_arena_ventilation",
+    "electric_equipment_space_type_name": "sports_arena_playing_area_class_ii_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "sports arena schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "sports arena - playing area class IV",
+    "lighting_space_type_name": "sports_arena_lighting",
+    "ventilation_space_type_name": "sports_arena_ventilation",
+    "electric_equipment_space_type_name": "sports_arena_playing_area_class_iv_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "sports arena - playing area class IV schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'sports arena'; specific value(s): electric_equipment; other values repeated from the 'sports arena' level 1 entry"
+  },
+  {
+    "space_type_name": "stairwell",
+    "lighting_space_type_name": "stairwell_lighting",
+    "ventilation_space_type_name": "stairwell_ventilation",
+    "electric_equipment_space_type_name": "stairwell_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "stairwell schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "storage",
+    "lighting_space_type_name": "storage_lighting",
+    "ventilation_space_type_name": "storage_ventilation",
+    "electric_equipment_space_type_name": "storage_50_to_1000_sf_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "storage - 50-1000 sf (hospital)",
+    "lighting_space_type_name": "storage_lighting",
+    "ventilation_space_type_name": "storage_ventilation",
+    "electric_equipment_space_type_name": "storage_50_to_1000_sf_hospital_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - 50-1000 sf (hospital) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "storage - < 50 sf (all other)",
+    "lighting_space_type_name": "storage_lighting",
+    "ventilation_space_type_name": "storage_ventilation",
+    "electric_equipment_space_type_name": "storage_lt_50_sf_all_other_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - < 50 sf (all other) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "storage - < 50 sf (hospital)",
+    "lighting_space_type_name": "storage_lighting",
+    "ventilation_space_type_name": "storage_ventilation",
+    "electric_equipment_space_type_name": "storage_lt_50_sf_hospital_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - < 50 sf (hospital) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "storage - inactive",
+    "lighting_space_type_name": "storage_lighting",
+    "ventilation_space_type_name": "storage_ventilation",
+    "electric_equipment_space_type_name": "storage_inactive_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - inactive schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "storage - warehouse - medium to bulky palletized items",
+    "lighting_space_type_name": "warehouse_storage_area_medium_to_bulky_palletized_items_lighting",
+    "ventilation_space_type_name": "miscellaneous_spaces_warehouses_ventilation",
+    "electric_equipment_space_type_name": "warehouse_bulk_storage_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - warehouse - medium to bulky palletized items schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "storage - warehouse - smaller hand-carried items",
+    "lighting_space_type_name": "warehouse_storage_area_smaller_hand-carried_items_lighting",
+    "ventilation_space_type_name": "miscellaneous_spaces_warehouses_ventilation",
+    "electric_equipment_space_type_name": "warehouse_fine_storage_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "storage - warehouse - smaller hand-carried items schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'storage'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'storage' level 1 entry"
+  },
+  {
+    "space_type_name": "transportation",
+    "lighting_space_type_name": "transportation_lighting",
+    "ventilation_space_type_name": "transportation_ventilation",
+    "electric_equipment_space_type_name": "transportation_ticket_counter_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "transportation schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "transportation - airport concourse",
+    "lighting_space_type_name": "airport_concourse_lighting",
+    "ventilation_space_type_name": "airport_concourse_ventilation",
+    "electric_equipment_space_type_name": "airport_concourse_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "transportation - airport concourse schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'transportation'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'transportation' level 1 entry"
+  },
+  {
+    "space_type_name": "transportation - baggage carousel",
+    "lighting_space_type_name": "baggage_carousel_lighting",
+    "ventilation_space_type_name": "baggage_carousel_ventilation",
+    "electric_equipment_space_type_name": "baggage_carousel_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "transportation - baggage carousel schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'transportation'; specific value(s): lighting, ventilation, electric_equipment; other values repeated from the 'transportation' level 1 entry"
+  },
+  {
+    "space_type_name": "transportation - ticket counter",
+    "lighting_space_type_name": "transportation_facility_ticket_counter_lighting",
+    "ventilation_space_type_name": "transportation_ventilation",
+    "electric_equipment_space_type_name": "transportation_ticket_counter_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "transportation - ticket counter schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'transportation'; specific value(s): lighting; other values repeated from the 'transportation' level 1 entry"
+  },
+  {
+    "space_type_name": "vehicular maintenance",
+    "lighting_space_type_name": "vehicular_maintenance_lighting",
+    "ventilation_space_type_name": "vehicular_maintenance_ventilation",
+    "electric_equipment_space_type_name": "vehicular_maintenance_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "vehicular maintenance schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "vehicular maintenance - automotive (general)",
+    "lighting_space_type_name": "automotive_general_lighting",
+    "ventilation_space_type_name": "vehicular_maintenance_ventilation",
+    "electric_equipment_space_type_name": "vehicular_maintenance_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "vehicular maintenance - automotive (general) schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'vehicular maintenance'; specific value(s): lighting; other values repeated from the 'vehicular maintenance' level 1 entry"
+  },
+  {
+    "space_type_name": "workshop",
+    "lighting_space_type_name": "workshop_lighting",
+    "ventilation_space_type_name": "workshop_ventilation",
+    "electric_equipment_space_type_name": "workshop_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "workshop schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "workshop - photo studio",
+    "lighting_space_type_name": "workshop_lighting",
+    "ventilation_space_type_name": "miscellaneous_spaces_photo_studios_ventilation",
+    "electric_equipment_space_type_name": "workshop_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "workshop - photo studio schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'workshop'; specific value(s): ventilation; other values repeated from the 'workshop' level 1 entry; parent assignment based on judgment"
+  },
+  {
+    "space_type_name": "workshop - wood/metal shop",
+    "lighting_space_type_name": "workshop_lighting",
+    "ventilation_space_type_name": "educational_facilities_wood_metal_shop_ventilation",
+    "electric_equipment_space_type_name": "workshop_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "workshop - wood/metal shop schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'workshop'; specific value(s): ventilation; other values repeated from the 'workshop' level 1 entry"
+  },
+  {
+    "space_type_name": "worship",
+    "lighting_space_type_name": "worship_lighting",
+    "ventilation_space_type_name": "worship_ventilation",
+    "electric_equipment_space_type_name": "worship_pulpit_choir_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "worship schedule set",
+    "critical_operation": false,
+    "annotation": null
+  },
+  {
+    "space_type_name": "worship - fellowship hall",
+    "lighting_space_type_name": "religious_buildings_fellowship_hall_lighting",
+    "ventilation_space_type_name": "worship_ventilation",
+    "electric_equipment_space_type_name": "fellowship_hall_religious_facility_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "worship - fellowship hall schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'worship'; specific value(s): lighting, electric_equipment; other values repeated from the 'worship' level 1 entry"
+  },
+  {
+    "space_type_name": "worship - pulpit/choir",
+    "lighting_space_type_name": "religious_buildings_worship_pulpit_choir_lighting",
+    "ventilation_space_type_name": "worship_ventilation",
+    "electric_equipment_space_type_name": "worship_pulpit_choir_area_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "schedule_set_name": "worship - pulpit/choir schedule set",
+    "critical_operation": false,
+    "annotation": "sub-space type of 'worship'; specific value(s): lighting; other values repeated from the 'worship' level 1 entry"
+  }
+]

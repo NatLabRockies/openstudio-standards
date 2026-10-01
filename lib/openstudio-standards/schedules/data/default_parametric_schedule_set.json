@@ -1,0 +1,2513 @@
+[
+    {
+        "schedule_set_name":  "atrium schedule set",
+        "occupancy_schedule":  "atrium occupancy",
+        "occupancy_provenance":  "pnnl_support: atrium_lt_20_ft_height | fit: control_point_fit",
+        "interior_lighting_schedule":  "atrium lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "atrium electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "atrium"
+        ]
+    },
+    {
+        "schedule_set_name":  "atrium - > 40 ft height schedule set",
+        "occupancy_schedule":  "atrium - > 40 ft height occupancy",
+        "occupancy_provenance":  "pnnl_support: atrium_lt_20_ft_height | fit: control_point_fit",
+        "interior_lighting_schedule":  "atrium - > 40 ft height lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "atrium - > 40 ft height electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "atrium - > 40 ft height"
+        ]
+    },
+    {
+        "schedule_set_name":  "atrium - >= 20 ft and <= 40 ft height schedule set",
+        "occupancy_schedule":  "atrium - >= 20 ft and <= 40 ft height occupancy",
+        "occupancy_provenance":  "pnnl_support: atrium_lt_20_ft_height | fit: control_point_fit",
+        "interior_lighting_schedule":  "atrium - >= 20 ft and <= 40 ft height lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "atrium - >= 20 ft and <= 40 ft height electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "atrium - >= 20 ft and <= 40 ft height"
+        ]
+    },
+    {
+        "schedule_set_name":  "atrium - first three floors schedule set",
+        "occupancy_schedule":  "atrium - first three floors occupancy",
+        "occupancy_provenance":  "pnnl_support: atrium_lt_20_ft_height | fit: control_point_fit",
+        "interior_lighting_schedule":  "atrium - first three floors lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "atrium - first three floors electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "atrium - first three floors"
+        ]
+    },
+    {
+        "schedule_set_name":  "attic schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "attic lighting",
+        "lighting_provenance":  "authored: attic | fit: manual",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "attic"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating schedule set",
+        "occupancy_schedule":  "audience seating occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - auditorium schedule set",
+        "occupancy_schedule":  "audience seating - auditorium occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - auditorium lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - auditorium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - auditorium electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - auditorium"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - auditorium - primary school schedule set",
+        "occupancy_schedule":  "audience seating - auditorium - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - auditorium - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - auditorium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - auditorium - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - auditorium - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - auditorium - secondary school schedule set",
+        "occupancy_schedule":  "audience seating - auditorium - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - auditorium - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - auditorium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - auditorium - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - auditorium - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - bowling alley schedule set",
+        "occupancy_schedule":  "audience seating - bowling alley occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - bowling alley lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - bowling alley against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - bowling alley electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - bowling alley"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - convention center schedule set",
+        "occupancy_schedule":  "audience seating - convention center occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - convention center lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - convention center against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - convention center electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - convention center"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - exercise center schedule set",
+        "occupancy_schedule":  "audience seating - exercise center occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - exercise center lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - exercise center against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - exercise center electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - exercise center"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - general seating area schedule set",
+        "occupancy_schedule":  "audience seating - general seating area occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - general seating area lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - general seating area against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - general seating area electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - general seating area"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - gymnasium schedule set",
+        "occupancy_schedule":  "audience seating - gymnasium occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - gymnasium lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - gymnasium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - gymnasium electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - gymnasium"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - gymnasium - primary school schedule set",
+        "occupancy_schedule":  "audience seating - gymnasium - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - gymnasium - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - gymnasium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - gymnasium - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - gymnasium - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - gymnasium - secondary school schedule set",
+        "occupancy_schedule":  "audience seating - gymnasium - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - gymnasium - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - gymnasium against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - gymnasium - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - gymnasium - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - motion picture theater schedule set",
+        "occupancy_schedule":  "audience seating - motion picture theater occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Auditorium | SchoolSecondary BLDG_OCC_SCH_Auditorium | fit: manual",
+        "interior_lighting_schedule":  "audience seating - motion picture theater lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - motion picture theater against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - motion picture theater electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - motion picture theater"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - penitentiary schedule set",
+        "occupancy_schedule":  "audience seating - penitentiary occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - penitentiary lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - penitentiary against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - penitentiary electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - penitentiary"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - performing arts theater schedule set",
+        "occupancy_schedule":  "audience seating - performing arts theater occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Auditorium | SchoolSecondary BLDG_OCC_SCH_Auditorium | fit: manual",
+        "interior_lighting_schedule":  "audience seating - performing arts theater lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - performing arts theater against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - performing arts theater electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - performing arts theater"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - primary school schedule set",
+        "occupancy_schedule":  "audience seating - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - religious buildings schedule set",
+        "occupancy_schedule":  "audience seating - religious buildings occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Auditorium | SchoolSecondary BLDG_OCC_SCH_Auditorium | fit: manual",
+        "interior_lighting_schedule":  "audience seating - religious buildings lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - religious buildings against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - religious buildings electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "audience seating - religious buildings hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "audience seating - religious buildings"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - secondary school schedule set",
+        "occupancy_schedule":  "audience seating - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "audience seating - sports arena schedule set",
+        "occupancy_schedule":  "audience seating - sports arena occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "audience seating - sports arena lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of audience seating - sports arena against its Wkdy occupancy trace, exponential response 0.05, MAE 0.083 (was 0.227 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "audience seating - sports arena electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "audience seating - sports arena"
+        ]
+    },
+    {
+        "schedule_set_name":  "banking schedule set",
+        "occupancy_schedule":  "banking occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "banking lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "banking electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "banking"
+        ]
+    },
+    {
+        "schedule_set_name":  "banking - bank vaults/safe deposit schedule set",
+        "occupancy_schedule":  "banking - bank vaults/safe deposit occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/banking_activity | banking_activity | fit: manual",
+        "interior_lighting_schedule":  "banking - bank vaults/safe deposit lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "banking - bank vaults/safe deposit electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "banking - bank vaults/safe deposit"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training schedule set",
+        "occupancy_schedule":  "classroom/lecture/training occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - art classroom schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - art classroom occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - art classroom lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - art classroom against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - art classroom electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - art classroom hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - art classroom"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - classrooms (ages 5-8) schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - classrooms (ages 5-8) occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - classrooms (ages 5-8) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - classrooms (ages 5-8) against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - classrooms (ages 5-8) electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - classrooms (ages 5-8) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - classrooms (ages 5-8)"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - daycare (through age 4) schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - daycare (through age 4) occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/PrimarySchool - Classroom | SchoolPrimary BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "classroom/lecture/training - daycare (through age 4) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - daycare (through age 4) against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - daycare (through age 4) electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - daycare (through age 4) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - daycare (through age 4)"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - lecture classroom schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - lecture classroom occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - lecture classroom lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - lecture classroom against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - lecture classroom electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - lecture classroom hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - lecture classroom"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - lecture hall (fixed seats) schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - lecture hall (fixed seats) occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - lecture hall (fixed seats) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - lecture hall (fixed seats) against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - lecture hall (fixed seats) electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - lecture hall (fixed seats) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - lecture hall (fixed seats)"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - music/theater/dance schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - music/theater/dance occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/PrimarySchool - Classroom | SchoolPrimary BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "classroom/lecture/training - music/theater/dance lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - music/theater/dance against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - music/theater/dance electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - music/theater/dance hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - music/theater/dance"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - penitentiary schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - penitentiary occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - penitentiary lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - penitentiary against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - penitentiary electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - penitentiary hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - penitentiary"
+        ]
+    },
+    {
+        "schedule_set_name":  "classroom/lecture/training - preschool to 12th grade schedule set",
+        "occupancy_schedule":  "classroom/lecture/training - preschool to 12th grade occupancy",
+        "occupancy_provenance":  "comstock_2019: SchoolPrimary BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "classroom/lecture/training - preschool to 12th grade lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of classroom/lecture/training - preschool to 12th grade against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "classroom/lecture/training - preschool to 12th grade electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "classroom/lecture/training - preschool to 12th grade hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "classroom/lecture/training - preschool to 12th grade"
+        ]
+    },
+    {
+        "schedule_set_name":  "computer room schedule set",
+        "occupancy_schedule":  "computer room occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "computer room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "computer room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "computer room"
+        ]
+    },
+    {
+        "schedule_set_name":  "computer room - computer (not printing) schedule set",
+        "occupancy_schedule":  "computer room - computer (not printing) occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "computer room - computer (not printing) lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "computer room - computer (not printing) electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "computer room - computer (not printing)"
+        ]
+    },
+    {
+        "schedule_set_name":  "conference/meeting/multipurpose schedule set",
+        "occupancy_schedule":  "conference/meeting/multipurpose occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "conference/meeting/multipurpose lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "conference/meeting/multipurpose electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "conference/meeting/multipurpose"
+        ]
+    },
+    {
+        "schedule_set_name":  "conference/meeting/multipurpose - multi-use assembly schedule set",
+        "occupancy_schedule":  "conference/meeting/multipurpose - multi-use assembly occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "conference/meeting/multipurpose - multi-use assembly lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "conference/meeting/multipurpose - multi-use assembly electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "conference/meeting/multipurpose - multi-use assembly"
+        ]
+    },
+    {
+        "schedule_set_name":  "confinement cells schedule set",
+        "occupancy_schedule":  "confinement cells occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "confinement cells lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "confinement cells electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "confinement cells"
+        ]
+    },
+    {
+        "schedule_set_name":  "confinement cells - booking/waiting schedule set",
+        "occupancy_schedule":  "confinement cells - booking/waiting occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "confinement cells - booking/waiting lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "confinement cells - booking/waiting electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "confinement cells - booking/waiting"
+        ]
+    },
+    {
+        "schedule_set_name":  "confinement cells - day room schedule set",
+        "occupancy_schedule":  "confinement cells - day room occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "confinement cells - day room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "confinement cells - day room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "confinement cells - day room"
+        ]
+    },
+    {
+        "schedule_set_name":  "confinement cells - guard stations schedule set",
+        "occupancy_schedule":  "confinement cells - guard stations occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Courthouse - Cell | Courthouse CELL_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "confinement cells - guard stations lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "confinement cells - guard stations electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "confinement cells - guard stations"
+        ]
+    },
+    {
+        "schedule_set_name":  "copy/print schedule set",
+        "occupancy_schedule":  "copy/print occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Office - PrintRoom | OfficeLarge BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "copy/print lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "copy/print electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "copy/print"
+        ]
+    },
+    {
+        "schedule_set_name":  "corridor schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "corridor lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Corridor | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "corridor electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/corridor_all_other | corridor_all_other | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "corridor"
+        ]
+    },
+    {
+        "schedule_set_name":  "corridor - hospital schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "corridor - hospital lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/Hospital - Corridor | Hospital BLDG_LIGHT_CORRIDOR_SCH | fit: control_point_fit",
+        "electric_equipment_schedule":  "corridor - hospital electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/corridor_all_other | corridor_all_other | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "corridor - hospital"
+        ]
+    },
+    {
+        "schedule_set_name":  "corridor - manufacturing facility schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "corridor - manufacturing facility lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Corridor | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "corridor - manufacturing facility electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/corridor_all_other | corridor_all_other | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "corridor - manufacturing facility"
+        ]
+    },
+    {
+        "schedule_set_name":  "corridor - primary school schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "corridor - primary school lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Corridor | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "corridor - primary school electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/corridor_all_other | corridor_all_other | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "corridor - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "corridor - secondary school schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "corridor - secondary school lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Corridor | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "corridor - secondary school electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/corridor_all_other | corridor_all_other | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "corridor - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "courtroom schedule set",
+        "occupancy_schedule":  "courtroom occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "courtroom lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "courtroom electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "courtroom"
+        ]
+    },
+    {
+        "schedule_set_name":  "datacenter/high ite schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "datacenter/high ite lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/computer_room | computer_room | fit: control_point_fit",
+        "electric_equipment_schedule":  "datacenter/high ite electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/computer_room | computer_room | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "datacenter/high ite"
+        ]
+    },
+    {
+        "schedule_set_name":  "datacenter/low ite schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "datacenter/low ite lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/computer_room | computer_room | fit: control_point_fit",
+        "electric_equipment_schedule":  "datacenter/low ite electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/computer_room | computer_room | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "datacenter/low ite"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining schedule set",
+        "occupancy_schedule":  "dining occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "dining lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - bar/lounge/leisure schedule set",
+        "occupancy_schedule":  "dining - bar/lounge/leisure occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/FullServiceRestaurant - Dining | RestaurantSitDown BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "dining - bar/lounge/leisure lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - bar/lounge/leisure electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - bar/lounge/leisure"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - cafeteria/fast food schedule set",
+        "occupancy_schedule":  "dining - cafeteria/fast food occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/FullServiceRestaurant - Dining | RestaurantSitDown BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "dining - cafeteria/fast food lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - cafeteria/fast food electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - cafeteria/fast food"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - family dining schedule set",
+        "occupancy_schedule":  "dining - family dining occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "dining - family dining lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - family dining electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - family dining"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - penitentiary schedule set",
+        "occupancy_schedule":  "dining - penitentiary occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "dining - penitentiary lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - penitentiary electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - penitentiary"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - primary school schedule set",
+        "occupancy_schedule":  "dining - primary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "dining - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "dining - secondary school schedule set",
+        "occupancy_schedule":  "dining - secondary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "dining - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "dining - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dining - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "dressing room schedule set",
+        "occupancy_schedule":  "dressing room occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Outpatient - DressingRoom | OutPatientHealthCare BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "dressing room lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/Outpatient - DressingRoom | OutPatientHealthCare BLDG_LIGHT_SCH | fit: grid_search",
+        "electric_equipment_schedule":  "dressing room electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/Outpatient - DressingRoom | OutPatientHealthCare BLDG_EQUIP_SCH_2013 | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "dressing room"
+        ]
+    },
+    {
+        "schedule_set_name":  "electrical/mechanical schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "electrical/mechanical lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/PrimarySchool - Mechanical | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "electrical/mechanical electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/electrical_mechanical | electrical_mechanical | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "electrical/mechanical"
+        ]
+    },
+    {
+        "schedule_set_name":  "emergency room schedule set",
+        "occupancy_schedule":  "emergency room occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "emergency room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "emergency room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "emergency room hot water equipment",
+        "hot_water_equipment_provenance":  "authored: emergency_room | Hospital BLDG_SWH_EXTD_SCH | fit: manual",
+        "applies_to":  [
+            "emergency room"
+        ]
+    },
+    {
+        "schedule_set_name":  "emergency vehicle garage schedule set",
+        "occupancy_schedule":  "emergency vehicle garage occupancy",
+        "occupancy_provenance":  "pnnl_support: emergency_vehicle_garage | fit: control_point_fit",
+        "interior_lighting_schedule":  "emergency vehicle garage lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "emergency vehicle garage electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "emergency vehicle garage"
+        ]
+    },
+    {
+        "schedule_set_name":  "exam/treatment schedule set",
+        "occupancy_schedule":  "exam/treatment occupancy",
+        "occupancy_provenance":  "comstock_2019: OutPatientHealthCare BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "exam/treatment lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "exam/treatment electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "exam/treatment hot water equipment",
+        "hot_water_equipment_provenance":  "authored: exam_treatment | OutPatientHealthCare BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "exam/treatment"
+        ]
+    },
+    {
+        "schedule_set_name":  "exercise area schedule set",
+        "occupancy_schedule":  "exercise area occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "exercise area lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "exercise area electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exercise area"
+        ]
+    },
+    {
+        "schedule_set_name":  "exercise area - health club/weight rooms schedule set",
+        "occupancy_schedule":  "exercise area - health club/weight rooms occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "exercise area - health club/weight rooms lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "exercise area - health club/weight rooms electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exercise area - health club/weight rooms"
+        ]
+    },
+    {
+        "schedule_set_name":  "exercise area - primary school schedule set",
+        "occupancy_schedule":  "exercise area - primary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "exercise area - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "exercise area - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exercise area - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "exercise area - secondary school schedule set",
+        "occupancy_schedule":  "exercise area - secondary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "exercise area - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "exercise area - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exercise area - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "exercise area - swimming pool deck schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "exercise area - swimming pool deck lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SmallHotel - Exercise | HotelSmall BLDG_LIGHT_EXERCENTER_SCH | fit: control_point_fit",
+        "electric_equipment_schedule":  "exercise area - swimming pool deck electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/SmallHotel - Exercise | HotelSmall ExerciseCenter_Eqp_Sch | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exercise area - swimming pool deck"
+        ]
+    },
+    {
+        "schedule_set_name":  "exhibit schedule set",
+        "occupancy_schedule":  "exhibit occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "exhibit lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "electric_equipment_schedule":  "exhibit electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exhibit"
+        ]
+    },
+    {
+        "schedule_set_name":  "exhibit - children's museum schedule set",
+        "occupancy_schedule":  "exhibit - children's museum occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "exhibit - children's museum lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "electric_equipment_schedule":  "exhibit - children's museum electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exhibit - children's museum"
+        ]
+    },
+    {
+        "schedule_set_name":  "exhibit - convention center schedule set",
+        "occupancy_schedule":  "exhibit - convention center occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "exhibit - convention center lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "electric_equipment_schedule":  "exhibit - convention center electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exhibit - convention center"
+        ]
+    },
+    {
+        "schedule_set_name":  "exhibit - museum restoration room schedule set",
+        "occupancy_schedule":  "exhibit - museum restoration room occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "exhibit - museum restoration room lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "electric_equipment_schedule":  "exhibit - museum restoration room electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/museum_exhibit_area | museum_exhibit_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "exhibit - museum restoration room"
+        ]
+    },
+    {
+        "schedule_set_name":  "food preparation schedule set",
+        "occupancy_schedule":  "food preparation occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation"
+        ],
+        "start_time_offset":  -1.0,
+        "end_time_offset":  1.0
+    },
+    {
+        "schedule_set_name":  "food preparation - bakery schedule set",
+        "occupancy_schedule":  "food preparation - bakery occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation - bakery lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation - bakery electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation - bakery gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation - bakery hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation - bakery"
+        ],
+        "start_time_offset":  -1.0,
+        "end_time_offset":  1.0
+    },
+    {
+        "schedule_set_name":  "food preparation - deli schedule set",
+        "occupancy_schedule":  "food preparation - deli occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation - deli lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation - deli electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation - deli gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation - deli hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation - deli"
+        ],
+        "start_time_offset":  -1.0,
+        "end_time_offset":  1.0
+    },
+    {
+        "schedule_set_name":  "food preparation - deli/bakery schedule set",
+        "occupancy_schedule":  "food preparation - deli/bakery occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation - deli/bakery lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation - deli/bakery electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation - deli/bakery gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation - deli/bakery hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation - deli/bakery"
+        ],
+        "start_time_offset":  -1.0,
+        "end_time_offset":  1.0
+    },
+    {
+        "schedule_set_name":  "food preparation - primary school schedule set",
+        "occupancy_schedule":  "food preparation - primary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation - primary school lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation - primary school gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation - primary school hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "food preparation - secondary school schedule set",
+        "occupancy_schedule":  "food preparation - secondary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "food preparation - secondary school lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "food preparation - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "food preparation - secondary school gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "food preparation - secondary school hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "food preparation - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "guest room schedule set",
+        "occupancy_schedule":  "guest room occupancy",
+        "occupancy_provenance":  "authored: fit: manual",
+        "interior_lighting_schedule":  "guest room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "guest room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "guest room hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "guest room"
+        ]
+    },
+    {
+        "schedule_set_name":  "imaging schedule set",
+        "occupancy_schedule":  "imaging occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Hospital - Radiology | Hospital BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "imaging lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "imaging electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "imaging hot water equipment",
+        "hot_water_equipment_provenance":  "authored: imaging | Hospital BLDG_SWH_EXTD_SCH | fit: manual",
+        "applies_to":  [
+            "imaging"
+        ]
+    },
+    {
+        "schedule_set_name":  "interior parking schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "interior parking lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "interior parking"
+        ]
+    },
+    {
+        "schedule_set_name":  "judges chambers schedule set",
+        "occupancy_schedule":  "judges chambers occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "judges chambers lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "judges chambers electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "judges chambers"
+        ]
+    },
+    {
+        "schedule_set_name":  "laboratory schedule set",
+        "occupancy_schedule":  "laboratory occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "laboratory lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "laboratory electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "laboratory hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "laboratory"
+        ]
+    },
+    {
+        "schedule_set_name":  "laboratory - science laboratories (educational) schedule set",
+        "occupancy_schedule":  "laboratory - science laboratories (educational) occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "laboratory - science laboratories (educational) lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "laboratory - science laboratories (educational) electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "laboratory - science laboratories (educational) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "laboratory - science laboratories (educational)"
+        ]
+    },
+    {
+        "schedule_set_name":  "laundry/washing schedule set",
+        "occupancy_schedule":  "laundry/washing occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "laundry/washing lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "laundry/washing electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "laundry/washing gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "laundry/washing hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "laundry/washing"
+        ]
+    },
+    {
+        "schedule_set_name":  "laundry/washing - coin-operated laundries schedule set",
+        "occupancy_schedule":  "laundry/washing - coin-operated laundries occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "laundry/washing - coin-operated laundries lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "laundry/washing - coin-operated laundries electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "laundry/washing - coin-operated laundries gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "laundry/washing - coin-operated laundries hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "laundry/washing - coin-operated laundries"
+        ]
+    },
+    {
+        "schedule_set_name":  "library schedule set",
+        "occupancy_schedule":  "library occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - cataloging schedule set",
+        "occupancy_schedule":  "library - cataloging occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - cataloging lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - cataloging against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - cataloging electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - cataloging"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - media center schedule set",
+        "occupancy_schedule":  "library - media center occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - media center lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - media center against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - media center electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - media center"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - media center - primary school schedule set",
+        "occupancy_schedule":  "library - media center - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - media center - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - media center against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - media center - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - media center - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - media center - secondary school schedule set",
+        "occupancy_schedule":  "library - media center - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - media center - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - media center against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - media center - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - media center - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - primary school schedule set",
+        "occupancy_schedule":  "library - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - reading area schedule set",
+        "occupancy_schedule":  "library - reading area occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Library | SchoolSecondary BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "library - reading area lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - reading area against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - reading area electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - reading area"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - secondary school schedule set",
+        "occupancy_schedule":  "library - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - stacks schedule set",
+        "occupancy_schedule":  "library - stacks occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - stacks lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - stacks against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - stacks electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - stacks"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - stacks - primary school schedule set",
+        "occupancy_schedule":  "library - stacks - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - stacks - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - stacks against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - stacks - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - stacks - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "library - stacks - secondary school schedule set",
+        "occupancy_schedule":  "library - stacks - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "library - stacks - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of library - stacks against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "library - stacks - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "library - stacks - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "living quarters schedule set",
+        "occupancy_schedule":  "living quarters occupancy",
+        "occupancy_provenance":  "pnnl_support: dormitory_living_quarters | fit: control_point_fit",
+        "interior_lighting_schedule":  "living quarters lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own living quarters source profiles (R4), since no occupancy derivation follows them (best MAE 0.151)",
+        "electric_equipment_schedule":  "living quarters electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own living quarters source profiles (R4), since no occupancy derivation follows them (best MAE 0.246)",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "living quarters hot water equipment",
+        "hot_water_equipment_provenance":  "authored: dormitory_living_quarters | ApartmentMidRise APT_DHW_SCH | fit: manual",
+        "applies_to":  [
+            "living quarters"
+        ]
+    },
+    {
+        "schedule_set_name":  "loading dock schedule set",
+        "occupancy_schedule":  "loading dock occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: manual",
+        "interior_lighting_schedule":  "loading dock lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: grid_search",
+        "electric_equipment_schedule":  "loading dock electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "loading dock"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby schedule set",
+        "occupancy_schedule":  "lobby occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "lobby lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - elevator schedule set",
+        "occupancy_schedule":  "lobby - elevator occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "lobby - elevator lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby - elevator against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby - elevator electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - elevator"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - hotel schedule set",
+        "occupancy_schedule":  "lobby - hotel occupancy",
+        "occupancy_provenance":  "authored: fit: manual",
+        "interior_lighting_schedule":  "lobby - hotel lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own lobby - hotel source profiles (R4), since no occupancy derivation follows them (best MAE 0.227)",
+        "electric_equipment_schedule":  "lobby - hotel electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own lobby - hotel source profiles (R4), since no occupancy derivation follows them (best MAE 0.388)",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - hotel"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - motion picture theater schedule set",
+        "occupancy_schedule":  "lobby - motion picture theater occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Lobby | SchoolSecondary BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "lobby - motion picture theater lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby - motion picture theater against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby - motion picture theater electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - motion picture theater"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - performing arts theater schedule set",
+        "occupancy_schedule":  "lobby - performing arts theater occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Lobby | SchoolSecondary BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "lobby - performing arts theater lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby - performing arts theater against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby - performing arts theater electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - performing arts theater"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - primary school schedule set",
+        "occupancy_schedule":  "lobby - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "lobby - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "lobby - secondary school schedule set",
+        "occupancy_schedule":  "lobby - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "lobby - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of lobby against its Wkdy occupancy trace, exponential-inverse response 2.55, MAE 0.049 (was 0.225 at the 0.05 floor)",
+        "electric_equipment_schedule":  "lobby - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "lobby - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "locker room schedule set",
+        "occupancy_schedule":  "locker room occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "locker room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "locker room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "locker room"
+        ]
+    },
+    {
+        "schedule_set_name":  "locker room - primary school schedule set",
+        "occupancy_schedule":  "locker room - primary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "locker room - primary school lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "locker room - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "locker room - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "locker room - secondary school schedule set",
+        "occupancy_schedule":  "locker room - secondary school occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "locker room - secondary school lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "locker room - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "locker room - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "lounge/breakroom schedule set",
+        "occupancy_schedule":  "lounge/breakroom occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "lounge/breakroom lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "lounge/breakroom electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "lounge/breakroom hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "lounge/breakroom"
+        ]
+    },
+    {
+        "schedule_set_name":  "lounge/breakroom - health care facility schedule set",
+        "occupancy_schedule":  "lounge/breakroom - health care facility occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "lounge/breakroom - health care facility lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "lounge/breakroom - health care facility electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "lounge/breakroom - health care facility hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "lounge/breakroom - health care facility"
+        ]
+    },
+    {
+        "schedule_set_name":  "manufacturing schedule set",
+        "occupancy_schedule":  "manufacturing occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: control_point_fit",
+        "interior_lighting_schedule":  "manufacturing lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "electric_equipment_schedule":  "manufacturing electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "manufacturing hot water equipment",
+        "hot_water_equipment_provenance":  "authored: manufacturing_low_bay | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "manufacturing"
+        ]
+    },
+    {
+        "schedule_set_name":  "manufacturing - detailed manufacturing area schedule set",
+        "occupancy_schedule":  "manufacturing - detailed manufacturing area occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: control_point_fit",
+        "interior_lighting_schedule":  "manufacturing - detailed manufacturing area lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "electric_equipment_schedule":  "manufacturing - detailed manufacturing area electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "manufacturing - detailed manufacturing area hot water equipment",
+        "hot_water_equipment_provenance":  "authored: manufacturing_low_bay | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "manufacturing - detailed manufacturing area"
+        ]
+    },
+    {
+        "schedule_set_name":  "manufacturing - equipment room schedule set",
+        "occupancy_schedule":  "manufacturing - equipment room occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: manual",
+        "interior_lighting_schedule":  "manufacturing - equipment room lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "manufacturing - equipment room hot water equipment",
+        "hot_water_equipment_provenance":  "authored: manufacturing_equipment_room | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "manufacturing - equipment room"
+        ]
+    },
+    {
+        "schedule_set_name":  "manufacturing - high bay (25-50 ft floor-to-ceiling height) schedule set",
+        "occupancy_schedule":  "manufacturing - high bay (25-50 ft floor-to-ceiling height) occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: control_point_fit",
+        "interior_lighting_schedule":  "manufacturing - high bay (25-50 ft floor-to-ceiling height) lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "electric_equipment_schedule":  "manufacturing - high bay (25-50 ft floor-to-ceiling height) electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "manufacturing - high bay (25-50 ft floor-to-ceiling height) hot water equipment",
+        "hot_water_equipment_provenance":  "authored: manufacturing_low_bay | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "manufacturing - high bay (25-50 ft floor-to-ceiling height)"
+        ]
+    },
+    {
+        "schedule_set_name":  "manufacturing - low bay (< 25 ft floor-to-ceiling height) schedule set",
+        "occupancy_schedule":  "manufacturing - low bay (< 25 ft floor-to-ceiling height) occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: control_point_fit",
+        "interior_lighting_schedule":  "manufacturing - low bay (< 25 ft floor-to-ceiling height) lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "electric_equipment_schedule":  "manufacturing - low bay (< 25 ft floor-to-ceiling height) electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/manufacturing_low_bay | manufacturing_low_bay | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "manufacturing - low bay (< 25 ft floor-to-ceiling height) hot water equipment",
+        "hot_water_equipment_provenance":  "authored: manufacturing_low_bay | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "manufacturing - low bay (< 25 ft floor-to-ceiling height)"
+        ]
+    },
+    {
+        "schedule_set_name":  "medical supply schedule set",
+        "occupancy_schedule":  "medical supply occupancy",
+        "occupancy_provenance":  "pnnl_support: pharmacy | fit: control_point_fit",
+        "interior_lighting_schedule":  "medical supply lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "medical supply electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "medical supply"
+        ]
+    },
+    {
+        "schedule_set_name":  "multifamily schedule set",
+        "occupancy_schedule":  "multifamily occupancy",
+        "occupancy_provenance":  "authored: fit: manual",
+        "interior_lighting_schedule":  "multifamily lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "multifamily electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "multifamily hot water equipment",
+        "hot_water_equipment_provenance":  "authored: apartment | ApartmentHighRise APT_DHW_SCH | fit: manual",
+        "applies_to":  [
+            "multifamily"
+        ]
+    },
+    {
+        "schedule_set_name":  "multifamily - dwelling unit schedule set",
+        "occupancy_schedule":  "multifamily - dwelling unit occupancy",
+        "occupancy_provenance":  "authored: fit: manual",
+        "interior_lighting_schedule":  "multifamily - dwelling unit lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "multifamily - dwelling unit electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "multifamily - dwelling unit hot water equipment",
+        "hot_water_equipment_provenance":  "authored: apartment | ApartmentHighRise APT_DHW_SCH | fit: manual",
+        "applies_to":  [
+            "multifamily - dwelling unit"
+        ]
+    },
+    {
+        "schedule_set_name":  "nursery schedule set",
+        "occupancy_schedule":  "nursery occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/patient_room | patient_room | fit: control_point_fit",
+        "interior_lighting_schedule":  "nursery lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "nursery electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "nursery"
+        ]
+    },
+    {
+        "schedule_set_name":  "nurses station schedule set",
+        "occupancy_schedule":  "nurses station occupancy",
+        "occupancy_provenance":  "comstock_2019: OutPatientHealthCare BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "nurses station lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "nurses station electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "nurses station"
+        ]
+    },
+    {
+        "schedule_set_name":  "office schedule set",
+        "occupancy_schedule":  "office occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "office lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "office electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "office hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "office"
+        ]
+    },
+    {
+        "schedule_set_name":  "office - open plan schedule set",
+        "occupancy_schedule":  "office - open plan occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "office - open plan lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "office - open plan electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "office - open plan hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "office - open plan"
+        ]
+    },
+    {
+        "schedule_set_name":  "office/enclosed schedule set",
+        "occupancy_schedule":  "office/enclosed occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "office/enclosed lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "office/enclosed electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "office/enclosed hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "office/enclosed"
+        ]
+    },
+    {
+        "schedule_set_name":  "office/enclosed - > 250 sf schedule set",
+        "occupancy_schedule":  "office/enclosed - > 250 sf occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "office/enclosed - > 250 sf lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "office/enclosed - > 250 sf electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "office/enclosed - > 250 sf hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "office/enclosed - > 250 sf"
+        ]
+    },
+    {
+        "schedule_set_name":  "office/enclosed - general schedule set",
+        "occupancy_schedule":  "office/enclosed - general occupancy",
+        "occupancy_provenance":  "comstock_2019: OfficeLarge BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "office/enclosed - general lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "office/enclosed - general electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "office/enclosed - general hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "office/enclosed - general"
+        ]
+    },
+    {
+        "schedule_set_name":  "operating room schedule set",
+        "occupancy_schedule":  "operating room occupancy",
+        "occupancy_provenance":  "comstock_2019: Hospital BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "operating room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "operating room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  "operating room gas equipment",
+        "gas_equipment_provenance":  "legacy",
+        "hot_water_equipment_schedule":  "operating room hot water equipment",
+        "hot_water_equipment_provenance":  "authored: operating_room | Hospital BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "operating room"
+        ]
+    },
+    {
+        "schedule_set_name":  "patient room schedule set",
+        "occupancy_schedule":  "patient room occupancy",
+        "occupancy_provenance":  "comstock_2019: Hospital BLDG_OCC_EXTD_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "patient room lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "patient room electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "patient room hot water equipment",
+        "hot_water_equipment_provenance":  "authored: patient_room | Hospital BLDG_SWH_EXTD_SCH | fit: manual",
+        "applies_to":  [
+            "patient room"
+        ]
+    },
+    {
+        "schedule_set_name":  "pharmacy schedule set",
+        "occupancy_schedule":  "pharmacy occupancy",
+        "occupancy_provenance":  "pnnl_support: pharmacy | fit: control_point_fit",
+        "interior_lighting_schedule":  "pharmacy lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "pharmacy electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "pharmacy"
+        ]
+    },
+    {
+        "schedule_set_name":  "physical therapy schedule set",
+        "occupancy_schedule":  "physical therapy occupancy",
+        "occupancy_provenance":  "comstock_2019: OutPatientHealthCare BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "physical therapy lighting",
+        "lighting_provenance":  "legacy",
+        "electric_equipment_schedule":  "physical therapy electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "physical therapy hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "physical therapy"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area schedule set",
+        "occupancy_schedule":  "playing area occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "playing area lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gymnasium_playing_area | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - disco/dance floors schedule set",
+        "occupancy_schedule":  "playing area - disco/dance floors occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Gym | SchoolSecondary BLDG_OCC_SCH_Gym | fit: manual",
+        "interior_lighting_schedule":  "playing area - disco/dance floors lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area - disco/dance floors against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - disco/dance floors electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - disco/dance floors hot water equipment",
+        "hot_water_equipment_provenance":  "authored: dance_floor | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - disco/dance floors"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - gambling casinos schedule set",
+        "occupancy_schedule":  "playing area - gambling casinos occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Gym | SchoolSecondary BLDG_OCC_SCH_Gym | fit: manual",
+        "interior_lighting_schedule":  "playing area - gambling casinos lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area - gambling casinos against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - gambling casinos electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - gambling casinos hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gambling_casino | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - gambling casinos"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - game arcades schedule set",
+        "occupancy_schedule":  "playing area - game arcades occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "playing area - game arcades lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area - game arcades against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - game arcades electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - game arcades hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gymnasium_playing_area | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - game arcades"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - primary school schedule set",
+        "occupancy_schedule":  "playing area - primary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "playing area - primary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - primary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - primary school hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gymnasium_playing_area | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - secondary school schedule set",
+        "occupancy_schedule":  "playing area - secondary school occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "playing area - secondary school lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - secondary school electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - secondary school hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gymnasium_playing_area | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "playing area - stages/studios schedule set",
+        "occupancy_schedule":  "playing area - stages/studios occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "playing area - stages/studios lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | refit 2026-09-07: the Default|Wkdy profile of playing area - stages/studios against its DummySmrDsn occupancy trace, linear response 2.5, MAE 0.094 (was 0.226 at the 0.05 floor) - above the 0.05 limit, review",
+        "electric_equipment_schedule":  "playing area - stages/studios electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "playing area - stages/studios hot water equipment",
+        "hot_water_equipment_provenance":  "authored: gymnasium_playing_area | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "playing area - stages/studios"
+        ]
+    },
+    {
+        "schedule_set_name":  "plenum schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "plenum lighting",
+        "lighting_provenance":  "authored: plenum | fit: manual",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "plenum"
+        ]
+    },
+    {
+        "schedule_set_name":  "post office schedule set",
+        "occupancy_schedule":  "post office occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "post office lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: grid_search",
+        "electric_equipment_schedule":  "post office electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "post office hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "post office"
+        ]
+    },
+    {
+        "schedule_set_name":  "post office - sorting area schedule set",
+        "occupancy_schedule":  "post office - sorting area occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "post office - sorting area lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: grid_search",
+        "electric_equipment_schedule":  "post office - sorting area electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/post_office_sorting_area | post_office_sorting_area | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "post office - sorting area hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "post office - sorting area"
+        ]
+    },
+    {
+        "schedule_set_name":  "recovery schedule set",
+        "occupancy_schedule":  "recovery occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Outpatient - PACU | OutPatientHealthCare BLDG_OCC_SCH | fit: control_point_fit",
+        "interior_lighting_schedule":  "recovery lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "recovery electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "recovery hot water equipment",
+        "hot_water_equipment_provenance":  "authored: recovery | OutPatientHealthCare BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "recovery"
+        ]
+    },
+    {
+        "schedule_set_name":  "recreation/common living schedule set",
+        "occupancy_schedule":  "recreation/common living occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/lounge_breakroom_all_other | lounge_breakroom_all_other | fit: manual",
+        "interior_lighting_schedule":  "recreation/common living lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "recreation/common living electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "recreation/common living"
+        ]
+    },
+    {
+        "schedule_set_name":  "restroom schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "restroom lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "restroom electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_EQUIP_EndUseData | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "restroom hot water equipment",
+        "hot_water_equipment_provenance":  "authored: restroom_all_other | fit: manual",
+        "applies_to":  [
+            "restroom"
+        ]
+    },
+    {
+        "schedule_set_name":  "restroom - primary school schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "restroom - primary school lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "restroom - primary school electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_EQUIP_EndUseData | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "restroom - primary school hot water equipment",
+        "hot_water_equipment_provenance":  "authored: restroom_all_other | fit: manual",
+        "applies_to":  [
+            "restroom - primary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "restroom - secondary school schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "restroom - secondary school lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "restroom - secondary school electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Restroom | Education_School BLDG_EQUIP_EndUseData | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "restroom - secondary school hot water equipment",
+        "hot_water_equipment_provenance":  "authored: restroom_all_other | fit: manual",
+        "applies_to":  [
+            "restroom - secondary school"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail schedule set",
+        "occupancy_schedule":  "retail occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "retail lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales | RetailStripmall Type1_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "retail"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail - barber shop schedule set",
+        "occupancy_schedule":  "retail - barber shop occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "retail - barber shop lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail - barber shop electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail - barber shop hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales | RetailStripmall Type1_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "retail - barber shop"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail - beauty and nail salons schedule set",
+        "occupancy_schedule":  "retail - beauty and nail salons occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "retail - beauty and nail salons lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail - beauty and nail salons electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail - beauty and nail salons hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales | RetailStripmall Type1_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "retail - beauty and nail salons"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail - mall concourse schedule set",
+        "occupancy_schedule":  "retail - mall concourse occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "retail - mall concourse lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail - mall concourse electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail - mall concourse hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales | RetailStripmall Type1_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "retail - mall concourse"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail - pet shops (animal areas) schedule set",
+        "occupancy_schedule":  "retail - pet shops (animal areas) occupancy",
+        "occupancy_provenance":  "legacy",
+        "interior_lighting_schedule":  "retail - pet shops (animal areas) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail - pet shops (animal areas) electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail - pet shops (animal areas) hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales | RetailStripmall Type1_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "retail - pet shops (animal areas)"
+        ]
+    },
+    {
+        "schedule_set_name":  "retail - supermarket schedule set",
+        "occupancy_schedule":  "retail - supermarket occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SuperMarket - Sales | SuperMarket Bldg Occ | fit: control_point_fit",
+        "interior_lighting_schedule":  "retail - supermarket lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "retail - supermarket electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "retail - supermarket hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sales_supermarket | D_Rt3_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "retail - supermarket"
+        ]
+    },
+    {
+        "schedule_set_name":  "shaft schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "shaft lighting",
+        "lighting_provenance":  "authored: shaft | fit: manual",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "shaft"
+        ]
+    },
+    {
+        "schedule_set_name":  "sleeping quarters schedule set",
+        "occupancy_schedule":  "sleeping quarters occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/dormitory_living_quarters | dormitory_living_quarters | fit: manual",
+        "interior_lighting_schedule":  "sleeping quarters lighting",
+        "lighting_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own sleeping quarters source profiles (R4), since no occupancy derivation follows them (best MAE 0.151)",
+        "electric_equipment_schedule":  "sleeping quarters electric equipment",
+        "electric_equipment_provenance":  "legacy: fit: grid_search | decoupled 2026-09-07: built directly from its own sleeping quarters source profiles (R4), since no occupancy derivation follows them (best MAE 0.246)",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "sleeping quarters hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sleeping_quarters | D_EUn_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "sleeping quarters"
+        ]
+    },
+    {
+        "schedule_set_name":  "sports arena schedule set",
+        "occupancy_schedule":  "sports arena occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/sports_arena_playing_area_class_ii | sports_arena_playing_area_class_ii | fit: control_point_fit",
+        "interior_lighting_schedule":  "sports arena lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/sports_arena_playing_area_class_ii | sports_arena_playing_area_class_ii | fit: grid_search",
+        "electric_equipment_schedule":  "sports arena electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/sports_arena_playing_area_class_ii | sports_arena_playing_area_class_ii | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "sports arena"
+        ]
+    },
+    {
+        "schedule_set_name":  "sports arena - playing area class IV schedule set",
+        "occupancy_schedule":  "sports arena - playing area class IV occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Gym | SchoolSecondary BLDG_OCC_SCH_Gym | fit: control_point_fit",
+        "interior_lighting_schedule":  "sports arena - playing area class IV lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Gym | Education_School BLDG_LIGHT_EndUseData | fit: control_point_fit",
+        "electric_equipment_schedule":  "sports arena - playing area class IV electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/SecondarySchool - Gym | Education_School BLDG_EQUIP_EndUseData | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "sports arena - playing area class IV hot water equipment",
+        "hot_water_equipment_provenance":  "authored: sports_arena_playing_area_class_iv | SchoolSecondary BLDG_SWH_SCH | fit: manual",
+        "applies_to":  [
+            "sports arena - playing area class IV"
+        ]
+    },
+    {
+        "schedule_set_name":  "stairwell schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "stairwell lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/Office - Stair | OfficeLarge BLDG_LIGHT_SCH_2013 | fit: control_point_fit",
+        "electric_equipment_schedule":  "stairwell electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/Office - Stair | Office BLDG_EQUIP_EndUseData | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "stairwell"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage schedule set",
+        "occupancy_schedule":  "storage occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "storage lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "storage electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "storage hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "storage"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - 50-1000 sf (hospital) schedule set",
+        "occupancy_schedule":  "storage - 50-1000 sf (hospital) occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "storage - 50-1000 sf (hospital) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "storage - 50-1000 sf (hospital) electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "storage - 50-1000 sf (hospital) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "storage - 50-1000 sf (hospital)"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - < 50 sf (all other) schedule set",
+        "occupancy_schedule":  "storage - < 50 sf (all other) occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "storage - < 50 sf (all other) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "storage - < 50 sf (all other) electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "storage - < 50 sf (all other) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "storage - < 50 sf (all other)"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - < 50 sf (hospital) schedule set",
+        "occupancy_schedule":  "storage - < 50 sf (hospital) occupancy",
+        "occupancy_provenance":  "legacy: fit: control_point_fit",
+        "interior_lighting_schedule":  "storage - < 50 sf (hospital) lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  "storage - < 50 sf (hospital) electric equipment",
+        "electric_equipment_provenance":  "legacy",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "storage - < 50 sf (hospital) hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "storage - < 50 sf (hospital)"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - inactive schedule set",
+        "occupancy_schedule":  "storage - inactive occupancy",
+        "occupancy_provenance":  "comstock_2019: ComStock 90.1-2019/Office - Storage | OfficeLarge BLDG_OCC_SCH | fit: manual",
+        "interior_lighting_schedule":  "storage - inactive lighting",
+        "lighting_provenance":  "legacy: fit: grid_search",
+        "electric_equipment_schedule":  null,
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "storage - inactive hot water equipment",
+        "hot_water_equipment_provenance":  "legacy",
+        "applies_to":  [
+            "storage - inactive"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - warehouse - medium to bulky palletized items schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "storage - warehouse - medium to bulky palletized items lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/Warehouse - Bulk | Warehouse BLDG_LIGHT_STORAGE_SCH | fit: control_point_fit",
+        "electric_equipment_schedule":  "storage - warehouse - medium to bulky palletized items electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/Warehouse - Bulk | Warehouse Bldg Equip | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "storage - warehouse - medium to bulky palletized items"
+        ]
+    },
+    {
+        "schedule_set_name":  "storage - warehouse - smaller hand-carried items schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "storage - warehouse - smaller hand-carried items lighting",
+        "lighting_provenance":  "comstock_2019: ComStock 90.1-2019/Warehouse - Bulk | Warehouse BLDG_LIGHT_STORAGE_SCH | fit: control_point_fit",
+        "electric_equipment_schedule":  "storage - warehouse - smaller hand-carried items electric equipment",
+        "electric_equipment_provenance":  "comstock_2019: ComStock 90.1-2019/Warehouse - Bulk | Warehouse Bldg Equip | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "storage - warehouse - smaller hand-carried items"
+        ]
+    },
+    {
+        "schedule_set_name":  "transportation schedule set",
+        "occupancy_schedule":  "transportation occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: control_point_fit",
+        "interior_lighting_schedule":  "transportation lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "electric_equipment_schedule":  "transportation electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "transportation"
+        ]
+    },
+    {
+        "schedule_set_name":  "transportation - airport concourse schedule set",
+        "occupancy_schedule":  "transportation - airport concourse occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: manual",
+        "interior_lighting_schedule":  "transportation - airport concourse lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "electric_equipment_schedule":  "transportation - airport concourse electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "transportation - airport concourse"
+        ]
+    },
+    {
+        "schedule_set_name":  "transportation - baggage carousel schedule set",
+        "occupancy_schedule":  "transportation - baggage carousel occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: manual",
+        "interior_lighting_schedule":  "transportation - baggage carousel lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "electric_equipment_schedule":  "transportation - baggage carousel electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "transportation - baggage carousel"
+        ]
+    },
+    {
+        "schedule_set_name":  "transportation - ticket counter schedule set",
+        "occupancy_schedule":  "transportation - ticket counter occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: control_point_fit",
+        "interior_lighting_schedule":  "transportation - ticket counter lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "electric_equipment_schedule":  "transportation - ticket counter electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/transportation_ticket_counter | transportation_ticket_counter | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "transportation - ticket counter"
+        ]
+    },
+    {
+        "schedule_set_name":  "vehicular maintenance schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "vehicular maintenance lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/vehicular_maintenance | vehicular_maintenance | fit: control_point_fit",
+        "electric_equipment_schedule":  "vehicular maintenance electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/vehicular_maintenance | vehicular_maintenance | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "vehicular maintenance"
+        ]
+    },
+    {
+        "schedule_set_name":  "vehicular maintenance - automotive (general) schedule set",
+        "occupancy_schedule":  null,
+        "interior_lighting_schedule":  "vehicular maintenance - automotive (general) lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/vehicular_maintenance | vehicular_maintenance | fit: control_point_fit",
+        "electric_equipment_schedule":  "vehicular maintenance - automotive (general) electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/vehicular_maintenance | vehicular_maintenance | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "vehicular maintenance - automotive (general)"
+        ]
+    },
+    {
+        "schedule_set_name":  "workshop schedule set",
+        "occupancy_schedule":  "workshop occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "interior_lighting_schedule":  "workshop lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: grid_search",
+        "electric_equipment_schedule":  "workshop electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "workshop hot water equipment",
+        "hot_water_equipment_provenance":  "authored: workshop | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "workshop"
+        ]
+    },
+    {
+        "schedule_set_name":  "workshop - photo studio schedule set",
+        "occupancy_schedule":  "workshop - photo studio occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "interior_lighting_schedule":  "workshop - photo studio lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: grid_search",
+        "electric_equipment_schedule":  "workshop - photo studio electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "workshop - photo studio hot water equipment",
+        "hot_water_equipment_provenance":  "authored: workshop | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "workshop - photo studio"
+        ]
+    },
+    {
+        "schedule_set_name":  "workshop - wood/metal shop schedule set",
+        "occupancy_schedule":  "workshop - wood/metal shop occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "interior_lighting_schedule":  "workshop - wood/metal shop lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: grid_search",
+        "electric_equipment_schedule":  "workshop - wood/metal shop electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/workshop | workshop | fit: control_point_fit",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  "workshop - wood/metal shop hot water equipment",
+        "hot_water_equipment_provenance":  "authored: workshop | D_MLI_All_DHW_DHW_Yr | fit: manual",
+        "applies_to":  [
+            "workshop - wood/metal shop"
+        ]
+    },
+    {
+        "schedule_set_name":  "worship schedule set",
+        "occupancy_schedule":  "worship occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "worship lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "electric_equipment_schedule":  "worship electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "worship"
+        ]
+    },
+    {
+        "schedule_set_name":  "worship - fellowship hall schedule set",
+        "occupancy_schedule":  "worship - fellowship hall occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "worship - fellowship hall lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "electric_equipment_schedule":  "worship - fellowship hall electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "worship - fellowship hall"
+        ]
+    },
+    {
+        "schedule_set_name":  "worship - pulpit/choir schedule set",
+        "occupancy_schedule":  "worship - pulpit/choir occupancy",
+        "occupancy_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: control_point_fit",
+        "interior_lighting_schedule":  "worship - pulpit/choir lighting",
+        "lighting_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "electric_equipment_schedule":  "worship - pulpit/choir electric equipment",
+        "electric_equipment_provenance":  "pnnl_support: PNNL support_schedules.json/worship_pulpit_choir_area | worship_pulpit_choir_area | fit: grid_search",
+        "gas_equipment_schedule":  null,
+        "hot_water_equipment_schedule":  null,
+        "applies_to":  [
+            "worship - pulpit/choir"
+        ]
+    }
+]

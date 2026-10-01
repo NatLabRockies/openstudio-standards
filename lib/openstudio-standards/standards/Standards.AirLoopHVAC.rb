@@ -2011,6 +2011,71 @@ class Standard
     return true
   end
 
+  # Raise each VAV terminal's minimum airflow to cover its zone's design outdoor air.
+  #
+  # The prototype terminals start at a constant minimum of 0.3 of the terminal's design flow.
+  # Where a zone's outdoor air requirement is larger than that - laboratories, patient rooms
+  # and other air-change-driven spaces - the terminal passes less air at its minimum than the
+  # zone's ventilation, and the loop's outdoor air controller makes up the difference by
+  # raising the loop's outdoor air fraction toward 100%, which the central heating coil was not
+  # sized to heat. Raising the minimum keeps each terminal's minimum flow at or above its zone's
+  # outdoor air, so the heating design flow the central coil is sized on and the flow the
+  # terminals pass in heating agree. The terminal keeps its zone minimum air flow input method:
+  # a 'Constant' fraction is raised, a 'FixedFlowRate' rate is raised, so tools that carry the
+  # constant fraction across hard sizing keep it. Needs a sizing run first when the terminal's
+  # maximum flow is autosized.
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @return [Integer] the number of terminals whose minimum was raised
+  def air_loop_hvac_apply_vav_terminal_minimum_outdoor_air(air_loop_hvac)
+    raised = 0
+    air_loop_hvac.thermalZones.sort.each do |zone|
+      zone.equipment.each do |equip|
+        terminal = if equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
+                     equip.to_AirTerminalSingleDuctVAVReheat.get
+                   elsif equip.to_AirTerminalSingleDuctVAVNoReheat.is_initialized
+                     equip.to_AirTerminalSingleDuctVAVNoReheat.get
+                   end
+        next if terminal.nil?
+
+        zone_oa = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate(zone)
+        next unless zone_oa > 0.0
+
+        method = terminal.zoneMinimumAirFlowInputMethod
+        method = method.is_initialized ? method.get : 'Constant' if method.respond_to?(:is_initialized)
+        case method
+        when 'FixedFlowRate'
+          current = terminal.fixedMinimumAirFlowRate
+          current = current.is_initialized ? current.get : 0.0
+          next unless zone_oa > current
+
+          terminal.setFixedMinimumAirFlowRate(zone_oa)
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: raised the fixed minimum air flow rate from #{current.round(4)} to the zone outdoor air of #{zone_oa.round(4)} m^3/s.")
+          raised += 1
+        when 'Constant'
+          max_flow = terminal.maximumAirFlowRate
+          max_flow = terminal.autosizedMaximumAirFlowRate unless max_flow.is_initialized
+          unless max_flow.is_initialized && max_flow.get > 0.0
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: no maximum air flow rate is available (run a sizing run first); the minimum air flow fraction was not checked against the zone outdoor air.")
+            next
+          end
+
+          current = terminal.constantMinimumAirFlowFraction
+          next unless current.is_initialized # autosized: EnergyPlus derives it from the zone outdoor air itself
+
+          needed = [zone_oa / max_flow.get, 1.0].min
+          next unless needed > current.get
+
+          terminal.setConstantMinimumAirFlowFraction(needed)
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: raised the constant minimum air flow fraction from #{current.get.round(3)} to #{needed.round(3)} to cover the zone outdoor air of #{zone_oa.round(4)} m^3/s at a maximum flow of #{max_flow.get.round(4)} m^3/s.")
+          raised += 1
+        end
+      end
+    end
+
+    return raised
+  end
+
   # Adjust minimum VAV damper positions and set minimum design
   # system outdoor air flow
   #
@@ -2132,11 +2197,17 @@ class Standard
           end
         elsif equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
           term = equip.to_AirTerminalSingleDuctVAVReheat.get
-          if term.constantMinimumAirFlowFraction.is_initialized
+          # EnergyPlus enforces only the input the terminal's method selects, so read the
+          # minimum the way EnergyPlus will: the fraction under Constant, the fixed rate
+          # under FixedFlowRate. Reading both would overstate the zone minimum and
+          # understate the ventilation adjustment this method exists to make.
+          if term.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+            mdp_term = 0.0
+            if term.fixedMinimumAirFlowRate.is_initialized
+              min_zn_flow = term.fixedMinimumAirFlowRate.get
+            end
+          elsif term.constantMinimumAirFlowFraction.is_initialized
             mdp_term = term.constantMinimumAirFlowFraction.get
-          end
-          if term.fixedMinimumAirFlowRate.is_initialized
-            min_zn_flow = term.fixedMinimumAirFlowRate.get
           end
         end
       end
@@ -2278,7 +2349,22 @@ class Standard
         term.setConstantMinimumAirFlowFraction(mdp)
       elsif equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
         term = equip.to_AirTerminalSingleDuctVAVReheat.get
-        term.setConstantMinimumAirFlowFraction(mdp)
+        # A terminal on the FixedFlowRate input method ignores the constant fraction, so
+        # the raised minimum has to go through the fixed rate, converted with the
+        # terminal's design flow. Without a design flow to convert with, fall back to the
+        # Constant method so the adjustment is not silently dropped.
+        if term.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+          max_flow = term.maximumAirFlowRate
+          max_flow = term.autosizedMaximumAirFlowRate unless max_flow.is_initialized
+          if max_flow.is_initialized
+            term.setFixedMinimumAirFlowRate(mdp * max_flow.get)
+          else
+            term.setZoneMinimumAirFlowInputMethod('Constant')
+            term.setConstantMinimumAirFlowFraction(mdp)
+          end
+        else
+          term.setConstantMinimumAirFlowFraction(mdp)
+        end
       end
     end
 
