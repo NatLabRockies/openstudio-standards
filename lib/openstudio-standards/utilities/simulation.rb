@@ -195,7 +195,12 @@ Standard.class_eval do
     if model.version >= OpenStudio::VersionString.new('3.8.0')
       sim_control.setDoZoneSizingCalculation(true)
       sim_control.setDoSystemSizingCalculation(true)
-      sim_control.setDoPlantSizingCalculation(true)
+      # Do plant sizing only if there are Sizing:Plant objects in the model, or else E+ version 25.2+ will error out
+      if model.getSizingPlants.size > 0
+        sim_control.setDoPlantSizingCalculation(true)
+      else
+        sim_control.setDoPlantSizingCalculation(false)
+      end
     end
 
     # check that all zones have surfaces.

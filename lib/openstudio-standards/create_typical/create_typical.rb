@@ -992,7 +992,7 @@ module OpenstudioStandards
         end
 
         # set climate zone
-        os_climate_zone = climate_zone.gsub('ASHRAE 169-2013-', '')
+        os_climate_zone = climate_zone.gsub(/ASHRAE .*-.*-/, '')
         # trim off letter from climate zone 7 or 8
         if (os_climate_zone[0] == '7') || (os_climate_zone[0] == '8')
           os_climate_zone = os_climate_zone[0]
