@@ -206,7 +206,8 @@ module OpenstudioStandards
           service_water_pump_motor_efficiency = 1.0
         end
 
-        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment)
+        # size to shared water use and booster water use equipment
+        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment + booster_water_use_equipment)
         water_heater_capacity_w = water_heater_sizing[:water_heater_capacity]
         water_heater_volume_m3 = water_heater_sizing[:water_heater_volume]
 
