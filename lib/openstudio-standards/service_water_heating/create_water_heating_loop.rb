@@ -53,9 +53,9 @@ module OpenstudioStandards
         service_water_loop.setMaximumLoopTemperature(60.0)
       end
 
-      # set minimum temperature of 125F for legionella growth risk
-      swh_loop_min_c = OpenStudio.convert(125.0, 'F', 'C').get
-      service_water_loop.setMinimumLoopTemperature(swh_loop_min_c)
+      # Set the minimum loop temperature requirement to be above freezing.
+      # Not part of EnergyPlus control, only used as a warning.
+      service_water_loop.setMinimumLoopTemperature(0.0)
 
       if system_name.nil?
         system_name = 'Service Water Loop'
@@ -213,9 +213,9 @@ module OpenstudioStandards
         service_water_loop.setMaximumLoopTemperature(82.2)
       end
 
-      # set minimum temperature of 125F for legionella growth risk
-      swh_loop_min_c = OpenStudio.convert(125.0, 'F', 'C').get
-      service_water_loop.setMinimumLoopTemperature(swh_loop_min_c)
+      # Set the minimum loop temperature requirement to be above freezing.
+      # Not part of EnergyPlus control, only used as a warning.
+      service_water_loop.setMinimumLoopTemperature(0.0)
 
       # create and add booster water heater to loop
       booster_water_heater = OpenstudioStandards::ServiceWaterHeating.create_water_heater(model,
