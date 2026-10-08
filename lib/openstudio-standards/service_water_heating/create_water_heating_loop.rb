@@ -207,15 +207,16 @@ module OpenstudioStandards
       booster_service_water_loop = OpenStudio::Model::PlantLoop.new(model)
       booster_service_water_loop.setName('Booster Service Water Loop')
 
+      # set loop temperature limits
       if service_water_temperature > 82.2
-        service_water_loop.setMaximumLoopTemperature(service_water_temperature)
+        booster_service_water_loop.setMaximumLoopTemperature(service_water_temperature)
       else
-        service_water_loop.setMaximumLoopTemperature(82.2)
+        booster_service_water_loop.setMaximumLoopTemperature(82.2)
       end
 
       # Set the minimum loop temperature requirement to be above freezing.
       # Not part of EnergyPlus control, only used as a warning.
-      service_water_loop.setMinimumLoopTemperature(0.0)
+      booster_service_water_loop.setMinimumLoopTemperature(0.0)
 
       # create and add booster water heater to loop
       booster_water_heater = OpenstudioStandards::ServiceWaterHeating.create_water_heater(model,
