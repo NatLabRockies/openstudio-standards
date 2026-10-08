@@ -149,6 +149,7 @@ module OpenstudioStandards
           service_water_loop_temperature_c = OpenStudio.convert(140.0, 'F', 'C').get
 
           # add service water loop with water heater
+          # do not include piping losses with dedicated point-of-use heaters
           swh_loop = OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_loop(model,
                                                                                                 system_name: "#{space.name} Service Water Loop",
                                                                                                 service_water_temperature: service_water_loop_temperature_c,
@@ -158,7 +159,7 @@ module OpenstudioStandards
                                                                                                 water_heater_volume: water_heater_volume_m3,
                                                                                                 water_heater_fuel: dedicated_water_heating_fuel,
                                                                                                 number_of_water_heaters: num_water_heaters,
-                                                                                                add_piping_losses: true,
+                                                                                                add_piping_losses: false,
                                                                                                 floor_area: total_space_floor_area_m2,
                                                                                                 number_of_stories: 1)
 
