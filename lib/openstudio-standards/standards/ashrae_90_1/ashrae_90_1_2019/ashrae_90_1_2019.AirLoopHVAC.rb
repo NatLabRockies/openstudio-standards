@@ -61,7 +61,7 @@ class ASHRAE9012019 < ASHRAE901
       # Moisture regime is not needed for climate zone 8
       climate_zone = climate_zone.split('-')[-1]
       climate_zone = '8' if climate_zone.include?('8')
-s
+
       search_criteria = {
         'template' => template,
         'climate_zone' => climate_zone
