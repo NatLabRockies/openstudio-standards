@@ -61,7 +61,7 @@ class ASHRAE9012019 < ASHRAE901
       # Moisture regime is not needed for climate zone 8
       climate_zone = climate_zone.split('-')[-1]
       climate_zone = '8' if climate_zone.include?('8')
-s
+
       search_criteria = {
         'template' => template,
         'climate_zone' => climate_zone
@@ -757,8 +757,8 @@ s
           air_terminal = air_terminal.get
           if air_terminal.to_AirTerminalSingleDuctVAVReheat.is_initialized
             air_terminal = air_terminal.to_AirTerminalSingleDuctVAVReheat.get
-            if air_terminal.zoneMinimumAirFlowInputMethod == 'Constant' || air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlow'
-              if air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlow'
+            if air_terminal.zoneMinimumAirFlowInputMethod == 'Constant' || air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+              if air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
                 mdp_org = air_terminal.fixedMinimumAirFlowRate.get / air_terminal.autosizedMaximumAirFlowRate.get
                 air_terminal.setFixedMinimumAirFlowRate(0)
               else
