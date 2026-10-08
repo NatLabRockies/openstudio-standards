@@ -757,8 +757,8 @@ class ASHRAE9012019 < ASHRAE901
           air_terminal = air_terminal.get
           if air_terminal.to_AirTerminalSingleDuctVAVReheat.is_initialized
             air_terminal = air_terminal.to_AirTerminalSingleDuctVAVReheat.get
-            if air_terminal.zoneMinimumAirFlowInputMethod == 'Constant' || air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlow'
-              if air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlow'
+            if air_terminal.zoneMinimumAirFlowInputMethod == 'Constant' || air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+              if air_terminal.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
                 mdp_org = air_terminal.fixedMinimumAirFlowRate.get / air_terminal.autosizedMaximumAirFlowRate.get
                 air_terminal.setFixedMinimumAirFlowRate(0)
               else
