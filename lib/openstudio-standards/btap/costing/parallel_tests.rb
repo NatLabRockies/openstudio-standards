@@ -63,7 +63,7 @@ def write_results(result, test_file)
   end
 end
 
-class ParallelTests
+class ParallelTestHelper
 
   def run(file_list)
     did_all_tests_pass = true
