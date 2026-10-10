@@ -75,6 +75,6 @@ class RunAllCostTests < Minitest::Test
     puts 'testing these scenarioes'
     puts test_list
     puts "To change the costing tests being run please edit test_run_costing_tests.rb."
-    assert(ParallelTests.new.run(test_list), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
+    assert(ParallelTestHelper.new.run(test_list), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
   end
 end

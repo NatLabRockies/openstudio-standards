@@ -22,6 +22,6 @@ class RunAllTests < Minitest::Test
       puts "Could not find list of files to test at #{test_list_file}"
       return false
     end
-    assert(ParallelTests.new.run(full_file_list), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
+    assert(ParallelTestHelper.new.run(full_file_list), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
   end
 end

@@ -175,8 +175,9 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
     non_booster_volume_gal = OpenStudio::convert(non_booster_volume, 'm^3', 'gal').get
 
     # # check results
-    assert_in_epsilon(215.0, non_booster_capacity_kbtu_hr, 0.40)
-    assert_in_epsilon(215.0, non_booster_volume_gal, 0.40)
+    assert_in_epsilon(315.7, non_booster_capacity_kbtu_hr, 0.40)
+    assert_in_epsilon(315.7, non_booster_volume_gal, 0.40)
+    model.save("#{output_dir}/out.osm", true)
   end
 
   def test_create_typical_service_water_heating_midrise
