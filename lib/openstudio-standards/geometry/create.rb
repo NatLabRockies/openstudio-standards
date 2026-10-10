@@ -165,6 +165,113 @@ module OpenstudioStandards
       return hash_of_point_vectors
     end
 
+    # The standardsSpaceType name behind a space type slice key.
+    #
+    # Slice keys are usually SpaceType objects but are plain names in some of create_bar's
+    # earlier stages, and create_sliced_bar_multi_polygons swaps the key for a child space type
+    # on double loaded corridors. Matching on the name survives all of that.
+    #
+    # @param key [OpenStudio::Model::SpaceType, String] a space type slice key
+    # @return [String] the standards space type name, or the key's own string form
+    def self.slice_space_type_name(key)
+      if key.respond_to?(:standardsSpaceType) && key.standardsSpaceType.is_initialized
+        return key.standardsSpaceType.get
+      end
+
+      key.to_s
+    end
+
+    # Index each space type slice to the slice it needs to sit beside, in both directions.
+    #
+    # @param entries [Array<Array>] space type slices, as [key, hash] pairs
+    # @param adjacency_pairs [Array<Array<String>>] pairs of standards space type names that
+    #   need to be adjacent, as returned by {OpenstudioStandards::HVAC.exhaust_makeup_air_pairs}
+    # @return [Hash] each slice key mapped to its partner's [key, hash] entry
+    def self.slice_adjacency_partners(entries, adjacency_pairs)
+      return {} if adjacency_pairs.nil? || adjacency_pairs.empty?
+
+      by_name = {}
+      entries.each { |entry| by_name[OpenstudioStandards::Geometry.slice_space_type_name(entry[0])] ||= entry }
+
+      partners = {}
+      adjacency_pairs.each do |first_name, second_name|
+        first = by_name[first_name]
+        second = by_name[second_name]
+        next if first.nil? || second.nil?
+        next if first[0] == second[0]
+
+        partners[first[0]] = second
+        partners[second[0]] = first
+      end
+
+      partners
+    end
+
+    # Reorder space type slices so each adjacency pair ends up side by side.
+    #
+    # Slices are laid along the bar in the order they appear, so two consecutive entries share a
+    # wall. The incoming order is by floor area, which puts a pair together only by coincidence:
+    # a hospital's dining and food preparation spaces sit two slices apart because an
+    # exam/treatment space happens to fall between them by area, and the kitchen makeup air that
+    # the DOE prototype geometry got for free is lost.
+    #
+    # Only the makeup side of each pair moves, and only within the ordering -- floor areas are
+    # untouched, so every area target and ratio is unaffected.
+    #
+    # @param entries [Array<Array>] space type slices, as [key, hash] pairs, in slice order
+    # @param adjacency_pairs [Array<Array<String>>] pairs of standards space type names to place adjacent
+    # @param protect_first [Boolean] whether the first entry must stay first, which it must where
+    #   the caller has deliberately moved the largest space type to the front of the bar
+    # @return [Array<Array>] the slices, reordered
+    def self.order_slices_for_adjacency(entries, adjacency_pairs, protect_first: false)
+      return entries if adjacency_pairs.nil? || adjacency_pairs.empty?
+      return entries if entries.size < 3
+
+      ordered = entries.dup
+
+      adjacency_pairs.each do |exhaust_name, makeup_name|
+        exhaust_index = ordered.index { |entry| OpenstudioStandards::Geometry.slice_space_type_name(entry[0]) == exhaust_name }
+        makeup_index = ordered.index { |entry| OpenstudioStandards::Geometry.slice_space_type_name(entry[0]) == makeup_name }
+        next if exhaust_index.nil? || makeup_index.nil?
+        next if (exhaust_index - makeup_index).abs == 1
+
+        # the protected first slice is the bar's own end and cannot be moved off it
+        next if protect_first && makeup_index.zero?
+
+        target_index = exhaust_index.zero? ? 1 : exhaust_index
+        makeup = ordered.delete_at(makeup_index)
+        target_index -= 1 if makeup_index < target_index
+        ordered.insert(target_index, makeup)
+      end
+
+      ordered
+    end
+
+    # Whether a space type slice should be held back to the next story to stay with its partner.
+    #
+    # The greedy story fill takes space types in ascending area order, so a story boundary can
+    # fall between a pair that {order_slices_for_adjacency} deliberately put side by side. Where
+    # this slice fits on the story but leaves the partner no room, both go to the next story
+    # instead. A slice that overruns the story is not held back: it continues onto the next story
+    # where its partner still follows it in the ordering.
+    #
+    # @param own_area_m2 [Double] floor area of this slice still to be placed
+    # @param partner_area_m2 [Double] floor area of the partner slice still to be placed
+    # @param partner_on_story [Boolean] whether the partner already has area on this story
+    # @param remaining_footprint_m2 [Double] floor area left on this story
+    # @param min_slice_area_m2 [Double] smallest slice the bar can hold without becoming a sliver
+    # @param final_story [Boolean] whether this is the last story, where there is nowhere to defer to
+    # @return [Boolean] true if the slice should be skipped on this story
+    def self.defer_slice_for_adjacency?(own_area_m2, partner_area_m2, partner_on_story,
+                                       remaining_footprint_m2, min_slice_area_m2, final_story)
+      return false if final_story
+      return false if partner_on_story
+      return false if partner_area_m2 <= 0.0001
+      return false if own_area_m2 > remaining_footprint_m2
+
+      (remaining_footprint_m2 - own_area_m2) < min_slice_area_m2
+    end
+
     # sliced bar multi creates and array of multiple sliced bar simple hashes
     #
     # @param space_types [Array<Hash>] Array of hashes with the space type and floor area
@@ -172,8 +279,11 @@ module OpenstudioStandards
     # @param width [Double] width of building in meters
     # @param footprint_origin_point [OpenStudio::Point3d] OpenStudio Point3d object for the new origin
     # @param story_hash [Hash] A hash of building story information including space origin z value and space height
+    # @param adjacency_pairs [Array<Array<String>>] Optional pairs of standards space type names to
+    #   place on the same story and in adjacent slices. nil leaves the ordering to floor area alone.
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
-    def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash)
+    def self.create_sliced_bar_multi_polygons(space_types, length, width, footprint_origin_point, story_hash,
+                                              adjacency_pairs: nil)
       # total building floor area to calculate ratios from space type floor areas
       total_floor_area = 0.0
       target_per_space_type = {}
@@ -184,6 +294,11 @@ module OpenstudioStandards
 
       # sort array by floor area, this hash will be altered to reduce floor area for each space type to 0
       space_types_running_count = space_types.sort_by { |k, v| v[:floor_area] }
+
+      # put each adjacency pair next to each other in the fill order, so the greedy story fill
+      # reaches them together rather than however their floor areas happen to sort
+      space_types_running_count = OpenstudioStandards::Geometry.order_slices_for_adjacency(space_types_running_count, adjacency_pairs)
+      adjacency_partners = OpenstudioStandards::Geometry.slice_adjacency_partners(space_types_running_count, adjacency_pairs)
 
       # array entry for each story
       footprints = []
@@ -216,6 +331,18 @@ module OpenstudioStandards
           tol_value = 0.0001
           next if current_footprint_area + tol_value >= target_footprint_area
           next if space_type_hash[:floor_area] <= tol_value
+
+          # hold an exhausted space type and its makeup air source together across the story
+          # boundary the greedy fill would otherwise put between them
+          partner = adjacency_partners[space_type]
+          unless partner.nil?
+            next if OpenstudioStandards::Geometry.defer_slice_for_adjacency?(
+              space_type_hash[:floor_area], partner[1][:floor_area],
+              space_types_local_count.key?(partner[0]),
+              target_footprint_area - current_footprint_area,
+              valid_bar_area_min_m2, i + 1 == story_hash.size
+            )
+          end
 
           # special test for when total floor area is smaller than valid_bar_area_min_m2, just make bar smaller that valid min and warn user
           if target_per_space_type[space_type] < valid_bar_area_min_m2
@@ -302,7 +429,8 @@ module OpenstudioStandards
         end
 
         # creating footprint for story
-        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(space_types_local_count, length, width, footprint_origin_point)
+        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(space_types_local_count, length, width, footprint_origin_point,
+                                                                                     adjacency_pairs: adjacency_pairs)
       end
       return footprints
     end
@@ -315,10 +443,13 @@ module OpenstudioStandards
     # @param width [Double] width of building in meters
     # @param footprint_origin_point [OpenStudio::Point3d] Optional OpenStudio Point3d object for the new origin
     # @param perimeter_zone_depth [Double] Optional perimeter zone depth in meters
+    # @param adjacency_pairs [Array<Array<String>>] Optional pairs of standards space type names to
+    #   slice next to each other. nil leaves the ordering to floor area alone.
     # @return [Hash] Hash of point vectors that define the space geometry for each direction
     def self.create_sliced_bar_simple_polygons(space_types, length, width,
                                                footprint_origin_point = OpenStudio::Point3d.new(0.0, 0.0, 0.0),
-                                               perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get)
+                                               perimeter_zone_depth = OpenStudio.convert(15.0, 'ft', 'm').get,
+                                               adjacency_pairs: nil)
       hash_of_point_vectors = {} # key is name, value is a hash, one item of which is polygon. Another could be space type
 
       reverse_slice = false
@@ -353,6 +484,11 @@ module OpenstudioStandards
       # guard against empty space_types (e.g. when all space types were slivers removed by caller)
       return hash_of_point_vectors if space_types.empty?
       space_types.insert(0, space_types.delete_at(space_types.size - 1)) # .to_h
+
+      # slices are laid along the bar in this order, so consecutive entries share a wall. Move
+      # each makeup air space type next to the space type it serves; the largest space type stays
+      # at the front, where it forms the bar's own end.
+      space_types = OpenstudioStandards::Geometry.order_slices_for_adjacency(space_types, adjacency_pairs, protect_first: true)
 
       # min and max bar end values
       min_bar_end_multiplier = 0.75

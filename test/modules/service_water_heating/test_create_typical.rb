@@ -174,8 +174,12 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
     non_booster_volume_gal = OpenStudio::convert(non_booster_volume, 'm^3', 'gal').get
 
     # # check results
-    assert_in_epsilon(215.0, non_booster_capacity_kbtu_hr, 0.40)
-    assert_in_epsilon(215.0, non_booster_volume_gal, 0.40)
+    # The large hotel's guest room floors carry a zone multiplier, and the sizing now
+    # weights each fixture's flow by it, as EnergyPlus does to the draws themselves. That
+    # raised the shared heater from about 215 to about 316 kBtu/hr; the old expectation was
+    # the unmultiplied draw.
+    assert_in_epsilon(316.0, non_booster_capacity_kbtu_hr, 0.40)
+    assert_in_epsilon(316.0, non_booster_volume_gal, 0.40)
     model.save("#{output_dir}/out.osm", true)
   end
 
@@ -223,6 +227,15 @@ class TestCreateTypicalServiceWaterHeating < Minitest::Test
 
     # check results
     assert_equal(10, created_loops.size, 'Expected 1 loop per space, for a total of 10 loops.')
+
+    # A point-of-use loop carries no distribution pipe. With one, the 0.03 gpm trickle through
+    # 20 ft of insulated pipe reached the fixture at ambient temperature - 21 to 47 C from a
+    # 59 C tank on the strip mall - and warned every timestep of the year.
+    created_loops.each do |loop|
+      indoor = loop.demandComponents.select { |c| c.to_PipeIndoor.is_initialized } +
+               loop.supplyComponents.select { |c| c.to_PipeIndoor.is_initialized }
+      assert_empty(indoor.map { |c| c.name.to_s }, "#{loop.name} is a dedicated per-space loop and should carry no Pipe:Indoor")
+    end
 
     model.save("#{output_dir}/out.osm", true)
   end

@@ -14,6 +14,52 @@ module OpenstudioStandards
     # @param peak_flow_fraction [Double] a variable for system diversity as fraction of peak flow when setting water heater capacity
     # @param minimum_volume [Double] minimum allowable volume of the water heater, in gallons
     # @return [Hash] hash with water_heater_capacity in watts and water_heater_volume in m^3
+    # Attach a water use connection to a service water loop and tell it what temperature that
+    # loop supplies.
+    #
+    # create_typical_service_water_heating builds all of its water use equipment before it knows
+    # which loop each piece belongs on -- the shared and booster loops are sized from the
+    # equipment, so they cannot exist yet -- which is why the supply temperature is set here at
+    # the attachment rather than in create_water_use.
+    #
+    # @param water_use_equipment [OpenStudio::Model::WaterUseEquipment] OpenStudio WaterUseEquipment object
+    # @param service_water_loop [OpenStudio::Model::PlantLoop] the loop to attach it to
+    # @return [Boolean] true where the equipment was attached
+    def self.attach_water_use_to_loop(water_use_equipment, service_water_loop)
+      connection = water_use_equipment.waterUseConnections
+      return false if connection.empty?
+
+      connection = connection.get
+      service_water_loop.addDemandBranchForComponent(connection)
+
+      schedule = OpenstudioStandards::ServiceWaterHeating.service_water_loop_temperature_schedule(service_water_loop)
+      connection.setHotWaterSupplyTemperatureSchedule(schedule) unless schedule.nil?
+
+      true
+    end
+
+    # The temperature schedule a service water loop holds, taken from the setpoint manager on
+    # its supply outlet node.
+    #
+    # Returned so callers can hand the loop's own schedule object to the water use connections
+    # on it rather than building a second schedule that says the same thing.
+    #
+    # @param service_water_loop [OpenStudio::Model::PlantLoop] OpenStudio PlantLoop object
+    # @return [OpenStudio::Model::Schedule, nil] the loop's setpoint schedule, or nil where it
+    #   has no scheduled setpoint manager
+    def self.service_water_loop_temperature_schedule(service_water_loop)
+      return nil if service_water_loop.nil?
+
+      service_water_loop.supplyOutletNode.setpointManagers.each do |manager|
+        scheduled = manager.to_SetpointManagerScheduled
+        next if scheduled.empty?
+
+        return scheduled.get.schedule
+      end
+
+      nil
+    end
+
     def self.water_heater_sizing_from_water_use_equipment(water_use_equipment_array,
                                                           capacity_to_volume_ratio: 1.0,
                                                           water_heater_efficiency: 0.8,
@@ -36,8 +82,14 @@ module OpenstudioStandards
         # Get peak flow rate from water use equipment definition
         peak_flow_rate_m3_per_s = water_use_equip.waterUseEquipmentDefinition.peakFlowRate
 
+        # EnergyPlus multiplies each water use equipment draw by its zone multiplier, so the
+        # heater has to be sized for the multiplied flow. Left out, a mid-rise building whose
+        # middle floors carry a multiplier draws several times what its heater was sized for,
+        # the heater runs at a 100% annual load factor, and the loop never reaches setpoint.
+        multiplier = water_use_equip.space.is_initialized ? water_use_equip.space.get.multiplier : 1
+
         # Calculate adjusted flow rate based on the peak fraction found in the flow rate fraction schedule
-        adjusted_peak_flow_rate_m3_per_s = max_sch_value * peak_flow_rate_m3_per_s
+        adjusted_peak_flow_rate_m3_per_s = max_sch_value * peak_flow_rate_m3_per_s * multiplier
         adjusted_max_flow_rates_gal_per_hr << OpenStudio.convert(adjusted_peak_flow_rate_m3_per_s, 'm^3/s', 'gal/hr').get
       end
 

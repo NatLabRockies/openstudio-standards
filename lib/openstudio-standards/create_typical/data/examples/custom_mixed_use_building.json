@@ -1,0 +1,31 @@
+{
+  "name": "Mixed Use Campus Hub",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "MediumOffice",
+  "space_type_ratios": [
+    { "building_type": "MediumOffice", "space_type": "Conference", "ratio": 0.2 },
+    { "building_type": "PrimarySchool", "space_type": "Corridor", "ratio": 0.125, "circ": true },
+    { "building_type": "PrimarySchool", "space_type": "Classroom", "ratio": 0.175, "default": true },
+    { "building_type": "Warehouse", "space_type": "Office", "ratio": 0.5 }
+  ],
+  "form": {
+    "total_bldg_floor_area": 50000.0,
+    "num_stories_above_grade": 2,
+    "ns_to_ew_ratio": 2.0,
+    "wwr": 0.3,
+    "floor_height": 12.0
+  },
+  "schedule_overrides": [
+    { "space_type": "*", "lighting": { "base": 0.02 } },
+    { "space_type": "conference/meeting/multipurpose", "occupancy": { "base": 0.03, "peak": 0.85 } }
+  ],
+  "load_overrides": [
+    { "space_type": "*", "lighting": { "w_per_area": 0.85 } },
+    { "space_type": "classroom/lecture/training", "people": { "people_per_1000_ft2": 40.0 }, "electric_equipment": { "w_per_area": 1.2 } }
+  ],
+  "typical_options": {
+    "add_hvac": false,
+    "schedule_method": "parametric"
+  }
+}

@@ -405,7 +405,7 @@ def export_openstudio_libraries
           std_applier.space_type_apply_internal_loads(space_type)
 
           # Schedules
-          std_applier.space_type_apply_internal_load_schedules(space_type)
+          std_applier.space_type_apply_standard_internal_load_schedules(space_type)
         end
       end
 

@@ -1,0 +1,91 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "Outpatient (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "Outpatient",
+  "space_type_ratios": [
+    {
+      "space_type": "corridor",
+      "ratio": 0.2099,
+      "circ": true
+    },
+    {
+      "space_type": "office",
+      "ratio": 0.1995
+    },
+    {
+      "space_type": "exam/treatment",
+      "ratio": 0.1364,
+      "default": true
+    },
+    {
+      "space_type": "storage",
+      "ratio": 0.0748
+    },
+    {
+      "space_type": "operating room",
+      "ratio": 0.0595
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.0564
+    },
+    {
+      "space_type": "physical therapy",
+      "ratio": 0.0504
+    },
+    {
+      "space_type": "imaging",
+      "ratio": 0.0402
+    },
+    {
+      "space_type": "lounge/breakroom",
+      "ratio": 0.032
+    },
+    {
+      "space_type": "recovery",
+      "ratio": 0.0253
+    },
+    {
+      "space_type": "restroom",
+      "ratio": 0.0211
+    },
+    {
+      "space_type": "locker room",
+      "ratio": 0.0207
+    },
+    {
+      "space_type": "nurses station",
+      "ratio": 0.0206
+    },
+    {
+      "space_type": "stairwell",
+      "ratio": 0.0159
+    },
+    {
+      "space_type": "electrical/mechanical",
+      "ratio": 0.0143
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.0112
+    },
+    {
+      "space_type": "conference/meeting/multipurpose",
+      "ratio": 0.0089
+    },
+    {
+      "space_type": "datacenter/low ite",
+      "ratio": 0.0029
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 40946.0,
+    "num_stories_above_grade": 3,
+    "ns_to_ew_ratio": 1.6,
+    "wwr": 0.2,
+    "floor_height": 10.0,
+    "perim_mult": 1.121
+  }
+}

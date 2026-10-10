@@ -7,8 +7,12 @@ module OpenstudioStandards
     # Create typical equipment in a model
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
+    # @param building_type_fallback [Boolean] when true, a space type whose standards building type
+    #   has no entry in the equipment data falls back to the median value across the building types
+    #   with data for that equipment space type. Used for custom building space types that do not
+    #   belong to a standard building type. When false (default), unmatched space types get no equipment.
     # @return [Boolean] returns true if successful, false if not
-    def self.create_typical_equipment(model)
+    def self.create_typical_equipment(model, building_type_fallback: false)
       # load equipment data
       electric_equipment_space_type_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/electric_equipment_space_types.json"), symbolize_names: true)
       gas_equipment_space_type_data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/gas_equipment_space_types.json"), symbolize_names: true)
@@ -57,6 +61,15 @@ module OpenstudioStandards
         if has_electric_equipment_space_type && !electric_equipment_space_type.nil? && (electric_equipment_space_type != 'na')
           # get equipment properties for the electric equipment space type
           electric_equipment_space_type_properties = electric_equipment_space_type_data.select { |r| (r[:electric_equipment_space_type_name] == electric_equipment_space_type) && (r[:standards_building_type] == standards_building_type) }
+          if electric_equipment_space_type_properties.empty? && building_type_fallback
+            # fall back to the median value across the building types with data
+            fallback_rows = electric_equipment_space_type_data.select { |r| (r[:electric_equipment_space_type_name] == electric_equipment_space_type) && !r[:electric_equipment_per_area].nil? }
+            unless fallback_rows.empty?
+              fallback_row = fallback_rows.sort_by { |r| r[:electric_equipment_per_area].to_f }[fallback_rows.size / 2]
+              electric_equipment_space_type_properties = [fallback_row]
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Equipment', "No electric equipment space type data for '#{electric_equipment_space_type}' with standards_building_type #{standards_building_type}. Using the median value across building types, from standards_building_type #{fallback_row[:standards_building_type]}.")
+            end
+          end
           if electric_equipment_space_type_properties.empty?
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Equipment', "Unable to find electric equipment space type data for '#{electric_equipment_space_type}' with standards_building_type #{standards_building_type}.")
           else
@@ -85,6 +98,15 @@ module OpenstudioStandards
         if has_gas_equipment_space_type && !gas_equipment_space_type.nil? && (gas_equipment_space_type != 'na')
           # get equipment properties for the gas equipment space type
           gas_equipment_space_type_properties = gas_equipment_space_type_data.select { |r| (r[:natural_gas_equipment_space_type_name] == gas_equipment_space_type) && (r[:standards_building_type] == standards_building_type) }
+          if gas_equipment_space_type_properties.empty? && building_type_fallback
+            # fall back to the median value across the building types with data
+            fallback_rows = gas_equipment_space_type_data.select { |r| (r[:natural_gas_equipment_space_type_name] == gas_equipment_space_type) && !r[:gas_equipment_per_area].nil? }
+            unless fallback_rows.empty?
+              fallback_row = fallback_rows.sort_by { |r| r[:gas_equipment_per_area].to_f }[fallback_rows.size / 2]
+              gas_equipment_space_type_properties = [fallback_row]
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Equipment', "No gas equipment space type data for '#{gas_equipment_space_type}' with standards_building_type #{standards_building_type}. Using the median value across building types, from standards_building_type #{fallback_row[:standards_building_type]}.")
+            end
+          end
           if gas_equipment_space_type_properties.empty?
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Equipment', "Unable to find gas equipment space type data for '#{gas_equipment_space_type}' with standards_building_type #{standards_building_type}.")
           else

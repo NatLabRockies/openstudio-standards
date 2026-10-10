@@ -366,7 +366,7 @@ Standard.class_eval do
       space_type_apply_internal_loads(space_type)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type)
+      space_type_apply_standard_internal_load_schedules(space_type)
 
       # Thermostat Schedules
       space_type_apply_thermostat_schedules(space_type)
@@ -573,17 +573,25 @@ Standard.class_eval do
   # @param model[OpenStudio::Model::Model] OpenStudio Model
   # @param climate_zone [String] climate zone as described for prototype models. C-Factor is based on this parameter
   # @param building_type [String] the building type
+  # @param building_category [String] the building category the ground contact wall assembly is
+  #   looked up under, 'Nonresidential' or 'Residential'. The construction_sets table is consulted
+  #   for it only when the caller does not state it: that table has no row for an ASHRAE building
+  #   type under a DEER template, and without a category this method returns before doing anything,
+  #   which is how DEER models came to sit on default walls instead of C-factor assemblies.
   # @return [Boolean] returns true if successful, false if not
-  def model_set_below_grade_wall_constructions(model, building_type, climate_zone)
-    # Find ground contact wall building category
-    construction_set_data = model_get_construction_set(building_type)
+  def model_set_below_grade_wall_constructions(model, building_type, climate_zone, building_category: nil)
+    if building_category.nil?
+      # Find ground contact wall building category
+      construction_set_data = model_get_construction_set(building_type)
 
-    # If no construction data, return and allow code to use default constructions
-    return false if construction_set_data.nil?
+      # If no construction data, return and allow code to use default constructions
+      return false if construction_set_data.nil?
+
+      building_category = construction_set_data['exterior_wall_building_category']
+    end
 
     # Find wall C factor
-    building_type_category = construction_set_data['exterior_wall_building_category']
-    wall_construction_properties = model_get_construction_properties(model, 'GroundContactWall', 'Mass', building_type_category, climate_zone)
+    wall_construction_properties = model_get_construction_properties(model, 'GroundContactWall', 'Mass', building_category, climate_zone)
 
     # If no construction properties are found at all, return and allow code to use default constructions
     return false if wall_construction_properties.nil?
@@ -633,17 +641,25 @@ Standard.class_eval do
   # @param model [OpenStudio Model] OpenStudio model being modified
   # @param building_type [String the building type
   # @param climate_zone [String climate zone as described for prototype models. F-Factor is based on this parameter
+  # @param building_category [String] the building category the ground contact floor assembly is
+  #   looked up under, 'Nonresidential' or 'Residential'. The construction_sets table is consulted
+  #   for it only when the caller does not state it. This governs slab-on-grade floors, which every
+  #   building has, so a template whose table has no row for the building type - a DEER template
+  #   under an ASHRAE building type - left every ground floor on an uninsulated slab.
   # @return [Boolean] returns true if successful, false if not
-  def model_set_floor_constructions(model, building_type, climate_zone)
-    # Find ground contact wall building category
-    construction_set_data = model_get_construction_set(building_type)
+  def model_set_floor_constructions(model, building_type, climate_zone, building_category: nil)
+    if building_category.nil?
+      # Find ground contact floor building category
+      construction_set_data = model_get_construction_set(building_type)
 
-    # If no construction data, return and allow code to use default constructions
-    return false if construction_set_data.nil?
+      # If no construction data, return and allow code to use default constructions
+      return false if construction_set_data.nil?
+
+      building_category = construction_set_data['ground_contact_floor_building_category']
+    end
 
     # Find floor F factor
-    building_type_category = construction_set_data['ground_contact_floor_building_category']
-    floor_construction_properties = model_get_construction_properties(model, 'GroundContactFloor', 'Unheated', building_type_category, climate_zone)
+    floor_construction_properties = model_get_construction_properties(model, 'GroundContactFloor', 'Unheated', building_category, climate_zone)
 
     # If no construction properties are found at all, return and allow code to use default constructions
     return false if floor_construction_properties.nil?
@@ -818,125 +834,13 @@ Standard.class_eval do
   def model_add_exhaust(model,
                         makeup_source: 'None',
                         remove_existing_exhaust_fans: true)
-    # remove existing exhaust fans
-    if remove_existing_exhaust_fans
-      model.getThermalZones.sort.each do |thermal_zone|
-        thermal_zone.equipment.each { |equip| equip.remove if equip.to_FanZoneExhaust.is_initialized }
-      end
-    end
-
-    # placeholder for zone exhaust fans
-    zone_exhaust_fans = []
-
-    # populate standard_space_types_with_makup_air
-    standard_space_types_with_makup_air = {}
-    standard_space_types_with_makup_air[['FullServiceRestaurant', 'Kitchen']] = ['FullServiceRestaurant', 'Dining']
-    standard_space_types_with_makup_air[['QuickServiceRestaurant', 'Kitchen']] = ['QuickServiceRestaurant', 'Dining']
-    standard_space_types_with_makup_air[['Hospital', 'Kitchen']] = ['Hospital', 'Dining']
-    standard_space_types_with_makup_air[['SecondarySchool', 'Kitchen']] = ['SecondarySchool', 'Cafeteria']
-    standard_space_types_with_makup_air[['PrimarySchool', 'Kitchen']] = ['PrimarySchool', 'Cafeteria']
-    standard_space_types_with_makup_air[['LargeHotel', 'Kitchen']] = ['LargeHotel', 'Cafe']
-
-    # apply make up air kitchen spaces
-    if makeup_source == 'Adjacent'
-      # loop through thermal zones and add exhaust
-      model.getThermalZones.sort.each do |thermal_zone|
-        has_exhaust_fan = false
-        thermal_zone.equipment.each { |equip| has_exhaust_fan = true if equip.to_FanZoneExhaust.is_initialized }
-
-        if has_exhaust_fan
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Thermal zone #{thermal_zone.name} already has an exhaust fan. None will be added.")
-          next
-        end
-
-        # loop through space types and add exhaust fans to kitchen spaces
-        thermal_zone.spaces.each do |space|
-          next unless space.spaceType.is_initialized
-          next unless space.partofTotalFloorArea
-
-          space_type = space.spaceType.get
-          next unless space_type.standardsBuildingType.is_initialized
-          next unless space_type.standardsSpaceType.is_initialized
-
-          standards_building_type = space_type.standardsBuildingType.get
-          standards_space_type = space_type.standardsSpaceType.get
-
-          # get makeup air source
-          makeup_target_space_type = [standards_building_type, standards_space_type]
-          makeup_source_space_type = standard_space_types_with_makup_air[makeup_target_space_type]
-
-          # skip if nil
-          next if makeup_source_space_type.nil?
-
-          # get largest adjacent zone matching the makeup_source_space_type
-          makeup_space = nil
-          adjacent_zones = OpenstudioStandards::Geometry.thermal_zone_get_adjacent_zones_with_shared_walls(thermal_zone)
-          adjacent_zones.each do |adjacent_zone|
-            adjacent_zone.spaces.each do |adjacent_space|
-              next unless adjacent_space.spaceType.is_initialized
-              next unless adjacent_space.partofTotalFloorArea
-
-              adjacent_space_type = adjacent_space.spaceType.get
-              next unless adjacent_space_type.standardsBuildingType.is_initialized
-              next unless adjacent_space_type.standardsSpaceType.is_initialized
-
-              adjacent_standards_building_type = adjacent_space_type.standardsBuildingType.get
-              adjacent_standards_space_type = adjacent_space_type.standardsSpaceType.get
-
-              # filter out adjacent spaces not matching the makeup_source_space_type criteria
-              next unless (makeup_source_space_type[0] == adjacent_standards_building_type) && (makeup_source_space_type[1] == adjacent_standards_space_type)
-
-              # set makeup_space if not set or if adjacent space is larger
-              if makeup_space.nil? || (adjacent_space.floorArea > makeup_space.floorArea)
-                makeup_space = adjacent_space
-              end
-            end
-          end
-
-          if makeup_space.nil?
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Model has zone #{thermal_zone.name} with standards types #{makeup_target_space_type} but no adjacent zone with #{makeup_source_space_type}. Exhaust will be added, but no makeup air.")
-            makeup_thermal_zone = nil
-          else
-            makeup_thermal_zone = makeup_space.thermalZone.get
-          end
-
-          zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone, make_up_air_source_zone: makeup_thermal_zone)
-          unless zone_exhaust_fan.nil?
-            # set fan pressure rise
-            fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
-
-            # update efficiency and pressure rise
-            prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
-
-            zone_exhaust_fans << zone_exhaust_fan
-          end
-        end
-      end
-    end
-
-    # loop through thermal zones and add exhaust fans
-    model.getThermalZones.sort.each do |thermal_zone|
-      has_exhaust_fan = false
-      thermal_zone.equipment.each { |equip| has_exhaust_fan = true if equip.to_FanZoneExhaust.is_initialized }
-
-      if has_exhaust_fan
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.Prototype.Model', "Thermal zone #{thermal_zone.name} already has an exhaust fan. None will be added.")
-        next
-      end
-
-      zone_exhaust_fan = OpenstudioStandards::HVAC.create_exhaust_fan(thermal_zone)
-      unless zone_exhaust_fan.nil?
-        # set fan pressure rise
-        fan_zone_exhaust_apply_prototype_fan_pressure_rise(zone_exhaust_fan)
-
-        # update efficiency and pressure rise
-        prototype_fan_apply_prototype_fan_efficiency(zone_exhaust_fan)
-
-        zone_exhaust_fans << zone_exhaust_fan
-      end
-    end
-
-    return zone_exhaust_fans
+    # Delegates so the prototype and typical paths cannot drift. The makeup air table this
+    # method used to carry inline now lives in
+    # openstudio-standards/hvac/exhaust/data/exhaust_makeup_air.json, whose legacy_makeup_air
+    # section holds the same DOE prototype (building_type, space_type) pairs.
+    OpenstudioStandards::HVAC.create_typical_exhaust(model, self,
+                                                     makeup_source: makeup_source,
+                                                     remove_existing_exhaust_fans: remove_existing_exhaust_fans)
   end
 
   # Add guestroom vacancy controls
@@ -2043,6 +1947,11 @@ Standard.class_eval do
     # to reflect damper leakage per PNNL
     econ_max_70_pct_oa_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     econ_max_70_pct_oa_sch.setName('Economizer Max OA Fraction 70 pct')
+    # the controller slot this goes on does not stamp type limits, so state them here or
+    # EnergyPlus reports "Schedule Type Limits Name is empty" and skips validating the values
+    econ_max_70_pct_oa_sch.setScheduleTypeLimits(
+      OpenstudioStandards::Schedules.create_schedule_type_limits(model, standard_schedule_type_limit: 'Fractional')
+    )
     econ_max_70_pct_oa_sch.defaultDaySchedule.setName('Economizer Max OA Fraction 70 pct Default')
     econ_max_70_pct_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.7)
 
