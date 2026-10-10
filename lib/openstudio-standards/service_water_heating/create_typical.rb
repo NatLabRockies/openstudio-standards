@@ -149,6 +149,7 @@ module OpenstudioStandards
           service_water_loop_temperature_c = OpenStudio.convert(140.0, 'F', 'C').get
 
           # add service water loop with water heater
+          # do not include piping losses with dedicated point-of-use heaters
           swh_loop = OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_loop(model,
                                                                                                 system_name: "#{space.name} Service Water Loop",
                                                                                                 service_water_temperature: service_water_loop_temperature_c,
@@ -158,7 +159,7 @@ module OpenstudioStandards
                                                                                                 water_heater_volume: water_heater_volume_m3,
                                                                                                 water_heater_fuel: dedicated_water_heating_fuel,
                                                                                                 number_of_water_heaters: num_water_heaters,
-                                                                                                add_piping_losses: true,
+                                                                                                add_piping_losses: false,
                                                                                                 floor_area: total_space_floor_area_m2,
                                                                                                 number_of_stories: 1)
 
@@ -205,7 +206,8 @@ module OpenstudioStandards
           service_water_pump_motor_efficiency = 1.0
         end
 
-        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment)
+        # size to shared water use and booster water use equipment
+        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment + booster_water_use_equipment)
         water_heater_capacity_w = water_heater_sizing[:water_heater_capacity]
         water_heater_volume_m3 = water_heater_sizing[:water_heater_volume]
 
@@ -232,10 +234,14 @@ module OpenstudioStandards
         # Attach booster water heater loop to shared loop
         unless booster_water_use_equipment.empty?
           # find_water_heater_capacity_volume_and_parasitic
+
+          # Size the booster heater to meet the loop temperature plus the heater deadband setpoint offset
+          booster_setpoint_offset_k = 2.0
+          booster_supply_temperature_f = 180.0 + OpenStudio.convert(booster_setpoint_offset_k, 'K', 'R').get
           booster_water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(booster_water_use_equipment,
                                                                                                                               water_heater_efficiency: 1.0,
                                                                                                                               inlet_temperature: 140.0,
-                                                                                                                              supply_temperature: 180.0)
+                                                                                                                              supply_temperature: booster_supply_temperature_f)
 
           # Note that booster water heaters are always assumed to be electric resistance
           booster_water_loop_temperature_c = OpenStudio.convert(180.0, 'F', 'C').get
@@ -243,6 +249,7 @@ module OpenstudioStandards
                                                                                                         system_name: 'Booster Water Loop',
                                                                                                         water_heater_capacity: booster_water_heater_sizing[:water_heater_capacity],
                                                                                                         service_water_temperature: booster_water_loop_temperature_c,
+                                                                                                        setpoint_offset: booster_setpoint_offset_k,
                                                                                                         service_water_loop: shared_swh_loop)
 
           # Add loop to array

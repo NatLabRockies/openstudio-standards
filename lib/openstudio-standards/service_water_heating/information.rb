@@ -36,8 +36,11 @@ module OpenstudioStandards
         # Get peak flow rate from water use equipment definition
         peak_flow_rate_m3_per_s = water_use_equip.waterUseEquipmentDefinition.peakFlowRate
 
+        # Muliply each water use equipment's peak by the zone or space multiplier
+        multiplier = water_use_equip.space.is_initialized ? water_use_equip.space.get.multiplier : 1
+
         # Calculate adjusted flow rate based on the peak fraction found in the flow rate fraction schedule
-        adjusted_peak_flow_rate_m3_per_s = max_sch_value * peak_flow_rate_m3_per_s
+        adjusted_peak_flow_rate_m3_per_s = max_sch_value * peak_flow_rate_m3_per_s * multiplier
         adjusted_max_flow_rates_gal_per_hr << OpenStudio.convert(adjusted_peak_flow_rate_m3_per_s, 'm^3/s', 'gal/hr').get
       end
 
