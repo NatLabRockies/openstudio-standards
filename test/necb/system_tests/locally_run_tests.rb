@@ -14,7 +14,7 @@ class RunNECBTests < Minitest::Test
     puts full_file_list
     puts "Starting Tests"
     start_time = Time.now.to_i
-    assert(ParallelTests.new.run(full_file_list, RelativeOutputFolder), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
+    assert(ParallelTestHelper.new.run(full_file_list, RelativeOutputFolder), "Some tests failed please ensure all test pass and tests have been updated to reflect the changes you expect before issuing a pull request")
     duration = Time.now.to_i - start_time
     puts "Running time: #{duration}s"
   end
