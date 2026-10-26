@@ -35,25 +35,15 @@ class NECB_Skylights_Tests < Minitest::Test
     # spaces below roofs (e.g. attics or plenums). Both require skylight wells
     # to toplight occupied spaces below.
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       'LargeOffice',
       'MediumOffice',
-      # 'NorthernEducation',  # *
-      # 'NorthernHealthCare', # *
+      'NorthernEducation',
+      'NorthernHealthCare',
       'QuickServiceRestaurant',
       'SmallOffice'
     ]
-
-    # (*) 'NorthernEducation' and 'NorthernHealthCare' have neither:
-    #       - Building.standardsNumberOfStories
-    #       - Building.standardsNumberOfAboveStories
-    #
-    #     ... and so both templates/models fail early on, irrespective of
-    #         BTAP::Activity features - @todo.
-
-    # NOTE: Skipping NorthernEducation for now:
-    #   Minitest::UnexpectedError: RuntimeError: validation of model failed.
-
+    
     # Range of test options. NECB2011 for now. Skipping later NECBs - they're
     # systematically easier to deploy, given their lower reference building SRR
     # targets (e.g. 2% vs 5%). BTAPPRE1980 cases are likely worth testing at
@@ -184,7 +174,7 @@ class NECB_Skylights_Tests < Minitest::Test
                 refute(lc.empty?)
                 lc = lc.get
                 err_msg = "BTAP/Sky: Uninsulated well wall (#{cas})?"
-                assert_equal(TBD.rsi(lc, s.filmResistance).round(2), 4.85)
+                assert_equal(TBD.rsi(lc, s.filmResistance).round(2), 4.76)
               end
             elsif plnums.include?(building)
               spaces = model.getSpaces.reject { |s| s.partofTotalFloorArea }

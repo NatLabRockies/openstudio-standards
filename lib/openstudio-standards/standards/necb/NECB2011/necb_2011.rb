@@ -293,6 +293,7 @@ class NECB2011 < Standard
                                    scale_x: nil,
                                    scale_y: nil,
                                    scale_z: nil,
+                                   footprint_aspect_ratio: nil,
                                    pv_ground_type: nil,
                                    pv_ground_total_area_pv_panels_m2: nil,
                                    pv_ground_tilt_angle: nil,
@@ -366,6 +367,7 @@ class NECB2011 < Standard
                                 scale_x: scale_x,
                                 scale_y: scale_y,
                                 scale_z: scale_z,
+                                footprint_aspect_ratio: footprint_aspect_ratio,
                                 pv_ground_type: pv_ground_type, # Two options: (1) nil/none/false/'NECB_Default', (2) 'add_pv_ground'
                                 pv_ground_total_area_pv_panels_m2: pv_ground_total_area_pv_panels_m2, # Options: (1) nil/none/false, (2) 'NECB_Default' (i.e. building footprint), (3) area value (e.g. 50)
                                 pv_ground_tilt_angle: pv_ground_tilt_angle, # Options: (1) nil/none/false, (2) 'NECB_Default' (i.e. latitude), (3) tilt angle value (e.g. 20)
@@ -402,7 +404,7 @@ class NECB2011 < Standard
   # Created this method so that additional methods can be addded for bulding the prototype model in later
   # code versions without modifying the build_protoype_model method or copying it wholesale for a few changes.
   def model_apply_standard(model:,
-                           construction_opt: '',
+                           construction_opt: 'structure',
                            tbd_option: 'none',
                            tbd_interpolate: true,
                            epw_file:,
@@ -450,6 +452,7 @@ class NECB2011 < Standard
                            scale_x: nil,
                            scale_y: nil,
                            scale_z: nil,
+                           footprint_aspect_ratio: nil,
                            nv_type: nil,
                            nv_opening_fraction: nil,
                            nv_temp_out_min: nil,
@@ -475,6 +478,7 @@ class NECB2011 < Standard
                            airloop_fancoils_heating: nil,
                            oerd_utility_pricing: nil)
 
+    oerd_utility_pricing = false
     apply_weather_data(model: model,
                        epw_file: epw_file,
                        custom_weather_folder: custom_weather_folder,
@@ -482,19 +486,37 @@ class NECB2011 < Standard
     primary_heating_fuel = validate_primary_heating_fuel(primary_heating_fuel: primary_heating_fuel, model: model)
     self.fuel_type_set = SystemFuels.new()
     self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: primary_heating_fuel)
-    clean_and_scale_model(model: model, rotation_degrees: rotation_degrees, scale_x: scale_x, scale_y: scale_y, scale_z: scale_z)
-    fdwr_set = convert_arg_to_f(variable: fdwr_set, default: -1)
-    srr_set = convert_arg_to_f(variable: srr_set, default: -1)
-    srr_opt = convert_arg_to_string(variable: srr_opt, default: '')
-    construction_opt = convert_arg_to_string(variable: construction_opt, default: '')
-    massive = construction_opt == 'structure'
-    tbd_option = convert_arg_to_string(variable: tbd_option, default: 'none')
-    tbd_interpolate = convert_arg_to_bool(variable: tbd_interpolate, default: true)
-    necb_hdd = convert_arg_to_bool(variable: necb_hdd, default: true)
-    boiler_fuel = convert_arg_to_string(variable: boiler_fuel, default: nil)
-    boiler_cap_ratio = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
-    swh_fuel = convert_arg_to_string(variable: swh_fuel, default: nil)
+    clean_and_scale_model(model: model,
+                rotation_degrees: rotation_degrees,
+                scale_x: scale_x,
+                scale_y: scale_y,
+                scale_z: scale_z,
+                footprint_aspect_ratio: footprint_aspect_ratio)
+
+    ext_floor_cond           = convert_arg_to_f(variable: ext_floor_cond, default: nil)
+    ext_roof_cond            = convert_arg_to_f(variable: ext_roof_cond, default: nil)
+    ext_wall_cond            = convert_arg_to_f(variable: ext_wall_cond, default: nil)
+    ground_floor_cond        = convert_arg_to_f(variable: ground_floor_cond, default: nil)
+    ground_roof_cond         = convert_arg_to_f(variable: ground_roof_cond, default: nil)
+    ground_wall_cond         = convert_arg_to_f(variable: ground_wall_cond, default: nil)
+    door_construction_cond   = convert_arg_to_f(variable: door_construction_cond, default: nil)
+    fixed_window_cond        = convert_arg_to_f(variable: fixed_window_cond, default: nil)
+    fixed_wind_solar_trans   = convert_arg_to_f(variable: fixed_wind_solar_trans, default: nil)
+    skylight_solar_trans     = convert_arg_to_f(variable: skylight_solar_trans, default: nil)
+    glass_door_solar_trans   = convert_arg_to_f(variable: glass_door_solar_trans, default: nil)
+    fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
+    srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
+    srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
+    construction_opt         = convert_arg_to_string(variable: construction_opt, default: 'structure')
+    tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
+    tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
+    necb_hdd                 = convert_arg_to_bool(variable: necb_hdd, default: true)
+    boiler_fuel              = convert_arg_to_string(variable: boiler_fuel, default: nil)
+    boiler_cap_ratio         = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
+    swh_fuel                 = convert_arg_to_string(variable: swh_fuel, default: nil)
     airloop_fancoils_heating = convert_arg_to_bool(variable: airloop_fancoils_heating, default: false)
+
+    massive = construction_opt == 'structure'
 
     # Check if custom systems are assigned to dwelling units, washrooms, corridors, and storage rooms.  If they are, set
     # them to be the same as the primary system type.  If no primary system type is defined then set them to be nil.
@@ -517,7 +539,7 @@ class NECB2011 < Standard
 
     output_meters = check_output_meters(output_meters: output_meters) if oerd_utility_pricing
 
-    assign_building_activity(model: model)
+    assign_building_activity(model: model, option: construction_opt)
     assign_building_structure(model: model, activity: @activity, massive: massive)
     apply_loads(model: model,
                 lights_type: lights_type,
@@ -527,8 +549,6 @@ class NECB2011 < Standard
                 oa_scale: oa_scale)
     apply_envelope(model: model,
                    construction_opt: construction_opt,
-                   bldg_category: @activity.category,
-                   bldg_structure: @structure.structure,
                    ext_wall_cond: ext_wall_cond,
                    ext_floor_cond: ext_floor_cond,
                    ext_roof_cond: ext_roof_cond,
@@ -550,6 +570,7 @@ class NECB2011 < Standard
                                srr_set: srr_set,
                                srr_opt: srr_opt,
                                necb_hdd: necb_hdd)
+    set_construction_air_film_resistances(model: model)
     apply_thermal_bridging(model: model,
                            necb_hdd: necb_hdd,
                            structure: @structure,
@@ -562,7 +583,7 @@ class NECB2011 < Standard
                       sizing_run_dir: sizing_run_dir,
                       lights_type: lights_type,
                       lights_scale: lights_scale)
-    apply_kiva_foundation(model, massive)
+    apply_kiva_foundation(model)
     apply_systems_and_efficiencies(model: model,
                                    sizing_run_dir: sizing_run_dir,
                                    hvac_system_primary: hvac_system_primary,
@@ -600,7 +621,7 @@ class NECB2011 < Standard
   end
 
   # This method cleans the model of any existing HVAC systems and applies any desired ratation or scaling to the model.
-  def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil)
+  def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil, footprint_aspect_ratio: nil)
     # clean model..
     BTAP::Resources::Envelope::remove_all_envelope_information(model)
     model = OpenstudioStandards::HVAC.remove_all_hvac(model)
@@ -624,9 +645,6 @@ class NECB2011 < Standard
     model.getSpaces.sort.each { |space| space.designSpecificationOutdoorAir(&:remove) }
     model.getThermostatSetpointDualSetpoints.each(&:remove)
 
-    scale_x = 1.0
-    scale_y = 1.0
-    scale_z = 1.0
     # Rotate to model if requested
     rotation_degrees = convert_arg_to_f(variable: rotation_degrees, default: 0.0)
     BTAP::Geometry.rotate_building(model: model, degrees: rotation_degrees) unless rotation_degrees == 0.0
@@ -635,9 +653,10 @@ class NECB2011 < Standard
     scale_x = convert_arg_to_f(variable: scale_x, default: 1.0)
     scale_y = convert_arg_to_f(variable: scale_y, default: 1.0)
     scale_z = convert_arg_to_f(variable: scale_z, default: 1.0)
-    return unless scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
+    BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z) if scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
 
-    BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z)
+    footprint_aspect_ratio = convert_arg_to_f(variable: footprint_aspect_ratio, default: nil)
+    BTAP::Geometry.set_footprint_aspect_ratio(model, footprint_aspect_ratio) unless footprint_aspect_ratio.nil?
   end
 
   def apply_systems_and_efficiencies(model:,
@@ -812,8 +831,6 @@ class NECB2011 < Standard
 
   def apply_envelope(model:,
                      construction_opt: '',
-                     bldg_category: '',
-                     bldg_structure: '',
                      ext_wall_cond: nil,
                      ext_floor_cond: nil,
                      ext_roof_cond: nil,
@@ -839,30 +856,99 @@ class NECB2011 < Standard
     model.getOutsideSurfaceConvectionAlgorithm.setAlgorithm('TARP')
 
     construction_opt = '' unless construction_opt.respond_to?(:to_sym)
-    bldg_structure   = '' unless bldg_structure.respond_to?(:to_sym)
     construction_opt = construction_opt.to_s.downcase
-    bldg_structure   = bldg_structure.to_s.downcase.to_sym
-    bldg_structures  = @structure.data[:structure].keys
 
-    if construction_opt == 'structure' && bldg_structures.include?(bldg_structure)
-      argh            = {}
-      argh[:eWallU  ] = ext_wall_cond          if ext_wall_cond
-      argh[:eFloorU ] = ext_floor_cond         if ext_floor_cond
-      argh[:eRoofU  ] = ext_roof_cond          if ext_roof_cond
-      argh[:gWallU  ] = ground_wall_cond       if ground_wall_cond
-      argh[:gFloorU ] = ground_floor_cond      if ground_floor_cond
-      argh[:gRoofU  ] = ground_roof_cond       if ground_roof_cond
-      argh[:doorU   ] = door_construction_cond if door_construction_cond
-      argh[:fenU    ] = fixed_window_cond      if fixed_window_cond
-      argh[:skyU    ] = skylight_solar_trans   if skylight_solar_trans
-      argh[:doorSHGC] = glass_door_solar_trans if glass_door_solar_trans
-      argh[:fenSHGC ] = fixed_wind_solar_trans if fixed_wind_solar_trans
-      argh[:skySHGC ] = skylight_solar_trans   if skylight_solar_trans
+    if construction_opt == 'structure'
+      argh             = {}
+      argh[:eWallU   ] = ext_wall_cond          if ext_wall_cond
+      argh[:eFloorU  ] = ext_floor_cond         if ext_floor_cond
+      argh[:eRoofU   ] = ext_roof_cond          if ext_roof_cond
+      argh[:gWallU   ] = ground_wall_cond       if ground_wall_cond
+      argh[:gFloorU  ] = ground_floor_cond      if ground_floor_cond
+      argh[:gRoofU   ] = ground_roof_cond       if ground_roof_cond
+      argh[:doorU    ] = door_construction_cond if door_construction_cond
+      argh[:fenU     ] = fixed_window_cond      if fixed_window_cond
+      argh[:skyU     ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:fenSHGC  ] = fixed_wind_solar_trans if fixed_wind_solar_trans
+      argh[:skySHGC  ] = skylight_solar_trans   if skylight_solar_trans
+      argh[:category ] = @activity.category
+      argh[:structure] = @structure.structure
+      argh[:framing  ] = @structure.framing
+      argh[:cladding ] = @structure.cladding
+      argh[:finish   ] = @structure.finish
 
-      assign_contruction_to_adiabatic_surfaces(model)
-      ok = add_construction_sets(model, necb_hdd, argh)
+      # Hard-set (full-height) basement floor constructions.
+      set_basement_floor_construction(model)
 
-      raise('NECB2011: Failed to assign default construction sets') unless ok
+      # Add default BUILDING construction sets.
+      unless add_construction_sets(model.getSpaces, true, necb_hdd, argh)
+        raise('NECB: Failed to assign default BUILDING construction sets')
+      end
+
+      # Add default construction sets to customized spaces. Group spaces along
+      # customized STRUCTURE, FRAMING, CLADDING and/or FINISH.
+      unless @structure.spaces.empty?
+        custom = []
+        id     = @structure.spaces.keys.first
+        sp     = @structure.spaces.values.first
+        espace = model.getSpaceByName(id)
+
+        unless espace.empty?
+          espace = espace.get
+
+          first             = {}
+          first[:spaces   ] = [espace]
+          first[:structure] = sp[:structure]
+          first[:framing  ] = sp[:framing]
+          first[:cladding ] = sp[:cladding]
+          first[:finish   ] = sp[:finish]
+          custom           << first
+
+          # Group spaces when sharing common attributes.
+          @structure.spaces.each do |id, sp|
+            space = model.getSpaceByName(id)
+            next if space.empty?
+
+            match = false
+            space = space.get
+            next if space == espace
+
+            custom.each do |csp|
+              break if match
+
+              if sp[:structure] == csp[:structure] &&
+                 sp[:framing  ] == csp[:framing  ] &&
+                 sp[:cladding ] == csp[:cladding ] &&
+                 sp[:finish   ] == csp[:finish   ]
+
+                 csp[:spaces] << space
+                 match = true
+              end
+            end
+
+            unless match
+              spx             = {}
+              spx[:spaces   ] = [space]
+              spx[:structure] = sp[:structure]
+              spx[:framing  ] = sp[:framing]
+              spx[:cladding ] = sp[:cladding]
+              spx[:finish   ] = sp[:finish]
+              custom         << spx
+            end
+          end
+
+          custom.each do |csp|
+            argh[:structure] = csp[:structure]
+            argh[:framing  ] = csp[:framing]
+            argh[:cladding ] = csp[:cladding]
+            argh[:finish   ] = csp[:finish]
+
+            unless add_construction_sets(csp[:spaces], false, necb_hdd, argh)
+              raise('NECB: Failed to assign (custom) SPACE construction sets')
+            end
+          end
+        end
+      end
     else
       model_add_constructions(model)
       apply_standard_construction_properties(model: model,
@@ -886,82 +972,281 @@ class NECB2011 < Standard
     model_create_thermal_zones(model, @space_multiplier_map)
   end
 
-  # Apply Kiva foundation model to floors/walls with ground boundary condition.
-  # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
-  # 'massive' edit: denis@rd2.ca
+  ##
+  # Assign surface area-weighted air film resistances (in m2.K/W) to insulated
+  # (opaque) layered constructions (as AdditionalProperty "btap_film"), as well
+  # as the (net) area of surfaces referencing each construction. The solution
+  # initially targets constructions having a valid AdditionalProperty "btap_uo"
+  # (auto-generated with option "structure"). If no constructions are tagged
+  # with "btap_uo" in the model, the fallback is to instead target all outdoor-
+  # facing, above-grade layered constructions. In case of latter scenario,
+  # AdditionalProperties "btap_uo", "btap_ut", "btap_id", "btap_type" &
+  # "btap_area" are added. All constructions having (or inherting) a "btap_uo"
+  # property are adjusted to match the specified Uo (factoring in "btap_film").
   #
-  # @param massive [Boolean] whether opaque materials are standard (not massless)
-  def apply_kiva_foundation(model, massive = false)
-    # define a Kiva model for the whole bldg that's used for the first floor in contact with ground in each zone
+  # @author: denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Boolean] true if successful
+  def set_construction_air_film_resistances(model: nil)
+    return false unless model.is_a?(OpenStudio::Model::Model)
+    
+    ok  = false
+    hdd = get_necb_hdd18(model: model, necb_hdd: true)
+
+    model.getLayeredConstructions.each do |lc|
+      next unless lc.additionalProperties.hasFeature("btap_uo")
+
+      ok = true
+      fR = lc.isFenestration ? 0 : filmR(lc)
+      lc.additionalProperties.setFeature("btap_film", fR)
+      lc.additionalProperties.setFeature("btap_area", lc.getNetArea)
+    end
+
+    # No "btap_uo" AdditionalProperty?
+    model.getSurfaces.each do |surface|
+      break if ok
+
+      tp = surface.surfaceType.downcase
+      bc = surface.outsideBoundaryCondition.downcase
+      next unless bc == "outdoors"
+
+      lc = surface.construction
+      next if lc.empty?
+
+      lc = lc.get.to_LayeredConstruction
+      next if lc.empty?
+
+      lc = lc.get
+      m2 = lc.getNetArea
+      next unless m2 > 0
+
+      uo = max_u_necb(tp, bc, hdd)
+      ty = case tp
+           when "wall"  then :walls
+           when "floor" then :floors
+           else              :roofs
+           end
+
+      unless lc.additionalProperties.hasFeature("btap_film")
+        lc.additionalProperties.setFeature("btap_film", filmR(lc))
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_area")
+        lc.additionalProperties.setFeature("btap_area", m2)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_type")
+        lc.additionalProperties.setFeature("btap_type", ty.to_s)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_uo")
+        lc.additionalProperties.setFeature("btap_uo", uo)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_ut")
+        lc.additionalProperties.setFeature("btap_ut", uo)
+      end
+
+      unless lc.additionalProperties.hasFeature("btap_id")
+        argh           = {}
+        argh[:perform] = :lp
+        argh[:stype  ] = ty
+        argh[:uo     ] = uo
+        id = BTAP::Bridging.costed_assembly(argh)
+        lc.additionalProperties.setFeature("btap_id", id)
+      end
+    end
+
+    # Isolate building default exterior wall construction.
+    wlc = nil
+    set = model.getBuilding.defaultConstructionSet
+
+    unless set.empty?
+      ext = set.get.defaultExteriorSurfaceConstructions
+
+      unless ext.empty?
+        wlc = ext.get.wallConstruction
+        wlc = wlc.empty? ? nil : wlc.get
+      end
+    end
+
+    # Adjust tagged insulated constructions.
+    model.getLayeredConstructions.each do |lc|
+      id = lc.additionalProperties.getFeatureAsString("btap_id")
+      uo = lc.additionalProperties.getFeatureAsDouble("btap_uo")
+      ut = lc.additionalProperties.getFeatureAsDouble("btap_ut")
+      fr = lc.additionalProperties.getFeatureAsDouble("btap_film")
+      ty = lc.additionalProperties.getFeatureAsString("btap_type")
+      m2 = lc.additionalProperties.getFeatureAsString("btap_area")
+      next if id.empty?
+      next if uo.empty?
+      next if ut.empty?
+      next if fr.empty?
+      next if ty.empty?
+      next if m2.empty?
+      next if lc.isFenestration
+
+      id = id.get
+      uo = uo.get
+      ut = ut.get
+      fr = fr.get
+      ty = ty.get
+      m2 = m2.get
+      il = TBD.insulatingLayer(lc)
+      next if id.downcase.chr == "g"
+      next unless il[:index]
+
+      TBD.resetUo(lc, fr, il[:index], uo)
+
+      # Add default exterior wall construction tags to building.
+      if lc == wlc
+        next unless ty == "walls"
+
+        model.getBuilding.additionalProperties.setFeature("btap_id", id)
+        model.getBuilding.additionalProperties.setFeature("btap_uo", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_ut", uo)
+        model.getBuilding.additionalProperties.setFeature("btap_film", fr)
+        model.getBuilding.additionalProperties.setFeature("btap_type", ty)
+        model.getBuilding.additionalProperties.setFeature("btap_area", m2)
+      end
+    end
+
+    true
+  end
+
+  ##
+  # Apply Kiva foundation model to floors/walls with ground boundary condition.
+  #
+  # @author kamel.haddad@nrcan-rncan.gc.ca
+  # @author denis@rd2.ca
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Float] slab-on-grade perimeter area (0 if not applicable)
+  def apply_kiva_foundation(model)
+    hdd = get_necb_hdd18(model: model, necb_hdd: true)
+    slb = false
+
     bldg_kiva_model = OpenStudio::Model::FoundationKiva.new(model)
     bldg_kiva_model.setName("Bldg Kiva Foundation")
     bldg_kiva_model.setWallHeightAboveGrade(0.0)
     bldg_kiva_model.setWallDepthBelowSlab(0.0)
+
     model.getThermalZones.sort.each do |zone|
       zone_kiva_models = [bldg_kiva_model]
       zone_grd_flr_counter = 0
+
       zone.spaces.sort.each do |space|
-        # store space floors and walls in contact with ground and exterior walls
+        # Store space floors and walls in contact with ground and exterior walls.
         space_ground_floors = []
         space_ground_walls = []
         space_ext_walls = []
         space_ground_floors += space.surfaces.select {|surf| surf.surfaceType.downcase == 'floor' && surf.isGroundSurface }
         space_ground_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.isGroundSurface }
         space_ext_walls += space.surfaces.select {|surf| surf.surfaceType.downcase == 'wall' && surf.outsideBoundaryCondition.downcase == 'outdoors'}
-        # loop through space floors in contact with ground and assing a Kiva model for each
+
+        # Slab-on-grade (not basement) if no ground-facing walls. Add perimeter
+        # insulation to building KIVA foundation.
+        unless space_ground_floors.empty?
+          if space_ground_walls.empty?
+            if hdd < 7000
+              xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
+
+              if xps38.empty?
+                xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+                xps38.setName("XPS 38mm")
+                xps38.setRoughness("Smooth")
+                xps38.setThickness(0.038)
+                xps38.setConductivity(0.029)
+                xps38.setDensity(28)
+                xps38.setSpecificHeat(1450)
+              else
+                xps38 = xps38.get
+              end
+
+              zone_kiva_models.last.setInteriorHorizontalInsulationMaterial(xps38)
+              zone_kiva_models.last.setInteriorHorizontalInsulationWidth(1.2)
+
+              slb = true
+            end
+          end
+        end
+
+        # Loop through space floors in contact with ground and assign a Kiva
+        # model for each.
         space_ground_floors.each do |gfloor|
           zone_grd_flr_counter += 1
+
+          # A new Kiva model is needed for each additional floor in contact with
+          # the ground in the zone.
           if zone_grd_flr_counter > 1
-            # a new Kiva model is needed for each additional floor in contact with the ground in the zone
             kiva_model = OpenStudio::Model::FoundationKiva.new(model)
             kiva_model.setName("#{gfloor.name.to_s} Kiva Foundation")
             kiva_model.setWallHeightAboveGrade(0.0)
             kiva_model.setWallDepthBelowSlab(0.0)
+
+            # Slab-on-grade (not basement) if no ground-facing walls. Add
+            # perimeter insulation to building KIVA foundation.
+            if space_ground_walls.empty?
+              if hdd < 7000
+                xps38 = model.getStandardOpaqueMaterialByName("XPS 38mm")
+
+                if xps38.empty?
+                  xps38 = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+                  xps38.setName("XPS 38mm")
+                  xps38.setRoughness("Smooth")
+                  xps38.setThickness(0.038)
+                  xps38.setConductivity(0.029)
+                  xps38.setDensity(28)
+                  xps38.setSpecificHeat(1450)
+                else
+                  xps38 = xps38.get
+                end
+
+                kiva_model.setInteriorHorizontalInsulationMaterial(xps38)
+                kiva_model.setInteriorHorizontalInsulationWidth(1.2)
+
+                slb = true
+              end
+            end
+
             zone_kiva_models << kiva_model
           end
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones.
-          # Kiva model only works with standard materials. Replace constructions
-          # massless materials with standard ones. Skip check if 'massive'.
-          if massive
-            c = gfloor.construction.get.to_LayeredConstruction.get
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-            gfloor.setConstruction(c)
-          else
-            replace_massless_material_with_std_material(model,gfloor)
-            gfloor.setOutsideBoundaryCondition('Foundation')
-            gfloor.setAdjacentFoundation(zone_kiva_models.last)
-          end
+
+          c = gfloor.construction.get.to_LayeredConstruction.get
+          gfloor.setOutsideBoundaryCondition('Foundation')
+          gfloor.setAdjacentFoundation(zone_kiva_models.last)
+          gfloor.setConstruction(c)
 
           # Set the exposed perimeter for space floors in contact with the ground.
           floor_exp_per = 0.0
+
           if !space_ground_walls.empty?
-            floor_exp_per += get_surface_exp_per(gfloor,space_ground_walls)
+            floor_exp_per += get_surface_exp_per(gfloor, space_ground_walls)
           elsif !space_ext_walls.empty?
-            floor_exp_per += get_surface_exp_per(gfloor,space_ext_walls)
+            floor_exp_per += get_surface_exp_per(gfloor, space_ext_walls)
           end
-          gfloor.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter',floor_exp_per)
-          # specify a foundation boundary condition for space walls in contact with the ground and in
-          # contact with the space floor in contact with ground 'gfloor'
+
+          gfloor.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', floor_exp_per)
+
+          # Specify a foundation boundary condition for space walls in contact
+          # with the ground and in contact with the space floor in contact with
+          # ground 'gfloor'.
           space_ground_walls.each do |gwall|
-            if surfaces_are_in_contact?(gfloor,gwall)
-              if massive
-                c = gwall.construction.get.to_LayeredConstruction.get
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-                gwall.setConstruction(c)
-              else
-                replace_massless_material_with_std_material(model,gwall)
-                gwall.setOutsideBoundaryCondition('Foundation')
-                gwall.setAdjacentFoundation(zone_kiva_models.last)
-              end
+            if surfaces_are_in_contact?(gfloor, gwall)
+              c = gwall.construction.get.to_LayeredConstruction.get
+              gwall.setOutsideBoundaryCondition('Foundation')
+              gwall.setAdjacentFoundation(zone_kiva_models.last)
+              gwall.setConstruction(c)
             end
           end
         end
       end
     end
-    kiva_settings = model.getFoundationKivaSettings if !model.getFoundationKivas.empty?
+
+    slb == true ? BTAP::Geometry::Spaces.perimeter_m2(model.getSpaces, 1.2) : 0
   end
 
   # check if two surfaces are in contact. For every two consecutive vertices on surface 1,
@@ -1012,7 +1297,7 @@ class NECB2011 < Standard
   # with the name: 'Insulation: Expanded polystyrene - extruded (smooth skin surface) (HCFC-142b exp.)'.
   # The thickness of the new material is based on the thermal resistance of the massless material it replaces.
   # created by: Kamel Haddad (kamel.haddad@nrcan-rncan.gc.ca)
-  def replace_massless_material_with_std_material(model,surf)
+  def replace_massless_material_with_std_material(model, surf)
     std_const_name = "#{surf.construction.get.name.to_s}_std"
     std_const = model.getLayeredConstructions.select {|const| const.name.to_s == std_const_name}
     new_const = nil
@@ -1150,10 +1435,11 @@ class NECB2011 < Standard
   # Initiates a BTAP building ACTIVITY.
   #
   # @param model [OpenStudio::Model::Model] a model
+  # @param option ["", "structure"] construction option
   #
   # @return [BTAP::Activity] a BTAP building ACTIVITY (see logs if failed)
-  def assign_building_activity(model: nil)
-    @activity = BTAP::Activity.new(model)
+  def assign_building_activity(model: nil, option: "")
+    @activity = BTAP::Activity.new(model, option)
   end
 
   # Initiates a BTAP building STRUCTURE.
@@ -1169,7 +1455,7 @@ class NECB2011 < Standard
 
   ##
   # (Optionally) uprates - then derates - envelope surface constructions due to
-  # MAJOR thermal bridges (e.g. roof parapets, corners, fenestration
+  # linear thermal bridges (e.g. roof parapets, corners, fenestration
   # perimeters). See lib/openstudio-standards/btap/bridging.rb, which relies on
   # the Thermal Bridging & Derating (TBD) gem.
   #
@@ -1186,14 +1472,14 @@ class NECB2011 < Standard
   def apply_thermal_bridging(model: nil,
                              necb_hdd: true,
                              structure: nil,
-                             option: 'none',
+                             option: "none",
                              interpolate: false,
                              wallU: nil,
                              floorU: nil,
                              roofU: nil)
     necb_hdd = true unless [true, false].include?(necb_hdd)
     return true unless option.respond_to?(:to_sym)
-    return true if option.to_s.downcase == 'none'
+    return true if option.to_s.downcase == "none"
 
     hdd    = get_necb_hdd18(model: model, necb_hdd: necb_hdd)
     wallU  = wallU  ? wallU  : max_u_necb("wall", "outdoors", hdd)
@@ -1206,19 +1492,19 @@ class NECB2011 < Standard
     argh[:floors   ] = { uo: floorU }
     argh[:roofs    ] = { uo: roofU  }
 
-    case option.downcase
-    when 'uprate'
-      argh[:walls  ][:ut] = wallU
-      argh[:floors ][:ut] = floorU
-      argh[:roofs  ][:ut] = roofU
-    when 'good'
+    case option.to_s.downcase
+    when "uprate"
+      argh[:walls ][:ut] = wallU
+      argh[:floors][:ut] = floorU
+      argh[:roofs ][:ut] = roofU
+    when "good"
       argh[:quality] = :good
     else
       argh[:quality] = :bad
     end
 
     argh[:interpolate] = interpolate
-    argh[:interpolate] = false unless [true, false].include?(interpolate)
+    argh[:interpolate] = false unless argh[:interpolate] == true
 
     @tbd = BTAP::Bridging.new(model, argh)
 
@@ -1317,10 +1603,8 @@ class NECB2011 < Standard
   end
 
   def apply_loop_pump_power(model:, sizing_run_dir:)
-    # Remove duplicate materials and constructions
-    # Note For NECB2015 This is the 2nd time this method is bieng run.
-    # First time it ran in the super() within model_apply_standard() method
-    # model = return BTAP::FileIO::remove_duplicate_materials_and_constructions(model)
+    # Note For NECB2015 This is the 2nd time this method is being run.
+    # First time it ran in the super() within model_apply_standard() method.
     return model
   end
 
@@ -1736,15 +2020,41 @@ class NECB2011 < Standard
           end
         end
 
-        if daylight_space.spaceType.get.standardsSpaceType.get.to_s == 'Office - enclosed' && daylight_space_area >= 25.0
+        # Match both the NECB2011 name ('Office - enclosed') and the NECB2015+/
+        # NECB2020 names ('Office enclosed <= 25 m2' / 'Office enclosed > 25 m2');
+        # the exact-2011-string comparison meant the >= 25 m2 office exemption
+        # NEVER fired on 2015+ models.
+        if daylight_space.spaceType.get.standardsSpaceType.get.to_s =~ /office\s*-?\s*enclosed/i && daylight_space_area >= 25.0
           offices_larger_25m2 << daylight_space.name.to_s
         end
       end
 
       ##### find daylight_spaces which do not need daylight sensor controls based on the primary_sidelighted_area as per NECB2011: 4.2.2.8.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their primary_sidelighted_area <= 100m2), as per NECB2011: 4.2.2.2.
+      # The exception criteria for sidelighting (4.2.2.8/4.2.2.10) only apply to
+      # spaces WITH exterior windows, and the skylight criteria (4.2.2.4/4.2.2.7)
+      # only to spaces WITH skylights. Previously every criterion was applied to
+      # every space, so a window-only space was ALWAYS excepted (its skylight
+      # area is 0 <= 400 m2) and a skylight-only space likewise — with the
+      # practical result that almost no space ever received a daylighting sensor.
+      spaces_with_windows = []
+      spaces_with_skylights = []
+      daylight_spaces.sort.each do |daylight_space|
+        daylight_space.surfaces.sort.each do |surface|
+          surface.subSurfaces.sort.each do |subsurface|
+            next unless subsurface.outsideBoundaryCondition == 'Outdoors'
+
+            if subsurface.subSurfaceType == 'FixedWindow' || subsurface.subSurfaceType == 'OperableWindow'
+              spaces_with_windows << daylight_space.name.to_s
+            elsif subsurface.subSurfaceType == 'Skylight'
+              spaces_with_skylights << daylight_space.name.to_s
+            end
+          end
+        end
+      end
       daylight_spaces_exception = []
       primary_sidelighted_area_hash.sort.each do |key_daylight_space_name, value_primary_sidelighted_area|
+        next unless spaces_with_windows.include?(key_daylight_space_name)
         if value_primary_sidelighted_area <= 100.0 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1753,6 +2063,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the sidelighting_effective_aperture as per NECB2011: 4.2.2.8.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their sidelighting_effective_aperture <= 10%), as per NECB2011: 4.2.2.2.
       sidelighting_effective_aperture_hash.sort.each do |key_daylight_space_name, value_sidelighting_effective_aperture|
+        next unless spaces_with_windows.include?(key_daylight_space_name)
         if value_sidelighting_effective_aperture <= 0.1 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1761,6 +2072,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the daylighted_area_under_skylights as per NECB2011: 4.2.2.4.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their daylighted_area_under_skylights <= 400m2), as per NECB2011: 4.2.2.2.
       daylighted_area_under_skylights_hash.sort.each do |key_daylight_space_name, value_daylighted_area_under_skylights|
+        next unless spaces_with_skylights.include?(key_daylight_space_name)
         if value_daylighted_area_under_skylights <= 400.0 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -1769,6 +2081,7 @@ class NECB2011 < Standard
       ##### find daylight_spaces which do not need daylight sensor controls based on the skylight_effective_aperture criterion as per NECB2011: 4.2.2.4.
       ##### Note: Office spaces >= 25m2 are excluded (i.e. they should have daylighting controls even if their skylight_effective_aperture <= 0.6%), as per NECB2011: 4.2.2.2.
       skylight_effective_aperture_hash.sort.each do |key_daylight_space_name, value_skylight_effective_aperture|
+        next unless spaces_with_skylights.include?(key_daylight_space_name)
         if value_skylight_effective_aperture <= 0.006 && [key_daylight_space_name].any? { |word| offices_larger_25m2.include?(word) } == false
           daylight_spaces_exception << key_daylight_space_name
         end
@@ -2146,7 +2459,7 @@ class NECB2011 < Standard
     # Interate through all spaces in model.. not just ones that have space type defined.. Is this right sara?
     space_type.spaces.sort.each do |space|
       # Get only the wall type surfaces and iterate throught them.
-      space.surfaces.sort.select(&:surfaceType == 'Wall').each do |wall_surface|
+      space.surfaces.sort.select { |surface| surface.surfaceType == 'Wall' }.each do |wall_surface|
         # Find the vertex with the max z value.
         vertex_with_max_height = wall_surface.vertices.max_by(&:z)
         # replace max if this surface has something bigger.
@@ -2393,7 +2706,6 @@ class NECB2011 < Standard
                     # if skylight_vertex_0_distance == skylight_vertex_1_distance
                   end
 
-                  daylighted_under_skylight_area += daylighted_under_skylight_length * daylighted_under_skylight_width
                   # if subsurface.subSurfaceType == "FixedWindow" || subsurface.subSurfaceType == "OperableWindow"
                 end
                 # surface.subSurfaces.each do |subsurface|
@@ -2402,6 +2714,11 @@ class NECB2011 < Standard
             end
             # daylight_space.surfaces.each do |surface|
           end
+          # Accumulate ONCE per skylight. Previously the accumulation sat inside
+          # the exterior-window loop above, so (a) spaces with skylights but no
+          # exterior windows always computed ZERO daylighted area, and (b) each
+          # additional exterior window double-counted the whole area.
+          daylighted_under_skylight_area += daylighted_under_skylight_length * daylighted_under_skylight_width
           # if subsurface.subSurfaceType == "Skylight"
         end
         # surface.subSurfaces.each do |subsurface|
@@ -2812,45 +3129,140 @@ class NECB2011 < Standard
   # Arguments:
   # model (OpenStudio::Model::Model): The model to run the sizing run on.
   # sizing_run_dir (String): The directory where the sizing run files will be saved.
-  def try_sizing_run(model:, sizing_run_dir:, sizing_run_subdir:)
+  def try_sizing_run(model:, sizing_run_dir:, sizing_run_subdir:, retry: 0)
     raise('validation of model failed.') unless validate_initial_model(model)
 
     # Do a sizing run to determine the system capacities.  If a sizing run fails, hard size any failing DX heating coils
     # to 1.0 kW and rerun the sizing run until it succeeds.  If no DX heating coils are found, or none had a small
     # capacity then raise an error.
+    dx_coil_changed = false
+    num_changes = 0
     loop do
       sizing_run_success = model_run_sizing_run(model, "#{sizing_run_dir}/#{sizing_run_subdir}", true)
       break if sizing_run_success
+      num_changes += 1
 
-      # Sizing run failed, check all DX heating coils and set their size to 1 if less than 1
-      dx_coil_changed = false
+      # Report severe or fatal errors in the run
+      error_query = "SELECT ErrorMessage
+          FROM Errors
+          WHERE ErrorType in(1,2)"
+      errs = model.sqlFile.get.execAndReturnVectorOfString(error_query)
+      if errs.is_initialized
+        errs = errs.get
+      end
+      # Get error and get any DX coils with issues
 
-      model.getCoilHeatingDXSingleSpeeds.each do |coil|
-        autosized_capacity = coil.autosizedRatedTotalHeatingCapacity
-        if autosized_capacity.is_initialized && autosized_capacity.get < 1.0
-          coil.setRatedTotalHeatingCapacity(1.0)
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
-          puts "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
-          dx_coil_changed = true
+      issue_coils = []
+      errs.each do |err|
+        # Find any DX heating coil names that are in the error message
+        error_heating_coils = model.getCoilHeatingDXSingleSpeeds.select { |coil| err.to_s.downcase.include?(coil.name.to_s.downcase) }
+        # If more the DX heating coil name appears more than one time in the error message, only select the one without a number at the end of the name.
+        if error_heating_coils.length > 1
+          error_heating_coils.each do |coil|
+            if coil.name.to_s.downcase.match(/\d/)
+              # Skip coils if there is another number in the error message after the name of the coil (e.g. coilheatingdx 1 appears but so does coilheatingdx 10 or coilheatingdx 13).
+              error_index = err.to_s.downcase.index(coil.name.to_s.downcase) + coil.name.to_s.length
+              next if err.to_s[error_index].match(/\d/)
+              heating_coil_element = {}
+              heating_coil_element[:heating_coil] = coil
+              heating_coil_element[:is_autosized] = true if coil.isRatedTotalHeatingCapacityAutosized
+              heating_coil_element[:is_autosized] = false unless coil.isRatedTotalHeatingCapacityAutosized
+              heating_coil_element[:capacity] = coil.ratedTotalHeatingCapacity.to_f
+              issue_coils << heating_coil_element
+            end
+          end
+        elsif error_heating_coils.length == 1
+          heating_coil_element = {}
+          heating_coil_element[:heating_coil] = error_heating_coils[0]
+          heating_coil_element[:is_autosized] = true if error_heating_coils[0].isRatedTotalHeatingCapacityAutosized
+          heating_coil_element[:is_autosized] = false unless error_heating_coils[0].isRatedTotalHeatingCapacityAutosized
+          heating_coil_element[:capacity] = error_heating_coils[0].ratedTotalHeatingCapacity.to_f
+          issue_coils << heating_coil_element
+        end
+        # Find any DX cooling coil names that are in the error message
+        error_cooling_coils = model.getCoilCoolingDXSingleSpeeds.select { |coil| err.to_s.downcase.include?(coil.name.to_s.downcase) }
+        # If more the DX cooling coil name appears more than one time in the error message, only select the one without a number at the end of the name.
+        if error_cooling_coils.length > 1
+          error_cooling_coils.each do |coil|
+            if coil.name.to_s.downcase.match(/\d/)
+              # Skip coils if there is another number in the error message after the name of the coil (e.g. coilcoolingdx 1 appears but so does coilcoolingdx 10 or coilcoolingdx 13).
+              error_index = err.to_s.downcase.index(coil.name.to_s.downcase) + coil.name.to_s.downcase.length
+              next if err.to_s[error_index].match(/\d/)
+              cooling_coil_element = {}
+              cooling_coil_element[:cooling_coil] = coil
+              cooling_coil_element[:is_autosized] = true if coil.isRatedTotalCoolingCapacityAutosized
+              cooling_coil_element[:is_autosized] = false unless coil.isRatedTotalCoolingCapacityAutosized
+              cooling_coil_element[:capacity] = coil.ratedTotalCoolingCapacity.to_f
+              issue_coils << cooling_coil_element
+            end
+          end
+        elsif error_cooling_coils.length == 1
+          cooling_coil_element = {}
+          cooling_coil_element[:cooling_coil] = error_cooling_coils[0]
+          cooling_coil_element[:is_autosized] = true if error_cooling_coils[0].isRatedTotalCoolingCapacityAutosized
+          cooling_coil_element[:is_autosized] = false unless error_cooling_coils[0].isRatedTotalCoolingCapacityAutosized
+          cooling_coil_element[:capacity] = error_cooling_coils[0].ratedTotalCoolingCapacity.to_f
+          issue_coils << cooling_coil_element
         end
       end
-      model.getCoilHeatingDXMultiSpeeds.each do |coil|
-        coil.stages.each do |stage|
-          autosized_capacity = stage.autosizedGrossRatedHeatingCapacity
-          if autosized_capacity.is_initialized && autosized_capacity.get < 1.0
-            stage.setGrossRatedHeatingCapacity(1.0)
-            OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "A DX Heating Coil #{coil.name.to_s} stage has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
-            puts "A DX Heating Coil #{coil.name.to_s} stage has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
-            dx_coil_changed = true
+      issue_coils.uniq!
+
+      # Adjust the capacity of DX coils with issues.  This resolves most sizing run issues.
+      issue_coils.each do |issue_coil|
+        # If the coil is autosized and has a capacity less than 1.0 kW, resize the coil (and similar coils) to 1.0 kW
+        if issue_coil[:is_autosized] == true && issue_coil[:capacity].to_f < 1.0
+          if issue_coil.key?(:heating_coil)
+            resize_coils = model.getCoilHeatingDXSingleSpeeds.select { |coil| coil.isRatedTotalHeatingCapacityAutosized && coil.ratedTotalHeatingCapacity.to_f < 1.0 }
+            resize_coils.each do |coil|
+              coil.setRatedTotalHeatingCapacity(1.0)
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
+              puts "DX Heating Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
+              dx_coil_changed = true
+            end
+          elsif issue_coil.key?(:cooling_coil)
+            resize_coils = model.getCoilCoolingDXSingleSpeeds.select { |coil| coil.isRatedTotalCoolingCapacityAutosized && coil.ratedTotalCoolingCapacity.to_f < 1.0 }
+            resize_coils.each do |coil|
+              coil.setRatedTotalCoolingCapacity(1.0)
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure.")
+              puts "DX Cooling Coil #{coil.name.to_s} has a rated capacity less than 1.0 kW and has been resized to 1.0 kW to avoid sizing run failure."
+              dx_coil_changed = true
+            end
+          end
+        # If the coil is not autosized, or has a capacity larger than 1 kW, increase the capacity by 1% to avoid sizing run issues with rounding
+        else
+          if issue_coil.key?(:heating_coil)
+            cooling_coil_name = issue_coil[:heating_coil].name.to_s.gsub('CoilHeatingDX','CoilCoolingDX')
+            cooling_coil = model.getCoilCoolingDXSingleSpeeds.select { |coil| cooling_coil_name.to_s.downcase == coil.name.to_s.downcase }[0]
+            if cooling_coil.ratedTotalCoolingCapacity.to_f.round(0) == issue_coil[:capacity].to_f.round(0)
+              revised_capacity = issue_coil[:capacity].to_f * 1.01
+              issue_coil[:heating_coil].setRatedTotalHeatingCapacity(revised_capacity)
+              cooling_coil.setRatedTotalCoolingCapacity(revised_capacity)
+              dx_coil_changed = true
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX heating and cooling coil #{issue_coil[:heating_coil].name.to_s} has been resized #{revised_capacity}W to avoid sizing run failure.")
+              puts "Adjusted both heating and cooling coil #{issue_coil[:heating_coil].name.to_s} capacity to #{revised_capacity}W to avoid sizing run failure."
+              dx_coil_changed = true
+            end
+          elsif issue_coil.key?(:cooling_coil)
+            heating_coil_name = issue_coil[:cooling_coil].name.to_s.gsub('CoilCoolingDX','CoilHeatingDX')
+            heating_coil = model.getCoilHeatingDXSingleSpeeds.select { |coil| heating_coil_name.to_s.downcase == coil.name.to_s.downcase }[0]
+            if heating_coil.ratedTotalHeatingCapacity.to_f.round(0) == issue_coil[:capacity].to_f.round(0)
+              revised_capacity = issue_coil[:capacity].to_f * 1.01
+              issue_coil[:cooling_coil].setRatedTotalCoolingCapacity(revised_capacity)
+              heating_coil.setRatedTotalHeatingCapacity(revised_capacity)
+              dx_coil_changed = true
+              OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC',  "DX heating and cooling coil #{issue_coil[:cooling_coil].name.to_s} has been resized #{revised_capacity}W to avoid sizing run failure.")
+              puts "Adjusted both heating and cooling coil #{issue_coil[:cooling_coil].name.to_s} capacity to #{revised_capacity}W to avoid sizing run failure."
+              dx_coil_changed = true
+            end
           end
         end
       end
 
-      # If no DX coil was changed, break loop and raise error
-      if !dx_coil_changed
+      # If no DX coil was changed, or too many changes were made, break loop and raise error
+      if !dx_coil_changed || num_changes > 100
         raise("sizing run failed! check #{sizing_run_dir}/#{sizing_run_subdir} (DX coil sizes adjusted, but no further changes possible)")
       end
-      puts "Rerunning sizing run after adjusting DX heating coil capacity to 1.0 kW."
+      puts "Rerunning sizing run after adjusting coil capacity this many times: #{num_changes}."
       # Otherwise, loop will rerun sizing
     end
   end

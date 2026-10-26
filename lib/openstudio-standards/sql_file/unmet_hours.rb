@@ -320,10 +320,11 @@ module OpenstudioStandards
     # Gets the annual occupied unmet hours from the sql file
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
-    # @return [Double] the total number of unmet heating or cooling hours
+    # @return [Double, Boolean] the total number of unmet heating or cooling hours, or false if results are missing
     def self.model_get_annual_occupied_unmet_hours(model)
       heating_setpoint_unmet = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_heating_hours(model)
       cooling_setpoint_unmet = OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_cooling_hours(model)
+      return false unless heating_setpoint_unmet && cooling_setpoint_unmet
 
       # aggregate heating and cooling hrs
       heating_or_cooling_setpoint_unmet = heating_setpoint_unmet + cooling_setpoint_unmet

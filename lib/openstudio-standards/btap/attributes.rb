@@ -1,9 +1,13 @@
-# BTAP Attributes: Currently stores model attributes related to envelopes. 
-require "openstudio"
+# BTAP Attributes
+#
+# This file extends some of the OpenStudio classes to add some new methods
+# and parameters for convenience. Additionally, it also houses methods
+# involving the pre-processing of an OpenStudio model for shared use in one
+# of BTAP's facilities, for now BTAP Costing and BTAP Carbon. Currently, this
+# pre-processing involves retrieving the correct constructions for envelopes and
+# a few attributes for thermal bridging.
 
 module BTAP
-
-  # Class modifications to simplyify post-analysis functions
   class OpenStudio::Model::Model
     def getThermalZonesSorted
       return @zones_sorted
@@ -19,40 +23,64 @@ module BTAP
       return @spaces_sorted
     end
 
-    def <<(space)
+    def <<(space) # Override the append operator to compile the sorted spaces
       @spaces_sorted << space
     end
   end
 
-  class OpenStudio::Model::Space
-    attr_reader :construction_set
-    attr_reader :surfaces_hash
-  end
-
-  class OpenStudio::Model::Surface
-    attr_reader :construction_hash # Stores the construction for this surface.
-  end
-
-  class OpenStudio::Model::SubSurface
-    attr_reader :construction_hash # Same as the previous.
-  end
-
+  # Class for accessing and pre-processing model attributes.
   class Attributes
-    attr_reader :model
-    attr_reader :zones
-    attr_reader :spaces
-    attr_reader :surface_types
-    
-    def initialize(model, prototype_creator)
-      @model             = model
-      @prototype_creator = prototype_creator
-      @costing_database  = CostingDatabase.instance
+    attr_reader :model                  # [OpenStudio::Model::Model]
+    attr_reader :zones                  # [Array[OpenStudio::Model::Zone]]
+    attr_reader :spaces                 # [Array[OpenStudio::Model::Space]]
+    attr_reader :surface_types          # [Array]
+    attr_reader :tbd_enabled            # [Boolean]
+    attr_reader :tbd_edge_tallies       # [Hash]
+    attr_reader :tbd_compliance         # [Boolean]
+    attr_reader :surface_types_to_snake # [Hash]
+    attr_reader :constructions          # [Hash]
+    attr_reader :surface_types_to_assembly_tallies # [Hash]
+
+    class << self
+      attr_reader :surface_types_to_assembly_names   # [Hash]
+    end
+
+    # TODO: Temporary default constructions for underatable surface types.
+    @surface_types_to_assembly_names = {
+      "ExteriorFixedWindow"             => "BTAP-ExteriorWindow-FixedWindow-1",
+      "ExteriorOperableWindow"          => "BTAP-ExteriorWindow-OperableWindow-5b",
+      "ExteriorSkylight"                => "BTAP-Skylight-2",
+      "ExteriorTubularDaylightDiffuser" => "BTAP-Skylight-2",
+      "ExteriorTubularDaylightDome"     => "BTAP-Skylight-2",
+      "ExteriorDoor"                    => "BTAP-ExteriorDoor-Metal-1",
+      "ExteriorGlassDoor"               => "BTAP-ExteriorWindow-GlazedDoor-4",
+      "ExteriorOverheadDoor"            => "BTAP-ExteriorOverheadDoor-Metal-1",
+      "GroundContactWall"               => "BTAP-GroundContactWall-Mass-2",
+      "GroundContactRoof"               => "BTAP-GroundContactRoof-Mass-2",
+      "GroundContactFloor"              => "BTAP-GroundContactFloor-Unheated-1"
+    }
+
+    # @param model            [OpenStudio::Model::Model]
+    # @param standard         [Standard]
+    # @param tbd_enabled      [Boolean]
+    # @param tbd_edge_tallies [Hash]
+    def initialize(model:, standard:, tbd_enabled:, tbd_edge_tallies:)
+      @model            = model
+      @standard         = standard
+      @costing_database = Database.instance
+      @tbd_enabled      = tbd_enabled
+      @tbd_edge_tallies = tbd_edge_tallies
+      @tbd_compliance   = @model.getBuilding.additionalProperties.hasFeature("tbd_compliance") ?
+                            @model.getBuilding.additionalProperties.getFeatureAsBoolean("tbd_compliance").get : nil
 
       # Surfaces considered for envelope costing and carbon.
-      @surface_types = [ 
+      @surface_types = [
         "ExteriorWall",
         "ExteriorRoof",
         "ExteriorFloor",
+        "InterzonalRoof",
+        "InterzonalSkylightWalls",
+        "InterzonalFloor",
         "ExteriorFixedWindow",
         "ExteriorOperableWindow",
         "ExteriorSkylight",
@@ -66,101 +94,267 @@ module BTAP
         "GroundContactFloor"
       ]
 
-      @zones  = [] 
-      @spaces = [] 
+      # Formatted dictionary of surface types from camel case to snake case
+      # for neat reporting.
+      @surface_types_to_snake = @surface_types.map { |type|
+        [type, type.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase] }.to_h
 
-      self.compile
+      @surface_types_to_envelope_type = {
+        "ExteriorWall"                    => "wall",
+        "ExteriorRoof"                    => "roof",
+        "ExteriorFloor"                   => "floor",
+        "InterzonalRoof"                  => "roof",
+        "InterzonalFloor"                 => "floor",
+
+        # TODO: Although we don't have specific constructions on interzonal
+        # skylight walls, using external wall constructions is better than
+        # ignoring them.
+        "InterzonalSkylightWalls"         => "wall",
+        "ExteriorFixedWindow"             => "window",
+        "ExteriorOperableWindow"          => "window",
+        "ExteriorSkylight"                => "skylight",
+        "ExteriorTubularDaylightDiffuser" => "skylight",
+        "ExteriorTubularDaylightDome"     => "skylight",
+        "ExteriorDoor"                    => "door",
+        "ExteriorGlassDoor"               => "door_glass",
+        "ExteriorOverheadDoor"            => "door",
+        "GroundContactWall"               => "bg_wall",
+        "GroundContactRoof"               => "bg_roof",
+        "GroundContactFloor"              => "slab"
+      }
+
+      # Store area, cost, and carbon emission tallies of assemblies by surface
+      # type, stored as hashes as some surface types may have different
+      # assemblies.
+      @surface_types_to_assembly_tallies = @surface_types.to_h { |surface_type| [surface_type, {}] }
+
+      @zones         = []
+      @spaces        = []
+      @constructions = {}
+
+      self.compile_model
+      self.compile_constructions
     end
 
-    # Compile all the pertinent data into the data structures of this class while also appending
-    # to the exisitng OpenStudio ones. 
-    def compile
-      template_type = @prototype_creator.template
-      num_of_above_ground_stories = @model.getBuilding.standardsNumberOfAboveGroundStories.to_i
-      
+    # Fetch the additional properties in each default construction set which
+    # reflects the attributes of all the surfaces of a type. Populate the
+    # members of the `@constructions` and `@surface_types_to_assembly_tallies`
+    # hashes.
+    def compile_constructions
+
+      @model.getDefaultConstructionSets.each do |set|
+
+        # Plenum construction sets don't contain any information pertinent to
+        # costing, skip them.
+        if set.nameString =~ /PLENUM$/
+          next
+
+        # Attic construction sets concern insulated interzonal surfaces. This
+        # also concerns crawlspaces, of which the interzonal floors will be
+        # tallied.
+        elsif set.nameString =~ /ATTIC$/
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "InterzonalSkylightWalls")
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "InterzonalRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultInteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "InterzonalFloor")
+
+        # The following default construction sets concern the surfaces of the
+        # whole building:
+        elsif set.nameString =~ /BLDG$/
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "ExteriorWall")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "ExteriorRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "ExteriorFloor")
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "GroundContactWall")
+
+          # Basement ground contact floors are removed from this default
+          # construction set beforehand in prototype creation with the
+          # `NECB2011/building_envelope.rb:set_basement_floor_construction()`
+          # method since they're uninsulated and shouldn't be costed. So this
+          # only tallies slabs on grade.
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "GroundContactFloor")
+
+            # From NECB2011 to NECB2025, ground contact floors only need to be
+            # insulated wholly in climate zone 8. Otherwise, they need to be
+            # insulated only for 1.2m about the perimeter. Insulation for the
+            # low-conductnace ground contact floor U-factor variant have been
+            # manually seperated into its own assembly below. Also check for the
+            # presence of the perimeter additional property which denotes that
+            # there are slab on grade ground contact floors.
+            if @standard.get_necb_hdd18(model: @model) < 7000 and
+               @model.getBuilding.additionalProperties.hasFeature("btap_slab_perimeter_m2")
+
+              isoboard_name = "BTAP-GroundContactFloor-Isoboard"
+              compile_construction_attributes(
+                construction: set.defaultGroundContactSurfaceConstructions.get.floorConstruction.get,
+                name: isoboard_name,
+                entry: @costing_database["constructions"]["slab"][isoboard_name])
+
+              @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name] = {}
+              @surface_types_to_assembly_tallies["GroundContactFloor"][isoboard_name]["area"] = \
+                @model.getBuilding.additionalProperties.getFeatureAsDouble("btap_slab_perimeter_m2").get
+
+          end
+
+          compile_construction_by_type(
+            construction: set.defaultGroundContactSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "GroundContactRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.fixedWindowConstruction.get,
+            surface_type: "ExteriorFixedWindow")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.operableWindowConstruction.get,
+            surface_type: "ExteriorOperableWindow")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.skylightConstruction.get,
+            surface_type: "ExteriorSkylight")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.tubularDaylightDiffuserConstruction.get,
+            surface_type: "ExteriorTubularDaylightDiffuser")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.tubularDaylightDomeConstruction.get,
+            surface_type: "ExteriorTubularDaylightDome")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.doorConstruction.get,
+            surface_type: "ExteriorDoor")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.glassDoorConstruction.get,
+            surface_type: "ExteriorGlassDoor")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSubSurfaceConstructions.get.overheadDoorConstruction.get,
+            surface_type: "ExteriorOverheadDoor")
+
+        # Any remaining construction sets will be custom and defined
+        # by the user by manually adding additional properties to
+        # spaces and will only comprise exterior-facing surfaces.
+        # (see NECB2011/building_envelope.rb:add_construction_sets())
+        else
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.wallConstruction.get,
+            surface_type: "ExteriorWall")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.roofCeilingConstruction.get,
+            surface_type: "ExteriorRoof")
+
+          compile_construction_by_type(
+            construction: set.defaultExteriorSurfaceConstructions.get.floorConstruction.get,
+            surface_type: "ExteriorFloor")
+
+        end
+      end
+    end
+
+    # @param construction: [OpenStudio::Model::ConstructionBase]
+    # @param surface_type: [String]
+    def compile_construction_by_type(construction:, surface_type:)
+      assembly_name = construction.additionalProperties.getFeatureAsString("btap_id").get
+
+      # If the construction isn't already present in the  `@constructions` hash,
+      # add it in.
+      unless @constructions.key?(assembly_name)
+        compile_construction_attributes(
+          construction: construction,
+          name: assembly_name,
+          entry: @costing_database["constructions"][@surface_types_to_envelope_type[surface_type]][assembly_name])
+      end
+
+      # Only include the assembly in the tallies hash if its area is non-zero.
+      area = construction.additionalProperties.getFeatureAsDouble("btap_area").get
+      unless area == 0
+        @surface_types_to_assembly_tallies[surface_type][assembly_name] = {}
+        @surface_types_to_assembly_tallies[surface_type][assembly_name]["area"] = area
+      end
+    end
+
+    # @param construction: [OpenStudio::Model::ConstructionBase]
+    # @param name:         [Hash] Assembly name.
+    # @param entry:        [Hash] BTAP construction attributes.
+    def compile_construction_attributes(construction:, name:, entry:)
+        construction_btap            = {}
+        construction_btap["type"]    = entry["type"]
+        construction_btap["rsi"]     = 1 / construction.additionalProperties.getFeatureAsDouble("btap_uo").get
+        construction_btap["subsets"] = \
+          entry["usi"].transform_keys { |usi| 1 / usi.to_f }.map { |rsi, hash| hash["rsi"] = rsi; hash }
+
+        construction_btap["shgc"] = OpenstudioStandards::Constructions.construction_get_solar_transmittance(
+          construction.to_Construction.get) unless construction.isOpaque
+
+        @constructions[name] = construction_btap
+    end
+
+    # Add new accessors for zones, spaces, and surfaces while keeping them
+    # sorted for future accesses.
+    def compile_model
+
       # Iterate through the data structures while also saving their sorted order later for reference.
       @model.instance_variable_set(:@zones_sorted, [])
-
       @model.getThermalZones.sort.each do |zone|
         @model << zone
         @zones << zone
         zone.instance_variable_set(:@spaces_sorted, [])
-
         zone.spaces.sort.each do |space|
-          if space.spaceType.empty? or space.spaceType.get.standardsSpaceType.empty? or space.spaceType.get.standardsBuildingType.empty?
-            raise ("standards Space type and building type is not defined for space:#{space.name.get}. Skipping this space.")
+          if space.spaceType.empty? or
+             space.spaceType.get.standardsSpaceType.empty? or
+             space.spaceType.get.standardsBuildingType.empty?
+            raise("Error: Space type not defined for #{space.name.get}")
           end
           zone    << space
           @spaces << space
+        end
+      end
+    end
 
-          space_type    = space.spaceType.get.standardsSpaceType
-          building_type = space.spaceType.get.standardsBuildingType
+    # Only relevant surface-specific tally is window perimeter for BTAP
+    # Carbon. Add surface-specific tallies for underatable surfaces.
+    # Currently only windows have emissions data for frames.
+    def compile_window_perimeter
+      windows = ["ExteriorFixedWindow", "ExteriorOperableWindow"]
+      windows.each do |window|
+        @surface_types_to_assembly_tallies[window][self.class.surface_types_to_assembly_names[window]]["perimeter"] = 0
+      end
 
-          # Compile a list of construction sets for each space.
-          construction_set = @costing_database["raw"]["construction_sets"].select { |data|
-            data["template"].to_s.gsub(/\s*/, "") == template_type               and
-            data["building_type"].to_s.downcase   == building_type.to_s.downcase and
-            data["space_type"].to_s.downcase      == space_type.to_s.downcase    and
-            data["min_stories"].to_i              <= num_of_above_ground_stories and
-            data["max_stories"].to_i              >= num_of_above_ground_stories
-          }.first
-          space.instance_variable_set(:@construction_set, construction_set)
-          
-          surfaces_hash = {}
+      @spaces.each do |space|
+        windows.each do |window|
+          assembly_name = self.class.surface_types_to_assembly_names[window]
+          BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(BTAP::Geometry::Surfaces::filter_by_boundary_condition(
+            space.surfaces, "Outdoors").flat_map(&:subSurfaces), ["FixedWindow", "OperableWindow"]).each do |surface|
 
-          # Exterior
-          exterior_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Outdoors")
-          surfaces_hash["ExteriorWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Wall").sort
-          surfaces_hash["ExteriorRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "RoofCeiling").sort
-          surfaces_hash["ExteriorFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(exterior_surfaces, "Floor").sort
+            @surface_types_to_assembly_tallies[window][assembly_name]["perimeter"] += \
+              BTAP::Geometry::Surfaces.getSurfacePerimeterFromVertices(vertices: surface.vertices)
 
-          # Exterior Subsurfaces
-          exterior_subsurfaces = exterior_surfaces.flat_map(&:subSurfaces)
-          surfaces_hash["ExteriorFixedWindow"]             = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["FixedWindow"]).sort
-          surfaces_hash["ExteriorOperableWindow"]          = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["OperableWindow"]).sort
-          surfaces_hash["ExteriorSkylight"]                = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["Skylight"]).sort
-          surfaces_hash["ExteriorTubularDaylightDiffuser"] = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["TubularDaylightDiffuser"]).sort
-          surfaces_hash["ExteriorTubularDaylightDome"]     = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["TubularDaylightDome"]).sort
-          surfaces_hash["ExteriorDoor"]                    = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["Door"]).sort
-          surfaces_hash["ExteriorGlassDoor"]               = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["GlassDoor"]).sort
-          surfaces_hash["ExteriorOverheadDoor"]            = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(exterior_subsurfaces, ["OverheadDoor"]).sort
-
-          # Ground Surfaces
-          ground_surfaces  = BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Ground")
-          ground_surfaces += BTAP::Geometry::Surfaces::filter_by_boundary_condition(space.surfaces, "Foundation")
-          surfaces_hash["GroundContactWall"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Wall").sort
-          surfaces_hash["GroundContactRoof"]  = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "RoofCeiling").sort
-          surfaces_hash["GroundContactFloor"] = BTAP::Geometry::Surfaces::filter_by_surface_types(ground_surfaces, "Floor").sort
-
-          space.instance_variable_set(:@surfaces_hash, surfaces_hash)
-
-          if construction_set.nil?
-            next
-          end
-
-          @surface_types.each do |surface_type|
-            space.surfaces_hash[surface_type].each do |surface|
-
-              # Search for a matching opaque or glazing construction and append the type to the hash.
-              construction_hash = @costing_database["raw"]["constructions_opaque"].find { |construction|
-                construction["construction_type_name"] == construction_set[surface_type]
-              }
-              if not construction_hash.nil?
-                construction_hash["type"] = "opaque"
-                surface.instance_variable_set(:@construction_hash, construction_hash)
-              else
-                construction_hash = @costing_database["raw"]["constructions_glazing"].find { |construction|
-                  construction["construction_type_name"] == construction_set[surface_type]
-                }
-                if not construction_hash.nil?
-                  construction_hash["type"] = "glazing"
-                  surface.instance_variable_set(:@construction_hash, construction_hash)
-                end
-              end
-            end
           end
         end
       end
     end
   end
 end
+

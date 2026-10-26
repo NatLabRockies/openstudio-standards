@@ -6,7 +6,7 @@ require 'json'
 require 'parallel'
 #require 'hashdiff'
 
-# Add significant digits capability to float amd integer class to tidy up reporting.
+# Add significant digits capability to float and integer class to tidy up reporting.
 class Float
   def signif(digits=4)
     return 0 if self.zero?
@@ -48,7 +48,7 @@ module NecbHelper
 
   # Hold an array of the instantiated standards (to save recreating them all the time).
   @@standards = []
-  
+
   # Default to true for PERFORM_STANDARDS in testing.
   PERFORM_STANDARDS = true
 
@@ -219,7 +219,6 @@ module NecbHelper
     return test_results
   end
 
-
   # Method to recover existing template (or create on if it has not been instantiated).
   def get_standard(template)
     standard = nil
@@ -231,6 +230,134 @@ module NecbHelper
     end
     logger.debug "Using template: #{standard.class}"
     return standard
+  end
+
+  # Baseline model creation method for unit tests not running full simulations.
+  #
+  # @param osm_file              [String]
+  # @param template              [String]
+  # @param epw_file              [String]
+  # @param primary_heating_fuel  [String]
+  # @param num_stories           [Integer]
+  # @param add_thermostat        [Boolean]
+  # @param add_baseboard_heating [Boolean]
+  def create_baseline_necb_model(
+    osm_file: File.join(__dir__, '../necb/models/5ZoneNoHVAC.osm'),
+    template: 'NECB2011',
+    epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
+    primary_heating_fuel: nil,
+    num_stories: 1,
+    add_thermostat: false,
+    add_baseboard_heating: false)
+
+    standard   = Standard.build(template)
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    model      = translator.loadModel(osm_file).get
+
+    OpenstudioStandards::Weather.model_set_building_location(
+      model,
+      weather_file_path: OpenstudioStandards::Weather.get_standards_weather_file_path(epw_file))
+
+    model.getSpaceTypes.each do |space_type|
+      space_type.setStandardsBuildingType('Space Function')
+      space_type.setStandardsSpaceType('Office - open plan')
+    end
+
+    building = model.getBuilding
+    building.setStandardsNumberOfStories(num_stories)
+    building.setStandardsNumberOfAboveGroundStories(num_stories)
+
+    if add_thermostat
+      htg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      htg_sch.setName('Heating Setpoint Schedule')
+      htg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 21.0)
+
+      clg_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      clg_sch.setName('Cooling Setpoint Schedule')
+      clg_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 24.0)
+
+      model.getThermalZones.each do |zone|
+        thermostat = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
+        thermostat.setHeatingSetpointTemperatureSchedule(htg_sch)
+        thermostat.setCoolingSetpointTemperatureSchedule(clg_sch)
+        zone.setThermostatSetpointDualSetpoint(thermostat)
+      end
+    end
+
+    if add_baseboard_heating
+      standard.add_sys1_unitary_ac_baseboard_heating(
+        model: model,
+        zones: model.getThermalZones.sort,
+        mau_type: true,
+        mau_heating_coil_type: 'Electric',
+        baseboard_type: 'Electric',
+        hw_loop: nil
+      )
+    end
+
+    unless primary_heating_fuel.nil?
+      standard.fuel_type_set = SystemFuels.new()
+      standard.fuel_type_set.set_defaults(
+        standards_data: standard.instance_variable_get(:@standards_data),
+        primary_heating_fuel: primary_heating_fuel)
+    end
+
+    return [model, standard]
+  end
+
+  # Load a sized model from fixture cache.
+  # If fixture doesn't exist, returns nil.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @return [OpenStudio::Model::Model, nil] The sized model, or nil if not cached
+  def get_sized_model_from_fixture(template:, building_type:, epw_file:, system_type: nil)
+    require_relative './necb_fixture_manager'
+
+    # Check if fixture exists
+    config = {
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      openstudio_version: OpenStudio.openStudioVersion,
+      fixture_version: NecbFixtureManager::FIXTURE_VERSION
+    }
+
+    fixture_path = NecbFixtureManager.fixture_path(config)
+
+    if File.exist?(fixture_path)
+      logger.debug "Loading sized model from fixture: #{File.basename(fixture_path)}"
+      NecbFixtureManager.send(:load_fixture, fixture_path)
+    else
+      logger.debug "No fixture found for: #{template} #{building_type} #{system_type}"
+      nil
+    end
+  end
+
+  # Get or create a sized model using fixture cache.
+  # First tries to load from cache, if not found creates and caches the sized model.
+  #
+  # @param template [String] NECB template (e.g., 'NECB2011')
+  # @param building_type [String] Building type (e.g., 'MediumOffice')
+  # @param epw_file [String] Weather file name
+  # @param system_type [Integer, nil] NECB system type or nil
+  # @param customize_block [Proc, nil] Optional block to customize model before sizing
+  # @return [OpenStudio::Model::Model, nil] The sized model
+  def get_or_create_sized_model_with_cache(template:, building_type:, epw_file:, system_type: nil, &customize_block)
+    require_relative './necb_fixture_manager'
+
+    logger.debug "Requesting sized model: #{template} #{building_type} #{system_type}"
+
+    NecbFixtureManager.get_or_create_sized_model(
+      template: template,
+      building_type: building_type,
+      epw_file: epw_file,
+      system_type: system_type,
+      &customize_block
+    )
   end
 
   # Standard method to run sizing for NECB testing. Parameters:
@@ -281,6 +408,68 @@ module NecbHelper
 
     # Save model after sizing.
     BTAP::FileIO.save_osm(model, "#{output_dir}/post-sizing.osm") if save_model_versions
+  end
+
+  # Expand a hash of arrays into a cartesian product of case hashes.
+  #
+  # @param headers [Hash] Hash of parameters to calculate the combinations of.
+  def self.test_case_matrix(headers)
+    keys = headers.keys
+    values = headers.values
+    values[0].product(*values[1..-1]).map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+  end
+
+  # Build test name tokens matching existing NECB system test naming.
+  #
+  # @param value [String]
+  def self.hvac_case_token(value)
+    map = {
+      'FuelOilNo2' => 'fuel_oil2',
+      'NaturalGas' => 'natural_gas',
+      'Hot Water' => 'hot_water',
+      'Rotary Screw' => 'rotary_screw',
+      'AF_or_BI_rdg_fancurve' => 'af_or_bi_rdg_fancurve'
+    }
+    return map[value] if map.key?(value)
+
+    value.to_s.downcase.gsub(' ', '_')
+  end
+
+  # Shared sizing + standards application used by NECB HVAC system tests.
+  #
+  # @param model      [OpenStudio::Model::Model]
+  # @param standard   [Standard]
+  # @param sizing_dir [String]
+  def run_necb_hvac_measure(model:, standard:, sizing_dir:)
+    building_type = 'FullServiceRestaurant'
+    climate_zone = 'NECB HDD Method'
+
+    FileUtils.mkdir_p(sizing_dir) unless Dir.exist?(sizing_dir)
+
+    if standard.model_run_sizing_run(model, "#{sizing_dir}/SizingRun1") == false
+      raise("could not find sizing run #{sizing_dir}/SizingRun1")
+    end
+
+    standard.model_apply_prototype_hvac_assumptions(model, building_type, climate_zone)
+    standard.model_apply_hvac_efficiency_standard(model, climate_zone)
+    return true
+  end
+
+  # Check simulation SQL for severe/fatal messages.
+  #
+  # @param model [OpenStudio::Model::Model]
+  def necb_hvac_simulation_clean?(model)
+    fatal = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='2' ").get
+    severe = model.sqlFile.get.execAndReturnVectorOfString("SELECT ErrorMessage FROM Errors WHERE ErrorType='1' ").get
+
+    if severe.size > 0 || fatal.size > 0
+      puts "Errors:"
+      puts severe
+      puts fatal
+      return false
+    end
+
+    return true
   end
 
   # @note Helper method to return the part load curve data.

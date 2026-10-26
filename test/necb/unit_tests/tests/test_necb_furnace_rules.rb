@@ -105,7 +105,7 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     # Wrap test in begin/rescue/ensure.
     begin
       # Load model and set climate file.
-      model = BTAP::FileIO.load_osm(File.join(@resources_folder, "5ZoneNoHVAC.osm"))
+      model = BTAP::FileIO.load_osm(File.join(__dir__, "../../models/5ZoneNoHVAC.osm"))
       weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
       OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
       BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
@@ -242,7 +242,7 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     # Wrap test in begin/rescue/ensure.
     begin
       # Load model and set climate file.
-      model = BTAP::FileIO.load_osm(File.join(@resources_folder, "5ZoneNoHVAC.osm"))
+      model = BTAP::FileIO.load_osm(File.join(__dir__, "../../models/5ZoneNoHVAC.osm"))
       weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
       OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
       BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models
@@ -387,7 +387,7 @@ class NECB_HVAC_Furnace_Tests < Minitest::Test
     begin
 
       # Load model and set climate file.
-      model = BTAP::FileIO.load_osm(File.join(@resources_folder, "5ZoneNoHVAC.osm"))
+      model = BTAP::FileIO.load_osm(File.join(__dir__, "../../models/5ZoneNoHVAC.osm"))
       weather_file_path = OpenstudioStandards::Weather.get_standards_weather_file_path('CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
       OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
       BTAP::FileIO.save_osm(model, "#{output_folder}/baseline.osm") if save_intermediate_models

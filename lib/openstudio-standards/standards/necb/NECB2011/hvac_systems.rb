@@ -1105,11 +1105,19 @@ class NECB2011
     avail_manager_out_var.setReportingFrequency('Timestep')
     night_cycle_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, avail_manager_out_var)
     heat_pump_avail_sch = nil
-    if multi_speed_heat_pump.availabilitySchedule.is_initialized
-      heat_pump_avail_sch = multi_speed_heat_pump.availabilitySchedule.get
-    elsif multi_speed_heat_pump.airLoopHVAC.get.availabilitySchedule.is_initialized
-      heat_pump_avail_sch = multi_speed_heat_pump.airLoopHVAC.get.availabilitySchedule.get
-    else
+    # In OpenStudio 3.x, availabilitySchedule returns Schedule directly, not OptionalSchedule
+    hp_sch = multi_speed_heat_pump.availabilitySchedule
+    if hp_sch.is_a?(OpenStudio::Model::Schedule)
+      heat_pump_avail_sch = hp_sch
+    elsif multi_speed_heat_pump.airLoopHVAC.is_initialized
+      loop_sch = multi_speed_heat_pump.airLoopHVAC.get.availabilitySchedule
+      if loop_sch.is_a?(OpenStudio::Model::Schedule)
+        heat_pump_avail_sch = loop_sch
+      end
+    end
+
+    # Create default schedule if none found
+    if heat_pump_avail_sch.nil?
       heat_pump_avail_sch = OpenStudio::Model::ScheduleConstant.new(model)
       heat_pump_avail_sch.setValue(1.0)
     end
@@ -2191,7 +2199,7 @@ class NECB2011
   def assign_base_sys_name(air_loop:, sys_abbr:, sys_oa:, sys_name_pars:)
     sys_name = "#{sys_abbr}|#{sys_oa}|"
     sys_name_pars.each do |key, value|
-      case key.downcase
+      case key.to_s.downcase
       when 'sys_hr'
         case value.downcase
         when 'none'

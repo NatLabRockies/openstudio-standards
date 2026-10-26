@@ -107,7 +107,7 @@ class Standard
         OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.standard', "Loading JSON files from #{data_dir}")
         files = Dir.glob("#{data_dir}/data/*.json").select { |e| File.file? e }
         files.each do |file|
-          data = JSON.parse(File.read(file))
+          data = JSON.parse(File.read(file, encoding: 'UTF-8'))
           data.each_pair do |key, objs|
             # Override the template in inherited files to match the instantiated template
             objs.each do |obj|

@@ -28,7 +28,7 @@ module OpenstudioStandards
         # Gas
         # Convert C to K
         temperature_k = temperature + 273.0
-        conductance = material.to_Gas.get.getThermalConductivity(temperature_k) unless material.to_Gas.empty?
+        conductance = material.to_Gas.get.getThermalConductance(temperature_k) unless material.to_Gas.empty?
         conductance = material.to_GasMixture.get.getThermalConductance(temperature_k) unless material.to_GasMixture.empty?
 
         if conductance.nil?

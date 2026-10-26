@@ -323,10 +323,11 @@ class ASHRAE9012019 < ASHRAE901
         light_id += 1
         # EnergyPlus v9.4 name change for EMS actuators
         # https://github.com/NREL/OpenStudio/pull/4104
+        # Space is passed as the last argument since Lights is a SpaceLoadInstance
         if model.version < OpenStudio::VersionString.new('3.1.0')
-          light_x_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(light_x, 'Lights', 'Electric Power Level')
+          light_x_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(light_x, 'Lights', 'Electric Power Level', space)
         else
-          light_x_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(light_x, 'Lights', 'Electricity Rate')
+          light_x_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(light_x, 'Lights', 'Electricity Rate', space)
         end
         light_x_actuator_name_ems = "#{OpenstudioStandards::HVAC.ems_friendly_name(key_name)}_Light#{light_id}_Actuator"
         light_x_actuator.setName(light_x_actuator_name_ems)

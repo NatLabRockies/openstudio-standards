@@ -1,4 +1,4 @@
-require_relative '../../../lib/openstudio-standards.rb'
+require_relative '../../../lib/openstudio-standards'
 require 'optparse'
 require 'logger'
 require 'minitest/autorun'
@@ -7,7 +7,6 @@ require 'fileutils'
 #require 'optparse'
 
 class Btap_results_helper
-
   def btap_results_regression_test()
     cp = CommonPaths.instance
     args = {}
@@ -86,10 +85,9 @@ class Btap_results_helper
     model.save(model_out_path, true)
 
     # Do costing.
-    post_analysis = BTAPDatapointAnalysis.new(
+    post_analysis = BTAP::DatapointAnalysis.new(
       model: model,
       output_folder: run_dir,
-      template: template,
       standard: standard,
       qaqc: nil)
 

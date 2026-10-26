@@ -82,7 +82,7 @@ class NECB_Daylighting_Sensor_Control_Tests < Minitest::Test
 
                   # this runs the step in the model.
                   standard.assign_building_activity(model: model)
-                  standard.assign_building_structure(model: model, activity: @activity, massive: false)
+                  standard.assign_building_structure(model: model, activity: @activity)
                   standard.apply_weather_data(model: model, epw_file: epw_file)
                   standard.assign_building_activity(model: model)
                   standard.assign_building_structure(model: model, activity: @activity)

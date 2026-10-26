@@ -67,7 +67,7 @@ class TestConstructionsInformation < Minitest::Test
     material1 = OpenStudio::Model::Gas.new(model, 'Air', 0.01)
     material2 = OpenStudio::Model::StandardGlazing.new(model, 'SpectralAverage', 0.1)
     construction.setLayers([material2, material1, material2])
-    assert_in_delta(0.0247, @constructions.construction_get_conductance(construction, temperature: 10.0), 0.0001)
+    assert_in_delta(1.6, @constructions.construction_get_conductance(construction, temperature: 10.0), 0.001)
   end
 
   def test_construction_get_solar_transmittance
@@ -167,10 +167,10 @@ class TestConstructionsInformation < Minitest::Test
     window2.setConstruction(construction2)
 
     avg_cond = @constructions.surfaces_get_conductance([window1, window2])
-    assert_in_delta((0.4 + 0.0247) / 2.0, avg_cond, 0.001)
+    assert_in_delta((0.4 + 1.568) / 2.0, avg_cond, 0.001)
 
     avg_cond = @constructions.surfaces_get_conductance([window1, window2, south_wall_surface])
-    assert_in_delta((0.4 + 0.0247 + 13 * wall_u) / 15.0, avg_cond, 0.001)
+    assert_in_delta((0.4 + 1.568 + 13 * wall_u) / 15.0, avg_cond, 0.001)
   end
 
   def test_surfaces_get_solar_transmittance

@@ -13,7 +13,7 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
   # Test to validate btap_data.json generation
   def test_btap_data_reporting
     logger.info "Starting suite of tests for: #{__method__}"
-    
+
     # Define test parameters that apply to all tests.
     test_parameters = {TestMethod: __method__,
                        SaveIntermediateModels: true,
@@ -21,21 +21,21 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
                        epw_file: 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw',
                        archetype: 'FullServiceRestaurant'}
 
-    # Define test cases. 
+    # Define test cases.
     test_cases = Hash.new
 
     # Define references.
     test_cases = {Reference: "BTAP test - checking creation of btap_data report"}
-    
+
     # Test cases. Three cases for NG.
     # Results and name are tbd here as they will be calculated in the test.
-    test_cases_hash = {vintage: ['NECB2011'], # @AllTemplates, 
-                       TestCase: ["case 1"], 
+    test_cases_hash = {vintage: ['NECB2011'], # @AllTemplates,
+                       TestCase: ["case 1"],
                        TestPars: {:tbd => 'tbd'}}
     new_test_cases = make_test_cases_json(test_cases_hash)
     merge_test_cases!(test_cases, new_test_cases)
-    
-        
+
+
     # Create empty results hash and call the template method that runs the individual test cases.
     test_results = do_test_cases(test_cases: test_cases, test_pars: test_parameters)
 
@@ -44,7 +44,7 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
     test_result_file = File.join(@test_results_folder, "#{file_root}-test_results.json")
     File.write(test_result_file, JSON.pretty_generate(test_results))
 
-    # Read expected results. 
+    # Read expected results.
     file_name = File.join(@expected_results_folder, "#{file_root}-expected_results.json")
     expected_results = JSON.parse(File.read(file_name), {symbolize_names: true})
 
@@ -71,14 +71,14 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
     fuel_type = test_pars[:fuel_type]
     epw_file = test_pars[:epw_file]
     building_type = test_pars[:archetype]
-    
+
     # Variable inputs.
     vintage = test_pars[:vintage]
 
     # Test case inputs.
-    
 
-    # Define the test name. 
+
+    # Define the test name.
     name = "#{vintage}_btap_data_report"
     name_short = "#{vintage}_btap_rep"
     output_folder = method_output_folder("#{test_name}/#{name_short}")
@@ -110,7 +110,7 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
     qaqc[:os_standards_version] = "test"
     qaqc[:openstudio_version] = "test"
     qaqc[:energyplus_version] = "test"
-    results = BTAPData.new(model: model,
+    results = BTAP::Data.new(model: model,
                            runner: nil,
                            cost_result: nil,
                            carbon_result: nil,
@@ -124,7 +124,7 @@ class NECB_BTAP_Data_Reporting < Minitest::Test
     results["simulation_os_standards_revision"] = "test"
     results["simulation_os_standards_version"] = "test"
     results["simulation_date"] = "test"
-    
+
     logger.info "Completed individual test: #{name}"
     return results
   end

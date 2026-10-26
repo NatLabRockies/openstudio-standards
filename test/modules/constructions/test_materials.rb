@@ -14,7 +14,7 @@ class TestConstructionsMaterials < Minitest::Test
     assert_in_delta(1.0 / 0.2, @materials.material_get_conductance(material), 0.0001)
 
     material = OpenStudio::Model::Gas.new(model, 'Air', 0.01)
-    assert_in_delta(0.02561, @materials.material_get_conductance(material, temperature: 20.0), 0.0001)
+    assert_in_delta(2.561, @materials.material_get_conductance(material, temperature: 20.0), 0.001)
 
     material = OpenStudio::Model::Shade.new(model, 0.4, 0.5, 0.4, 0.5, 0.9, 0.0, 0.05, 0.1)
     assert_in_delta(0.1 / 0.05, @materials.material_get_conductance(material), 0.0001)

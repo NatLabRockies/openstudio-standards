@@ -1,13 +1,8 @@
-require_relative '../../../lib/openstudio-standards.rb'
-require_relative '../../../lib/openstudio-standards/btap/btap_test_helper.rb'
-require 'minitest/autorun'
-require 'optparse'
-require 'fileutils'
-require 'minitest/unit'
-require 'optparse'
+require_relative '../../helpers/minitest_helper'
+require_relative '../../helpers/btap_results_helper'
 
-class BTAPResults_HS14_Test < Minitest::Test
-  def test_qaqc()
+class BTAP::Results_HS14_Test < Minitest::Test
+  def test_results_hs14()
     #building_type = 'Outpatient'
     #building_type = 'LargeHotel'
     # building_type = 'FullServiceRestaurant'
@@ -40,7 +35,7 @@ class BTAPResults_HS14_Test < Minitest::Test
                                                    building_type: building_type,
                                                    primary_heating_fuel: primary_heating_fuel,
                                                    ecm_system_name: ecm_system_name,
-                                                   cached: BTAPResultsHelper.cached)
+                                                   cached: BTAP::ResultsHelper.cached)
   end
 
   def create_model_simulate_and_qaqc_regression_test(epw_file:,
@@ -53,7 +48,7 @@ class BTAPResults_HS14_Test < Minitest::Test
     model_name = "#{building_type}-#{template}-#{File.basename(epw_file, '.epw')}-ecm_system_name-#{ecm_system_name}"
     test_dir   = "#{File.dirname(__FILE__)}/output"
     run_dir    = "#{test_dir}/#{model_name}"
-    helper     = BTAPResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
+    helper     = BTAP::ResultsHelper.new(test_path: __FILE__, model_name: model_name, run_dir: run_dir)
 
     Dir.mkdir(test_dir) unless Dir.exist?(test_dir)
     Dir.mkdir(run_dir) unless Dir.exist?(run_dir)
@@ -122,10 +117,10 @@ class BTAPResults_HS14_Test < Minitest::Test
       model_out_path = "#{run_dir}/final.osm"
       sql_path = "#{run_dir}/run/eplusout.sql"
       model.save(model_out_path, true)
-      post_analysis = BTAPDatapointAnalysis.new(
+      helper.cache_osm_and_sql_if_env(model_path: model_out_path, sql_path: sql_path)
+      post_analysis = BTAP::DatapointAnalysis.new(
         model: model,
         output_folder: run_dir,
-        template: template,
         standard: standard,
         qaqc: nil)
     else

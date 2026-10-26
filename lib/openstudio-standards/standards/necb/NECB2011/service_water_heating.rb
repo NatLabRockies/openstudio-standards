@@ -250,10 +250,11 @@ class NECB2011
       space_peak_flow = 0
       data = nil
       space_type_name = space.spaceType.get.standardsSpaceType.get.to_s
+      space_type_building = space.spaceType.get.standardsBuildingType.get.to_s
       tank_temperature = 60
       # find the specific space_type properties from standard.json
       space_types_table.each do |space_type|
-        if (space_type['building_type'] + ' ' + space_type_name) == (space_type['building_type'] + ' ' + space_type['space_type'])
+        if (space_type_building + ' ' + space_type_name) == (space_type['building_type'] + ' ' + space_type['space_type'])
           break if space_type['necb_hvac_system_selection_type'] == '- undefined -'
           # If there is no service hot water load.. Don't bother adding anything.
           break if (space_type['service_water_heating_peak_flow_per_area'].to_f == 0.0 && space_type['service_water_heating_peak_flow_rate'].to_f == 0.0) || space_type['service_water_heating_schedule'].nil?
@@ -360,7 +361,11 @@ class NECB2011
     # the hourly shw demand is for the following hour.  It is meant to determine, of the peak hourly shw times, which has
     # the highest shw demand the following hour.  This is used to determine shw capacity and volume.
     weekly_peak_flow.sort.each do |day_peak_sched|
-      day_peak_sched[1].sort.each_with_index do |hour_flow, hour_index|
+      # NOTE: this previously iterated `day_peak_sched[1].sort` — the SORTED
+      # hourly array — while using the (sorted) index against the UNSORTED
+      # arrays below, so the "hour after the peak" was effectively an arbitrary
+      # hour. The hourly array is now iterated in hour order.
+      day_peak_sched[1].each_with_index do |hour_flow, hour_index|
         if hour_flow == peak_flow_sched
           if hour_index == 23
             next_hour_test = 0

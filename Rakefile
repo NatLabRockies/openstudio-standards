@@ -38,14 +38,6 @@ namespace :test do
     t.verbose = false
   end
 
-  desc 'Run costing on each permutation of building type, fuel, and template.'
-  Rake::TestTask.new('costing_tests') do |t|
-    file_list = FileList.new('lib/openstudio-standards/btap/costing/test_run_costing_tests.rb')
-    t.libs << 'test'
-    t.test_files = file_list
-    t.verbose = false
-  end
-
   # These tests only available in the CI environment
   if ENV['CI'] == 'true'
 
