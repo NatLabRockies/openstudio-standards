@@ -1836,7 +1836,7 @@ module OpenstudioStandards
       end
 
       # oa damper schedule
-      unless oa_damper_sch.nil?
+      if oa_damper_sch.nil?
         oa_damper_sch = model.alwaysOnDiscreteSchedule
       end
 
