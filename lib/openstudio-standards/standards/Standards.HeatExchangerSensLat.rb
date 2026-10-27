@@ -121,6 +121,7 @@ class Standard
 
   # Defines the minimum sensible and latent effectiveness of the heat exchanger.
   # Assumed to apply to sensible and latent effectiveness at all flow rates.
+  # Returns zero effectiveness when no applicable energy recovery requirement is found.
   #
   # @param heat_exchanger_air_to_air_sensible_and_latent [OpenStudio::Model::HeatExchangerAirToAirSensibleAndLatent] the heat exchanger
   # @return [Array] List of full and part load heat echanger effectiveness
@@ -169,7 +170,7 @@ class Standard
       if erv_enthalpy_recovery_ratio.nil?
         erv_enthalpy_recovery_ratio = erv_data
       end
-      if !erv_data[metric].nil? && (erv_enthalpy_recovery_ratio[metric] <= erv_data[metric])
+      if !erv_data[metric].nil? && (erv_enthalpy_recovery_ratio[metric].nil? || erv_enthalpy_recovery_ratio[metric] <= erv_data[metric])
         erv_enthalpy_recovery_ratio = erv_data
       end
     end
@@ -183,6 +184,11 @@ class Standard
         design_conditions = erv_enthalpy_recovery_ratio['design_conditions'].downcase
         enthalpy_recovery_ratio = erv_enthalpy_recovery_ratio[metric]
       end
+    end
+
+    if enthalpy_recovery_ratio.nil?
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HeatExchangerAirToAirSensibleAndLatent', "For #{heat_exchanger_air_to_air_sensible_and_latent.name}: No applicable energy recovery requirement found for #{template} in #{climate_zone}; using zero effectiveness.")
+      return Array.new(8, 0.0)
     end
 
     enthalpy_recovery_ratio = enthalpy_recovery_ratio_design_to_typical_adjustment(enthalpy_recovery_ratio, climate_zone)
@@ -234,7 +240,7 @@ class Standard
   # @param design_conditions [String] design_conditions for effectiveness calculation, either 'cooling' or 'heating'
   # @return [Array] heating and cooling heat exchanger effectiveness at 100% and 75% nominal airflow
   def heat_exchanger_air_to_air_sensible_and_latent_enthalpy_recovery_ratio_to_effectiveness(enthalpy_recovery_ratio, design_conditions)
-    case design_conditions
+    case design_conditions.downcase
       when 'cooling'
         full_htg_sens_eff = ((20.707 * (enthalpy_recovery_ratio**2)) + (41.354 * enthalpy_recovery_ratio) + 40.755) / 100
         full_htg_lat_eff = ((127.45 * enthalpy_recovery_ratio) - 18.625) / 100
