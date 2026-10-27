@@ -1422,20 +1422,22 @@ class Standard
                            end
 
           # Add a hot water PTAC to each zone
+          # A cycling fan lets the standard controls run it continuously only when the zone is occupied (90.1-2019 Section G3.1.2.4).
           OpenstudioStandards::HVAC.model_add_ptac(model,
-                         zones,
-                         cooling_type: 'Single Speed DX AC',
-                         heating_type: 'Water',
-                         hot_water_loop: hot_water_loop,
-                         fan_type: 'ConstantVolume')
+                                                   zones,
+                                                   cooling_type: 'Single Speed DX AC',
+                                                   heating_type: 'Water',
+                                                   hot_water_loop: hot_water_loop,
+                                                   fan_type: 'Cycling')
         end
 
       when 'PTHP' # System 2
         unless zones.empty?
           # add an air-source packaged terminal heat pump with electric supplemental heat to each zone.
+          # A cycling fan lets the standard controls run it continuously only when the zone is occupied (90.1-2019 Section G3.1.2.4).  
           OpenstudioStandards::HVAC.model_add_pthp(model,
-                         zones,
-                         fan_type: 'ConstantVolume')
+                                                  zones,
+                                                  fan_type: 'Cycling')
         end
 
       when 'PSZ_AC' # System 3
