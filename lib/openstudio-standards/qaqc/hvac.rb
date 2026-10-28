@@ -276,11 +276,11 @@ module OpenstudioStandards
             obj_type = component.iddObjectType.valueName.to_s
             case obj_type
             when 'OS_Fan_ConstantVolume'
-              actual_w_per_cfm = std.fan_rated_w_per_cfm(component.to_FanConstantVolume.get)
+              actual_w_per_cfm = OpenstudioStandards::HVAC.fan_rated_w_per_cfm(component.to_FanConstantVolume.get)
             when 'OS_Fan_OnOff'
-              actual_w_per_cfm = std.fan_rated_w_per_cfm(component.to_FanOnOff.get)
+              actual_w_per_cfm = OpenstudioStandards::HVAC.fan_rated_w_per_cfm(component.to_FanOnOff.get)
             when 'OS_Fan_VariableVolume'
-              actual_w_per_cfm = std.fan_rated_w_per_cfm(component.to_FanVariableVolume.get)
+              actual_w_per_cfm = OpenstudioStandards::HVAC.fan_rated_w_per_cfm(component.to_FanVariableVolume.get)
             else
               next # Skip non-fan objects
             end
@@ -430,11 +430,11 @@ module OpenstudioStandards
           chiller_max_flow_rate_units_ip = options['chiller_max_flow_rate']['units']
 
           # get capacity of loop (not individual chiller but entire loop)
-          total_cooling_capacity_w = std.plant_loop_total_cooling_capacity(plant_loop)
+          total_cooling_capacity_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
           total_cooling_capacity_ton = OpenStudio.convert(total_cooling_capacity_w, 'W', 'Btu/h').get / 12_000.0
 
           # get the max flow rate (not individual chiller)
-          maximum_loop_flow_rate = std.plant_loop_find_maximum_loop_flow_rate(plant_loop)
+          maximum_loop_flow_rate = OpenstudioStandards::HVAC.plant_loop_maximum_loop_flow_rate(plant_loop)
           maximum_loop_flow_rate_ip = OpenStudio.convert(maximum_loop_flow_rate, 'm^3/s', 'gal/min').get
 
           if total_cooling_capacity_ton < 0.01
@@ -470,8 +470,8 @@ module OpenstudioStandards
           air_loop_max_flow_rate_units_ip = sizing_benchmarks['air_loop_max_flow_rate']['units']
 
           # get values from model for air loop checks
-          floor_area_served = std.air_loop_hvac_floor_area_served(air_loop)
-          design_supply_air_flow_rate = std.air_loop_hvac_find_design_supply_air_flow_rate(air_loop)
+          floor_area_served = OpenstudioStandards::HVAC.air_loop_hvac_floor_area(air_loop)
+          design_supply_air_flow_rate = OpenstudioStandards::HVAC.air_loop_hvac_design_supply_air_flow_rate(air_loop)
 
           # check max flow rate of air loops in the model
           model_normalized_flow_rate_si = design_supply_air_flow_rate / floor_area_served
@@ -500,8 +500,8 @@ module OpenstudioStandards
           air_loop_cooling_capacity_units_ip = sizing_benchmarks['air_loop_cooling_capacity']['units']
 
           # check cooling capacity of air loops in the model
-          floor_area_served = std.air_loop_hvac_floor_area_served(air_loop)
-          capacity = std.air_loop_hvac_total_cooling_capacity(air_loop)
+          floor_area_served = OpenstudioStandards::HVAC.air_loop_hvac_floor_area(air_loop)
+          capacity = OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop)
           model_normalized_capacity_si = capacity / floor_area_served
           model_normalized_capacity_ip = OpenStudio.convert(model_normalized_capacity_si, 'W/m^2', 'Btu/ft^2*h').get / 12_000.0
 
@@ -699,7 +699,7 @@ module OpenstudioStandards
           motor_eff = component.motorEfficiency
 
           # get eff values from standards
-          motor_bhp = std.fan_brake_horsepower(component)
+          motor_bhp = OpenstudioStandards::HVAC.fan_brake_horsepower(component)
           standard_minimum_motor_efficiency_and_size = std.fan_standard_minimum_motor_efficiency_and_size(component, motor_bhp)[0]
 
           # check actual against target
@@ -718,7 +718,7 @@ module OpenstudioStandards
           motor_eff = component.motorEfficiency
 
           # get eff values from standards
-          motor_bhp = std.fan_brake_horsepower(component)
+          motor_bhp = OpenstudioStandards::HVAC.fan_brake_horsepower(component)
           standard_minimum_motor_efficiency_and_size = std.fan_standard_minimum_motor_efficiency_and_size(component, motor_bhp)[0]
 
           # check actual against target
@@ -1045,7 +1045,7 @@ module OpenstudioStandards
           end
 
           # skip of brake horsepower is 0
-          next if std.fan_brake_horsepower(component) < 0.0001 # less than 1 wat
+          next if OpenstudioStandards::HVAC.fan_brake_horsepower(component) < 0.0001 # less than 1 wat
 
           # temp model for use by temp model and target curve
           model_temp = OpenStudio::Model::Model.new
@@ -1145,10 +1145,10 @@ module OpenstudioStandards
         # Check the heating and cooling capacity of the plant loops against their coil loads
         @model.getPlantLoops.sort.each do |plant_loop|
           # Heating capacity
-          htg_cap_w = std.plant_loop_total_heating_capacity(plant_loop)
+          htg_cap_w = OpenstudioStandards::HVAC.plant_loop_total_heating_capacity(plant_loop)
 
           # Cooling capacity
-          clg_cap_w = std.plant_loop_total_cooling_capacity(plant_loop)
+          clg_cap_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
 
           # Sum the load for each coil on the loop
           htg_load_w = 0.0

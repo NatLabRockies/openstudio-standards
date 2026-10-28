@@ -15,7 +15,7 @@ class Standard
     mz_fan = false
     if fan_variable_volume.airLoopHVAC.is_initialized
       air_loop = fan_variable_volume.airLoopHVAC.get
-      mz_fan = air_loop_hvac_multizone_vav_system?(air_loop)
+      mz_fan = OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop)
     end
 
     # No part load fan power control is required for single zone VAV systems
@@ -36,15 +36,15 @@ class Standard
         return part_load_control_required
       end
       air_loop = air_loop.get
-      clg_cap_w = air_loop_hvac_total_cooling_capacity(air_loop)
+      clg_cap_w = OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop)
       clg_cap_btu_per_hr = OpenStudio.convert(clg_cap_w, 'W', 'Btu/hr').get
-      fan_hp = fan_motor_horsepower(fan_variable_volume)
+      fan_hp = OpenstudioStandards::HVAC.fan_motor_horsepower(fan_variable_volume)
       if fan_hp >= hp_limit && clg_cap_btu_per_hr >= cap_limit_btu_per_hr
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.FanVariableVolume', "For #{fan_variable_volume.name}: part load fan power control is required for #{fan_hp.round(1)} HP fan, #{clg_cap_btu_per_hr.round} Btu/hr cooling capacity.")
         part_load_control_required = true
       end
     elsif hp_limit
-      fan_hp = fan_motor_horsepower(fan_variable_volume)
+      fan_hp = OpenstudioStandards::HVAC.fan_motor_horsepower(fan_variable_volume)
       if fan_hp >= hp_limit
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.FanVariableVolume', "For #{fan_variable_volume.name}: Part load fan power control is required for #{fan_hp.round(1)} HP fan.")
         part_load_control_required = true

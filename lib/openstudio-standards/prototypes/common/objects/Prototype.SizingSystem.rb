@@ -1,44 +1,6 @@
 class Standard
   # @!group Sizing System
 
-  # Prototype SizingSystem object
-  #
-  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
-  # @param dsgn_temps [Hash] a hash of design temperature lookups from standard_design_sizing_temperatures
-  # @return [OpenStudio::Model::SizingSystem] sizing system object
-  def adjust_sizing_system(air_loop_hvac,
-                           dsgn_temps,
-                           type_of_load_sizing: 'Sensible',
-                           min_sys_airflow_ratio: 0.3,
-                           sizing_option: 'Coincident')
-
-    # adjust sizing system defaults
-    sizing_system = air_loop_hvac.sizingSystem
-    sizing_system.setTypeofLoadtoSizeOn(type_of_load_sizing)
-    sizing_system.autosizeDesignOutdoorAirFlowRate
-    sizing_system.setPreheatDesignTemperature(dsgn_temps['prehtg_dsgn_sup_air_temp_c'])
-    sizing_system.setPrecoolDesignTemperature(dsgn_temps['preclg_dsgn_sup_air_temp_c'])
-    sizing_system.setCentralCoolingDesignSupplyAirTemperature(dsgn_temps['clg_dsgn_sup_air_temp_c'])
-    sizing_system.setCentralHeatingDesignSupplyAirTemperature(dsgn_temps['htg_dsgn_sup_air_temp_c'])
-    sizing_system.setPreheatDesignHumidityRatio(0.008)
-    sizing_system.setPrecoolDesignHumidityRatio(0.008)
-    sizing_system.setCentralCoolingDesignSupplyAirHumidityRatio(0.0085)
-    sizing_system.setCentralHeatingDesignSupplyAirHumidityRatio(0.0080)
-    if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.7.0')
-      sizing_system.setMinimumSystemAirFlowRatio(min_sys_airflow_ratio)
-    else
-      sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(min_sys_airflow_ratio)
-    end
-    sizing_system.setSizingOption(sizing_option)
-    sizing_system.setAllOutdoorAirinCooling(false)
-    sizing_system.setAllOutdoorAirinHeating(false)
-    sizing_system.setSystemOutdoorAirMethod('ZoneSum')
-    sizing_system.setCoolingDesignAirFlowMethod('DesignDay')
-    sizing_system.setHeatingDesignAirFlowMethod('DesignDay')
-
-    return sizing_system
-  end
-
   # adjust the outdoor air sizing to the use the ventilation rate procedure
   # @todo this needs to be changed in both the sizing system and controller mechanical ventilation objects
   #

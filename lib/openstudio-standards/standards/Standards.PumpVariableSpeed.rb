@@ -50,7 +50,7 @@ class Standard
     case plant_loop_type
       when 'Heating'
         # Determine the area served by the plant loop
-        area_served_m2 = plant_loop_total_floor_area_served(plant_loop)
+        area_served_m2 = OpenstudioStandards::HVAC.plant_loop_total_floor_area_served(plant_loop)
         area_served_ft2 = OpenStudio.convert(area_served_m2, 'm^2', 'ft^2').get
 
         return 'VSD No Reset' if area_served_ft2 > 120_000
@@ -59,7 +59,7 @@ class Standard
         return 'Riding Curve'
       when 'Cooling'
         # Get plant loop capacity capacity
-        cooling_capacity_w = plant_loop_total_cooling_capacity(plant_loop)
+        cooling_capacity_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
 
         return 'VSD No Reset' if cooling_capacity_w >= 300
 

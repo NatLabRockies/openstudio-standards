@@ -48,7 +48,7 @@ class DEER
     # Determine if the airloop serves any computer rooms
     # / data centers, which changes the economizer.
     is_dc = false
-    if air_loop_hvac_data_center_area_served(air_loop_hvac) > 0
+    if OpenstudioStandards::HVAC.air_loop_hvac_data_center_area(air_loop_hvac) > 0
       is_dc = true
     end
 
@@ -73,7 +73,7 @@ class DEER
 
     # Check whether the system requires an economizer by comparing
     # the system capacity to the minimum capacity.
-    total_cooling_capacity_w = air_loop_hvac_total_cooling_capacity(air_loop_hvac)
+    total_cooling_capacity_w = OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop_hvac)
     total_cooling_capacity_btu_per_hr = OpenStudio.convert(total_cooling_capacity_w, 'W', 'Btu/hr').get
 
     # Check whether the system has chilled water cooling
