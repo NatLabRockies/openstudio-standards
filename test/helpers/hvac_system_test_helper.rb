@@ -112,7 +112,7 @@ def model_hvac_test(hvac_arguments)
     end
 
     # Add the HVAC
-    added_hvac = standard.model_add_hvac_system(model, system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
+    added_hvac = OpenstudioStandards::HVAC.model_add_hvac_system(model, system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, zones,
                                                 hot_water_loop_type: hot_water_loop_type,
                                                 chilled_water_loop_cooling_type: chilled_water_loop_cooling_type,
                                                 heat_pump_loop_cooling_type: heat_pump_loop_cooling_type,
@@ -326,11 +326,11 @@ def model_radiant_system_test(arguments)
 
     # create plant loops
     zones = model.getThermalZones
-    hot_water_loop = standard.model_get_or_add_hot_water_loop(model, 'DistrictHeating', hot_water_loop_type: 'LowTemperature')
-    chilled_water_loop = standard.model_get_or_add_chilled_water_loop(model, 'DistrictCooling', chilled_water_loop_cooling_type: 'WaterCooled')
+    hot_water_loop = OpenstudioStandards::HVAC.model_get_or_add_hot_water_loop(model, 'DistrictHeating', hot_water_loop_type: 'LowTemperature')
+    chilled_water_loop = OpenstudioStandards::HVAC.model_get_or_add_chilled_water_loop(model, 'DistrictCooling', chilled_water_loop_cooling_type: 'WaterCooled')
 
     # add doas system for ventilation
-    air_loop = standard.model_add_doas(model,
+    air_loop = OpenstudioStandards::HVAC.model_add_doas(model,
                                        zones,
                                        hot_water_loop: hot_water_loop,
                                        chilled_water_loop: chilled_water_loop)
@@ -343,7 +343,7 @@ def model_radiant_system_test(arguments)
     end
 
     # add radiant system
-    radiant_loops = standard.model_add_low_temp_radiant(model,
+    radiant_loops = OpenstudioStandards::HVAC.model_add_low_temp_radiant(model,
                                                         zones,
                                                         hot_water_loop,
                                                         chilled_water_loop,

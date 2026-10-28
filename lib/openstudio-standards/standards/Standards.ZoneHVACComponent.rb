@@ -66,12 +66,12 @@ class Standard
     max_air_flow_rate_cfm = OpenStudio.convert(max_air_flow_rate, 'm^3/s', 'ft^3/min').get
 
     # Set the impeller efficiency
-    fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
+    OpenstudioStandards::HVAC.fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
 
     # Set the motor efficiency, preserving the impeller efficency.
     # For zone HVAC fans, a bhp lookup of 0.5bhp is always used because
     # they are assumed to represent a series of small fans in reality.
-    fan_apply_standard_minimum_motor_efficiency(fan, fan_brake_horsepower(fan))
+    fan_apply_standard_minimum_motor_efficiency(fan, OpenstudioStandards::HVAC.fan_brake_horsepower(fan))
 
     # Calculate a new pressure rise to hit the target W/cfm
     fan_tot_eff = fan.fanEfficiency

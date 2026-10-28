@@ -602,10 +602,10 @@ class ASHRAE901PRM < Standard
       # - No cooling coil and/or,
       # - An evaporative cooling coil
       zone.airLoopHVACs.each do |air_loop|
-        if (!air_loop_hvac_include_cooling_coil?(air_loop) &&
-          air_loop_hvac_include_evaporative_cooler?(air_loop)) ||
-           (!air_loop_hvac_include_cooling_coil?(air_loop) &&
-             air_loop_hvac_include_economizer?(air_loop))
+        if (!OpenstudioStandards::HVAC.air_loop_hvac_cooling_coil?(air_loop) &&
+          OpenstudioStandards::HVAC.air_loop_hvac_direct_evap?(air_loop)) ||
+           (!OpenstudioStandards::HVAC.air_loop_hvac_cooling_coil?(air_loop) &&
+             OpenstudioStandards::HVAC.air_loop_hvac_economizer?(air_loop))
           air_loop.additionalProperties.setFeature('non_mechanically_cooled', true)
           zone.additionalProperties.setFeature('non_mechanically_cooled', true)
         end
@@ -676,10 +676,10 @@ class ASHRAE901PRM < Standard
 
     # @todo The fan and pump efficiency will be done by another task.
     # Fans
-    # model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    # model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
+    # model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    # model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
 
     # Pumps
     # model.getPumpConstantSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
@@ -831,12 +831,12 @@ class ASHRAE901PRM < Standard
         end
       end
     end
-    # in this situation, we hard set the temperature to be 22 F
-    # (ASHRAE 90.1 Room heating stepoint temperature is 72 F)
+    # in this situation, we hard set the temperature to be 22 C
+    # (ASHRAE 90.1 Room heating setpoint temperature is 72 F)
     max_heat_setpoint = 22.2 if max_heat_setpoint.zero?
 
     max_heat_setpoint_f = OpenStudio.convert(max_heat_setpoint, 'C', 'F').get
-    preheat_setpoint_f = max_heat_setpoint_f - 20
+    preheat_setpoint_f = max_heat_setpoint_f - 20.0
     preheat_setpoint_c = OpenStudio.convert(preheat_setpoint_f, 'F', 'C').get
 
     # create a new constant schedule and this method will add schedule limit type
@@ -1874,12 +1874,12 @@ class ASHRAE901PRM < Standard
   def model_apply_baseline_swh_loops(model, building_type)
     model.getPlantLoops.each do |plant_loop|
       # Skip non service water heating loops
-      next unless plant_loop_swh_loop?(plant_loop)
+      next unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
       # Rename the loop to avoid accidentally hooking up the HVAC systems to this loop later.
       plant_loop.setName('Service Water Heating Loop')
 
-      htg_fuels, combination_system, storage_capacity, total_heating_capacity = plant_loop_swh_system_type(plant_loop)
+      htg_fuels, combination_system, storage_capacity, total_heating_capacity = OpenstudioStandards::HVAC.plant_loop_swh_system_type(plant_loop)
 
       electric = true
       if htg_fuels.include?('NaturalGas') ||
