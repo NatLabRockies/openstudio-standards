@@ -1036,7 +1036,7 @@ class ASHRAE901PRM < Standard
         oa_flow_m3_per_s = get_airloop_hvac_design_oa_from_sql(air_loop_hvac)
       else
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}, DCV not applicable because it has no OA intake.")
-        return false
+        next
       end
       oa_flow_cfm = OpenStudio.convert(oa_flow_m3_per_s, 'm^3/s', 'cfm').get
       if oa_flow_cfm <= 3000
