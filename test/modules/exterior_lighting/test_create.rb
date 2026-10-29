@@ -93,6 +93,11 @@ class TestExteriorLightingCreate < Minitest::Test
     base_lighting = exterior_lights.select { |e| e.name.get == 'Base Site Allowance 750.0 W' }[0]
     assert(base_lighting.exteriorLightsDefinition.designLevel == 750.0)
 
+    # Combine the facade's overnight shutoff schedule with daylight shutoff.
+    facade_lighting = exterior_lights.select { |e| e.name.get == 'Building Facades 0.84 W/ft' }[0]
+    assert_equal('AstronomicalClock', facade_lighting.controlOption)
+    exterior_lights.each { |e| assert_equal('AstronomicalClock', e.controlOption, "#{e.name} should follow the astronomical clock") }
+
     model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_default.osm"), true)
   end
 
