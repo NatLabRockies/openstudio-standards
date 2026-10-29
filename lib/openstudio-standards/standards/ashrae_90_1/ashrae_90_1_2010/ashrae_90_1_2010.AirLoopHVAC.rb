@@ -166,7 +166,7 @@ class ASHRAE9012010 < ASHRAE901
 
     # Not required for systems that require an ERV
     # Exception 2 to Section 6.5.3.3
-    if air_loop_hvac_energy_recovery?(air_loop_hvac)
+    if OpenstudioStandards::HVAC.air_loop_hvac_energy_recovery?(air_loop_hvac)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: multizone vav optimization is not required because the system has Energy Recovery.")
       return multizone_opt_required
     end
@@ -284,7 +284,7 @@ class ASHRAE9012010 < ASHRAE901
   # @return [Integer] the number of stages: 0, 1, 2
   def air_loop_hvac_single_zone_controls_num_stages(air_loop_hvac, climate_zone)
     min_clg_cap_btu_per_hr = 65_000
-    clg_cap_btu_per_hr = OpenStudio.convert(air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
+    clg_cap_btu_per_hr = OpenStudio.convert(OpenstudioStandards::HVAC.air_loop_hvac_total_cooling_capacity(air_loop_hvac), 'W', 'Btu/hr').get
     if clg_cap_btu_per_hr >= min_clg_cap_btu_per_hr
       num_stages = 2
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name}: two-stage control is required since cooling capacity of #{clg_cap_btu_per_hr.round} Btu/hr exceeds the minimum of #{min_clg_cap_btu_per_hr.round} Btu/hr .")
@@ -306,7 +306,7 @@ class ASHRAE9012010 < ASHRAE901
     is_sat_reset_required = false
 
     # Only required for multizone VAV systems
-    unless air_loop_hvac_multizone_vav_system?(air_loop_hvac)
+    unless OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop_hvac)
       return is_sat_reset_required
     end
 
@@ -373,11 +373,19 @@ class ASHRAE9012010 < ASHRAE901
     # Moisture regime is not needed for climate zone 8
     climate_zone = climate_zone.split('-')[-1]
     climate_zone = '8' if climate_zone.include?('8')
+    # Default to use values for cooling for climate zones 0, 1, 2, and 3 and heating for all others.
+    case climate_zone
+    when '0A', '0B', '1A', '1A', '1B', '2A', '2B', '3A', '3B', '3C'
+      design_conditions = 'Cooling'
+    else
+      design_conditions = 'Heating'
+    end
 
     # Table 6.5.6.1
     search_criteria = {
       'template' => template,
-      'climate_zone' => climate_zone
+      'climate_zone' => climate_zone,
+      'design_conditions' => design_conditions
     }
     energy_recovery_limits = model_find_object(standards_data['energy_recovery'], search_criteria)
     if energy_recovery_limits.nil?

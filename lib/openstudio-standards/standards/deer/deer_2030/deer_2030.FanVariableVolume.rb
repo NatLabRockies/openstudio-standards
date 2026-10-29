@@ -13,7 +13,7 @@ class DEER2030 < DEER
     mz_fan = false
     if fan_variable_volume.airLoopHVAC.is_initialized
       air_loop = fan_variable_volume.airLoopHVAC.get
-      mz_fan = air_loop_hvac_multizone_vav_system?(air_loop)
+      mz_fan = OpenstudioStandards::HVAC.air_loop_hvac_multizone_vav_system?(air_loop)
     end
 
     # No part load fan power control is required for single zone VAV systems

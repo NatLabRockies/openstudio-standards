@@ -144,16 +144,16 @@ class TestThermalZone < Minitest::Test
     std = Standard.build('90.1-2013')
     model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESecondarySchool.osm")
     std.model_add_loads(model)
-    std.model_add_hvac_system(model, 'VAV Reheat', ht = 'Electricity', znht = 'Electricity', cl = 'Electricity', model.getThermalZones,
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'VAV Reheat', ht = 'Electricity', znht = 'Electricity', cl = 'Electricity', model.getThermalZones,
                               chilled_water_loop_cooling_type: 'AirCooled')
     thermal_zone = model.getThermalZoneByName('TZ-Aux_Gym_ZN_1_FLR_1').get
     assert_equal(true, @zone.thermal_zone_electric_heat?(thermal_zone))
 
     # test a mixed system
     OpenstudioStandards::HVAC.remove_hvac(model)
-    std.model_add_hvac_system(model, 'DOAS', ht = 'NaturalGas', znht = nil, cl = 'Electricity', model.getThermalZones,
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'DOAS', ht = 'NaturalGas', znht = nil, cl = 'Electricity', model.getThermalZones,
                               air_loop_cooling_type: 'DX')
-    std.model_add_hvac_system(model, 'VRF', ht = 'Electricity', znht = nil, cl = 'Electricity', model.getThermalZones)
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'VRF', ht = 'Electricity', znht = nil, cl = 'Electricity', model.getThermalZones)
     assert_equal(true, @zone.thermal_zone_electric_heat?(thermal_zone))
   end
 
@@ -161,7 +161,7 @@ class TestThermalZone < Minitest::Test
     std = Standard.build('90.1-2013')
     model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESecondarySchool.osm")
     std.model_add_loads(model)
-    std.model_add_hvac_system(model, 'VAV Reheat', ht = 'NaturalGas', znht = 'NaturalGas', cl = 'Electricity', model.getThermalZones,
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'VAV Reheat', ht = 'NaturalGas', znht = 'NaturalGas', cl = 'Electricity', model.getThermalZones,
                               chilled_water_loop_cooling_type: 'AirCooled')
     thermal_zone = model.getThermalZoneByName('TZ-Aux_Gym_ZN_1_FLR_1').get
     assert_equal(true, @zone.thermal_zone_fossil_heat?(thermal_zone))
@@ -171,7 +171,7 @@ class TestThermalZone < Minitest::Test
     std = Standard.build('90.1-2013')
     model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESecondarySchool.osm")
     std.model_add_loads(model)
-    std.model_add_hvac_system(model, 'VAV Reheat', ht = 'DistrictHeating', znht = 'DistrictHeating', cl = 'Electricity', model.getThermalZones,
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'VAV Reheat', ht = 'DistrictHeating', znht = 'DistrictHeating', cl = 'Electricity', model.getThermalZones,
                               chilled_water_loop_cooling_type: 'AirCooled')
     thermal_zone = model.getThermalZoneByName('TZ-Aux_Gym_ZN_1_FLR_1').get
     assert_equal(true, @zone.thermal_zone_district_heat?(thermal_zone))
@@ -182,10 +182,10 @@ class TestThermalZone < Minitest::Test
     model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESecondarySchool.osm")
     std.model_add_loads(model)
     thermal_zone = model.getThermalZoneByName('TZ-Aux_Gym_ZN_1_FLR_1').get
-    std.model_add_hvac_system(model, 'DOAS', ht = 'NaturalGas', znht = nil, cl = 'Electricity', model.getThermalZones,
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'DOAS', ht = 'NaturalGas', znht = nil, cl = 'Electricity', model.getThermalZones,
                               air_loop_cooling_type: 'DX')
     assert_equal(false, @zone.thermal_zone_mixed_heat?(thermal_zone))
-    std.model_add_hvac_system(model, 'VRF', ht = 'Electricity', znht = nil, cl = 'Electricity', model.getThermalZones)
+    OpenstudioStandards::HVAC.model_add_hvac_system(model, 'VRF', ht = 'Electricity', znht = nil, cl = 'Electricity', model.getThermalZones)
     assert_equal(true, @zone.thermal_zone_mixed_heat?(thermal_zone))
   end
 

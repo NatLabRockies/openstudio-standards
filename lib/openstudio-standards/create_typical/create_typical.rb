@@ -69,7 +69,7 @@ module OpenstudioStandards
     # @param remove_objects [Boolean] Clean model of non-geometry objects. Only removes the same objects types as those added to the model.
     # @param user_hvac_mapping [Hash] Hash defining a mapping of system types to zones.
     #   Structure is:
-    #     ['systems'][N]['system_type'] = 'MY_CBECS_HVAC_TYPE' as defined in lib/openstudio-standards/hvac/cbecs_hvac.rb
+    #     ['systems'][N]['system_type'] = 'MY_CBECS_HVAC_TYPE' as defined in lib/openstudio-standards/hvac/create_cbecs_hvac_system.rb
     #     ['systems'][N]['thermal_zones'] = ['Zone 1', 'Zone 2', ...]
     # @param load_overrides [Array<Hash>, String] runtime internal load overrides, as a Ruby array or JSON string.
     #   Each entry is keyed by `space_type` (matched against the schedule set name or standards space type) or `"*"`,
@@ -936,7 +936,7 @@ module OpenstudioStandards
                 end
 
                 # Add the primary system to the primary zones
-                unless standard.model_add_hvac_system(model, sys_type, central_htg_fuel, zone_htg_fuel, clg_fuel, system_zones)
+                unless OpenstudioStandards::HVAC.model_add_hvac_system(model, sys_type, central_htg_fuel, zone_htg_fuel, clg_fuel, system_zones)
                   OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{sys_type}' not recognized. Check input system type argument against Model.hvac.rb for valid hvac system type names.")
                   return false
                 end
@@ -949,7 +949,7 @@ module OpenstudioStandards
                     cooled_only_zones = system_zones.select { |zone| !OpenstudioStandards::ThermalZone.thermal_zone_heated?(zone) && OpenstudioStandards::ThermalZone.thermal_zone_cooled?(zone) }
                     system_zones = heated_and_cooled_zones + cooled_only_zones
                   end
-                  unless standard.model_add_hvac_system(model, sec_sys_type, central_htg_fuel, zone_htg_fuel, clg_fuel, system_zones)
+                  unless OpenstudioStandards::HVAC.model_add_hvac_system(model, sec_sys_type, central_htg_fuel, zone_htg_fuel, clg_fuel, system_zones)
                     OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{sys_type}' not recognized. Check input system type argument against Model.hvac.rb for valid hvac system type names.")
                     return false
                   end
@@ -969,8 +969,8 @@ module OpenstudioStandards
               # Add the user specified HVAC system for each story.
               # Single-zone systems will get one per zone.
               story_zone_groups.each do |zones|
-                unless OpenstudioStandards::HVAC.add_cbecs_hvac_system(model, standard, hvac_system_type, zones)
-                  OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{hvac_system_type}' not recognized. Check input system type argument against cbecs_hvac.rb in the HVAC module for valid HVAC system type names.")
+                unless OpenstudioStandards::HVAC.create_cbecs_hvac_system(model, standard, hvac_system_type, zones)
+                  OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{hvac_system_type}' not recognized. Check input system type argument against create_cbecs_hvac_system.rb in the HVAC module for valid HVAC system type names.")
                   return false
                 end
               end
@@ -989,8 +989,8 @@ module OpenstudioStandards
 
             puts "Adding #{hvac_system_type} to #{zone_names.join(', ')}"
 
-            unless OpenstudioStandards::HVAC.add_cbecs_hvac_system(model, standard, hvac_system_type, zones)
-              OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{hvac_system_type}' not recognized. Check input system type argument against cbecs_hvac.rb in the HVAC module for valid HVAC system type names.")
+            unless OpenstudioStandards::HVAC.create_cbecs_hvac_system(model, standard, hvac_system_type, zones)
+              OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "HVAC system type '#{hvac_system_type}' not recognized. Check input system type argument against create_cbecs_hvac_system.rb in the HVAC module for valid HVAC system type names.")
               return false
             end
           end

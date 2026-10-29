@@ -1,6 +1,7 @@
 class Standard
   # @!group Sizing System
 
+<<<<<<< HEAD
   # Prototype SizingSystem object
   #
   # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
@@ -68,6 +69,8 @@ class Standard
     return true
   end
 
+=======
+>>>>>>> develop
   # adjust the outdoor air sizing to the use the ventilation rate procedure
   # @todo this needs to be changed in both the sizing system and controller mechanical ventilation objects
   #
