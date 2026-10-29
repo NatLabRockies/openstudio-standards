@@ -188,19 +188,34 @@ module OpenstudioStandards
       end
 
       # creating infiltration schedules based on hvac schedule
+      # Create or get fractional schedule type limits for validation
+      schedule_type_limits = model.getScheduleTypeLimitsByName('Fractional')
+      if schedule_type_limits.empty?
+        schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
+        schedule_type_limits.setName('Fractional')
+        schedule_type_limits.setLowerLimitValue(0.0)
+        schedule_type_limits.setUpperLimitValue(1.0)
+        schedule_type_limits.setNumericType('Continuous')
+      else
+        schedule_type_limits = schedule_type_limits[0]
+      end
+
       if hvac_schedule.nil?
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Infiltration.nist_infiltration', 'Unable to determine the building HVAC schedule. Treating the building as if there is no HVAC system with outdoor air. This may be appropriate for design sizing, particularly heating design sizing. If this is not the case, input a schedule argument, or assign one to an air loop in the model.')
         on_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         on_schedule.setName('Infiltration HVAC On Schedule')
         on_schedule.setValue(0.0)
+        on_schedule.setScheduleTypeLimits(schedule_type_limits)
         off_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         off_schedule.setName('Infiltration HVAC Off Schedule')
         off_schedule.setValue(1.0)
+        off_schedule.setScheduleTypeLimits(schedule_type_limits)
       elsif hvac_schedule.to_ScheduleConstant.is_initialized
         hvac_schedule = hvac_schedule.to_ScheduleConstant.get
         on_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         on_schedule.setName('Infiltration HVAC On Schedule')
         on_schedule.setValue(hvac_schedule.value)
+        on_schedule.setScheduleTypeLimits(schedule_type_limits)
         off_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         off_schedule.setName('Infiltration HVAC Off Schedule')
         if hvac_schedule.value > 0
@@ -208,11 +223,14 @@ module OpenstudioStandards
         else
           off_schedule.setValue(1.0)
         end
+        off_schedule.setScheduleTypeLimits(schedule_type_limits)
       elsif hvac_schedule.to_ScheduleRuleset.is_initialized
         hvac_schedule = hvac_schedule.to_ScheduleRuleset.get
         on_schedule = hvac_schedule.clone.to_ScheduleRuleset.get
         on_schedule.setName('Infiltration HVAC On Schedule')
+        on_schedule.setScheduleTypeLimits(schedule_type_limits)
         off_schedule = OpenstudioStandards::Schedules.create_inverted_schedule_ruleset(hvac_schedule, schedule_name: 'Infiltration HVAC Off Schedule')
+        off_schedule.setScheduleTypeLimits(schedule_type_limits)
       end
 
       # get climate zone number
