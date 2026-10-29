@@ -197,7 +197,7 @@ module OpenstudioStandards
         schedule_type_limits.setUpperLimitValue(1.0)
         schedule_type_limits.setNumericType('Continuous')
       else
-        schedule_type_limits = schedule_type_limits[0]
+        schedule_type_limits = schedule_type_limits.get
       end
 
       if hvac_schedule.nil?
