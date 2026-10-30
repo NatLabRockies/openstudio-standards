@@ -1800,7 +1800,11 @@ module OpenstudioStandards
     # @param fan_efficiency [Double] fan total efficiency, including motor and impeller
     # @param fan_motor_efficiency [Double] fan motor efficiency
     # @param fan_pressure_rise [Double] fan pressure rise, inH2O
-    # @param min_sys_airflow_ratio [Double] minimum system airflow ratio
+    # @param min_sys_airflow_ratio [Double, Symbol] central heating maximum system air flow ratio, the
+    #   fraction of the cooling design flow the central heating coil is sized to heat. Defaults to
+    #   :autosize, which lets EnergyPlus derive it from the zones' heating design flows - the airflow
+    #   the terminals pass in heating once minimum outdoor air is counted. Pass a number to pin it;
+    #   the DOE prototypes pin 0.3. See set_air_loop_system_sizing.
     # @param vav_sizing_option [String] air system sizing option, Coincident or NonCoincident
     # @param econo_ctrl_mthd [String] economizer control type
     # @return [OpenStudio::Model::AirLoopHVAC] the resulting VAV air loop
@@ -1817,7 +1821,7 @@ module OpenstudioStandards
                                   fan_efficiency: 0.62,
                                   fan_motor_efficiency: 0.9,
                                   fan_pressure_rise: 4.0,
-                                  min_sys_airflow_ratio: 0.3,
+                                  min_sys_airflow_ratio: :autosize,
                                   vav_sizing_option: 'Coincident',
                                   econo_ctrl_mthd: nil)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding VAV system for #{thermal_zones.size} zones.")
@@ -1842,14 +1846,7 @@ module OpenstudioStandards
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
-      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
-      if !min_sys_airflow_ratio.nil?
-        if model.version < OpenStudio::VersionString.new('2.7.0')
-          sizing_system.setMinimumSystemAirFlowRatio(min_sys_airflow_ratio)
-        else
-          sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(min_sys_airflow_ratio)
-        end
-      end
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: min_sys_airflow_ratio)
       sizing_system.setSizingOption(vav_sizing_option) unless vav_sizing_option.nil?
       unless hot_water_loop.nil?
         hw_temp_c = hot_water_loop.sizingPlant.designLoopExitTemperature
@@ -2067,7 +2064,8 @@ module OpenstudioStandards
                                      oa_damper_sch: nil,
                                      fan_efficiency: 0.62,
                                      fan_motor_efficiency: 0.9,
-                                     fan_pressure_rise: 4.0)
+                                     fan_pressure_rise: 4.0,
+                                     min_sys_airflow_ratio: :autosize)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding VAV with PFP Boxes and Reheat system for #{thermal_zones.size} zones.")
 
       # create air handler
@@ -2090,7 +2088,7 @@ module OpenstudioStandards
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
-      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: min_sys_airflow_ratio)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2202,7 +2200,8 @@ module OpenstudioStandards
                             electric_reheat: false,
                             hvac_op_sch: nil,
                             oa_damper_sch: nil,
-                            econo_ctrl_mthd: nil)
+                            econo_ctrl_mthd: nil,
+                            min_sys_airflow_ratio: :autosize)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding Packaged VAV for #{thermal_zones.size} zones.")
 
       # create air handler
@@ -2237,7 +2236,7 @@ module OpenstudioStandards
       end
 
       # default design settings used across all air loops
-      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: min_sys_airflow_ratio)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
@@ -2404,7 +2403,8 @@ module OpenstudioStandards
                                       oa_damper_sch: nil,
                                       fan_efficiency: 0.62,
                                       fan_motor_efficiency: 0.9,
-                                      fan_pressure_rise: 4.0)
+                                      fan_pressure_rise: 4.0,
+                                      min_sys_airflow_ratio: :autosize)
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.Model.Model', "Adding PVAV with PFP Boxes and Reheat system for #{thermal_zones.size} zones.")
 
       # create air handler
@@ -2427,7 +2427,7 @@ module OpenstudioStandards
 
       # default design temperatures and settings used across all air loops
       dsgn_temps = OpenstudioStandards::HVAC.standard_air_loop_design_sizing_temperatures
-      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps)
+      sizing_system = OpenstudioStandards::HVAC.set_air_loop_system_sizing(air_loop, dsgn_temps, minimum_system_airflow_ratio: min_sys_airflow_ratio)
 
       # air handler controls
       sa_temp_sch = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(model,
