@@ -29,13 +29,17 @@ module OpenstudioStandards
     # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
     # @param design_temperatures [Hash] a hash of design temperature lookups from standard_air_loop_design_sizing_temperatures
     # @param type_of_load_sizing [String] type of load to size on
-    # @param minimum_system_airflow_ratio [Double] minimum system airflow ratio, between 0 and 1
+    # @param minimum_system_airflow_ratio [Double, Symbol, nil] central heating maximum system air flow ratio, the
+    #   fraction of the cooling design flow the central heating coil is sized to heat. Defaults to
+    #   :autosize (nil is treated the same), which lets EnergyPlus derive it from the zones' heating design flows - the airflow
+    #   the terminals pass in heating once minimum outdoor air is counted. Pass a number to pin it;
+    #   the DOE prototypes pin 0.3.
     # @param sizing_option [String] sizing option. Options are 'Coincident' and 'NonCoincident'
     # @return [OpenStudio::Model::SizingSystem] sizing system object
     def self.set_air_loop_system_sizing(air_loop_hvac,
                                         design_temperatures,
                                         type_of_load_sizing: 'Sensible',
-                                        minimum_system_airflow_ratio: 0.3,
+                                        minimum_system_airflow_ratio: :autosize,
                                         sizing_option: 'Coincident')
       # adjust sizing system defaults
       sizing_system = air_loop_hvac.sizingSystem
@@ -49,10 +53,12 @@ module OpenstudioStandards
       sizing_system.setPrecoolDesignHumidityRatio(0.008)
       sizing_system.setCentralCoolingDesignSupplyAirHumidityRatio(0.0085)
       sizing_system.setCentralHeatingDesignSupplyAirHumidityRatio(0.0080)
-      if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.7.0')
-        sizing_system.setMinimumSystemAirFlowRatio(minimum_system_airflow_ratio)
-      else
-        sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(minimum_system_airflow_ratio)
+      if !minimum_system_airflow_ratio.nil? && minimum_system_airflow_ratio != :autosize
+        if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.7.0')
+          sizing_system.setMinimumSystemAirFlowRatio(minimum_system_airflow_ratio)
+        else
+          sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(minimum_system_airflow_ratio)
+        end
       end
       sizing_system.setSizingOption(sizing_option)
       sizing_system.setAllOutdoorAirinCooling(false)
