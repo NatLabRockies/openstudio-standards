@@ -1,0 +1,26 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "QuickServiceRestaurant (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "QuickServiceRestaurant",
+  "space_type_ratios": [
+    {
+      "space_type": "food preparation",
+      "ratio": 0.5
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.5,
+      "default": true
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 2500.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 1.0,
+    "wwr": 0.18,
+    "floor_height": 10.0,
+    "perim_mult": 1.0
+  }
+}

@@ -557,11 +557,54 @@ module OpenstudioStandards
       if sch_name.nil?
         sch_name = "#{thermal_zone.name} Occ Sch"
       end
+      continuous = OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation_schedule([thermal_zone], sch_name, occupied_percentage_threshold)
+      return continuous unless continuous.nil?
+
       # Get the occupancy schedule for all spaces in thermal_zone
       sch_ruleset = OpenstudioStandards::Space.spaces_get_occupancy_schedule(thermal_zone.spaces,
                                                                              sch_name: sch_name,
                                                                              occupied_percentage_threshold: occupied_percentage_threshold)
       return sch_ruleset
+    end
+
+    # The space types among the zones' spaces whose systems run regardless of occupancy.
+    #
+    # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of OpenStudio ThermalZone objects
+    # @return [Array<String>] the names of the flagged space types, empty when there are none
+    def self.thermal_zones_critical_operation_space_types(thermal_zones)
+      space_types = thermal_zones.flat_map { |zone| zone.spaces.filter_map { |space| space.spaceType.is_initialized ? space.spaceType.get : nil } }
+      space_types.uniq { |space_type| space_type.handle.to_s }
+                 .select { |space_type| OpenstudioStandards::SpaceType.space_type_critical_operation?(space_type) }
+                 .map { |space_type| space_type.name.to_s }
+    end
+
+    # An always-on operation schedule for zones that serve a critical operation space type,
+    # in place of the thresholded occupancy schedule.
+    #
+    # An on/off schedule derived from an occupancy fraction says when a system may shut
+    # down. A patient floor may not: it is occupied around the clock by a few people and
+    # its ventilation is a code requirement, not a function of how many are there. Its
+    # occupancy fraction also sits close to any threshold, so the derived schedule flips
+    # with small changes elsewhere on the loop - a cafeteria joining a hospital's patient
+    # floor loop cost that floor fourteen hours a day of HVAC and outdoor air. Only the
+    # thresholded form is replaced: a fractional occupancy schedule is a load profile, not
+    # an operation schedule.
+    #
+    # @param thermal_zones [Array<OpenStudio::Model::ThermalZone>] array of OpenStudio ThermalZone objects
+    # @param sch_name [String] the name for the schedule
+    # @param occupied_percentage_threshold [Double, nil] the threshold the caller asked for; nil returns nil
+    # @return [OpenStudio::Model::ScheduleRuleset, nil] an always-on schedule, or nil when no zone is flagged
+    def self.thermal_zones_continuous_operation_schedule(thermal_zones, sch_name, occupied_percentage_threshold)
+      return nil if occupied_percentage_threshold.nil? || thermal_zones.empty?
+
+      critical = OpenstudioStandards::ThermalZone.thermal_zones_critical_operation_space_types(thermal_zones)
+      return nil if critical.empty?
+
+      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ThermalZone',
+                         "#{sch_name} is always on: the zones serve #{critical.join(', ')}, whose systems run regardless of occupancy.")
+      OpenstudioStandards::Schedules.create_constant_schedule_ruleset(thermal_zones.first.model, 1.0,
+                                                                      name: sch_name,
+                                                                      schedule_type_limit: 'Fractional')
     end
 
     # This method creates a new fractional schedule ruleset.
@@ -579,6 +622,9 @@ module OpenstudioStandards
       if sch_name.nil?
         sch_name = "#{thermal_zones.size} zone Occ Sch"
       end
+      continuous = OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation_schedule(thermal_zones, sch_name, occupied_percentage_threshold)
+      return continuous unless continuous.nil?
+
       # Get the occupancy schedule for all spaces in thermal_zones
       spaces = []
       thermal_zones.each do |thermal_zone|

@@ -1,0 +1,64 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "SuperMarket (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "SuperMarket",
+  "space_type_ratios": [
+    {
+      "space_type": "retail",
+      "ratio": 0.7733,
+      "default": true
+    },
+    {
+      "space_type": "storage",
+      "ratio": 0.101
+    },
+    {
+      "space_type": "food preparation",
+      "ratio": 0.05
+    },
+    {
+      "space_type": "restroom",
+      "ratio": 0.015,
+      "default": true
+    },
+    {
+      "space_type": "electrical/mechanical",
+      "ratio": 0.0133,
+      "default": true
+    },
+    {
+      "space_type": "corridor",
+      "ratio": 0.0118,
+      "default": true
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.0111,
+      "default": true
+    },
+    {
+      "space_type": "conference/meeting/multipurpose",
+      "ratio": 0.0111,
+      "default": true
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.0067,
+      "default": true
+    },
+    {
+      "space_type": "office",
+      "ratio": 0.0067
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 45002.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 1.5,
+    "wwr": 0.11,
+    "floor_height": 20.0,
+    "perim_mult": 1.0
+  }
+}

@@ -77,4 +77,33 @@ class TestAddFFactorFloor < CreateDOEPrototypeBuildingTest
 
   end
 
+  # A template whose construction_sets table has no row for the building type - a DEER template
+  # under an ASHRAE building type, which is how a ComStock DEER model is built - used to leave
+  # every ground floor on an uninsulated slab, because this method returns before doing anything
+  # when that row is missing. The building category is the only field it takes from the row, and
+  # a construction spec states it per surface, so it can be passed in instead.
+  def test_model_set_floor_constructions_with_an_explicit_building_category
+    osm_path = "#{File.dirname(__FILE__)}/models/SmallOffice_FFactor_Test.osm"
+    standard = Standard.build('90.1-2004')
+    climate_zone = 'ASHRAE 169-2013-1A'
+
+    # no construction_sets row for this building type: nothing happens, as before
+    without = BTAP::FileIO.load_osm(osm_path)
+    refute(standard.model_set_floor_constructions(without, 'NotABuildingType', climate_zone))
+    assert_empty(without.getFFactorGroundFloorConstructions)
+
+    # with the category stated, the assembly is found and applied
+    with = BTAP::FileIO.load_osm(osm_path)
+    assert(standard.model_set_floor_constructions(with, 'NotABuildingType', climate_zone, building_category: 'Nonresidential'))
+    refute_empty(with.getFFactorGroundFloorConstructions)
+
+    # and they are the assemblies the building type's own row selects, one per space
+    from_row = BTAP::FileIO.load_osm(osm_path)
+    assert(standard.model_set_floor_constructions(from_row, 'SmallOffice', climate_zone))
+    names = ->(model) { model.getFFactorGroundFloorConstructions.map { |c| c.name.get }.sort }
+    assert_equal(names.call(from_row), names.call(with))
+    assert_equal(from_row.getFFactorGroundFloorConstructions.map { |c| c.fFactor.round(6) }.sort,
+                 with.getFFactorGroundFloorConstructions.map { |c| c.fFactor.round(6) }.sort)
+  end
+
 end

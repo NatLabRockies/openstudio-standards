@@ -276,6 +276,19 @@ class TestSpace < Minitest::Test
 
     assert_in_delta(@sch.schedule_ruleset_get_equivalent_full_load_hours(occ_sch_fracs), 2290.15, 0.01)
 
+    # A fraction within the tolerance below its threshold counts as occupied: the hourly
+    # fractions here are exactly 0.25 and 0.5, so a threshold of 0.253 sits on the edge.
+    # An exact comparison would turn the 0.25 hours off; the default tolerance keeps them.
+    on_edge = @space.spaces_get_occupancy_schedule([space1,space2], sch_name: 'test occupancy edge', occupied_percentage_threshold: 0.253, threshold_calc_method: nil)
+    edge_vals = @sch.schedule_day_get_hourly_values(on_edge.getDaySchedules(OpenStudio::Date.new('2018-Apr-10'),OpenStudio::Date.new('2018-Apr-10')).first)
+    assert_equal(6, edge_vals.index(1.0), 'the 0.25 hours should count as occupied against 0.253')
+    exact = @space.spaces_get_occupancy_schedule([space1,space2], sch_name: 'test occupancy exact', occupied_percentage_threshold: 0.253, threshold_calc_method: nil, threshold_tolerance: 0.0)
+    exact_vals = @sch.schedule_day_get_hourly_values(exact.getDaySchedules(OpenStudio::Date.new('2018-Apr-10'),OpenStudio::Date.new('2018-Apr-10')).first)
+    assert_equal(8, exact_vals.index(1.0), 'with no tolerance the 0.25 hours are unoccupied')
+    beyond = @space.spaces_get_occupancy_schedule([space1,space2], sch_name: 'test occupancy beyond', occupied_percentage_threshold: 0.26, threshold_calc_method: nil)
+    beyond_vals = @sch.schedule_day_get_hourly_values(beyond.getDaySchedules(OpenStudio::Date.new('2018-Apr-10'),OpenStudio::Date.new('2018-Apr-10')).first)
+    assert_equal(8, beyond_vals.index(1.0), 'a fraction more than the tolerance below the threshold is unoccupied')
+
     # not normalized
     occ_sch_values = @space.spaces_get_occupancy_schedule([space1,space2], sch_name: 'test occupancy threshold', occupied_percentage_threshold: 0.3, threshold_calc_method: nil)
     # puts "Un-normalized: #{occ_sch_values.scheduleRules.size} Schedule Rules"

@@ -251,7 +251,7 @@ module OpenstudioStandards
       default_data_array.delete_at(0)
       default_data_array.each do |data_pair|
         hour = data_pair[0].truncate
-        min = ((data_pair[0] - hour) * 60).to_i
+        min = ((data_pair[0] - hour) * 60).round
         default_day.addValue(OpenStudio::Time.new(0, hour, min, 0), data_pair[1])
       end
 
@@ -273,6 +273,8 @@ module OpenstudioStandards
           rule.setApplyThursday(true) if days.include? 'Thu'
           rule.setApplyFriday(true) if days.include? 'Fri'
           rule.setApplySaturday(true) if days.include? 'Sat'
+          rule.setApplyWeekdays(true) if days.include? 'Wkdy'
+          rule.setApplyWeekends(true) if days.include? 'Wknd'
           day_schedule = rule.daySchedule
           day_schedule.setName("#{sch_ruleset.name} #{data_array[0]}")
           data_array.delete_at(0)
@@ -390,16 +392,17 @@ module OpenstudioStandards
       sch_ruleset = OpenStudio::Model::ScheduleRuleset.new(model)
       sch_ruleset.setName(sch_name)
 
-      # create winter design day profile
-      winter_dsn_day = OpenStudio::Model::ScheduleDay.new(model)
-      sch_ruleset.setWinterDesignDaySchedule(winter_dsn_day)
+      # create winter design day profile - from the ruleset's own getter, as in
+      # create_simple_schedule, so no parentless day schedule is left behind by the clone
+      sch_ruleset.setWinterDesignDaySchedule(sch_ruleset.winterDesignDaySchedule)
       winter_dsn_day = sch_ruleset.winterDesignDaySchedule
+      winter_dsn_day.clearValues
       winter_dsn_day.setName("#{sch_ruleset.name} Winter Design Day")
 
       # create  summer design day profile
-      summer_dsn_day = OpenStudio::Model::ScheduleDay.new(model)
-      sch_ruleset.setSummerDesignDaySchedule(summer_dsn_day)
+      sch_ruleset.setSummerDesignDaySchedule(sch_ruleset.summerDesignDaySchedule)
       summer_dsn_day = sch_ruleset.summerDesignDaySchedule
+      summer_dsn_day.clearValues
       summer_dsn_day.setName("#{sch_ruleset.name} Summer Design Day")
 
       # create default profile
@@ -550,24 +553,36 @@ module OpenstudioStandards
         new_schedule.setName(schedule_name)
       end
 
+      # The design day setters CLONE the day schedule they are handed, so a day schedule
+      # built first and handed over is left in the model with no parent once the clone
+      # becomes the real child - and orphaned day schedules reach the IDF with no schedule
+      # type limits. As in create_simple_schedule: set the design day from the ruleset's
+      # own getter, take the clone back, and fill that.
       # change summer design day
-      new_summer_dd_schedule = OpenstudioStandards::Schedules.create_inverted_schedule_day(schedule_ruleset.summerDesignDaySchedule)
-      new_schedule.setSummerDesignDaySchedule(new_summer_dd_schedule)
+      new_schedule.setSummerDesignDaySchedule(new_schedule.summerDesignDaySchedule)
+      new_summer_dd_schedule = new_schedule.summerDesignDaySchedule
+      new_summer_dd_schedule.clearValues
+      OpenstudioStandards::Schedules.create_inverted_schedule_day(schedule_ruleset.summerDesignDaySchedule,
+                                                                  new_schedule_day: new_summer_dd_schedule)
 
       # change winter design day
-      new_winter_dd_schedule = OpenstudioStandards::Schedules.create_inverted_schedule_day(schedule_ruleset.winterDesignDaySchedule)
-      new_schedule.setWinterDesignDaySchedule(new_winter_dd_schedule)
+      new_schedule.setWinterDesignDaySchedule(new_schedule.winterDesignDaySchedule)
+      new_winter_dd_schedule = new_schedule.winterDesignDaySchedule
+      new_winter_dd_schedule.clearValues
+      OpenstudioStandards::Schedules.create_inverted_schedule_day(schedule_ruleset.winterDesignDaySchedule,
+                                                                  new_schedule_day: new_winter_dd_schedule)
 
       # change the default day values
       OpenstudioStandards::Schedules.create_inverted_schedule_day(schedule_ruleset.defaultDaySchedule,
                                                                   new_schedule_day: new_schedule.defaultDaySchedule)
 
-      # change for schedule rules
+      # change for schedule rules: a rule made on the ruleset owns its day schedule from the
+      # start, so fill that rather than handing the constructor one to clone
       schedule_ruleset.scheduleRules.each_with_index do |rule, i|
         old_schedule_day = rule.daySchedule
-        new_schedule_day = OpenstudioStandards::Schedules.create_inverted_schedule_day(old_schedule_day)
-
-        new_rule = OpenStudio::Model::ScheduleRule.new(new_schedule, new_schedule_day)
+        new_rule = OpenStudio::Model::ScheduleRule.new(new_schedule)
+        new_schedule_day = OpenstudioStandards::Schedules.create_inverted_schedule_day(old_schedule_day,
+                                                                                       new_schedule_day: new_rule.daySchedule)
         new_rule.setName("#{new_schedule_day.name} Rule")
         new_rule.setApplySunday(rule.applySunday)
         new_rule.setApplyMonday(rule.applyMonday)

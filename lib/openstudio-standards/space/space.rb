@@ -419,8 +419,12 @@ module OpenstudioStandards
     #   normalized_annual_range evaluates each value against the min/max range for the year
     #   normalized_daily_range evaluates each value against the min/max range for the day.
     #   The goal is a dynamic threshold that calibrates each day.
+    # @param threshold_tolerance [Double] a fraction this close below the threshold still counts as
+    #   occupied. Thresholds are stated to two decimals and the fractions are people-weighted sums
+    #   that carry rounding, so an exact comparison flips hours on noise; half of the last stated
+    #   decimal is the default.
     # @return [<OpenStudio::Model::ScheduleRuleset>] a ScheduleRuleset of fractional or discrete occupancy
-    def self.spaces_get_occupancy_schedule(spaces, sch_name: nil, occupied_percentage_threshold: nil, threshold_calc_method: 'value')
+    def self.spaces_get_occupancy_schedule(spaces, sch_name: nil, occupied_percentage_threshold: nil, threshold_calc_method: 'value', threshold_tolerance: 0.005)
       if spaces.empty?
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.space', 'Empty spaces array passed to spaces_get_occupancy_schedule method.')
         return false
@@ -491,7 +495,9 @@ module OpenstudioStandards
 
       # if design occupancy is zero, return zero schedule
       if total_design_occ.zero?
-        schedule_ruleset = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(spaces[0].model, 0.0, name: sch_name)
+        schedule_ruleset = OpenstudioStandards::Schedules.create_constant_schedule_ruleset(spaces[0].model, 0.0,
+                                                                                           name: sch_name,
+                                                                                           schedule_type_limit: 'Fractional')
         return schedule_ruleset
       end
 
@@ -506,6 +512,11 @@ module OpenstudioStandards
 
       # If occupied_percentage_threshold is specified, schedule values are boolean
       # Otherwise use the actual spaces_occ_frac
+      # A fraction within the tolerance below its threshold counts as occupied: the sums
+      # carry rounding, and an hour that sits at the threshold should not flip off because
+      # a load elsewhere in the building moved its share by a thousandth.
+      tolerance = threshold_tolerance.to_f
+      occupied = ->(day_val, threshold) { day_val + tolerance >= threshold ? 1 : 0 }
       if occupied_percentage_threshold.nil?
         occ_status_vals = daily_combined_occ_fracs
       elsif threshold_calc_method == 'normalized_daily_range'
@@ -515,7 +526,7 @@ module OpenstudioStandards
         # normalize threshold to daily min/max values
         daily_normalized_thresholds = daily_min_vals.zip(daily_max_vals).map { |min_max| min_max[0] + ((min_max[1] - min_max[0]) * occupied_percentage_threshold) }
         # if daily occ frac exceeds daily normalized threshold, set value to 1
-        occ_status_vals = daily_combined_occ_fracs.each_with_index.map { |day_array, i| day_array.map { |day_val| !day_val.zero? && day_val >= daily_normalized_thresholds[i] ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.each_with_index.map { |day_array, i| day_array.map { |day_val| day_val.zero? ? 0 : occupied.call(day_val, daily_normalized_thresholds[i]) } }
       elsif threshold_calc_method == 'normalized_annual_range'
         # calculate annual min/max values
         annual_max = daily_combined_occ_fracs.max_by(&:max).max
@@ -523,9 +534,9 @@ module OpenstudioStandards
         # normalize threshold to annual min/max
         annual_normalized_threshold = annual_min + ((annual_max - annual_min) * occupied_percentage_threshold)
         # if vals exceed threshold, set val to 1
-        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| day_val >= annual_normalized_threshold ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| occupied.call(day_val, annual_normalized_threshold) } }
       else # threshold_calc_method == 'value'
-        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| day_val >= occupied_percentage_threshold ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| occupied.call(day_val, occupied_percentage_threshold) } }
       end
 
       # get unique daily profiles for weekdays, saturdays and sundays
@@ -547,6 +558,15 @@ module OpenstudioStandards
       # create schedule
       schedule_ruleset = OpenStudio::Model::ScheduleRuleset.new(spaces[0].model)
       schedule_ruleset.setName(sch_name.to_s)
+      # State the type limits. This schedule is not assigned to a typed slot on a load or a
+      # default schedule set -- it is built for hours-of-operation inference, elevator
+      # schedules and the like -- so nothing else stamps them, and EnergyPlus warns
+      # "Schedule Type Limits Name is empty ... Schedule will not be validated" for this
+      # schedule, each of its design day profiles, and every rule day it goes on to create.
+      # Setting them on the ruleset reaches all of its day schedules.
+      schedule_ruleset.setScheduleTypeLimits(
+        OpenstudioStandards::Schedules.create_schedule_type_limits(spaces[0].model, standard_schedule_type_limit: 'Fractional')
+      )
       # add properties to schedule
       props = schedule_ruleset.additionalProperties
       props.setFeature('max_occ_in_spaces', total_design_occ)

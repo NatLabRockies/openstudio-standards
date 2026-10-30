@@ -19,6 +19,7 @@ module OpenstudioStandards
       end
       cases_tbl = CSV.table(cases_csv, encoding: 'ISO8859-1:utf-8')
       cases_hsh = cases_tbl.map(&:to_hash)
+      tagged_names = OpenstudioStandards::Refrigeration.refrigeration_tagged_names(cases_hsh)
 
       # Look for one of the space types that would typically have refrigeration
       display_case_zone = nil
@@ -33,7 +34,7 @@ module OpenstudioStandards
 
         stds_spc_type = space_type.standardsSpaceType.get
         stds_bldg_type = space_type.standardsBuildingType.get
-        cases = cases_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
+        cases = cases_hsh.select { |r| OpenstudioStandards::Refrigeration.refrigeration_record_applies?(r, stds_spc_type, stds_bldg_type, tagged_names: tagged_names) }
         unless cases.empty?
           if zone.floorArea > display_case_zone_area_m2
             display_case_zone = zone
@@ -80,6 +81,7 @@ module OpenstudioStandards
       end
       walkins_tbl = CSV.table(walkins_csv, encoding: 'ISO8859-1:utf-8')
       walkins_hsh = walkins_tbl.map(&:to_hash)
+      tagged_names = OpenstudioStandards::Refrigeration.refrigeration_tagged_names(walkins_hsh)
 
       # Look for one of the space types that would typically have walkins
       walkin_zone = nil
@@ -94,7 +96,7 @@ module OpenstudioStandards
 
         stds_spc_type = space_type.standardsSpaceType.get
         stds_bldg_type = space_type.standardsBuildingType.get
-        walkins = walkins_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
+        walkins = walkins_hsh.select { |r| OpenstudioStandards::Refrigeration.refrigeration_record_applies?(r, stds_spc_type, stds_bldg_type, tagged_names: tagged_names) }
         unless walkins.empty?
           if zone.floorArea > walkin_zone_area_m2
             walkin_zone = zone

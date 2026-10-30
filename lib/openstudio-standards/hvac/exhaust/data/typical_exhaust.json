@@ -1,89 +1,150 @@
 {
+  "notes": [
+    "exhaust_per_area is cfm/ft2 of the space type's floor area.",
+    "The legacy space_type/building_type keys are DOE prototype names and are KEPT: prototype models set standardsSpaceType to those names, and dropping them would strip exhaust from every prototype build.",
+    "all_level_space_types crosswalks each record onto the all-level space type taxonomy, which is what create_typical builds from. Only one record carries a given all-level name, so the lookup is deterministic.",
+    "Records with an empty all_level_space_types carry all_level_exclusion_reason. Two reasons appear: the all-level taxonomy has no name specific enough to hold the rate without spreading it over unrelated space (Anesthesia, Soil Work), or another record already owns the all-level name (the duplicate kitchens, MRI_Control, Toilet)."
+  ],
   "space_types": [
     {
       "space_type": "Kitchen",
       "building_type": "FullServiceRestaurant",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [
+        "food preparation"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Kitchen",
       "building_type": "Hospital",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "FullServiceRestaurant Kitchen owns 'food preparation'; all six Kitchen records carry the same 0.7 cfm/ft2, so the choice among them is immaterial."
     },
     {
       "space_type": "Kitchen",
       "building_type": "LargeHotel",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "FullServiceRestaurant Kitchen owns 'food preparation'."
     },
     {
       "space_type": "Laundry",
       "building_type": "LargeHotel",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [
+        "laundry/washing"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Anesthesia",
       "building_type": "Outpatient",
-      "exhaust_per_area": "1.3333"
+      "exhaust_per_area": "1.3333",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "The nearest all-level name is 'exam/treatment', which is the general clinical space of every hospital and outpatient building. An anesthesia room's 1.3333 cfm/ft2 applied to all of it would add exhaust to ordinary exam rooms that have never had any."
     },
     {
       "space_type": "MRI",
       "building_type": "Outpatient",
-      "exhaust_per_area": "1.0"
+      "exhaust_per_area": "1.0",
+      "all_level_space_types": [
+        "imaging"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "MRI_Control",
       "building_type": "Outpatient",
-      "exhaust_per_area": "1.0"
+      "exhaust_per_area": "1.0",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "MRI owns 'imaging'; both records carry 1.0 cfm/ft2."
     },
     {
       "space_type": "Soil Work",
       "building_type": "Outpatient",
-      "exhaust_per_area": "1.6666"
+      "exhaust_per_area": "1.6666",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "The all-level taxonomy has no soiled-utility name. 'storage' would be wrong, and no other name is specific enough."
     },
     {
       "space_type": "Toilet",
       "building_type": "Outpatient",
-      "exhaust_per_area": "1.6666"
+      "exhaust_per_area": "1.6666",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "SmallHotel PublicRestroom owns 'restroom' at the lower 1.14 cfm/ft2. Outpatient restrooms lose 0.53 cfm/ft2 relative to the prototype path."
     },
     {
       "space_type": "Kitchen",
       "building_type": "PrimarySchool",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [
+        "food preparation - primary school"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Restroom",
       "building_type": "PrimarySchool",
-      "exhaust_per_area": "0.29"
+      "exhaust_per_area": "0.29",
+      "all_level_space_types": [
+        "restroom - primary school"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Kitchen",
       "building_type": "QuickServiceRestaurant",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [],
+      "all_level_exclusion_reason": "FullServiceRestaurant Kitchen owns 'food preparation'."
     },
     {
       "space_type": "Kitchen",
       "building_type": "SecondarySchool",
-      "exhaust_per_area": "0.7"
+      "exhaust_per_area": "0.7",
+      "all_level_space_types": [
+        "food preparation - secondary school"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Restroom",
       "building_type": "SecondarySchool",
-      "exhaust_per_area": "0.28"
+      "exhaust_per_area": "0.28",
+      "all_level_space_types": [
+        "restroom - secondary school"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "PublicRestroom",
       "building_type": "SmallHotel",
-      "exhaust_per_area": "1.14"
+      "exhaust_per_area": "1.14",
+      "all_level_space_types": [
+        "restroom"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Bakery",
       "building_type": "SuperMarket",
-      "exhaust_per_area": "1.24"
+      "exhaust_per_area": "1.24",
+      "all_level_space_types": [
+        "food preparation - bakery",
+        "food preparation - deli/bakery"
+      ],
+      "all_level_mapping_tier": "curated"
     },
     {
       "space_type": "Deli",
       "building_type": "SuperMarket",
-      "exhaust_per_area": "1.24"
+      "exhaust_per_area": "1.24",
+      "all_level_space_types": [
+        "food preparation - deli"
+      ],
+      "all_level_mapping_tier": "curated"
     }
   ]
 }

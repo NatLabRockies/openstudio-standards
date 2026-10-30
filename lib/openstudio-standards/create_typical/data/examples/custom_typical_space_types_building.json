@@ -1,0 +1,25 @@
+{
+  "name": "Typical Space Type Mix",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "MediumOffice",
+  "space_type_ratios": [
+    { "space_type": "office", "ratio": 0.5, "default": true },
+    { "space_type": "conference/meeting/multipurpose", "ratio": 0.15 },
+    { "space_type": "classroom/lecture/training", "ratio": 0.15 },
+    { "space_type": "corridor", "ratio": 0.1, "circ": true },
+    { "space_type": "lounge/breakroom", "ratio": 0.05 },
+    { "space_type": "restroom", "ratio": 0.05 }
+  ],
+  "form": {
+    "total_bldg_floor_area": 40000.0,
+    "num_stories_above_grade": 2
+  },
+  "schedule_overrides": [
+    { "space_type": "conference/meeting/multipurpose", "occupancy": { "base": 0.1, "peak": 0.9 } }
+  ],
+  "load_overrides": [
+    { "space_type": "classroom/lecture/training", "people": { "people_per_1000_ft2": 40.0 } }
+  ],
+  "typical_options": { "add_hvac": false }
+}

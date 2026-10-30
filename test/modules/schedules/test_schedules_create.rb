@@ -127,6 +127,10 @@ class TestSchedulesCreate < Minitest::Test
     assert(schedule['mergedSchedule'].to_ScheduleRuleset.is_initialized)
     assert(schedule['mergedSchedule'].name.to_s == 'Merged Schedule')
     assert(schedule['denominator'] == 10.0)
+    # the design day setters clone what they are handed; building the day first left it
+    # parentless in the model, reaching the IDF with no type limits
+    orphans = model.getScheduleDays.reject { |day| day.parent.is_initialized }
+    assert_empty(orphans.map { |day| day.name.to_s }, 'day schedules were left with no parent')
   end
 
   def test_create_inverted_schedule_day
@@ -158,6 +162,13 @@ class TestSchedulesCreate < Minitest::Test
     inverted_schedule = @sch.create_inverted_schedule_ruleset(schedule)
     assert(inverted_schedule.to_ScheduleRuleset.is_initialized)
     assert_equal('Test Create Simple inverted', inverted_schedule.name.to_s)
+    # every day of the source is inverted, including the design days, which are filled in
+    # place after the setter rather than built first and cloned
+    [inverted_schedule.defaultDaySchedule, inverted_schedule.summerDesignDaySchedule, inverted_schedule.winterDesignDaySchedule].each do |day|
+      assert_equal([1.0, 0.0, 1.0], day.values, "#{day.name} is not the inversion of its source")
+      assert_equal([8.0, 16.0, 24.0], day.times.map(&:totalHours))
+    end
+    refute_equal(inverted_schedule.defaultDaySchedule.handle, inverted_schedule.summerDesignDaySchedule.handle)
 
     rules = []
     rules << ['Tuesdays and Thursdays', '1/1-12/31', 'Tue/Thu', [4, 0], [4.33, 1], [18, 0], [18.66, 1], [24, 0]]
@@ -172,5 +183,15 @@ class TestSchedulesCreate < Minitest::Test
     inverted_schedule = @sch.create_inverted_schedule_ruleset(schedule)
     assert(inverted_schedule.to_ScheduleRuleset.is_initialized)
     assert_equal('Test Create Complex inverted', inverted_schedule.name.to_s)
+    assert_equal(1, inverted_schedule.scheduleRules.size)
+    rule = inverted_schedule.scheduleRules.first
+    assert_equal([1.0, 0.0, 1.0, 0.0, 1.0], rule.daySchedule.values)
+    assert(rule.applyTuesday && rule.applyThursday && !rule.applyMonday)
+    assert_equal([0.0], inverted_schedule.summerDesignDaySchedule.values)
+    assert_equal([1.0], inverted_schedule.winterDesignDaySchedule.values)
+
+    # no day schedule is built first and cloned by a setter: nothing is left parentless
+    orphans = model.getScheduleDays.reject { |day| day.parent.is_initialized }
+    assert_empty(orphans.map { |day| day.name.to_s }, 'day schedules were left with no parent')
   end
 end

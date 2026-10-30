@@ -1,0 +1,1810 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NREL/openstudio-standards/blob/master/lib/openstudio-standards/create_typical/data/custom_building_spec_schema.json",
+  "title": "Custom building specification",
+  "description": "Input specification for OpenstudioStandards::CreateTypical.create_custom_building_from_spec. Defines a custom building type as a named mix of standard space types with custom area ratios, building form, schedule overrides, internal load overrides, and thermostat setpoint overrides. Building, space type, template, and climate zone names are validated against live standards data at runtime, not by this schema.",
+  "type": "object",
+  "required": [
+    "template",
+    "climate_zone",
+    "space_type_ratios"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional reference to this schema file, enables editor autocomplete and validation."
+    },
+    "name": {
+      "type": "string",
+      "description": "Label for the custom building. Sets the Building object name and a 'custom_building_type' additional property. Does not affect standards lookups."
+    },
+    "template": {
+      "type": "string",
+      "minLength": 1,
+      "description": "OpenStudio Standards template, e.g. '90.1-2013'. Must be resolvable by Standard.build (checked at runtime).",
+      "examples": [
+        "90.1-2013",
+        "90.1-2019",
+        "ComStock 90.1-2013"
+      ]
+    },
+    "climate_zone": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ASHRAE or CEC climate zone, e.g. 'ASHRAE 169-2013-4A'.",
+      "examples": [
+        "ASHRAE 169-2013-4A"
+      ]
+    },
+    "primary_building_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Standard building type that drives building form defaults, the default construction set, residential classification, internal mass, and prototype HVAC assumptions. Must be a standard building type (checked at runtime). When omitted, the building type of the first ratio entry drives the form and the largest space type floor area drives the rest. Required when the space_type_ratios entries are typical space types (no building_type), since no building type is available to infer from.",
+      "examples": [
+        "MediumOffice",
+        "Warehouse"
+      ]
+    },
+    "space_type_ratios": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Space types making up the building and their fractions of total floor area. Ratios should sum to 1.0 (checked at runtime). Entries come in two forms that cannot be mixed within one spec: standard entries with a building_type and space_type drawn from the standards data for the template, or typical entries with only a space_type naming a typical space type from lib/openstudio-standards/space_type/data/all_level_space_types.json, which is the level-1 names plus the building-type-qualified variants (e.g. 'office', 'classroom/lecture/training', 'corridor - hospital'). Typical entries use the same space type vocabulary as schedule_overrides and load_overrides, require a top-level primary_building_type, and build internal loads from the typical lighting, equipment, and ventilation data instead of the standards space type data.",
+      "items": {
+        "$ref": "#/$defs/space_type_ratio_entry"
+      }
+    },
+    "form": {
+      "$ref": "#/$defs/form"
+    },
+    "site": {
+      "$ref": "#/$defs/site"
+    },
+    "schedule_overrides": {
+      "type": "array",
+      "description": "Runtime parametric schedule overrides, applied field-by-field over the standard parametric schedule parameters. Only used with schedule_method 'parametric' (the default).",
+      "items": {
+        "$ref": "#/$defs/schedule_override_entry"
+      }
+    },
+    "load_overrides": {
+      "type": "array",
+      "description": "Runtime internal load overrides, applied on top of the loads created from standards space type data.",
+      "items": {
+        "$ref": "#/$defs/load_override_entry"
+      }
+    },
+    "thermostat_overrides": {
+      "type": "array",
+      "description": "Runtime thermostat setpoint overrides, applied field-by-field over the setpoints the space type data supplies. Use these where a space type means something different in this building than it does in the stock at large, e.g. warehouse storage held as an unheated bulk store rather than as a conditioned storage room. An entry may also state continuous_operation, holding the systems that serve the space type always on rather than on an occupancy-derived schedule.",
+      "items": {
+        "$ref": "#/$defs/thermostat_override_entry"
+      }
+    },
+    "service_water_heating_overrides": {
+      "type": "array",
+      "description": "Runtime service water heating overrides, applied to the water use equipment a space type resolves to. Use these where a per-area draw depends on the building as much as the space: a restaurant kitchen draws 0.054 gph/ft2 and a hospital kitchen 0.009, and the all-level space type 'food preparation' cannot say which.",
+      "items": {
+        "$ref": "#/$defs/service_water_heating_override_entry"
+      }
+    },
+    "exhaust_overrides": {
+      "type": "array",
+      "description": "Runtime zone exhaust overrides, replacing the exhaust rate a space type resolves to. Use these where an all-level space type is broader than the exhaust record behind it: 'imaging' carries the outpatient MRI room's 1.0 cfm/ft2, which a hospital's radiology rooms should not necessarily inherit.",
+      "items": {
+        "$ref": "#/$defs/exhaust_override_entry"
+      }
+    },
+    "ventilation_overrides": {
+      "type": "array",
+      "description": "Runtime outdoor air ventilation overrides, replacing the rates a space type resolves to from the ventilation space type data. Fields left unnamed keep their data values. An entry applies even where the data covers the space type with nothing, which is how a space type gets ventilation the data does not give it. Applies under the typical space type load method.",
+      "items": {
+        "$ref": "#/$defs/ventilation_override_entry"
+      }
+    },
+    "occupancy_overrides": {
+      "type": "array",
+      "description": "Runtime occupancy overrides, replacing the occupant density a space type resolves to from the ventilation space type data. An entry applies even where the data gives no density, which is how a space type the data leaves empty becomes occupied. Applies under the typical space type load method.",
+      "items": {
+        "$ref": "#/$defs/occupancy_override_entry"
+      }
+    },
+    "constructions": {
+      "description": "Envelope construction types named directly, instead of taken from the primary building type row in the standards construction_sets table. That row carries no assembly properties of its own: it only selects a construction type and a building category per surface, and the assembly comes from construction_properties. Naming those here reaches the same assemblies without the building type taking part, which is what lets a building be modeled under a template whose construction_sets table has no row for it. Anything left out falls back to the building type row, so a spec may name one surface and inherit the rest. Give a bare construction spec for one envelope, or a default plus sets for a mixed-use building that carries more than one.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/construction_spec"
+        },
+        {
+          "$ref": "#/$defs/construction_set_collection"
+        }
+      ]
+    },
+    "typical_options": {
+      "type": "object",
+      "description": "Additional keyword arguments passed through to create_typical_building_from_model, e.g. {\"add_hvac\": false, \"schedule_method\": \"parametric\"}. Keys are validated at runtime against the method signature. climate_zone, primary_building_type, building_name, schedule_overrides, load_overrides, and thermostat_overrides are managed by the top-level spec keys and are not allowed here. space_type_load_method is determined from the space_type_ratios entry form and is not allowed here either."
+    }
+  },
+  "$defs": {
+    "construction_set_collection": {
+      "type": "object",
+      "description": "A default construction set plus one set per collection of space types that differs from it.",
+      "properties": {
+        "default": {
+          "$ref": "#/$defs/construction_spec",
+          "description": "The building own construction set, and the parent every entry in sets inherits from."
+        },
+        "sets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/construction_set_entry"
+          },
+          "description": "Additional sets, assigned to the space types their selectors match. Order is precedence: a space type matched by more than one entry keeps the first."
+        }
+      },
+      "required": [
+        "sets"
+      ],
+      "additionalProperties": false
+    },
+    "construction_set_entry": {
+      "type": "object",
+      "description": "One construction set and the space types it governs. Constructions resolve space type before building, so this set governs the surfaces of its spaces and the default governs everything else, which is how a mixed-use building carries more than one envelope. Anything the entry does not name comes from the default spec, then from the building type row.",
+      "properties": {
+        "building_category": {
+          "type": "string",
+          "enum": [
+            "Nonresidential",
+            "Residential",
+            "HighriseResidential",
+            "Semiheated",
+            "Adiabatic",
+            "Any"
+          ],
+          "description": "Category the construction_properties rows are looked up under, together with the construction type, for every assembly-lookup surface that does not name its own -- shorthand for surfaces.<surface>.building_category. It selects assemblies only: the residential classification and the building type row fallback follow is_residential, not this. Which values a template carries varies: ASHRAE and DOE Ref use Nonresidential, Residential and Semiheated; DEER uses Nonresidential and HighriseResidential."
+        },
+        "is_residential": {
+          "type": "boolean",
+          "description": "Whether the building is classified residential. It selects which construction_sets row the building type fallback reads, prefixes the set name with Res, and drives the residential classification downstream. It does not affect which assemblies a construction type resolves to -- that is building_category. Stated outright because the fallback infers it from a hard-coded list of ASHRAE prototype building type names, which no DEER building type matches, so a DEER hotel or apartment is otherwise always classified nonresidential."
+        },
+        "exterior_wall_type": {
+          "type": "string",
+          "enum": [
+            "Mass",
+            "Metal Building",
+            "SteelFramed",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior wall, shorthand for surfaces.exterior_wall.construction_type; the surface entry wins where both are given."
+        },
+        "exterior_roof_type": {
+          "type": "string",
+          "enum": [
+            "Attic and Other",
+            "IEAD",
+            "Mass",
+            "Metal Building",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior roof, shorthand for surfaces.exterior_roof.construction_type; the surface entry wins where both are given."
+        },
+        "exterior_floor_type": {
+          "type": "string",
+          "enum": [
+            "Mass",
+            "SteelFramed",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior floor, shorthand for surfaces.exterior_floor.construction_type; the surface entry wins where both are given."
+        },
+        "surfaces": {
+          "$ref": "#/$defs/construction_surfaces"
+        },
+        "name": {
+          "type": "string",
+          "description": "Label for this set, used in the construction set name and in log messages, e.g. residential tower."
+        },
+        "space_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Space types this set governs, matched against the space type schedule set name or its standards space type, with * matching all. Same vocabulary the override families use."
+        },
+        "building_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Standards building types this set governs, for mixed-use models whose space types carry different building types. Matched against the space type standardsBuildingType."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "space_types"
+          ]
+        },
+        {
+          "required": [
+            "building_types"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "construction_spec": {
+      "type": "object",
+      "properties": {
+        "building_category": {
+          "type": "string",
+          "enum": [
+            "Nonresidential",
+            "Residential",
+            "HighriseResidential",
+            "Semiheated",
+            "Adiabatic",
+            "Any"
+          ],
+          "description": "Category the construction_properties rows are looked up under, together with the construction type, for every assembly-lookup surface that does not name its own -- shorthand for surfaces.<surface>.building_category. It selects assemblies only: the residential classification and the building type row fallback follow is_residential, not this. Which values a template carries varies: ASHRAE and DOE Ref use Nonresidential, Residential and Semiheated; DEER uses Nonresidential and HighriseResidential."
+        },
+        "is_residential": {
+          "type": "boolean",
+          "description": "Whether the building is classified residential. It selects which construction_sets row the building type fallback reads, prefixes the set name with Res, and drives the residential classification downstream. It does not affect which assemblies a construction type resolves to -- that is building_category. Stated outright because the fallback infers it from a hard-coded list of ASHRAE prototype building type names, which no DEER building type matches, so a DEER hotel or apartment is otherwise always classified nonresidential."
+        },
+        "exterior_wall_type": {
+          "type": "string",
+          "enum": [
+            "Mass",
+            "Metal Building",
+            "SteelFramed",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior wall, shorthand for surfaces.exterior_wall.construction_type; the surface entry wins where both are given."
+        },
+        "exterior_roof_type": {
+          "type": "string",
+          "enum": [
+            "Attic and Other",
+            "IEAD",
+            "Mass",
+            "Metal Building",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior roof, shorthand for surfaces.exterior_roof.construction_type; the surface entry wins where both are given."
+        },
+        "exterior_floor_type": {
+          "type": "string",
+          "enum": [
+            "Mass",
+            "SteelFramed",
+            "WoodFramed"
+          ],
+          "description": "Standards construction type for every exterior floor, shorthand for surfaces.exterior_floor.construction_type; the surface entry wins where both are given."
+        },
+        "surfaces": {
+          "$ref": "#/$defs/construction_surfaces"
+        }
+      },
+      "additionalProperties": false
+    },
+    "exhaust_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "required": [
+        "exhaust"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "exhaust": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "exhaust_per_area"
+          ],
+          "properties": {
+            "exhaust_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Zone exhaust rate per unit floor area, cfm/ft^2. 0 removes the space type's exhaust in this building without removing it for every building that shares the space type."
+            }
+          }
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Building form arguments passed through to the bar geometry generator. All values are optional; a value of 0 (the default) means 'use the smart default for the primary building type'.",
+      "properties": {
+        "total_bldg_floor_area": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Total building floor area in ft^2. Defaults to 10000."
+        },
+        "single_floor_area": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Single floor area in ft^2. When greater than 0, overrides total_bldg_floor_area and disables custom-height bars."
+        },
+        "num_stories_above_grade": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Number of stories above grade. Defaults to 1."
+        },
+        "num_stories_below_grade": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories below grade. Defaults to 0."
+        },
+        "floor_height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Typical floor-to-floor height in ft. 0 uses the smart default for the primary building type."
+        },
+        "custom_height_bar": {
+          "type": "boolean",
+          "description": "When true (default), space types with a story_height get a dedicated custom-height bar section."
+        },
+        "building_rotation": {
+          "type": "number",
+          "description": "Building rotation in degrees from north."
+        },
+        "ns_to_ew_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "North-south to east-west aspect ratio. 0 uses the smart default for the primary building type."
+        },
+        "perim_mult": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Perimeter multiplier. 0 uses the smart default; other values must be >= 1.0."
+        },
+        "bar_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Bar width in ft. Non-zero values override the perimeter multiplier."
+        },
+        "bar_sep_dist_mult": {
+          "type": "number",
+          "description": "Bar separation distance multiplier for dual-bar buildings. Defaults to 10."
+        },
+        "wwr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Building window to wall ratio. 0 uses the smart default for the primary building type."
+        },
+        "party_wall_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of exterior wall area with an adjacent structure."
+        },
+        "party_wall_stories_north": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories with party walls on the north facade."
+        },
+        "party_wall_stories_south": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories with party walls on the south facade."
+        },
+        "party_wall_stories_east": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories with party walls on the east facade."
+        },
+        "party_wall_stories_west": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of stories with party walls on the west facade."
+        },
+        "bottom_story_ground_exposed_floor": {
+          "type": "boolean",
+          "description": "When true (default), the bottom story floor is ground exposed."
+        },
+        "top_story_exterior_exposed_roof": {
+          "type": "boolean",
+          "description": "When true (default), the top story roof is exterior exposed."
+        },
+        "story_multiplier_method": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Basements Ground Mid Top"
+          ],
+          "description": "Story multiplier method. Defaults to 'Basements Ground Mid Top'."
+        },
+        "building_height_relative_to_neighbors": {
+          "type": "number",
+          "description": "Height of this building relative to its neighbors, in ft. Negative means the neighbors are taller. Used with neighbor_height_method 'Relative'. NOT YET CONSUMED by the bar geometry generator; carried so callers have a stable slot for it once neighbor shading is implemented."
+        },
+        "neighbor_height_method": {
+          "type": "string",
+          "enum": [
+            "Absolute",
+            "Relative"
+          ],
+          "description": "How neighbor heights are specified. 'Absolute' uses the per-direction neighbor_height_* values, 'Relative' uses building_height_relative_to_neighbors. NOT YET CONSUMED by the bar geometry generator."
+        },
+        "neighbor_height_north": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height of the neighboring building to the north, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_height_south": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height of the neighboring building to the south, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_height_east": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height of the neighboring building to the east, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_height_west": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height of the neighboring building to the west, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_offset_north": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance to the neighboring building to the north, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_offset_south": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance to the neighboring building to the south, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_offset_east": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance to the neighboring building to the east, in ft. NOT YET CONSUMED."
+        },
+        "neighbor_offset_west": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance to the neighboring building to the west, in ft. NOT YET CONSUMED."
+        },
+        "make_mid_story_surfaces_adiabatic": {
+          "type": "boolean",
+          "description": "When true (default), mid-story floor/ceiling surfaces are adiabatic instead of intersected and matched."
+        },
+        "bar_division_method": {
+          "type": "string",
+          "enum": [
+            "Multiple Space Types - Simple Sliced",
+            "Multiple Space Types - Individual Stories Sliced",
+            "Single Space Type - Core and Perimeter"
+          ],
+          "description": "How the bar is divided into spaces. Defaults to 'Multiple Space Types - Individual Stories Sliced'."
+        },
+        "double_loaded_corridor": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Primary Space Type"
+          ],
+          "description": "Double-loaded corridor placement. Defaults to 'Primary Space Type', which sandwiches a circ-flagged space type between default-flagged space types."
+        },
+        "space_type_sort_logic": {
+          "type": "string",
+          "enum": [
+            "Size",
+            "Building Type > Size"
+          ],
+          "description": "Order in which space types are laid out along the bar. Defaults to 'Building Type > Size'."
+        },
+        "building_form_defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Form default values that override the built-in lookup for the primary building type. Required when primary_building_type is not a standard building type and the corresponding form arguments are left at 0.",
+          "properties": {
+            "aspect_ratio": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Default north-south to east-west aspect ratio."
+            },
+            "wwr": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Default window to wall ratio."
+            },
+            "typical_story": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Default typical story height in ft."
+            },
+            "first_story": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Default first story height in ft, for building types with a taller ground floor."
+            },
+            "perim_mult": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Default perimeter multiplier."
+            }
+          }
+        }
+      }
+    },
+    "load_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "people": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "people_per_1000_ft2": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Occupant density in people per 1000 ft^2. By default this sets the design occupancy level; see keep_standard_design_level."
+            },
+            "keep_standard_design_level": {
+              "type": "boolean",
+              "description": "When true, keep the design occupancy level from the standard input and instead adjust the space type's occupancy schedule peak so the peak occupancy (design level * peak schedule value) matches people_per_1000_ft2. Only takes effect with the parametric schedule method. When false or omitted, people_per_1000_ft2 sets the design occupancy level and the schedule is not adjusted."
+            }
+          }
+        },
+        "lighting": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "w_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Lighting power density in W/ft^2."
+            },
+            "w_per_person": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Lighting power in W/person."
+            }
+          }
+        },
+        "electric_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "w_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Electric equipment power density in W/ft^2."
+            }
+          }
+        },
+        "gas_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "btu_per_hr_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Gas equipment power density in Btu/hr per ft^2."
+            }
+          }
+        },
+        "ventilation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cfm_per_person": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air flow per person in cfm."
+            },
+            "cfm_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air flow per floor area in cfm/ft^2."
+            },
+            "ach": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air flow in air changes per hour."
+            }
+          }
+        }
+      }
+    },
+    "occupancy_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "required": [
+        "occupancy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "occupancy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "people_per_1000_ft2"
+          ],
+          "properties": {
+            "people_per_1000_ft2": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Occupant density, people per 1000 ft^2. 0 leaves the space type unoccupied."
+            }
+          }
+        }
+      }
+    },
+    "schedule_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "occupancy": {
+          "$ref": "#/$defs/schedule_override_section"
+        },
+        "lighting": {
+          "$ref": "#/$defs/schedule_override_section"
+        },
+        "electric_equipment": {
+          "$ref": "#/$defs/schedule_override_section"
+        },
+        "gas_equipment": {
+          "$ref": "#/$defs/schedule_override_section"
+        },
+        "hot_water_equipment": {
+          "$ref": "#/$defs/schedule_override_section"
+        }
+      }
+    },
+    "schedule_override_section": {
+      "type": "object",
+      "description": "Parametric schedule parameter overrides for one load. Common fields are base and peak (schedule fraction values) or base_peak_ratio, each with a weekend counterpart; any parametric expansion or derivation parameter accepted by the schedules module may be supplied.",
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "description": "Name of the schedule to use for this load, from the category's schedule data, replacing the one the space type's schedule set names. A schedule set that names none for a load leaves that load unscheduled and its objects are removed; naming one here is how an otherwise unoccupied space type gets occupancy."
+        },
+        "base": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Schedule fraction outside operating hours."
+        },
+        "peak": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Schedule fraction at peak occupancy."
+        },
+        "base_peak_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "The base as a fraction of the peak, for callers holding a ratio rather than an absolute. A base-to-peak ratio is usually what is sampled, because peak varies by space type and no single absolute base expresses the same ratio across a whole building. Ignored when base is also given."
+        },
+        "wknd_base": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Schedule fraction outside operating hours on Saturday and Sunday. Falls back to base."
+        },
+        "wknd_peak": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Schedule fraction at peak occupancy on Saturday and Sunday. Falls back to peak."
+        },
+        "wknd_base_peak_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "The base as a fraction of the peak on Saturday and Sunday. Falls back to base_peak_ratio."
+        }
+      },
+      "additionalProperties": true
+    },
+    "service_water_heating_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "required": [
+        "equipment"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "equipment": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Keyed by water use equipment name, e.g. 'Dishwasher Booster', or '*' for every piece of equipment in the space type. A space type usually carries more than one -- a kitchen has a booster at 180 F and a general draw at 120 F -- so '*' is also the only way to reach equipment the data leaves unnamed. A named entry's fields win over the wildcard's.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "peak_flow_rate_gph_per_floor_area_ft2": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Peak draw per unit floor area, gallons per hour per ft^2. Setting this clears any absolute peak_flow_rate_gph on the equipment, which would otherwise take precedence."
+              },
+              "peak_flow_rate_gph": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Absolute peak draw in gallons per hour. Setting this clears any per-area rate on the equipment."
+              },
+              "mixed_water_temperature_f": {
+                "type": "number",
+                "description": "Mixed water delivery temperature in degrees Fahrenheit."
+              },
+              "sensible_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Fraction of the draw's energy that becomes a sensible gain to the space."
+              },
+              "latent_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Fraction of the draw's energy that becomes a latent gain to the space."
+              },
+              "flow_rate_schedule": {
+                "type": "string",
+                "description": "Name of the draw profile schedule. Only used when the space type has no parametric schedule set of its own, which otherwise supplies the profile."
+              }
+            }
+          }
+        }
+      }
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Site and weather inputs. Without this section the building location is set from the climate zone alone, using the climate-zone representative weather file. Supply weather_file_path to place the building on a specific weather file instead, which is what a stock model needs: the representative file would otherwise silently replace it, and because equipment is sized inside this call, sizing would follow the wrong weather too.",
+      "properties": {
+        "weather_file_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute path to the .epw file. The matching .ddy and .stat files are read from the same directory for design days, site water mains temperature, and undisturbed ground temperatures."
+        },
+        "ddy_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Regex strings matching the design day names to take from the .ddy file, e.g. 'Htg 99.6. Condns DB'. Omit to use the annual heating 99.6% DB and annual cooling 0.4% DB/WB design days."
+        },
+        "terrain": {
+          "type": "string",
+          "enum": [
+            "Country",
+            "Suburbs",
+            "City",
+            "Ocean",
+            "Urban"
+          ],
+          "description": "Site terrain, which sets the wind speed profile and therefore how much infiltration the building sees. EnergyPlus defaults to Suburbs; leaving this unset in a stock model is a silent change in heating load, so supply it explicitly."
+        },
+        "grid_region": {
+          "type": "string",
+          "description": "Electric grid region, stored as the building additional property 'grid_region'. Consumed downstream by emissions reporting rather than by the model itself."
+        },
+        "soil_conductivity": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Soil conductivity in Btu/hr-ft-F, stored as the building additional property 'Soil Conductivity'. Used by ground source heat pump modelling."
+        },
+        "undisturbed_ground_temperature": {
+          "type": "number",
+          "description": "Undisturbed ground temperature in degrees C, stored as the building additional property 'Undisturbed Ground Temperature'. Used by ground source heat pump modelling. When omitted, the value derived from the .stat file is left in place."
+        }
+      }
+    },
+    "space_type_ratio_entry": {
+      "type": "object",
+      "required": [
+        "space_type",
+        "ratio"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "building_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Standard building type the space type is drawn from, e.g. 'MediumOffice'. Checked against standards data for the template at runtime. When omitted, space_type instead names a typical space type from all_level_space_types.json and internal loads come from the typical lighting, equipment, and ventilation data; all entries must then omit building_type."
+        },
+        "space_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "With building_type: a standard space type within the building type, e.g. 'Conference', checked against standards data for the template at runtime. Without building_type: a typical space type from all_level_space_types.json, e.g. 'office', 'conference/meeting/multipurpose', or a building-type-qualified variant such as 'corridor - hospital'. Bare names are the same vocabulary schedule_overrides and load_overrides match on; a qualified name preserves a space type's building context when it differs from primary_building_type."
+        },
+        "ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Fraction of total building floor area for this space type. All ratios should sum to 1.0."
+        },
+        "story_height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Custom story height for this space type in ft. Creates a custom-height bar section when the building floor height is left to its smart default."
+        },
+        "wwr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Window to wall ratio for this space type's exterior walls. Only used when the building-level wwr resolves to 0 (e.g. Warehouse form defaults)."
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Marks this space type as the default (perimeter) space type for double-loaded corridor placement. Exactly one default and one circ entry per building type enables the double-loaded corridor."
+        },
+        "circ": {
+          "type": "boolean",
+          "description": "Marks this space type as the circulation space type for double-loaded corridor placement."
+        },
+        "space_type_gen": {
+          "type": "boolean",
+          "description": "When false, the space type is created but no geometry is generated for it (used for undeveloped or basement space types)."
+        }
+      }
+    },
+    "thermostat_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "required": [
+        "thermostat"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "thermostat": {
+          "type": "object",
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "heating_setpoint_c"
+              ]
+            },
+            {
+              "required": [
+                "cooling_setpoint_c"
+              ]
+            },
+            {
+              "required": [
+                "heating_setback_delta_c"
+              ]
+            },
+            {
+              "required": [
+                "cooling_setback_delta_c"
+              ]
+            },
+            {
+              "required": [
+                "continuous_operation"
+              ]
+            }
+          ],
+          "properties": {
+            "continuous_operation": {
+              "type": "boolean",
+              "description": "Whether the systems serving this space type run regardless of occupancy. Air loop and zone equipment operation schedules are otherwise derived from the occupancy fraction of the zones they serve; true holds them always on for any loop serving this space type, false releases a space type the data flags. Patient rooms, operating rooms, recovery, emergency rooms, nurses stations and data centers are flagged in all_level_space_types.json and need no entry. May stand alone or accompany setpoints."
+            },
+            "heating_setpoint_c": {
+              "type": "number",
+              "description": "Occupied heating setpoint in degrees Celsius. A value below 5 C (41 F) leaves the zone reading as unheated."
+            },
+            "heating_setback_delta_c": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Degrees Celsius the heating setpoint drops below the occupied value outside operating hours. 0 holds the setpoint around the clock. Fields are overridden individually, so an unstated setback keeps the space type's own; it falls to 0 only when the space type has no setpoint data at all."
+            },
+            "cooling_setpoint_c": {
+              "type": "number",
+              "description": "Occupied cooling setpoint in degrees Celsius. A value above 32.8 C (91 F) leaves the zone reading as uncooled."
+            },
+            "cooling_setback_delta_c": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Degrees Celsius the cooling setpoint rises above the occupied value outside operating hours. 0 holds the setpoint around the clock."
+            }
+          }
+        }
+      }
+    },
+    "ventilation_override_entry": {
+      "type": "object",
+      "anyOf": [
+        {
+          "required": [
+            "space_type"
+          ]
+        },
+        {
+          "required": [
+            "schedule_set"
+          ]
+        },
+        {
+          "required": [
+            "ventilation_space_type"
+          ]
+        }
+      ],
+      "required": [
+        "ventilation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "space_type": {
+          "type": "string",
+          "description": "Match key: any name the space type answers to - its parametric schedule set, its all-level space type (e.g. 'restroom'), its ventilation space type (e.g. 'restroom_ventilation') - or '*' for all space types."
+        },
+        "schedule_set": {
+          "type": "string",
+          "description": "Match key: a parametric schedule set name, targeting that name specifically."
+        },
+        "ventilation_space_type": {
+          "type": "string",
+          "description": "Match key: a ventilation space type name, targeting that name specifically."
+        },
+        "ventilation": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "cfm_per_person": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air per person, cfm/person."
+            },
+            "cfm_per_area": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air per unit floor area, cfm/ft^2."
+            },
+            "ach": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Outdoor air in air changes per hour."
+            }
+          }
+        }
+      }
+    },
+    "construction_surfaces": {
+      "type": "object",
+      "description": "Per-surface constructions, keyed by the surface and subsurface types of an OpenStudio DefaultConstructionSet, for anything the shorthand fields do not cover. Exterior and ground surfaces resolve an assembly from a construction_type and building_category, or pin a named construction; interior, shading, and tubular daylighting surfaces take a construction name.",
+      "properties": {
+        "exterior_floor": {
+          "$ref": "#/$defs/construction_surface_exterior_floor"
+        },
+        "exterior_wall": {
+          "$ref": "#/$defs/construction_surface_exterior_wall"
+        },
+        "exterior_roof": {
+          "$ref": "#/$defs/construction_surface_exterior_roof"
+        },
+        "ground_contact_floor": {
+          "$ref": "#/$defs/construction_surface_ground_contact_floor"
+        },
+        "ground_contact_wall": {
+          "$ref": "#/$defs/construction_surface_ground_contact_wall"
+        },
+        "ground_contact_ceiling": {
+          "$ref": "#/$defs/construction_surface_ground_contact_ceiling"
+        },
+        "exterior_fixed_window": {
+          "$ref": "#/$defs/construction_surface_exterior_fixed_window"
+        },
+        "exterior_operable_window": {
+          "$ref": "#/$defs/construction_surface_exterior_operable_window"
+        },
+        "exterior_door": {
+          "$ref": "#/$defs/construction_surface_exterior_door"
+        },
+        "exterior_overhead_door": {
+          "$ref": "#/$defs/construction_surface_exterior_overhead_door"
+        },
+        "exterior_glass_door": {
+          "$ref": "#/$defs/construction_surface_exterior_glass_door"
+        },
+        "exterior_skylight": {
+          "$ref": "#/$defs/construction_surface_exterior_skylight"
+        },
+        "interior_floors": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_walls": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_ceilings": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_fixed_windows": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_operable_windows": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_doors": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "interior_partitions": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "tubular_daylight_domes": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "tubular_daylight_diffusers": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "space_shading": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "building_shading": {
+          "$ref": "#/$defs/construction_named_surface"
+        },
+        "site_shading": {
+          "$ref": "#/$defs/construction_named_surface"
+        }
+      },
+      "additionalProperties": false
+    },
+    "construction_named_surface": {
+      "description": "Name of a construction in the standards constructions data for the template, e.g. Typical Interior Wall, DEER Uncarpeted 6in Slab Floor. Names are not enumerated here: there are over 500 across the templates and they are template-specific. An unknown name is logged and the surface is left unset.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_door": {
+      "description": "Construction for the exterior door surfaces, looked up as intended_surface_type ExteriorDoor. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "NonSwinging",
+                "Swinging"
+              ],
+              "description": "Standards construction type for ExteriorDoor. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_fixed_window": {
+      "description": "Construction for the exterior fixed window surfaces, looked up as intended_surface_type ExteriorWindow. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Any Vertical Glazing",
+                "Fixed",
+                "Metal framing (all other)",
+                "Metal framing (curtainwall/storefront)",
+                "Metal framing, fixed",
+                "Metal framing, operable",
+                "Nonmetal framing (all)",
+                "Nonmetal framing, all",
+                "Operable"
+              ],
+              "description": "Standards construction type for ExteriorWindow. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_floor": {
+      "description": "Construction for the exterior floor surfaces, looked up as intended_surface_type ExteriorFloor. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Mass",
+                "SteelFramed",
+                "WoodFramed"
+              ],
+              "description": "Standards construction type for ExteriorFloor. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_glass_door": {
+      "description": "Construction for the exterior glass door surfaces, looked up as intended_surface_type GlassDoor. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Any Vertical Glazing",
+                "Entrance door",
+                "Metal framing (entrance door)",
+                "Metal framing, entrance door"
+              ],
+              "description": "Standards construction type for GlassDoor. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_operable_window": {
+      "description": "Construction for the exterior operable window surfaces, looked up as intended_surface_type ExteriorWindow. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Any Vertical Glazing",
+                "Fixed",
+                "Metal framing (all other)",
+                "Metal framing (curtainwall/storefront)",
+                "Metal framing, fixed",
+                "Metal framing, operable",
+                "Nonmetal framing (all)",
+                "Nonmetal framing, all",
+                "Operable"
+              ],
+              "description": "Standards construction type for ExteriorWindow. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_overhead_door": {
+      "description": "Construction for the exterior overhead door surfaces, looked up as intended_surface_type ExteriorDoor. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "NonSwinging",
+                "Swinging"
+              ],
+              "description": "Standards construction type for ExteriorDoor. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_roof": {
+      "description": "Construction for the exterior roof surfaces, looked up as intended_surface_type ExteriorRoof. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Attic and Other",
+                "IEAD",
+                "Mass",
+                "Metal Building",
+                "WoodFramed"
+              ],
+              "description": "Standards construction type for ExteriorRoof. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_skylight": {
+      "description": "Construction for the exterior skylight surfaces, looked up as intended_surface_type Skylight. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Any Skylight",
+                "Glass with Curb",
+                "Plastic with Curb",
+                "Without Curb"
+              ],
+              "description": "Standards construction type for Skylight. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_exterior_wall": {
+      "description": "Construction for the exterior wall surfaces, looked up as intended_surface_type ExteriorWall. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Mass",
+                "Metal Building",
+                "SteelFramed",
+                "WoodFramed"
+              ],
+              "description": "Standards construction type for ExteriorWall. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_ground_contact_ceiling": {
+      "description": "Construction for the ground contact ceiling surfaces, looked up as intended_surface_type GroundContactRoof. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "description": "Standards construction type for GroundContactRoof. The shipped construction_properties data has no GroundContactRoof rows in any template, so this slot cannot currently resolve; it is listed because model_add_construction_set names it."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_ground_contact_floor": {
+      "description": "Construction for the ground contact floor surfaces, looked up as intended_surface_type GroundContactFloor. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Heated",
+                "Mass",
+                "Unheated"
+              ],
+              "description": "Standards construction type for GroundContactFloor. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "construction_surface_ground_contact_wall": {
+      "description": "Construction for the ground contact wall surfaces, looked up as intended_surface_type GroundContactWall. Give a construction_type (and optionally a building_category) to resolve an assembly from the standards data, or a construction to pin a named construction directly.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "construction_type": {
+              "type": "string",
+              "enum": [
+                "Mass"
+              ],
+              "description": "Standards construction type for GroundContactWall. Not every template carries every value; an unmatched pair is logged and the slot is left unset."
+            },
+            "building_category": {
+              "type": "string",
+              "enum": [
+                "Nonresidential",
+                "Residential",
+                "HighriseResidential",
+                "Semiheated",
+                "Adiabatic",
+                "Any"
+              ],
+              "description": "Building category for this surface, overriding the spec-level building_category."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Resolved from the standards construction properties data by construction type and building category."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "construction": {
+              "type": "string",
+              "description": "Name of a construction in the standards constructions data, pinned on this surface directly instead of resolved from a construction type and building category. An unknown name is logged and the surface is left unset."
+            }
+          },
+          "required": [
+            "construction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

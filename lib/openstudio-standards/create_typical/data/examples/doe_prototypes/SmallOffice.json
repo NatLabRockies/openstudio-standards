@@ -1,0 +1,51 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "SmallOffice (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "SmallOffice",
+  "space_type_ratios": [
+    {
+      "space_type": "office",
+      "ratio": 0.4984,
+      "default": true
+    },
+    {
+      "space_type": "storage",
+      "ratio": 0.1363
+    },
+    {
+      "space_type": "corridor",
+      "ratio": 0.1213,
+      "circ": true
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.0818
+    },
+    {
+      "space_type": "conference/meeting/multipurpose",
+      "ratio": 0.0818
+    },
+    {
+      "space_type": "restroom",
+      "ratio": 0.0402
+    },
+    {
+      "space_type": "stairwell",
+      "ratio": 0.0201
+    },
+    {
+      "space_type": "electrical/mechanical",
+      "ratio": 0.0201
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 5500.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 1.5,
+    "wwr": 0.15,
+    "floor_height": 10.0,
+    "perim_mult": 1.0
+  }
+}

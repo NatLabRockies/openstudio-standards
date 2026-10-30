@@ -1,0 +1,396 @@
+{
+  "metadata": {
+    "description": "Heating and cooling setpoints and setback deltas by all-level space type, used to build thermostat schedules around a model own hours of operation.",
+    "derived_from": "prototypes/common/data/thermostat_schedule_lookup.json and the standards schedule data",
+    "units": "degrees Celsius",
+    "notes": [
+      "A setback delta of 0 means the space type holds its setpoint around the clock.",
+      "A space type found under several building types takes the setpoints of the building type it is most commonly found in.",
+      "Building-type-qualified space types inherit their base type when the lookup has no entry of their own.",
+      "A model needing different setpoints for a space type states them in the thermostat_overrides section of its specification."
+    ]
+  },
+  "space_types": [
+    {
+      "space_type_name": "apartment",
+      "heating_setpoint_c": 21.7,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 24.4,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "MidriseApartment",
+      "source": "ApartmentMidRise HTGSETP_APT_SCH / ApartmentMidRise CLGSETP_APT_SCH"
+    },
+    {
+      "space_type_name": "audience seating",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source_building_type": "SecondarySchool",
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp"
+    },
+    {
+      "space_type_name": "classroom/lecture/training",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source_building_type": "SecondarySchool",
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp"
+    },
+    {
+      "space_type_name": "computer room",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source_building_type": "SecondarySchool",
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp"
+    },
+    {
+      "space_type_name": "conference/meeting/multipurpose",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "confinement cells",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.4,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 2.7,
+      "source_building_type": null,
+      "source": "Courthouse HTGSETP / Courthouse CLGSETP"
+    },
+    {
+      "space_type_name": "copy/print",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "corridor",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "courtroom",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.4,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 2.7,
+      "source_building_type": null,
+      "source": "Courthouse HTGSETP / Courthouse CLGSETP"
+    },
+    {
+      "space_type_name": "datacenter/high ite",
+      "heating_setpoint_c": 15.0,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 35.0,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "LargeDataCenterHighITE",
+      "source": "DataCenter HTGSETP_SCH / DataCenter CLGSETP_SCH"
+    },
+    {
+      "space_type_name": "datacenter/low ite",
+      "heating_setpoint_c": 15.0,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 35.0,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "LargeDataCenterLowITE",
+      "source": "DataCenter HTGSETP_SCH / DataCenter CLGSETP_SCH"
+    },
+    {
+      "space_type_name": "dining",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.4,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 6.0,
+      "source_building_type": "FullServiceRestaurant",
+      "source": "RestaurantSitDown HTGSETP_SCH_NO_OPTIMUM / RestaurantSitDown CLGSETP_SCH_NO_OPTIMUM"
+    },
+    {
+      "space_type_name": "dressing room",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "electrical/mechanical",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "emergency room",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "Hospital",
+      "source": "Hospital Critical HtgSetp / Hospital Critical ClgSetp"
+    },
+    {
+      "space_type_name": "exam/treatment",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "exercise area",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source_building_type": "SecondarySchool",
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp"
+    },
+    {
+      "space_type_name": "exhibit",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 24.4,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": null,
+      "source": "D_Asm_All_HTemp_Yr / D_Asm_All_CTemp_Yr"
+    },
+    {
+      "space_type_name": "food preparation",
+      "heating_setpoint_c": 19.0,
+      "heating_setback_delta_c": 3.4,
+      "cooling_setpoint_c": 26.0,
+      "cooling_setback_delta_c": 4.0,
+      "source_building_type": "FullServiceRestaurant",
+      "source": "RestaurantSitDown HTGSETP_KITCHEN_SCH_NO_OPTIMUM / RestaurantSitDown CLGSETP_KITCHEN_SCH_NO_OPTIMUM"
+    },
+    {
+      "space_type_name": "guest room",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 0.0,
+      "source": "LargeHotel GuestRoom HtgSetp / LargeHotel GuestRoom ClgSetp (curated)"
+    },
+    {
+      "space_type_name": "imaging",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "interior parking",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.4,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 2.7,
+      "source_building_type": null,
+      "source": "Courthouse HTGSETP / Courthouse CLGSETP"
+    },
+    {
+      "space_type_name": "judges chambers",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.4,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 2.7,
+      "source_building_type": null,
+      "source": "Courthouse HTGSETP / Courthouse CLGSETP"
+    },
+    {
+      "space_type_name": "laboratory",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source": "Hospital Bldg HtgSetp / Hospital Bldg ClgSetp (curated)"
+    },
+    {
+      "space_type_name": "laundry/washing",
+      "heating_setpoint_c": 21.11,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 23.89,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "SmallHotel",
+      "source": "HotelSmall CommonArea_HtgSP_Sch / HotelSmall CommonArea_ClgSP_Sch"
+    },
+    {
+      "space_type_name": "library",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source_building_type": "SecondarySchool",
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp"
+    },
+    {
+      "space_type_name": "lobby",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "locker room",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "lounge/breakroom",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "nurses station",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "office",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "operating room",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 0.0,
+      "source": "Hospital Critical HtgSetp / Hospital Critical ClgSetp (curated)"
+    },
+    {
+      "space_type_name": "patient room",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "Hospital",
+      "source": "Hospital Critical HtgSetp / Hospital Critical ClgSetp"
+    },
+    {
+      "space_type_name": "physical therapy",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "playing area",
+      "heating_setpoint_c": 21.0,
+      "heating_setback_delta_c": 5.0,
+      "cooling_setpoint_c": 24.0,
+      "cooling_setback_delta_c": 3.0,
+      "source": "SecondarySchool HtgSetp / SecondarySchool ClgSetp (curated)"
+    },
+    {
+      "space_type_name": "recovery",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 2.8,
+      "cooling_setpoint_c": 22.2,
+      "cooling_setback_delta_c": 2.8,
+      "source_building_type": "Outpatient",
+      "source": "OutPatientHealthCare HTGSETP_SCH_YES_OPTIMUM / OutPatientHealthCare CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "restroom",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "retail",
+      "heating_setpoint_c": 21.11,
+      "heating_setback_delta_c": 5.55,
+      "cooling_setpoint_c": 23.89,
+      "cooling_setback_delta_c": 5.55,
+      "source_building_type": "Retail",
+      "source": "RetailStandalone HTGSETP_SCH_YES_OPTIMUM / RetailStandalone CLGSETP_SCH_YES_OPTIMUM"
+    },
+    {
+      "space_type_name": "stairwell",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "storage",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse"
+    },
+    {
+      "space_type_name": "storage - warehouse - medium to bulky palletized items",
+      "heating_setpoint_c": 7.2,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 50.0,
+      "cooling_setback_delta_c": 0.0,
+      "source": "Warehouse HtgSetp BulkStorage / Warehouse ClgSetp BulkStorage (curated)"
+    },
+    {
+      "space_type_name": "storage - warehouse - smaller hand-carried items",
+      "heating_setpoint_c": 15.56,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 29.44,
+      "cooling_setback_delta_c": 0.0,
+      "source": "Warehouse HtgSetp FineStorage / Warehouse ClgSetp FineStorage (curated)"
+    },
+    {
+      "space_type_name": "workshop",
+      "heating_setpoint_c": 21.1,
+      "heating_setback_delta_c": 0.0,
+      "cooling_setpoint_c": 24.4,
+      "cooling_setback_delta_c": 0.0,
+      "source_building_type": "ESe",
+      "source": "D_ESe_All_HTemp_Yr / D_ESe_All_CTemp_Yr"
+    }
+  ]
+}

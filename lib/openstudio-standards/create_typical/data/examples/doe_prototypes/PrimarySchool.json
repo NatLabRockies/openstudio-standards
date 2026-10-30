@@ -1,0 +1,64 @@
+{
+  "$schema": "../../custom_building_spec_schema.json",
+  "name": "PrimarySchool (typical space types)",
+  "template": "90.1-2013",
+  "climate_zone": "ASHRAE 169-2013-4A",
+  "primary_building_type": "PrimarySchool",
+  "space_type_ratios": [
+    {
+      "space_type": "classroom/lecture/training",
+      "ratio": 0.4793,
+      "default": true
+    },
+    {
+      "space_type": "corridor",
+      "ratio": 0.1633,
+      "circ": true
+    },
+    {
+      "space_type": "office",
+      "ratio": 0.0642
+    },
+    {
+      "space_type": "library",
+      "ratio": 0.0581
+    },
+    {
+      "space_type": "exercise area",
+      "ratio": 0.052
+    },
+    {
+      "space_type": "dining",
+      "ratio": 0.0458
+    },
+    {
+      "space_type": "electrical/mechanical",
+      "ratio": 0.0367
+    },
+    {
+      "space_type": "restroom",
+      "ratio": 0.0277
+    },
+    {
+      "space_type": "lobby",
+      "ratio": 0.0249
+    },
+    {
+      "space_type": "food preparation",
+      "ratio": 0.0244
+    },
+    {
+      "space_type": "computer room",
+      "ratio": 0.0236,
+      "default": true
+    }
+  ],
+  "form": {
+    "total_bldg_floor_area": 73960.0,
+    "num_stories_above_grade": 1,
+    "ns_to_ew_ratio": 2.8,
+    "wwr": 0.35,
+    "floor_height": 13.0,
+    "perim_mult": 1.914
+  }
+}
