@@ -3,7 +3,25 @@ module OpenstudioStandards
   module SpaceType
     # @!group SpaceType
 
+    # Resolve catalog properties, preferring a building-qualified subtype over the base name.
+    #
+    # @param space_types_data [Array<Hash>] parsed space_types.json data with symbol keys
+    # @param space_type_name [String] standards space type name from the model
+    # @param space_type [OpenStudio::Model::SpaceType] space type being resolved
+    # @return [Hash, nil] matching properties, or nil when the name is unknown
+    def self.resolve_space_type_properties(space_types_data, space_type_name, space_type)
+      if space_type.standardsBuildingType.is_initialized
+        building_type = space_type.standardsBuildingType.get.to_s
+        suffix = building_type.gsub(/([a-z\d])([A-Z])/, '\1 \2').downcase
+        qualified = space_types_data.find { |s| s[:space_type_name] == "#{space_type_name} - #{suffix}" }
+        return qualified unless qualified.nil?
+      end
+
+      space_types_data.find { |s| s[:space_type_name] == space_type_name }
+    end
+
     # Assign standards space type additional properties to all space types in the model.
+    # Base space types and detailed subtypes share the space_types.json catalog.
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
     # @param space_type_field [String] where the standards space type is stored, either 'StandardsSpaceType' or 'AdditionalProperties'
@@ -30,7 +48,7 @@ module OpenstudioStandards
           return false
         end
 
-        space_type_properties = space_types_data.find { |s| s[:space_type_name] == space_type_name }
+        space_type_properties = OpenstudioStandards::SpaceType.resolve_space_type_properties(space_types_data, space_type_name, space_type)
         if space_type_properties.nil?
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', "No space type properties found for space type #{space_type.name} with standards space type '#{space_type_name}' in building #{model.getBuilding.name}")
         else
@@ -48,10 +66,29 @@ module OpenstudioStandards
           space_type.additionalProperties.setFeature('ventilation_space_type', ventilation_space_type_name)
           schedule_set_name = space_type_properties[:schedule_set_name].nil? ? 'na' : space_type_properties[:schedule_set_name]
           space_type.additionalProperties.setFeature('schedule_set', schedule_set_name)
+          space_type.additionalProperties.setFeature('critical_operation', space_type_properties[:critical_operation] == true)
         end
       end
 
       return true
+    end
+
+    # Whether a space type requires continuous system operation regardless of occupancy.
+    # A stamped additional property takes precedence over the catalog.
+    #
+    # @param space_type [OpenStudio::Model::SpaceType] space type to check
+    # @return [Boolean] true when the property or catalog flags critical operation
+    def self.space_type_critical_operation?(space_type)
+      stamped = space_type.additionalProperties.getFeatureAsBoolean('critical_operation')
+      return stamped.get if stamped.is_initialized
+
+      name = space_type.additionalProperties.getFeatureAsString('standards_space_type')
+      name = space_type.standardsSpaceType if name.empty?
+      return false if name.empty?
+
+      @space_types_data ||= JSON.parse(File.read("#{File.dirname(__FILE__)}/data/space_types.json"), symbolize_names: true)
+      record = OpenstudioStandards::SpaceType.resolve_space_type_properties(@space_types_data, name.get, space_type)
+      !record.nil? && record[:critical_operation] == true
     end
   end
 end
