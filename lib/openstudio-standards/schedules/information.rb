@@ -890,16 +890,13 @@ module OpenstudioStandards
       profiles = {}
 
       profiles[schedule_ruleset.defaultDaySchedule] = 'Default'
-      
-      if !schedule_ruleset.isSummerDesignDayScheduleDefaulted
-      #   profiles[schedule_ruleset.defaultDaySchedule] += '|SmrDsn'
-      # else
+
+      # A defaulted design day shares the default day schedule, which is already categorized.
+      unless schedule_ruleset.isSummerDesignDayScheduleDefaulted
         profiles[schedule_ruleset.summerDesignDaySchedule] = 'SmrDsn'
       end
 
-      if !schedule_ruleset.isWinterDesignDayScheduleDefaulted
-      #   profiles[schedule_ruleset.defaultDaySchedule] += '|WntrDsn'
-      # else
+      unless schedule_ruleset.isWinterDesignDayScheduleDefaulted
         profiles[schedule_ruleset.winterDesignDaySchedule] = 'WntrDsn'
       end
 

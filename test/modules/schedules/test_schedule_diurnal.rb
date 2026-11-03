@@ -28,7 +28,7 @@ class TestScheduleDiurnal < Minitest::Test
 
   def lighting_params(diurnal: false)
     p = { name: 'guest lights', category: 'Lighting', derivation_type: 'linear',
-          base: 0.05, peak: 0.9, response: 1.0,
+          base: 0.05, peak: 0.9, response: 1.0, base_peak_mode: 'relative',
           summer_design_day_base: 1.0, winter_design_day_peak: 0.0 }
     if diurnal
       p[:diurnal_profile] = 'sleep awake'

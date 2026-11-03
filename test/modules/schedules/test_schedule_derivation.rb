@@ -39,6 +39,56 @@ class TestSchedulesDerivation < Minitest::Test
     model.save(File.dirname(__FILE__) + '/output/test_schedule_derivation_basic.osm', true)
   end
 
+  def test_linear_response_above_one_saturates_at_peak
+    # A linear response above 1 reaches the peak before full presence; unclamped it kept
+    # climbing past it - 'retail - supermarket lighting' (base 0.05, peak 0.9, response
+    # 1.15) reached 1.00125 on its default day and EnergyPlus refused the Fractional
+    # schedule before the simulation started.
+    model = OpenStudio::Model::Model.new
+    model.getTimestep.setNumberOfTimestepsPerHour(4)
+    occ_sch = OpenstudioStandards::Schedules.create_parametric_schedule_full(model, @schedule_data, 'conference occupancy', {})
+    params = {
+      "name": "conference lighting",
+      "category": "Lighting",
+      "derivation_type": "linear",
+      "base": 0.05,
+      "peak": 0.9,
+      "response": 1.15
+    }
+    lighting = OpenstudioStandards::Schedules.create_derived_schedule_from_occupancy_schedule(occ_sch, params)
+    days = [lighting.defaultDaySchedule] + lighting.scheduleRules.map(&:daySchedule)
+    values = days.flat_map(&:values)
+    assert_operator(values.max, :<=, 0.9, 'a derived value passed the peak')
+    assert_operator(values.min, :>=, 0.05, 'a derived value fell below the base')
+    assert_in_delta(0.9, lighting.defaultDaySchedule.values.max, 1e-9, 'the default day never reaches the peak')
+
+    pairs = OpenstudioStandards::Schedules.derive_values('linear', 0.05, 0.9, 1.15, [[8.0, 0.0], [12.0, 0.5], [18.0, 1.0]])
+    assert_equal([0.05, 0.05 + (0.85 * 0.5 * 1.15), 0.9], pairs.map { |_, v| v.round(9) })
+  end
+
+  def test_supermarket_lighting_stays_within_its_fractional_limits
+    # the shipped definition that reached EnergyPlus at 1.00125 and stopped the grocery's
+    # sizing run: built through the same path create_typical uses
+    model = OpenStudio::Model::Model.new
+    model.getTimestep.setNumberOfTimestepsPerHour(4)
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName('retail - supermarket')
+    space_type.setStandardsSpaceType('retail - supermarket')
+    space_type.additionalProperties.setFeature('standards_space_type', 'retail - supermarket')
+    space_type.additionalProperties.setFeature('schedule_set', 'retail - supermarket schedule set')
+    assert(OpenstudioStandards::Schedules.space_type_apply_parametric_internal_load_schedules(space_type))
+
+    lighting = space_type.defaultScheduleSet.get.lightingSchedule
+    assert(lighting.is_initialized, 'no lighting schedule was applied')
+    ruleset = lighting.get.to_ScheduleRuleset.get
+    days = [ruleset.defaultDaySchedule, ruleset.summerDesignDaySchedule, ruleset.winterDesignDaySchedule] + ruleset.scheduleRules.map(&:daySchedule)
+    days.each do |day|
+      assert_operator(day.values.max, :<=, 1.0, "#{day.name} exceeds 1")
+      assert_operator(day.values.min, :>=, 0.0, "#{day.name} is below 0")
+    end
+    assert_in_delta(0.9, ruleset.defaultDaySchedule.values.max, 1e-9, 'the default day does not reach its 0.9 peak')
+  end
+
   def test_schedule_derivation_slope
     # create a new model
     model = OpenStudio::Model::Model.new

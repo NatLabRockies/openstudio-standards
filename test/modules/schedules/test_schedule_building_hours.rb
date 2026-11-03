@@ -114,19 +114,19 @@ class TestScheduleBuildingHours < Minitest::Test
   # -------------------------------------------------------------------------
 
   def test_authored_offset_applied_by_orchestrator
-    # kitchen schedule set carries start_time_offset -1.0 / end_time_offset +1.0
+    # the food preparation schedule set carries start_time_offset -1.0 / end_time_offset +1.0
     model = new_model
     space_type = OpenStudio::Model::SpaceType.new(model)
     space_type.setName('kitchen space')
-    space_type.additionalProperties.setFeature('schedule_set', 'kitchen')
+    space_type.additionalProperties.setFeature('schedule_set', 'food preparation schedule set')
 
     assert @sch.space_type_apply_parametric_internal_load_schedules(space_type, wkdy_start_time: 9.0, wkdy_duration: 6.0)
     people_sched = space_type.defaultScheduleSet.get.numberofPeopleSchedule.get.to_ScheduleRuleset.get
     offset_vals = hourly(people_sched.defaultDaySchedule)
 
     # same occupancy definition built directly at the building hours, without offset
-    schedules = JSON.parse(File.read("#{File.dirname(__FILE__)}/../../../lib/openstudio-standards/schedules/data/default_parametric_schedules.json"), symbolize_names: true)
-    no_offset = @sch.create_parametric_schedule_full(new_model, schedules, 'restaurant kitchen occupancy',
+    schedules = @sch.schedule_data(:occupancy)
+    no_offset = @sch.create_parametric_schedule_full(new_model, schedules, 'food preparation occupancy',
                                                      { st: 9.0, et: 15.0 }, category: 'Occupancy')
     no_offset_vals = hourly(no_offset.to_ScheduleRuleset.get.defaultDaySchedule)
 

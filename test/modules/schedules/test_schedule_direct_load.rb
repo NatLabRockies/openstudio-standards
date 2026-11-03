@@ -18,7 +18,7 @@ class TestScheduleDirectLoad < Minitest::Test
     model = new_model
     space_type = OpenStudio::Model::SpaceType.new(model)
     space_type.setName('interior parking')
-    space_type.additionalProperties.setFeature('schedule_set', 'parking_area_interior')
+    space_type.additionalProperties.setFeature('schedule_set', 'interior parking schedule set')
 
     assert @sch.space_type_apply_parametric_internal_load_schedules(space_type)
     sch_set = space_type.defaultScheduleSet.get
@@ -36,21 +36,24 @@ class TestScheduleDirectLoad < Minitest::Test
 
   def test_resolve_load_schedule_prefers_direct_over_derived
     model = new_model
-    schedules = JSON.parse(File.read("#{File.dirname(__FILE__)}/../../../lib/openstudio-standards/schedules/data/default_parametric_schedules.json"), symbolize_names: true)
-    light = @sch.resolve_load_schedule(model, schedules, 'parking interior lighting', 'Lighting',
-                                       "#{File.dirname(__FILE__)}/../../../lib/openstudio-standards/schedules/data/default_lighting_parameters.json",
-                                       nil, {}, {})
-    refute_nil light, 'a Lighting name should resolve to a direct schedule even with no occupancy'
+    light = @sch.resolve_load_schedule(model, 'interior parking lighting', 'Lighting',
+                                       :interior_lighting, nil, {}, {})
+    refute_nil light, 'a control-point lighting schedule should resolve even with no occupancy'
     assert light.to_ScheduleRuleset.is_initialized
   end
 
   def test_resolve_load_schedule_warns_when_no_basis
     model = new_model
-    schedules = JSON.parse(File.read("#{File.dirname(__FILE__)}/../../../lib/openstudio-standards/schedules/data/default_parametric_schedules.json"), symbolize_names: true)
-    # a name that is neither a direct Lighting schedule nor resolvable without occupancy
-    result = @sch.resolve_load_schedule(model, schedules, 'some derived lighting name', 'Lighting',
-                                        "#{File.dirname(__FILE__)}/../../../lib/openstudio-standards/schedules/data/default_lighting_parameters.json",
-                                        nil, {}, {})
-    assert_nil result, 'a derived name with no occupancy schedule should resolve to nil'
+    # a derived record resolves only against an occupancy schedule, so without one it is nil
+    result = @sch.resolve_load_schedule(model, 'atrium lighting', 'Lighting',
+                                        :interior_lighting, nil, {}, {})
+    assert_nil result, 'a derived schedule with no occupancy schedule should resolve to nil'
+  end
+
+  def test_resolve_load_schedule_reports_an_unknown_name
+    model = new_model
+    result = @sch.resolve_load_schedule(model, 'no such lighting schedule', 'Lighting',
+                                        :interior_lighting, nil, {}, {})
+    assert_nil result, 'an unknown schedule name should resolve to nil'
   end
 end

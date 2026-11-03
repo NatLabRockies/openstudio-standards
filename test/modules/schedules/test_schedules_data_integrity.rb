@@ -14,23 +14,35 @@ class TestSchedulesDataIntegrity < Minitest::Test
   # day-type tokens the schedule builder understands (create_complex_schedule + design days)
   DAY_TYPES = %w[Default Wkdy Wknd Mon Tue Wed Thu Fri Sat Sun SmrDsn WntrDsn Hol].freeze
   EXPANSIONS = %w[control_points slope].freeze
-  ADJUSTMENT_MODES = %w[stretch static truncate].freeze
-  DERIVATION_TYPES = %w[linear exponential exponential-inverse up_down].freeze
+  ADJUSTMENT_MODES = %w[stretch truncate].freeze
+  DERIVATION_TYPES = %w[linear exponential exponential-inverse up_down logistic saturating first_order].freeze
   DIURNAL_MODES = %w[off_when_asleep on_when_asleep].freeze
+
+  # One file per category. Each load file holds both forms a schedule can take: a
+  # control-point profile (direct) and a derivation parameter set (derived from occupancy).
+  DATA_FILES = {
+    occupancy: 'default_occupancy_schedules.json',
+    Lighting: 'default_lighting_schedules.json',
+    electric_equipment: 'default_electric_equipment_schedules.json',
+    gas_equipment: 'default_gas_equipment_schedules.json',
+    hot_water_equipment: 'default_hot_water_equipment_schedules.json',
+    diurnal: 'default_diurnal_schedules.json'
+  }.freeze
+
+  LOAD_SLOTS = %i[Lighting electric_equipment gas_equipment hot_water_equipment].freeze
 
   # control-point expression grammar: an anchor with an optional +/-/* numeric modifier
   TIME_EXPR = /\A(st|et)([+\-*]\d+(\.\d+)?)?\z/.freeze
-  VALUE_EXPR = /\A(base|peak)([+\-*]\d+(\.\d+)?)?\z/.freeze
+  # 'range*f' places a point f of the way from base to peak (see reanchor_control_points.rb)
+  VALUE_EXPR = /\A(base|peak|range)([+\-*]\d+(\.\d+)?)?\z/.freeze
 
   def setup
-    @schedules = load_json('default_parametric_schedules.json')
+    @files = DATA_FILES.transform_values { |f| load_json(f) }
     @schedule_sets = load_json('default_parametric_schedule_set.json')
-    @load_param_files = {
-      'Lighting' => load_json('default_lighting_parameters.json'),
-      'electric_equipment' => load_json('default_electric_equipment_parameters.json'),
-      'gas_equipment' => load_json('default_gas_equipment_parameters.json'),
-      'hot_water_equipment' => load_json('default_hot_water_equipment_parameters.json')
-    }
+    # A record's form, not its file, says which rules apply to it: a profile carries
+    # day_types, a derivation carries derivation_type.
+    @schedules = @files.values.flatten.select { |o| o.key?('day_types') }
+    @load_param_files = LOAD_SLOTS.to_h { |slot| [slot, @files[slot].reject { |o| o.key?('day_types') }] }
   end
 
   def load_json(name)
@@ -153,7 +165,7 @@ class TestSchedulesDataIntegrity < Minitest::Test
 
   def test_load_parameter_files_structure
     errors = []
-    diurnal_names = @schedules.select { |o| o['category'] == 'Diurnal' }.map { |o| o['name'] }
+    diurnal_names = @files[:diurnal].map { |o| o['name'] }
 
     @load_param_files.each do |label, entries|
       entries.each_with_index do |obj, i|
@@ -191,27 +203,56 @@ class TestSchedulesDataIntegrity < Minitest::Test
     assert_no_errors(errors)
   end
 
+  # A linear derivation is base + (peak - base) x presence x response, so its reachable
+  # maximum is base + (peak - base) x response. The grid search that fit these parameters
+  # tied on a flat occupancy trace and kept its first candidate, a response of 0.05, on 53
+  # lighting records: a classroom whose peak is 0.657 could not rise above 0.149 whatever
+  # the occupancy. A derivation whose peak cannot be reached is a broken fit, not a
+  # calibration choice, so every linear record must reach at least half of its peak.
+  def test_linear_derivations_can_reach_their_peak
+    errors = []
+    @load_param_files.each do |label, entries|
+      entries.each do |obj|
+        next unless obj['derivation_type'] == 'linear' && numeric?(obj['base']) && numeric?(obj['peak']) && numeric?(obj['response'])
+
+        peak = obj['peak'].to_f
+        next if peak < 0.2
+
+        reachable = obj['base'].to_f + ((peak - obj['base'].to_f) * obj['response'].to_f)
+        next if reachable >= 0.5 * peak
+
+        errors << format("%s/%s: linear response %.3f reaches only %.3f of a %.3f peak", label, obj['name'], obj['response'].to_f, reachable, peak)
+      end
+    end
+    assert_no_errors(errors)
+  end
+
   # ---------------------------------------------------------------------------
   # default_parametric_schedule_set.json — structure + cross-file references
   # ---------------------------------------------------------------------------
 
-  # Mirrors resolve_load_schedule: a load reference resolves if it names a direct
-  # parametric schedule of the load's category, OR a derivation parameter set.
-  def load_reference_resolves?(name, direct_category, param_file_label)
-    return true if @schedules.any? { |o| o['name'] == name && o['category'] == direct_category }
-
-    @load_param_files[param_file_label].any? { |o| o['name'] == name }
+  # Mirrors resolve_load_schedule: a load reference resolves if the category's own file
+  # holds a record of that name, in either form.
+  def load_reference_resolves?(name, slot)
+    @files[slot].any? { |o| o['name'] == name }
   end
 
   def test_schedule_set_references
     errors = []
-    occ_names = @schedules.select { |o| o['category'] == 'Occupancy' }.map { |o| o['name'] }
+    occ_names = @files[:occupancy].map { |o| o['name'] }
 
     load_columns = {
-      'derived_interior_lighting_parameters' => ['Lighting', 'Lighting'],
-      'derived_electric_equipment_parameters' => ['Equipment', 'electric_equipment'],
-      'derived_gas_equipment_parameters' => ['Equipment', 'gas_equipment'],
-      'derived_hot_water_equipment_parameters' => ['Equipment', 'hot_water_equipment']
+      'interior_lighting_schedule' => :Lighting,
+      'electric_equipment_schedule' => :electric_equipment,
+      'gas_equipment_schedule' => :gas_equipment,
+      'hot_water_equipment_schedule' => :hot_water_equipment
+    }
+    legacy_schedules = load_json('default_parametric_schedules.json')
+    legacy_columns = {
+      'derived_interior_lighting_parameters' => ['Lighting', 'default_lighting_parameters.json'],
+      'derived_electric_equipment_parameters' => ['Equipment', 'default_electric_equipment_parameters.json'],
+      'derived_gas_equipment_parameters' => ['Equipment', 'default_gas_equipment_parameters.json'],
+      'derived_hot_water_equipment_parameters' => ['Equipment', 'default_hot_water_equipment_parameters.json']
     }
 
     @schedule_sets.each_with_index do |set, i|
@@ -223,16 +264,28 @@ class TestSchedulesDataIntegrity < Minitest::Test
       end
 
       occ = set['occupancy_schedule']
-      if !occ.nil? && !occ_names.include?(occ)
+      legacy = set.key?('derived_interior_lighting_parameters')
+      occupancy_names = legacy ? legacy_schedules.select { |row| row['category'] == 'Occupancy' }.map { |row| row['name'] } : occ_names
+      if !occ.nil? && !occupancy_names.include?(occ)
         errors << "#{id}: occupancy_schedule '#{occ}' has no Occupancy definition"
       end
+      if legacy
+        legacy_columns.each do |column, (category, file)|
+          name = set[column]
+          next if name.nil?
 
-      load_columns.each do |column, (direct_category, param_label)|
+          direct = legacy_schedules.any? { |row| row['name'] == name && row['category'] == category }
+          derived = load_json(file).any? { |row| row['name'] == name }
+          errors << "#{id}: #{column} '#{name}' has no legacy schedule definition" unless direct || derived
+        end
+      end
+
+      load_columns.each do |column, slot|
         name = set[column]
         next if name.nil?
 
-        unless load_reference_resolves?(name, direct_category, param_label)
-          errors << "#{id}: #{column} '#{name}' resolves to neither a direct #{direct_category} schedule nor a #{param_label} parameter set"
+        unless load_reference_resolves?(name, slot)
+          errors << "#{id}: #{column} '#{name}' has no record in #{DATA_FILES[slot]}"
         end
       end
     end
