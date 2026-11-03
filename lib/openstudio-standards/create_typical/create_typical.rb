@@ -625,7 +625,13 @@ module OpenstudioStandards
           model.getThermostatSetpointDualSetpoints.each(&:remove)
         end
 
-        OpenstudioStandards::ThermalZone.thermal_zones_set_thermostat_schedules(model.getThermalZones)
+        OpenstudioStandards::ThermalZone.thermal_zones_set_thermostat_schedules(
+          model.getThermalZones,
+          wkdy_op_hrs_start_time: modify_wkdy_op_hrs ? wkdy_op_hrs_start_time : nil,
+          wkdy_op_hrs_duration: modify_wkdy_op_hrs ? wkdy_op_hrs_duration : nil,
+          wknd_op_hrs_start_time: modify_wknd_op_hrs ? wknd_op_hrs_start_time : nil,
+          wknd_op_hrs_duration: modify_wknd_op_hrs ? wknd_op_hrs_duration : nil
+        )
       end
 
       # add internal mass
