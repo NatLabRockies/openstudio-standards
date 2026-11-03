@@ -29,31 +29,12 @@ module OpenstudioStandards
 
         space_type = space_type.get
 
-        # get refrigeration space type from the object
-        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
-
-        # skip spaces types with no refrigeration space type defined
-        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
-        next if refrigeration_space_type.nil?
-
-        # skip spaces type with no refrigeration called out in the refrigeration space type
-        cases = cases_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
+        cases = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(cases_hsh, space_type)
         next if cases.empty?
 
-        # get standards building type and use specific standards building type information if present
-        if space_type.standardsBuildingType.is_initialized
-          standards_building_type = space_type.standardsBuildingType.get
-          building_type_specific_properties = cases_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
-          unless building_type_specific_properties.empty?
-            cases = building_type_specific_properties
-          end
-        end
-
-        unless cases.empty?
-          if zone.floorArea > display_case_zone_area_m2
-            display_case_zone = zone
-            display_case_zone_area_m2 = zone.floorArea
-          end
+        if zone.floorArea > display_case_zone_area_m2
+          display_case_zone = zone
+          display_case_zone_area_m2 = zone.floorArea
         end
       end
 
@@ -105,31 +86,12 @@ module OpenstudioStandards
 
         space_type = space_type.get
 
-        # get refrigeration space type from the object
-        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
-
-        # skip spaces types with no refrigeration space type defined
-        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
-        next if refrigeration_space_type.nil?
-
-        # skip spaces type with no refrigeration called out in the refrigeration space type
-        walkins = walkins_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
+        walkins = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(walkins_hsh, space_type)
         next if walkins.empty?
 
-        # get standards building type and use specific standards building type information if present
-        if space_type.standardsBuildingType.is_initialized
-          standards_building_type = space_type.standardsBuildingType.get
-          building_type_specific_properties = walkins_hsh.select { |h| (h[:standards_building_type] == standards_building_type) && (h[:refrigeration_space_type] == refrigeration_space_type) }
-          unless building_type_specific_properties.empty?
-            walkins = building_type_specific_properties
-          end
-        end
-
-        unless walkins.empty?
-          if zone.floorArea > walkin_zone_area_m2
-            walkin_zone = zone
-            walkin_zone_area_m2 = zone.floorArea
-          end
+        if zone.floorArea > walkin_zone_area_m2
+          walkin_zone = zone
+          walkin_zone_area_m2 = zone.floorArea
         end
       end
 

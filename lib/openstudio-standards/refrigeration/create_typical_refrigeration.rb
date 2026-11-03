@@ -79,6 +79,87 @@ module OpenstudioStandards
       return true
     end
 
+    # Whether a refrigeration data row describes a standards space type.
+    #
+    # @param record [Hash] a refrigeration CSV row
+    # @param standards_space_type [String] the space type's standardsSpaceType
+    # @param standards_building_type [String, nil] the space type's standardsBuildingType
+    # @param tagged_names [Array<String>] all-level names in the data table
+    # @return [Boolean] true if the row applies to the space type and building type
+    def self.refrigeration_record_applies?(record, standards_space_type, standards_building_type, tagged_names: [])
+      return false if standards_space_type.nil?
+
+      record_building_type = record[:standards_building_type].to_s
+      record_building_type = record[:building_type].to_s if record_building_type.empty?
+      return false unless record_building_type.empty? || record_building_type == standards_building_type.to_s
+
+      names = record[:all_level_space_type].to_s.split('|').map(&:strip)
+      space_type_name = standards_space_type.to_s
+      return true if names.include?(space_type_name)
+
+      return true if space_type_name.include?(' - ') &&
+                     !tagged_names.include?(space_type_name) &&
+                     names.include?(space_type_name.split(' - ').first)
+
+      record[:space_type].to_s == space_type_name
+    end
+
+    # Return the best-matching refrigeration rows for a space type.
+    #
+    # Explicit all-level or prototype-name rows take precedence over the existing generic
+    # refrigeration_space_type rows. The building type remains part of the match because a
+    # shared all-level space type such as retail is refrigerated only in some buildings.
+    #
+    # @param records [Array<Hash>] rows from a refrigeration data table
+    # @param space_type [OpenStudio::Model::SpaceType] the model space type being matched
+    # @return [Array<Hash>] the matching rows, preferring explicit building-specific data
+    def self.refrigeration_records_for_space_type(records, space_type)
+      standards_space_type = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
+      standards_building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
+      refrigeration_space_type = if space_type.additionalProperties.hasFeature('refrigeration_space_type')
+                                   space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
+                                 end
+      tagged_names = refrigeration_tagged_names(records)
+
+      explicit_records = records.select do |record|
+        refrigeration_record_applies?(record, standards_space_type, standards_building_type, tagged_names: tagged_names)
+      end
+      return explicit_records unless explicit_records.empty?
+
+      space_type_name_is_tagged = records.any? do |record|
+        names = record[:all_level_space_type].to_s.split('|').map(&:strip)
+        names.include?(standards_space_type.to_s) ||
+          record[:space_type].to_s == standards_space_type.to_s ||
+          (standards_space_type.to_s.include?(' - ') &&
+           !tagged_names.include?(standards_space_type.to_s) &&
+           names.include?(standards_space_type.to_s.split(' - ').first))
+      end
+      return [] if space_type_name_is_tagged
+      return [] if refrigeration_space_type.nil? || refrigeration_space_type.empty?
+
+      property_records = records.select { |record| record[:refrigeration_space_type].to_s == refrigeration_space_type }
+      return [] if property_records.empty?
+
+      specific_records = property_records.select do |record|
+        building_type = record[:standards_building_type].to_s
+        building_type = record[:building_type].to_s if building_type.empty?
+        !building_type.empty? && building_type == standards_building_type.to_s
+      end
+      return specific_records unless specific_records.empty?
+
+      property_records.select do |record|
+        record[:standards_building_type].to_s.empty? && record[:building_type].to_s.empty?
+      end
+    end
+
+    # All all-level space type names tagged in refrigeration data.
+    #
+    # @param records [Array<Hash>] rows from a refrigeration data table
+    # @return [Array<String>] unique tagged names
+    def self.refrigeration_tagged_names(records)
+      records.flat_map { |record| record[:all_level_space_type].to_s.split('|').map(&:strip) }.reject(&:empty?).uniq
+    end
+
     # Returns the typical refrigeration equipment in a model based on space types
     #
     # @param model [OpenStudio::Model::Model] OpenStudio model object
@@ -109,37 +190,10 @@ module OpenstudioStandards
         total_space_type_floor_area_m2 = space_type.floorArea
         total_space_type_floor_area_ft2 = OpenStudio.convert(total_space_type_floor_area_m2, 'm^2', 'ft^2').get
 
-        # get refrigeration space type from the object
-        next unless space_type.additionalProperties.hasFeature('refrigeration_space_type')
-
-        # skip spaces types with no refrigeration space type defined
-        refrigeration_space_type = space_type.additionalProperties.getFeatureAsString('refrigeration_space_type').to_s
-        next if refrigeration_space_type.nil?
-
         ref_thermal_zone = OpenstudioStandards::SpaceType.space_type_get_largest_thermal_zone(space_type)
 
-        ref_cases = cases_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
-        ref_walkins = walkins_hsh.select { |h| h[:refrigeration_space_type] == refrigeration_space_type }
-
-        # get standards building type and use specific standards building type information if present
-        if space_type.standardsBuildingType.is_initialized
-          standards_building_type = space_type.standardsBuildingType.get
-          building_type_specific_properties = ref_cases.select { |h| (h[:standards_building_type] == standards_building_type) }
-          if building_type_specific_properties.empty?
-            ref_cases = ref_cases.select { |h| h[:standards_building_type] == nil }
-          else
-            ref_cases = building_type_specific_properties
-          end
-          building_type_specific_properties = ref_walkins.select { |h| (h[:standards_building_type] == standards_building_type) }
-          if building_type_specific_properties.empty?
-            ref_walkins = ref_walkins.select { |h| h[:standards_building_type] == nil }
-          else
-            ref_walkins = building_type_specific_properties
-          end
-        else
-          ref_cases = ref_cases.select { |h| h[:standards_building_type] == nil }
-          ref_walkins = ref_walkins.select { |h| h[:standards_building_type] == nil }
-        end
+        ref_cases = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(cases_hsh, space_type)
+        ref_walkins = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(walkins_hsh, space_type)
 
         # create list of cases
         ref_cases.each do |ref_case|

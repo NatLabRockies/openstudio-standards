@@ -1,29 +1,81 @@
-refrigeration_space_type,standards_building_type,walkin_name,walkin_type,size_ft2,reference_space_type_area_ft2,notes
-kitchen,,Walk-in Cooler,Walk-in Cooler,150,1500,
-kitchen,,Walk-in Freezer,Walk-in Freezer,150,1500,
-kitchen,PrimarySchool,Walk-in Cooler,Walk-in Cooler,120,1800,
-kitchen,PrimarySchool,Walk-in Freezer,Walk-in Freezer,120,1800,
-kitchen,SecondarySchool,Walk-in Cooler,Walk-in Cooler,240,2325,
-kitchen,SecondarySchool,Walk-in Freezer,Walk-in Freezer,240,2325,
-kitchen,QuickServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1250,
-kitchen,QuickServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1250,
-kitchen,FullServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1500,
-kitchen,FullServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1500,
-kitchen,LargeHotel,Walk-in Cooler,Walk-in Cooler,120,1110,
-kitchen,LargeHotel,Walk-in Freezer,Walk-in Freezer,120,1110,
-kitchen,Hospital,Walk-in Cooler,Walk-in Cooler,360,10000,
-kitchen,Hospital,Walk-in Freezer,Walk-in Freezer,360,10000,
-bakery,SuperMarket,Bakery Cooler,Walk-in Cooler,120,5000,
-bakery,SuperMarket,Bakery Freezer,Walk-in Freezer,150,5000,
-kitchen,SuperMarket,Kitchen Cooler,Walk-in Cooler,290,5000,
-kitchen,SuperMarket,Kitchen Freezer,Walk-in Freezer,96,5000,
-grocery_sales,,Beer Cooler,Walk-in Cooler,320,27500,
-grocery_sales,,Dairy Cooler,Walk-in Cooler,240,27500,
-grocery_sales,,Floral Cooler,Walk-in Cooler,80,27500,
-grocery_sales,,Grocery Freezer,Walk-in Freezer,240,27500,
-grocery_sales,,Meat Cooler,Walk-in Cooler,570,27500,
-grocery_sales,,Meat Freezer,Walk-in Freezer,60,27500,
-grocery_sales,,Prep Cooler 1,Walk-in Cooler,480,27500,
-grocery_sales,,Prep Cooler 2,Walk-in Cooler,480,27500,
-grocery_sales,,Produce Cooler,Walk-in Cooler,620,27500,
-grocery_sales,,Specialty Cooler,Walk-in Cooler,72,27500
+refrigeration_space_type,standards_building_type,walkin_name,walkin_type,size_ft2,reference_space_type_area_ft2,notes,building_type,space_type,all_level_space_type
+kitchen,,Walk-in Cooler,Walk-in Cooler,150,1500,,,,
+kitchen,,Walk-in Freezer,Walk-in Freezer,150,1500,,,,
+kitchen,PrimarySchool,Walk-in Cooler,Walk-in Cooler,120,1800,,PrimarySchool,,
+kitchen,PrimarySchool,Walk-in Freezer,Walk-in Freezer,120,1800,,PrimarySchool,,
+kitchen,SecondarySchool,Walk-in Cooler,Walk-in Cooler,240,2325,,SecondarySchool,,
+kitchen,SecondarySchool,Walk-in Freezer,Walk-in Freezer,240,2325,,SecondarySchool,,
+kitchen,QuickServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1250,,QuickServiceRestaurant,,
+kitchen,QuickServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1250,,QuickServiceRestaurant,,
+kitchen,FullServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1500,,FullServiceRestaurant,,
+kitchen,FullServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1500,,FullServiceRestaurant,,
+kitchen,LargeHotel,Walk-in Cooler,Walk-in Cooler,120,1110,,LargeHotel,,
+kitchen,LargeHotel,Walk-in Freezer,Walk-in Freezer,120,1110,,LargeHotel,,
+kitchen,Hospital,Walk-in Cooler,Walk-in Cooler,360,10000,,Hospital,,
+kitchen,Hospital,Walk-in Freezer,Walk-in Freezer,360,10000,,Hospital,,
+bakery,SuperMarket,Bakery Cooler,Walk-in Cooler,120,5000,,SuperMarket,,
+bakery,SuperMarket,Bakery Freezer,Walk-in Freezer,150,5000,,SuperMarket,,
+kitchen,SuperMarket,Kitchen Cooler,Walk-in Cooler,290,5000,,SuperMarket,,
+kitchen,SuperMarket,Kitchen Freezer,Walk-in Freezer,96,5000,,SuperMarket,,
+grocery_sales,,Beer Cooler,Walk-in Cooler,320,27500,,,,
+grocery_sales,,Dairy Cooler,Walk-in Cooler,240,27500,,,,
+grocery_sales,,Floral Cooler,Walk-in Cooler,80,27500,,,,
+grocery_sales,,Grocery Freezer,Walk-in Freezer,240,27500,,,,
+grocery_sales,,Meat Cooler,Walk-in Cooler,570,27500,,,,
+grocery_sales,,Meat Freezer,Walk-in Freezer,60,27500,,,,
+grocery_sales,,Prep Cooler 1,Walk-in Cooler,480,27500,,,,
+grocery_sales,,Prep Cooler 2,Walk-in Cooler,480,27500,,,,
+grocery_sales,,Produce Cooler,Walk-in Cooler,620,27500,,,,
+grocery_sales,,Specialty Cooler,Walk-in Cooler,72,27500,,,,
+kitchen,PrimarySchool,Walk-in Cooler,Walk-in Cooler,120,1800,,PrimarySchool,Kitchen,food preparation - primary school
+kitchen,PrimarySchool,Walk-in Freezer,Walk-in Freezer,120,1800,,PrimarySchool,Kitchen,food preparation - primary school
+kitchen,SecondarySchool,Walk-in Cooler,Walk-in Cooler,240,2325,,SecondarySchool,Kitchen,food preparation - secondary school
+kitchen,SecondarySchool,Walk-in Freezer,Walk-in Freezer,240,2325,,SecondarySchool,Kitchen,food preparation - secondary school
+kitchen,QuickServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1250,,QuickServiceRestaurant,Kitchen,food preparation
+kitchen,QuickServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1250,,QuickServiceRestaurant,Kitchen,food preparation
+kitchen,FullServiceRestaurant,Walk-in Cooler,Walk-in Cooler,100,1500,,FullServiceRestaurant,Kitchen,food preparation
+kitchen,FullServiceRestaurant,Walk-in Freezer,Walk-in Freezer,100,1500,,FullServiceRestaurant,Kitchen,food preparation
+kitchen,LargeHotel,Walk-in Cooler,Walk-in Cooler,120,1110,,LargeHotel,Kitchen,food preparation
+kitchen,LargeHotel,Walk-in Freezer,Walk-in Freezer,120,1110,,LargeHotel,Kitchen,food preparation
+kitchen,Hospital,Walk-in Cooler,Walk-in Cooler,360,10000,,Hospital,Kitchen,food preparation
+kitchen,Hospital,Walk-in Freezer,Walk-in Freezer,360,10000,,Hospital,Kitchen,food preparation
+,SuperMarket,Bakery Cooler,Walk-in Cooler,120,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Bakery Freezer,Walk-in Freezer,150,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Beer Cooler,Walk-in Cooler,320,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Dairy Cooler,Walk-in Cooler,240,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Floral Cooler,Walk-in Cooler,80,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Grocery Freezer,Walk-in Freezer,240,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Kitchen Cooler,Walk-in Cooler,290,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Kitchen Freezer,Walk-in Freezer,96,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Meat Cooler,Walk-in Cooler,570,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Meat Freezer,Walk-in Freezer,60,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Prep Cooler 1,Walk-in Cooler,480,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Prep Cooler 2,Walk-in Cooler,480,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Produce Cooler,Walk-in Cooler,620,4500,,SuperMarket,DryStorage,storage
+,SuperMarket,Specialty Cooler,Walk-in Cooler,72,4500,,SuperMarket,DryStorage,storage
+kitchen,EPr,Walk-in Cooler,Walk-in Cooler,120,1750,,EPr,Kitchen,food preparation - primary school
+kitchen,EPr,Walk-in Freezer,Walk-in Freezer,120,1750,,EPr,Kitchen,food preparation - primary school
+kitchen,ESe,Walk-in Cooler,Walk-in Cooler,240,2630,,ESe,Kitchen,food preparation - secondary school
+kitchen,ESe,Walk-in Freezer,Walk-in Freezer,240,2630,,ESe,Kitchen,food preparation - secondary school
+,RFF,Walk-in Cooler,Walk-in Cooler,100,800,"No DEER RFF or RSD model has a StockRoom space type, so these four rows have never matched anything. Left untagged so the all-level crosswalk does not activate dead data. Under an ASHRAE template the same ComStock restaurant reaches the QuickServiceRestaurant and FullServiceRestaurant rows through 'food preparation'.",RFF,StockRoom,
+,RFF,Walk-in Freezer,Walk-in Freezer,100,800,see the RFF Walk-in Cooler note,RFF,StockRoom,
+,RSD,Walk-in Cooler,Walk-in Cooler,100,1600,see the RFF Walk-in Cooler note,RSD,StockRoom,
+,RSD,Walk-in Freezer,Walk-in Freezer,100,5000,see the RFF Walk-in Cooler note,RSD,StockRoom,
+kitchen,Htl,Walk-in Cooler,Walk-in Cooler,120,1000,,Htl,Kitchen,food preparation
+kitchen,Htl,Walk-in Freezer,Walk-in Freezer,120,1000,,Htl,Kitchen,food preparation
+kitchen,Hsp,Walk-in Cooler,Walk-in Cooler,360,1875,,Hsp,Kitchen,food preparation
+kitchen,Hsp,Walk-in Freezer,Walk-in Freezer,360,1875,,Hsp,Kitchen,food preparation
+grocery_sales,Gro,Bakery Cooler,Walk-in Cooler,120,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Bakery Freezer,Walk-in Freezer,150,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Beer Cooler,Walk-in Cooler,320,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Dairy Cooler,Walk-in Cooler,240,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Floral Cooler,Walk-in Cooler,80,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Grocery Freezer,Walk-in Freezer,240,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Kitchen Cooler,Walk-in Cooler,290,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Kitchen Freezer,Walk-in Freezer,96,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Meat Cooler,Walk-in Cooler,570,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Meat Freezer,Walk-in Freezer,60,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Prep Cooler 1,Walk-in Cooler,480,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Prep Cooler 2,Walk-in Cooler,480,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Produce Cooler,Walk-in Cooler,620,40000,,Gro,GrocSales,retail
+grocery_sales,Gro,Specialty Cooler,Walk-in Cooler,72,40000,,Gro,GrocSales,retail
