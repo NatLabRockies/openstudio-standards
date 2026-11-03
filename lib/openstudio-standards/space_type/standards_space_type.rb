@@ -10,6 +10,7 @@ module OpenstudioStandards
     # @param space_type [OpenStudio::Model::SpaceType] space type being resolved
     # @return [Hash, nil] matching properties, or nil when the name is unknown
     def self.resolve_space_type_properties(space_types_data, space_type_name, space_type)
+      space_types_data = space_types_data.reject { |s| s[:prototype_standards_building_type] }
       if space_type.standardsBuildingType.is_initialized
         building_type = space_type.standardsBuildingType.get.to_s
         suffix = building_type.gsub(/([a-z\d])([A-Z])/, '\1 \2').downcase
@@ -18,6 +19,27 @@ module OpenstudioStandards
       end
 
       space_types_data.find { |s| s[:space_type_name] == space_type_name }
+    end
+
+    # Resolve a service-water category for a specific prototype building/space type pair.
+    #
+    # @param space_types_data [Array<Hash>] parsed space_types.json data with symbol keys
+    # @param space_type [OpenStudio::Model::SpaceType] space type being resolved
+    # @return [String, nil] pair-specific service-water category, or nil if no override exists
+    def self.resolve_service_water_space_type_name(space_types_data, space_type)
+      building_type = space_type.additionalProperties.getFeatureAsString('prototype_standards_building_type')
+      building_type = space_type.standardsBuildingType if building_type.empty?
+      return nil if building_type.empty?
+
+      standards_space_type = space_type.additionalProperties.getFeatureAsString('prototype_standards_space_type')
+      standards_space_type = space_type.standardsSpaceType if standards_space_type.empty?
+      return nil if standards_space_type.empty?
+
+      override = space_types_data.find do |properties|
+        properties[:prototype_standards_building_type] == building_type.get &&
+          properties[:prototype_standards_space_type] == standards_space_type.get
+      end
+      override.nil? ? nil : override[:service_water_space_type_name]
     end
 
     # Assign standards space type additional properties to all space types in the model.
@@ -60,7 +82,9 @@ module OpenstudioStandards
           space_type.additionalProperties.setFeature('natural_gas_equipment_space_type', natural_gas_equipment_space_type_name)
           refrigeration_space_type_name = space_type_properties[:refrigeration_space_type_name].nil? ? 'na' : space_type_properties[:refrigeration_space_type_name]
           space_type.additionalProperties.setFeature('refrigeration_space_type', refrigeration_space_type_name)
-          service_water_space_type_name = space_type_properties[:service_water_space_type_name].nil? ? 'na' : space_type_properties[:service_water_space_type_name]
+          service_water_space_type_name = OpenstudioStandards::SpaceType.resolve_service_water_space_type_name(space_types_data, space_type)
+          service_water_space_type_name ||= space_type_properties[:service_water_space_type_name]
+          service_water_space_type_name = 'na' if service_water_space_type_name.nil?
           space_type.additionalProperties.setFeature('service_water_space_type', service_water_space_type_name)
           ventilation_space_type_name = space_type_properties[:ventilation_space_type_name].nil? ? 'na' : space_type_properties[:ventilation_space_type_name]
           space_type.additionalProperties.setFeature('ventilation_space_type', ventilation_space_type_name)

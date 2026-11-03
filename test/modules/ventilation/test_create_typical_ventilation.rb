@@ -62,6 +62,16 @@ class TestVentilationCreateTypical < Minitest::Test
     assert_equal(false, outside_vocabulary.designSpecificationOutdoorAir.is_initialized)
   end
 
+  def test_procedure_room_uses_ashrae_170_outdoor_air_changes
+    model = model_with('procedure room')
+
+    @vent.create_typical_ventilation(model, template: '90.1-2013')
+
+    dsoa = space_type(model, 'procedure room').designSpecificationOutdoorAir.get
+    assert_in_delta(3.0, dsoa.outdoorAirFlowAirChangesperHour, 0.0001)
+    assert_equal('curated | ASHRAE 170-2021', dsoa.additionalProperties.getFeatureAsString('ventilation_standard').get)
+  end
+
   def test_create_typical_ventilation_overwrites_existing
     model = model_with('office')
     office = space_type(model, 'office')

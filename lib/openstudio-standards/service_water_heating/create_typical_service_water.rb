@@ -25,6 +25,7 @@ module OpenstudioStandards
 
       # @todo remove once model_add_schedule is refactored
       std = Standard.build('90.1-2013')
+      data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_water_use_equipment.json"), symbolize_names: true)
 
       # loop through space types adding demand side of swh
       model.getSpaces.sort.each do |space|
@@ -34,29 +35,7 @@ module OpenstudioStandards
         total_space_floor_area_ft2 = OpenStudio.convert(total_space_floor_area_m2, 'm^2', 'ft^2').get
         space_type = space.spaceType.get
 
-        # get refrigeration space type from the object
-        next unless space_type.additionalProperties.hasFeature('service_water_space_type')
-
-        # skip spaces types with no refrigeration space type defined
-        service_water_space_type = space_type.additionalProperties.getFeatureAsString('service_water_space_type').to_s
-        next if service_water_space_type.nil?
-
-        # load typical water use equipment data
-        data = JSON.parse(File.read("#{File.dirname(__FILE__)}/data/typical_water_use_equipment.json"), symbolize_names: true)
-        space_type_properties = data[:service_water_space_types].select { |hash| (hash[:service_water_space_type] == service_water_space_type) }
-
-        # get standards building type and use specific standards building type information if present
-        if space_type.standardsBuildingType.is_initialized
-          standards_building_type = space_type.standardsBuildingType.get
-          building_type_specific_properties = space_type_properties.select { |h| (h[:standards_building_type] == standards_building_type) }
-          if building_type_specific_properties.empty?
-            space_type_properties = space_type_properties.select { |h| h[:standards_building_type] == nil }
-          else
-            space_type_properties = building_type_specific_properties
-          end
-        else
-          space_type_properties = space_type_properties.select { |h| h[:standards_building_type] == nil }
-        end
+        space_type_properties = OpenstudioStandards::ServiceWaterHeating.service_water_data_for_space_type(data, space_type)
 
         # skip spaces with no equipment defined
         next if space_type_properties.empty?
@@ -97,7 +76,7 @@ module OpenstudioStandards
 
           # If there is no SWH schedule, assume no SWH use for this space type.
           unless flow_rate_schedule
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating', "No service water heating schedule was specified for space type #{space_type.name} with service water space type #{service_water_space_type}. Assuming an always off schedule.")
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ServiceWaterHeating', "No service water heating schedule was specified for space type #{space_type.name}. Assuming an always off schedule.")
             flow_rate_schedule = model.alwaysOffDiscreteSchedule
           end
 
@@ -221,7 +200,10 @@ module OpenstudioStandards
         end
 
         # size to shared water use and booster water use equipment
-        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(shared_water_use_equipment + booster_water_use_equipment)
+        water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(
+          shared_water_use_equipment + booster_water_use_equipment,
+          apply_multiplier: false
+        )
         water_heater_capacity_w = water_heater_sizing[:water_heater_capacity]
         water_heater_volume_m3 = water_heater_sizing[:water_heater_volume]
 
@@ -241,8 +223,7 @@ module OpenstudioStandards
 
         # Attach all water use equipment to the shared loop
         shared_water_use_equipment.sort.each do |water_use_equip|
-          swh_connection = water_use_equip.waterUseConnections
-          shared_swh_loop.addDemandBranchForComponent(swh_connection.get) if swh_connection.is_initialized
+          OpenstudioStandards::ServiceWaterHeating.attach_water_use_to_loop(water_use_equip, shared_swh_loop)
         end
 
         # Attach booster water heater loop to shared loop
@@ -255,7 +236,8 @@ module OpenstudioStandards
           booster_water_heater_sizing = OpenstudioStandards::ServiceWaterHeating.water_heater_sizing_from_water_use_equipment(booster_water_use_equipment,
                                                                                                                               water_heater_efficiency: 1.0,
                                                                                                                               inlet_temperature: 140.0,
-                                                                                                                              supply_temperature: booster_supply_temperature_f)
+                                                                                                                              supply_temperature: booster_supply_temperature_f,
+                                                                                                                              apply_multiplier: false)
 
           # Note that booster water heaters are always assumed to be electric resistance
           booster_water_loop_temperature_c = OpenStudio.convert(180.0, 'F', 'C').get
@@ -271,13 +253,37 @@ module OpenstudioStandards
 
           # Attach booster water use equipment to the booster loop
           booster_water_use_equipment.each do |booster_equip|
-            booster_swh_connection = booster_equip.waterUseConnections
-            swh_booster_loop.addDemandBranchForComponent(booster_swh_connection.get) if booster_swh_connection.is_initialized
+            OpenstudioStandards::ServiceWaterHeating.attach_water_use_to_loop(booster_equip, swh_booster_loop)
           end
         end
       end
 
       return swh_systems
+    end
+
+    # Select water-use data by the service_water_space_type additional property.
+    #
+    # @param data [Hash] water-use equipment data from typical_water_use_equipment.json
+    # @param space_type [OpenStudio::Model::SpaceType] the model space type being matched
+    # @return [Array<Hash>] matching water-use records
+    def self.service_water_data_for_space_type(data, space_type)
+      standards_building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
+      return [] unless space_type.additionalProperties.hasFeature('service_water_space_type')
+
+      service_water_space_type = space_type.additionalProperties.getFeatureAsString('service_water_space_type').to_s
+      return [] if service_water_space_type.empty? || service_water_space_type == 'na'
+
+      legacy_records = Array(data[:service_water_space_types]).select do |record|
+        record[:service_water_space_type] == service_water_space_type
+      end
+      return legacy_records.select { |record| record[:standards_building_type].nil? } if standards_building_type.nil?
+
+      building_type_specific_records = legacy_records.select do |record|
+        record[:standards_building_type] == standards_building_type
+      end
+      return building_type_specific_records unless building_type_specific_records.empty?
+
+      legacy_records.select { |record| record[:standards_building_type].nil? }
     end
 
     # Check if the standards building type tends to have a circulating system by default

@@ -259,6 +259,19 @@
     "critical_operation": false
   },
   {
+    "space_type_name": "procedure room",
+    "description": null,
+    "annotation": null,
+    "lighting_space_type_name": "exam_treatment_lighting",
+    "electric_equipment_space_type_name": "exam_treatment_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "refrigeration_space_type_name": null,
+    "service_water_space_type_name": "procedure_room",
+    "ventilation_space_type_name": "procedure_room_ventilation",
+    "schedule_set_name": "exam_treatment",
+    "critical_operation": false
+  },
+  {
     "space_type_name": "exercise area",
     "description": null,
     "annotation": null,
@@ -317,7 +330,7 @@
     "electric_equipment_space_type_name": "guest_room_electric_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": "guest_room",
+    "service_water_space_type_name": "guest room vacant",
     "ventilation_space_type_name": "guest_room_ventilation",
     "schedule_set_name": "guest_room_vacant"
   },
@@ -329,7 +342,7 @@
     "electric_equipment_space_type_name": "imaging_room_equipment",
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
-    "service_water_space_type_name": null,
+    "service_water_space_type_name": "imaging",
     "ventilation_space_type_name": "imaging_ventilation",
     "schedule_set_name": "exam_treatment",
     "critical_operation": false
@@ -568,6 +581,19 @@
     "critical_operation": false
   },
   {
+    "space_type_name": "whole building office",
+    "description": null,
+    "annotation": null,
+    "lighting_space_type_name": "office_lighting",
+    "electric_equipment_space_type_name": "office_open_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "refrigeration_space_type_name": null,
+    "service_water_space_type_name": "whole_building_office",
+    "ventilation_space_type_name": "office_ventilation",
+    "schedule_set_name": "office_open",
+    "critical_operation": false
+  },
+  {
     "space_type_name": "office/enclosed",
     "description": null,
     "annotation": null,
@@ -719,6 +745,19 @@
     "natural_gas_equipment_space_type_name": null,
     "refrigeration_space_type_name": null,
     "service_water_space_type_name": null,
+    "ventilation_space_type_name": "retail_sales_ventilation",
+    "schedule_set_name": "sales",
+    "critical_operation": false
+  },
+  {
+    "space_type_name": "whole building retail",
+    "description": null,
+    "annotation": null,
+    "lighting_space_type_name": "retail_sales_lighting",
+    "electric_equipment_space_type_name": "sales_electric_equipment",
+    "natural_gas_equipment_space_type_name": null,
+    "refrigeration_space_type_name": null,
+    "service_water_space_type_name": "whole_building_retail",
     "ventilation_space_type_name": "retail_sales_ventilation",
     "schedule_set_name": "sales",
     "critical_operation": false

@@ -17,6 +17,8 @@ require 'json'
 # service_water_space_type_name: The service water typical to this space type
 # ventilation_space_type_name: The ventilation typical to this space type.
 # schedule_set_name: The schedule set typical to this space type.
+# prototype_standards_building_type and prototype_standards_space_type: Optional
+#   building-specific service-water mapping for a prototype space type pair.
 
 def convert_space_type_data_to_json(input_csv = 'space_types.csv',
                                     output_json = 'space_types.json')
@@ -35,7 +37,9 @@ def convert_space_type_data_to_json(input_csv = 'space_types.csv',
       refrigeration_space_type_name: row[:refrigeration_space_type_name],
       service_water_space_type_name: row[:service_water_space_type_name],
       ventilation_space_type_name: row[:ventilation_space_type_name],
-      schedule_set_name: row[:schedule_set_name]
+      schedule_set_name: row[:schedule_set_name],
+      prototype_standards_building_type: row[:prototype_standards_building_type],
+      prototype_standards_space_type: row[:prototype_standards_space_type]
     }
 
     # Add the space_type_hash to the result array
@@ -64,7 +68,9 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
     :refrigeration_space_type_name,
     :service_water_space_type_name,
     :ventilation_space_type_name,
-    :schedule_set_name
+    :schedule_set_name,
+    :prototype_standards_building_type,
+    :prototype_standards_space_type
   ]
 
   # Write the CSV file
@@ -80,7 +86,9 @@ def convert_space_type_data_to_csv(input_json = 'space_types.json',
         space_type_entry[:refrigeration_space_type_name],
         space_type_entry[:service_water_space_type_name],
         space_type_entry[:ventilation_space_type_name],
-        space_type_entry[:schedule_set_name]
+        space_type_entry[:schedule_set_name],
+        space_type_entry[:prototype_standards_building_type],
+        space_type_entry[:prototype_standards_space_type]
       ]
     end
   end

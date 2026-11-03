@@ -323,6 +323,22 @@
       ]
     },
     {
+      "service_water_space_type": "procedure_room",
+      "standards_building_type": "Outpatient",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.007017544,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
       "service_water_space_type": "recovery",
       "standards_building_type": "Outpatient",
       "water_use_equipment": [
@@ -510,7 +526,7 @@
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.064102564,
-          "loop_type": "Shared",
+          "loop_type": "One Per Space",
           "mixed_water_temperature_f": 110.0,
           "flow_rate_schedule": "HotelSmall LaundryRoom_SHW_Sch",
           "sensible_fraction": 0.2,
@@ -715,6 +731,86 @@
           "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_RSD_All_DHW_DHW_Yr",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "exam_treatment",
+      "standards_building_type": "Hospital",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.003333333,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "imaging",
+      "standards_building_type": "Hospital",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.000190476,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "whole_building_office",
+      "standards_building_type": "Office",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.000516521,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "OfficeLarge BLDG_SWH_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "guest room vacant",
+      "standards_building_type": "SmallHotel",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.006324786,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "HotelSmall AlwaysOff",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "whole_building_retail",
+      "standards_building_type": "StripMall",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": 1.8,
+          "peak_flow_rate_gph_per_floor_area_ft2": null,
+          "loop_type": "One Per Space",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "RetailStripmall Type2_SWH_SCH",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
