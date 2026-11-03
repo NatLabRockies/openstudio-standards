@@ -522,7 +522,8 @@ module OpenstudioStandards
           model.getFanZoneExhausts.each(&:remove)
         end
 
-        zone_exhaust_fans = standard.model_add_exhaust(model, makeup_source: kitchen_makeup)
+        zone_exhaust_fans = OpenstudioStandards::HVAC.create_typical_exhaust(model, standard,
+                                                                             makeup_source: kitchen_makeup)
         zone_exhaust_fans.each do |zone_exhaust_fan|
           max_flow_rate_ip = OpenStudio.convert(zone_exhaust_fan.maximumFlowRate.get, 'm^3/s', 'cfm').get
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Adding #{OpenStudio.toNeatString(max_flow_rate_ip, 0, true)} (cfm) of exhaust to #{zone_exhaust_fan.thermalZone.get.name}")
@@ -851,6 +852,10 @@ module OpenstudioStandards
         # adjust infiltration schedules
         if add_infiltration
           OpenstudioStandards::Infiltration.model_set_nist_infiltration_schedules(model)
+        end
+
+        if add_exhaust
+          OpenstudioStandards::HVAC.exhaust_fans_follow_hvac_availability(model)
         end
       end
 
