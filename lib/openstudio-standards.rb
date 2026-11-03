@@ -34,6 +34,9 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/interior_lighting/create_lights'
   require_relative 'openstudio-standards/interior_lighting/create_typical_interior_lighting'
 
+  # Occupancy Module
+  require_relative 'openstudio-standards/occupancy/create_typical_occupancy'
+
   # Daylighting Module
   require_relative 'openstudio-standards/daylighting/space'
 
