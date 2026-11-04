@@ -2239,6 +2239,18 @@ class Standard
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished applying multizone vav OA sizing.')
   end
 
+  # Applies zone outdoor-air minimums to VAV terminals after a sizing run.
+  #
+  # @param model [OpenStudio::Model::Model] model to update
+  # @return [Integer] number of terminals whose minimum was raised
+  def model_apply_vav_terminal_minimum_outdoor_air(model)
+    raised = model.getAirLoopHVACs.sort.sum do |air_loop|
+      air_loop_hvac_apply_vav_terminal_minimum_outdoor_air(air_loop)
+    end
+    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Raised the minimum airflow of #{raised} VAV terminals to cover their zone outdoor air.") if raised.positive?
+    raised
+  end
+
   # Applies the HVAC parts of the template to all objects in the model using the the template specified in the model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio model object

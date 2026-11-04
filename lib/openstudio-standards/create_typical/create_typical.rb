@@ -837,6 +837,8 @@ module OpenstudioStandards
             return false
           end
 
+          standard.model_apply_vav_terminal_minimum_outdoor_air(model)
+
           # If there are any multizone systems, reset damper positions
           # to achieve a 60% ventilation effectiveness minimum for the system
           # following the ventilation rate procedure from 62.1
