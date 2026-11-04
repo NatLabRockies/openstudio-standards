@@ -1931,6 +1931,9 @@ Standard.class_eval do
     # to reflect damper leakage per PNNL
     econ_max_70_pct_oa_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     econ_max_70_pct_oa_sch.setName('Economizer Max OA Fraction 70 pct')
+    econ_max_70_pct_oa_sch.setScheduleTypeLimits(
+      OpenstudioStandards::Schedules.create_schedule_type_limits(model, standard_schedule_type_limit: 'Fractional')
+    )
     econ_max_70_pct_oa_sch.defaultDaySchedule.setName('Economizer Max OA Fraction 70 pct Default')
     econ_max_70_pct_oa_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.7)
 

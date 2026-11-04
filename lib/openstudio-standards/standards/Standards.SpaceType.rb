@@ -497,6 +497,17 @@ class Standard
     return true
   end
 
+  # @deprecated Renamed to space_type_apply_standard_internal_load_schedules.
+  def space_type_apply_internal_load_schedules(space_type, set_people: true, set_lights: true, set_electric_equipment: true, set_gas_equipment: true, set_ventilation: true)
+    OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.SpaceType', 'space_type_apply_internal_load_schedules is deprecated; use space_type_apply_standard_internal_load_schedules.')
+    space_type_apply_standard_internal_load_schedules(space_type,
+                                                      set_people: set_people,
+                                                      set_lights: set_lights,
+                                                      set_electric_equipment: set_electric_equipment,
+                                                      set_gas_equipment: set_gas_equipment,
+                                                      set_ventilation: set_ventilation)
+  end
+
   # Makes a thermostat for this space type from the schedules listed for the space type.
   # This thermostat is not hooked to any zone by this method,but may be found and used later.
   #

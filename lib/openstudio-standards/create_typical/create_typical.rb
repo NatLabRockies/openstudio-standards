@@ -27,6 +27,11 @@ module OpenstudioStandards
     # @param wall_construction_type [String] wall construction type.
     #  Options are 'Inferred', 'Mass', 'Metal Building', 'WoodFramed', 'SteelFramed'
     # @param add_space_type_loads [Boolean] Populate existing standards space types in the model with internal loads
+    # @param space_type_load_method [String] Source of internal load definitions: 'standards' or 'typical'.
+    #   'standards' uses the template's standards space type data. 'typical' uses the module-level
+    #   typical occupancy, lighting, equipment, and ventilation data for the space type.
+    # @param lighting_generation [String] Lighting generation used with the 'typical' load method.
+    #   See InteriorLighting.create_typical_interior_lighting.
     # @param add_daylighting_controls [Boolean] Add daylighting controls
     # @param add_infiltration [Boolean] Adds infiltration to the model based on cosntruction
     # @param add_elevators [Boolean] Apply elevators directly to a space in the model instead of to a space type
@@ -38,7 +43,13 @@ module OpenstudioStandards
     # @param add_thermostat [Boolean] Add thermostats to thermal zones based on the standards space type
     # @param add_refrigeration [Boolean] Add refrigerated cases and walkin refrigeration
     # @param refrigeration_template [String] The refrigeration technology level, either 'old', 'new', or 'advanced'
-    # @param schedule_method [String] The method for creating schedules for internal loads and thermostats. Options are 'prototype' or 'parametric'. 'prototype' uses the default schedules from the legacy DOE Prototype Models. 'parametric' creates schedules based on parametric occupancy schedules and derives internal load schedules from those. 'parametric' is recommend, as it results in more realistic schedules and better alignment between internal loads and occupancy.
+    # @param schedule_method [String] The method for creating schedules for internal loads and thermostats.
+    #   Options are 'prototype' or 'parametric'. 'prototype' uses the default schedules from the
+    #   legacy DOE Prototype Models. 'parametric' creates schedules based on parametric occupancy
+    #   schedules and derives internal load schedules from those, resulting in more realistic
+    #   schedules and better alignment between internal loads and occupancy. When nil, the method
+    #   follows the space type load method: 'prototype' with 'standards' loads, preserving existing
+    #   behavior, and 'parametric' with 'typical' loads, which have no prototype schedule data.
     # @param modify_wkdy_op_hrs [Boolean] Modify the default weekday hours of operation
     # @param wkdy_op_hrs_start_time [Double] Weekday operating hours start time. Enter as a fractional value, e.g. 5:15pm is 17.25. Only used if modify_wkdy_op_hrs is true.
     # @param wkdy_op_hrs_duration [Double] Weekday operating hours duration from start time. Enter as a fractional value, e.g. 5:15pm is 17.25. Only used if modify_wkdy_op_hrs is true.
@@ -68,6 +79,8 @@ module OpenstudioStandards
                                                 add_constructions: true,
                                                 wall_construction_type: 'Inferred',
                                                 add_space_type_loads: true,
+                                                space_type_load_method: 'standards',
+                                                lighting_generation: 'gen4_led',
                                                 add_daylighting_controls: true,
                                                 add_infiltration: true,
                                                 add_elevators: true,
@@ -79,7 +92,7 @@ module OpenstudioStandards
                                                 add_thermostat: true,
                                                 add_refrigeration: true,
                                                 refrigeration_template: 'new',
-                                                schedule_method: 'parametric',
+                                                schedule_method: nil,
                                                 modify_wkdy_op_hrs: false,
                                                 wkdy_op_hrs_start_time: 8.0,
                                                 wkdy_op_hrs_duration: 8.0,
@@ -105,6 +118,19 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "Could not parse schedule_overrides JSON string: #{e.message}")
           schedule_overrides = nil
         end
+      end
+
+      unless ['standards', 'typical'].include?(space_type_load_method)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "space_type_load_method '#{space_type_load_method}' is not recognized. Options are 'standards' or 'typical'.")
+        return false
+      end
+      schedule_method = space_type_load_method == 'typical' ? 'parametric' : 'prototype' if schedule_method.nil?
+      unless ['prototype', 'parametric'].include?(schedule_method)
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "schedule_method '#{schedule_method}' is not recognized. Options are 'prototype' or 'parametric'.")
+        return false
+      end
+      if space_type_load_method == 'typical' && schedule_method == 'prototype'
+        OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "The 'prototype' schedule method relies on standards space type data and may not find schedules for space types using the 'typical' load method. The 'parametric' schedule method is recommended.")
       end
 
       # report initial condition of model
@@ -226,7 +252,11 @@ module OpenstudioStandards
       end
 
       # set space type additional properties
-      standard.prototype_space_type_map(model, reset_standards_space_type: false, set_additional_properties: true)
+      if space_type_load_method == 'typical'
+        OpenstudioStandards::SpaceType.set_standards_space_type_additional_properties(model)
+      else
+        standard.prototype_space_type_map(model, reset_standards_space_type: false, set_additional_properties: true)
+      end
 
       # add internal loads to space types
       if add_space_type_loads
@@ -245,14 +275,20 @@ module OpenstudioStandards
           model.getDefaultScheduleSets.each(&:remove)
         end
 
+        if space_type_load_method == 'typical'
+          OpenstudioStandards::Occupancy.create_typical_occupancy(model, template: template)
+          OpenstudioStandards::InteriorLighting.create_typical_interior_lighting(model, lighting_generation: lighting_generation)
+          OpenstudioStandards::Equipment.create_typical_equipment(model, building_type_fallback: true)
+          OpenstudioStandards::Ventilation.create_typical_ventilation(model, template: template)
+        end
+
         model.getSpaceTypes.sort.each do |space_type|
-          # split out parts here to allow different options for lighting and ventilation
-          # lighting standard or technology
-          # ventilation standard
-          test = standard.space_type_apply_internal_loads(space_type)
-          if test == false
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Could not add loads for #{space_type.name}. Not expected for #{template}")
-            next
+          unless space_type_load_method == 'typical'
+            test = standard.space_type_apply_internal_loads(space_type)
+            if test == false
+              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CreateTypical', "Could not add loads for #{space_type.name}. Not expected for #{template}")
+              next
+            end
           end
 
           # apply internal load schedules
