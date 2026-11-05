@@ -4,6 +4,37 @@ module OpenstudioStandards
     # @!group CreateTypical
     # Methods to create typical models
 
+    # Parse a construction set specification supplied as a Ruby hash or JSON string.
+    #
+    # @param constructions [Hash, String, nil] construction set specification
+    # @return [Hash, nil] deeply symbolized specification, or nil when absent or invalid
+    def self.parse_constructions_argument(constructions)
+      if constructions.is_a?(String)
+        return nil if constructions.strip.empty?
+
+        begin
+          constructions = JSON.parse(constructions, symbolize_names: true)
+        rescue JSON::ParserError => e
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "Could not parse constructions JSON string: #{e.message}")
+          return nil
+        end
+      end
+      return nil unless constructions.is_a?(Hash)
+      return nil if constructions.empty?
+
+      symbolize = lambda do |value|
+        case value
+        when Hash
+          value.each_with_object({}) { |(key, item), result| result[key.to_sym] = symbolize.call(item) }
+        when Array
+          value.map { |item| symbolize.call(item) }
+        else
+          value
+        end
+      end
+      symbolize.call(constructions)
+    end
+
     # create typical building from model
     # creates a complete energy model from model with defined geometry and standards space type assignments
     #
@@ -24,6 +55,8 @@ module OpenstudioStandards
     # @param exterior_lighting_zone [String] The exterior lighting zone for exterior lighting allowance.
     #   Options are '0 - Undeveloped Areas Parks', '1 - Developed Areas Parks', '2 - Neighborhood', '3 - All Other Areas', '4 - High Activity'
     # @param add_constructions [Boolean] Create and apply default construction set
+    # @param constructions [Hash, String, nil] Optional construction set specification. May be a
+    #   Ruby hash or JSON string; named construction types can be used without a construction_sets row.
     # @param wall_construction_type [String] wall construction type.
     #  Options are 'Inferred', 'Mass', 'Metal Building', 'WoodFramed', 'SteelFramed'
     # @param add_space_type_loads [Boolean] Populate existing standards space types in the model with internal loads
@@ -77,6 +110,7 @@ module OpenstudioStandards
                                                 kitchen_makeup: 'Adjacent',
                                                 exterior_lighting_zone: '3 - All Other Areas',
                                                 add_constructions: true,
+                                                constructions: nil,
                                                 wall_construction_type: 'Inferred',
                                                 add_space_type_loads: true,
                                                 space_type_load_method: 'standards',
@@ -108,6 +142,11 @@ module OpenstudioStandards
                                                 sizing_run_directory: nil)
       # sizing run directory
       sizing_run_directory = Dir.pwd if sizing_run_directory.nil?
+
+      construction_spec = OpenstudioStandards::CreateTypical.parse_constructions_argument(constructions)
+      if !constructions.nil? && !constructions.to_s.strip.empty? && construction_spec.nil? && constructions != {}
+        return false
+      end
 
       # accept schedule_overrides as a Ruby array (API callers) or a JSON string
       # (flat-typed measure callers). See space_type_apply_parametric_internal_load_schedules.
@@ -360,9 +399,28 @@ module OpenstudioStandards
       lookup_building_type = standard.model_get_lookup_name(primary_bldg_type)
       model.getBuilding.setStandardsBuildingType(primary_bldg_type)
 
+      construction_default = if construction_spec.nil?
+                               nil
+                             elsif construction_spec[:default].is_a?(Hash)
+                               construction_spec[:default]
+                             else
+                               construction_spec
+                             end
+      spec_category = lambda do |surface|
+        next nil if construction_default.nil?
+
+        surface_spec = construction_default[:surfaces].is_a?(Hash) ? construction_default[:surfaces][surface] : nil
+        surface_category = surface_spec[:building_category] if surface_spec.is_a?(Hash)
+        surface_category || construction_default[:building_category]
+      end
+      ground_wall_category = spec_category.call(:ground_contact_wall) || spec_category.call(:exterior_wall)
+      ground_floor_category = spec_category.call(:ground_contact_floor)
+
       # set FC factor constructions before adding other constructions
-      standard.model_set_below_grade_wall_constructions(model, lookup_building_type, climate_zone)
-      standard.model_set_floor_constructions(model, lookup_building_type, climate_zone)
+      standard.model_set_below_grade_wall_constructions(model, lookup_building_type, climate_zone,
+                                                        building_category: ground_wall_category)
+      standard.model_set_floor_constructions(model, lookup_building_type, climate_zone,
+                                             building_category: ground_floor_category)
       if model.getFFactorGroundFloorConstructions.empty?
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', 'Unable to determine FC factor value to use. Using default ground construction instead.')
       else
@@ -388,25 +446,35 @@ module OpenstudioStandards
           model.getDefaultConstructionSets.each(&:remove)
         end
 
-        if ['SmallHotel', 'LargeHotel', 'MidriseApartment', 'HighriseApartment'].include?(primary_bldg_type)
+        if !construction_default.nil? && construction_default.key?(:is_residential)
+          is_residential = construction_default[:is_residential] ? 'Yes' : 'No'
+        elsif ['SmallHotel', 'LargeHotel', 'MidriseApartment', 'HighriseApartment'].include?(primary_bldg_type)
           is_residential = 'Yes'
-          occ_type = 'Residential'
         else
           is_residential = 'No'
-          occ_type = 'Nonresidential'
         end
-        bldg_def_const_set = standard.model_add_construction_set(model, climate_zone, lookup_building_type, nil, is_residential)
-        if bldg_def_const_set.is_initialized
-          bldg_def_const_set = bldg_def_const_set.get
-          if is_residential == 'Yes'
-            bldg_def_const_set.setName("Res #{bldg_def_const_set.name}")
-          end
-          model.getBuilding.setDefaultConstructionSet(bldg_def_const_set)
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Adding default construction set named #{bldg_def_const_set.name}")
+        wall_category = spec_category.call(:exterior_wall)
+        occ_type = wall_category || (is_residential == 'Yes' ? 'Residential' : 'Nonresidential')
+
+        if construction_spec.nil?
+          construction_set_optional = standard.model_add_construction_set(model, climate_zone, lookup_building_type, nil, is_residential)
+          bldg_def_const_set = construction_set_optional.is_initialized ? construction_set_optional.get : nil
+          model.getBuilding.setDefaultConstructionSet(bldg_def_const_set) unless bldg_def_const_set.nil?
         else
+          bldg_def_const_set = OpenstudioStandards::Constructions.assign_construction_sets(
+            model, standard, climate_zone, construction_spec,
+            fallback_building_type: lookup_building_type
+          )
+        end
+
+        if bldg_def_const_set.nil?
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.CreateTypical', "Could not create default construction set for the building type #{lookup_building_type} in climate zone #{climate_zone} with template #{template}.")
           return false
         end
+        if is_residential == 'Yes' && !bldg_def_const_set.name.to_s.start_with?('Res ')
+          bldg_def_const_set.setName("Res #{bldg_def_const_set.name}")
+        end
+        OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.CreateTypical', "Adding default construction set named #{bldg_def_const_set.name}")
 
         # Replace the construction of exterior walls with user-specified wall construction type
         unless wall_construction_type == 'Inferred'

@@ -19,6 +19,7 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/constructions/create'
   require_relative 'openstudio-standards/constructions/information'
   require_relative 'openstudio-standards/constructions/modify'
+  require_relative 'openstudio-standards/constructions/create_construction_set'
   require_relative 'openstudio-standards/constructions/materials/information'
   require_relative 'openstudio-standards/constructions/materials/modify'
 

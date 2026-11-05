@@ -573,17 +573,19 @@ Standard.class_eval do
   # @param model[OpenStudio::Model::Model] OpenStudio Model
   # @param climate_zone [String] climate zone as described for prototype models. C-Factor is based on this parameter
   # @param building_type [String] the building type
+  # @param building_category [String, nil] ground-contact wall construction category. Falls back
+  #   to the construction_sets row when not provided.
   # @return [Boolean] returns true if successful, false if not
-  def model_set_below_grade_wall_constructions(model, building_type, climate_zone)
-    # Find ground contact wall building category
-    construction_set_data = model_get_construction_set(building_type)
+  def model_set_below_grade_wall_constructions(model, building_type, climate_zone, building_category: nil)
+    if building_category.nil?
+      construction_set_data = model_get_construction_set(building_type)
+      return false if construction_set_data.nil?
 
-    # If no construction data, return and allow code to use default constructions
-    return false if construction_set_data.nil?
+      building_category = construction_set_data['exterior_wall_building_category']
+    end
 
     # Find wall C factor
-    building_type_category = construction_set_data['exterior_wall_building_category']
-    wall_construction_properties = model_get_construction_properties(model, 'GroundContactWall', 'Mass', building_type_category, climate_zone)
+    wall_construction_properties = model_get_construction_properties(model, 'GroundContactWall', 'Mass', building_category, climate_zone)
 
     # If no construction properties are found at all, return and allow code to use default constructions
     return false if wall_construction_properties.nil?
@@ -633,17 +635,19 @@ Standard.class_eval do
   # @param model [OpenStudio Model] OpenStudio model being modified
   # @param building_type [String the building type
   # @param climate_zone [String climate zone as described for prototype models. F-Factor is based on this parameter
+  # @param building_category [String, nil] ground-contact floor construction category. Falls back
+  #   to the construction_sets row when not provided.
   # @return [Boolean] returns true if successful, false if not
-  def model_set_floor_constructions(model, building_type, climate_zone)
-    # Find ground contact wall building category
-    construction_set_data = model_get_construction_set(building_type)
+  def model_set_floor_constructions(model, building_type, climate_zone, building_category: nil)
+    if building_category.nil?
+      construction_set_data = model_get_construction_set(building_type)
+      return false if construction_set_data.nil?
 
-    # If no construction data, return and allow code to use default constructions
-    return false if construction_set_data.nil?
+      building_category = construction_set_data['ground_contact_floor_building_category']
+    end
 
     # Find floor F factor
-    building_type_category = construction_set_data['ground_contact_floor_building_category']
-    floor_construction_properties = model_get_construction_properties(model, 'GroundContactFloor', 'Unheated', building_type_category, climate_zone)
+    floor_construction_properties = model_get_construction_properties(model, 'GroundContactFloor', 'Unheated', building_category, climate_zone)
 
     # If no construction properties are found at all, return and allow code to use default constructions
     return false if floor_construction_properties.nil?
