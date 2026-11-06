@@ -25,6 +25,8 @@ jobs:
       image: nrel/openstudio:${{ matrix.image }}
     strategy:
       fail-fast: false
+      # GitHub-hosted concurrency (20 jobs on the Free plan) is shared by the whole org; don't take more than 6 slots
+      max-parallel: 6
       matrix:
         # 3.11.0 = Jenkinsfile, the alpha = Jenkinsfile_develop
         image: ['3.11.0', '3.12.0-alpha-29ea277545']
