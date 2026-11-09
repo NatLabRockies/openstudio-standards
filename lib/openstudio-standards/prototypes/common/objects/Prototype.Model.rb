@@ -951,8 +951,10 @@ Standard.class_eval do
             shc_mult = 1 # No adjustments
         end
 
-        # Modify schedules
-        OpenstudioStandards::Schedules.schedule_day_multiply_by_value(sch.defaultDaySchedule, sch_mult)
+        day_schedules = [sch.defaultDaySchedule] + sch.scheduleRules.map(&:daySchedule)
+        day_schedules.uniq.each do |day_schedule|
+          OpenstudioStandards::Schedules.schedule_day_multiply_by_value(day_schedule, sch_mult)
+        end
       end
     end
   end
@@ -1077,7 +1079,7 @@ Standard.class_eval do
     end
   end
 
-  # Reduce thermostat temperature setpoint delay (when switching from occupied to unoccupied ) by 10 mins
+  # Reduce thermostat temperature setpoint delay by 10 mins on default and annual rule days.
   #
   # @code_sections [90.1-2019_6.4.3.3.5.1]
   # @author Xuechen (Jerry) Lei, PNNL
@@ -1091,10 +1093,13 @@ Standard.class_eval do
     return true unless template == '90.1-2019'
 
     heating_schrst, cooling_schrst = get_occ_guestroom_setpoint_schedules(model)
-    heating_default_day_sch = heating_schrst.defaultDaySchedule
-    schedule_reduce_reset_delay_10min(heating_default_day_sch, heating_default_day_sch.values.min)
-    cooling_default_day_sch = cooling_schrst.defaultDaySchedule
-    schedule_reduce_reset_delay_10min(cooling_default_day_sch, cooling_default_day_sch.values.max)
+    [heating_schrst, cooling_schrst].each_with_index do |schedule, index|
+      day_schedules = [schedule.defaultDaySchedule] + schedule.scheduleRules.map(&:daySchedule)
+      day_schedules.uniq.each do |day_schedule|
+        off_value = index.zero? ? day_schedule.values.min : day_schedule.values.max
+        schedule_reduce_reset_delay_10min(day_schedule, off_value)
+      end
+    end
   end
 
   # Helper method for model_add_guestroom_vent_sch and model_reduce_setback_sch_delay
