@@ -24,7 +24,6 @@ module OpenstudioStandards
                                        minimum_input_power_fraction_continuous: 0.3,
                                        minimum_light_output_fraction_continuous: 0.2,
                                        number_of_stepped_control_steps: 1)
-
       daylight_sensor = OpenStudio::Model::DaylightingControl.new(space.model)
       daylight_sensor.setSpace(space)
       sensor_name = name.nil? ? "#{space.name} Daylight Sensor" : name

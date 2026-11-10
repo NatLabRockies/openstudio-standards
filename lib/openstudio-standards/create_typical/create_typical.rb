@@ -348,7 +348,7 @@ module OpenstudioStandards
           end
 
           # Include the template as an additional property on the space type object if present
-          space_type.additionalProperties.setFeature('template', "#{template}")
+          space_type.additionalProperties.setFeature('template', template.to_s)
         end
 
         # warn about override entries that matched no space type in the model

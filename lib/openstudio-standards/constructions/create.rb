@@ -42,7 +42,7 @@ module OpenstudioStandards
         else
           new_construction = construction.clone.to_Construction.get
         end
-        (0..new_construction.layers.length - 1).each do |layer_number|
+        (0..(new_construction.layers.length) - 1).each do |layer_number|
           cloned_layer = new_construction.getLayer(layer_number).clone.to_Material.get
           new_construction.setLayer(layer_number, cloned_layer)
         end

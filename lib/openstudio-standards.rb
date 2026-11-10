@@ -156,9 +156,9 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/btap/btap'
 
   # BTAP QAQC
-  require_relative "openstudio-standards/btap/qaqc/analysis.rb"
-  require_relative "openstudio-standards/btap/qaqc/data.rb"
-  require_relative "openstudio-standards/btap/qaqc/datapoint.rb"
+  require_relative 'openstudio-standards/btap/qaqc/analysis'
+  require_relative 'openstudio-standards/btap/qaqc/data'
+  require_relative 'openstudio-standards/btap/qaqc/datapoint'
 
   # BTAP Costing
   require_relative 'openstudio-standards/btap/costing/database'
@@ -357,7 +357,6 @@ module OpenstudioStandards
   require_relative "#{stds}/Standards.People"
   require_relative "#{stds}/Standards.PlanarSurface"
   require_relative "#{stds}/Standards.PlantLoop"
-  require_relative "#{stds}/Standards.Pump"
   require_relative "#{stds}/Standards.PumpVariableSpeed"
   require_relative "#{stds}/Standards.ScheduleRuleset"
   require_relative "#{stds}/Standards.ServiceWaterHeating"
