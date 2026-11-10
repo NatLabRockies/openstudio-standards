@@ -648,11 +648,6 @@ module OpenstudioStandards
       end
     end
 
-    # Add time value pairs to OpenStudio ScheduleDay
-    #
-    # @param day_sch [OpenStudio::Model::ScheduleDay] OpenStudio ScheduleDay object
-    # @param time_value_pairs [Array] array of time value pairs
-    # @return [Boolean] true if successful, false if not
     # Collapse each run of equal consecutive values to its last pair, which is the one
     # entry an until-time day schedule needs for the run. The final pair always survives.
     #
@@ -664,6 +659,11 @@ module OpenstudioStandards
       end
     end
 
+    # Add time value pairs to OpenStudio ScheduleDay
+    #
+    # @param day_sch [OpenStudio::Model::ScheduleDay] OpenStudio ScheduleDay object
+    # @param time_value_pairs [Array] array of time value pairs
+    # @return [Boolean] true if successful, false if not
     def self.add_time_value_pairs_to_schedule(day_sch, time_value_pairs)
       time_value_pairs.each_with_index do |pair, i|
         if i != (time_value_pairs.size - 1) && pair[1] == time_value_pairs[i + 1][1]
