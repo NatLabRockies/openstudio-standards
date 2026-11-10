@@ -2,6 +2,11 @@
 require 'csv'
 require 'json'
 
+# Convert typical exhaust fan data from CSV to JSON
+#
+# @param input_csv [String] path to the input CSV file
+# @param output_json [String] path to the output JSON file
+# @return [void]
 def typical_exhaust_csv_to_json(input_csv = 'typical_exhaust.csv',
                                 output_json = 'typical_exhaust.json')
   # Initialize the structure
@@ -31,6 +36,11 @@ def typical_exhaust_csv_to_json(input_csv = 'typical_exhaust.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
+# Convert typical exhaust fan data from JSON to CSV
+#
+# @param input_json [String] path to the input JSON file
+# @param output_csv [String] path to the output CSV file
+# @return [void]
 def typical_exhaust_json_to_csv(input_json = 'typical_exhaust.json',
                                 output_csv = 'typical_exhaust.csv')
   # Read the JSON file

@@ -107,6 +107,10 @@ module OpenstudioStandards
         return false
       end
 
+      # Validate that an effectiveness hash's keys and values are floats between 0.0 and 1.0
+      #
+      # @param values_hash [Hash(Float=>Float)] flow decimal fraction => effectiveness decimal fraction pairs
+      # @return [Boolean] true if all keys and values are valid, false if not
       def self.validate_effectiveness_hash(values_hash)
         values_hash.all? do |key, value|
           key.is_a?(Float) && value.is_a?(Float) && key.between?(0.0, 1.0) && value.between?(0.0, 1.0)

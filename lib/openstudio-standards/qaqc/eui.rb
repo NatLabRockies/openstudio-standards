@@ -1,5 +1,6 @@
 # Module to apply QAQC checks to a model
 module OpenstudioStandards
+  # Methods to apply QAQC checks to a model
   module QAQC
     # @!group Energy Use Intensity (EUI)
 

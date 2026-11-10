@@ -677,11 +677,13 @@ module OpenstudioStandards
       end
     end
 
+    # Directory containing the default schedule JSON data files
+    SCHEDULE_DATA_DIR = File.join(__dir__, 'data').freeze
+
     # Schedule data is organized one file per category. Each load file holds both forms a
     # schedule can take: control-point profiles (direct) and derivation parameters (derived
     # from occupancy). The schedule set's `{category}_schedule` key names a record in the
     # file its slot maps to here.
-    SCHEDULE_DATA_DIR = File.join(__dir__, 'data').freeze
     SCHEDULE_DATA_FILES = {
       occupancy: 'default_occupancy_schedules.json',
       interior_lighting: 'default_lighting_schedules.json',

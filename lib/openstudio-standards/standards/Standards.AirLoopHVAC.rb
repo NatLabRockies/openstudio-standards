@@ -1392,6 +1392,10 @@ class Standard
     return heat_exchanger_type
   end
 
+  # Remove the Energy Recovery Ventilator, if any, from this air loop's outdoor air system
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @return [Boolean] returns true if successful, false if not
   def air_loop_hvac_remove_erv(air_loop_hvac)
     # Get the OA system
     oa_sys = nil

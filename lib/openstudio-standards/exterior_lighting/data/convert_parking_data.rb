@@ -2,6 +2,11 @@
 require 'csv'
 require 'json'
 
+# Convert parking data from CSV to JSON
+#
+# @param input_csv [String] path to the input CSV file
+# @param output_json [String] path to the output JSON file
+# @return [void]
 def parking_csv_to_json(input_csv = 'parking.csv',
                         output_json = 'parking.json')
   # Initialize the structure
@@ -37,6 +42,11 @@ def parking_csv_to_json(input_csv = 'parking.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
+# Convert parking data from JSON to CSV
+#
+# @param input_json [String] path to the input JSON file
+# @param output_csv [String] path to the output CSV file
+# @return [void]
 def parking_json_to_csv(input_json = 'parking.json',
                         output_csv = 'parking.csv')
   # Read the JSON file

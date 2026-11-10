@@ -1,5 +1,6 @@
 module OpenstudioStandards
   module Constructions
+    # Maps assembly type to [standards construction-set field name, surface accessor method, construction setter method]
     ASSEMBLY_SURFACES = {
       exterior_floor: ['ExteriorFloor', :exterior_surfaces, :setFloorConstruction],
       exterior_wall: ['ExteriorWall', :exterior_surfaces, :setWallConstruction],
@@ -15,6 +16,7 @@ module OpenstudioStandards
       exterior_skylight: ['Skylight', :exterior_subsurfaces, :setSkylightConstruction]
     }.freeze
 
+    # Maps named surface type to [surface accessor method, construction setter method]
     NAMED_SURFACES = {
       interior_floors: [:interior_surfaces, :setFloorConstruction],
       interior_walls: [:interior_surfaces, :setWallConstruction],
@@ -30,6 +32,7 @@ module OpenstudioStandards
       site_shading: [:construction_set, :setSiteShadingConstruction]
     }.freeze
 
+    # Maps construction-set broadcast field name to the assembly type it applies to
     BROADCAST_TYPES = {
       exterior_wall_type: :exterior_wall,
       exterior_roof_type: :exterior_roof,
