@@ -170,22 +170,20 @@ class Standard
     end
 
     # Standby mode occupancy control
-    unless air_loop_hvac.thermalZones.empty?
-      thermal_zones = air_loop_hvac.thermalZones
+    return if air_loop_hvac.thermalZones.empty?
 
-      standby_mode_spaces = []
-      thermal_zones.sort.each do |thermal_zone|
-        thermal_zone.spaces.sort.each do |space|
-          if space_occupancy_standby_mode_required?(space)
-            standby_mode_spaces << space
-          end
+    thermal_zones = air_loop_hvac.thermalZones
+
+    standby_mode_spaces = []
+    thermal_zones.sort.each do |thermal_zone|
+      thermal_zone.spaces.sort.each do |space|
+        if space_occupancy_standby_mode_required?(space)
+          standby_mode_spaces << space
         end
       end
-
-      if !standby_mode_spaces.empty?
-        air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces)
-      end
     end
+
+    air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces) if standby_mode_spaces.any?
   end
 
   # Apply all PRM baseline required controls to the airloop.
@@ -1527,7 +1525,7 @@ class Standard
       erv.setSensibleEffectivenessat75CoolingAirFlow(0.75)
       erv.setLatentEffectivenessat75CoolingAirFlow(0.6)
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       values['Sensible Heating'][0.75] = 0.7
       values['Sensible Heating'][1.0] = 0.7
       values['Latent Heating'][0.75] = 0.6
@@ -2906,15 +2904,13 @@ class Standard
     air_loop_hvac.setNightCycleControlType('CycleOnAny')
     if OpenstudioStandards::HVAC.air_loop_hvac_parallel_piu_air_terminals?(air_loop_hvac)
       avail_mgrs = air_loop_hvac.availabilityManagers
-      if !avail_mgrs.nil?
-        avail_mgrs.each do |avail_mgr|
-          if avail_mgr.to_AvailabilityManagerNightCycle.is_initialized
-            avail_mgr_nc = avail_mgr.to_AvailabilityManagerNightCycle.get
-            avail_mgr_nc.setControlType('CycleOnAnyCoolingOrHeatingZone')
-            zones = air_loop_hvac.thermalZones
-            avail_mgr_nc.setCoolingControlThermalZones(zones)
-            avail_mgr_nc.setHeatingZoneFansOnlyThermalZones(zones)
-          end
+      avail_mgrs&.each do |avail_mgr|
+        if avail_mgr.to_AvailabilityManagerNightCycle.is_initialized
+          avail_mgr_nc = avail_mgr.to_AvailabilityManagerNightCycle.get
+          avail_mgr_nc.setControlType('CycleOnAnyCoolingOrHeatingZone')
+          zones = air_loop_hvac.thermalZones
+          avail_mgr_nc.setCoolingControlThermalZones(zones)
+          avail_mgr_nc.setHeatingZoneFansOnlyThermalZones(zones)
         end
       end
     end

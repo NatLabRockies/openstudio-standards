@@ -1,6 +1,4 @@
 # These methods convert space type interior lighting data to and from .csv for editing.
-private
-
 require 'csv'
 require 'json'
 

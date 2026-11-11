@@ -21,7 +21,6 @@ class DOERef1980to2004 < ASHRAE901
                          elevator_fan_schedule,
                          elevator_lights_schedule,
                          building_type = nil)
-
     # Lift motor assumptions
     lift_pwr_w = model_elevator_lift_power(model, elevator_type, building_type)
 

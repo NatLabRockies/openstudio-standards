@@ -202,7 +202,7 @@ class Standard
                            end
 
     # Get the search criteria
-    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type') ? true : false
+    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type')
     search_criteria = coil_dx_find_search_criteria(coil_cooling_dx_single_speed, necb_ref_hp, equipment_type)
 
     # Additional search criteria

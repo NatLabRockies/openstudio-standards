@@ -64,7 +64,7 @@ module OpenstudioStandards
           latent_fraction = w[:latent_fraction]
 
           # derived from equipment properties
-          is_booster = water_use_name && water_use_name.downcase.include?('booster')
+          is_booster = water_use_name&.downcase&.include?('booster')
           water_use_name = water_use_name ? "#{space.name} #{water_use_name}" : "#{space.name} Water Use"
           mixed_water_temperature_c = OpenStudio.convert(temperature, 'F', 'C').get
 

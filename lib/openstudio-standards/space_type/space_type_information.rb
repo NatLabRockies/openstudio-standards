@@ -15,19 +15,18 @@ module OpenstudioStandards
           thermal_zones << space.thermalZone.get
         end
       end
-      if thermal_zones.empty?
-        return nil
-      else
-        max_floor_area = 0.0
-        largest_thermal_zone = nil
-        thermal_zones.sort_by { |zone| zone.name.to_s }.each do |zone|
-          if zone.floorArea > max_floor_area
-            largest_thermal_zone = zone
-            max_floor_area = zone.floorArea
-          end
+
+      return nil if thermal_zones.empty?
+
+      max_floor_area = 0.0
+      largest_thermal_zone = nil
+      thermal_zones.sort_by { |zone| zone.name.to_s }.each do |zone|
+        if zone.floorArea > max_floor_area
+          largest_thermal_zone = zone
+          max_floor_area = zone.floorArea
         end
-        return largest_thermal_zone
       end
+      return largest_thermal_zone
     end
   end
 end

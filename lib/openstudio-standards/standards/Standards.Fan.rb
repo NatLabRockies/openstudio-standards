@@ -141,8 +141,7 @@ module Fan
       nominal_hp = 0.5
 
       # Get the efficiency based on the nominal horsepower
-      motor_type = motor_type(nominal_hp)
-      motor_properties = motor_fractional_hp_efficiencies(nominal_hp, motor_type = motor_type)
+      motor_properties = motor_fractional_hp_efficiencies(nominal_hp, motor_type = motor_type(nominal_hp))
 
       if motor_properties.nil?
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Fan', "For #{fan.name}, could not find nominal motor properties using search criteria: #{search_criteria}, motor_hp = #{nominal_hp} hp.")

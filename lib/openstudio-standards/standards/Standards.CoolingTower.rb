@@ -219,8 +219,7 @@ module CoolingTower
     fan_motor_eff = 0.85
 
     if nominal_hp <= 0.75
-      motor_type = motor_type(nominal_hp)
-      motor_properties = motor_fractional_hp_efficiencies(nominal_hp, motor_type = motor_type)
+      motor_properties = motor_fractional_hp_efficiencies(nominal_hp, motor_type = motor_type(nominal_hp))
     else
       # Lookup the minimum motor efficiency
       motors = standards_data['motors']

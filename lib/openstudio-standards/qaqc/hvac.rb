@@ -20,11 +20,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin
@@ -163,11 +159,8 @@ module OpenstudioStandards
             next
           else
             # convert to ruby array
-            temperatures = []
             supply_temp_vector = supply_temp_timeseries.get.values
-            for i in (0..supply_temp_vector.size - 1)
-              temperatures << supply_temp_vector[i]
-            end
+            temperatures = (0...supply_temp_vector.size).map { |i| supply_temp_vector[i] }
           end
 
           # get supply air flow rates for supply outlet node
@@ -177,11 +170,8 @@ module OpenstudioStandards
             next
           else
             # convert to ruby array
-            flowrates = []
             supply_flow_vector = supply_flow_timeseries.get.values
-            for i in (0..supply_flow_vector.size - 1)
-              flowrates << supply_flow_vector[i]
-            end
+            flowrates = (0...supply_flow_vector.size).map { |i| supply_flow_vector[i] }
           end
           # check reasonableness of supply air temperatures when supply air flow rate is operating
           flow_tolerance = OpenStudio.convert(10.0, 'cfm', 'm^3/s').get
@@ -191,7 +181,7 @@ module OpenstudioStandards
           next if operating_temperatures.empty?
 
           runtime_fraction = operating_temperatures.size.to_f / temperatures.size
-          temps_out_of_bounds = operating_temperatures.select { |t| ((t < 40.0) || (t > 110.0) || ((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max)) }
+          temps_out_of_bounds = operating_temperatures.select { |t| (t < 40.0) || (t > 110.0) || ((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max) }
 
           next if temps_out_of_bounds.empty?
 
@@ -218,7 +208,7 @@ module OpenstudioStandards
           err << "Out of #{operating_temperatures.size}/#{temperatures.size} (#{(runtime_fraction * 100.0).round(1)}%) operating supply air temperatures"
           err << "#{temps_out_of_bounds.size}/#{operating_temperatures.size} (#{((temps_out_of_bounds.size.to_f / operating_temperatures.size) * 100.0).round(1)}%)"
           err << "are out of bounds with #{min_op_temp_f.round(1)}F min and #{max_op_temp_f.round(1)}F max."
-          check_elems << OpenStudio::Attribute.new('flag', err.join(' ').gsub(/\n/, ''))
+          check_elems << OpenStudio::Attribute.new('flag', err.join(' ').gsub("\n", ''))
         end
       rescue StandardError => e
         # brief description of ruby error
@@ -250,11 +240,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -326,11 +312,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -393,11 +375,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -584,11 +562,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -805,11 +779,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -1132,11 +1102,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -1221,11 +1187,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin
@@ -1233,11 +1195,9 @@ module OpenstudioStandards
         ann_env_pd = nil
         @sql.availableEnvPeriods.each do |env_pd|
           env_type = @sql.environmentType(env_pd)
-          if env_type.is_initialized
-            if env_type.get == OpenStudio::EnvironmentType.new('WeatherRunPeriod')
-              ann_env_pd = env_pd
-              break
-            end
+          if env_type.is_initialized && (env_type.get == OpenStudio::EnvironmentType.new('WeatherRunPeriod'))
+            ann_env_pd = env_pd
+            break
           end
         end
 
@@ -1289,11 +1249,8 @@ module OpenstudioStandards
             next
           else
             # convert to ruby array
-            temperatures = []
             supply_temp_vector = supply_temp_timeseries.get.values
-            for i in (0..supply_temp_vector.size - 1)
-              temperatures << supply_temp_vector[i]
-            end
+            temperatures = (0...supply_temp_vector.size).map { |i| supply_temp_vector[i] }
           end
 
           # get supply water flow rates for supply outlet node
@@ -1303,11 +1260,8 @@ module OpenstudioStandards
             next
           else
             # convert to ruby array
-            flowrates = []
             supply_flow_vector = supply_flow_timeseries.get.values
-            for i in (0..supply_flow_vector.size - 1)
-              flowrates << supply_flow_vector[i].to_f
-            end
+            flowrates = (0...supply_flow_vector.size).map { |i| supply_flow_vector[i].to_f }
           end
 
           # check reasonableness of supply water temperatures when supply water flow rate is operating
@@ -1326,16 +1280,16 @@ module OpenstudioStandards
             design_return_temperature = design_supply_temperature - design_temperature_difference
             expected_max = spm_max_temp_f.nil? ? design_supply_temperature : [design_supply_temperature, spm_max_temp_f].max
             expected_min = spm_min_temp_f.nil? ? design_return_temperature : [design_return_temperature, spm_min_temp_f].min
-            temps_out_of_bounds = (operating_temperatures.select { |t| (((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max)) })
+            temps_out_of_bounds = operating_temperatures.select { |t| ((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max) }
           when 'Cooling'
             design_return_temperature = design_supply_temperature + design_temperature_difference
             expected_max = spm_max_temp_f.nil? ? design_return_temperature : [design_return_temperature, spm_max_temp_f].max
             expected_min = spm_min_temp_f.nil? ? design_supply_temperature : [design_supply_temperature, spm_min_temp_f].min
-            temps_out_of_bounds = (operating_temperatures.select { |t| (((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max)) })
+            temps_out_of_bounds = operating_temperatures.select { |t| ((t + max_operating_temp_delta) < expected_min) || ((t - max_operating_temp_delta) > expected_max) }
           when 'Condenser'
             design_return_temperature = design_supply_temperature + design_temperature_difference
             expected_max = spm_max_temp_f.nil? ? design_return_temperature : [design_return_temperature, spm_max_temp_f].max
-            temps_out_of_bounds = (operating_temperatures.select { |t| ((t < 35.0) || (t > 100.0) || ((t - max_operating_temp_delta) > expected_max)) })
+            temps_out_of_bounds = operating_temperatures.select { |t| (t < 35.0) || (t > 100.0) || ((t - max_operating_temp_delta) > expected_max) }
           end
 
           next if temps_out_of_bounds.empty?
@@ -1357,7 +1311,7 @@ module OpenstudioStandards
           err << "Out of #{operating_temperatures.size}/#{temperatures.size} (#{(runtime_fraction * 100.0).round(1)}%) operating supply water temperatures"
           err << "#{temps_out_of_bounds.size}/#{operating_temperatures.size} (#{((temps_out_of_bounds.size.to_f / operating_temperatures.size) * 100.0).round(1)}%)"
           err << "are out of bounds with #{min_op_temp_f.round(1)}F min and #{max_op_temp_f.round(1)}F max."
-          check_elems << OpenStudio::Attribute.new('flag', err.join(' ').gsub(/\n/, ''))
+          check_elems << OpenStudio::Attribute.new('flag', err.join(' ').gsub("\n", ''))
         end
       rescue StandardError => e
         # brief description of ruby error
@@ -1389,11 +1343,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -1467,11 +1417,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin
@@ -1496,7 +1442,7 @@ module OpenstudioStandards
         @model.getAirTerminalSingleDuctVAVReheats.sort.each do |term|
           # Reheat coil heating rate
           rht_coil = term.reheatCoil
-          key_value =  rht_coil.name.get.to_s.upcase # must be in all caps.
+          key_value = rht_coil.name.get.to_s.upcase # must be in all caps.
           time_step = 'Hourly' # "Zone Timestep", "Hourly", "HVAC System Timestep"
           variable_name = 'Heating Coil Heating Rate'
           variable_name_alt = 'Heating Coil Air Heating Rate'
@@ -1692,11 +1638,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin

@@ -205,7 +205,6 @@ Standard.class_eval do
     return true
   end
 
-
   # load a model into OS & version translates, exiting and erroring if a problem is found
   #
   # @param model_path_string [String] file path to OpenStudio model file

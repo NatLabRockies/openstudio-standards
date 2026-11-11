@@ -554,8 +554,10 @@ module OpenstudioStandards
             length = bar_hash[:length]
             width = bar_hash[:width]
           end
-          footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(bar_hash[:space_types], length, width, bar_hash[:center_of_footprint],
-                                                                                       adjacency_pairs: bar_hash[:space_type_adjacency_pairs])
+          footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(
+            bar_hash[:space_types], length, width, bar_hash[:center_of_footprint],
+            adjacency_pairs: bar_hash[:space_type_adjacency_pairs]
+          )
         end
 
       elsif bar_hash[:bar_division_method] == 'Multiple Space Types - Individual Stories Sliced'
@@ -568,8 +570,10 @@ module OpenstudioStandards
           end
         end
 
-        footprints = OpenstudioStandards::Geometry.create_sliced_bar_multi_polygons(bar_hash[:space_types], bar_hash[:length], bar_hash[:width], bar_hash[:center_of_footprint], story_hash,
-                                                                                   adjacency_pairs: bar_hash[:space_type_adjacency_pairs])
+        footprints = OpenstudioStandards::Geometry.create_sliced_bar_multi_polygons(
+          bar_hash[:space_types], bar_hash[:length], bar_hash[:width], bar_hash[:center_of_footprint], story_hash,
+          adjacency_pairs: bar_hash[:space_type_adjacency_pairs]
+        )
 
       else
         footprints = []
@@ -590,7 +594,7 @@ module OpenstudioStandards
 
         # set primary space type to building default space type
         space_types = bar_hash[:space_types].sort_by { |k, v| v[:floor_area] }
-        if space_types.last.first.class.to_s == 'OpenStudio::Model::SpaceType'
+        if space_types.last.first.instance_of?(::OpenStudio::Model::SpaceType)
           model.getBuilding.setSpaceType(space_types.last.first)
         end
 
@@ -673,7 +677,7 @@ module OpenstudioStandards
           end
         end
 
-        if (bar_hash[:make_mid_story_surfaces_adiabatic])
+        if bar_hash[:make_mid_story_surfaces_adiabatic]
           # elsif bar_hash[:double_loaded_corridor] # only intersect spaces in each story, not between wtory
           model.getBuilding.buildingStories.sort.each do |story|
             # intersect and surface match two pair by pair
@@ -712,7 +716,7 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', 'Intersecting and matching surfaces in model, this will create additional geometry.')
         end
       else
-        if (bar_hash[:make_mid_story_surfaces_adiabatic])
+        if bar_hash[:make_mid_story_surfaces_adiabatic]
           # elsif bar_hash[:double_loaded_corridor] # only intersect spaces in each story, not between wtory
           model.getBuilding.buildingStories.sort.each do |story|
             story_spaces = OpenStudio::Model::SpaceVector.new
@@ -877,7 +881,7 @@ module OpenstudioStandards
 
             # get the absolute azimuth for the surface so we can categorize it
             absolute_azimuth = OpenStudio.convert(surface.azimuth, 'rad', 'deg').get + surface.space.get.directionofRelativeNorth + model.getBuilding.northAxis
-            absolute_azimuth = absolute_azimuth % 360.0 # should result in value between 0 and 360
+            absolute_azimuth %= 360.0 # should result in value between 0 and 360
             absolute_azimuth = absolute_azimuth.round(5) # this was creating issues at 45 deg angles with opposing facades
 
             # target wwr values that may be changed for specific space types
@@ -1089,12 +1093,12 @@ module OpenstudioStandards
         # reverse array to properly handle 45, 135, 225, and 315
         best_fit = card_dir_array.reverse.min_by { |x| (x.to_f - rotation).abs }
 
-        if ![90.0, 270.0].include? best_fit
-          width_card_dir = ['east', 'west']
-          length_card_dir = ['north', 'south']
-        else # if rotation is closest to 90 or 270 then reverse which orientation is used for length and width
+        if [90.0, 270.0].include? best_fit
           width_card_dir = ['north', 'south']
           length_card_dir = ['east', 'west']
+        else
+          width_card_dir = ['east', 'west']
+          length_card_dir = ['north', 'south']
         end
 
         # if dont' find enough on short sides
@@ -1180,12 +1184,12 @@ module OpenstudioStandards
         # return false
 
         # not providing adiabatic work around when top story is partial story.
-        if args[:num_stories_above_grade].to_i != args[:num_stories_above_grade].ceil
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', 'Ground exposed floor or Roof area is larger than footprint, likely inter-floor surface matching and intersection error.')
-          return false
-        else
+        if args[:num_stories_above_grade].to_i == args[:num_stories_above_grade].ceil
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', 'Ground exposed floor or Roof area is larger than footprint, likely inter-floor surface matching and intersection error, altering impacted surfaces boundary condition to be adiabatic.')
           match_error = true
+        else
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', 'Ground exposed floor or Roof area is larger than footprint, likely inter-floor surface matching and intersection error.')
+          return false
         end
       else
         match_error = false
@@ -1316,10 +1320,10 @@ module OpenstudioStandards
 
       if args[:perim_mult].abs < 0.01
         # if this is not defined then use default of 1.0
-        if !building_form_defaults.key?(:perim_mult)
-          args[:perim_mult] = 1.0
-        else
+        if building_form_defaults.key?(:perim_mult)
           args[:perim_mult] = building_form_defaults[:perim_mult]
+        else
+          args[:perim_mult] = 1.0
         end
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Geometry.Create', "0.0 value for minimum perimeter multiplier will be replaced with smart default for #{primary_building_type} of #{building_form_defaults[:perim_mult]}.")
       elsif args[:perim_mult] < 1.0
@@ -1496,7 +1500,7 @@ module OpenstudioStandards
       # resort if not sorted by building type
       if args[:space_type_sort_logic] == 'Size'
         # added code to convert to hash. I use sort_by 3 other times, but those seem to be working fine as is now.
-        space_types_hash = Hash[space_types_hash.sort_by { |k, v| v[:floor_area] }]
+        space_types_hash = space_types_hash.sort_by { |k, v| v[:floor_area] }.to_h
       end
 
       # calculate targets for testing
@@ -1631,11 +1635,8 @@ module OpenstudioStandards
             # test for unexpected
             unexpected = false
             if (target_area - (adiabatic_dual_double_end_length * adiabatic_dual_double_end_width)).abs > tol_testing then unexpected = true end
-            if specified_bar_width_si == 0
-              if (target_perim - ((adiabatic_dual_double_end_length * 2) + (adiabatic_dual_double_end_width * 2))).abs > tol_testing then unexpected = true end
-            end
-            if unexpected
-              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'Unexpected values for dual rectangle adiabatic ends bar b.')
+            if specified_bar_width_si == 0 && (target_perim - ((adiabatic_dual_double_end_length * 2) + (adiabatic_dual_double_end_width * 2))).abs > tol_testing
+              unexpected = true
             end
             # now that stretched  bar is made, determine where to split it and rotate
             adiabatic_bar_a_length = (args[:ns_to_ew_ratio] * (adiabatic_dual_double_end_length + adiabatic_dual_double_end_width)) / (1 + args[:ns_to_ew_ratio])
@@ -1901,12 +1902,12 @@ module OpenstudioStandards
 
         if (space_type.floorArea - target_areas[space_type]).abs >= 1.0
 
-          if !args[:bar_division_method].include? 'Single Space Type'
-            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "#{space_type.name} doesn't have the expected floor area (actual #{OpenStudio.toNeatString(actual_ip, 0, true)} ft^2, target #{OpenStudio.toNeatString(target_ip, 0, true)} ft^2)")
-            throw_error = true
-          else
+          if args[:bar_division_method].include? 'Single Space Type'
             # will see this if use Single Space type division method on multi-use building or single building type without whole building space type
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{space_type.name} doesn't have the expected floor area (actual #{OpenStudio.toNeatString(actual_ip, 0, true)} ft^2, target #{OpenStudio.toNeatString(target_ip, 0, true)} ft^2)")
+          else
+            OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Geometry.Create', "#{space_type.name} doesn't have the expected floor area (actual #{OpenStudio.toNeatString(actual_ip, 0, true)} ft^2, target #{OpenStudio.toNeatString(target_ip, 0, true)} ft^2)")
+            throw_error = true
           end
 
         end
@@ -2185,8 +2186,8 @@ module OpenstudioStandards
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'args hash passed to create_bar_from_space_type_ratios must include a non-empty :space_type_ratios or :space_type_hash_string')
           return nil
         end
-        input = hash_string.split(/, /).map do |entry|
-          entry_map = entry.split(/=>/)
+        input = hash_string.split(', ').map do |entry|
+          entry_map = entry.split('=>')
           building_type, space_type = entry_map[0].to_s.split('|').map { |name| name.to_s.strip }
           { building_type: building_type, space_type: space_type, ratio: entry_map[1].to_s.strip.to_f }
         end
@@ -2248,7 +2249,7 @@ module OpenstudioStandards
           if lookup == false || lookup.empty?
             OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', "#{building_type} looks like an invalid building type for #{template}")
           elsif lookup.key?(space_type)
-            %i[story_height default circ].each do |key|
+            [:story_height, :default, :circ].each do |key|
               space_type_info_hash[key] = lookup[space_type][key] if lookup[space_type].key?(key)
             end
           else
@@ -2256,7 +2257,7 @@ module OpenstudioStandards
           end
         end
 
-        %i[story_height wwr default circ space_type_gen].each do |key|
+        [:story_height, :wwr, :default, :circ, :space_type_gen].each do |key|
           space_type_info_hash[key] = entry[key] unless entry[key].nil?
         end
         space_type_info_hash[:ratio] = ratio

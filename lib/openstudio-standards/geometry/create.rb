@@ -249,7 +249,7 @@ module OpenstudioStandards
     # @param final_story [Boolean] whether this is the last story, where there is nowhere to defer to
     # @return [Boolean] true if the slice should be skipped on this story
     def self.defer_slice_for_adjacency?(own_area_m2, partner_area_m2, partner_on_story,
-                                       remaining_footprint_m2, min_slice_area_m2, final_story)
+                                        remaining_footprint_m2, min_slice_area_m2, final_story)
       return false if final_story
       return false if partner_on_story
       return false if partner_area_m2 <= 0.0001
@@ -316,14 +316,12 @@ module OpenstudioStandards
           next if space_type_hash[:floor_area] <= tol_value
 
           partner = adjacency_partners[space_type]
-          unless partner.nil?
-            next if OpenstudioStandards::Geometry.defer_slice_for_adjacency?(
-              space_type_hash[:floor_area], partner[1][:floor_area],
-              space_types_local_count.key?(partner[0]),
-              target_footprint_area - current_footprint_area,
-              valid_bar_area_min_m2, i + 1 == story_hash.size
-            )
-          end
+          next if !partner.nil? && OpenstudioStandards::Geometry.defer_slice_for_adjacency?(
+            space_type_hash[:floor_area], partner[1][:floor_area],
+            space_types_local_count.key?(partner[0]),
+            target_footprint_area - current_footprint_area,
+            valid_bar_area_min_m2, i + 1 == story_hash.size
+          )
 
           # special test for when total floor area is smaller than valid_bar_area_min_m2, just make bar smaller that valid min and warn user
           if target_per_space_type[space_type] < valid_bar_area_min_m2
@@ -410,8 +408,10 @@ module OpenstudioStandards
         end
 
         # creating footprint for story
-        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(space_types_local_count, length, width, footprint_origin_point,
-                                                                                     adjacency_pairs: adjacency_pairs)
+        footprints << OpenstudioStandards::Geometry.create_sliced_bar_simple_polygons(
+          space_types_local_count, length, width, footprint_origin_point,
+          adjacency_pairs: adjacency_pairs
+        )
       end
       return footprints
     end
@@ -440,7 +440,7 @@ module OpenstudioStandards
       end
 
       # determine if core and perimeter zoning can be used
-      if !([length, width].min > perimeter_zone_depth * 2.5 && [length, width].min > perimeter_zone_depth * 2.5)
+      if [length, width].min <= perimeter_zone_depth * 2.5
         perimeter_zone_depth = 0 # if any size is to small then just model floor as single zone, issue warning
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Geometry.Create', 'Not modeling core and perimeter zones for some portion of the model.')
       end
@@ -464,6 +464,7 @@ module OpenstudioStandards
       space_types = space_types.sort_by { |k, v| v[:floor_area] }
       # guard against empty space_types (e.g. when all space types were slivers removed by caller)
       return hash_of_point_vectors if space_types.empty?
+
       space_types.insert(0, space_types.delete_at(space_types.size - 1)) # .to_h
       space_types = OpenstudioStandards::Geometry.order_slices_for_adjacency(space_types, adjacency_pairs, protect_first: true)
 
@@ -483,14 +484,12 @@ module OpenstudioStandards
             start_perimeter_width_deduction = perimeter_zone_depth
           end
           # see if last space type is too small for perimeter. If it is then save some of this space type
-          if ([length, width].max * space_types.last[1][:floor_area] / total_floor_area )< (perimeter_zone_depth * min_bar_end_multiplier)
+          if ([length, width].max * space_types.last[1][:floor_area] / total_floor_area) < (perimeter_zone_depth * min_bar_end_multiplier)
             re_apply_largest_space_type_at_end = true
           end
         end
-        if space_type == space_types.last[0]
-          if [length, width].max * space_type_hash[:floor_area] / total_floor_area > max_bar_end_multiplier * perimeter_zone_depth
-            end_perimeter_width_deduction = perimeter_zone_depth
-          end
+        if space_type == space_types.last[0] && [length, width].max * space_type_hash[:floor_area] / total_floor_area > max_bar_end_multiplier * perimeter_zone_depth
+          end_perimeter_width_deduction = perimeter_zone_depth
         end
         non_end_adjusted_width = ([length, width].max * space_type_hash[:floor_area] / total_floor_area) - start_perimeter_width_deduction - end_perimeter_width_deduction
 
@@ -579,7 +578,7 @@ module OpenstudioStandards
             perim_space_type = end_b_perim_space_type
           end
 
-          if slice.class.to_s == 'OpenStudio::Model::SpaceType' || slice.class.to_s == 'OpenStudio::Model::Building'
+          if slice.is_a?(::OpenStudio::Model::SpaceType) || slice.is_a?(::OpenStudio::Model::Building)
             space_type = slice
             max_reduction = [perimeter_zone_depth, max_reduction].min
             slice = max_reduction
@@ -900,7 +899,7 @@ module OpenstudioStandards
         space.setName(options['name'])
       end
 
-      if !options['space_type'].nil? && options['space_type'].class.to_s == 'OpenStudio::Model::SpaceType'
+      if options['space_type'].is_a?(::OpenStudio::Model::SpaceType)
         space.setSpaceType(options['space_type'])
       end
 

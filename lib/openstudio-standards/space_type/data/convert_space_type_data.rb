@@ -1,6 +1,4 @@
 # These methods convert space type data to and from .csv for easy editing.
-private
-
 require 'csv'
 require 'json'
 

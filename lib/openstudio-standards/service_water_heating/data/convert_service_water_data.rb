@@ -1,6 +1,4 @@
 # These methods convert space type service water heating equipment data to and from .csv for editing.
-private
-
 require 'csv'
 require 'json'
 

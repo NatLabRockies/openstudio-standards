@@ -35,10 +35,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
+        results = check_elems.map(&:valueAsString)
         return results
       end
 
@@ -225,9 +222,9 @@ module OpenstudioStandards
                 boundary_condition = sub_surface_detail[:boundary_condition]
                 surface_type = sub_surface_detail[:surface_type]
                 intended_surface_type = ''
-                if boundary_condition.to_s == 'Outdoors'
+                if boundary_condition.to_s == 'Outdoors' && surface_type.to_s == 'Door'
                   # @todo add additional intended surface types
-                  if surface_type.to_s == 'Door' then intended_surface_type = 'ExteriorDoor' end
+                  intended_surface_type = 'ExteriorDoor'
                 end
                 film_coefficients_r_value = OpenstudioStandards::Constructions.film_coefficients_r_value(intended_surface_type, includes_int_film = true, includes_ext_film = true)
 

@@ -143,6 +143,7 @@ class Standard
       proposed_model.getSpaces.sort.each do |space|
         space_cond_type = space_conditioning_category(space)
         next if space_cond_type == 'Unconditioned'
+
         OpenStudioStandards::RulesetChecking.tag_spaces(idf, space)
       end
       idf_path = OpenStudio::Path.new("#{sizing_run_dir}/proposed_final.idf")
@@ -273,8 +274,8 @@ class Standard
 
       # Run a sizing run to calculate VLT for layer-by-layer windows.
       if model_create_prm_baseline_building_requires_vlt_sizing_run(model) && (model_run_sizing_run(model, "#{sizing_run_dir}/SRVLT") == false)
-          return false
-        end
+        return false
+      end
 
       # Add or remove daylighting controls to each space
       # Add daylighting controls for 90.1-2013 and prior
@@ -700,8 +701,8 @@ class Standard
       # Check if the object needs to be checked for autosizing
       obj_to_be_checked_for_autosizing = false
       if (obj_type.include?('chiller') || obj_type.include?('boiler') || obj_type.include?('coil') || obj_type.include?('fan') || obj_type.include?('pump') || obj_type.include?('waterheater')) && !obj_type.include?('controller')
-          obj_to_be_checked_for_autosizing = true
-        end
+        obj_to_be_checked_for_autosizing = true
+      end
 
       # Check for autosizing
       if obj_to_be_checked_for_autosizing
@@ -711,9 +712,9 @@ class Standard
 
         casted_obj.methods.each do |method|
           if method.to_s.include?('is') && method.to_s.include?('Autosized') && (casted_obj.public_send(method) == true)
-              is_hvac_autosized = true
-              OpenStudio.logFree(OpenStudio::Info, 'prm.log', "The #{method.to_s.sub('is', '').sub('Autosized', '').sub(':', '')} field of the #{obj_type} named #{casted_obj.name} is autosized. It should be hard sized.")
-            end
+            is_hvac_autosized = true
+            OpenStudio.logFree(OpenStudio::Info, 'prm.log', "The #{method.to_s.sub('is', '').sub('Autosized', '').sub(':', '')} field of the #{obj_type} named #{casted_obj.name} is autosized. It should be hard sized.")
+          end
         end
       end
     end
@@ -1434,10 +1435,10 @@ class Standard
       when 'PTHP' # System 2
         unless zones.empty?
           # add an air-source packaged terminal heat pump with electric supplemental heat to each zone.
-          # A cycling fan lets the standard controls run it continuously only when the zone is occupied (90.1-2019 Section G3.1.2.4).  
+          # A cycling fan lets the standard controls run it continuously only when the zone is occupied (90.1-2019 Section G3.1.2.4).
           OpenstudioStandards::HVAC.model_add_pthp(model,
-                                                  zones,
-                                                  fan_type: 'Cycling')
+                                                   zones,
+                                                   fan_type: 'Cycling')
         end
 
       when 'PSZ_AC' # System 3
@@ -1471,27 +1472,27 @@ class Standard
 
           # Add a PSZ-AC to each zone
           OpenstudioStandards::HVAC.model_add_psz_ac(model,
-                           zones,
-                           cooling_type: cooling_type,
-                           chilled_water_loop: chilled_water_loop,
-                           heating_type: heating_type,
-                           supplemental_heating_type: 'Gas',
-                           hot_water_loop: hot_water_loop,
-                           fan_location: 'DrawThrough',
-                           fan_type: 'ConstantVolume')
+                                                     zones,
+                                                     cooling_type: cooling_type,
+                                                     chilled_water_loop: chilled_water_loop,
+                                                     heating_type: heating_type,
+                                                     supplemental_heating_type: 'Gas',
+                                                     hot_water_loop: hot_water_loop,
+                                                     fan_location: 'DrawThrough',
+                                                     fan_type: 'ConstantVolume')
         end
 
       when 'PSZ_HP' # System 4
         unless zones.empty?
           # Add an air-source packaged single zone heat pump with electric supplemental heat to each zone.
           OpenstudioStandards::HVAC.model_add_psz_ac(model,
-                           zones,
-                           system_name: 'PSZ-HP',
-                           cooling_type: 'Single Speed Heat Pump',
-                           heating_type: 'Single Speed Heat Pump',
-                           supplemental_heating_type: 'Electric',
-                           fan_location: 'DrawThrough',
-                           fan_type: 'ConstantVolume')
+                                                     zones,
+                                                     system_name: 'PSZ-HP',
+                                                     cooling_type: 'Single Speed Heat Pump',
+                                                     heating_type: 'Single Speed Heat Pump',
+                                                     supplemental_heating_type: 'Electric',
+                                                     fan_location: 'DrawThrough',
+                                                     fan_type: 'ConstantVolume')
         end
 
       when 'PVAV_Reheat' # System 5
@@ -1510,9 +1511,9 @@ class Standard
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    cooling_fuel: cool_fuel,
-                                                    chw_pumping_configuration: 'constant primary',
-                                                    outdoor_air_reset: true)
+                                                                              cooling_fuel: cool_fuel,
+                                                                              chw_pumping_configuration: 'constant primary',
+                                                                              outdoor_air_reset: true)
                                end
         end
 
@@ -1549,11 +1550,11 @@ class Standard
           # counter example: floor with only one elevator machine room that get classified as sec_zones
           unless pri_zones.empty?
             air_loop = OpenstudioStandards::HVAC.model_add_pvav(model,
-                                      pri_zones,
-                                      system_name: system_name,
-                                      hot_water_loop: hot_water_loop,
-                                      chilled_water_loop: chilled_water_loop,
-                                      electric_reheat: electric_reheat)
+                                                                pri_zones,
+                                                                system_name: system_name,
+                                                                hot_water_loop: hot_water_loop,
+                                                                chilled_water_loop: chilled_water_loop,
+                                                                electric_reheat: electric_reheat)
             model_system_outdoor_air_sizing_vrp_method(air_loop)
             air_loop_hvac_apply_vav_damper_action(air_loop)
             model_create_multizone_fan_schedule(model, zone_op_hrs, pri_zones, system_name)
@@ -1573,9 +1574,9 @@ class Standard
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    cooling_fuel: cool_fuel,
-                                                    chw_pumping_configuration: 'constant primary',
-                                                    outdoor_air_reset: true)
+                                                                              cooling_fuel: cool_fuel,
+                                                                              chw_pumping_configuration: 'constant primary',
+                                                                              outdoor_air_reset: true)
                                end
         end
 
@@ -1604,12 +1605,12 @@ class Standard
           # If and only if there are primary zones to attach to the loop
           unless pri_zones.empty?
             OpenstudioStandards::HVAC.model_add_pvav_pfp_boxes(model,
-                                     pri_zones,
-                                     system_name: system_name,
-                                     chilled_water_loop: chilled_water_loop,
-                                     fan_efficiency: 0.62,
-                                     fan_motor_efficiency: 0.9,
-                                     fan_pressure_rise: 4.0)
+                                                               pri_zones,
+                                                               system_name: system_name,
+                                                               chilled_water_loop: chilled_water_loop,
+                                                               fan_efficiency: 0.62,
+                                                               fan_motor_efficiency: 0.9,
+                                                               fan_pressure_rise: 4.0)
             model_create_multizone_fan_schedule(model, zone_op_hrs, pri_zones, system_name)
           end
           # Add a PSZ_HP for each secondary zone
@@ -1634,23 +1635,23 @@ class Standard
         else
           if cool_fuel == 'DistrictCooling'
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    cooling_fuel: cool_fuel,
-                                                    chw_pumping_configuration: 'constant primary',
-                                                    outdoor_air_reset: true)
+                                                                              cooling_fuel: cool_fuel,
+                                                                              chw_pumping_configuration: 'constant primary',
+                                                                              outdoor_air_reset: true)
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
             condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model,
-                                                     cooling_tower_type: 'Open Cooling Tower',
-                                                     cooling_tower_fan_type: 'Propeller or Axial',
-                                                     cooling_tower_capacity_control: fan_type,
-                                                     number_of_cells_per_tower: 1,
-                                                     number_cooling_towers: 1)
+                                                                               cooling_tower_type: 'Open Cooling Tower',
+                                                                               cooling_tower_fan_type: 'Propeller or Axial',
+                                                                               cooling_tower_capacity_control: fan_type,
+                                                                               number_of_cells_per_tower: 1,
+                                                                               number_cooling_towers: 1)
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
-                                                    chiller_cooling_type: 'WaterCooled',
-                                                    chiller_compressor_type: 'Rotary Screw',
-                                                    condenser_water_loop: condenser_water_loop,
-                                                    outdoor_air_reset: true)
+                                                                              chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
+                                                                              chiller_cooling_type: 'WaterCooled',
+                                                                              chiller_compressor_type: 'Rotary Screw',
+                                                                              condenser_water_loop: condenser_water_loop,
+                                                                              outdoor_air_reset: true)
           end
         end
 
@@ -1693,14 +1694,14 @@ class Standard
               chilled_water_loop = model.getPlantLoopByName(chilled_water_loop.additionalProperties.getFeatureAsString('secondary_loop_name').get).get
             end
             air_loop = OpenstudioStandards::HVAC.model_add_vav_reheat(model,
-                                            pri_zones,
-                                            system_name: system_name,
-                                            reheat_type: reheat_type,
-                                            hot_water_loop: hot_water_loop,
-                                            chilled_water_loop: chilled_water_loop,
-                                            fan_efficiency: 0.62,
-                                            fan_motor_efficiency: 0.9,
-                                            fan_pressure_rise: 4.0)
+                                                                      pri_zones,
+                                                                      system_name: system_name,
+                                                                      reheat_type: reheat_type,
+                                                                      hot_water_loop: hot_water_loop,
+                                                                      chilled_water_loop: chilled_water_loop,
+                                                                      fan_efficiency: 0.62,
+                                                                      fan_motor_efficiency: 0.9,
+                                                                      fan_pressure_rise: 4.0)
             model_system_outdoor_air_sizing_vrp_method(air_loop)
             air_loop_hvac_apply_vav_damper_action(air_loop)
             model_create_multizone_fan_schedule(model, zone_op_hrs, pri_zones, system_name)
@@ -1720,23 +1721,23 @@ class Standard
         else
           if cool_fuel == 'DistrictCooling'
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    cooling_fuel: cool_fuel,
-                                                    chw_pumping_configuration: 'constant primary',
-                                                    outdoor_air_reset: true)
+                                                                              cooling_fuel: cool_fuel,
+                                                                              chw_pumping_configuration: 'constant primary',
+                                                                              outdoor_air_reset: true)
           else
             fan_type = model_cw_loop_cooling_tower_fan_type(model)
             condenser_water_loop = OpenstudioStandards::HVAC.model_add_cw_loop(model,
-                                                     cooling_tower_type: 'Open Cooling Tower',
-                                                     cooling_tower_fan_type: 'Propeller or Axial',
-                                                     cooling_tower_capacity_control: fan_type,
-                                                     number_of_cells_per_tower: 1,
-                                                     number_cooling_towers: 1)
+                                                                               cooling_tower_type: 'Open Cooling Tower',
+                                                                               cooling_tower_fan_type: 'Propeller or Axial',
+                                                                               cooling_tower_capacity_control: fan_type,
+                                                                               number_of_cells_per_tower: 1,
+                                                                               number_cooling_towers: 1)
             chilled_water_loop = OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
-                                                    chiller_cooling_type: 'WaterCooled',
-                                                    chiller_compressor_type: 'Rotary Screw',
-                                                    condenser_water_loop: condenser_water_loop,
-                                                    outdoor_air_reset: true)
+                                                                              chw_pumping_configuration: 'constant primary variable secondary heat exchanger',
+                                                                              chiller_cooling_type: 'WaterCooled',
+                                                                              chiller_compressor_type: 'Rotary Screw',
+                                                                              condenser_water_loop: condenser_water_loop,
+                                                                              outdoor_air_reset: true)
           end
         end
 
@@ -1768,12 +1769,12 @@ class Standard
               chilled_water_loop = model.getPlantLoopByName(chilled_water_loop.additionalProperties.getFeatureAsString('secondary_loop_name').get).get
             end
             OpenstudioStandards::HVAC.model_add_vav_pfp_boxes(model,
-                                    pri_zones,
-                                    system_name: system_name,
-                                    chilled_water_loop: chilled_water_loop,
-                                    fan_efficiency: 0.62,
-                                    fan_motor_efficiency: 0.9,
-                                    fan_pressure_rise: 4.0)
+                                                              pri_zones,
+                                                              system_name: system_name,
+                                                              chilled_water_loop: chilled_water_loop,
+                                                              fan_efficiency: 0.62,
+                                                              fan_motor_efficiency: 0.9,
+                                                              fan_pressure_rise: 4.0)
 
             model_create_multizone_fan_schedule(model, zone_op_hrs, pri_zones, system_name)
           end
@@ -1796,21 +1797,21 @@ class Standard
           end
           # Add a System 9 - Gas Unit Heater to each zone
           OpenstudioStandards::HVAC.model_add_unitheater(model,
-                               zones,
-                               fan_control_type: 'ConstantVolume',
-                               fan_pressure_rise: 0.2,
-                               heating_type: main_heat_fuel,
-                               hot_water_loop: hot_water_loop)
+                                                         zones,
+                                                         fan_control_type: 'ConstantVolume',
+                                                         fan_pressure_rise: 0.2,
+                                                         heating_type: main_heat_fuel,
+                                                         hot_water_loop: hot_water_loop)
         end
 
       when 'Electric_Furnace' # System 10
         unless zones.empty?
           # Add a System 10 - Electric Unit Heater to each zone
           OpenstudioStandards::HVAC.model_add_unitheater(model,
-                               zones,
-                               fan_control_type: 'ConstantVolume',
-                               fan_pressure_rise: 0.2,
-                               heating_type: main_heat_fuel)
+                                                         zones,
+                                                         fan_control_type: 'ConstantVolume',
+                                                         fan_pressure_rise: 0.2,
+                                                         heating_type: main_heat_fuel)
         end
 
       when 'SZ_CV' # System 12 (gas or district heat) or System 13 (electric resistance heat)
@@ -1832,17 +1833,17 @@ class Standard
                                  model.getPlantLoopByName('Chilled Water Loop').get
                                else
                                  OpenstudioStandards::HVAC.model_add_chw_loop(model,
-                                                    cooling_fuel: cool_fuel,
-                                                    chw_pumping_configuration: 'constant primary',
-                                                    outdoor_air_reset: true)
+                                                                              cooling_fuel: cool_fuel,
+                                                                              chw_pumping_configuration: 'constant primary',
+                                                                              outdoor_air_reset: true)
                                end
 
           OpenstudioStandards::HVAC.model_add_four_pipe_fan_coil(model,
-                                       zones,
-                                       chilled_water_loop,
-                                       hot_water_loop: hot_water_loop,
-                                       ventilation: true,
-                                       capacity_control_method: 'ConstantVolume')
+                                                                 zones,
+                                                                 chilled_water_loop,
+                                                                 hot_water_loop: hot_water_loop,
+                                                                 ventilation: true,
+                                                                 capacity_control_method: 'ConstantVolume')
         end
       when 'SZ_VAV' # System 11, chilled water, heating type varies by climate zone
         unless zones.empty?
@@ -1882,16 +1883,16 @@ class Standard
                                end
 
           OpenstudioStandards::HVAC.model_add_psz_vav(model,
-                            zones,
-                            heating_type: heating_type,
-                            cooling_type: 'WaterCooled',
-                            supplemental_heating_type: nil,
-                            hvac_op_sch: nil,
-                            fan_type: 'PSZ_VAV_System_Fan',
-                            oa_damper_sch: nil,
-                            hot_water_loop: hot_water_loop,
-                            chilled_water_loop: chilled_water_loop,
-                            minimum_volume_setpoint: 0.5)
+                                                      zones,
+                                                      heating_type: heating_type,
+                                                      cooling_type: 'WaterCooled',
+                                                      supplemental_heating_type: nil,
+                                                      hvac_op_sch: nil,
+                                                      fan_type: 'PSZ_VAV_System_Fan',
+                                                      oa_damper_sch: nil,
+                                                      hot_water_loop: hot_water_loop,
+                                                      chilled_water_loop: chilled_water_loop,
+                                                      minimum_volume_setpoint: 0.5)
         end
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Model', "System type #{system_type} is not a valid choice, nothing will be added to the model.")
@@ -3091,6 +3092,7 @@ class Standard
         if valid
           return construction
         end
+
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Already added construction: '#{construction_name}' but its type '#{construction.iddObjectType.valueName}' is not valid for the intended surface type '#{intended_surface_type}'. A new construction will be created.")
       end
     end
@@ -3109,7 +3111,7 @@ class Standard
       return OpenStudio::Model::OptionalConstruction.new
     end
 
-    intended_surface_type = data["intended_surface_type"]
+    intended_surface_type = data['intended_surface_type']
     intended_surface_type ||= ''
 
     # Make a new construction and set the standards details

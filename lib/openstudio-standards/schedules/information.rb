@@ -359,7 +359,7 @@ module OpenstudioStandards
         (0..23).each do |j|
           values = []
           times = (time_interval_min..60).step(time_interval_min).to_a
-          times.each { |t| values << schedule_day.getValue(OpenStudio::Time.new(0, j, t, 0)) }
+          values = times.map { |t| schedule_day.getValue(OpenStudio::Time.new(0, j, t, 0)) }
           schedule_values << (values.sum / times.size).round(5)
         end
       else
@@ -902,7 +902,7 @@ module OpenstudioStandards
 
       schedule_ruleset.scheduleRules.each do |rule|
         day_sch = rule.daySchedule
-        profiles[day_sch] = ""
+        profiles[day_sch] = ''
         if rule.applyWeekdays
           profiles[day_sch] += '|Wkdy'
         elsif rule.applyWeekends
@@ -921,7 +921,7 @@ module OpenstudioStandards
       # clean up any staring pipe
       profiles.each do |k, v|
         if v.start_with?('|')
-          profiles[k] = v[1..-1]
+          profiles[k] = v[1..]
         end
       end
 

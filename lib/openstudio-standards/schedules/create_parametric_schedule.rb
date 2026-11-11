@@ -638,8 +638,8 @@ module OpenstudioStandards
       # case - and leaves an empty plateau (ramps so wide they overlap, end_lower <= start_upper)
       # unfilled, which comparing the wrapped bounds directly would not.
       combined.each do |pair|
-        in_plateau = (pair[0] >= start_upper && pair[0] <= end_lower) ||
-                     ((pair[0] + 24.0) >= start_upper && (pair[0] + 24.0) <= end_lower)
+        in_plateau = pair[0].between?(start_upper, end_lower) ||
+                     (pair[0] + 24.0).between?(start_upper, end_lower)
         pair[1] = 1 if in_plateau
       end
 
@@ -737,7 +737,7 @@ module OpenstudioStandards
     end
 
     # Calendar day-of-week order used for cross-day spillover adjacency.
-    DAY_OF_WEEK_ORDER = %w[Mon Tue Wed Thu Fri Sat Sun].freeze
+    DAY_OF_WEEK_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].freeze
 
     # Days of the week (Mon..Sun) that a schedule day type applies to.
     #
@@ -745,9 +745,9 @@ module OpenstudioStandards
     # @return [Array<String>] applied day-of-week abbreviations
     def self.day_type_applied_days(day_type)
       case day_type
-      when 'Wkdy' then %w[Mon Tue Wed Thu Fri]
-      when 'Wknd' then %w[Sat Sun]
-      when 'Default' then %w[Mon Tue Wed Thu Fri Sat Sun]
+      when 'Wkdy' then ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+      when 'Wknd' then ['Sat', 'Sun']
+      when 'Default' then ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       else DAY_OF_WEEK_ORDER.include?(day_type) ? [day_type] : []
       end
     end
@@ -925,7 +925,8 @@ module OpenstudioStandards
       end
 
       if schedule_objs.empty?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "No parametric schedule found for name '#{schedule_name}'#{category.nil? ? '' : " and category '#{category}'"}.")
+        category_msg = category.nil? ? '' : " and category '#{category}'"
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "No parametric schedule found for name '#{schedule_name}'#{category_msg}.")
         return nil
       end
 
@@ -943,7 +944,7 @@ module OpenstudioStandards
         # hours when supplied; everything else uses the weekday building hours. The
         # standard timings (st_std/et_std) are the fallback when building hours are not
         # supplied, so standalone expansion (empty params) is unchanged.
-        is_weekend = (day_types & %w[Wknd Sat Sun]).any? && (day_types & %w[Default Wkdy]).empty?
+        is_weekend = day_types.intersect?(['Wknd', 'Sat', 'Sun']) && !day_types.intersect?(['Default', 'Wkdy'])
 
         base, peak = OpenstudioStandards::Schedules.resolve_base_and_peak(params, obj[:base_std], obj[:peak_std], weekend: is_weekend)
         st = if is_weekend
@@ -971,8 +972,8 @@ module OpenstudioStandards
         # only the control-point path.
         design_base = base
         design_peak = peak
-        if (day_types & %w[SmrDsn WntrDsn]).any?
-          ratio_free = params.reject { |key, _| %i[base_peak_ratio wknd_base_peak_ratio].include?(key) }
+        if day_types.intersect?(['SmrDsn', 'WntrDsn'])
+          ratio_free = params.except(:base_peak_ratio, :wknd_base_peak_ratio)
           design_base, design_peak = OpenstudioStandards::Schedules.resolve_base_and_peak(ratio_free, obj[:base_std], obj[:peak_std], weekend: is_weekend)
         end
 
@@ -989,7 +990,7 @@ module OpenstudioStandards
         # Capture cross-midnight spillover for control-point profiles so boundary-day
         # rules can be added after all type profiles are assembled. Design-day
         # types do not spill (they are stand-alone peak days).
-        if obj[:control_points] && !(day_types & %w[SmrDsn WntrDsn Hol]).any?
+        if obj[:control_points] && !['SmrDsn', 'WntrDsn', 'Hol'].intersect?(day_types)
           spill = OpenstudioStandards::Schedules.schedule_control_points_spillover(obj, base, peak, st, et, timesteps_per_hour)
           unless spill[:next_day].empty? && spill[:prev_day].empty?
             spillover_sources << { obj: obj, day_types: day_types, next_day: spill[:next_day], prev_day: spill[:prev_day] }
@@ -1249,7 +1250,8 @@ module OpenstudioStandards
         end
       when 'up_down'
         if start_slope.nil? || end_slope.nil?
-          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Cannot derive 'up_down' schedule#{schedule_name.nil? ? '' : " '#{schedule_name}'"} without start_slope and end_slope.")
+          schedule_name_msg = schedule_name.nil? ? '' : " '#{schedule_name}'"
+          OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules', "Cannot derive 'up_down' schedule#{schedule_name_msg} without start_slope and end_slope.")
           return []
         end
 
@@ -1583,8 +1585,8 @@ module OpenstudioStandards
     def self.resolve_schedule_overrides(schedule_overrides, schedule_set_name, standards_space_type, extra_match_keys: [])
       return {} if schedule_overrides.nil? || schedule_overrides.empty?
 
-      section_keys = %i[occupancy lighting electric_equipment gas_equipment hot_water_equipment]
-      key_fields = %i[space_type schedule_set standards_space_type ventilation_space_type]
+      section_keys = [:occupancy, :lighting, :electric_equipment, :gas_equipment, :hot_water_equipment]
+      key_fields = [:space_type, :schedule_set, :standards_space_type, :ventilation_space_type]
       merged = {}
       [['*'], [schedule_set_name, standards_space_type, *extra_match_keys].compact.map(&:to_s)].each do |match_keys|
         entry = schedule_overrides.find do |override|
@@ -1699,7 +1701,7 @@ module OpenstudioStandards
       # An occupancy override wins over building hours + offsets and the standards.
       # :schedule names which schedule to draw from, handled by schedule_name_for below; the
       # rest of the section are expansion parameters
-      occ_params = occ_params.merge(overrides[:occupancy].reject { |field, _| field == :schedule }) if overrides[:occupancy].is_a?(Hash)
+      occ_params = occ_params.merge(overrides[:occupancy].except(:schedule)) if overrides[:occupancy].is_a?(Hash)
 
       # A keep_standard_design_level people load override adjusts the occupancy schedule peak
       # instead of the design occupancy level (see CreateTypical.space_type_apply_load_overrides).
@@ -1832,7 +1834,7 @@ module OpenstudioStandards
 
         # :schedule names which schedule to draw from; it is not one of the expansion or
         # derivation parameters the rest of the section carries
-        load_override = (overrides[section_key] || {}).reject { |field, _| field == :schedule }
+        load_override = (overrides[section_key] || {}).except(:schedule)
         load_sch = if legacy
                      path = File.join(SCHEDULE_DATA_DIR, legacy_loads.fetch(section_key)[1])
                      OpenstudioStandards::Schedules.resolve_load_schedule(

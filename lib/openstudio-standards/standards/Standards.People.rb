@@ -42,7 +42,7 @@ class Standard
         instance = OpenStudio::Model::People.new(definition)
         instance.setName("#{space_type.name} People")
         instance.setSpaceType(space_type)
-        thermal_comfort_models.each { |m| definition.pushThermalComfortModelType(m)}
+        thermal_comfort_models.each { |m| definition.pushThermalComfortModelType(m) }
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} had no people, one has been created.")
         instances << instance
       elsif instances.size > 1

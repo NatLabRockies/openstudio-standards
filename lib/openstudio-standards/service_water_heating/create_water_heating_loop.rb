@@ -44,7 +44,6 @@ module OpenstudioStandards
                                                pipe_insulation_thickness: 0.0127,
                                                floor_area: nil,
                                                number_of_stories: nil)
-
       # create service water heating loop
       service_water_loop = OpenStudio::Model::PlantLoop.new(model)
       if service_water_temperature > 60.0
@@ -212,7 +211,7 @@ module OpenstudioStandards
       loop_temperature = service_water_temperature + setpoint_offset
       unless setpoint_offset.zero?
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ServiceWaterHeating',
-          "Booster loop setpoint set to #{OpenStudio.convert(loop_temperature, 'C', 'F').get.round(1)}F, #{setpoint_offset.round(1)}K above the #{OpenStudio.convert(service_water_temperature, 'C', 'F').get.round(1)}F the fixtures target.")
+                           "Booster loop setpoint set to #{OpenStudio.convert(loop_temperature, 'C', 'F').get.round(1)}F, #{setpoint_offset.round(1)}K above the #{OpenStudio.convert(service_water_temperature, 'C', 'F').get.round(1)}F the fixtures target.")
       end
 
       water_heater_volume_gal = OpenStudio.convert(water_heater_volume, 'm^3', 'gal').get

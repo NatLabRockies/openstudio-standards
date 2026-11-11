@@ -205,7 +205,7 @@ module OpenstudioStandards
         keys << space_type.standardsSpaceType.get if space_type.standardsSpaceType.is_initialized
         schedule_set = space_type.additionalProperties.getFeatureAsString('schedule_set')
         keys << schedule_set.get if schedule_set.is_initialized
-        return true unless (names & keys).empty?
+        return true if names.intersect?(keys)
       end
 
       building_types = Array(entry[:building_types]).map(&:to_s)
@@ -248,7 +248,7 @@ module OpenstudioStandards
                                       building_name: nil)
       constructions = symbolize_construction_spec(constructions)
       entries = constructions[:sets].is_a?(Array) ? constructions[:sets] : []
-      default_spec = constructions[:default].is_a?(Hash) ? constructions[:default] : constructions.reject { |key, _| %i[default sets].include?(key) }
+      default_spec = constructions[:default].is_a?(Hash) ? constructions[:default] : constructions.except(:default, :sets)
       default_spec = symbolize_construction_spec(default_spec)
       label = building_name || fallback_building_type
       building_set = create_construction_set(
@@ -310,12 +310,12 @@ module OpenstudioStandards
     def self.symbolize_construction_spec(spec)
       return {} if spec.nil?
 
-      out = spec.each_with_object({}) { |(key, value), hash| hash[key.to_sym] = value }
+      out = spec.transform_keys(&:to_sym)
       return out unless out[:surfaces].is_a?(Hash)
 
       out[:surfaces] = out[:surfaces].each_with_object({}) do |(surface, value), hash|
         hash[surface.to_sym] = if value.is_a?(Hash)
-                                 value.each_with_object({}) { |(key, item), nested| nested[key.to_sym] = item }
+                                 value.transform_keys(&:to_sym)
                                else
                                  value
                                end
