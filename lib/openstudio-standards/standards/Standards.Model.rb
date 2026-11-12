@@ -443,6 +443,11 @@ class Standard
       # following the ventilation rate procedure from 62.1
       model_apply_multizone_vav_outdoor_air_sizing(model)
 
+      # Re-apply the minimum damper positions after multizone VAV sizing to ensure they reflect the final zone OA requirements
+      model.getAirLoopHVACs.sort.each do |air_loop|
+        air_loop_hvac_apply_minimum_vav_damper_positions(air_loop, false)
+      end
+
       # Set the baseline fan power for all air loops
       model.getAirLoopHVACs.sort.each do |air_loop|
         air_loop_hvac_apply_prm_baseline_fan_power(air_loop)
