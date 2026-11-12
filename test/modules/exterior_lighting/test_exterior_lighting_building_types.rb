@@ -5,7 +5,7 @@ class TestExteriorLightingBuildingTypes < Minitest::Test
 
   def form_default_building_types
     source = File.read(File.expand_path('../../../lib/openstudio-standards/geometry/create_bar.rb', __dir__))
-    body = source[/def self\.building_form_defaults.*?\n    end\n/m]
+    body = source[/def self\.building_form_defaults.*?\r?\n    end\r?\n/m]
     refute_nil(body, 'could not read building_form_defaults')
     body.scan(/hash\['([^']+)'\]/).flatten.uniq
   end
