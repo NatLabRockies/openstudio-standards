@@ -384,6 +384,15 @@
       "source": "Warehouse HtgSetp FineStorage / Warehouse ClgSetp FineStorage (curated)"
     },
     {
+      "space_type_name": "whole building office",
+      "heating_setpoint_c": 20.0,
+      "heating_setback_delta_c": 2.6,
+      "cooling_setpoint_c": 23.1,
+      "cooling_setback_delta_c": 2.2,
+      "source_building_type": "Office",
+      "source": "Office HtgSetp_Enduse / Office ClgSetp_Enduse (inherited from base office space type)"
+    },
+    {
       "space_type_name": "workshop",
       "heating_setpoint_c": 21.1,
       "heating_setback_delta_c": 0.0,
@@ -393,4 +402,4 @@
       "source": "D_ESe_All_HTemp_Yr / D_ESe_All_CTemp_Yr"
     }
   ]
-}
+}
