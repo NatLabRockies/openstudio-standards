@@ -53,6 +53,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '0.22.0'
   spec.add_development_dependency 'solargraph', '~> 0.58.0'
   spec.add_development_dependency 'yard', '~> 0.9'
-  spec.add_runtime_dependency 'tbd', '~> 3'
+  spec.add_runtime_dependency 'tbd', '~> 3.6.1'
   spec.add_development_dependency 'aws-sdk-s3'
 end
