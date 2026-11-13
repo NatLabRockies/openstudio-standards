@@ -1,8 +1,40 @@
 {
-  "space_types": [
+  "service_water_space_types": [
     {
-      "space_type": "Break Room",
-      "building_type": "Courthouse",
+      "service_water_space_type": "apartment",
+      "standards_building_type": null,
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": 3.48,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.003663158,
+          "loop_type": "One Per Unit",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "ApartmentMidRise APT_DHW_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "restroom",
+      "standards_building_type": null,
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.02,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": null,
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "lounge_breakroom",
+      "standards_building_type": "Courthouse",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -17,8 +49,8 @@
       ]
     },
     {
-      "space_type": "Restroom",
-      "building_type": "Courthouse",
+      "service_water_space_type": "restroom",
+      "standards_building_type": "Courthouse",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -33,8 +65,8 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "FullServiceRestaurant",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "FullServiceRestaurant",
       "water_use_equipment": [
         {
           "equipment_name": "Dishwasher Booster",
@@ -59,8 +91,8 @@
       ]
     },
     {
-      "space_type": "Apartment",
-      "building_type": "HighriseApartment",
+      "service_water_space_type": "apartment",
+      "standards_building_type": "HighriseApartment",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -75,8 +107,8 @@
       ]
     },
     {
-      "space_type": "ER_Exam",
-      "building_type": "Hospital",
+      "service_water_space_type": "emergency_room",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -91,40 +123,8 @@
       ]
     },
     {
-      "space_type": "ER_Trauma",
-      "building_type": "Hospital",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.003333333,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "ER_Triage",
-      "building_type": "Hospital",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.003333333,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Kitchen",
-      "building_type": "Hospital",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": "Dishwasher Booster",
@@ -149,8 +149,8 @@
       ]
     },
     {
-      "space_type": "Lab",
-      "building_type": "Hospital",
+      "service_water_space_type": "laboratory",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -165,8 +165,8 @@
       ]
     },
     {
-      "space_type": "OR",
-      "building_type": "Hospital",
+      "service_water_space_type": "operating_room",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -181,8 +181,8 @@
       ]
     },
     {
-      "space_type": "PatRoom",
-      "building_type": "Hospital",
+      "service_water_space_type": "patient_room",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -197,8 +197,8 @@
       ]
     },
     {
-      "space_type": "PhysTherapy",
-      "building_type": "Hospital",
+      "service_water_space_type": "physical_therapy",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -213,24 +213,8 @@
       ]
     },
     {
-      "space_type": "Radiology",
-      "building_type": "Hospital",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000190476,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "GuestRoom",
-      "building_type": "LargeHotel",
+      "service_water_space_type": "guest_room",
+      "standards_building_type": "LargeHotel",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -245,8 +229,8 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "LargeHotel",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "LargeHotel",
       "water_use_equipment": [
         {
           "equipment_name": "Dishwasher Booster",
@@ -271,8 +255,8 @@
       ]
     },
     {
-      "space_type": "Laundry",
-      "building_type": "LargeHotel",
+      "service_water_space_type": "laundry_washing",
+      "standards_building_type": "LargeHotel",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -287,24 +271,8 @@
       ]
     },
     {
-      "space_type": "Apartment",
-      "building_type": "MidriseApartment",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 3.48,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.003663158,
-          "loop_type": "One Per Unit",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "ApartmentMidRise APT_DHW_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Restroom",
-      "building_type": "Office",
+      "service_water_space_type": "restroom",
+      "standards_building_type": "Office",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -339,136 +307,8 @@
       ]
     },
     {
-      "space_type": "WholeBuilding - Lg Office",
-      "building_type": "Office",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000516521,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OfficeLarge BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "WholeBuilding - Lg Office-basement",
-      "building_type": "Office",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000516521,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OfficeLarge BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "WholeBuilding - Lg Office-others",
-      "building_type": "Office",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000516521,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OfficeLarge BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "WholeBuilding - Md Office",
-      "building_type": "Office",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000950996,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OfficeMedium BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "WholeBuilding - Sm Office",
-      "building_type": "Office",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000545256,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OfficeSmall BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Anesthesia",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.018518519,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "MRI",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.004545455,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "MRI_Control",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.011904762,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "OR",
-      "building_type": "Outpatient",
+      "service_water_space_type": "operating_room",
+      "standards_building_type": "Outpatient",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -483,56 +323,8 @@
       ]
     },
     {
-      "space_type": "PACU",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.006329114,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "PhysicalTherapy",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.002114165,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "PreOp",
-      "building_type": "Outpatient",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.007590133,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "ProcedureRoom",
-      "building_type": "Outpatient",
+      "service_water_space_type": "procedure_room",
+      "standards_building_type": "Outpatient",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -547,13 +339,13 @@
       ]
     },
     {
-      "space_type": "Xray",
-      "building_type": "Outpatient",
+      "service_water_space_type": "recovery",
+      "standards_building_type": "Outpatient",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.002222222,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.006329114,
           "loop_type": "Shared",
           "mixed_water_temperature_f": 110.0,
           "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
@@ -563,8 +355,40 @@
       ]
     },
     {
-      "space_type": "Restroom",
-      "building_type": "PrimarySchool",
+      "service_water_space_type": "physical_therapy",
+      "standards_building_type": "Outpatient",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.002114165,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "exam_treatment",
+      "standards_building_type": "Outpatient",
+      "water_use_equipment": [
+        {
+          "equipment_name": null,
+          "peak_flow_rate_gph": null,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.007590133,
+          "loop_type": "Shared",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "OutPatientHealthCare BLDG_SWH_SCH",
+          "sensible_fraction": 0.2,
+          "latent_fraction": 0.05
+        }
+      ]
+    },
+    {
+      "service_water_space_type": "restroom",
+      "standards_building_type": "PrimarySchool",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -579,8 +403,8 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "SecondarySchool",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "SecondarySchool",
       "water_use_equipment": [
         {
           "equipment_name": "Dishwasher Booster",
@@ -605,8 +429,8 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "PrimarySchool",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "PrimarySchool",
       "water_use_equipment": [
         {
           "equipment_name": "Dishwasher Booster",
@@ -631,8 +455,8 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "QuickServiceRestaurant",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "QuickServiceRestaurant",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -647,8 +471,8 @@
       ]
     },
     {
-      "space_type": "Gym",
-      "building_type": "SecondarySchool",
+      "service_water_space_type": "exercise_area",
+      "standards_building_type": "SecondarySchool",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -663,8 +487,8 @@
       ]
     },
     {
-      "space_type": "Restroom",
-      "building_type": "SecondarySchool",
+      "service_water_space_type": "restroom",
+      "standards_building_type": "SecondarySchool",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -679,8 +503,8 @@
       ]
     },
     {
-      "space_type": "GuestRoom123Occ",
-      "building_type": "SmallHotel",
+      "service_water_space_type": "guest_room",
+      "standards_building_type": "SmallHotel",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -695,24 +519,8 @@
       ]
     },
     {
-      "space_type": "GuestRoom123Vac",
-      "building_type": "SmallHotel",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.006324786,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "HotelSmall AlwaysOff",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Laundry",
-      "building_type": "SmallHotel",
+      "service_water_space_type": "laundry_washing",
+      "standards_building_type": "SmallHotel",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -727,56 +535,8 @@
       ]
     },
     {
-      "space_type": "Strip mall - type 1",
-      "building_type": "StripMall",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 1.8,
-          "peak_flow_rate_gph_per_floor_area_ft2": null,
-          "loop_type": "One Per Space",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "RetailStripmall Type1_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Strip mall - type 2",
-      "building_type": "StripMall",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 1.8,
-          "peak_flow_rate_gph_per_floor_area_ft2": null,
-          "loop_type": "One Per Space",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "RetailStripmall Type2_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Strip mall - type 3",
-      "building_type": "StripMall",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 1.8,
-          "peak_flow_rate_gph_per_floor_area_ft2": null,
-          "loop_type": "One Per Space",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "RetailStripmall Type3_SWH_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Bakery",
-      "building_type": "SuperMarket",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "SuperMarket",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -785,62 +545,30 @@
           "loop_type": "Shared",
           "mixed_water_temperature_f": 110.0,
           "flow_rate_schedule": "SuperMarket Bldg Swh",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Deli",
-      "building_type": "SuperMarket",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.002141786,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "SuperMarket Bldg Swh",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "OfficeGeneral",
-      "building_type": "Asm",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.036321959,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_Asm_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         },
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.036321959,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.002141786,
           "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_Asm_All_DHW_DHW_Yr",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "SuperMarket Bldg Swh",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "ECC",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "ECC",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.200390499,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_ECC_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -849,14 +577,14 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "EPr",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "EPr",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.0476755,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_EPr_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -865,30 +593,14 @@
       ]
     },
     {
-      "space_type": "Classroom",
-      "building_type": "ERC",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.007802747,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_ERC_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Kitchen",
-      "building_type": "ESe",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "ESe",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.106434595,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_ESe_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -897,30 +609,14 @@
       ]
     },
     {
-      "space_type": "DormitoryRoom",
-      "building_type": "EUn",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.004358811,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "D_EUn_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Kitchen",
-      "building_type": "EUn",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "EUn",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.206848891,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_EUn_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -929,14 +625,14 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "Hsp",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "Hsp",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.742112849,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_Hsp_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -945,8 +641,8 @@
       ]
     },
     {
-      "space_type": "GuestRmOcc",
-      "building_type": "Htl",
+      "service_water_space_type": "guest_room",
+      "standards_building_type": "Htl",
       "water_use_equipment": [
         {
           "equipment_name": null,
@@ -961,14 +657,14 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "Htl",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "Htl",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.169299412,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_Htl_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -977,78 +673,14 @@
       ]
     },
     {
-      "space_type": "OfficeOpen",
-      "building_type": "MBT",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.004856812,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_MBT_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "ResBedroom",
-      "building_type": "MFm",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 3.48,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.003663158,
-          "loop_type": "One Per Unit",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "ApartmentMidRise APT_DHW_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "ResLiving",
-      "building_type": "MFm",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": 3.48,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.003663158,
-          "loop_type": "One Per Unit",
-          "mixed_water_temperature_f": 110.0,
-          "flow_rate_schedule": "ApartmentMidRise APT_DHW_SCH",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Work",
-      "building_type": "MLI",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.001934756,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_MLI_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Laundry",
-      "building_type": "Mtl",
+      "service_water_space_type": "laundry_washing",
+      "standards_building_type": "Mtl",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.135305351,
-          "loop_type": "Dedicated",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_Mtl_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -1057,14 +689,14 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "Nrs",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "Nrs",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.116349097,
-          "loop_type": "Dedicated",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_Nrs_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -1073,46 +705,14 @@
       ]
     },
     {
-      "space_type": "OfficeOpen",
-      "building_type": "OfL",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.001699689,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_OfL_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "OfficeSmall",
-      "building_type": "OfS",
-      "water_use_equipment": [
-        {
-          "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.001311762,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_OfS_All_DHW_DHW_Yr",
-          "sensible_fraction": 0.2,
-          "latent_fraction": 0.05
-        }
-      ]
-    },
-    {
-      "space_type": "Kitchen",
-      "building_type": "RFF",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "RFF",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.034460537,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_RFF_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -1121,14 +721,14 @@
       ]
     },
     {
-      "space_type": "Kitchen",
-      "building_type": "RSD",
+      "service_water_space_type": "kitchen",
+      "standards_building_type": "RSD",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
           "peak_flow_rate_gph_per_floor_area_ft2": 0.03112423,
-          "loop_type": "One Per Space",
+          "loop_type": "Shared",
           "mixed_water_temperature_f": 135.0,
           "flow_rate_schedule": "D_RSD_All_DHW_DHW_Yr",
           "sensible_fraction": 0.2,
@@ -1137,80 +737,80 @@
       ]
     },
     {
-      "space_type": "RetailSales",
-      "building_type": "Rt3",
+      "service_water_space_type": "exam_treatment",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.0002815,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.003333333,
           "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_Rt3_All_DHW_DHW_Yr",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
       ]
     },
     {
-      "space_type": "RetailSales",
-      "building_type": "RtL",
+      "service_water_space_type": "imaging",
+      "standards_building_type": "Hospital",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000350744,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.000190476,
           "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_RtL_All_DHW_DHW_Yr",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "Hospital BLDG_SWH_EXTD_SCH",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
       ]
     },
     {
-      "space_type": "RetailSales",
-      "building_type": "RtS",
+      "service_water_space_type": "whole_building_office",
+      "standards_building_type": "Office",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000674871,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.000516521,
           "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_RtS_All_DHW_DHW_Yr",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "OfficeLarge BLDG_SWH_SCH",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
       ]
     },
     {
-      "space_type": "WarehouseCond",
-      "building_type": "SCn",
+      "service_water_space_type": "guest room vacant",
+      "standards_building_type": "SmallHotel",
       "water_use_equipment": [
         {
           "equipment_name": null,
           "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000104042,
+          "peak_flow_rate_gph_per_floor_area_ft2": 0.006324786,
           "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_SCn_All_DHW_DHW_Yr",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "HotelSmall AlwaysOff",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }
       ]
     },
     {
-      "space_type": "WarehouseUnCond",
-      "building_type": "SUn",
+      "service_water_space_type": "whole_building_retail",
+      "standards_building_type": "StripMall",
       "water_use_equipment": [
         {
           "equipment_name": null,
-          "peak_flow_rate_gph": null,
-          "peak_flow_rate_gph_per_floor_area_ft2": 0.000104042,
-          "loop_type": "Shared",
-          "mixed_water_temperature_f": 135.0,
-          "flow_rate_schedule": "D_SUn_All_DHW_DHW_Yr",
+          "peak_flow_rate_gph": 1.8,
+          "peak_flow_rate_gph_per_floor_area_ft2": null,
+          "loop_type": "One Per Space",
+          "mixed_water_temperature_f": 110.0,
+          "flow_rate_schedule": "RetailStripmall Type2_SWH_SCH",
           "sensible_fraction": 0.2,
           "latent_fraction": 0.05
         }

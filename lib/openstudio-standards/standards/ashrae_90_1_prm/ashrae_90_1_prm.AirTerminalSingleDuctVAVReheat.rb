@@ -22,7 +22,8 @@ class ASHRAE901PRM < Standard
     # Minimum OA flow rate
     # If specified, set the MDP as the larger of the two
     unless zone_min_oa.nil?
-      min_oa_damp_position = [zone_min_oa / air_terminal_single_duct_vav_reheat.autosizedMaximumAirFlowRate.get, min_damper_position].max
+      max_flow = air_terminal_single_duct_vav_reheat.autosizedMaximumAirFlowRate.get
+      min_oa_damp_position = [zone_min_oa / max_flow, min_damper_position].max
       air_terminal_single_duct_vav_reheat.setConstantMinimumAirFlowFraction(min_oa_damp_position)
     end
 

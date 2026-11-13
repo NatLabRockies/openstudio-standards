@@ -25,8 +25,8 @@ class TestRefrigerationInformation < Minitest::Test
     args['bldg_type_a'] = 'SuperMarket'
     result = @geo.create_bar_from_building_type_ratios(model, args)
 
-    # get case zone
+    # get walk-in zone
     zone = @refrig.refrigeration_walkin_zone(model)
-    assert_equal('Zone SuperMarket DryStorage B  - Story ground', zone.name.to_s)
+    assert_equal('Zone SuperMarket DryStorage B end_b - Story ground', zone.name.to_s)
   end
 end

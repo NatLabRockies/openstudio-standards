@@ -16,7 +16,7 @@ class NECB2011
       space_type_apply_internal_loads(space_type: space_type)
 
       # Schedules
-      space_type_apply_internal_load_schedules(space_type)
+      space_type_apply_standard_internal_load_schedules(space_type)
       space_type_apply_thermostat_schedules(space_type)
     end
   end
@@ -291,7 +291,7 @@ class NECB2011
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation per area to #{ventilation_per_area} cfm/ft^2.")
       end
       unless ventilation_per_person.zero?
-        # The occupancy per area rate for ventilation is different from the occupancy used for other loads as the occupancy assumption in the applicable  
+        # The occupancy per area rate for ventilation is different from the occupancy used for other loads as the occupancy assumption in the applicable
         # ventilation standard is followed.  The mod_ventilation_per_person rate adjusts the per person ventilation rate (from the standard) so that the
         # correct ventilation rate (per the standard) is calculated when using the NECB occupant density (defined as occupancy_per_area in the space_types.json file)
         # Later the method thermal_zone_convert_outdoor_air_to_per_area (in standards) uses the space occupancy which is the NECB figure to get the total vent rate.
@@ -303,7 +303,7 @@ class NECB2011
         ventilation.setOutdoorAirFlowAirChangesperHour(ventilation_ach)
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.SpaceType', "#{space_type.name} set ventilation to #{ventilation_ach} ACH.")
       end
-      
+
       # Add information about the source to an additional properties object. Used in unit testing but could be useful elsewhere.
       notes = ventilation.additionalProperties
       notes.setFeature("Ref OA per area", space_type_properties['ventilation_per_area'].to_f)

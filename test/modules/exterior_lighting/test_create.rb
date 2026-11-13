@@ -93,7 +93,32 @@ class TestExteriorLightingCreate < Minitest::Test
     base_lighting = exterior_lights.select { |e| e.name.get == 'Base Site Allowance 750.0 W' }[0]
     assert(base_lighting.exteriorLightsDefinition.designLevel == 750.0)
 
+    # Combine the facade's overnight shutoff schedule with daylight shutoff.
+    facade_lighting = exterior_lights.select { |e| e.name.get == 'Building Facades 0.84 W/ft' }[0]
+    assert_equal('AstronomicalClock', facade_lighting.controlOption)
+    exterior_lights.each { |e| assert_equal('AstronomicalClock', e.controlOption, "#{e.name} should follow the astronomical clock") }
+
     model.save(OpenStudio::Path.new("#{__dir__}/output/test_create_typical_exterior_lighting_default.osm"), true)
+  end
+
+  def test_create_typical_exterior_lighting_uses_configured_control_option_unless_overridden
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    path = OpenStudio::Path.new("#{__dir__}/../../doe_prototype/models/example_model_multipliers.osm")
+    model = translator.loadModel(path).get
+    model.getExteriorLightss.each(&:remove)
+
+    properties = @ext.exterior_lighting_properties(lighting_generation: 'default').merge('control_option' => 'ScheduleNameOnly')
+    @ext.stub :exterior_lighting_properties, properties do
+      exterior_lights = @ext.create_typical_exterior_lighting(model, lighting_generation: 'default', lighting_zone: 3)
+      assert(exterior_lights.any?)
+      exterior_lights.each { |light| assert_equal('ScheduleNameOnly', light.controlOption) }
+
+      exterior_lights.each(&:remove)
+      overridden_lights = @ext.create_typical_exterior_lighting(model, lighting_generation: 'default',
+                                                                lighting_zone: 3, control_option: 'AstronomicalClock')
+      assert(overridden_lights.any?)
+      overridden_lights.each { |light| assert_equal('AstronomicalClock', light.controlOption) }
+    end
   end
 
   def test_create_typical_exterior_lighting_small_hotel

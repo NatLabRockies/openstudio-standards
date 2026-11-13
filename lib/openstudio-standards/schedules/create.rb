@@ -22,7 +22,6 @@ module OpenstudioStandards
                                          upper_limit_value: nil,
                                          numeric_type: nil,
                                          unit_type: nil)
-
       if standard_schedule_type_limit.nil?
         if lower_limit_value.nil? || upper_limit_value.nil? || numeric_type.nil? || unit_type.nil?
           OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Schedules.Create', 'If calling create_schedule_type_limits without a standard_schedule_type_limit, you must specify all properties of ScheduleTypeLimits.')
@@ -251,38 +250,38 @@ module OpenstudioStandards
       default_data_array.delete_at(0)
       default_data_array.each do |data_pair|
         hour = data_pair[0].truncate
-        min = ((data_pair[0] - hour) * 60).to_i
+        min = ((data_pair[0] - hour) * 60).round
         default_day.addValue(OpenStudio::Time.new(0, hour, min, 0), data_pair[1])
       end
 
       # Rules
-      unless options['rules'].nil?
-        options['rules'].each do |data_array|
-          rule = OpenStudio::Model::ScheduleRule.new(sch_ruleset)
-          rule.setName("#{sch_ruleset.name} #{data_array[0]} Rule")
-          date_range = data_array[1].split('-')
-          start_date = date_range[0].split('/')
-          end_date = date_range[1].split('/')
-          rule.setStartDate(model.getYearDescription.makeDate(start_date[0].to_i, start_date[1].to_i))
-          rule.setEndDate(model.getYearDescription.makeDate(end_date[0].to_i, end_date[1].to_i))
-          days = data_array[2].split('/')
-          rule.setApplySunday(true) if days.include? 'Sun'
-          rule.setApplyMonday(true) if days.include? 'Mon'
-          rule.setApplyTuesday(true) if days.include? 'Tue'
-          rule.setApplyWednesday(true) if days.include? 'Wed'
-          rule.setApplyThursday(true) if days.include? 'Thu'
-          rule.setApplyFriday(true) if days.include? 'Fri'
-          rule.setApplySaturday(true) if days.include? 'Sat'
-          day_schedule = rule.daySchedule
-          day_schedule.setName("#{sch_ruleset.name} #{data_array[0]}")
-          data_array.delete_at(0)
-          data_array.delete_at(0)
-          data_array.delete_at(0)
-          data_array.each do |data_pair|
-            hour = data_pair[0].truncate
-            min = ((data_pair[0] - hour) * 60).to_i
-            day_schedule.addValue(OpenStudio::Time.new(0, hour, min, 0), data_pair[1])
-          end
+      options['rules']&.each do |data_array|
+        rule = OpenStudio::Model::ScheduleRule.new(sch_ruleset)
+        rule.setName("#{sch_ruleset.name} #{data_array[0]} Rule")
+        date_range = data_array[1].split('-')
+        start_date = date_range[0].split('/')
+        end_date = date_range[1].split('/')
+        rule.setStartDate(model.getYearDescription.makeDate(start_date[0].to_i, start_date[1].to_i))
+        rule.setEndDate(model.getYearDescription.makeDate(end_date[0].to_i, end_date[1].to_i))
+        days = data_array[2].split('/')
+        rule.setApplySunday(true) if days.include? 'Sun'
+        rule.setApplyMonday(true) if days.include? 'Mon'
+        rule.setApplyTuesday(true) if days.include? 'Tue'
+        rule.setApplyWednesday(true) if days.include? 'Wed'
+        rule.setApplyThursday(true) if days.include? 'Thu'
+        rule.setApplyFriday(true) if days.include? 'Fri'
+        rule.setApplySaturday(true) if days.include? 'Sat'
+        rule.setApplyWeekdays(true) if days.include? 'Wkdy'
+        rule.setApplyWeekends(true) if days.include? 'Wknd'
+        day_schedule = rule.daySchedule
+        day_schedule.setName("#{sch_ruleset.name} #{data_array[0]}")
+        data_array.delete_at(0)
+        data_array.delete_at(0)
+        data_array.delete_at(0)
+        data_array.each do |data_pair|
+          hour = data_pair[0].truncate
+          min = ((data_pair[0] - hour) * 60).to_i
+          day_schedule.addValue(OpenStudio::Time.new(0, hour, min, 0), data_pair[1])
         end
       end
 
@@ -360,11 +359,7 @@ module OpenstudioStandards
 
         i = 0
         until i == times_intermediate.size
-          if i == (times_intermediate.size - 1)
-            profile.addValue(times_intermediate[i], values_intermediate[i].to_f)
-          else
-            profile.addValue(times_intermediate[i], values_intermediate[i].to_f)
-          end
+          profile.addValue(times_intermediate[i], values_intermediate[i].to_f)
           i += 1
         end
       end
@@ -521,7 +516,7 @@ module OpenstudioStandards
       end
 
       # invert schedule values
-      for index in 0..old_schedule_day.times.size - 1
+      for index in 0..(old_schedule_day.times.size - 1)
         old_value = old_schedule_day.values[index]
         if old_value == 0
           new_value = 1

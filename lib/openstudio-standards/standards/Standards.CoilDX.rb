@@ -39,7 +39,7 @@ module CoilDX
     # The heating side of unitary heat pumps don't have a heating type as part of the search
     if coil_dx.to_CoilHeatingDXSingleSpeed.is_initialized &&
       OpenstudioStandards::HVAC.coil_dx_heat_pump?(coil_dx) &&
-       coil_dx.airLoopHVAC.empty? && coil_dx.containingHVACComponent.is_initialized
+      coil_dx.airLoopHVAC.empty? && coil_dx.containingHVACComponent.is_initialized
       containing_comp = coil_dx.containingHVACComponent.get
       if containing_comp.to_AirLoopHVACUnitaryHeatPumpAirToAir.is_initialized
         search_criteria['heating_type'] = nil
@@ -77,11 +77,10 @@ module CoilDX
   #   CoilCoolingDXSingleSpeed, CoilCoolingDXTwoSpeed, CoilCoolingDXMultiSpeed
   # @return [String] PTAC application
   def coil_dx_packaged_terminal_application(coil_dx)
-    if template.include?('90.1-2004') || template.include?('90.1-2007')
-      return 'New Construction'
-    else # '90.1-2010', '90.1-2013', '90.1-2016', '90.1-2019', others
-      return 'Standard Size'
-    end
+    return 'New Construction' if template.include?('90.1-2004') || template.include?('90.1-2007')
+
+    # '90.1-2010', '90.1-2013', '90.1-2016', '90.1-2019', others
+    return 'Standard Size'
   end
 
   # Determine what electric power phase value should be used for efficiency lookups for DX coils

@@ -4,12 +4,14 @@
 # Where a Cop is not listed, it uses the Rubocop defaults.
 
 AllCops:
+  TargetRubyVersion: 3.2
   Exclude:
     - 'data/**/*'
     - 'test/**/*'
     - 'lib/openstudio-standards/btap/**/*'
     - 'lib/openstudio-standards/standards/necb/**/*'
     - 'lib/openstudio-standards/prototypes/common/do_not_edit_metaclasses.rb'
+    - 'openstudio-standards.gemspec'
   NewCops: enable
 
 # Define the error reporting for each category
@@ -25,8 +27,17 @@ Style:
   Severity: error
 
 # ==================== Linters ====================
+
 Lint/AmbiguousOperator:
   Enabled: true
+
+# Allow duplicate branches for code clarity in some contexts
+Lint/DuplicateBranch:
+  Severity: warning
+
+# Allow empty classes
+Lint/EmptyClass:
+  Severity: warning
 
 # Allow empty when branches to give
 # a space to clearly document the
@@ -110,6 +121,10 @@ Style/ClassAndModuleChildren:
 Style/ClassVars:
   Enabled: false
 
+# Excluded because this codebase has many interdependent loops
+Style/CombinableLoops:
+  Enabled: false
+
 # Allow this syntax -- do not autocorrect.
 #   a = if true
 #         1
@@ -130,6 +145,9 @@ Style/EachWithObject:
 Style/For:
   Enabled: false
 
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 # Configuration parameters: AllowedVariables.
 Style/GlobalVars:
   Enabled: false
@@ -138,6 +156,12 @@ Style/GlobalVars:
 # the current approach is more readable.
 Style/GuardClause:
   Enabled: true
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: either
+
+Style/HashEachMethods:
+  Enabled: false
 
 # Allow duplication inside conditional branches to keep
 # code that does certain tasks more consolidated.
@@ -175,6 +199,10 @@ Style/NumericPredicate:
   Description: 'Do not force using .zero?'
   Enabled: false
 
+# Allow optional boolean parameters for backward compatibility
+Style/OptionalBooleanParameter:
+  Severity: warning
+
 # encourage explicit returns for clarity
 Style/RedundantReturn:
   Description: 'Do not use return where it is not required.'
@@ -183,6 +211,9 @@ Style/RedundantReturn:
 
 # Do NOT enable this because it appears $? is different than $CHILD_STATUS.
 Style/SpecialGlobalVars:
+  Enabled: false
+
+Style/SuperArguments:
   Enabled: false
 
 # Do not use %w, %W, %i, etc
@@ -197,16 +228,10 @@ Style/WordArray:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-w'
   EnforcedStyle: brackets
 
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
-Style/HashSyntax:
-  EnforcedShorthandSyntax: either
-
-Style/HashEachMethods:
-  Enabled: false
-
 # ==================== Naming ====================
+
+Naming/PredicateMethod:
+  Enabled: false
 
 # Intentionally allow set_foo because these methods do not
 # take have cooresponding getters.

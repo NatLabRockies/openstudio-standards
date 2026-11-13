@@ -60,7 +60,7 @@ module OpenstudioStandards
         # length of the wall edge
         intersect_vector = wall_edge_p1 - wall_edge_p2
         edge_vector = OpenStudio::Vector3d.new(intersect_vector.x, intersect_vector.y, intersect_vector.z)
-        return(edge_vector.length)
+        return edge_vector.length
       end
 
       # If no edges intersected, return 0
@@ -85,7 +85,7 @@ module OpenstudioStandards
       edge_array = []
 
       # Iterate through each vertex in the surface and construct an edge for it
-      for edge_counter in 0..n_vertices - 1
+      for edge_counter in (0..(n_vertices - 1))
 
         # If not the last vertex in surface
         if edge_counter < n_vertices - 1
@@ -160,7 +160,7 @@ module OpenstudioStandards
 
       # Determine the surface's cardinal direction
       cardinal_direction = ''
-      if (surface_abs_azimuth >= 0 && surface_abs_azimuth <= 45) || (surface_abs_azimuth > 315 && surface_abs_azimuth <= 360)
+      if surface_abs_azimuth.between?(0, 45) || surface_abs_azimuth.between?(315, 360)
         cardinal_direction = 'N'
       elsif surface_abs_azimuth > 45 && surface_abs_azimuth <= 135
         cardinal_direction = 'E'
@@ -242,10 +242,7 @@ module OpenstudioStandards
       # Check if the 2 lowest z-values
       # are the same
       z_vals = []
-      verts.each do |vertex|
-        z_vals << vertex.z
-      end
-      z_vals = z_vals.sort
+      z_vals = verts.map(&:z).sort
       return false unless z_vals[0] == z_vals[1]
 
       # Check if the diagonals are equal length
@@ -315,13 +312,11 @@ module OpenstudioStandards
         end
 
         # Conditioned space OR semi-heated space <-> unconditioned spaces
-        unless surf_cnt
+        if !surf_cnt && surface.outsideBoundaryCondition == 'Surface'
           # @todo add a case for 'Zone' when supported
-          if surface.outsideBoundaryCondition == 'Surface'
-            adj_space = surface.adjacentSurface.get.space.get
-            adj_space_cond_type = std.space_conditioning_category(adj_space)
-            surf_cnt = true unless adj_space_cond_type != 'Unconditioned'
-          end
+          adj_space = surface.adjacentSurface.get.space.get
+          adj_space_cond_type = std.space_conditioning_category(adj_space)
+          surf_cnt = true unless adj_space_cond_type != 'Unconditioned'
         end
 
         if surf_cnt
@@ -498,9 +493,7 @@ module OpenstudioStandards
 
         # calculate wall height as difference of maximum and minimum z values, assuming square, vertical walls
         z_values = []
-        surface.vertices.each do |vertex|
-          z_values << vertex.z
-        end
+        z_values = surface.vertices.map(&:z)
         surface_height = z_values.max - z_values.min
       end
 
@@ -1171,7 +1164,6 @@ module OpenstudioStandards
 
       return perimeter
     end
-
 
     # Calculate the model envelope area.
     # According to the 90.1 definition, the building envelope includes:

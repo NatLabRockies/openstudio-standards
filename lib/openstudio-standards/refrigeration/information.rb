@@ -28,17 +28,13 @@ module OpenstudioStandards
         next if space_type.empty?
 
         space_type = space_type.get
-        next if space_type.standardsSpaceType.empty?
-        next if space_type.standardsBuildingType.empty?
 
-        stds_spc_type = space_type.standardsSpaceType.get
-        stds_bldg_type = space_type.standardsBuildingType.get
-        cases = cases_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
-        unless cases.empty?
-          if zone.floorArea > display_case_zone_area_m2
-            display_case_zone = zone
-            display_case_zone_area_m2 = zone.floorArea
-          end
+        cases = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(cases_hsh, space_type)
+        next if cases.empty?
+
+        if zone.floorArea > display_case_zone_area_m2
+          display_case_zone = zone
+          display_case_zone_area_m2 = zone.floorArea
         end
       end
 
@@ -89,17 +85,13 @@ module OpenstudioStandards
         next if space_type.empty?
 
         space_type = space_type.get
-        next if space_type.standardsSpaceType.empty?
-        next if space_type.standardsBuildingType.empty?
 
-        stds_spc_type = space_type.standardsSpaceType.get
-        stds_bldg_type = space_type.standardsBuildingType.get
-        walkins = walkins_hsh.select { |r| (r[:building_type] == stds_bldg_type) && (r[:space_type] == stds_spc_type) }
-        unless walkins.empty?
-          if zone.floorArea > walkin_zone_area_m2
-            walkin_zone = zone
-            walkin_zone_area_m2 = zone.floorArea
-          end
+        walkins = OpenstudioStandards::Refrigeration.refrigeration_records_for_space_type(walkins_hsh, space_type)
+        next if walkins.empty?
+
+        if zone.floorArea > walkin_zone_area_m2
+          walkin_zone = zone
+          walkin_zone_area_m2 = zone.floorArea
         end
       end
 

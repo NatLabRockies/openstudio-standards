@@ -12,6 +12,11 @@ class TestRefrigerationCreateWalkIn < Minitest::Test
     args['total_bldg_floor_area'] = 50000.0
     args['bldg_type_a'] = 'SuperMarket'
     result = @geo.create_bar_from_building_type_ratios(model, args)
+
+    # set add space types and set additional properties
+    std = Standard.build('90.1-2013')
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     zone = model.getThermalZoneByName('Zone SuperMarket Sales A  - Story ground').get
 
     # default walkin

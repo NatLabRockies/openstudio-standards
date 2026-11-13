@@ -16,6 +16,8 @@ module OpenstudioStandards
     # @param sensible_fraction [Double] the water use equipment sensible fraction to the space
     # @param latent_fraction [Double] the water use equipment latent fraction to the space
     # @param service_water_loop [OpenStudio::Model::PlantLoop] if provided, add the water use fixture to this loop
+    # @param hot_water_supply_temperature_schedule [OpenStudio::Model::Schedule] optional hot water supply temperature schedule
+    # @param cold_water_supply_temperature_schedule [OpenStudio::Model::Schedule] optional cold water supply temperature schedule
     # @param space [OpenStudio::Model::Space] OpenStudio Space object
     # @return [OpenStudio::Model::WaterUseEquipment] OpenStudio WaterUseEquipment object
     def self.create_water_use(model,
@@ -27,6 +29,8 @@ module OpenstudioStandards
                               sensible_fraction: 0.2,
                               latent_fraction: 0.05,
                               service_water_loop: nil,
+                              hot_water_supply_temperature_schedule: nil,
+                              cold_water_supply_temperature_schedule: nil,
                               space: nil)
       # IP conversions for naming
       flow_rate_gpm = OpenStudio.convert(flow_rate, 'm^3/s', 'gal/min').get
@@ -81,7 +85,12 @@ module OpenstudioStandards
 
       # add to the service water loop if provided
       unless service_water_loop.nil?
-        service_water_loop.addDemandBranchForComponent(swh_connection)
+        OpenstudioStandards::ServiceWaterHeating.attach_water_use_to_loop(
+          water_fixture,
+          service_water_loop,
+          hot_water_supply_temperature_schedule: hot_water_supply_temperature_schedule,
+          cold_water_supply_temperature_schedule: cold_water_supply_temperature_schedule
+        )
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ServiceWaterHeating', "Adding water fixture to #{service_water_loop.name}.")
       end
 

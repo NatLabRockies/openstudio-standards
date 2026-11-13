@@ -18,7 +18,6 @@ module OpenstudioStandards
                                                  hot_water_loop,
                                                  name: nil,
                                                  cop: 3.65)
-
       # create the PlantComponentUserDefined object as a proxy for the Central Air Source Heat Pump
       plant_comp = OpenStudio::Model::PlantComponentUserDefined.new(model)
       if name.nil?

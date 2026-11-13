@@ -406,7 +406,6 @@ class Standard
                                      cases,
                                      walkins,
                                      thermal_zone)
-
     # Refrigeration system
     ref_sys = OpenStudio::Model::RefrigerationSystem.new(model)
     ref_sys.setName(system_name.to_s)

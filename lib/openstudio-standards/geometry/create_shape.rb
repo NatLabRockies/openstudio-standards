@@ -59,7 +59,7 @@ module OpenstudioStandards
 
       # Loop through the number of floors
       building_stories = []
-      for floor in ((under_ground_storys * -1)..above_ground_storys - 1)
+      for floor in ((under_ground_storys * -1)..(above_ground_storys - 1))
         z = (floor_to_floor_height * floor) + initial_height
 
         # Create a new story within the building
@@ -208,13 +208,13 @@ module OpenstudioStandards
       length = Math.sqrt((floor_area / (num_floors * 1.0)) / aspect_ratio)
       width = Math.sqrt((floor_area / (num_floors * 1.0)) * aspect_ratio)
       OpenstudioStandards::Geometry.create_shape_rectangle(model,
-                                                           length = length,
-                                                           width = width,
-                                                           above_ground_storys = num_floors,
-                                                           under_ground_storys = 0,
-                                                           floor_to_floor_height = floor_to_floor_height,
-                                                           plenum_height = plenum_height,
-                                                           perimeter_zone_depth = perimeter_zone_depth)
+                                                           length,
+                                                           width,
+                                                           above_ground_storys: num_floors,
+                                                           under_ground_storys: 0,
+                                                           floor_to_floor_height: floor_to_floor_height,
+                                                           plenum_height: plenum_height,
+                                                           perimeter_zone_depth: perimeter_zone_depth)
       BTAP::Geometry.rotate_model(model, rotation)
 
       return model
@@ -293,7 +293,7 @@ module OpenstudioStandards
       end
 
       # Loop through the number of floors
-      for floor in (0..num_floors - 1)
+      for floor in (0..(num_floors - 1))
         z = floor_to_floor_height * floor
 
         # Create a new story within the building
@@ -653,7 +653,7 @@ module OpenstudioStandards
       end
 
       # Loop through the number of floors
-      for floor in (0..num_floors - 1)
+      for floor in (0..(num_floors - 1))
         z = floor_to_floor_height * floor
 
         # Create a new story within the building
@@ -1030,7 +1030,7 @@ module OpenstudioStandards
       end
 
       # Loop through the number of floors
-      for floor in (0..num_floors - 1)
+      for floor in (0..(num_floors - 1))
         z = floor_to_floor_height * floor
 
         # Create a new story within the building
@@ -1280,7 +1280,7 @@ module OpenstudioStandards
       end
 
       # Loop through the number of floors
-      for floor in (0..num_floors - 1)
+      for floor in (0..(num_floors - 1))
         z = floor_to_floor_height * floor
 
         # Create a new story within the building
@@ -1573,7 +1573,7 @@ module OpenstudioStandards
       end
 
       # Loop through the number of floors
-      for floor in (0..num_floors - 1)
+      for floor in (0..(num_floors - 1))
         z = floor_to_floor_height * floor
 
         # Create a new story within the building

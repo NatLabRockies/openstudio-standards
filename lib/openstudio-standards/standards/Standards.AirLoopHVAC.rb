@@ -170,22 +170,20 @@ class Standard
     end
 
     # Standby mode occupancy control
-    unless air_loop_hvac.thermalZones.empty?
-      thermal_zones = air_loop_hvac.thermalZones
+    return if air_loop_hvac.thermalZones.empty?
 
-      standby_mode_spaces = []
-      thermal_zones.sort.each do |thermal_zone|
-        thermal_zone.spaces.sort.each do |space|
-          if space_occupancy_standby_mode_required?(space)
-            standby_mode_spaces << space
-          end
+    thermal_zones = air_loop_hvac.thermalZones
+
+    standby_mode_spaces = []
+    thermal_zones.sort.each do |thermal_zone|
+      thermal_zone.spaces.sort.each do |space|
+        if space_occupancy_standby_mode_required?(space)
+          standby_mode_spaces << space
         end
       end
-
-      if !standby_mode_spaces.empty?
-        air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces)
-      end
     end
+
+    air_loop_hvac_standby_mode_occupancy_control(air_loop_hvac, standby_mode_spaces) if standby_mode_spaces.any?
   end
 
   # Apply all PRM baseline required controls to the airloop.
@@ -1392,6 +1390,10 @@ class Standard
     return heat_exchanger_type
   end
 
+  # Remove the Energy Recovery Ventilator, if any, from this air loop's outdoor air system
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @return [Boolean] returns true if successful, false if not
   def air_loop_hvac_remove_erv(air_loop_hvac)
     # Get the OA system
     oa_sys = nil
@@ -1523,7 +1525,7 @@ class Standard
       erv.setSensibleEffectivenessat75CoolingAirFlow(0.75)
       erv.setLatentEffectivenessat75CoolingAirFlow(0.6)
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       values['Sensible Heating'][0.75] = 0.7
       values['Sensible Heating'][1.0] = 0.7
       values['Latent Heating'][0.75] = 0.6
@@ -1622,6 +1624,59 @@ class Standard
     end
 
     return true
+  end
+
+  # Raise VAV terminal minimum airflow to cover its zone's design outdoor air.
+  #
+  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
+  # @return [Integer] number of terminals whose minimum was raised
+  def air_loop_hvac_apply_vav_terminal_minimum_outdoor_air(air_loop_hvac)
+    raised = 0
+    air_loop_hvac.thermalZones.sort.each do |zone|
+      zone.equipment.each do |equip|
+        terminal = if equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
+                     equip.to_AirTerminalSingleDuctVAVReheat.get
+                   elsif equip.to_AirTerminalSingleDuctVAVNoReheat.is_initialized
+                     equip.to_AirTerminalSingleDuctVAVNoReheat.get
+                   end
+        next if terminal.nil?
+
+        zone_oa = OpenstudioStandards::ThermalZone.thermal_zone_get_outdoor_airflow_rate(zone)
+        next unless zone_oa > 0.0
+
+        method = terminal.zoneMinimumAirFlowInputMethod
+        method = method.is_initialized ? method.get : 'Constant' if method.respond_to?(:is_initialized)
+        case method
+        when 'FixedFlowRate'
+          current = terminal.fixedMinimumAirFlowRate
+          current = current.is_initialized ? current.get : 0.0
+          next unless zone_oa > current
+
+          terminal.setFixedMinimumAirFlowRate(zone_oa)
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: raised the fixed minimum air flow rate from #{current.round(4)} to the zone outdoor air of #{zone_oa.round(4)} m^3/s.")
+          raised += 1
+        when 'Constant'
+          max_flow = terminal.maximumAirFlowRate
+          max_flow = terminal.autosizedMaximumAirFlowRate unless max_flow.is_initialized
+          unless max_flow.is_initialized && max_flow.get > 0.0
+            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: no maximum air flow rate is available (run a sizing run first); the minimum air flow fraction was not checked against the zone outdoor air.")
+            next
+          end
+
+          current = terminal.constantMinimumAirFlowFraction
+          next unless current.is_initialized
+
+          needed = [zone_oa / max_flow.get, 1.0].min
+          next unless needed > current.get
+
+          terminal.setConstantMinimumAirFlowFraction(needed)
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.AirLoopHVAC', "For #{terminal.name}: raised the constant minimum air flow fraction from #{current.get.round(3)} to #{needed.round(3)} to cover the zone outdoor air of #{zone_oa.round(4)} m^3/s at a maximum flow of #{max_flow.get.round(4)} m^3/s.")
+          raised += 1
+        end
+      end
+    end
+
+    return raised
   end
 
   # Adjust minimum VAV damper positions and set minimum design
@@ -1745,11 +1800,13 @@ class Standard
           end
         elsif equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
           term = equip.to_AirTerminalSingleDuctVAVReheat.get
-          if term.constantMinimumAirFlowFraction.is_initialized
+          if term.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+            mdp_term = 0.0
+            if term.fixedMinimumAirFlowRate.is_initialized
+              min_zn_flow = term.fixedMinimumAirFlowRate.get
+            end
+          elsif term.constantMinimumAirFlowFraction.is_initialized
             mdp_term = term.constantMinimumAirFlowFraction.get
-          end
-          if term.fixedMinimumAirFlowRate.is_initialized
-            min_zn_flow = term.fixedMinimumAirFlowRate.get
           end
         end
       end
@@ -1891,7 +1948,18 @@ class Standard
         term.setConstantMinimumAirFlowFraction(mdp)
       elsif equip.to_AirTerminalSingleDuctVAVReheat.is_initialized
         term = equip.to_AirTerminalSingleDuctVAVReheat.get
-        term.setConstantMinimumAirFlowFraction(mdp)
+        if term.zoneMinimumAirFlowInputMethod == 'FixedFlowRate'
+          max_flow = term.maximumAirFlowRate
+          max_flow = term.autosizedMaximumAirFlowRate unless max_flow.is_initialized
+          if max_flow.is_initialized
+            term.setFixedMinimumAirFlowRate(mdp * max_flow.get)
+          else
+            term.setZoneMinimumAirFlowInputMethod('Constant')
+            term.setConstantMinimumAirFlowFraction(mdp)
+          end
+        else
+          term.setConstantMinimumAirFlowFraction(mdp)
+        end
       end
     end
 
@@ -2836,15 +2904,13 @@ class Standard
     air_loop_hvac.setNightCycleControlType('CycleOnAny')
     if OpenstudioStandards::HVAC.air_loop_hvac_parallel_piu_air_terminals?(air_loop_hvac)
       avail_mgrs = air_loop_hvac.availabilityManagers
-      if !avail_mgrs.nil?
-        avail_mgrs.each do |avail_mgr|
-          if avail_mgr.to_AvailabilityManagerNightCycle.is_initialized
-            avail_mgr_nc = avail_mgr.to_AvailabilityManagerNightCycle.get
-            avail_mgr_nc.setControlType('CycleOnAnyCoolingOrHeatingZone')
-            zones = air_loop_hvac.thermalZones
-            avail_mgr_nc.setCoolingControlThermalZones(zones)
-            avail_mgr_nc.setHeatingZoneFansOnlyThermalZones(zones)
-          end
+      avail_mgrs&.each do |avail_mgr|
+        if avail_mgr.to_AvailabilityManagerNightCycle.is_initialized
+          avail_mgr_nc = avail_mgr.to_AvailabilityManagerNightCycle.get
+          avail_mgr_nc.setControlType('CycleOnAnyCoolingOrHeatingZone')
+          zones = air_loop_hvac.thermalZones
+          avail_mgr_nc.setCoolingControlThermalZones(zones)
+          avail_mgr_nc.setHeatingZoneFansOnlyThermalZones(zones)
         end
       end
     end

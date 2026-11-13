@@ -36,7 +36,6 @@ module OpenstudioStandards
                                      max_plr: 1.2,
                                      opt_plr: 1.0,
                                      sizing_factor: nil)
-
       # create the boiler
       boiler = OpenStudio::Model::BoilerHotWater.new(model)
       if name.nil?

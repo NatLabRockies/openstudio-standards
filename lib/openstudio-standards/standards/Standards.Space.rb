@@ -112,11 +112,9 @@ class Standard
         # @todo stop skipping non-vertical walls
         surface_normal = surface.outwardNormal
         surface_normal_z = surface_normal.z
-        unless surface_normal_z.abs < 0.001
-          unless surface.subSurfaces.empty?
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-vertical walls; skipping windows on #{surface.name} in #{space.name}.")
-            next
-          end
+        if surface_normal_z.abs >= 0.001 && !surface.subSurfaces.empty?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-vertical walls; skipping windows on #{surface.name} in #{space.name}.")
+          next
         end
 
         surface.subSurfaces.sort.each do |sub_surface|
@@ -271,12 +269,10 @@ class Standard
         # @todo stop skipping non-horizontal roofs
         surface_normal = surface.outwardNormal
         straight_upward = OpenStudio::Vector3d.new(0, 0, 1)
-        unless surface_normal.to_s == straight_upward.to_s
-          unless surface.subSurfaces.empty?
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-horizontal roofs; skipping skylights on #{surface.name} in #{space.name}.")
-            OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Space', "---Surface #{surface.name} has outward normal of #{surface_normal.to_s.gsub(/\[|\]/, '|')}; up is #{straight_upward.to_s.gsub(/\[|\]/, '|')}.")
-            next
-          end
+        if surface_normal.to_s != straight_upward.to_s && !surface.subSurfaces.empty?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-horizontal roofs; skipping skylights on #{surface.name} in #{space.name}.")
+          OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Space', "---Surface #{surface.name} has outward normal of #{surface_normal.to_s.gsub(/\[|\]/, '|')}; up is #{straight_upward.to_s.gsub(/\[|\]/, '|')}.")
+          next
         end
 
         surface.subSurfaces.sort.each do |sub_surface|
@@ -912,20 +908,16 @@ class Standard
       surface_normal = surface.outwardNormal
       if surface.surfaceType == 'Wall'
         # @todo stop skipping non-vertical walls
-        unless surface_normal.z.abs < 0.001
-          unless surface.subSurfaces.empty?
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-vertical walls; skipping windows on #{surface.name} in #{space.name} for daylight sensor positioning.")
-            next
-          end
+        if surface_normal.z.abs >= 0.001 && !surface.subSurfaces.empty?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-vertical walls; skipping windows on #{surface.name} in #{space.name} for daylight sensor positioning.")
+          next
         end
       elsif surface.surfaceType == 'RoofCeiling'
         # @todo stop skipping non-horizontal roofs
-        unless surface_normal.to_s == straight_upward.to_s
-          unless surface.subSurfaces.empty?
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-horizontal roofs; skipping skylights on #{surface.name} in #{space.name} for daylight sensor positioning.")
-            OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Space', "---Surface #{surface.name} has outward normal of #{surface_normal.to_s.gsub(/\[|\]/, '|')}; up is #{straight_upward.to_s.gsub(/\[|\]/, '|')}.")
-            next
-          end
+        if surface_normal.to_s != straight_upward.to_s && !surface.subSurfaces.empty?
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Space', "Cannot currently handle non-horizontal roofs; skipping skylights on #{surface.name} in #{space.name} for daylight sensor positioning.")
+          OpenStudio.logFree(OpenStudio::Debug, 'openstudio.standards.Space', "---Surface #{surface.name} has outward normal of #{surface_normal.to_s.gsub(/\[|\]/, '|')}; up is #{straight_upward.to_s.gsub(/\[|\]/, '|')}.")
+          next
         end
       end
 
@@ -1457,13 +1449,9 @@ class Standard
       w_per_person = 125 # Initial assumption
       occ_sch_max = 1
       act_sch = people.activityLevelSchedule
-      if people.isActivityLevelScheduleDefaulted
+      if people.isActivityLevelScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.peopleActivityLevelSchedule.empty?
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.peopleActivityLevelSchedule.empty?
-            act_sch = space.spaceType.get.defaultScheduleSet.get.peopleActivityLevelSchedule
-          end
-        end
+        act_sch = space.spaceType.get.defaultScheduleSet.get.peopleActivityLevelSchedule
       end
       if act_sch.is_initialized
         act_sch_obj = act_sch.get
@@ -1477,13 +1465,9 @@ class Standard
 
       occ_sch_ruleset = nil
       occ_sch = people.numberofPeopleSchedule
-      if people.isNumberofPeopleScheduleDefaulted
+      if people.isNumberofPeopleScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.numberofPeopleSchedule.empty?
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.numberofPeopleSchedule.empty?
-            occ_sch = space.spaceType.get.defaultScheduleSet.get.numberofPeopleSchedule
-          end
-        end
+        occ_sch = space.spaceType.get.defaultScheduleSet.get.numberofPeopleSchedule
       end
       if occ_sch.is_initialized
         occ_sch_obj = occ_sch.get
@@ -1534,13 +1518,9 @@ class Standard
       ltg_sch = light.schedule
       ltg_w = light.getLightingPower(space.floorArea, ppl_total)
 
-      if light.isScheduleDefaulted
+      if light.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.lightingSchedule.empty?
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.lightingSchedule.empty?
-            ltg_sch = space.spaceType.get.defaultScheduleSet.get.lightingSchedule
-          end
-        end
+        ltg_sch = space.spaceType.get.defaultScheduleSet.get.lightingSchedule
       end
       if ltg_sch.is_initialized
         ltg_sch_obj = ltg_sch.get
@@ -1570,13 +1550,9 @@ class Standard
       ltg_w = light.getPowerPerFloorArea(space.floorArea) * space.floorArea
       ltg_w += light.getPowerPerPerson(ppl_total) * ppl_total
 
-      if light.isScheduleDefaulted
+      if light.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.lightingSchedule.empty?
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.lightingSchedule.empty?
-            ltg_sch = space.spaceType.get.defaultScheduleSet.get.lightingSchedule
-          end
-        end
+        ltg_sch = space.spaceType.get.defaultScheduleSet.get.lightingSchedule
       end
       if ltg_sch.is_initialized
         ltg_sch_obj = ltg_sch.get
@@ -1688,65 +1664,45 @@ class Standard
       load_lost = equip.electricEquipmentDefinition.fractionLost # eqp-type-specific
       load_w = equip.getDesignLevel(space.floorArea, ppl_total) * (1 - load_lost)
 
-      if equip.isScheduleDefaulted
+      if equip.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.electricEquipmentSchedule.empty? # eqp-type-specific
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.electricEquipmentSchedule.empty? # eqp-type-specific
-            load_sch = space.spaceType.get.defaultScheduleSet.get.electricEquipmentSchedule # eqp-type-specific
-          end
-        end
+        load_sch = space.spaceType.get.defaultScheduleSet.get.electricEquipmentSchedule # eqp-type-specific
       end
     when 'gas equipment'
       load_sch = equip.schedule
       load_lost = equip.gasEquipmentDefinition.fractionLost # eqp-type-specific
       load_w = equip.getDesignLevel(space.floorArea, ppl_total) * (1 - load_lost)
 
-      if equip.isScheduleDefaulted
+      if equip.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.gasEquipmentSchedule.empty? # eqp-type-specific
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.gasEquipmentSchedule.empty? # eqp-type-specific
-            load_sch = space.spaceType.get.defaultScheduleSet.get.gasEquipmentSchedule # eqp-type-specific
-          end
-        end
+        load_sch = space.spaceType.get.defaultScheduleSet.get.gasEquipmentSchedule # eqp-type-specific
       end
     when 'steam equipment'
       load_sch = equip.schedule
       load_lost = equip.steamEquipmentDefinition.fractionLost # eqp-type-specific
       load_w = equip.getDesignLevel(space.floorArea, ppl_total) * (1 - load_lost)
 
-      if equip.isScheduleDefaulted
+      if equip.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.steamEquipmentSchedule.empty? # eqp-type-specific
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.steamEquipmentSchedule.empty? # eqp-type-specific
-            load_sch = space.spaceType.get.defaultScheduleSet.get.steamEquipmentSchedule # eqp-type-specific
-          end
-        end
+        load_sch = space.spaceType.get.defaultScheduleSet.get.steamEquipmentSchedule # eqp-type-specific
       end
     when 'hot water equipment'
       load_sch = equip.schedule
       load_lost = equip.hotWaterEquipmentDefinition.fractionLost # eqp-type-specific
       load_w = equip.getDesignLevel(space.floorArea, ppl_total) * (1 - load_lost)
 
-      if equip.isScheduleDefaulted
+      if equip.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.hotWaterEquipmentSchedule.empty? # eqp-type-specific
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.hotWaterEquipmentSchedule.empty? # eqp-type-specific
-            load_sch = space.spaceType.get.defaultScheduleSet.get.hotWaterEquipmentSchedule # eqp-type-specific
-          end
-        end
+        load_sch = space.spaceType.get.defaultScheduleSet.get.hotWaterEquipmentSchedule # eqp-type-specific
       end
     when 'other equipment'
       load_sch = equip.schedule
       load_lost = equip.otherEquipmentDefinition.fractionLost # eqp-type-specific
       load_w = equip.getDesignLevel(space.floorArea, ppl_total) * (1 - load_lost)
 
-      if equip.isScheduleDefaulted
+      if equip.isScheduleDefaulted && !space.spaceType.get.defaultScheduleSet.empty? && !space.spaceType.get.defaultScheduleSet.get.otherEquipmentSchedule.empty? # eqp-type-specific
         # Check default schedule set
-        unless space.spaceType.get.defaultScheduleSet.empty?
-          unless space.spaceType.get.defaultScheduleSet.get.otherEquipmentSchedule.empty? # eqp-type-specific
-            load_sch = space.spaceType.get.defaultScheduleSet.get.otherEquipmentSchedule # eqp-type-specific
-          end
-        end
+        load_sch = space.spaceType.get.defaultScheduleSet.get.otherEquipmentSchedule # eqp-type-specific
       end
     end
 

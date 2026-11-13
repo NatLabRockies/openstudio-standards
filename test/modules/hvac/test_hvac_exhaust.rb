@@ -18,7 +18,9 @@ class TestHVACExhaust < Minitest::Test
     output_dir = "#{__dir__}/output/#{__method__}"
     FileUtils.mkdir output_dir unless Dir.exist? output_dir
 
-    # apply create exhaust fan
+    # set add space types and set additional properties
+    std.prototype_space_type_map(model, set_additional_properties: true)
+
     exhaust_zone = model.getThermalZoneByName('TZ-Kitchen_ZN_1_FLR_1').get
     makeup_zone = model.getThermalZoneByName('TZ-Cafeteria_ZN_1_FLR_1').get
     assert(0, model.getZoneMixings.size)
@@ -46,6 +48,9 @@ class TestHVACExhaust < Minitest::Test
     # set output directory
     output_dir = "#{__dir__}/output/#{__method__}"
     FileUtils.mkdir output_dir unless Dir.exist? output_dir
+
+    # set add space types and set additional properties
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # apply create exhaust fan
     exhaust_zone = model.getThermalZoneByName('TZ-Floor 1 Anesthesia').get

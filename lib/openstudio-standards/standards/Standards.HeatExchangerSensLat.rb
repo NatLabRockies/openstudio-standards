@@ -17,7 +17,7 @@ class Standard
       heat_exchanger_air_to_air_sensible_and_latent.setSensibleEffectivenessat75CoolingAirFlow(0.75)
       heat_exchanger_air_to_air_sensible_and_latent.setLatentEffectivenessat75CoolingAirFlow(0.6)
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       values['Sensible Heating'][0.75] = 0.7
       values['Sensible Heating'][1.0] = 0.7
       values['Latent Heating'][0.75] = 0.6
@@ -68,7 +68,7 @@ class Standard
       heat_exchanger_air_to_air_sensible_and_latent.setSensibleEffectivenessat75CoolingAirFlow(part_cool_sens_eff)
       heat_exchanger_air_to_air_sensible_and_latent.setLatentEffectivenessat75CoolingAirFlow(part_cool_lat_eff)
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       values['Sensible Heating'][0.75] = part_htg_sens_eff
       values['Sensible Heating'][1.0] = full_htg_sens_eff
       values['Latent Heating'][0.75] = part_htg_lat_eff
@@ -102,7 +102,7 @@ class Standard
       heat_exchanger_air_to_air_sensible_and_latent.setSensibleEffectivenessat75CoolingAirFlow(part_cool_sens_eff)
       heat_exchanger_air_to_air_sensible_and_latent.setLatentEffectivenessat75CoolingAirFlow(part_cool_lat_eff)
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       values['Sensible Heating'][0.75] = part_htg_sens_eff
       values['Sensible Heating'][1.0] = full_htg_sens_eff
       values['Latent Heating'][0.75] = part_htg_lat_eff
@@ -138,7 +138,7 @@ class Standard
 
     # Default to use values for cooling for climate zones 0, 1, 2, and 3 and heating for all others.
     case climate_zone_code
-    when '0A', '0B', '1A', '1A', '1B', '2A', '2B', '3A', '3B', '3C'
+    when '0A', '0B', '1A', '1B', '2A', '2B', '3A', '3B', '3C'
       design_conditions = 'Cooling'
     else
       design_conditions = 'Heating'
