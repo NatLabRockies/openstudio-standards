@@ -2825,9 +2825,10 @@ class Standard
 
       # Winter Design Day
       if day_types.include?('WntrDsn')
-        day_sch = OpenStudio::Model::ScheduleDay.new(model)
-        sch_ruleset.setWinterDesignDaySchedule(day_sch)
+        # Setters clone the schedule day; populate the ruleset-owned clone to avoid an orphan.
+        sch_ruleset.setWinterDesignDaySchedule(sch_ruleset.winterDesignDaySchedule)
         day_sch = sch_ruleset.winterDesignDaySchedule
+        day_sch.clearValues
         day_sch.setName("#{schedule_name} Winter Design Day")
         model_add_vals_to_sch(model, day_sch, sch_type, values)
         if model.version < OpenStudio::VersionString.new('3.8.0')
@@ -2839,9 +2840,9 @@ class Standard
 
       # Summer Design Day
       if day_types.include?('SmrDsn')
-        day_sch = OpenStudio::Model::ScheduleDay.new(model)
-        sch_ruleset.setSummerDesignDaySchedule(day_sch)
+        sch_ruleset.setSummerDesignDaySchedule(sch_ruleset.summerDesignDaySchedule)
         day_sch = sch_ruleset.summerDesignDaySchedule
+        day_sch.clearValues
         day_sch.setName("#{schedule_name} Summer Design Day")
         model_add_vals_to_sch(model, day_sch, sch_type, values)
         if model.version < OpenStudio::VersionString.new('3.8.0')
