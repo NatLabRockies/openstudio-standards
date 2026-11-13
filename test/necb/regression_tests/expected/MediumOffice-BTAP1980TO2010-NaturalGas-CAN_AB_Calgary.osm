@@ -368,59 +368,59 @@ OS:AdditionalProperties,
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000048},  !- Handle
-  {00000000-0000-0000-0020-000000000023};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000049},  !- Handle
   {00000000-0000-0000-0020-000000000025};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000050},  !- Handle
+  {00000000-0000-0000-0001-000000000049},  !- Handle
   {00000000-0000-0000-0020-000000000021};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000051},  !- Handle
+  {00000000-0000-0000-0001-000000000050},  !- Handle
   {00000000-0000-0000-0020-000000000027};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000052},  !- Handle
+  {00000000-0000-0000-0001-000000000051},  !- Handle
   {00000000-0000-0000-0020-000000000031};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000053},  !- Handle
-  {00000000-0000-0000-0020-000000000029};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000054},  !- Handle
+  {00000000-0000-0000-0001-000000000052},  !- Handle
   {00000000-0000-0000-0020-000000000015};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000055},  !- Handle
+  {00000000-0000-0000-0001-000000000053},  !- Handle
+  {00000000-0000-0000-0020-000000000019};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000054},  !- Handle
   {00000000-0000-0000-0020-000000000009};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000056},  !- Handle
+  {00000000-0000-0000-0001-000000000055},  !- Handle
   {00000000-0000-0000-0020-000000000030};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000057},  !- Handle
+  {00000000-0000-0000-0001-000000000056},  !- Handle
   {00000000-0000-0000-0020-000000000033};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000058},  !- Handle
+  {00000000-0000-0000-0001-000000000057},  !- Handle
   {00000000-0000-0000-0020-000000000034};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000059},  !- Handle
+  {00000000-0000-0000-0001-000000000058},  !- Handle
   {00000000-0000-0000-0020-000000000036};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000060},  !- Handle
+  {00000000-0000-0000-0001-000000000059},  !- Handle
   {00000000-0000-0000-0020-000000000035};  !- Object Name
 
 OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000060},  !- Handle
+  {00000000-0000-0000-0020-000000000023};  !- Object Name
+
+OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000061},  !- Handle
-  {00000000-0000-0000-0020-000000000019};  !- Object Name
+  {00000000-0000-0000-0020-000000000029};  !- Object Name
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000062},  !- Handle
@@ -6432,41 +6432,41 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0038-000000000001},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_hw_sc_c_chw_ssf_vv_zh_b_hw_zc_none_srf_vv__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {07806afb-af1c-4a45-914d-def4308cf796}<23.9 && {07806afb-af1c-4a45-914d-def4308cf796}>1.7, !- Program Line 1
-  SET {3912fc01-e879-471a-8000-ec3ad6862667} = 29.4, !- Program Line 2
-  SET {effe88a5-43ef-42d1-bafa-cfb6c3622553} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {07806afb-af1c-4a45-914d-def4308cf796}<23.9 && {07806afb-af1c-4a45-914d-def4308cf796}>1.7, !- Program Line 4
-  SET {3912fc01-e879-471a-8000-ec3ad6862667} = 29.4, !- Program Line 5
-  SET {effe88a5-43ef-42d1-bafa-cfb6c3622553} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {07806afb-af1c-4a45-914d-def4308cf796}<23.9 && {07806afb-af1c-4a45-914d-def4308cf796}>1.7, !- Program Line 7
-  SET {3912fc01-e879-471a-8000-ec3ad6862667} = 29.4, !- Program Line 8
-  SET {effe88a5-43ef-42d1-bafa-cfb6c3622553} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {07806afb-af1c-4a45-914d-def4308cf796}<23.9 && {07806afb-af1c-4a45-914d-def4308cf796}>1.7, !- Program Line 10
-  SET {3912fc01-e879-471a-8000-ec3ad6862667} = 29.4, !- Program Line 11
-  SET {effe88a5-43ef-42d1-bafa-cfb6c3622553} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}<23.9 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}>1.7, !- Program Line 1
+  SET {1ea0a239-b853-4cc3-9f46-9ce55aea7c9d} = 29.4, !- Program Line 2
+  SET {2c276e0f-3008-4bb8-8a2b-a9418dcf141c} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}<23.9 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}>1.7, !- Program Line 4
+  SET {1ea0a239-b853-4cc3-9f46-9ce55aea7c9d} = 29.4, !- Program Line 5
+  SET {2c276e0f-3008-4bb8-8a2b-a9418dcf141c} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}<23.9 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}>1.7, !- Program Line 7
+  SET {1ea0a239-b853-4cc3-9f46-9ce55aea7c9d} = 29.4, !- Program Line 8
+  SET {2c276e0f-3008-4bb8-8a2b-a9418dcf141c} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}<23.9 && {48831f40-7e91-41be-bb1f-3cd3b3c444ba}>1.7, !- Program Line 10
+  SET {1ea0a239-b853-4cc3-9f46-9ce55aea7c9d} = 29.4, !- Program Line 11
+  SET {2c276e0f-3008-4bb8-8a2b-a9418dcf141c} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {3912fc01-e879-471a-8000-ec3ad6862667} = NULL, !- Program Line 14
-  SET {effe88a5-43ef-42d1-bafa-cfb6c3622553} = NULL, !- Program Line 15
+  SET {1ea0a239-b853-4cc3-9f46-9ce55aea7c9d} = NULL, !- Program Line 14
+  SET {2c276e0f-3008-4bb8-8a2b-a9418dcf141c} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0038-000000000002},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_hw_sc_c_chw_ssf_vv_zh_b_hw_zc_none_srf_vv__2_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {1893be0e-0f30-4efc-b9da-3c631e703973}<23.9 && {1893be0e-0f30-4efc-b9da-3c631e703973}>1.7, !- Program Line 1
-  SET {df25e418-846e-4015-877e-bc930ca10873} = 29.4, !- Program Line 2
-  SET {71802041-0243-463a-be59-2aacd0850e2e} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {1893be0e-0f30-4efc-b9da-3c631e703973}<23.9 && {1893be0e-0f30-4efc-b9da-3c631e703973}>1.7, !- Program Line 4
-  SET {df25e418-846e-4015-877e-bc930ca10873} = 29.4, !- Program Line 5
-  SET {71802041-0243-463a-be59-2aacd0850e2e} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {1893be0e-0f30-4efc-b9da-3c631e703973}<23.9 && {1893be0e-0f30-4efc-b9da-3c631e703973}>1.7, !- Program Line 7
-  SET {df25e418-846e-4015-877e-bc930ca10873} = 29.4, !- Program Line 8
-  SET {71802041-0243-463a-be59-2aacd0850e2e} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {1893be0e-0f30-4efc-b9da-3c631e703973}<23.9 && {1893be0e-0f30-4efc-b9da-3c631e703973}>1.7, !- Program Line 10
-  SET {df25e418-846e-4015-877e-bc930ca10873} = 29.4, !- Program Line 11
-  SET {71802041-0243-463a-be59-2aacd0850e2e} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {50baa7e5-aec4-453a-83fd-5098554af803}<23.9 && {50baa7e5-aec4-453a-83fd-5098554af803}>1.7, !- Program Line 1
+  SET {57a02aa4-a66e-4af7-8ee9-5202a47e37b5} = 29.4, !- Program Line 2
+  SET {608ce5c4-6733-42d9-b69d-b7d121dcb466} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {50baa7e5-aec4-453a-83fd-5098554af803}<23.9 && {50baa7e5-aec4-453a-83fd-5098554af803}>1.7, !- Program Line 4
+  SET {57a02aa4-a66e-4af7-8ee9-5202a47e37b5} = 29.4, !- Program Line 5
+  SET {608ce5c4-6733-42d9-b69d-b7d121dcb466} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {50baa7e5-aec4-453a-83fd-5098554af803}<23.9 && {50baa7e5-aec4-453a-83fd-5098554af803}>1.7, !- Program Line 7
+  SET {57a02aa4-a66e-4af7-8ee9-5202a47e37b5} = 29.4, !- Program Line 8
+  SET {608ce5c4-6733-42d9-b69d-b7d121dcb466} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {50baa7e5-aec4-453a-83fd-5098554af803}<23.9 && {50baa7e5-aec4-453a-83fd-5098554af803}>1.7, !- Program Line 10
+  SET {57a02aa4-a66e-4af7-8ee9-5202a47e37b5} = 29.4, !- Program Line 11
+  SET {608ce5c4-6733-42d9-b69d-b7d121dcb466} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {df25e418-846e-4015-877e-bc930ca10873} = NULL, !- Program Line 14
-  SET {71802041-0243-463a-be59-2aacd0850e2e} = NULL, !- Program Line 15
+  SET {57a02aa4-a66e-4af7-8ee9-5202a47e37b5} = NULL, !- Program Line 14
+  SET {608ce5c4-6733-42d9-b69d-b7d121dcb466} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -9469,565 +9469,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000002},  !- Handle
-  Clothing Schedule Default Winter Clothes, !- Name
-  {00000000-0000-0000-0065-000000000003},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  1;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000003},  !- Handle
-  Clothing Schedule Summer Clothes,        !- Name
-  {00000000-0000-0000-0065-000000000003},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.5;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000004},  !- Handle
-  Economizer Max OA Fraction 100 pct Default, !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  1;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000005},  !- Handle
-  Fraction Latent - 0.05 Default,          !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.05;                                    !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000006},  !- Handle
-  Fraction Sensible - 0.2 Default,         !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.2;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000007},  !- Handle
-  Mixed Water At Faucet Temp - 140F Default, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  60;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000008},  !- Handle
-  NECB-A-Electric-Equipment Default,       !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.2,                                     !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.3,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.8,                                     !- Value Until Time 3
-  18,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  19,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.5,                                     !- Value Until Time 5
-  21,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.3,                                     !- Value Until Time 6
-  24,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.2;                                     !- Value Until Time 7
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000009},  !- Handle
-  NECB-A-Electric-Equipment Default|Wkdy Day, !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.2,                                     !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.3,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.8,                                     !- Value Until Time 3
-  18,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  19,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.5,                                     !- Value Until Time 5
-  21,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.3,                                     !- Value Until Time 6
-  24,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.2;                                     !- Value Until Time 7
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000010},  !- Handle
-  NECB-A-Electric-Equipment Sat Day,       !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.2;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000011},  !- Handle
-  NECB-A-Electric-Equipment Sun|Hol Day,   !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.2;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000012},  !- Handle
-  NECB-A-Lighting Default,                 !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.05,                                    !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.3,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.8,                                     !- Value Until Time 3
-  17,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  18,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.8,                                     !- Value Until Time 5
-  19,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.5,                                     !- Value Until Time 6
-  21,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.3,                                     !- Value Until Time 7
-  23,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.1,                                     !- Value Until Time 8
-  24,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.05;                                    !- Value Until Time 9
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000013},  !- Handle
-  NECB-A-Lighting Default|Wkdy Day,        !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.05,                                    !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.3,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.8,                                     !- Value Until Time 3
-  17,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  18,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.8,                                     !- Value Until Time 5
-  19,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.5,                                     !- Value Until Time 6
-  21,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.3,                                     !- Value Until Time 7
-  23,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.1,                                     !- Value Until Time 8
-  24,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.05;                                    !- Value Until Time 9
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000014},  !- Handle
-  NECB-A-Lighting Sat Day,                 !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.05;                                    !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000015},  !- Handle
-  NECB-A-Lighting Sun|Hol Day,             !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.05;                                    !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000016},  !- Handle
-  NECB-A-Occupancy Default,                !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0,                                       !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.1,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.7,                                     !- Value Until Time 3
-  12,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  14,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.5,                                     !- Value Until Time 5
-  17,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.9,                                     !- Value Until Time 6
-  18,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.7,                                     !- Value Until Time 7
-  19,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.3,                                     !- Value Until Time 8
-  23,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.1,                                     !- Value Until Time 9
-  24,                                      !- Hour 10
-  0,                                       !- Minute 10
-  0;                                       !- Value Until Time 10
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000017},  !- Handle
-  NECB-A-Occupancy Default|Wkdy Day,       !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0,                                       !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.1,                                     !- Value Until Time 2
-  9,                                       !- Hour 3
-  0,                                       !- Minute 3
-  0.7,                                     !- Value Until Time 3
-  12,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  14,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.5,                                     !- Value Until Time 5
-  17,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.9,                                     !- Value Until Time 6
-  18,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.7,                                     !- Value Until Time 7
-  19,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.3,                                     !- Value Until Time 8
-  23,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.1,                                     !- Value Until Time 9
-  24,                                      !- Hour 10
-  0,                                       !- Minute 10
-  0;                                       !- Value Until Time 10
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000018},  !- Handle
-  NECB-A-Occupancy Sat Day,                !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000019},  !- Handle
-  NECB-A-Occupancy Sun|Hol Day,            !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000020},  !- Handle
-  NECB-A-Service Water Heating Default,    !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.05,                                    !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.1,                                     !- Value Until Time 2
-  10,                                      !- Hour 3
-  0,                                       !- Minute 3
-  0.5,                                     !- Value Until Time 3
-  16,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  17,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.7,                                     !- Value Until Time 5
-  18,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.5,                                     !- Value Until Time 6
-  19,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.3,                                     !- Value Until Time 7
-  22,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.2,                                     !- Value Until Time 8
-  24,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.05;                                    !- Value Until Time 9
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000021},  !- Handle
-  NECB-A-Service Water Heating Default|Wkdy Day, !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  7,                                       !- Hour 1
-  0,                                       !- Minute 1
-  0.05,                                    !- Value Until Time 1
-  8,                                       !- Hour 2
-  0,                                       !- Minute 2
-  0.1,                                     !- Value Until Time 2
-  10,                                      !- Hour 3
-  0,                                       !- Minute 3
-  0.5,                                     !- Value Until Time 3
-  16,                                      !- Hour 4
-  0,                                       !- Minute 4
-  0.9,                                     !- Value Until Time 4
-  17,                                      !- Hour 5
-  0,                                       !- Minute 5
-  0.7,                                     !- Value Until Time 5
-  18,                                      !- Hour 6
-  0,                                       !- Minute 6
-  0.5,                                     !- Value Until Time 6
-  19,                                      !- Hour 7
-  0,                                       !- Minute 7
-  0.3,                                     !- Value Until Time 7
-  22,                                      !- Hour 8
-  0,                                       !- Minute 8
-  0.2,                                     !- Value Until Time 8
-  24,                                      !- Hour 9
-  0,                                       !- Minute 9
-  0.05;                                    !- Value Until Time 9
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000022},  !- Handle
-  NECB-A-Service Water Heating Sat Day,    !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.05;                                    !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000023},  !- Handle
-  NECB-A-Service Water Heating Sun|Hol Day, !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0.05;                                    !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000024},  !- Handle
-  NECB-A-Thermostat Setpoint-Cooling Default, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  6,                                       !- Hour 1
-  0,                                       !- Minute 1
-  35,                                      !- Value Until Time 1
-  21,                                      !- Hour 2
-  0,                                       !- Minute 2
-  24,                                      !- Value Until Time 2
-  24,                                      !- Hour 3
-  0,                                       !- Minute 3
-  35;                                      !- Value Until Time 3
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000025},  !- Handle
-  NECB-A-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  6,                                       !- Hour 1
-  0,                                       !- Minute 1
-  35,                                      !- Value Until Time 1
-  21,                                      !- Hour 2
-  0,                                       !- Minute 2
-  24,                                      !- Value Until Time 2
-  24,                                      !- Hour 3
-  0,                                       !- Minute 3
-  35;                                      !- Value Until Time 3
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000026},  !- Handle
-  NECB-A-Thermostat Setpoint-Cooling Sat Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  35;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000027},  !- Handle
-  NECB-A-Thermostat Setpoint-Cooling Sun|Hol Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  35;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000028},  !- Handle
-  NECB-A-Thermostat Setpoint-Heating Default, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  6,                                       !- Hour 1
-  0,                                       !- Minute 1
-  18,                                      !- Value Until Time 1
-  7,                                       !- Hour 2
-  0,                                       !- Minute 2
-  20,                                      !- Value Until Time 2
-  21,                                      !- Hour 3
-  0,                                       !- Minute 3
-  22,                                      !- Value Until Time 3
-  24,                                      !- Hour 4
-  0,                                       !- Minute 4
-  18;                                      !- Value Until Time 4
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000029},  !- Handle
-  NECB-A-Thermostat Setpoint-Heating Default|Wkdy Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  6,                                       !- Hour 1
-  0,                                       !- Minute 1
-  18,                                      !- Value Until Time 1
-  7,                                       !- Hour 2
-  0,                                       !- Minute 2
-  20,                                      !- Value Until Time 2
-  21,                                      !- Hour 3
-  0,                                       !- Minute 3
-  22,                                      !- Value Until Time 3
-  24,                                      !- Hour 4
-  0,                                       !- Minute 4
-  18;                                      !- Value Until Time 4
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000030},  !- Handle
-  NECB-A-Thermostat Setpoint-Heating Sat Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  18;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000031},  !- Handle
-  NECB-A-Thermostat Setpoint-Heating Sun|Hol Day, !- Name
-  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  18;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000032},  !- Handle
-  NECB-Activity Default,                   !- Name
-  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  130;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000033},  !- Handle
-  NECB-Activity Summer Design Day,         !- Name
-  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  130;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000034},  !- Handle
-  NECB-Activity Winter Design Day,         !- Name
-  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
-  No,                                      !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  130;                                     !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000035},  !- Handle
-  Schedule Day 1,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000036},  !- Handle
-  Schedule Day 10,                         !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000037},  !- Handle
-  Schedule Day 11,                         !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000038},  !- Handle
-  Schedule Day 12,                         !- Name
-  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000039},  !- Handle
-  Schedule Day 2,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000040},  !- Handle
-  Schedule Day 3,                          !- Name
+  CHW Temp Default Schedule,               !- Name
   {00000000-0000-0000-0065-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
@@ -10104,8 +9546,8 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000041},  !- Handle
-  Schedule Day 4,                          !- Name
+  {00000000-0000-0000-0062-000000000003},  !- Handle
+  CW Temp Default Schedule,                !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
@@ -10182,8 +9624,548 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000042},  !- Handle
-  Schedule Day 5,                          !- Name
+  {00000000-0000-0000-0062-000000000004},  !- Handle
+  Clothing Schedule Default Winter Clothes, !- Name
+  {00000000-0000-0000-0065-000000000003},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  1;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000005},  !- Handle
+  Clothing Schedule Summer Clothes,        !- Name
+  {00000000-0000-0000-0065-000000000003},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.5;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000006},  !- Handle
+  Economizer Max OA Fraction 100 pct Default, !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  1;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000007},  !- Handle
+  Fraction Latent - 0.05 Default,          !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.05;                                    !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000008},  !- Handle
+  Fraction Sensible - 0.2 Default,         !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.2;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000009},  !- Handle
+  Mixed Water At Faucet Temp - 140F Default, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  60;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000010},  !- Handle
+  NECB-A-Electric-Equipment Default,       !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.2,                                     !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.3,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.8,                                     !- Value Until Time 3
+  18,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  19,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.5,                                     !- Value Until Time 5
+  21,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.3,                                     !- Value Until Time 6
+  24,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.2;                                     !- Value Until Time 7
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000011},  !- Handle
+  NECB-A-Electric-Equipment Default|Wkdy Day, !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.2,                                     !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.3,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.8,                                     !- Value Until Time 3
+  18,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  19,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.5,                                     !- Value Until Time 5
+  21,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.3,                                     !- Value Until Time 6
+  24,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.2;                                     !- Value Until Time 7
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000012},  !- Handle
+  NECB-A-Electric-Equipment Sat Day,       !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.2;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000013},  !- Handle
+  NECB-A-Electric-Equipment Sun|Hol Day,   !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.2;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000014},  !- Handle
+  NECB-A-Lighting Default,                 !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.05,                                    !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.3,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.8,                                     !- Value Until Time 3
+  17,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  18,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.8,                                     !- Value Until Time 5
+  19,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.5,                                     !- Value Until Time 6
+  21,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.3,                                     !- Value Until Time 7
+  23,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.1,                                     !- Value Until Time 8
+  24,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.05;                                    !- Value Until Time 9
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000015},  !- Handle
+  NECB-A-Lighting Default|Wkdy Day,        !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.05,                                    !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.3,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.8,                                     !- Value Until Time 3
+  17,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  18,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.8,                                     !- Value Until Time 5
+  19,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.5,                                     !- Value Until Time 6
+  21,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.3,                                     !- Value Until Time 7
+  23,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.1,                                     !- Value Until Time 8
+  24,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.05;                                    !- Value Until Time 9
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000016},  !- Handle
+  NECB-A-Lighting Sat Day,                 !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.05;                                    !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000017},  !- Handle
+  NECB-A-Lighting Sun|Hol Day,             !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.05;                                    !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000018},  !- Handle
+  NECB-A-Occupancy Default,                !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0,                                       !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.1,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.7,                                     !- Value Until Time 3
+  12,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  14,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.5,                                     !- Value Until Time 5
+  17,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.9,                                     !- Value Until Time 6
+  18,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.7,                                     !- Value Until Time 7
+  19,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.3,                                     !- Value Until Time 8
+  23,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.1,                                     !- Value Until Time 9
+  24,                                      !- Hour 10
+  0,                                       !- Minute 10
+  0;                                       !- Value Until Time 10
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000019},  !- Handle
+  NECB-A-Occupancy Default|Wkdy Day,       !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0,                                       !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.1,                                     !- Value Until Time 2
+  9,                                       !- Hour 3
+  0,                                       !- Minute 3
+  0.7,                                     !- Value Until Time 3
+  12,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  14,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.5,                                     !- Value Until Time 5
+  17,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.9,                                     !- Value Until Time 6
+  18,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.7,                                     !- Value Until Time 7
+  19,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.3,                                     !- Value Until Time 8
+  23,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.1,                                     !- Value Until Time 9
+  24,                                      !- Hour 10
+  0,                                       !- Minute 10
+  0;                                       !- Value Until Time 10
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000020},  !- Handle
+  NECB-A-Occupancy Sat Day,                !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000021},  !- Handle
+  NECB-A-Occupancy Sun|Hol Day,            !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000022},  !- Handle
+  NECB-A-Service Water Heating Default,    !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.05,                                    !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.1,                                     !- Value Until Time 2
+  10,                                      !- Hour 3
+  0,                                       !- Minute 3
+  0.5,                                     !- Value Until Time 3
+  16,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  17,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.7,                                     !- Value Until Time 5
+  18,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.5,                                     !- Value Until Time 6
+  19,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.3,                                     !- Value Until Time 7
+  22,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.2,                                     !- Value Until Time 8
+  24,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.05;                                    !- Value Until Time 9
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000023},  !- Handle
+  NECB-A-Service Water Heating Default|Wkdy Day, !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  7,                                       !- Hour 1
+  0,                                       !- Minute 1
+  0.05,                                    !- Value Until Time 1
+  8,                                       !- Hour 2
+  0,                                       !- Minute 2
+  0.1,                                     !- Value Until Time 2
+  10,                                      !- Hour 3
+  0,                                       !- Minute 3
+  0.5,                                     !- Value Until Time 3
+  16,                                      !- Hour 4
+  0,                                       !- Minute 4
+  0.9,                                     !- Value Until Time 4
+  17,                                      !- Hour 5
+  0,                                       !- Minute 5
+  0.7,                                     !- Value Until Time 5
+  18,                                      !- Hour 6
+  0,                                       !- Minute 6
+  0.5,                                     !- Value Until Time 6
+  19,                                      !- Hour 7
+  0,                                       !- Minute 7
+  0.3,                                     !- Value Until Time 7
+  22,                                      !- Hour 8
+  0,                                       !- Minute 8
+  0.2,                                     !- Value Until Time 8
+  24,                                      !- Hour 9
+  0,                                       !- Minute 9
+  0.05;                                    !- Value Until Time 9
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000024},  !- Handle
+  NECB-A-Service Water Heating Sat Day,    !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.05;                                    !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000025},  !- Handle
+  NECB-A-Service Water Heating Sun|Hol Day, !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0.05;                                    !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000026},  !- Handle
+  NECB-A-Thermostat Setpoint-Cooling Default, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  6,                                       !- Hour 1
+  0,                                       !- Minute 1
+  35,                                      !- Value Until Time 1
+  21,                                      !- Hour 2
+  0,                                       !- Minute 2
+  24,                                      !- Value Until Time 2
+  24,                                      !- Hour 3
+  0,                                       !- Minute 3
+  35;                                      !- Value Until Time 3
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000027},  !- Handle
+  NECB-A-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  6,                                       !- Hour 1
+  0,                                       !- Minute 1
+  35,                                      !- Value Until Time 1
+  21,                                      !- Hour 2
+  0,                                       !- Minute 2
+  24,                                      !- Value Until Time 2
+  24,                                      !- Hour 3
+  0,                                       !- Minute 3
+  35;                                      !- Value Until Time 3
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000028},  !- Handle
+  NECB-A-Thermostat Setpoint-Cooling Sat Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  35;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000029},  !- Handle
+  NECB-A-Thermostat Setpoint-Cooling Sun|Hol Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  35;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000030},  !- Handle
+  NECB-A-Thermostat Setpoint-Heating Default, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  6,                                       !- Hour 1
+  0,                                       !- Minute 1
+  18,                                      !- Value Until Time 1
+  7,                                       !- Hour 2
+  0,                                       !- Minute 2
+  20,                                      !- Value Until Time 2
+  21,                                      !- Hour 3
+  0,                                       !- Minute 3
+  22,                                      !- Value Until Time 3
+  24,                                      !- Hour 4
+  0,                                       !- Minute 4
+  18;                                      !- Value Until Time 4
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000031},  !- Handle
+  NECB-A-Thermostat Setpoint-Heating Default|Wkdy Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  6,                                       !- Hour 1
+  0,                                       !- Minute 1
+  18,                                      !- Value Until Time 1
+  7,                                       !- Hour 2
+  0,                                       !- Minute 2
+  20,                                      !- Value Until Time 2
+  21,                                      !- Hour 3
+  0,                                       !- Minute 3
+  22,                                      !- Value Until Time 3
+  24,                                      !- Hour 4
+  0,                                       !- Minute 4
+  18;                                      !- Value Until Time 4
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000032},  !- Handle
+  NECB-A-Thermostat Setpoint-Heating Sat Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  18;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000033},  !- Handle
+  NECB-A-Thermostat Setpoint-Heating Sun|Hol Day, !- Name
+  {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  18;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000034},  !- Handle
+  NECB-Activity Default,                   !- Name
+  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  130;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000035},  !- Handle
+  NECB-Activity Summer Design Day,         !- Name
+  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  130;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000036},  !- Handle
+  NECB-Activity Winter Design Day,         !- Name
+  {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
+  No,                                      !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  130;                                     !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000037},  !- Handle
+  Schedule Day 1,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000038},  !- Handle
+  Schedule Day 10,                         !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000039},  !- Handle
+  Schedule Day 2,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000040},  !- Handle
+  Schedule Day 3,                          !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -10191,13 +10173,31 @@ OS:Schedule:Day,
   22;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000043},  !- Handle
-  Schedule Day 6,                          !- Name
+  {00000000-0000-0000-0062-000000000041},  !- Handle
+  Schedule Day 4,                          !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
   60;                                      !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000042},  !- Handle
+  Schedule Day 5,                          !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000043},  !- Handle
+  Schedule Day 6,                          !- Name
+  {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000044},  !- Handle
@@ -11293,7 +11293,7 @@ OS:Schedule:Rule,
   Schedule Rule 1,                         !- Name
   {00000000-0000-0000-0064-000000000004},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000003},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000005},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11312,7 +11312,7 @@ OS:Schedule:Rule,
   Schedule Rule 10,                        !- Name
   {00000000-0000-0000-0064-000000000009},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000011},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000013},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11331,7 +11331,7 @@ OS:Schedule:Rule,
   Schedule Rule 11,                        !- Name
   {00000000-0000-0000-0064-000000000014},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000029},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000031},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11350,7 +11350,7 @@ OS:Schedule:Rule,
   Schedule Rule 12,                        !- Name
   {00000000-0000-0000-0064-000000000014},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000030},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000032},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11369,7 +11369,7 @@ OS:Schedule:Rule,
   Schedule Rule 13,                        !- Name
   {00000000-0000-0000-0064-000000000014},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000031},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000033},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11388,7 +11388,7 @@ OS:Schedule:Rule,
   Schedule Rule 14,                        !- Name
   {00000000-0000-0000-0064-000000000013},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000025},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000027},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11407,7 +11407,7 @@ OS:Schedule:Rule,
   Schedule Rule 15,                        !- Name
   {00000000-0000-0000-0064-000000000013},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000026},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000028},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11426,7 +11426,7 @@ OS:Schedule:Rule,
   Schedule Rule 16,                        !- Name
   {00000000-0000-0000-0064-000000000013},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000027},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000029},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11445,7 +11445,7 @@ OS:Schedule:Rule,
   Schedule Rule 17,                        !- Name
   {00000000-0000-0000-0064-000000000012},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000021},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000023},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11464,7 +11464,7 @@ OS:Schedule:Rule,
   Schedule Rule 18,                        !- Name
   {00000000-0000-0000-0064-000000000012},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000022},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000024},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11483,7 +11483,7 @@ OS:Schedule:Rule,
   Schedule Rule 19,                        !- Name
   {00000000-0000-0000-0064-000000000012},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000023},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000025},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11502,7 +11502,7 @@ OS:Schedule:Rule,
   Schedule Rule 2,                         !- Name
   {00000000-0000-0000-0064-000000000011},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000017},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000019},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11521,7 +11521,7 @@ OS:Schedule:Rule,
   Schedule Rule 20,                        !- Name
   {00000000-0000-0000-0064-000000000023},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000044},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000042},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11540,7 +11540,7 @@ OS:Schedule:Rule,
   Schedule Rule 21,                        !- Name
   {00000000-0000-0000-0064-000000000023},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000045},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000043},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11559,7 +11559,7 @@ OS:Schedule:Rule,
   Schedule Rule 22,                        !- Name
   {00000000-0000-0000-0064-000000000021},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000046},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000044},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11578,7 +11578,7 @@ OS:Schedule:Rule,
   Schedule Rule 23,                        !- Name
   {00000000-0000-0000-0064-000000000021},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000036},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000045},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11597,7 +11597,7 @@ OS:Schedule:Rule,
   Schedule Rule 24,                        !- Name
   {00000000-0000-0000-0064-000000000022},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000037},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000046},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11635,7 +11635,7 @@ OS:Schedule:Rule,
   Schedule Rule 3,                         !- Name
   {00000000-0000-0000-0064-000000000011},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000018},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000020},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11654,7 +11654,7 @@ OS:Schedule:Rule,
   Schedule Rule 4,                         !- Name
   {00000000-0000-0000-0064-000000000011},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000019},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000021},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11673,7 +11673,7 @@ OS:Schedule:Rule,
   Schedule Rule 5,                         !- Name
   {00000000-0000-0000-0064-000000000010},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000013},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000015},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11692,7 +11692,7 @@ OS:Schedule:Rule,
   Schedule Rule 6,                         !- Name
   {00000000-0000-0000-0064-000000000010},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000014},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000016},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11711,7 +11711,7 @@ OS:Schedule:Rule,
   Schedule Rule 7,                         !- Name
   {00000000-0000-0000-0064-000000000010},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000015},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000017},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11730,7 +11730,7 @@ OS:Schedule:Rule,
   Schedule Rule 8,                         !- Name
   {00000000-0000-0000-0064-000000000009},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000009},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000011},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -11749,7 +11749,7 @@ OS:Schedule:Rule,
   Schedule Rule 9,                         !- Name
   {00000000-0000-0000-0064-000000000009},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0062-000000000010},  !- Day Schedule Name
+  {00000000-0000-0000-0062-000000000012},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -11887,99 +11887,99 @@ OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000002},  !- Handle
   CHW Temp,                                !- Name
   {00000000-0000-0000-0065-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000040};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000002};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000003},  !- Handle
   CW Temp,                                 !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000041};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000003};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000004},  !- Handle
   Clothing Schedule,                       !- Name
   {00000000-0000-0000-0065-000000000003},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000002};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000004};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000005},  !- Handle
   Economizer Max OA Fraction 100 pct,      !- Name
   ,                                        !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000004};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000006};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000006},  !- Handle
   Fraction Latent - 0.05,                  !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000005};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000007};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000007},  !- Handle
   Fraction Sensible - 0.2,                 !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000006};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000008};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000008},  !- Handle
   Mixed Water At Faucet Temp - 140F,       !- Name
   {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000007};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000009};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000009},  !- Handle
   NECB-A-Electric-Equipment,               !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000008};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000010};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000010},  !- Handle
   NECB-A-Lighting,                         !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000012};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000014};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000011},  !- Handle
   NECB-A-Occupancy,                        !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000016};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000018};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000012},  !- Handle
   NECB-A-Service Water Heating,            !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000020};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000022};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000013},  !- Handle
   NECB-A-Thermostat Setpoint-Cooling,      !- Name
   {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000024};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000026};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000014},  !- Handle
   NECB-A-Thermostat Setpoint-Heating,      !- Name
   {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000028};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000030};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000015},  !- Handle
   NECB-Activity,                           !- Name
   {00000000-0000-0000-0065-000000000001},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000032},  !- Default Day Schedule Name
-  {00000000-0000-0000-0062-000000000033},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0062-000000000034};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0062-000000000034},  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000035},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0062-000000000036};  !- Winter Design Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000016},  !- Handle
   Schedule Ruleset 1,                      !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000042};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000040};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000017},  !- Handle
   Schedule Ruleset 2,                      !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000043};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000041};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000018},  !- Handle

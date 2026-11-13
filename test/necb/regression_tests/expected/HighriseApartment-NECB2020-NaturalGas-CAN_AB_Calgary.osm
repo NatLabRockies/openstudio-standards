@@ -1022,7 +1022,7 @@ OS:AdditionalProperties,
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000108},  !- Handle
-  {00000000-0000-0000-0021-000000000018};  !- Object Name
+  {00000000-0000-0000-0021-000000000014};  !- Object Name
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000109},  !- Handle
@@ -1050,6 +1050,28 @@ OS:AdditionalProperties,
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000115},  !- Handle
+  {00000000-0000-0000-0021-000000000016},  !- Object Name
+  btap_film,                               !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.13598135286248303,                     !- Feature Value 1
+  btap_area,                               !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  767.97496084540001,                      !- Feature Value 2
+  btap_type,                               !- Feature Name 3
+  String,                                  !- Feature Data Type 3
+  roofs,                                   !- Feature Value 3
+  btap_uo,                                 !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  0.121,                                   !- Feature Value 4
+  btap_ut,                                 !- Feature Name 5
+  Double,                                  !- Feature Data Type 5
+  0.121,                                   !- Feature Value 5
+  btap_id,                                 !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  BTAP-ExteriorRoof-IEAD-4;                !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000116},  !- Handle
   {00000000-0000-0000-0021-000000000020},  !- Object Name
   btap_film,                               !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -1071,126 +1093,104 @@ OS:AdditionalProperties,
   BTAP-ExteriorWall-SteelFramed-2;         !- Feature Value 6
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000116},  !- Handle
+  {00000000-0000-0000-0001-000000000117},  !- Handle
   {00000000-0000-0000-0021-000000000010};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000117},  !- Handle
+  {00000000-0000-0000-0001-000000000118},  !- Handle
   {00000000-0000-0000-0021-000000000028};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000118},  !- Handle
+  {00000000-0000-0000-0001-000000000119},  !- Handle
   {00000000-0000-0000-0021-000000000032};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000119},  !- Handle
+  {00000000-0000-0000-0001-000000000120},  !- Handle
   {00000000-0000-0000-0021-000000000001};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000120},  !- Handle
+  {00000000-0000-0000-0001-000000000121},  !- Handle
   {00000000-0000-0000-0021-000000000003};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000121},  !- Handle
+  {00000000-0000-0000-0001-000000000122},  !- Handle
   {00000000-0000-0000-0021-000000000017};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000122},  !- Handle
+  {00000000-0000-0000-0001-000000000123},  !- Handle
   {00000000-0000-0000-0021-000000000013};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000123},  !- Handle
+  {00000000-0000-0000-0001-000000000124},  !- Handle
   {00000000-0000-0000-0021-000000000011};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000124},  !- Handle
+  {00000000-0000-0000-0001-000000000125},  !- Handle
   {00000000-0000-0000-0021-000000000005};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000125},  !- Handle
+  {00000000-0000-0000-0001-000000000126},  !- Handle
   {00000000-0000-0000-0021-000000000007};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000126},  !- Handle
+  {00000000-0000-0000-0001-000000000127},  !- Handle
   {00000000-0000-0000-0021-000000000023};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000127},  !- Handle
+  {00000000-0000-0000-0001-000000000128},  !- Handle
   {00000000-0000-0000-0021-000000000025};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000128},  !- Handle
+  {00000000-0000-0000-0001-000000000129},  !- Handle
   {00000000-0000-0000-0021-000000000021};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000129},  !- Handle
+  {00000000-0000-0000-0001-000000000130},  !- Handle
   {00000000-0000-0000-0021-000000000027};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000130},  !- Handle
+  {00000000-0000-0000-0001-000000000131},  !- Handle
   {00000000-0000-0000-0021-000000000031};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000131},  !- Handle
+  {00000000-0000-0000-0001-000000000132},  !- Handle
   {00000000-0000-0000-0021-000000000029};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000132},  !- Handle
-  {00000000-0000-0000-0021-000000000019};  !- Object Name
-
-OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000133},  !- Handle
-  {00000000-0000-0000-0021-000000000009};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000134},  !- Handle
-  {00000000-0000-0000-0021-000000000030};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000135},  !- Handle
-  {00000000-0000-0000-0021-000000000033};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000136},  !- Handle
-  {00000000-0000-0000-0021-000000000036};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000137},  !- Handle
-  {00000000-0000-0000-0021-000000000035};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000138},  !- Handle
   {00000000-0000-0000-0021-000000000015};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000139},  !- Handle
+  {00000000-0000-0000-0001-000000000134},  !- Handle
+  {00000000-0000-0000-0021-000000000019};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000135},  !- Handle
+  {00000000-0000-0000-0021-000000000009};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000136},  !- Handle
+  {00000000-0000-0000-0021-000000000030};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000137},  !- Handle
   {00000000-0000-0000-0021-000000000034};  !- Object Name
 
 OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000138},  !- Handle
+  {00000000-0000-0000-0021-000000000036};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000139},  !- Handle
+  {00000000-0000-0000-0021-000000000035};  !- Object Name
+
+OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000140},  !- Handle
-  {00000000-0000-0000-0021-000000000014};  !- Object Name
+  {00000000-0000-0000-0021-000000000018};  !- Object Name
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000141},  !- Handle
-  {00000000-0000-0000-0021-000000000016},  !- Object Name
-  btap_film,                               !- Feature Name 1
-  Double,                                  !- Feature Data Type 1
-  0.13598135286248303,                     !- Feature Value 1
-  btap_area,                               !- Feature Name 2
-  Double,                                  !- Feature Data Type 2
-  767.97496084540001,                      !- Feature Value 2
-  btap_type,                               !- Feature Name 3
-  String,                                  !- Feature Data Type 3
-  roofs,                                   !- Feature Value 3
-  btap_uo,                                 !- Feature Name 4
-  Double,                                  !- Feature Data Type 4
-  0.121,                                   !- Feature Value 4
-  btap_ut,                                 !- Feature Name 5
-  Double,                                  !- Feature Data Type 5
-  0.121,                                   !- Feature Value 5
-  btap_id,                                 !- Feature Name 6
-  String,                                  !- Feature Data Type 6
-  BTAP-ExteriorRoof-IEAD-4;                !- Feature Value 6
+  {00000000-0000-0000-0021-000000000033};  !- Object Name
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000142},  !- Handle
@@ -37814,25 +37814,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000036},  !- Handle
-  Schedule Day 1,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000037},  !- Handle
-  Schedule Day 2,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0062-000000000038},  !- Handle
-  Schedule Day 3,                          !- Name
+  ON_OFF_ALWAYS_OFF Default Schedule,      !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
@@ -37909,8 +37891,26 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000037},  !- Handle
+  Schedule Day 1,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0062-000000000038},  !- Handle
+  Schedule Day 2,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000039},  !- Handle
-  Schedule Day 4,                          !- Name
+  Schedule Day 3,                          !- Name
   {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -37919,7 +37919,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000040},  !- Handle
-  Schedule Day 5,                          !- Name
+  Schedule Day 4,                          !- Name
   {00000000-0000-0000-0065-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -37928,7 +37928,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000041},  !- Handle
-  Schedule Day 6,                          !- Name
+  Schedule Day 5,                          !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -37937,7 +37937,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000042},  !- Handle
-  Schedule Day 7,                          !- Name
+  Schedule Day 6,                          !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -37946,7 +37946,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000043},  !- Handle
-  Schedule Day 8,                          !- Name
+  Schedule Day 7,                          !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -37955,7 +37955,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0062-000000000044},  !- Handle
-  Schedule Day 9,                          !- Name
+  Schedule Day 8,                          !- Name
   {00000000-0000-0000-0065-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -39095,7 +39095,7 @@ OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000015},  !- Handle
   ON_OFF_ALWAYS_OFF,                       !- Name
   {00000000-0000-0000-0065-000000000007},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0062-000000000038};  !- Default Day Schedule Name
+  {00000000-0000-0000-0062-000000000036};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0064-000000000016},  !- Handle
