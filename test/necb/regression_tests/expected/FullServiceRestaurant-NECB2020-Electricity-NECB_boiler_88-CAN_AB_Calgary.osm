@@ -156,6 +156,28 @@ OS:AdditionalProperties,
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000022},  !- Handle
+  {00000000-0000-0000-0017-000000000016},  !- Object Name
+  btap_film,                               !- Feature Name 1
+  Double,                                  !- Feature Data Type 1
+  0.13714160041039716,                     !- Feature Value 1
+  btap_area,                               !- Feature Name 2
+  Double,                                  !- Feature Data Type 2
+  569.50571093534211,                      !- Feature Value 2
+  btap_type,                               !- Feature Name 3
+  String,                                  !- Feature Data Type 3
+  roofs,                                   !- Feature Value 3
+  btap_uo,                                 !- Feature Name 4
+  Double,                                  !- Feature Data Type 4
+  0.121,                                   !- Feature Value 4
+  btap_ut,                                 !- Feature Name 5
+  Double,                                  !- Feature Data Type 5
+  0.121,                                   !- Feature Value 5
+  btap_id,                                 !- Feature Name 6
+  String,                                  !- Feature Data Type 6
+  BTAP-ExteriorRoof-IEAD-4;                !- Feature Value 6
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000023},  !- Handle
   {00000000-0000-0000-0017-000000000020},  !- Object Name
   btap_film,                               !- Feature Name 1
   Double,                                  !- Feature Data Type 1
@@ -177,42 +199,20 @@ OS:AdditionalProperties,
   BTAP-ExteriorWall-SteelFramed-2;         !- Feature Value 6
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000023},  !- Handle
+  {00000000-0000-0000-0001-000000000024},  !- Handle
   {00000000-0000-0000-0017-000000000010};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000024},  !- Handle
+  {00000000-0000-0000-0001-000000000025},  !- Handle
   {00000000-0000-0000-0017-000000000028};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000025},  !- Handle
+  {00000000-0000-0000-0001-000000000026},  !- Handle
   {00000000-0000-0000-0017-000000000032};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000026},  !- Handle
-  {00000000-0000-0000-0017-000000000001};  !- Object Name
-
-OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000027},  !- Handle
-  {00000000-0000-0000-0017-000000000016},  !- Object Name
-  btap_film,                               !- Feature Name 1
-  Double,                                  !- Feature Data Type 1
-  0.13714160041039716,                     !- Feature Value 1
-  btap_area,                               !- Feature Name 2
-  Double,                                  !- Feature Data Type 2
-  569.50571093534211,                      !- Feature Value 2
-  btap_type,                               !- Feature Name 3
-  String,                                  !- Feature Data Type 3
-  roofs,                                   !- Feature Value 3
-  btap_uo,                                 !- Feature Name 4
-  Double,                                  !- Feature Data Type 4
-  0.121,                                   !- Feature Value 4
-  btap_ut,                                 !- Feature Name 5
-  Double,                                  !- Feature Data Type 5
-  0.121,                                   !- Feature Value 5
-  btap_id,                                 !- Feature Name 6
-  String,                                  !- Feature Data Type 6
-  BTAP-ExteriorRoof-IEAD-4;                !- Feature Value 6
+  {00000000-0000-0000-0017-000000000001};  !- Object Name
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000028},  !- Handle
