@@ -214,11 +214,10 @@ module BTAP
         sunday_rule.setEndDate(end_date)
 
         #set default schedule to be the same as the week schedule.
-        default_day =  ruleset.defaultDaySchedule
+        default_day = ruleset.defaultDaySchedule
+        default_day.setName("#{name} Default Schedule")
         default_day.clearValues()
         weekday.times.each_index {|counter| default_day.addValue(weekday.times[counter],weekday.values[counter])}
-
-
         return ruleset
       end
 

@@ -377,11 +377,6 @@ class NECB2011
 
         # Add a setpoint manager to control the
         # supply air to a constant temperature
-        sat_sch = OpenStudio::Model::ScheduleRuleset.new(model)
-        sat_sch.setName('Supply Air Temp')
-        #sat_sch.defaultDaySchedule.setName('Supply Air Temp Default')
-        #sat_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), system_data[:system_supply_air_temperature])
-        #sat_stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, sat_sch)
         sat_stpt_manager = OpenStudio::Model::SetpointManagerWarmest.new(model)
         sat_stpt_manager.setControlVariable("Temperature")
         sat_stpt_manager.setMinimumSetpointTemperature(13)
