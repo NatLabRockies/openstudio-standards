@@ -679,6 +679,8 @@ class ECMS
     when 'scheduled'
       sat = 20.0
       sat_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      sat_sch.setName("Air System Setpoint Schedule Ruleset")
+      sat_sch.defaultDaySchedule.setName("Air System Setpoint Day Schedule")
       sat_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), sat)
       spm = OpenStudio::Model::SetpointManagerScheduled.new(model, sat_sch)
     when 'single_zone_reheat'
