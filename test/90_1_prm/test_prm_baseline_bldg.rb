@@ -11,20 +11,20 @@ class Baseline9012013Test < Minitest::Test
     base_model = create_baseline_model('bldg_14', '90.1-2013', 'ASHRAE 169-2013-5B', 'Warehouse','Xcel Energy CO EDA', false, true)
     check_coil_efficiencies(base_model)
   end
- 
+
   # @author Matt Steen, Eric Ringold, Ambient Energy
   def test_bldg_14_ventilation_rates
     test_model_name = 'bldg_14'
     base_model = create_baseline_model(test_model_name, '90.1-2013', 'ASHRAE 169-2013-5B', 'Warehouse','Xcel Energy CO EDA', false, true)
     prop_model = load_test_model(test_model_name)
-    check_ventilation_rates(base_model, prop_model)    
+    check_ventilation_rates(base_model, prop_model)
   end
 
   # @author Taylor Roberts, Group14 Engineering
   def test_bldg_15_retail_standalone
     # Create the baseline model
     model = create_baseline_model('bldg_15', '90.1-2013', 'ASHRAE 169-2013-5B', 'RetailStandalone','Xcel Energy CO EDA', false, true)
-  
+
     # Conditions expected to be true in the baseline model
     # Check that the office system is a VAV system
     zone = model.getThermalZoneByName("15.Office.Cs Zone").get
@@ -42,13 +42,23 @@ class Baseline9012013Test < Minitest::Test
     # Check that their is chilled water system
     model.getPlantLoops.each do |plant_loop|
       next unless plant_loop.sizingPlant.loopType == 'Cooling'
-      has_chlr = false
+      has_cooling_equip = false
       plant_loop.supplyComponents.each do |supply_component|
         if supply_component.to_ChillerElectricEIR.is_initialized
-          has_chlr = true
+          has_cooling_equip = true
         end
       end
-      assert(has_chlr, "Office HVAC is not correct, it should be a VAV with CHW.  Missing chiller.")
+
+      # check if secondary loop
+      unless has_cooling_equip
+        plant_loop.supplyComponents.each do |supply_component|
+          if supply_component.to_HeatExchangerFluidToFluid.is_initialized
+            has_cooling_equip = true
+          end
+        end
+      end
+
+      assert(has_cooling_equip, "Office HVAC is not correct, it should be a VAV with CHW.  Missing chiller or HX.")
     end #The measure did this correctly
 
     # Check in window to wall ratio
@@ -76,7 +86,7 @@ class Baseline9012013Test < Minitest::Test
     lpd_w_per_ft2 = OpenStudio.convert(lpd_w_per_m2,'W/m^2','W/ft^2').get
     assert_in_delta(0.98, lpd_w_per_ft2, 0.01, "Open Office LPD is wrong.") #The measure did this correctly
 
-    # Conference LPD should be 1.23 W/ft2  
+    # Conference LPD should be 1.23 W/ft2
     space = model.getSpaceByName("9.Conference 1").get
     lpd_w_per_m2 = space.lightingPowerPerFloorArea
     lpd_w_per_ft2 = OpenStudio.convert(lpd_w_per_m2,'W/m^2','W/ft^2').get
@@ -96,7 +106,7 @@ class Baseline9012013Test < Minitest::Test
     # BUT because they are required they should already be in the proposed model so really the baseline doesn't have to change anything for those zones
     # for the zones it is NOT required in but the proposed has a schedule adjustment the baseline should go back to the orginal schedule
     # how to do this I am not sure, but maybe they will need to have a flag
-    
+
     # Daylighting Controls
 
     # OpenOffice Zones with glass should have daylighting
@@ -129,7 +139,7 @@ class Baseline9012013Test < Minitest::Test
     zone = model.getThermalZoneByName("1.Retail 2 Zone").get
     primary_daylighting_control = zone.primaryDaylightingControl
     #assert(primary_daylighting_control.empty?, "Daylighting control is in Retail zones, but should not be.")
-    #The measure did NOT do this correctly - there is a daylighting control present    
+    #The measure did NOT do this correctly - there is a daylighting control present
   end
 
   # @author Taylor Roberts, Group14 Engineering
@@ -182,7 +192,7 @@ class Baseline9012013Test < Minitest::Test
     # The measure also made a VAV system to serve the apartment units, which should be served by a PTHP system
     # Another issue is that the measure deleted the exhuast fans from the apartment units, which are used for the ventilation strategy
   end
- 
+
   # @author Taylor Roberts, Group14 Engineering
   def test_bldg_18_retail_standalone
     # Create the baseline model
@@ -310,7 +320,7 @@ class Baseline9012013Test < Minitest::Test
       num_shading_surfaces += shade_group.shadingSurfaces.size
     end
     assert_equal(0, num_shading_surfaces, "There should be no space or building shading surfaces in the baseline model")
-    
+
     # Baseline HVAC systems
     # Check for PTHP in the guest rooms
     zone = model.getThermalZoneByName("Level 2.GuestRoom 1 Zone").get

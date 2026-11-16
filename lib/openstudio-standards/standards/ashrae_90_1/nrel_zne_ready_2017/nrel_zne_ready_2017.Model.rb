@@ -9,7 +9,7 @@ class NRELZNEReady2017 < ASHRAE901
 
     # Air Loop Controls
     if apply_controls.nil? || apply_controls == true
-      model.getAirLoopHVACs.sort.each { |obj| air_loop_hvac_apply_standard_controls(obj, climate_zone) unless air_loop_hvac_unitary_system?(obj) }
+      model.getAirLoopHVACs.sort.each { |obj| air_loop_hvac_apply_standard_controls(obj, climate_zone) unless OpenstudioStandards::HVAC.air_loop_hvac_unitary_system?(obj) }
     end
 
     # Plant Loop Controls
@@ -23,10 +23,10 @@ class NRELZNEReady2017 < ASHRAE901
     ##### Apply equipment efficiencies
 
     # Fans
-    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
-    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, fan_brake_horsepower(obj)) }
+    model.getFanVariableVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanConstantVolumes.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanOnOffs.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
+    model.getFanZoneExhausts.sort.each { |obj| fan_apply_standard_minimum_motor_efficiency(obj, OpenstudioStandards::HVAC.fan_brake_horsepower(obj)) }
     model.getZoneHVACComponents.sort.each { |obj| zone_hvac_component_apply_prm_baseline_fan_power(obj) }
 
     # Pumps
@@ -34,7 +34,7 @@ class NRELZNEReady2017 < ASHRAE901
     model.getPumpVariableSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
     model.getHeaderedPumpsConstantSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
     model.getHeaderedPumpsVariableSpeeds.sort.each { |obj| pump_apply_standard_minimum_motor_efficiency(obj) }
-    model.getPlantLoops.sort.each { |obj| plant_loop_apply_prm_baseline_pumping_type(obj) unless plant_loop_swh_loop?(obj) }
+    model.getPlantLoops.sort.each { |obj| plant_loop_apply_prm_baseline_pumping_type(obj) unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(obj) }
 
     # Unitary HPs
     # set DX HP coils before DX clg coils because when DX HP coils need to first

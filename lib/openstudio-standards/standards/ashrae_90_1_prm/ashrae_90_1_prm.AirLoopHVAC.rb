@@ -39,7 +39,7 @@ class ASHRAE901PRM < Standard
     # the load is met by running the central system which stays off during heating
     # operation
     air_loop_hvac.setNightCycleControlType('CycleOnAny')
-    if air_loop_hvac_has_parallel_piu_air_terminals?(air_loop_hvac)
+    if OpenstudioStandards::HVAC.air_loop_hvac_parallel_piu_air_terminals?(air_loop_hvac)
       avail_mgrs = air_loop_hvac.availabilityManagers
       if !avail_mgrs.nil?
         avail_mgrs.each do |avail_mgr|
@@ -87,15 +87,6 @@ class ASHRAE901PRM < Standard
     end
 
     return true
-  end
-
-  # Determine if the system is a multizone VAV system
-  # @param air_loop_hvac [OpenStudio::Model::AirLoopHVAC] air loop
-  # @return [Boolean] Returns true if required, false if not.
-  def air_loop_hvac_multizone_vav_system?(air_loop_hvac)
-    return true if air_loop_hvac.name.to_s.include?('Sys5') || air_loop_hvac.name.to_s.include?('Sys6') || air_loop_hvac.name.to_s.include?('Sys7') || air_loop_hvac.name.to_s.include?('Sys8')
-
-    return false
   end
 
   # Determine whether the VAV damper control is single maximum or dual maximum control.
@@ -224,7 +215,7 @@ class ASHRAE901PRM < Standard
     is_nmc = true if air_loop_hvac.additionalProperties.hasFeature('non_mechanically_cooled')
 
     # Get all air loop fans
-    all_fans = air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac)
+    all_fans = OpenstudioStandards::HVAC.air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac)
 
     allowable_fan_bhp = 0.0
     allowable_power_w = 0.0
@@ -289,7 +280,7 @@ class ASHRAE901PRM < Standard
       supply_fan_power_fraction = 1.0
     end
 
-    supply_fan = air_loop_hvac_get_supply_fan(air_loop_hvac)
+    supply_fan = OpenstudioStandards::HVAC.air_loop_hvac_supply_fan(air_loop_hvac)
     if supply_fan.nil?
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.ashrae_90_1_prm.AirLoopHVAC', "Supply not found on #{airloop.name}.")
     end
@@ -337,7 +328,7 @@ class ASHRAE901PRM < Standard
     end
 
     # Get all air loop fans
-    all_fans = air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac)
+    all_fans = OpenstudioStandards::HVAC.air_loop_hvac_supply_return_exhaust_relief_fans(air_loop_hvac)
 
     # Set the motor efficiencies
     # for all fans based on the calculated
@@ -349,10 +340,10 @@ class ASHRAE901PRM < Standard
       if fan_efficacy_w_per_cfm > 0
         # Convert efficacy to metric
         fan_efficacy_w_per_m3_per_s = OpenStudio.convert(fan_efficacy_w_per_cfm, 'm^3/s', 'cfm').get
-        fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
+        OpenstudioStandards::HVAC.fan_change_impeller_efficiency(fan, fan_baseline_impeller_efficiency(fan))
 
         # Get fan BHP
-        fan_bhp = fan_brake_horsepower(fan)
+        fan_bhp = OpenstudioStandards::HVAC.fan_brake_horsepower(fan)
 
         # Set the motor efficiency, preserving the impeller efficiency.
         # For zone HVAC fans, a bhp lookup of 0.5bhp is always used because
@@ -451,7 +442,7 @@ class ASHRAE901PRM < Standard
     # check the following conditions at airloop level
     # has air economizer OR design outdoor airflow > 3000 cfm
 
-    has_economizer = air_loop_hvac_economizer?(air_loop_hvac)
+    has_economizer = OpenstudioStandards::HVAC.air_loop_hvac_economizer?(air_loop_hvac)
 
     if air_loop_hvac.airLoopHVACOutdoorAirSystem.is_initialized
       oa_flow_m3_per_s = get_airloop_hvac_design_oa_from_sql(air_loop_hvac)

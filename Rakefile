@@ -38,6 +38,18 @@ namespace :test do
     t.verbose = false
   end
 
+  desc 'Run the DOE prototype regression tests in parallel across local CPUs'
+  Rake::TestTask.new('parallel_doe_regression') do |t|
+    # Make an empty test/reports directory
+    report_dir = 'test/reports'
+    FileUtils.rm_rf(report_dir)
+    Dir.mkdir(report_dir)
+    file_list = FileList.new('test/doe_prototype/run_regression_parallel.rb')
+    t.libs << 'test'
+    t.test_files = file_list
+    t.verbose = false
+  end
+
   # These tests only available in the CI environment
   if ENV['CI'] == 'true'
 

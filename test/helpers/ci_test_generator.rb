@@ -1234,7 +1234,7 @@ class $(classname) < Minitest::Test
         OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: 'ASHRAE 169-2013-7A')
 
         # Add the HVAC
-        standard.model_add_hvac_system(model, system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, model.getThermalZones)
+        OpenstudioStandards::HVAC.model_add_hvac_system(model, system_type, main_heat_fuel, zone_heat_fuel, cool_fuel, model.getThermalZones)
 
         # Save the model
         model.save("#{model_dir}/final.osm", true)

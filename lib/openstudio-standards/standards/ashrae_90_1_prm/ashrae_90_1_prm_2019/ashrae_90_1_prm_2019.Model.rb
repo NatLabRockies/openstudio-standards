@@ -85,12 +85,12 @@ class ASHRAE901PRM2019 < ASHRAE901PRM
       end
       model.getPlantLoops.each do |plant_loop|
         # Skip non service water heating loops
-        next unless plant_loop_swh_loop?(plant_loop)
+        next unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         # Rename the loop to avoid accidentally hooking up the HVAC systems to this loop later.
         plant_loop.setName('Service Water Heating Loop')
 
-        htg_fuels, combination_system, storage_capacity, total_heating_capacity = plant_loop_swh_system_type(plant_loop)
+        htg_fuels, combination_system, storage_capacity, total_heating_capacity = OpenstudioStandards::HVAC.plant_loop_swh_system_type(plant_loop)
 
         # Per Table G3.1 11.e, if the baseline system was a combination of heating and service water heating,
         # delete all heating equipment and recreate a WaterHeater:Mixed.

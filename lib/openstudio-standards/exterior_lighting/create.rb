@@ -239,7 +239,7 @@ module OpenstudioStandards
                                                                                           units: units,
                                                                                           multiplier: multiplier,
                                                                                           schedule: ext_lights_sch_facade_and_landscape,
-                                                                                          control_option: 'ScheduleNameOnly')
+                                                                                          control_option: control_option)
           exterior_lights << ext_lights
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} #{units} of lighting for #{multiplier} #{units == 'W/ft' ? 'ft perimeter' : 'ft^2 area'} of building facade.")

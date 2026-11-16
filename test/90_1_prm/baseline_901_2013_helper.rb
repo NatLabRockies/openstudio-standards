@@ -710,7 +710,7 @@ module Baseline9012013
         case loop_type
         when 'Heating'
           # Don't check Service Water Heating loops
-          next if standard.plant_loop_swh_loop?(pl)
+          next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(pl)
 
           # G3.1.3.3 Hot-Water Supply Temperature (Systems 1, 5, 7, and 12)
           prm_min_sec = 'Hot-Water Supply Temperature'

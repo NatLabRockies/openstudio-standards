@@ -1,4 +1,5 @@
 require_relative '../../helpers/minitest_helper'
+require 'minitest/mock'
 
 class TestUnmetHours < Minitest::Test
   def setup
@@ -63,5 +64,27 @@ class TestUnmetHours < Minitest::Test
     thermal_zone = @model.getThermalZoneByName('GYM_ZN_1_FLR_1 ZN').get
     result = OpenstudioStandards::SqlFile.thermal_zone_get_annual_occupied_unmet_cooling_hours(thermal_zone)
     assert_in_delta(54.67, result, 1.0)
+  end
+end
+
+class TestUnmetHoursAggregation < Minitest::Test
+  def test_missing_results
+    [[false, false], [false, 10.0], [10.0, false]].each do |heating_hours, cooling_hours|
+      OpenstudioStandards::SqlFile.stub(:model_get_annual_occupied_unmet_heating_hours, heating_hours) do
+        OpenstudioStandards::SqlFile.stub(:model_get_annual_occupied_unmet_cooling_hours, cooling_hours) do
+          assert_equal(false, OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(nil))
+        end
+      end
+    end
+  end
+
+  def test_valid_results
+    [[0.0, 0.0], [10.0, 20.0]].each do |heating_hours, cooling_hours|
+      OpenstudioStandards::SqlFile.stub(:model_get_annual_occupied_unmet_heating_hours, heating_hours) do
+        OpenstudioStandards::SqlFile.stub(:model_get_annual_occupied_unmet_cooling_hours, cooling_hours) do
+          assert_equal(heating_hours + cooling_hours, OpenstudioStandards::SqlFile.model_get_annual_occupied_unmet_hours(nil))
+        end
+      end
+    end
   end
 end

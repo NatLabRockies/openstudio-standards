@@ -413,7 +413,7 @@ class AppendixGPRMTests < Minitest::Test
 
       if building_type == 'SmallOffice'
         model.getFanVariableVolumes.sort.each do |fan|
-          fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+          fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
           fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
           fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
           assert(fan_bhp_ip.round(4) == 0.0017, "Fan power for #{fan.name} fan in #{building_type} #{template} #{climate_zone} #{mod} is #{fan_bhp_ip.round(4)} instead of 0.0017.")
@@ -423,7 +423,7 @@ class AppendixGPRMTests < Minitest::Test
       if building_type == 'RetailStandalone'
         model.getFanOnOffs.sort.each do |fan|
           if fan.name.to_s.include?('Front_Entry ZN')
-            fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+            fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
             fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
             fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
             assert(fan_bhp_ip.round(4) == 0.0012, "Fan power for  #{fan.name} fan in #{building_type} #{template} #{climate_zone} #{mod} is #{fan_bhp_ip.round(4)} instead of 0.0012.")
@@ -641,7 +641,7 @@ class AppendixGPRMTests < Minitest::Test
           model_ptac = BTAP::FileIO.deep_copy(model_base)
           # Remove all HVAC from model, excluding service water heating
           std.model_remove_prm_hvac(model_ptac)
-          hot_water_loop = std.model_add_hw_loop(model_ptac, 'DistrictHeating')
+          hot_water_loop = OpenstudioStandards::HVAC.model_add_hw_loop(model_ptac, 'DistrictHeating')
           model_ptac.getPumpVariableSpeeds.each do |pump|
             pump.setRatedFlowRate(100)
           end
@@ -649,7 +649,7 @@ class AppendixGPRMTests < Minitest::Test
           zones.each do |zone|
             zone.additionalProperties.setFeature('baseline_system_type', 'PTAC')
           end
-          std.model_add_ptac(model_ptac,
+          OpenstudioStandards::HVAC.model_add_ptac(model_ptac,
                              zones,
                              cooling_type: 'Single Speed DX AC',
                              heating_type: 'Water',
@@ -690,7 +690,7 @@ class AppendixGPRMTests < Minitest::Test
             zones.each do |zone|
               zone.additionalProperties.setFeature('baseline_system_type', 'PTHP')
             end
-            std.model_add_pthp(model_pthp,
+            OpenstudioStandards::HVAC.model_add_pthp(model_pthp,
                                zones,
                                fan_type: 'ConstantVolume')
             zones.each do |zone|
@@ -734,7 +734,7 @@ class AppendixGPRMTests < Minitest::Test
             # Remove all EMS objects from the model
             std.model_remove_prm_ems_objects(model_psz_ac)
             zones = model_psz_ac.getThermalZones
-            std.model_add_psz_ac(model_psz_ac,
+            OpenstudioStandards::HVAC.model_add_psz_ac(model_psz_ac,
                                  zones,
                                  cooling_type: 'Single Speed DX AC',
                                  chilled_water_loop: nil,
@@ -954,7 +954,7 @@ class AppendixGPRMTests < Minitest::Test
           zones.each do |zone|
             zone.additionalProperties.setFeature('baseline_system_type', 'Gas_Furnace')
           end
-          std.model_add_unitheater(model_gas_furnace,
+          OpenstudioStandards::HVAC.model_add_unitheater(model_gas_furnace,
                                    zones,
                                    fan_control_type: 'ConstantVolume',
                                    fan_pressure_rise: 0.2,
@@ -1481,8 +1481,7 @@ class AppendixGPRMTests < Minitest::Test
         next if n_boilers == 0
 
         # Find area served by this loop
-        standard = Standard.build('90.1-PRM-2019')
-        area_served_m2 = standard.plant_loop_total_floor_area_served(plant_loop)
+        area_served_m2 = OpenstudioStandards::HVAC.plant_loop_total_floor_area_served(plant_loop)
         area_served_ft2 = OpenStudio.convert(area_served_m2, 'm^2', 'ft^2').get
 
         # check that the number of boilers equals the amount specified by the standard based on the conditioned floor area
@@ -1532,8 +1531,7 @@ class AppendixGPRMTests < Minitest::Test
         end
 
         # Initialize Standard class
-        standard = Standard.build('90.1-PRM-2019')
-        cap_w = standard.plant_loop_total_cooling_capacity(plant_loop)
+        cap_w = OpenstudioStandards::HVAC.plant_loop_total_cooling_capacity(plant_loop)
         cap_tons = OpenStudio.convert(cap_w, 'W', 'ton').get
 
         if cap_tons <= 300
@@ -1684,7 +1682,7 @@ class AppendixGPRMTests < Minitest::Test
       # first check if the baseline_model has water loops or not (SHW is not included)
       baseline_model.getPlantLoops.sort.each do |plant_loop|
         # Skip the SWH loops
-        next if Standard.new.plant_loop_swh_loop?(plant_loop)
+        next if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
 
         baseline_model.getSetpointManagerOutdoorAirResets.each do |oa_reset|
           name = oa_reset.name.to_s

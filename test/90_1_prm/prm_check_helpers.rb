@@ -260,14 +260,13 @@ class AppendixGPRMTests < Minitest::Test
     end
 
     # check baseline system fan power
-    std = Standard.build('90.1-PRM-2019')
     model.getFanOnOffs.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       assert(fan_power_ip.round(3) == 0.054, "Fan power (nmc system) for #{building_type} in climate zone #{climate_zone} is #{fan_power_ip.round(1)} instead of 0.054.")
     end
     model.getFanConstantVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       assert(fan_power_ip.round(1) == 0.3, "Fan power for #{building_type} in climate zone #{climate_zone} is #{fan_power_ip.round(1)} instead of 0.3.")
     end
@@ -308,13 +307,12 @@ class AppendixGPRMTests < Minitest::Test
     end
 
     # check baseline system fan power
-    std = Standard.build('90.1-PRM-2019')
     model.getFanOnOffs.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
       assert(fan_bhp_ip.round(5) == 0.00094, "Fan power for #{sub_text} is #{fan_bhp_ip.round(5)} instead of 0.00094.")
-      if fan_bhp_ip * OpenStudio.convert(std.fan_design_air_flow(fan), 'm^3/s', 'cfm').get <= 1.0
+      if fan_bhp_ip * OpenStudio.convert(OpenstudioStandards::HVAC.fan_design_air_flow(fan), 'm^3/s', 'cfm').get <= 1.0
         assert(fan.motorEfficiency == 0.825, "Fan motor efficiency for #{fan.name} in #{sub_text} is #{fan.motorEfficiency}, 0.825 is expected.")
       end
     end
@@ -341,13 +339,12 @@ class AppendixGPRMTests < Minitest::Test
 
     # check baseline system fan power
     # central fans
-    std = Standard.build('90.1-PRM-2019')
     model.getFanVariableVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
       assert(fan_bhp_ip.round(4) == 0.0013, "Fan power for central fan in #{sub_text} is #{fan_bhp_ip.round(4)} instead of 0.0013.")
-      fan_bhp_ip *= OpenStudio.convert(std.fan_design_air_flow(fan), 'm^3/s', 'cfm').get
+      fan_bhp_ip *= OpenStudio.convert(OpenstudioStandards::HVAC.fan_design_air_flow(fan), 'm^3/s', 'cfm').get
       if fan_bhp_ip <= 20.0 && fan_bhp_ip > 15.0
         assert(fan.motorEfficiency == 0.91, "Fan motor efficiency for #{fan.name} in #{sub_text} is #{fan.motorEfficiency}, 0.91 is expected.")
       end
@@ -355,7 +352,7 @@ class AppendixGPRMTests < Minitest::Test
 
     # PFP fans
     model.getFanConstantVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       assert(fan_power_ip.round(2) == 0.35, "Fan power for terminal fan in #{sub_text} is #{fan_power_ip.round(1)} instead of 0.35.")
     end
@@ -401,8 +398,8 @@ class AppendixGPRMTests < Minitest::Test
       end
 
       # Fan power ratios
-      return_to_supply_fan_power_ratio = std.fan_fanpower(return_fan) / std.fan_fanpower(supply_fan)
-      relief_to_supply_fan_power_ratio = std.fan_fanpower(relief_fan) / std.fan_fanpower(supply_fan)
+      return_to_supply_fan_power_ratio = OpenstudioStandards::HVAC.fan_fanpower(return_fan) / OpenstudioStandards::HVAC.fan_fanpower(supply_fan)
+      relief_to_supply_fan_power_ratio = OpenstudioStandards::HVAC.fan_fanpower(relief_fan) / OpenstudioStandards::HVAC.fan_fanpower(supply_fan)
 
       assert(return_to_supply_fan_power_ratio.round(0) == 2, "Fan power ratio between return and supply is incorrect, got #{return_to_supply_fan_power_ratio.round(0)} instead 2.")
       assert(relief_to_supply_fan_power_ratio.round(0) == 3, "Fan power ratio between relief and supply is incorrect, got #{relief_to_supply_fan_power_ratio.round(0)} instead 3.")
@@ -427,13 +424,12 @@ class AppendixGPRMTests < Minitest::Test
 
     # check baseline system fan power
     # central fans
-    std = Standard.build('90.1-PRM-2019')
     model.getFanVariableVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
       assert(fan_bhp_ip.round(4) == 0.0013, "Fan power for central fan in #{sub_text} is #{fan_power_ip.round(4)} instead of 0.0013.")
-      fan_bhp_ip *= OpenStudio.convert(std.fan_design_air_flow(fan), 'm^3/s', 'cfm').get
+      fan_bhp_ip *= OpenStudio.convert(OpenstudioStandards::HVAC.fan_design_air_flow(fan), 'm^3/s', 'cfm').get
       if fan_bhp_ip <= 20.0 && fan_bhp_ip > 15.0
         assert(fan.motorEfficiency == 0.91, "Fan motor efficiency for #{fan.name} in #{sub_text} is #{fan.motorEfficiency}, 0.91 is expected.")
       end
@@ -441,7 +437,7 @@ class AppendixGPRMTests < Minitest::Test
 
     # PFP fans
     model.getFanConstantVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       assert(fan_power_ip.round(2) == 0.35, "Fan power for terminal fan in #{sub_text} is #{fan_power_ip.round(1)} instead of 0.35.")
     end
@@ -531,9 +527,8 @@ class AppendixGPRMTests < Minitest::Test
     end
 
     # check baseline system fan power
-    std = Standard.build('90.1-PRM-2019')
     model.getFanConstantVolumes.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       assert(fan_power_ip.round(1) == 0.3, "Fan power for #{sub_text} is #{fan_power_ip.round(1)} instead of 0.3.")
     end
@@ -580,13 +575,12 @@ class AppendixGPRMTests < Minitest::Test
     end
 
     # check baseline system fan power
-    std = Standard.build('90.1-PRM-2019')
     model.getFanOnOffs.sort.each do |fan|
-      fan_power_si = std.fan_fanpower(fan) / std.fan_design_air_flow(fan)
+      fan_power_si = OpenstudioStandards::HVAC.fan_fanpower(fan) / OpenstudioStandards::HVAC.fan_design_air_flow(fan)
       fan_power_ip = fan_power_si / OpenStudio.convert(1, 'm^3/s', 'cfm').get
       fan_bhp_ip = fan_power_ip * fan.motorEfficiency / 746.0
       assert(fan_bhp_ip.round(5) == 0.00094, "Fan power for #{sub_text} is #{fan_bhp_ip.round(5)} instead of 0.00094.")
-      if fan_bhp_ip * OpenStudio.convert(std.fan_design_air_flow(fan), 'm^3/s', 'cfm').get <= 1.0
+      if fan_bhp_ip * OpenStudio.convert(OpenstudioStandards::HVAC.fan_design_air_flow(fan), 'm^3/s', 'cfm').get <= 1.0
         assert(fan.motorEfficiency == 0.825, "Fan motor efficiency for #{fan.name} in #{sub_text} is #{fan.motorEfficiency}, 0.825 is expected.")
       end
     end
