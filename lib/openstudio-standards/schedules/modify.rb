@@ -118,16 +118,14 @@ module OpenstudioStandards
       sch_rule.setEndDate(end_date) unless end_date.nil?
 
       # set the days for which the rule applies
-      unless day_names.nil?
-        day_names.each do |day_of_week|
-          sch_rule.setApplySunday(true) if day_of_week == 'Sunday'
-          sch_rule.setApplyMonday(true) if day_of_week == 'Monday'
-          sch_rule.setApplyTuesday(true) if day_of_week == 'Tuesday'
-          sch_rule.setApplyWednesday(true) if day_of_week == 'Wednesday'
-          sch_rule.setApplyThursday(true) if day_of_week == 'Thursday'
-          sch_rule.setApplyFriday(true) if day_of_week == 'Friday'
-          sch_rule.setApplySaturday(true) if day_of_week == 'Saturday'
-        end
+      day_names&.each do |day_of_week|
+        sch_rule.setApplySunday(true) if day_of_week == 'Sunday'
+        sch_rule.setApplyMonday(true) if day_of_week == 'Monday'
+        sch_rule.setApplyTuesday(true) if day_of_week == 'Tuesday'
+        sch_rule.setApplyWednesday(true) if day_of_week == 'Wednesday'
+        sch_rule.setApplyThursday(true) if day_of_week == 'Thursday'
+        sch_rule.setApplyFriday(true) if day_of_week == 'Friday'
+        sch_rule.setApplySaturday(true) if day_of_week == 'Saturday'
       end
 
       # Create the day schedule and add hourly values
@@ -181,11 +179,11 @@ module OpenstudioStandards
           case modification_type
           when 'Multiplier', 'Percentage'
             # percentage was used early on but Multiplier is preferable
-            new_value = [lower_bound, [upper_bound, sch_value * value].min].max
+            new_value = (sch_value * value).clamp(lower_bound, upper_bound)
             profile.addValue(times[i], new_value)
           when 'Sum', 'Value'
             # value was used early on but Sum is preferable
-            new_value = [lower_bound, [upper_bound, sch_value + value].min].max
+            new_value = (sch_value + value).clamp(lower_bound, upper_bound)
             profile.addValue(times[i], new_value)
           end
           i += 1
@@ -262,10 +260,10 @@ module OpenstudioStandards
     # @return [OpenStudio::Model::ScheduleRuleset] OpenStudio ScheduleRuleset object
     def self.schedule_ruleset_time_conditional_adjust_value(schedule_ruleset, hhmm_before, hhmm_after, inside_value, outside_value, modification_type = 'Sum')
       # setup variables
-      array = hhmm_before.to_s.split('')
+      array = hhmm_before.to_s.chars
       before_hour = "#{array[0]}#{array[1]}".to_i
       before_min = "#{array[2]}#{array[3]}".to_i
-      array = hhmm_after.to_s.split('')
+      array = hhmm_after.to_s.chars
       after_hour = "#{array[0]}#{array[1]}".to_i
       after_min = "#{array[2]}#{array[3]}".to_i
 
@@ -420,14 +418,14 @@ module OpenstudioStandards
       schedule.setName("#{schedule.name} - extend #{options['delta_length_hoo']} shift #{options['shift_hoo']}")
 
       # break time args into hours and minutes
-      start_hoo_hours = (options['base_start_hoo']).to_i
-      start_hoo_minutes = (((options['base_start_hoo']) - (options['base_start_hoo']).to_i) * 60).to_i
-      finish_hoo_hours = (options['base_finish_hoo']).to_i
-      finish_hoo_minutes = (((options['base_finish_hoo']) - (options['base_finish_hoo']).to_i) * 60).to_i
-      delta_hours = (options['delta_length_hoo']).to_i
-      delta_minutes = (((options['delta_length_hoo']) - (options['delta_length_hoo']).to_i) * 60).to_i
-      shift_hours = (options['shift_hoo']).to_i
-      shift_minutes = (((options['shift_hoo']) - (options['shift_hoo']).to_i) * 60).to_i
+      start_hoo_hours = options['base_start_hoo'].to_i
+      start_hoo_minutes = ((options['base_start_hoo'] - options['base_start_hoo'].to_i) * 60).to_i
+      finish_hoo_hours = options['base_finish_hoo'].to_i
+      finish_hoo_minutes = ((options['base_finish_hoo'] - options['base_finish_hoo'].to_i) * 60).to_i
+      delta_hours = options['delta_length_hoo'].to_i
+      delta_minutes = ((options['delta_length_hoo'] - options['delta_length_hoo'].to_i) * 60).to_i
+      shift_hours = options['shift_hoo'].to_i
+      shift_minutes = ((options['shift_hoo'] - options['shift_hoo'].to_i) * 60).to_i
 
       # time objects to use in measure
       time_0 = OpenStudio::Time.new(0, 0, 0, 0)
@@ -560,9 +558,7 @@ module OpenstudioStandards
         end
 
         # push values to array
-        values.each do |value|
-          new_values << value
-        end
+        new_values.concat(values)
 
         # add value for what will be 24
         new_times << time_24
@@ -576,7 +572,7 @@ module OpenstudioStandards
         # clear values
         day_sch.clearValues
 
-        new_time_val_hash = Hash[new_time_val_hash.sort]
+        new_time_val_hash = new_time_val_hash.sort.to_h
         prev_time = nil
         new_time_val_hash.sort.each do |hours, time_val|
           if prev_time.nil? || time_val[:time] - prev_time > time_1_min

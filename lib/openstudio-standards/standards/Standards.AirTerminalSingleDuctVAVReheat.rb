@@ -4,11 +4,12 @@ class Standard
   # Set the minimum damper position based on OA rate of the space and the template.
   # Zones with low OA per area get lower initial guesses.
   # Final position will be adjusted upward as necessary by Standards.AirLoopHVAC.adjust_minimum_vav_damper_positions
+  # EnergyPlus enforces only the input selected by Zone Minimum Air Flow Input Method.
   #
   # @param air_terminal_single_duct_vav_reheat [OpenStudio::Model::AirTerminalSingleDuctVAVReheat] the air terminal object
   # @param zone_min_oa [Double] the zone outdoor air flow rate, in m^3/s.
-  #   If supplied, this will be set as a minimum limit in addition to the minimum
-  #   damper position.  EnergyPlus will use the larger of the two values during sizing.
+  #   If supplied, the larger of this and the damper-position minimum is selected
+  #   through the input method EnergyPlus enforces.
   # @param has_ddc [Boolean] whether or not there is DDC control of the VAV terminal,
   #   which impacts the minimum damper position requirement.
   # @return [Boolean] returns true if successful, false if not
@@ -21,10 +22,16 @@ class Standard
 
     # Minimum OA flow rate
     # If specified, will also add this limit
-    # and the larger of the two will be used
-    # for sizing.
     unless zone_min_oa.nil?
       air_terminal_single_duct_vav_reheat.setFixedMinimumAirFlowRate(zone_min_oa)
+
+      max_flow = air_terminal_single_duct_vav_reheat.maximumAirFlowRate
+      max_flow = air_terminal_single_duct_vav_reheat.autosizedMaximumAirFlowRate unless max_flow.is_initialized
+      if !max_flow.is_initialized || (min_damper_position * max_flow.get) < zone_min_oa
+        air_terminal_single_duct_vav_reheat.setZoneMinimumAirFlowInputMethod('FixedFlowRate')
+      else
+        air_terminal_single_duct_vav_reheat.setZoneMinimumAirFlowInputMethod('Constant')
+      end
     end
 
     return true

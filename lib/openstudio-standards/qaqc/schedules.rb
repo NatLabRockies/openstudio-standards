@@ -20,11 +20,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)

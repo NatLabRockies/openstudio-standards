@@ -621,7 +621,7 @@ class NRELZNEReady2017 < ASHRAE901
         end
       end
     else
-      values = Hash.new{ |hash, key| hash[key] = {} }
+      values = Hash.new { |hash, key| hash[key] = {} }
       if heat_exchanger_type == 'Plate'
         if erv_type == 'HRV'
           values['Sensible Heating'][0.75] = 0.887

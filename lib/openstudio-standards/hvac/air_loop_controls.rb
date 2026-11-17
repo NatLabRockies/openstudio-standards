@@ -53,12 +53,16 @@ module OpenstudioStandards
       sizing_system.setPrecoolDesignHumidityRatio(0.008)
       sizing_system.setCentralCoolingDesignSupplyAirHumidityRatio(0.0085)
       sizing_system.setCentralHeatingDesignSupplyAirHumidityRatio(0.0080)
-      if !minimum_system_airflow_ratio.nil? && minimum_system_airflow_ratio != :autosize
-        if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.7.0')
-          sizing_system.setMinimumSystemAirFlowRatio(minimum_system_airflow_ratio)
-        else
-          sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(minimum_system_airflow_ratio)
+      autosize_airflow_ratio = minimum_system_airflow_ratio.nil? || minimum_system_airflow_ratio == :autosize
+      if air_loop_hvac.model.version < OpenStudio::VersionString.new('2.7.0')
+        if autosize_airflow_ratio
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.HVAC', "Central heating maximum system air flow ratio autosizing is unavailable before OpenStudio 2.7.0 for #{sizing_system.name}; using 0.3.")
         end
+        sizing_system.setMinimumSystemAirFlowRatio(autosize_airflow_ratio ? 0.3 : minimum_system_airflow_ratio)
+      elsif autosize_airflow_ratio
+        sizing_system.autosizeCentralHeatingMaximumSystemAirFlowRatio
+      else
+        sizing_system.setCentralHeatingMaximumSystemAirFlowRatio(minimum_system_airflow_ratio)
       end
       sizing_system.setSizingOption(sizing_option)
       sizing_system.setAllOutdoorAirinCooling(false)

@@ -19,6 +19,7 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/constructions/create'
   require_relative 'openstudio-standards/constructions/information'
   require_relative 'openstudio-standards/constructions/modify'
+  require_relative 'openstudio-standards/constructions/create_construction_set'
   require_relative 'openstudio-standards/constructions/materials/information'
   require_relative 'openstudio-standards/constructions/materials/modify'
 
@@ -33,6 +34,9 @@ module OpenstudioStandards
   # Interior Lighting Module
   require_relative 'openstudio-standards/interior_lighting/create_lights'
   require_relative 'openstudio-standards/interior_lighting/create_typical_interior_lighting'
+
+  # Occupancy Module
+  require_relative 'openstudio-standards/occupancy/create_typical_occupancy'
 
   # Daylighting Module
   require_relative 'openstudio-standards/daylighting/space'
@@ -52,13 +56,14 @@ module OpenstudioStandards
 
   # Schedules Module
   require_relative 'openstudio-standards/schedules/create'
+  require_relative 'openstudio-standards/schedules/create_parametric_schedule'
   require_relative 'openstudio-standards/schedules/modify'
   require_relative 'openstudio-standards/schedules/information'
   require_relative 'openstudio-standards/schedules/parametric'
 
   # ServiceWaterHeating Module
   require_relative 'openstudio-standards/service_water_heating/create_piping_losses'
-  require_relative 'openstudio-standards/service_water_heating/create_typical'
+  require_relative 'openstudio-standards/service_water_heating/create_typical_service_water'
   require_relative 'openstudio-standards/service_water_heating/create_water_heater'
   require_relative 'openstudio-standards/service_water_heating/create_water_heating_loop'
   require_relative 'openstudio-standards/service_water_heating/create_water_use'
@@ -69,6 +74,10 @@ module OpenstudioStandards
 
   # Space Type Module
   require_relative 'openstudio-standards/space_type/standards_space_type'
+  require_relative 'openstudio-standards/space_type/space_type_information'
+
+  # Ventilation Module
+  require_relative 'openstudio-standards/ventilation/create_typical_ventilation'
 
   # Thermal Zone Module
   require_relative 'openstudio-standards/thermal_zone/information'
@@ -147,9 +156,9 @@ module OpenstudioStandards
   require_relative 'openstudio-standards/btap/btap'
 
   # BTAP QAQC
-  require_relative "openstudio-standards/btap/qaqc/analysis.rb"
-  require_relative "openstudio-standards/btap/qaqc/data.rb"
-  require_relative "openstudio-standards/btap/qaqc/datapoint.rb"
+  require_relative 'openstudio-standards/btap/qaqc/analysis'
+  require_relative 'openstudio-standards/btap/qaqc/data'
+  require_relative 'openstudio-standards/btap/qaqc/datapoint'
 
   # BTAP Costing
   require_relative 'openstudio-standards/btap/costing/database'
@@ -348,7 +357,6 @@ module OpenstudioStandards
   require_relative "#{stds}/Standards.People"
   require_relative "#{stds}/Standards.PlanarSurface"
   require_relative "#{stds}/Standards.PlantLoop"
-  require_relative "#{stds}/Standards.Pump"
   require_relative "#{stds}/Standards.PumpVariableSpeed"
   require_relative "#{stds}/Standards.ScheduleRuleset"
   require_relative "#{stds}/Standards.ServiceWaterHeating"

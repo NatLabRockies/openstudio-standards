@@ -252,9 +252,7 @@ module OpenstudioStandards
       simple_transfer_air = false
       zones = air_loop_hvac.thermalZones
       zones_name = []
-      zones.each do |zone|
-        zones_name << zone.name.to_s
-      end
+      zones_name = zones.map(&:name).map(&:to_s)
       air_loop_hvac.model.getFanZoneExhausts.sort.each do |exhaust_fan|
         if (zones_name.include? exhaust_fan.thermalZone.get.name.to_s) && exhaust_fan.balancedExhaustFractionSchedule.is_initialized
           simple_transfer_air = true
@@ -795,7 +793,7 @@ module OpenstudioStandards
             end
             fan_power = supply_fan.autosizedMaximumFlowRate.to_f * supply_fan.pressureRise.to_f / supply_fan.fanTotalEfficiency.to_f
             nominal_cooling_capacity_w = coil.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
-            nominal_flow_rate_factor = supply_fan.autosizedMaximumFlowRate.to_f / coil.autosizedRatedAirFlowRateAtSelectedNominalSpeedLevel.to_f
+            nominal_flow_rate_factor = (supply_fan.autosizedMaximumFlowRate / coil.autosizedRatedAirFlowRateAtSelectedNominalSpeedLevel).to_f
             fan_power_adjustment_w = fan_power / coil.speeds.last.referenceUnitGrossRatedSensibleHeatRatio.to_f
             total_cooling_capacity_w += (nominal_cooling_capacity_w * nominal_flow_rate_factor) + fan_power_adjustment_w
           elsif coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.is_initialized
@@ -830,9 +828,7 @@ module OpenstudioStandards
 
       # Get all the zone multipliers
       zn_mults = []
-      air_loop_hvac.thermalZones.each do |zone|
-        zn_mults << zone.multiplier
-      end
+      zn_mults = air_loop_hvac.thermalZones.map(&:multiplier)
 
       # Warn if there are different multipliers
       uniq_mults = zn_mults.uniq

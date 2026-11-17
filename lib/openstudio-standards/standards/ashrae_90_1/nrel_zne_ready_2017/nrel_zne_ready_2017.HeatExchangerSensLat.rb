@@ -27,7 +27,7 @@ class NRELZNEReady2017 < ASHRAE901
         heat_exchanger_air_to_air_sensible_and_latent.setLatentEffectivenessat75CoolingAirFlow(0.78)
       end
     else
-      values = Hash.new{|hash, key| hash[key] = Hash.new}
+      values = Hash.new { |hash, key| hash[key] = {} }
       if heat_exchanger_type == 'Plate'
         values['Sensible Heating'][0.75] = 0.791
         values['Sensible Heating'][1.0] = 0.755

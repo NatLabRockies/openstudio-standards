@@ -3,6 +3,9 @@
 # separate files for each template in the templates folder.
 require 'json'
 
+# Builds Ruby source strings defining the DOE prototype and NECB building-type classes
+#
+# @return [Array<String>] array of class definitions to be eval'd
 def create_class_array
   prototype_buildings = ['FullServiceRestaurant',
                          'Hospital',
@@ -287,6 +290,9 @@ end
   return class_array
 end
 
+# Builds Ruby source strings defining the DEER building-type classes
+#
+# @return [Array<String>] array of class definitions to be eval'd
 def create_deer_class_array
   prototype_buildings = [
     'Asm',
@@ -698,6 +704,9 @@ end
   return class_array
 end
 
+# Builds Ruby source strings defining the CBES building-type classes
+#
+# @return [Array<String>] array of class definitions to be eval'd
 def create_cbes_class_array
   prototype_buildings = [
     'MediumOffice',
@@ -886,17 +895,26 @@ end
   return class_array
 end
 
+# Evaluates the generated prototype, DEER, and CBES class definitions to create the meta classes
+#
+# @return [void]
 def create_meta_classes
   create_class_array.each { |item| eval(item) } # rubocop:disable Security/Eval
   create_deer_class_array.each { |item| eval(item) } # rubocop:disable Security/Eval
   create_cbes_class_array.each { |item| eval(item) } # rubocop:disable Security/Eval
 end
 
+# Writes the generated prototype class definitions to do_not_edit_metaclasses.rb
+#
+# @return [void]
 def save_meta_classes_to_file
   filepath = "#{File.dirname(__FILE__)}/do_not_edit_metaclasses.rb"
   File.open(filepath, 'w') { |f| create_class_array.each { |item| f << item } }
 end
 
+# Removes the generated do_not_edit_metaclasses.rb file
+#
+# @return [void]
 def remove_meta_class_file
   filepath = "#{File.dirname(__FILE__)}/do_not_edit_metaclasses.rb"
   FileUtils.rm(filepath)

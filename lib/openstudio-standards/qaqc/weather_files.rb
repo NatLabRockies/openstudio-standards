@@ -20,11 +20,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin
@@ -69,10 +65,7 @@ module OpenstudioStandards
         else
           check_elems << OpenStudio::Attribute.new('flag', "#{model_epw} is not a an expected weather file.")
           check_elems << OpenStudio::Attribute.new('flag', "Model doesn't have expected epw file, as a result can't validate design days.")
-          valid_climate_zones = []
-          options.each do |lookup_epw, value|
-            valid_climate_zones << value['climate_zone']
-          end
+          valid_climate_zones = options.map { |_lookup_epw, value| value['climate_zone'] }
         end
 
         # get ashrae climate zone from model
@@ -117,11 +110,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       begin

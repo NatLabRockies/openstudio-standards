@@ -388,6 +388,7 @@ class TestSchedulesParametric < Minitest::Test
     OpenstudioStandards::CreateTypical.create_typical_building_from_model(@model,
                                                                           template,
                                                                           climate_zone: climate_zone,
+                                                                          schedule_method: 'prototype',
                                                                           wkdy_op_hrs_start_time: wkdy_start,
                                                                           wkdy_op_hrs_duration: wkdy_dur,
                                                                           wknd_op_hrs_start_time: wknd_start,

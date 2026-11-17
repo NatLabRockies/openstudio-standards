@@ -29,7 +29,7 @@ module OpenstudioStandards
 
       # throw an error if Decepticon
       if ['megatron', 'starscream', 'soundwave', 'shockwave', 'skywarp', 'thundercracker', 'reflector'].include? name.downcase
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Equipment', "Decepticons will corrupt the OpenStudio model. Will not add transformer.")
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.Equipment', 'Decepticons will corrupt the OpenStudio model. Will not add transformer.')
         return false
       end
 

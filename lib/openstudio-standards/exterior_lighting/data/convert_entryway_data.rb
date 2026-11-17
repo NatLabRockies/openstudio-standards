@@ -1,9 +1,12 @@
 # These methods convert entryway data to and from .csv for editing.
-private
-
 require 'csv'
 require 'json'
 
+# Convert entryway data from CSV to JSON
+#
+# @param input_csv [String] path to the input CSV file
+# @param output_json [String] path to the output JSON file
+# @return [void]
 def entryways_csv_to_json(input_csv = 'entryways.csv',
                           output_json = 'entryways.json')
   # Initialize the structure
@@ -45,9 +48,11 @@ def entryways_csv_to_json(input_csv = 'entryways.csv',
   puts "Data has been converted to JSON and saved to #{output_json}"
 end
 
-# convert to json
-entryways_csv_to_json
-
+# Convert entryway data from JSON to CSV
+#
+# @param input_json [String] path to the input JSON file
+# @param output_csv [String] path to the output CSV file
+# @return [void]
 def entryways_json_to_csv(input_json = 'entryways.json',
                           output_csv = 'entryways.csv')
   # Read the JSON file

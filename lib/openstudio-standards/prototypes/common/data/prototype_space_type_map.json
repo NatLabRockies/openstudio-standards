@@ -42,7 +42,7 @@
   {
     "standards_building_type": "College",
     "standards_space_type": "Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "College",
@@ -172,7 +172,7 @@
   {
     "standards_building_type": "Courthouse",
     "standards_space_type": "Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "Courthouse",
@@ -183,6 +183,11 @@
     "standards_building_type": "Courthouse",
     "standards_space_type": "Plenum",
     "new_standards_space_type": "plenum"
+  },
+  {
+    "standards_building_type": "Courthouse",
+    "standards_space_type": "Restroom",
+    "new_standards_space_type": "restroom"
   },
   {
     "standards_building_type": "Courthouse",
@@ -582,22 +587,22 @@
   {
     "standards_building_type": "Office",
     "standards_space_type": "WholeBuilding - Sm Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "whole building office"
   },
   {
     "standards_building_type": "Office",
     "standards_space_type": "WholeBuilding - Md Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "whole building office"
   },
   {
     "standards_building_type": "Office",
     "standards_space_type": "WholeBuilding - Lg Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "whole building office"
   },
   {
     "standards_building_type": "Office",
     "standards_space_type": "WholeBuilding - Lg Office-basement",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "whole building office"
   },
   {
     "standards_building_type": "Office",
@@ -637,7 +642,7 @@
   {
     "standards_building_type": "Office",
     "standards_space_type": "ClosedOffice",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "Office",
@@ -822,7 +827,7 @@
   {
     "standards_building_type": "Office",
     "standards_space_type": "WholeBuilding - Lg Office-others",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "whole building office"
   },
   {
     "standards_building_type": "Office",
@@ -837,7 +842,7 @@
   {
     "standards_building_type": "Office",
     "standards_space_type": "MediumOffice - ClosedOffice",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "Office",
@@ -847,7 +852,7 @@
   {
     "standards_building_type": "Office",
     "standards_space_type": "SmallOffice - ClosedOffice",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "Office",
@@ -882,7 +887,7 @@
   {
     "standards_building_type": "Outpatient",
     "standards_space_type": "DressingRoom",
-    "new_standards_space_type": "dressing room"
+    "new_standards_space_type": "exam/treatment"
   },
   {
     "standards_building_type": "Outpatient",
@@ -977,12 +982,12 @@
   {
     "standards_building_type": "Outpatient",
     "standards_space_type": "PreOp",
-    "new_standards_space_type": "operating room"
+    "new_standards_space_type": "exam/treatment"
   },
   {
     "standards_building_type": "Outpatient",
     "standards_space_type": "ProcedureRoom",
-    "new_standards_space_type": "operating room"
+    "new_standards_space_type": "procedure room"
   },
   {
     "standards_building_type": "Outpatient",
@@ -1157,7 +1162,7 @@
   {
     "standards_building_type": "SecondarySchool",
     "standards_space_type": "Gym - audience",
-    "new_standards_space_type": "exercise area"
+    "new_standards_space_type": "audience seating"
   },
   {
     "standards_building_type": "SecondarySchool",
@@ -1232,7 +1237,7 @@
   {
     "standards_building_type": "SmallHotel",
     "standards_space_type": "GuestRoom123Vac",
-    "new_standards_space_type": "guest room"
+    "new_standards_space_type": "guest room vacant"
   },
   {
     "standards_building_type": "SmallHotel",
@@ -1337,27 +1342,27 @@
   {
     "standards_building_type": "StripMall",
     "standards_space_type": "Strip mall - type 1",
-    "new_standards_space_type": "retail"
+    "new_standards_space_type": "whole building retail"
   },
   {
     "standards_building_type": "StripMall",
     "standards_space_type": "Strip mall - type 2",
-    "new_standards_space_type": "retail"
+    "new_standards_space_type": "whole building retail"
   },
   {
     "standards_building_type": "StripMall",
     "standards_space_type": "Strip mall - type 3",
-    "new_standards_space_type": "retail"
+    "new_standards_space_type": "whole building retail"
   },
   {
     "standards_building_type": "SuperMarket",
     "standards_space_type": "Bakery",
-    "new_standards_space_type": "food preparation"
+    "new_standards_space_type": "bakery"
   },
   {
     "standards_building_type": "SuperMarket",
     "standards_space_type": "Deli",
-    "new_standards_space_type": "retail"
+    "new_standards_space_type": "food preparation"
   },
   {
     "standards_building_type": "SuperMarket",
@@ -1367,7 +1372,7 @@
   {
     "standards_building_type": "SuperMarket",
     "standards_space_type": "Office",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "SuperMarket",
@@ -1377,7 +1382,7 @@
   {
     "standards_building_type": "SuperMarket",
     "standards_space_type": "Sales",
-    "new_standards_space_type": "retail"
+    "new_standards_space_type": "grocery sales"
   },
   {
     "standards_building_type": "SuperMarket",
@@ -2019,7 +2024,7 @@
   {
     "standards_building_type": "MBT",
     "standards_space_type": "OfficeSmall",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "MBT",
@@ -2234,7 +2239,7 @@
   {
     "standards_building_type": "OfL",
     "standards_space_type": "OfficeSmall",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "OfL",
@@ -2299,7 +2304,7 @@
   {
     "standards_building_type": "OfS",
     "standards_space_type": "OfficeSmall",
-    "new_standards_space_type": "office"
+    "new_standards_space_type": "office/enclosed"
   },
   {
     "standards_building_type": "OfS",

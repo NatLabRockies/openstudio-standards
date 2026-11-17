@@ -174,9 +174,7 @@ module OpenstudioStandards
       end
 
       # add the water heater to the service water loop if provided
-      unless service_water_loop.nil?
-        service_water_loop.addSupplyBranchForComponent(water_heater)
-      end
+      service_water_loop&.addSupplyBranchForComponent(water_heater)
 
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ServiceWaterHeating', "Added water heater called #{water_heater.name}")
 
@@ -539,9 +537,7 @@ module OpenstudioStandards
       end
 
       # add the water heater to the service water loop if provided
-      unless service_water_loop.nil?
-        service_water_loop.addSupplyBranchForComponent(tank)
-      end
+      service_water_loop&.addSupplyBranchForComponent(tank)
 
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ServiceWaterHeating', "Added heat pump water heater called #{tank.name}")
 

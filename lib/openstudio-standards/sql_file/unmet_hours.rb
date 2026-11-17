@@ -65,7 +65,7 @@ module OpenstudioStandards
         zone_temperature_diff = zone_setpoint_temp_timeseries.map.with_index { |t, x| (zone_temp_timeseries[x] - t) }
         zone_unmet_hours = zone_temperature_diff.map { |x| (x + tolerance_k) < 0 ? 1 : 0 }
         zone_occ_unmet_hours = []
-        for i in (0..zone_unmet_hours.size - 1)
+        for i in 0..(zone_unmet_hours.size - 1)
           bldg_unmet_hours[i] = 0 if bldg_unmet_hours[i].nil?
           bldg_occ_unmet_hours[i] = 0 if bldg_occ_unmet_hours[i].nil?
           bldg_unmet_hours[i] += zone_unmet_hours[i]
@@ -163,7 +163,7 @@ module OpenstudioStandards
         zone_temperature_diff = zone_setpoint_temp_timeseries.map.with_index { |t, x| (t - zone_temp_timeseries[x]) }
         zone_unmet_hours = zone_temperature_diff.map { |x| (x - tolerance_k) > 0 ? 1 : 0 }
         zone_occ_unmet_hours = []
-        for i in (0..zone_unmet_hours.size - 1)
+        for i in 0..(zone_unmet_hours.size - 1)
           bldg_unmet_hours[i] = 0 if bldg_unmet_hours[i].nil?
           bldg_occ_unmet_hours[i] = 0 if bldg_occ_unmet_hours[i].nil?
           bldg_unmet_hours[i] += zone_unmet_hours[i]

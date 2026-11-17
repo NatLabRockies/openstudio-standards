@@ -1,14 +1,14 @@
 require 'optparse'
 require_relative '../../lib/openstudio-standards'
 
-@options  = {}
+@options = {}
 
 # Default folders if not using s3
 @options[:input_folder]   = File.join(__dir__, 'input')
 @options[:output_folder]  = File.join(__dir__, 'output')
 @options[:weather_folder] = File.join(__dir__, 'weather')
 
-OptionParser.new { |opts|
+OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} -s NAME id ..."
   opts.on('--help', 'Display this screen') do
     puts opts
@@ -16,10 +16,10 @@ OptionParser.new { |opts|
   end
   opts.on('--input_path NAME',  "Default is #{@options[:input_folder]}")   { |s| @options[:input_folder] = s }
   opts.on('--output_path NAME', "Default is #{@options[:output_folder]} ") { |s| @options[:output_folder] = s }
-}.parse!
+end.parse!
 
-BTAP::Datapoint.new(input_folder:   @options[:input_folder],
-                    output_folder:  @options[:output_folder],
+BTAP::Datapoint.new(input_folder: @options[:input_folder],
+                    output_folder: @options[:output_folder],
                     weather_folder: @options[:weather_folder])
 
 # Example command using s3 urls for input/output
