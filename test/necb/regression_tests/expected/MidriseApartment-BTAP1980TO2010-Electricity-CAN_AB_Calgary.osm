@@ -11893,25 +11893,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000036},  !- Handle
-  Schedule Day 1,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0054-000000000037},  !- Handle
-  Schedule Day 2,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0054-000000000038},  !- Handle
-  Schedule Day 3,                          !- Name
+  ON_OFF_ALWAYS_OFF Default Schedule,      !- Name
   {00000000-0000-0000-0057-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   1,                                       !- Hour 1
@@ -11988,8 +11970,26 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
+  {00000000-0000-0000-0054-000000000037},  !- Handle
+  Schedule Day 1,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
+  {00000000-0000-0000-0054-000000000038},  !- Handle
+  Schedule Day 2,                          !- Name
+  ,                                        !- Schedule Type Limits Name
+  ,                                        !- Interpolate to Timestep
+  24,                                      !- Hour 1
+  0,                                       !- Minute 1
+  0;                                       !- Value Until Time 1
+
+OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000039},  !- Handle
-  Schedule Day 4,                          !- Name
+  Schedule Day 3,                          !- Name
   {00000000-0000-0000-0057-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -11998,7 +11998,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000040},  !- Handle
-  Schedule Day 5,                          !- Name
+  Schedule Day 4,                          !- Name
   {00000000-0000-0000-0057-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -12007,7 +12007,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000041},  !- Handle
-  Schedule Day 6,                          !- Name
+  Schedule Day 5,                          !- Name
   {00000000-0000-0000-0057-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -12016,7 +12016,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000042},  !- Handle
-  Schedule Day 7,                          !- Name
+  Schedule Day 6,                          !- Name
   {00000000-0000-0000-0057-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -12025,7 +12025,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000043},  !- Handle
-  Schedule Day 8,                          !- Name
+  Schedule Day 7,                          !- Name
   {00000000-0000-0000-0057-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -12034,7 +12034,7 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0054-000000000044},  !- Handle
-  Schedule Day 9,                          !- Name
+  Schedule Day 8,                          !- Name
   {00000000-0000-0000-0057-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -13174,7 +13174,7 @@ OS:Schedule:Ruleset,
   {00000000-0000-0000-0056-000000000015},  !- Handle
   ON_OFF_ALWAYS_OFF,                       !- Name
   {00000000-0000-0000-0057-000000000007},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0054-000000000038};  !- Default Day Schedule Name
+  {00000000-0000-0000-0054-000000000036};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0056-000000000016},  !- Handle
