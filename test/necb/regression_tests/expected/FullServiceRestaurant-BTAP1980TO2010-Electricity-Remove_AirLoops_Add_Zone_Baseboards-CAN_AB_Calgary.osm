@@ -264,35 +264,35 @@ OS:AdditionalProperties,
 
 OS:AdditionalProperties,
   {00000000-0000-0000-0001-000000000040},  !- Handle
-  {00000000-0000-0000-0009-000000000015};  !- Object Name
-
-OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000041},  !- Handle
   {00000000-0000-0000-0009-000000000019};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000042},  !- Handle
+  {00000000-0000-0000-0001-000000000041},  !- Handle
   {00000000-0000-0000-0009-000000000009};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000043},  !- Handle
+  {00000000-0000-0000-0001-000000000042},  !- Handle
   {00000000-0000-0000-0009-000000000030};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000044},  !- Handle
+  {00000000-0000-0000-0001-000000000043},  !- Handle
   {00000000-0000-0000-0009-000000000033};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000045},  !- Handle
+  {00000000-0000-0000-0001-000000000044},  !- Handle
   {00000000-0000-0000-0009-000000000034};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000046},  !- Handle
+  {00000000-0000-0000-0001-000000000045},  !- Handle
   {00000000-0000-0000-0009-000000000036};  !- Object Name
 
 OS:AdditionalProperties,
-  {00000000-0000-0000-0001-000000000047},  !- Handle
+  {00000000-0000-0000-0001-000000000046},  !- Handle
   {00000000-0000-0000-0009-000000000035};  !- Object Name
+
+OS:AdditionalProperties,
+  {00000000-0000-0000-0001-000000000047},  !- Handle
+  {00000000-0000-0000-0009-000000000015};  !- Object Name
 
 OS:AvailabilityManagerAssignmentList,
   {00000000-0000-0000-0002-000000000001},  !- Handle
@@ -2793,24 +2793,6 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0036-000000000035},  !- Handle
   Schedule Day 1,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000036},  !- Handle
-  Schedule Day 2,                          !- Name
-  ,                                        !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000037},  !- Handle
-  Schedule Day 3,                          !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -2818,8 +2800,8 @@ OS:Schedule:Day,
   22;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000038},  !- Handle
-  Schedule Day 4,                          !- Name
+  {00000000-0000-0000-0036-000000000036},  !- Handle
+  Schedule Day 2,                          !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -2827,7 +2809,7 @@ OS:Schedule:Day,
   60;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000039},  !- Handle
+  {00000000-0000-0000-0036-000000000037},  !- Handle
   Service Water Loop Temp - 140F Default,  !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -2836,7 +2818,7 @@ OS:Schedule:Day,
   60;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000040},  !- Handle
+  {00000000-0000-0000-0036-000000000038},  !- Handle
   Water Heater Ambient Temp Schedule 71.6F Default, !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -2845,7 +2827,7 @@ OS:Schedule:Day,
   22.0000000000001;                        !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0036-000000000041},  !- Handle
+  {00000000-0000-0000-0036-000000000039},  !- Handle
   Work Efficiency Schedule Default,        !- Name
   {00000000-0000-0000-0039-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -3298,31 +3280,31 @@ OS:Schedule:Ruleset,
   {00000000-0000-0000-0038-000000000014},  !- Handle
   Schedule Ruleset 1,                      !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0036-000000000037};  !- Default Day Schedule Name
+  {00000000-0000-0000-0036-000000000035};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0038-000000000015},  !- Handle
   Schedule Ruleset 2,                      !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0036-000000000038};  !- Default Day Schedule Name
+  {00000000-0000-0000-0036-000000000036};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0038-000000000016},  !- Handle
   Service Water Loop Temp - 140F,          !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0036-000000000039};  !- Default Day Schedule Name
+  {00000000-0000-0000-0036-000000000037};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0038-000000000017},  !- Handle
   Water Heater Ambient Temp Schedule 71.6F, !- Name
   {00000000-0000-0000-0039-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0036-000000000040};  !- Default Day Schedule Name
+  {00000000-0000-0000-0036-000000000038};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0038-000000000018},  !- Handle
   Work Efficiency Schedule,                !- Name
   {00000000-0000-0000-0039-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0036-000000000041};  !- Default Day Schedule Name
+  {00000000-0000-0000-0036-000000000039};  !- Default Day Schedule Name
 
 OS:ScheduleTypeLimits,
   {00000000-0000-0000-0039-000000000001},  !- Handle
