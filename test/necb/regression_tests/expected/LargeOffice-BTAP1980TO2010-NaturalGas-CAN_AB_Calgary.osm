@@ -8485,61 +8485,61 @@ OS:EnergyManagementSystem:Actuator,
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0040-000000000001},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_hw_sc_c_chw_ssf_vv_zh_b_hw_zc_none_srf_vv__1_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}<23.9 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}>1.7, !- Program Line 1
-  SET {cd66c009-5b88-4774-a18b-0268422002a4} = 29.4, !- Program Line 2
-  SET {ebd241a2-f707-46d1-940f-3296b4e86faf} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}<23.9 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}>1.7, !- Program Line 4
-  SET {cd66c009-5b88-4774-a18b-0268422002a4} = 29.4, !- Program Line 5
-  SET {ebd241a2-f707-46d1-940f-3296b4e86faf} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}<23.9 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}>1.7, !- Program Line 7
-  SET {cd66c009-5b88-4774-a18b-0268422002a4} = 29.4, !- Program Line 8
-  SET {ebd241a2-f707-46d1-940f-3296b4e86faf} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}<23.9 && {e673cefc-bdc8-4e2a-a908-8ce3904302bd}>1.7, !- Program Line 10
-  SET {cd66c009-5b88-4774-a18b-0268422002a4} = 29.4, !- Program Line 11
-  SET {ebd241a2-f707-46d1-940f-3296b4e86faf} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {b053347a-6616-4414-b6de-0bc90d8978e8}<23.9 && {b053347a-6616-4414-b6de-0bc90d8978e8}>1.7, !- Program Line 1
+  SET {f1daec27-3b29-4501-bfc4-ab5152eee378} = 29.4, !- Program Line 2
+  SET {9acfcee9-2f45-4197-8242-212481c3bfb8} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {b053347a-6616-4414-b6de-0bc90d8978e8}<23.9 && {b053347a-6616-4414-b6de-0bc90d8978e8}>1.7, !- Program Line 4
+  SET {f1daec27-3b29-4501-bfc4-ab5152eee378} = 29.4, !- Program Line 5
+  SET {9acfcee9-2f45-4197-8242-212481c3bfb8} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {b053347a-6616-4414-b6de-0bc90d8978e8}<23.9 && {b053347a-6616-4414-b6de-0bc90d8978e8}>1.7, !- Program Line 7
+  SET {f1daec27-3b29-4501-bfc4-ab5152eee378} = 29.4, !- Program Line 8
+  SET {9acfcee9-2f45-4197-8242-212481c3bfb8} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {b053347a-6616-4414-b6de-0bc90d8978e8}<23.9 && {b053347a-6616-4414-b6de-0bc90d8978e8}>1.7, !- Program Line 10
+  SET {f1daec27-3b29-4501-bfc4-ab5152eee378} = 29.4, !- Program Line 11
+  SET {9acfcee9-2f45-4197-8242-212481c3bfb8} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {cd66c009-5b88-4774-a18b-0268422002a4} = NULL, !- Program Line 14
-  SET {ebd241a2-f707-46d1-940f-3296b4e86faf} = NULL, !- Program Line 15
+  SET {f1daec27-3b29-4501-bfc4-ab5152eee378} = NULL, !- Program Line 14
+  SET {9acfcee9-2f45-4197-8242-212481c3bfb8} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0040-000000000002},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_hw_sc_c_chw_ssf_vv_zh_b_hw_zc_none_srf_vv__2_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {a8910306-6fc1-43b6-8563-19a38cbed753}<23.9 && {a8910306-6fc1-43b6-8563-19a38cbed753}>1.7, !- Program Line 1
-  SET {3d63f02b-dc8f-4099-b8e0-4f15a6b86fb3} = 29.4, !- Program Line 2
-  SET {3a897a31-0ade-468c-afda-963700587171} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {a8910306-6fc1-43b6-8563-19a38cbed753}<23.9 && {a8910306-6fc1-43b6-8563-19a38cbed753}>1.7, !- Program Line 4
-  SET {3d63f02b-dc8f-4099-b8e0-4f15a6b86fb3} = 29.4, !- Program Line 5
-  SET {3a897a31-0ade-468c-afda-963700587171} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {a8910306-6fc1-43b6-8563-19a38cbed753}<23.9 && {a8910306-6fc1-43b6-8563-19a38cbed753}>1.7, !- Program Line 7
-  SET {3d63f02b-dc8f-4099-b8e0-4f15a6b86fb3} = 29.4, !- Program Line 8
-  SET {3a897a31-0ade-468c-afda-963700587171} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {a8910306-6fc1-43b6-8563-19a38cbed753}<23.9 && {a8910306-6fc1-43b6-8563-19a38cbed753}>1.7, !- Program Line 10
-  SET {3d63f02b-dc8f-4099-b8e0-4f15a6b86fb3} = 29.4, !- Program Line 11
-  SET {3a897a31-0ade-468c-afda-963700587171} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {e78b1640-57d2-4871-9e36-cfb150e500ad}<23.9 && {e78b1640-57d2-4871-9e36-cfb150e500ad}>1.7, !- Program Line 1
+  SET {1921b5ee-8e59-4338-b320-71a6878b5ede} = 29.4, !- Program Line 2
+  SET {f4c77d2c-40d0-4ae4-b6b4-92887b102c94} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {e78b1640-57d2-4871-9e36-cfb150e500ad}<23.9 && {e78b1640-57d2-4871-9e36-cfb150e500ad}>1.7, !- Program Line 4
+  SET {1921b5ee-8e59-4338-b320-71a6878b5ede} = 29.4, !- Program Line 5
+  SET {f4c77d2c-40d0-4ae4-b6b4-92887b102c94} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {e78b1640-57d2-4871-9e36-cfb150e500ad}<23.9 && {e78b1640-57d2-4871-9e36-cfb150e500ad}>1.7, !- Program Line 7
+  SET {1921b5ee-8e59-4338-b320-71a6878b5ede} = 29.4, !- Program Line 8
+  SET {f4c77d2c-40d0-4ae4-b6b4-92887b102c94} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {e78b1640-57d2-4871-9e36-cfb150e500ad}<23.9 && {e78b1640-57d2-4871-9e36-cfb150e500ad}>1.7, !- Program Line 10
+  SET {1921b5ee-8e59-4338-b320-71a6878b5ede} = 29.4, !- Program Line 11
+  SET {f4c77d2c-40d0-4ae4-b6b4-92887b102c94} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {3d63f02b-dc8f-4099-b8e0-4f15a6b86fb3} = NULL, !- Program Line 14
-  SET {3a897a31-0ade-468c-afda-963700587171} = NULL, !- Program Line 15
+  SET {1921b5ee-8e59-4338-b320-71a6878b5ede} = NULL, !- Program Line 14
+  SET {f4c77d2c-40d0-4ae4-b6b4-92887b102c94} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:Program,
   {00000000-0000-0000-0040-000000000003},  !- Handle
   ems_sys_6_mixed_shr_none_sh_c_hw_sc_c_chw_ssf_vv_zh_b_hw_zc_none_srf_vv__3_OptimumStartProg0, !- Name
-  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}<23.9 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}>1.7, !- Program Line 1
-  SET {e7f0a2c0-4077-4cae-b070-74daefdbf007} = 29.4, !- Program Line 2
-  SET {5388bf94-1854-4ec7-ac7e-7f5e8b248e0f} = 15.6, !- Program Line 3
-  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}<23.9 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}>1.7, !- Program Line 4
-  SET {e7f0a2c0-4077-4cae-b070-74daefdbf007} = 29.4, !- Program Line 5
-  SET {5388bf94-1854-4ec7-ac7e-7f5e8b248e0f} = 15.6, !- Program Line 6
-  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}<23.9 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}>1.7, !- Program Line 7
-  SET {e7f0a2c0-4077-4cae-b070-74daefdbf007} = 29.4, !- Program Line 8
-  SET {5388bf94-1854-4ec7-ac7e-7f5e8b248e0f} = 15.6, !- Program Line 9
-  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}<23.9 && {dc718bbe-4530-4250-b79d-a3f07de7d5f7}>1.7, !- Program Line 10
-  SET {e7f0a2c0-4077-4cae-b070-74daefdbf007} = 29.4, !- Program Line 11
-  SET {5388bf94-1854-4ec7-ac7e-7f5e8b248e0f} = 15.6, !- Program Line 12
+  IF DaylightSavings==0 && DayOfWeek>1 && Hour==5 && {eb8fff82-becc-4e64-a14c-166e99510e88}<23.9 && {eb8fff82-becc-4e64-a14c-166e99510e88}>1.7, !- Program Line 1
+  SET {d599d4e0-5626-476f-b1e5-5425ae748fe0} = 29.4, !- Program Line 2
+  SET {f5fc990b-3e96-4744-8b22-38493f2ef8df} = 15.6, !- Program Line 3
+  ELSEIF DaylightSavings==0 && DayOfWeek==1 && Hour==7 && {eb8fff82-becc-4e64-a14c-166e99510e88}<23.9 && {eb8fff82-becc-4e64-a14c-166e99510e88}>1.7, !- Program Line 4
+  SET {d599d4e0-5626-476f-b1e5-5425ae748fe0} = 29.4, !- Program Line 5
+  SET {f5fc990b-3e96-4744-8b22-38493f2ef8df} = 15.6, !- Program Line 6
+  ELSEIF DaylightSavings==1 && DayOfWeek>1 && Hour==4 && {eb8fff82-becc-4e64-a14c-166e99510e88}<23.9 && {eb8fff82-becc-4e64-a14c-166e99510e88}>1.7, !- Program Line 7
+  SET {d599d4e0-5626-476f-b1e5-5425ae748fe0} = 29.4, !- Program Line 8
+  SET {f5fc990b-3e96-4744-8b22-38493f2ef8df} = 15.6, !- Program Line 9
+  ELSEIF DaylightSavings==1 && DayOfWeek==1 && Hour==6 && {eb8fff82-becc-4e64-a14c-166e99510e88}<23.9 && {eb8fff82-becc-4e64-a14c-166e99510e88}>1.7, !- Program Line 10
+  SET {d599d4e0-5626-476f-b1e5-5425ae748fe0} = 29.4, !- Program Line 11
+  SET {f5fc990b-3e96-4744-8b22-38493f2ef8df} = 15.6, !- Program Line 12
   ELSE,                                    !- Program Line 13
-  SET {e7f0a2c0-4077-4cae-b070-74daefdbf007} = NULL, !- Program Line 14
-  SET {5388bf94-1854-4ec7-ac7e-7f5e8b248e0f} = NULL, !- Program Line 15
+  SET {d599d4e0-5626-476f-b1e5-5425ae748fe0} = NULL, !- Program Line 14
+  SET {f5fc990b-3e96-4744-8b22-38493f2ef8df} = NULL, !- Program Line 15
   ENDIF;                                   !- Program Line 16
 
 OS:EnergyManagementSystem:ProgramCallingManager,
@@ -12883,11 +12883,11 @@ OS:Schedule:Day,
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000037},  !- Handle
   Schedule Day 1,                          !- Name
-  ,                                        !- Schedule Type Limits Name
+  {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
+  22;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000038},  !- Handle
@@ -12918,16 +12918,16 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000041},  !- Handle
-  Schedule Day 13,                         !- Name
-  {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
+  Schedule Day 2,                          !- Name
+  {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
-  0;                                       !- Value Until Time 1
+  60;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000042},  !- Handle
-  Schedule Day 14,                         !- Name
+  Schedule Day 3,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
@@ -12936,8 +12936,8 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000043},  !- Handle
-  Schedule Day 2,                          !- Name
-  ,                                        !- Schedule Type Limits Name
+  Schedule Day 4,                          !- Name
+  {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
   24,                                      !- Hour 1
   0,                                       !- Minute 1
@@ -12945,24 +12945,6 @@ OS:Schedule:Day,
 
 OS:Schedule:Day,
   {00000000-0000-0000-0063-000000000044},  !- Handle
-  Schedule Day 3,                          !- Name
-  {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  22;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000045},  !- Handle
-  Schedule Day 4,                          !- Name
-  {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
-  ,                                        !- Interpolate to Timestep
-  24,                                      !- Hour 1
-  0,                                       !- Minute 1
-  60;                                      !- Value Until Time 1
-
-OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000046},  !- Handle
   Schedule Day 5,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -12971,7 +12953,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000047},  !- Handle
+  {00000000-0000-0000-0063-000000000045},  !- Handle
   Schedule Day 6,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -12980,7 +12962,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000048},  !- Handle
+  {00000000-0000-0000-0063-000000000046},  !- Handle
   Schedule Day 7,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -12989,7 +12971,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000049},  !- Handle
+  {00000000-0000-0000-0063-000000000047},  !- Handle
   Schedule Day 8,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -12998,7 +12980,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000050},  !- Handle
+  {00000000-0000-0000-0063-000000000048},  !- Handle
   Schedule Day 9,                          !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13007,7 +12989,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000051},  !- Handle
+  {00000000-0000-0000-0063-000000000049},  !- Handle
   Service Water Loop Temp - 140F Default,  !- Name
   {00000000-0000-0000-0066-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13016,7 +12998,7 @@ OS:Schedule:Day,
   60;                                      !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000052},  !- Handle
+  {00000000-0000-0000-0063-000000000050},  !- Handle
   Water Heater Ambient Temp Schedule 71.6F Default, !- Name
   {00000000-0000-0000-0066-000000000008},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13025,7 +13007,7 @@ OS:Schedule:Day,
   22.0000000000001;                        !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000053},  !- Handle
+  {00000000-0000-0000-0063-000000000051},  !- Handle
   Work Efficiency Schedule Default,        !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13034,7 +13016,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000054},  !- Handle
+  {00000000-0000-0000-0063-000000000052},  !- Handle
   satCHW Temp 1,                           !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13112,7 +13094,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000055},  !- Handle
+  {00000000-0000-0000-0063-000000000053},  !- Handle
   satCHW Temp,                             !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13190,7 +13172,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000056},  !- Handle
+  {00000000-0000-0000-0063-000000000054},  !- Handle
   satCW Temp 1,                            !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13268,7 +13250,7 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000057},  !- Handle
+  {00000000-0000-0000-0063-000000000055},  !- Handle
   satCW Temp,                              !- Name
   {00000000-0000-0000-0066-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13346,7 +13328,7 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000058},  !- Handle
+  {00000000-0000-0000-0063-000000000056},  !- Handle
   sunCHW Temp 1,                           !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13424,7 +13406,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000059},  !- Handle
+  {00000000-0000-0000-0063-000000000057},  !- Handle
   sunCHW Temp,                             !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13502,7 +13484,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000060},  !- Handle
+  {00000000-0000-0000-0063-000000000058},  !- Handle
   sunCW Temp 1,                            !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13580,7 +13562,7 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000061},  !- Handle
+  {00000000-0000-0000-0063-000000000059},  !- Handle
   sunCW Temp,                              !- Name
   {00000000-0000-0000-0066-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13658,7 +13640,7 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000062},  !- Handle
+  {00000000-0000-0000-0063-000000000060},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| Occ Sch Default, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13673,7 +13655,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 3
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000063},  !- Handle
+  {00000000-0000-0000-0063-000000000061},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| Occ Sch Summer Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13682,7 +13664,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000064},  !- Handle
+  {00000000-0000-0000-0063-000000000062},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| Occ Sch Winter Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13691,7 +13673,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000065},  !- Handle
+  {00000000-0000-0000-0063-000000000063},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 1 Occ Sch Default, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13706,7 +13688,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 3
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000066},  !- Handle
+  {00000000-0000-0000-0063-000000000064},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 1 Occ Sch Summer Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13715,7 +13697,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000067},  !- Handle
+  {00000000-0000-0000-0063-000000000065},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 1 Occ Sch Winter Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13724,7 +13706,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000068},  !- Handle
+  {00000000-0000-0000-0063-000000000066},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 2 Occ Sch Default, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13739,7 +13721,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 3
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000069},  !- Handle
+  {00000000-0000-0000-0063-000000000067},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 2 Occ Sch Summer Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13748,7 +13730,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000070},  !- Handle
+  {00000000-0000-0000-0063-000000000068},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 2 Occ Sch Winter Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13757,7 +13739,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000071},  !- Handle
+  {00000000-0000-0000-0063-000000000069},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 3 Occ Sch Default, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13772,7 +13754,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 3
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000072},  !- Handle
+  {00000000-0000-0000-0063-000000000070},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 3 Occ Sch Summer Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13781,7 +13763,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000073},  !- Handle
+  {00000000-0000-0000-0063-000000000071},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 3 Occ Sch Winter Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13790,7 +13772,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000074},  !- Handle
+  {00000000-0000-0000-0063-000000000072},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| Occ Sch Default, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13805,7 +13787,7 @@ OS:Schedule:Day,
   0;                                       !- Value Until Time 3
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000075},  !- Handle
+  {00000000-0000-0000-0063-000000000073},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| Occ Sch Summer Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13814,7 +13796,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000076},  !- Handle
+  {00000000-0000-0000-0063-000000000074},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| Occ Sch Winter Design Day, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13823,7 +13805,7 @@ OS:Schedule:Day,
   1;                                       !- Value Until Time 1
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000077},  !- Handle
+  {00000000-0000-0000-0063-000000000075},  !- Handle
   wkdCHW Temp 1,                           !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13901,7 +13883,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000078},  !- Handle
+  {00000000-0000-0000-0063-000000000076},  !- Handle
   wkdCHW Temp,                             !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -13979,7 +13961,7 @@ OS:Schedule:Day,
   7;                                       !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000079},  !- Handle
+  {00000000-0000-0000-0063-000000000077},  !- Handle
   wkdCW Temp 1,                            !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -14057,7 +14039,7 @@ OS:Schedule:Day,
   29;                                      !- Value Until Time 24
 
 OS:Schedule:Day,
-  {00000000-0000-0000-0063-000000000080},  !- Handle
+  {00000000-0000-0000-0063-000000000078},  !- Handle
   wkdCW Temp,                              !- Name
   {00000000-0000-0000-0066-000000000007},  !- Schedule Type Limits Name
   ,                                        !- Interpolate to Timestep
@@ -14367,7 +14349,7 @@ OS:Schedule:Rule,
   Schedule Rule 20,                        !- Name
   {00000000-0000-0000-0065-000000000021},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000046},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000042},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14386,7 +14368,7 @@ OS:Schedule:Rule,
   Schedule Rule 21,                        !- Name
   {00000000-0000-0000-0065-000000000021},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000047},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000043},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14405,7 +14387,7 @@ OS:Schedule:Rule,
   Schedule Rule 22,                        !- Name
   {00000000-0000-0000-0065-000000000025},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000048},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000044},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14424,7 +14406,7 @@ OS:Schedule:Rule,
   Schedule Rule 23,                        !- Name
   {00000000-0000-0000-0065-000000000025},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000049},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000045},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14443,7 +14425,7 @@ OS:Schedule:Rule,
   Schedule Rule 24,                        !- Name
   {00000000-0000-0000-0065-000000000022},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000050},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000046},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14462,7 +14444,7 @@ OS:Schedule:Rule,
   Schedule Rule 25,                        !- Name
   {00000000-0000-0000-0065-000000000022},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000038},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000047},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14481,7 +14463,7 @@ OS:Schedule:Rule,
   Schedule Rule 26,                        !- Name
   {00000000-0000-0000-0065-000000000023},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000039},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000048},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14500,7 +14482,7 @@ OS:Schedule:Rule,
   Schedule Rule 27,                        !- Name
   {00000000-0000-0000-0065-000000000023},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000040},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000038},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14519,7 +14501,7 @@ OS:Schedule:Rule,
   Schedule Rule 28,                        !- Name
   {00000000-0000-0000-0065-000000000024},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000041},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000039},  !- Day Schedule Name
   ,                                        !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14538,7 +14520,7 @@ OS:Schedule:Rule,
   Schedule Rule 29,                        !- Name
   {00000000-0000-0000-0065-000000000024},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000042},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000040},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   ,                                        !- Apply Monday
   ,                                        !- Apply Tuesday
@@ -14690,7 +14672,7 @@ OS:Schedule:Rule,
   satCHW Temprule,                         !- Name
   {00000000-0000-0000-0065-000000000002},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000054},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000052},  !- Day Schedule Name
   No,                                      !- Apply Sunday
   No,                                      !- Apply Monday
   No,                                      !- Apply Tuesday
@@ -14709,7 +14691,7 @@ OS:Schedule:Rule,
   satCW Temprule,                          !- Name
   {00000000-0000-0000-0065-000000000003},  !- Schedule Ruleset Name
   1,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000056},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000054},  !- Day Schedule Name
   No,                                      !- Apply Sunday
   No,                                      !- Apply Monday
   No,                                      !- Apply Tuesday
@@ -14728,7 +14710,7 @@ OS:Schedule:Rule,
   sunCHW Temprule,                         !- Name
   {00000000-0000-0000-0065-000000000002},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000058},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000056},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   No,                                      !- Apply Monday
   No,                                      !- Apply Tuesday
@@ -14747,7 +14729,7 @@ OS:Schedule:Rule,
   sunCW Temprule,                          !- Name
   {00000000-0000-0000-0065-000000000003},  !- Schedule Ruleset Name
   0,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000060},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000058},  !- Day Schedule Name
   Yes,                                     !- Apply Sunday
   No,                                      !- Apply Monday
   No,                                      !- Apply Tuesday
@@ -14766,7 +14748,7 @@ OS:Schedule:Rule,
   wkdCHW Temp rule,                        !- Name
   {00000000-0000-0000-0065-000000000002},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000077},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000075},  !- Day Schedule Name
   No,                                      !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -14785,7 +14767,7 @@ OS:Schedule:Rule,
   wkdCW Temp rule,                         !- Name
   {00000000-0000-0000-0065-000000000003},  !- Schedule Ruleset Name
   2,                                       !- Rule Order
-  {00000000-0000-0000-0063-000000000079},  !- Day Schedule Name
+  {00000000-0000-0000-0063-000000000077},  !- Day Schedule Name
   No,                                      !- Apply Sunday
   Yes,                                     !- Apply Monday
   Yes,                                     !- Apply Tuesday
@@ -14895,71 +14877,71 @@ OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000016},  !- Handle
   Schedule Ruleset 1,                      !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000044};  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000037};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000017},  !- Handle
   Schedule Ruleset 2,                      !- Name
   {00000000-0000-0000-0066-000000000006},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000045};  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000041};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000018},  !- Handle
   Service Water Loop Temp - 140F,          !- Name
   {00000000-0000-0000-0066-000000000008},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000051};  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000049};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000019},  !- Handle
   Water Heater Ambient Temp Schedule 71.6F, !- Name
   {00000000-0000-0000-0066-000000000008},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000052};  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000050};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000020},  !- Handle
   Work Efficiency Schedule,                !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000053};  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000051};  !- Default Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000021},  !- Handle
   sys_4|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| Occ Sch, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000062},  !- Default Day Schedule Name
-  {00000000-0000-0000-0063-000000000063},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0063-000000000064};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000060},  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000061},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000062};  !- Winter Design Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000022},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 1 Occ Sch, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000065},  !- Default Day Schedule Name
-  {00000000-0000-0000-0063-000000000066},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0063-000000000067};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000063},  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000064},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000065};  !- Winter Design Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000023},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 2 Occ Sch, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000068},  !- Default Day Schedule Name
-  {00000000-0000-0000-0063-000000000069},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0063-000000000070};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000066},  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000067},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000068};  !- Winter Design Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000024},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| 3 Occ Sch, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000071},  !- Default Day Schedule Name
-  {00000000-0000-0000-0063-000000000072},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0063-000000000073};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000069},  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000070},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000071};  !- Winter Design Day Schedule Name
 
 OS:Schedule:Ruleset,
   {00000000-0000-0000-0065-000000000025},  !- Handle
   sys_6|mixed|shr>none|sh>c-hw|sc>c-chw|ssf>vv|zh>b-hw|zc>none|srf>vv| Occ Sch, !- Name
   {00000000-0000-0000-0066-000000000004},  !- Schedule Type Limits Name
-  {00000000-0000-0000-0063-000000000074},  !- Default Day Schedule Name
-  {00000000-0000-0000-0063-000000000075},  !- Summer Design Day Schedule Name
-  {00000000-0000-0000-0063-000000000076};  !- Winter Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000072},  !- Default Day Schedule Name
+  {00000000-0000-0000-0063-000000000073},  !- Summer Design Day Schedule Name
+  {00000000-0000-0000-0063-000000000074};  !- Winter Design Day Schedule Name
 
 OS:ScheduleTypeLimits,
   {00000000-0000-0000-0066-000000000001},  !- Handle
