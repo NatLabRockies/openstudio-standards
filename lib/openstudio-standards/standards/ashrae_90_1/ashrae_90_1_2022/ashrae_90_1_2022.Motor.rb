@@ -1,3 +1,12 @@
-class ASHRAE9012022 < ASHRAE901
+﻿class ASHRAE9012022 < ASHRAE901
   # @!group Motor
+
+  # Determine the type of motor to model
+  #
+  # @param nominal_hp [Float] nominal or nameplate motor horsepower
+  # @return [String] motor type
+  def motor_type(nominal_hp)
+    return 'ECM' # Addendum aj to 90.1-2010
+  end
 end
+
