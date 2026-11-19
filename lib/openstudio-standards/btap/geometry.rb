@@ -148,7 +148,7 @@ module BTAP
 
     module Spaces
       ##
-      # Fetch a space's full height, maybe stored as an AdditionalProperty -
+      # Returns a space's full height, maybe stored as an AdditionalProperty -
       # search for AdditionalProperty feature "space_height".
       #
       # @param space [OpenStudio::Model::Space] a space
@@ -177,7 +177,7 @@ module BTAP
       end
 
       ##
-      # Fetch a space's width, maybe stored as an AdditionalProperty -
+      # Returns a space's width, maybe stored as an AdditionalProperty -
       # search for AdditionalProperty feature "space_width".
       #
       # @param space [OpenStudio::Model::Space] a space
@@ -206,10 +206,10 @@ module BTAP
       end
 
       ##
-      # Return slab-on-grade perimeter (insulation) area for one or more spaces.
-      # Solution returns 0 if full basement. Relies on OpenStudio's BOOST-based
-      # 'joinAll' & 'buffer'. Boost methods have strict requirements when
-      # processing polygons. The solution will yield incorrect estimates with
+      # Returns slab-on-grade perimeter (insulation) area for one or more
+      # spaces. Solution returns 0 if full basement. Relies on OpenStudio's
+      # BOOST-based 'joinAll' & 'buffer'. Boost methods have strict requirements
+      # when processing polygons - solution yields incorrect estimates with
       # poorly-developed OpenStudio models.
       #
       # @param spaces [Set<OpenStudio::Model::Space>] target spaces
@@ -256,7 +256,7 @@ module BTAP
         return 0 unless w.is_a?(Numeric)
         return 0 if w < 0.1
 
-        # Slab surfaces might not site perfectly at Z-axis '0'. Flatten.
+        # Slab surfaces might not sit perfectly at Z-axis '0'. Flatten.
         slabs = slabs.map { |slab| TBD.flatten(slab) }
         ctr   = 0
         total = 0
@@ -296,6 +296,80 @@ module BTAP
         end
 
         total
+      end
+
+      ##
+      # Validates whether space is somewhere above ground floor level, i.e.
+      # floor surface(s) > 2.0m above grade.
+      #
+      # @param space [OpenStudio::Model::Space] a space
+      #
+      # @return [Boolean] true if space is above ground floor level.
+      def self.aboveGroundFloor?(space = nil)
+        return false unless space.is_a?(OpenStudio::Model::Space)
+
+        minZ  = 10000
+        t     = space.buildingTransformation
+        slabs = []
+        slbs  = []
+        slbs  = TBD.facets(space, "all", "floor")
+        return false if slbs.empty?
+
+        slbs.each { |slb| slabs << t * slb.vertices }
+
+        slabs.each do |slab|
+          min  = [slab.min_by(&:z).z, minZ].min
+          minZ = [min, minZ].min
+        end
+
+        minZ > 2.0 ? true : false
+      end
+
+      ##
+      # Returns likely number of dwellings, based on floor area (e.g. 2 units
+      # per space if 140 m2 <= space floor area < 210 m2). The method doesn't
+      # double check whether a space's spacetype is actually a dwelling - users
+      # must do this beforehand.
+      #
+      # @param spaces [Set<OpenStudio::Model::Space>] target space(s)
+      #
+      # @return [Integer] likely number of dwellings (defaults to 1 per space)
+      def self.nDwellings(spaces = nil)
+        nD     = 0
+        spaces = spaces.is_a?(OpenStudio::Model::Space) ? [spaces] : spaces
+        spaces = spaces.respond_to?(:to_a) ? spaces.to_a : []
+        return 0 if spaces.empty?
+
+        spaces.each do |space|
+          next unless space.respond_to?(:setSpaceType)
+
+          nD += space.floorArea < 140 ? 1 : (space.floorArea/70).to_i
+        end
+
+        nD
+      end
+
+      ##
+      # Returns likely number of bedrooms in a dwelling space, based on floor
+      # area (e.g. 2 bedrooms if 70 m2 < space floor area <= 140 m2). The method
+      # doesn't double check whether a space's spacetype is actually a dwelling
+      # - users must do this beforehand. Relies on nDwellings method to estimate
+      # the likely number of dwellings in a multi-dwelling space.
+      #
+      # @param space [OpenStudio::Model::Space] a dwelling space
+      #
+      # @return [Integer] likely number of bedrooms in dwelling(s)
+      def self.nBedrooms(space = nil)
+        return 0 unless space.is_a?(OpenStudio::Model::Space)
+
+        nD = nDwellings(space)
+        m2 = space.floorArea / nD
+
+        case m2
+        when  0..70  then nD
+        when 70..140 then nD * 2
+        else              nD * 3
+        end
       end
     end
 

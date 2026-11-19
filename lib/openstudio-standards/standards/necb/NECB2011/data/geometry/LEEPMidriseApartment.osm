@@ -6674,7 +6674,7 @@ OS:Space,
   0,                                      !- Z Origin {m}
   {d2122a57-3bc3-4762-be36-4544879491c7}, !- Building Story Name
   {459de9b2-e628-4165-8735-0cfac418a1f4}, !- Thermal Zone Name
-  ,                                       !- Part of Total Floor Area
+  No,                                     !- Part of Total Floor Area
   ,                                       !- Design Specification Outdoor Air Object Name
   ,                                       !- Building Unit Name
   ,                                       !- Volume {m3}
@@ -9158,7 +9158,8 @@ OS:Space,
   30.9330171515816,                       !- Y Origin {m}
   6.8,                                    !- Z Origin {m}
   {a8d30073-8e3b-49c4-a8d0-ce06ac5aa68f}, !- Building Story Name
-  {85b93d29-1e86-4678-a465-1b2f6b95692b}; !- Thermal Zone Name
+  {85b93d29-1e86-4678-a465-1b2f6b95692b}, !- Thermal Zone Name
+  No;                                     !- Part of Total Floor Area
 
 OS:Surface,
   {bcfde44a-f9d2-4587-af6e-3a134b0b467a}, !- Handle
@@ -9443,7 +9444,8 @@ OS:Space,
   30.9330171515816,                       !- Y Origin {m}
   12.8,                                   !- Z Origin {m}
   {354f0676-773b-401f-80d8-3a67b30b6891}, !- Building Story Name
-  {d6f7abe7-b333-4f11-aa99-d03b1b14bc5b}; !- Thermal Zone Name
+  {d6f7abe7-b333-4f11-aa99-d03b1b14bc5b}, !- Thermal Zone Name
+  No;                                     !- Part of Total Floor Area
 
 OS:Surface,
   {9c4975f1-3440-4f0a-9862-9aeff5a27a91}, !- Handle
@@ -17182,4 +17184,3 @@ OS:Rendering:Color,
   255,                                    !- Rendering Red Value
   224,                                    !- Rendering Green Value
   255;                                    !- Rendering Blue Value
-
