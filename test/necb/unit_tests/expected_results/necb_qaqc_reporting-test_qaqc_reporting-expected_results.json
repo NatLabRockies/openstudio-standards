@@ -255,9 +255,7 @@
             "infiltration_method": "Flow/ExteriorArea",
             "infiltration_flow_per_m2": 0.00025,
             "occupancy_schedule": null,
-            "waterUseEquipment": [
-
-            ]
+            "waterUseEquipment": []
           },
           {
             "name": "Dining",
@@ -276,8 +274,8 @@
             "shw_m3_per_s": 0.0,
             "waterUseEquipment": [
               {
-                "peak_flow_rate": 2.39515451281452e-05,
-                "peak_flow_rate_per_area": 6.442950741383873e-08,
+                "peak_flow_rate": 0.0000239515451281452,
+                "peak_flow_rate_per_area": 0.00000006442950741383873,
                 "shw_watts_per_person": -11.986207841240901
               }
             ]
@@ -299,8 +297,8 @@
             "shw_m3_per_s": 0.0,
             "waterUseEquipment": [
               {
-                "peak_flow_rate": 4.49574007408925e-06,
-                "peak_flow_rate_per_area": 3.224943293840053e-08,
+                "peak_flow_rate": 0.00000449574007408925,
+                "peak_flow_rate_per_area": 0.00000003224943293840053,
                 "shw_watts_per_person": -5.9995555061282815
               }
             ]
@@ -319,9 +317,7 @@
           "infiltration_method": "Flow/ExteriorArea",
           "infiltration_flow_per_m2": 0.00025,
           "occupancy_schedule": null,
-          "waterUseEquipment": [
-
-          ]
+          "waterUseEquipment": []
         },
         {
           "name": "Dining",
@@ -340,8 +336,8 @@
           "shw_m3_per_s": 0.0,
           "waterUseEquipment": [
             {
-              "peak_flow_rate": 2.39515451281452e-05,
-              "peak_flow_rate_per_area": 6.442950741383873e-08,
+              "peak_flow_rate": 0.0000239515451281452,
+              "peak_flow_rate_per_area": 0.00000006442950741383873,
               "shw_watts_per_person": -11.986207841240901
             }
           ]
@@ -363,8 +359,8 @@
           "shw_m3_per_s": 0.0,
           "waterUseEquipment": [
             {
-              "peak_flow_rate": 4.49574007408925e-06,
-              "peak_flow_rate_per_area": 3.224943293840053e-08,
+              "peak_flow_rate": 0.00000449574007408925,
+              "peak_flow_rate_per_area": 0.00000003224943293840053,
               "shw_watts_per_person": -5.9995555061282815
             }
           ]
@@ -387,9 +383,7 @@
               "type": "Space Function - undefined -"
             }
           ],
-          "equipment": [
-
-          ]
+          "equipment": []
         },
         {
           "name": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
@@ -409,11 +403,11 @@
           ],
           "equipment": [
             {
-              "name": "Zone HVAC Baseboard Convective Water 1",
+              "name": "Zone HVAC Baseboard Convective Water 2",
               "type": "ZoneHVACComponent"
             },
             {
-              "name": "Air Terminal Single Duct Constant Volume No Reheat 1",
+              "name": "Air Terminal Single Duct Constant Volume No Reheat 2",
               "type": "StraightComponent"
             }
           ]
@@ -436,11 +430,11 @@
           ],
           "equipment": [
             {
-              "name": "Zone HVAC Baseboard Convective Water 2",
+              "name": "Zone HVAC Baseboard Convective Water 1",
               "type": "ZoneHVACComponent"
             },
             {
-              "name": "Air Terminal Single Duct Constant Volume No Reheat 2",
+              "name": "Air Terminal Single Duct Constant Volume No Reheat 1",
               "type": "StraightComponent"
             }
           ]
@@ -450,62 +444,6 @@
         {
           "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none|",
           "thermal_zones": [
-            "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B"
-          ],
-          "total_floor_area_served": 371.74807149,
-          "total_breathing_zone_outdoor_airflow_vbz": 2.6439,
-          "area_outdoor_air_rate_m3_per_s_m2": 0.0,
-          "outdoor_air_L_per_s": 0.0,
-          "supply_fan": {
-            "type": "CV",
-            "name": "Fan Constant Volume 1",
-            "fan_efficiency": 0.39975,
-            "motor_efficiency": 0.615,
-            "pressure_rise": 640.0,
-            "max_air_flow_rate_m3_per_s": 2.64,
-            "rated_electric_power_w": 4232.84
-          },
-          "economizer": {
-            "name": "Controller Outdoor Air 1",
-            "control_type": "DifferentialEnthalpy"
-          },
-          "cooling_coils": {
-            "dx_single_speed": [
-              {
-                "name": "CoilCoolingDXSingleSpeed_dx 224kBtu/hr 9.7EER",
-                "cop": 3.36680611439836,
-                "nominal_total_capacity_w": 65653.65
-              }
-            ],
-            "dx_two_speed": [
-
-            ],
-            "coil_cooling_water": [
-
-            ]
-          },
-          "heating_coils": {
-            "coil_heating_gas": [
-              {
-                "name": "Coil Heating Gas 1",
-                "type": "Gas",
-                "efficency": 0.81,
-                "nominal_capacity": 209949.22
-              }
-            ],
-            "coil_heating_electric": [
-
-            ],
-            "coil_heating_water": [
-
-            ]
-          },
-          "heat_exchanger": {
-          }
-        },
-        {
-          "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
-          "thermal_zones": [
             "ALL_ST=Food preparation_FL=Building Story 1_SCH=B"
           ],
           "total_floor_area_served": 139.4052442,
@@ -514,7 +452,7 @@
           "outdoor_air_L_per_s": 0.0,
           "supply_fan": {
             "type": "CV",
-            "name": "Fan Constant Volume 2",
+            "name": "Fan Constant Volume 1",
             "fan_efficiency": 0.39975,
             "motor_efficiency": 0.615,
             "pressure_rise": 640.0,
@@ -522,42 +460,80 @@
             "rated_electric_power_w": 662.57
           },
           "economizer": {
-            "name": "Controller Outdoor Air 2",
+            "name": "Controller Outdoor Air 1",
             "control_type": "NoEconomizer"
           },
           "cooling_coils": {
             "dx_single_speed": [
               {
-                "name": "CoilCoolingDXSingleSpeed_dx 1 32kBtu/hr 14.0SEER",
+                "name": "CoilCoolingDXSingleSpeed_dx 32kBtu/hr 14.0SEER",
                 "cop": 3.8248,
                 "nominal_total_capacity_w": 9875.88
               }
             ],
-            "dx_two_speed": [
-
+            "dx_two_speed": [],
+            "coil_cooling_water": []
+          },
+          "heating_coils": {
+            "coil_heating_gas": [
+              {
+                "name": "Coil Heating Gas 1",
+                "type": "Gas",
+                "efficency": 0.924,
+                "nominal_capacity": 21992.53
+              }
             ],
-            "coil_cooling_water": [
-
-            ]
+            "coil_heating_electric": [],
+            "coil_heating_water": []
+          },
+          "heat_exchanger": {}
+        },
+        {
+          "name": "sys_3|mixed|shr>none|sc>dx|sh>c-g|ssf>cv|zh>b-hw|zc>none|srf>none| 1",
+          "thermal_zones": [
+            "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B"
+          ],
+          "total_floor_area_served": 371.74807149,
+          "total_breathing_zone_outdoor_airflow_vbz": 2.6439,
+          "area_outdoor_air_rate_m3_per_s_m2": 0.0,
+          "outdoor_air_L_per_s": 0.0,
+          "supply_fan": {
+            "type": "CV",
+            "name": "Fan Constant Volume 2",
+            "fan_efficiency": 0.39975,
+            "motor_efficiency": 0.615,
+            "pressure_rise": 640.0,
+            "max_air_flow_rate_m3_per_s": 2.64,
+            "rated_electric_power_w": 4232.84
+          },
+          "economizer": {
+            "name": "Controller Outdoor Air 2",
+            "control_type": "DifferentialEnthalpy"
+          },
+          "cooling_coils": {
+            "dx_single_speed": [
+              {
+                "name": "CoilCoolingDXSingleSpeed_dx 1 224kBtu/hr 9.7EER",
+                "cop": 3.36680611439836,
+                "nominal_total_capacity_w": 65653.65
+              }
+            ],
+            "dx_two_speed": [],
+            "coil_cooling_water": []
           },
           "heating_coils": {
             "coil_heating_gas": [
               {
                 "name": "Coil Heating Gas 2",
                 "type": "Gas",
-                "efficency": 0.924,
-                "nominal_capacity": 21992.53
+                "efficency": 0.81,
+                "nominal_capacity": 209949.22
               }
             ],
-            "coil_heating_electric": [
-
-            ],
-            "coil_heating_water": [
-
-            ]
+            "coil_heating_electric": [],
+            "coil_heating_water": []
           },
-          "heat_exchanger": {
-          }
+          "heat_exchanger": {}
         }
       ],
       "plant_loops": [
@@ -580,7 +556,7 @@
               "name": "Primary Boiler 82kBtu/hr 0.85 AFUE",
               "type": "Boiler:HotWater",
               "fueltype": "NaturalGas",
-              "nominal_capacity": 24062.054028802
+              "nominal_capacity": 24062.0540285503
             },
             {
               "name": "Secondary Boiler 0kBtu/hr 0.85 AFUE",
@@ -589,15 +565,9 @@
               "nominal_capacity": 0.001
             }
           ],
-          "chiller_electric_eir": [
-
-          ],
-          "cooling_tower_single_speed": [
-
-          ],
-          "water_heater_mixed": [
-
-          ]
+          "chiller_electric_eir": [],
+          "cooling_tower_single_speed": [],
+          "water_heater_mixed": []
         },
         {
           "name": "Main Service Water Loop",
@@ -608,20 +578,14 @@
               "name": "Main Service Water Loop Circulator Pump",
               "type": "Pump:ConstantSpeed",
               "head_pa": 284784.23,
-              "water_flow_m3_per_s": 2.8e-05,
+              "water_flow_m3_per_s": 0.000028,
               "electric_power_w": -1.0,
               "motor_efficency": 0.7
             }
           ],
-          "boilers": [
-
-          ],
-          "chiller_electric_eir": [
-
-          ],
-          "cooling_tower_single_speed": [
-
-          ],
+          "boilers": [],
+          "chiller_electric_eir": [],
+          "cooling_tower_single_speed": [],
           "water_heater_mixed": [
             {
               "name": "49gal NaturalGas Water Heater - 33kBtu/hr 0.82 Therm Eff",
@@ -639,33 +603,29 @@
           "CheckUsedConstructions: There are 30 nominally unused constructions in input.  For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;",
           "GetInternalHeatGains: People=\"SPACE FUNCTION DINING - FAMILY SPACE PEOPLE\" has comfort related schedules but no thermal comfort model selected.  If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort  thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.  To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.",
           "GetInternalHeatGains: People=\"SPACE FUNCTION FOOD PREPARATION PEOPLE\" has comfort related schedules but no thermal comfort model selected.  If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort  thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.  To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.",
-          "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 1\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling.",
-          "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 2\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling.",
-          "GetDXCoils: Coil:Cooling:DX:SingleSpeed=\"COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER\", invalid  ...Part Load Fraction Correlation Curve Name = DXCOOL-NECB2011-REF-COOLPLFFPLR has out of range value.  ...Curve maximum must be <= 1.0, curve max at PLR = 0.99 is 1.015  ...Setting curve maximum to 1.0 and simulation continues.",
-          "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
-          "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 1 32KBTU/HR 14.0SEER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
+          "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 1\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=FOOD PREPARATION_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling.",
+          "GetOAControllerInputs: Controller:MechanicalVentilation=\"CONTROLLER MECHANICAL VENTILATION 2\"  Cannot locate a matching DesignSpecification:ZoneAirDistribution object for Zone=\"ALL_ST=DINING - FAMILY SPACE_FL=BUILDING STORY 1_SCH=B\".  Using default zone air distribution effectiveness of 1.0 for heating and cooling.",
+          "GetDXCoils: Coil:Cooling:DX:SingleSpeed=\"COILCOOLINGDXSINGLESPEED_DX 32KBTU/HR 14.0SEER\", invalid  ...Part Load Fraction Correlation Curve Name = DXCOOL-NECB2011-REF-COOLPLFFPLR has out of range value.  ...Curve maximum must be <= 1.0, curve max at PLR = 0.99 is 1.015  ...Setting curve maximum to 1.0 and simulation continues.",
+          "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 32KBTU/HR 14.0SEER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
+          "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COILCOOLINGDXSINGLESPEED_DX 1 224KBTU/HR 9.7EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
           "Output:Meter: invalid Key Name=\"DISTRICTHEATINGWATER:FACILITY\" - not found.",
           "Output:Meter: invalid Key Name=\"DISTRICTCOOLING:FACILITY\" - not found.",
           "Output:Meter:MeterFileOnly requested for \"Electricity:Facility\" (TimeStep), already on \"Output:Meter\". Will report to both eplusout.eso and eplusout.mtr",
           "CalcEquipmentFlowRates: \"DINING SERVICE WATER USE 0.3796GPM 140F\" - Target water temperature is greater than the hot water temperature by (1.10 C)   Environment=RUN PERIOD 1, at Simulation time=01/01 00:00 - 00:10  ...target water temperature     = 60.00 C  ...hot water temperature        = 58.90 C  ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.",
           "CalcEquipmentFlowRates: \"KITCHEN SERVICE WATER USE 0.0713GPM 140F\" - Target water temperature is greater than the hot water temperature by (1.10 C)   Environment=RUN PERIOD 1, at Simulation time=01/01 00:00 - 00:10  ...target water temperature     = 60.00 C  ...hot water temperature        = 58.90 C  ...Target water temperature should be less than or equal to the hot water temperature. Verify temperature setpoints and schedules.",
           "Processing Monthly Tabular Reports: Variable names not valid for this simulation  ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual variables.",
-          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 1 32KBTU/HR 14.0SEER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -18.23   ... Occurrence info = RUN PERIOD 1, 01/01 09:01 - 09:03  ... Operation at low ambient temperatures may require special performance curves.",
-          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 1 32KBTU/HR 14.0SEER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.09 C.   ...Occurrence info = RUN PERIOD 1, 01/01 09:01 - 09:03  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 19.482 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
+          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 32KBTU/HR 14.0SEER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -18.23   ... Occurrence info = RUN PERIOD 1, 01/01 09:01 - 09:03  ... Operation at low ambient temperatures may require special performance curves.",
+          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 32KBTU/HR 14.0SEER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.09 C.   ...Occurrence info = RUN PERIOD 1, 01/01 09:01 - 09:03  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 19.482 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
           "Temperature out of range [-100. to 200.] (PsyPsatFnTemp)   Routine=PsyTwbFnTdbWPb, Environment=RUN PERIOD 1, at Simulation time=04/21 19:40 - 19:50   Input Temperature=-146.61",
-          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 224KBTU/HR 9.7EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.83 C.   ...Occurrence info = RUN PERIOD 1, 05/20 09:18 - 09:20  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.133 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
+          "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COILCOOLINGDXSINGLESPEED_DX 1 224KBTU/HR 9.7EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.83 C.   ...Occurrence info = RUN PERIOD 1, 05/20 09:18 - 09:20  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.133 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
           "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-ELECTRICITY\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
           "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-DISTILLATE OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
           "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-RESIDUAL OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
           "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-NATURAL GAS\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
           "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-COAL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff."
         ],
-        "fatal": [
-
-        ],
-        "severe": [
-
-        ]
+        "fatal": [],
+        "severe": []
       },
       "ruby_warnings": [
         "space.spaceType.get.defaultScheduleSet.get.numberofPeopleSchedule is empty for attic",

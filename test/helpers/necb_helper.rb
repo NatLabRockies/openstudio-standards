@@ -633,6 +633,13 @@ module NecbHelper
 
       return [] if obj1 == obj2
 
+      # Allow for small floating-point tolerance (< 1e-10 relative error)
+      if obj1.is_a?(Numeric) && obj2.is_a?(Numeric)
+        tolerance = 1e-10
+        relative_diff = ((obj1 - obj2).abs / [obj1.abs, obj2.abs, 1.0].max)
+        return [] if relative_diff < tolerance
+      end
+
       [['~', prefix, obj1, obj2]]
     end
 
