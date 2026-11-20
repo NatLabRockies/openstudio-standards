@@ -19,7 +19,14 @@ OptionParser.new { |opts|
   opts.on('-c NUM_CORES', "Number of CPU cores to use") { |num_cores| options[:num_cores] = num_cores.to_i }
   opts.on('-s NUM_SAMPLES', "Number of randomly sampled permutations (default is parametric") { |num_samples|
     options[:num_samples] = num_samples.to_i }
+  opts.on('-o OSM_FOLDER', "Folder containing custom OSM files (searched before the defaults)") { |folder|
+    options[:osm_folder] = folder }
 }.parse!
+
+osm_folders = [options[:osm_folder],
+               File.dirname(File.expand_path(options[:input_file_path])),
+               input_folder,
+               File.join(__dir__, "../btap_cli/input")].compact
 
 if options[:batch_path].nil?
   raise ("Cannot find input file: #{options[:input_file_path]}") unless File.exist?(options[:input_file_path])
@@ -57,12 +64,14 @@ if options[:batch_path].nil?
   FileUtils.rm_rf(Dir.glob("#{analysis_copied_input_folder}/*")) if File.exist?(analysis_copied_input_folder)
 
   for combination in combinations.each
-    combination[:datapoint_id] = SecureRandom.uuid
+    combination[:datapoint_id] = combination[:building_type]
     combination[:datapoint_output_folder] = File.join(analysis_output_folder, combination[:datapoint_id])
     combination[:datapoint_copied_input_folder] = File.join(analysis_copied_input_folder, combination[:datapoint_id])
     run_options_file = File.join(combination[:datapoint_copied_input_folder], "run_options.yml")
     FileUtils.mkdir_p(combination[:datapoint_copied_input_folder])
     File.write(run_options_file, YAML.dump(combination))
+    osm_file = osm_folders.map { |folder| File.join(folder, "#{combination[:building_type]}.osm") }.find { |f| File.exist?(f) }
+    FileUtils.cp(osm_file, combination[:datapoint_copied_input_folder]) if osm_file
   end
 else
   raise ("Cannot find existing batch directory: #{options[:batch_path]}") unless File.exist?(options[:batch_path])
