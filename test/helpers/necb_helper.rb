@@ -558,6 +558,27 @@ module NecbHelper
     return eff_curve_name, eff_curve_type, corr_coeff
   end
 
+  # Sort air_loops arrays by name to make comparison order-independent
+  # This handles cases where different systems (Docker/OS/compiler) iterate
+  # through HVAC systems in different orders
+  def sort_air_loops_in_results(results)
+    if results.is_a?(Hash)
+      results.each do |key, value|
+        if key == 'air_loops' && value.is_a?(Array)
+          # Sort air_loops by name, preserving other properties
+          results[key] = value.sort_by { |loop| loop['name'] || '' }
+        elsif value.is_a?(Hash) || value.is_a?(Array)
+          sort_air_loops_in_results(value)
+        end
+      end
+    elsif results.is_a?(Array)
+      results.each do |item|
+        sort_air_loops_in_results(item)
+      end
+    end
+    results
+  end
+
   # Check if two files are identical with some added smarts.
   # (used in place of simple ruby methods)
   def compare_results(expected_results:, test_results:, msg: "Files do not match", type: nil)
@@ -567,6 +588,11 @@ module NecbHelper
       # Compare two json classes.
       expected_results = JSON.parse(JSON.pretty_generate(expected_results))
       test_results = JSON.parse(JSON.pretty_generate(test_results))
+      
+      # Sort air_loops by name to make comparison order-independent
+      expected_results = sort_air_loops_in_results(expected_results)
+      test_results = sort_air_loops_in_results(test_results)
+      
       diff = CompareJSON.diff(expected_results, test_results)
       error_msg = ""
       if !diff.nil?
