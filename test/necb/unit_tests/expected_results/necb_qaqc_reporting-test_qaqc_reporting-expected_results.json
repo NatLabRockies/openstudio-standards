@@ -599,8 +599,6 @@
       "eplusout_err": {
         "warnings": [
           "ProcessScheduleInput: Schedule:Day:Interval = ECONOMIZER MAX OA FRACTION 100 PCT DEFAULT  Schedule Type Limits Name is empty.  Schedule will not be validated.",
-          "ProcessScheduleInput: Schedule:Day:Interval = SCHEDULE DAY 1  Schedule Type Limits Name is empty.  Schedule will not be validated.",
-          "ProcessScheduleInput: Schedule:Day:Interval = SCHEDULE DAY 2  Schedule Type Limits Name is empty.  Schedule will not be validated.",
           "ProcessScheduleInput: Schedule:Year = ECONOMIZER MAX OA FRACTION 100 PCT  Schedule Type Limits Name is empty.  Schedule will not be validated.",
           "CheckUsedConstructions: There are 30 nominally unused constructions in input.  For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;",
           "GetInternalHeatGains: People=\"SPACE FUNCTION DINING - FAMILY SPACE PEOPLE\" has comfort related schedules but no thermal comfort model selected.  If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no thermal comfort  thermal comfort model is selected, the schedules will be listed as unused schedules in the .err file.  To avoid these errors, select a valid thermal comfort model or eliminate these schedules in the PEOPLE input.",
