@@ -791,11 +791,19 @@ module OpenstudioStandards
                 supply_fan = fan # assume supply fan has higher pressure drop
               end
             end
-            fan_power = supply_fan.autosizedMaximumFlowRate.to_f * supply_fan.pressureRise.to_f / supply_fan.fanTotalEfficiency.to_f
-            nominal_cooling_capacity_w = coil.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
-            nominal_flow_rate_factor = (supply_fan.autosizedMaximumFlowRate / coil.autosizedRatedAirFlowRateAtSelectedNominalSpeedLevel).to_f
-            fan_power_adjustment_w = fan_power / coil.speeds.last.referenceUnitGrossRatedSensibleHeatRatio.to_f
-            total_cooling_capacity_w += (nominal_cooling_capacity_w * nominal_flow_rate_factor) + fan_power_adjustment_w
+            if supply_fan&.autosizedMaximumFlowRate&.is_initialized &&
+               coil.autosizedRatedAirFlowRateAtSelectedNominalSpeedLevel.is_initialized
+              fan_power = supply_fan.autosizedMaximumFlowRate.to_f * supply_fan.pressureRise.to_f / supply_fan.fanTotalEfficiency.to_f
+              nominal_cooling_capacity_w = coil.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
+              nominal_flow_rate_factor = supply_fan.autosizedMaximumFlowRate.to_f / coil.autosizedRatedAirFlowRateAtSelectedNominalSpeedLevel.to_f
+              fan_power_adjustment_w = fan_power / coil.speeds.last.referenceUnitGrossRatedSensibleHeatRatio.to_f
+              total_cooling_capacity_w += (nominal_cooling_capacity_w * nominal_flow_rate_factor) + fan_power_adjustment_w
+            else
+              OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.AirLoopHVAC', "For #{air_loop_hvac.name} variable speed coil #{coil.name}, autosized flow rates are not available. Using gross rated capacity instead.")
+              if coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.is_initialized
+                total_cooling_capacity_w += coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
+              end
+            end
           elsif coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.is_initialized
             total_cooling_capacity_w += coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
           else
