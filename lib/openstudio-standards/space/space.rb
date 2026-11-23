@@ -419,10 +419,8 @@ module OpenstudioStandards
     #   normalized_annual_range evaluates each value against the min/max range for the year
     #   normalized_daily_range evaluates each value against the min/max range for the day.
     #   The goal is a dynamic threshold that calibrates each day.
-    # @param threshold_tolerance [Double] values this close below the threshold still count as
-    #   occupied; defaults to half of the threshold's last stated decimal place.
     # @return [<OpenStudio::Model::ScheduleRuleset>] a ScheduleRuleset of fractional or discrete occupancy
-    def self.spaces_get_occupancy_schedule(spaces, sch_name: nil, occupied_percentage_threshold: nil, threshold_calc_method: 'value', threshold_tolerance: 0.005)
+    def self.spaces_get_occupancy_schedule(spaces, sch_name: nil, occupied_percentage_threshold: nil, threshold_calc_method: 'value')
       if spaces.empty?
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.space', 'Empty spaces array passed to spaces_get_occupancy_schedule method.')
         return false
@@ -507,9 +505,7 @@ module OpenstudioStandards
 
       # If occupied_percentage_threshold is specified, schedule values are boolean
       # Otherwise use the actual spaces_occ_frac
-      # Tolerance prevents people-weighted rounding from switching an hour off at the threshold.
-      tolerance = threshold_tolerance.to_f
-      occupied = ->(day_val, threshold) { day_val + tolerance >= threshold ? 1 : 0 }
+      occupied = ->(day_val, threshold) { day_val >= threshold ? 1 : 0 }
       if occupied_percentage_threshold.nil?
         occ_status_vals = daily_combined_occ_fracs
       elsif threshold_calc_method == 'normalized_daily_range'
