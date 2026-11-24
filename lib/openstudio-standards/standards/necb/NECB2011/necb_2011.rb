@@ -255,6 +255,8 @@ class NECB2011 < Standard
                                    hvac_system_washrooms: nil,
                                    hvac_system_corridor: nil,
                                    hvac_system_storage: nil,
+                                   murb_oa: "",
+                                   ventless: false,
                                    primary_heating_fuel: 'Electricity',
                                    swh_fuel: nil,
                                    dcv_type: 'NECB_Default',
@@ -329,6 +331,8 @@ class NECB2011 < Standard
                                 hvac_system_washrooms: nil,
                                 hvac_system_corridor: nil,
                                 hvac_system_storage: nil,
+                                murb_oa: murb_oa,
+                                ventless: false,
                                 primary_heating_fuel: primary_heating_fuel,
                                 swh_fuel: swh_fuel,
                                 dcv_type: dcv_type, # Four options: (1) 'NECB_Default', (2) 'No_DCV', (3) 'Occupancy_based_DCV' , (4) 'CO2_based_DCV'
@@ -418,6 +422,8 @@ class NECB2011 < Standard
                            hvac_system_washrooms: 'NECB_Default',
                            hvac_system_corridor: 'NECB_Default',
                            hvac_system_storage: 'NECB_Default',
+                           murb_oa: "",
+                           ventless: false,
                            primary_heating_fuel: 'Electricity',
                            swh_fuel: nil,
                            dcv_type: 'NECB_Default',
@@ -546,6 +552,8 @@ class NECB2011 < Standard
                 lights_scale: lights_scale,
                 occupancy_loads_scale: occupancy_loads_scale,
                 electrical_loads_scale: electrical_loads_scale,
+                murb_oa: murb_oa,
+                ventless: ventless,
                 oa_scale: oa_scale)
     apply_envelope(model: model,
                    construction_opt: construction_opt,
@@ -565,6 +573,7 @@ class NECB2011 < Standard
                    skylight_solar_trans: skylight_solar_trans,
                    infiltration_scale: infiltration_scale,
                    necb_hdd: necb_hdd)
+    model_create_thermal_zones(model, @space_multiplier_map)
     apply_fdwr_srr_daylighting(model: model,
                                fdwr_set: fdwr_set,
                                srr_set: srr_set,
@@ -791,6 +800,8 @@ class NECB2011 < Standard
                   validate: true,
                   occupancy_loads_scale: nil,
                   electrical_loads_scale: nil,
+                  murb_oa: "",
+                  ventless: false,
                   oa_scale: nil)
     # Create ECM object.
     ecm = ECMS.new
@@ -802,7 +813,7 @@ class NECB2011 < Standard
     # this sets/stores the template version loads that the model uses.
     model.getBuilding.setStandardsTemplate(self.class.name)
     set_occ_sensor_spacetypes(model, @space_type_map)
-    model_add_loads(model, lights_type, lights_scale)
+    model_add_loads(model, lights_type, lights_scale, murb_oa, ventless)
     ecm.scale_occupancy_loads(model: model, scale: occupancy_loads_scale)
     ecm.scale_electrical_loads(model: model, scale: electrical_loads_scale)
     ecm.scale_oa_loads(model: model, scale: oa_scale)
@@ -968,8 +979,6 @@ class NECB2011 < Standard
                                              skylight_solar_trans: skylight_solar_trans,
                                              necb_hdd: necb_hdd)
     end
-
-    model_create_thermal_zones(model, @space_multiplier_map)
   end
 
   ##
@@ -991,7 +1000,7 @@ class NECB2011 < Standard
   # @return [Boolean] true if successful
   def set_construction_air_film_resistances(model: nil)
     return false unless model.is_a?(OpenStudio::Model::Model)
-    
+
     ok  = false
     hdd = get_necb_hdd18(model: model, necb_hdd: true)
 
@@ -2430,7 +2439,7 @@ class NECB2011 < Standard
   # pulled from sources such as the DOE Reference and DOE Prototype Buildings.
   #
   # @return [Boolean] returns true if successful, false if not
-  def model_add_loads(model, lights_type, lights_scale)
+  def model_add_loads(model, lights_type, lights_scale, murb_oa, ventless)
     OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Started applying space types (loads)')
 
     # Loop through all the space types currently in the model,
@@ -2440,7 +2449,11 @@ class NECB2011 < Standard
       space_type_apply_rendering_color(space_type)
 
       # Loads
-      space_type_apply_internal_loads(space_type: space_type, lights_type: lights_type, lights_scale: lights_scale)
+      space_type_apply_internal_loads(space_type: space_type,
+                                      lights_type: lights_type,
+                                      lights_scale: lights_scale,
+                                      murb_oa: murb_oa,
+                                      ventless: ventless)
 
       # Schedules
       space_type_apply_internal_load_schedules(space_type)

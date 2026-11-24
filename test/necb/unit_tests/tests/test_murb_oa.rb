@@ -22,10 +22,10 @@ class MURB_OA_Tests < Minitest::Test
     @buildings = [
       # 'HighriseApartment',
       # 'HighriseApartmentMult',
-      # 'LEEPMidriseApartment',
+      'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
-      'LEEPTownHouse',
+      # 'LEEPTownHouse',
       # 'LowriseApartment',
       # 'MidriseApartment'
     ]
@@ -39,8 +39,8 @@ class MURB_OA_Tests < Minitest::Test
     ]
 
     @options = [
-      "",        # BTAP default solution
-      # "a622",  # ANSI/ASHRAE 62.2 2016
+      # "",        # BTAP default solution
+      "a622",  # ANSI/ASHRAE 62.2 2016
       # "a621",  # ANSI/ASHRAE 62.1 2016
       # "nbc932" # National Building Code of Canada (NBC 9.32, 2025)
     ]
@@ -59,10 +59,47 @@ class MURB_OA_Tests < Minitest::Test
           cas  += " - #{option}" unless option.empty?
           st    = Standard.build(template)
           model = st.model_create_prototype_model(template: template,
-                                                    epw_file: epw,
-                                                    building_type: building,
-                                                    construction_opt: option,
-                                                    sizing_run_dir: @szg_dir)
+                                                  epw_file: epw,
+                                                  building_type: building,
+                                                  construction_opt: 'structure',
+                                                  murb_oa: option,
+                                                  ventless: false,
+                                                  sizing_run_dir: @szg_dir)
+          model.getSpaceTypes.each do |type|
+            next if type.spaces.empty?
+            next unless type.nameString.downcase.include?("dwelling")
+
+            stOA  = type.designSpecificationOutdoorAir
+            refute_empty(stOA, "#{cas}: spacetype OA empty?")
+            stOA  = stOA.get
+            stOAp = stOA.additionalProperties
+
+            type.spaces.each do |space|
+              id    = space.nameString
+              spOA  = space.designSpecificationOutdoorAir
+              refute_empty(spOA, "#{cas}: #{id} OA empty?")
+              spOA  = spOA.get
+              spOAp = spOA.additionalProperties
+
+              if option.empty?
+                emsg = "#{cas} #{id} OA not defaulted?"
+                assert(space.isDesignSpecificationOutdoorAirDefaulted, emsg)
+                assert_equal(stOA, spOA, "Defaulted #{id} OA")
+                assert_equal(stOAp, spOAp, "Defaulted #{id} OA props")
+              else
+                emsg = "#{cas} #{id} OA defaulted?"
+                refute(space.isDesignSpecificationOutdoorAirDefaulted, emsg)
+                refute_equal(stOA, spOA, "Non-defaulted #{id} OA")
+                refute_equal(stOAp, spOAp, "Non-Defaulted #{id} OA props")
+              end
+
+              puts "... #{id}"; puts
+              puts "... #{spOA}"
+              puts "... #{spOA.additionalProperties}"
+              break
+            end
+            break
+          end
         end                 # |option  |
       end                   # |template|
     end                     # |building|

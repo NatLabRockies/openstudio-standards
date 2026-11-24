@@ -12,6 +12,7 @@ class NECB_Activity_Tests < Minitest::Test
     sizd = "sizing_folder"
 
     plnums = ["LargeOffice", "MediumOffice", "NorthernEducation"]
+    shafts = ["LEEPMidriseApartment", "LEEPMultiTower", "LEEPPointTower"]
     attics = ["FullServiceRestaurant", "QuickServiceRestaurant", "SmallOffice"]
 
     @output_folder         = File.join(__dir__, outd)
@@ -36,14 +37,14 @@ class NECB_Activity_Tests < Minitest::Test
     @buildings = [
       'FullServiceRestaurant',
       # 'HighriseApartment',
-      # 'Hospital',
+      'Hospital',
       # 'LargeHotel',
-      'LargeOffice',
-      # 'LEEPMidriseApartment',
+      # 'LargeOffice',
+      'LEEPMidriseApartment',
       # 'LEEPMultiTower',
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
-      'LowriseApartment',
+      # 'LowriseApartment',
       'MediumOffice',
       # 'MidriseApartment',
       'NorthernEducation',
@@ -140,8 +141,13 @@ class NECB_Activity_Tests < Minitest::Test
               err_msg = "BTAP::Activity #{id} conditioned (#{cas})?"
               assert_equal(prop, "unconditioned", err_msg)
             else
-              err_msg = "BTAP::Activity #{id} plenum (#{cas})?"
-              assert_includes(plnums, building, err_msg)
+              if plnums.include?(building)
+                err_msg = "BTAP::Activity #{id} unconditioned (#{cas})?"
+                assert_equal(prop, "nonresconditioned", err_msg)
+              else # shafts
+                err_msg = "BTAP::Activity #{id} shaft (#{cas})?"
+                assert_includes(shafts, building, err_msg)
+              end
 
               err_msg = "BTAP::Activity #{id} unconditioned (#{cas})?"
               assert_equal(prop, "nonresconditioned", err_msg)

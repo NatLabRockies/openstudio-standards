@@ -1,5 +1,5 @@
 # *********************************************************************
-# *  Copyright (c) 2008-2025, Natural Resources Canada
+# *  Copyright (c) 2008-2026, Natural Resources Canada
 # *  All rights reserved.
 # *
 # *  This library is free software; you can redistribute it and/or
@@ -350,11 +350,11 @@ module BTAP
       end
 
       ##
-      # Returns likely number of bedrooms in a dwelling space, based on floor
-      # area (e.g. 2 bedrooms if 70 m2 < space floor area <= 140 m2). The method
-      # doesn't double check whether a space's spacetype is actually a dwelling
-      # - users must do this beforehand. Relies on nDwellings method to estimate
-      # the likely number of dwellings in a multi-dwelling space.
+      # Returns likely number of bedrooms in a dwelling space (1 or 2), based on
+      # floor area (e.g. 2 bedrooms if 70 m2 < space floor area <= 140 m2). The
+      # method doesn't double check whether a space's spacetype is actually a
+      # dwelling - users must do this beforehand. Relies on nDwellings method to
+      # estimate the likely number of dwellings in a multi-dwelling space.
       #
       # @param space [OpenStudio::Model::Space] a dwelling space
       #
@@ -365,11 +365,7 @@ module BTAP
         nD = nDwellings(space)
         m2 = space.floorArea / nD
 
-        case m2
-        when  0..70  then nD
-        when 70..140 then nD * 2
-        else              nD * 3
-        end
+        m2 > 70 ? nD * 2 : nD
       end
     end
 
