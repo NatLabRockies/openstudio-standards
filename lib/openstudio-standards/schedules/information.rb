@@ -359,7 +359,7 @@ module OpenstudioStandards
         (0..23).each do |j|
           values = []
           times = (time_interval_min..60).step(time_interval_min).to_a
-          times.each { |t| values << schedule_day.getValue(OpenStudio::Time.new(0, j, t, 0)) }
+          values = times.map { |t| schedule_day.getValue(OpenStudio::Time.new(0, j, t, 0)) }
           schedule_values << (values.sum / times.size).round(5)
         end
       else
@@ -877,6 +877,52 @@ module OpenstudioStandards
           profiles << rule.winterDesignDaySchedule
         end
 
+      end
+
+      return profiles
+    end
+
+    # Returns the day schedules associated with a ScheduleRuleset categorized by applicable day type
+    # Including summer and winter design days
+    # @param schedule_ruleset [OpenStudio::Model::ScheduleRuleset] OpenStudio ScheduleRuleset object
+    # @return [Hash<String, OpenStudio::Model::ScheduleDay>] hash of ScheduleDay: day_types
+    def self.schedule_ruleset_categorize_day_schedules(schedule_ruleset)
+      profiles = {}
+
+      profiles[schedule_ruleset.defaultDaySchedule] = 'Default'
+
+      # A defaulted design day shares the default day schedule, which is already categorized.
+      unless schedule_ruleset.isSummerDesignDayScheduleDefaulted
+        profiles[schedule_ruleset.summerDesignDaySchedule] = 'SmrDsn'
+      end
+
+      unless schedule_ruleset.isWinterDesignDayScheduleDefaulted
+        profiles[schedule_ruleset.winterDesignDaySchedule] = 'WntrDsn'
+      end
+
+      schedule_ruleset.scheduleRules.each do |rule|
+        day_sch = rule.daySchedule
+        profiles[day_sch] = ''
+        if rule.applyWeekdays
+          profiles[day_sch] += '|Wkdy'
+        elsif rule.applyWeekends
+          profiles[day_sch] += '|Wknd'
+        else
+          profiles[day_sch] += '|Sun' if rule.applySunday
+          profiles[day_sch] += '|Mon' if rule.applyMonday
+          profiles[day_sch] += '|Tue' if rule.applyTuesday
+          profiles[day_sch] += '|Wed' if rule.applyWednesday
+          profiles[day_sch] += '|Thu' if rule.applyThursday
+          profiles[day_sch] += '|Fri' if rule.applyFriday
+          profiles[day_sch] += '|Sat' if rule.applySaturday
+        end
+      end
+
+      # clean up any staring pipe
+      profiles.each do |k, v|
+        if v.start_with?('|')
+          profiles[k] = v[1..]
+        end
       end
 
       return profiles

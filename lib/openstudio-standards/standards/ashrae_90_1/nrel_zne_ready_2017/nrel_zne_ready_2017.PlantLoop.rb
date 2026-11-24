@@ -33,7 +33,7 @@ class NRELZNEReady2017 < ASHRAE901
         OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       elsif sc.to_HeaderedPumpsVariableSpeed.is_initialized
         pump = sc.to_HeaderedPumpsVariableSpeed.get
-         OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
+        OpenstudioStandards::HVAC.pump_variable_speed_set_control_type(pump, control_type: pri_control_type)
       end
     end
 

@@ -479,9 +479,8 @@ module OpenstudioStandards
       end
 
       # get nested array of 8760 values of the total occupancy at each hour of each schedule
-      all_schedule_hourly_occ = []
-      occ_schedules_num_occ.each do |occ_sch, num_occ|
-        all_schedule_hourly_occ << OpenstudioStandards::Schedules.schedule_get_hourly_values(occ_sch).map { |i| (i * num_occ).round(6) }
+      all_schedule_hourly_occ = occ_schedules_num_occ.map do |occ_sch, num_occ|
+        OpenstudioStandards::Schedules.schedule_get_hourly_values(occ_sch).map { |i| (i * num_occ).round(6) }
       end
 
       # total occupancy from all people
@@ -506,6 +505,7 @@ module OpenstudioStandards
 
       # If occupied_percentage_threshold is specified, schedule values are boolean
       # Otherwise use the actual spaces_occ_frac
+      occupied = ->(day_val, threshold) { day_val >= threshold ? 1 : 0 }
       if occupied_percentage_threshold.nil?
         occ_status_vals = daily_combined_occ_fracs
       elsif threshold_calc_method == 'normalized_daily_range'
@@ -515,7 +515,7 @@ module OpenstudioStandards
         # normalize threshold to daily min/max values
         daily_normalized_thresholds = daily_min_vals.zip(daily_max_vals).map { |min_max| min_max[0] + ((min_max[1] - min_max[0]) * occupied_percentage_threshold) }
         # if daily occ frac exceeds daily normalized threshold, set value to 1
-        occ_status_vals = daily_combined_occ_fracs.each_with_index.map { |day_array, i| day_array.map { |day_val| !day_val.zero? && day_val >= daily_normalized_thresholds[i] ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.each_with_index.map { |day_array, i| day_array.map { |day_val| day_val.zero? ? 0 : occupied.call(day_val, daily_normalized_thresholds[i]) } }
       elsif threshold_calc_method == 'normalized_annual_range'
         # calculate annual min/max values
         annual_max = daily_combined_occ_fracs.max_by(&:max).max
@@ -523,9 +523,9 @@ module OpenstudioStandards
         # normalize threshold to annual min/max
         annual_normalized_threshold = annual_min + ((annual_max - annual_min) * occupied_percentage_threshold)
         # if vals exceed threshold, set val to 1
-        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| day_val >= annual_normalized_threshold ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| occupied.call(day_val, annual_normalized_threshold) } }
       else # threshold_calc_method == 'value'
-        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| day_val >= occupied_percentage_threshold ? 1 : 0 } }
+        occ_status_vals = daily_combined_occ_fracs.map { |day_array| day_array.map { |day_val| occupied.call(day_val, occupied_percentage_threshold) } }
       end
 
       # get unique daily profiles for weekdays, saturdays and sundays

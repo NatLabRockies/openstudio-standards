@@ -299,7 +299,7 @@ class NECB2011
   # @author nicholas.pneumaticos@nrcan-rncan.gc.ca
   #
   # @param stype [#to_s] surface type, e.g. "roofceiling"
-  # @param bc [#to_s] outside boundary condition, e.g. "outdoors"
+  # @param condition [#to_s] outside boundary condition, e.g. "outdoors"
   # @param hdd [#to_f] heating-degree-days 18C
   #
   # @return [Float] required U-factor, defaults to 0.110 W/m2.K.
@@ -317,7 +317,7 @@ class NECB2011
   #
   # @author denis@rd2.ca
   #
-  # @param [OpenStudio::Model::LayeredConstruction] a construction
+  # @param construction [OpenStudio::Model::LayeredConstruction] a construction
   #
   # @return [Float] area-weighted surface air film resistances (0 if error)
   def filmR(construction = nil)

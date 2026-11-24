@@ -557,6 +557,8 @@ module OpenstudioStandards
       if sch_name.nil?
         sch_name = "#{thermal_zone.name} Occ Sch"
       end
+      return OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation_schedule([thermal_zone], sch_name, occupied_percentage_threshold) if OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation?([thermal_zone], occupied_percentage_threshold)
+
       # Get the occupancy schedule for all spaces in thermal_zone
       sch_ruleset = OpenstudioStandards::Space.spaces_get_occupancy_schedule(thermal_zone.spaces,
                                                                              sch_name: sch_name,
@@ -579,6 +581,8 @@ module OpenstudioStandards
       if sch_name.nil?
         sch_name = "#{thermal_zones.size} zone Occ Sch"
       end
+      return OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation_schedule(thermal_zones, sch_name, occupied_percentage_threshold) if OpenstudioStandards::ThermalZone.thermal_zones_continuous_operation?(thermal_zones, occupied_percentage_threshold)
+
       # Get the occupancy schedule for all spaces in thermal_zones
       spaces = []
       thermal_zones.each do |thermal_zone|

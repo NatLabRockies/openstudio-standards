@@ -149,17 +149,15 @@ class ASHRAE901PRM < Standard
     baseline_system_type = air_loop_hvac.additionalProperties.getFeatureAsString('baseline_system_type').get
     climate_zone_code = climate_zone.split('-')[-1]
     # System type 3 through 8 and 11, 12 and 13
-    if ['SZ_AC', 'PSZ_AC', 'PVAV_Reheat', 'VAV_Reheat', 'SZ_VAV', 'PSZ_HP', 'SZ_CV', 'PSZ_HP', 'PVAV_PFP_Boxes', 'VAV_PFP_Boxes'].include? baseline_system_type
-      unless ['0A', '0B', '1A', '1B', '2A', '3A', '4A'].include? climate_zone_code
-        economizer_required = true
-      end
+    if ['SZ_AC', 'PSZ_AC', 'PVAV_Reheat', 'VAV_Reheat', 'SZ_VAV', 'PSZ_HP', 'SZ_CV', 'PSZ_HP', 'PVAV_PFP_Boxes', 'VAV_PFP_Boxes'].include?(baseline_system_type) &&
+       !['0A', '0B', '1A', '1B', '2A', '3A', '4A'].include?(climate_zone_code)
+      economizer_required = true
     end
 
     # System type 3 and 4 in computer rooms are subject to exceptions
-    if baseline_system_type == 'PSZ_AC' || baseline_system_type == 'PSZ_HP'
-      if air_loop_hvac.additionalProperties.hasFeature('zone_group_type') && air_loop_hvac.additionalProperties.getFeatureAsString('zone_group_type').get == 'computer_zones'
-        economizer_required = false
-      end
+    if (baseline_system_type == 'PSZ_AC' || baseline_system_type == 'PSZ_HP') &&
+       air_loop_hvac.additionalProperties.hasFeature('zone_group_type') && air_loop_hvac.additionalProperties.getFeatureAsString('zone_group_type').get == 'computer_zones'
+      economizer_required = false
     end
 
     # Check user_data in the zones
@@ -512,13 +510,10 @@ class ASHRAE901PRM < Standard
   # @return [Boolean] flag of whether thermal zone in baseline is required to have DCV
   def baseline_thermal_zone_demand_control_ventilation_required?(thermal_zone)
     # zone needs dcv if user model has dcv and baseline does not meet apxg exception
-    if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV')
-      # meaning it was served by an airloop in the user model, does not mean much here, conditional as a safeguard
-      # in case it was not served by an airloop in the user model
-      if !thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get && # does not meet apxg exception (need to have dcv if user model has it
-         thermal_zone.additionalProperties.getFeatureAsBoolean('zone DCV implemented in user model').get
-        return true
-      end
+    if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV') &&
+       !thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get && # does not meet apxg exception (need to have dcv if user model has it
+       thermal_zone.additionalProperties.getFeatureAsBoolean('zone DCV implemented in user model').get
+      return true
     end
     return false
   end

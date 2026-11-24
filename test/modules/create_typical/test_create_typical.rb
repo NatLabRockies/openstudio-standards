@@ -28,6 +28,46 @@ class TestCreateTypical < Minitest::Test
     assert(starting_size < ending_size)
   end
 
+  def test_create_typical_building_from_model_with_typical_loads
+    template = '90.1-2013'
+    climate_zone = 'ASHRAE 169-2013-4A'
+    model = OpenStudio::Model::Model.new
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName('Office')
+    space_type.setStandardsBuildingType('SmallOffice')
+    space_type.setStandardsSpaceType('office')
+    footprint = OpenStudio::Point3dVector.new
+    footprint << OpenStudio::Point3d.new(0, 0, 0)
+    footprint << OpenStudio::Point3d.new(0, 10, 0)
+    footprint << OpenStudio::Point3d.new(10, 10, 0)
+    footprint << OpenStudio::Point3d.new(10, 0, 0)
+    space = OpenStudio::Model::Space.fromFloorPrint(footprint, 3.0, model).get
+    space.setSpaceType(space_type)
+
+    result = @create.create_typical_building_from_model(
+      model, template,
+      climate_zone: climate_zone,
+      space_type_load_method: 'typical',
+      add_hvac: false,
+      add_constructions: false,
+      add_daylighting_controls: false,
+      add_infiltration: false,
+      add_elevators: false,
+      add_internal_mass: false,
+      add_exterior_lights: false,
+      add_exhaust: false,
+      add_swh: false,
+      add_thermostat: false,
+      add_refrigeration: false
+    )
+
+    assert(result)
+    assert_operator(space_type.people.size, :>, 0)
+    assert_operator(space_type.lights.size, :>, 0)
+    assert_operator(space_type.electricEquipment.size, :>, 0)
+    assert_operator(model.getDesignSpecificationOutdoorAirs.size, :>, 0)
+  end
+
   def test_create_typical_building_from_model_comstock
     # load model and set up weather file
     template = 'ComStock DOE Ref 1980-2004'
@@ -243,12 +283,22 @@ class TestCreateTypical < Minitest::Test
   end
 
   def test_create_typical_comstock_supermarket
+    model = OpenStudio::Model::Model.new
+
+    args = {}
+    args['total_bldg_floor_area'] = 50000.0
+    args['bldg_type_a'] = 'SuperMarket'
+    args['bar_division_method'] = 'Multiple Space Types - Simple Sliced'
+    result = OpenstudioStandards::Geometry.create_bar_from_building_type_ratios(model, args)
+
     # load model and set up weather file
-    template = 'ComStock 90.1-2013'
     climate_zone = 'ASHRAE 169-2013-4A'
-    std = Standard.build(template)
-    model = std.safe_load_model("#{File.dirname(__FILE__)}/../../../data/geometry/ASHRAESuperMarket.osm")
     OpenstudioStandards::Weather.model_set_building_location(model, climate_zone: climate_zone)
+
+    # set space types and set additional properties
+    template = 'ComStock 90.1-2013'
+    std = Standard.build(template)
+    std.prototype_space_type_map(model, set_additional_properties: true)
 
     # set output directory
     output_dir = "#{__dir__}/output/#{__method__}"

@@ -1011,10 +1011,9 @@ class ASHRAE901PRM < Standard
          (!thermal_zone.additionalProperties.getFeatureAsBoolean('zone dcv required by 901').get ||
            !thermal_zone.additionalProperties.getFeatureAsBoolean('airloop dcv required by 901').get)
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "For thermal zone #{thermal_zone.name}, ASHRAE 90.1 2019 6.4.3.8 does NOT require this zone to have demand control ventilation, but it was implemented in the user model, Appendix G baseline generation will continue!")
-        if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV')
-          if !thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get
-            OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Moreover, for thermal zone #{thermal_zone.name}, Appendix G baseline model will have DCV based on ASHRAE 90.1 2019 G3.1.2.5")
-          end
+        if thermal_zone.additionalProperties.hasFeature('apxg no need to have DCV') &&
+           !thermal_zone.additionalProperties.getFeatureAsBoolean('apxg no need to have DCV').get
+          OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Model', "Moreover, for thermal zone #{thermal_zone.name}, Appendix G baseline model will have DCV based on ASHRAE 90.1 2019 G3.1.2.5")
         end
       end
       if thermal_zone.additionalProperties.getFeatureAsBoolean('zone dcv required by 901').get &&
@@ -1563,22 +1562,20 @@ class ASHRAE901PRM < Standard
         thermal_zone = zone_hvac_eqp.thermalZone.get
 
         zone_hvac_eqp_info.each_key do |info_key|
-          if info_key.include?('fan_power_credit')
-            if !zone_hvac_eqp_info[info_key].to_s.empty?
-              if info_key.include?('has_')
-                if thermal_zone.additionalProperties.hasFeature(info_key)
-                  current_value = thermal_zone.additionalProperties.getFeatureAsDouble(info_key).to_f
-                  thermal_zone.additionalProperties.setFeature(info_key, current_value + 1.0)
-                else
-                  thermal_zone.additionalProperties.setFeature(info_key, 1.0)
-                end
+          if info_key.include?('fan_power_credit') && !zone_hvac_eqp_info[info_key].to_s.empty?
+            if info_key.include?('has_')
+              if thermal_zone.additionalProperties.hasFeature(info_key)
+                current_value = thermal_zone.additionalProperties.getFeatureAsDouble(info_key).to_f
+                thermal_zone.additionalProperties.setFeature(info_key, current_value + 1.0)
               else
-                if thermal_zone.additionalProperties.hasFeature(info_key)
-                  current_value = thermal_zone.additionalProperties.getFeatureAsDouble(info_key).to_f
-                  thermal_zone.additionalProperties.setFeature(info_key, current_value + zone_hvac_eqp_info[info_key])
-                else
-                  thermal_zone.additionalProperties.setFeature(info_key, zone_hvac_eqp_info[info_key])
-                end
+                thermal_zone.additionalProperties.setFeature(info_key, 1.0)
+              end
+            else
+              if thermal_zone.additionalProperties.hasFeature(info_key)
+                current_value = thermal_zone.additionalProperties.getFeatureAsDouble(info_key).to_f
+                thermal_zone.additionalProperties.setFeature(info_key, current_value + zone_hvac_eqp_info[info_key])
+              else
+                thermal_zone.additionalProperties.setFeature(info_key, zone_hvac_eqp_info[info_key])
               end
             end
           end
@@ -1797,10 +1794,8 @@ class ASHRAE901PRM < Standard
       # Check for 2nd level hierarchy
       if user_spaces
         user_spaces.each do |user_space|
-          unless user_space['building_type_for_wwr'].nil?
-            if UserData.compare(space.name.get, user_space['name'])
-              type_for_wwr = user_space['building_type_for_wwr']
-            end
+          if !user_space['building_type_for_wwr'].nil? && UserData.compare(space.name.get, user_space['name'])
+            type_for_wwr = user_space['building_type_for_wwr']
           end
         end
       end
@@ -1810,10 +1805,8 @@ class ASHRAE901PRM < Standard
         building_name = prm_get_optional_handler(space.model, @sizing_run_dir, 'building', 'name')
         if user_buildings
           user_buildings.each do |user_building|
-            unless user_building['building_type_for_wwr'].nil?
-              if UserData.compare(user_building['name'], building_name)
-                type_for_wwr = user_building['building_type_for_wwr']
-              end
+            if !user_building['building_type_for_wwr'].nil? && UserData.compare(user_building['name'], building_name)
+              type_for_wwr = user_building['building_type_for_wwr']
             end
           end
         end
@@ -1833,10 +1826,8 @@ class ASHRAE901PRM < Standard
       # Check for 2nd hierarchy
       if user_wateruse_equipments
         user_wateruse_equipments.each do |user_wateruse_equipment|
-          unless user_wateruse_equipment['building_type_for_swh'].nil?
-            if UserData.compare(wateruse_equipment.name.get, user_wateruse_equipment['name'])
-              type_for_swh = user_wateruse_equipment['building_type_for_swh']
-            end
+          if !user_wateruse_equipment['building_type_for_swh'].nil? && UserData.compare(wateruse_equipment.name.get, user_wateruse_equipment['name'])
+            type_for_swh = user_wateruse_equipment['building_type_for_swh']
           end
         end
       end
@@ -1847,10 +1838,8 @@ class ASHRAE901PRM < Standard
         building_name = prm_get_optional_handler(wateruse_equipment.model, @sizing_run_dir, 'building', 'name')
         if user_buildings
           user_buildings.each do |user_building|
-            unless user_building['building_type_for_swh'].nil?
-              if UserData.compare(user_building['name'], building_name)
-                type_for_swh = user_building['building_type_for_swh']
-              end
+            if !user_building['building_type_for_swh'].nil? && UserData.compare(user_building['name'], building_name)
+              type_for_swh = user_building['building_type_for_swh']
             end
           end
         end

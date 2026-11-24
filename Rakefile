@@ -179,7 +179,7 @@ namespace :data do
 
   desc 'BTAP Costing: Validate the costing database'
   task 'validate_costing' do
-    require_relative './lib/openstudio-standards/btap/costing/btap_costing'
+    require_relative 'lib/openstudio-standards/btap/costing/btap_costing'
     data = BTAPCosting.new
     data.validate_database
   end

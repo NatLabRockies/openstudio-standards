@@ -26,11 +26,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -94,7 +90,9 @@ module OpenstudioStandards
 
           # building type specific logic for water consumption
           # todo - update test to exercise various building types
-          if !ashrae_hot_water_demand.empty?
+          if ashrae_hot_water_demand.empty?
+            # do nothing
+          else
 
             if building_type == 'FullServiceRestaurant'
               num_people_hours = 0.0
@@ -231,9 +229,6 @@ module OpenstudioStandards
             else
               check_elems << OpenStudio::Attribute.new('flag', "No rule of thumb values exist for  #{building_type}. Hot water consumption was not checked.")
             end
-
-          else
-            check_elems << OpenStudio::Attribute.new('flag', "No rule of thumb values exist for  #{building_type}. Hot water consumption was not checked.")
           end
         end
 

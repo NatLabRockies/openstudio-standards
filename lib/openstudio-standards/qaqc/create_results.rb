@@ -41,7 +41,6 @@ module OpenstudioStandards
                                       end_day = 30,
                                       end_hr = 18,
                                       electricity_consumption_tou_periods = [])
-
       # get the current version of OS being used to determine if sql query
       # changes are needed (for when E+ changes).
       os_version = OpenStudio::VersionString.new(OpenStudio.openStudioVersion)
@@ -202,15 +201,13 @@ module OpenstudioStandards
       result_elems << OpenStudio::Attribute.new('cash_flows', cash_flow_elems)
 
       # list of all end uses in OpenStudio
-      end_use_cat_types = []
-      OpenStudio::EndUseCategoryType.getValues.each do |end_use_val|
-        end_use_cat_types << OpenStudio::EndUseCategoryType.new(end_use_val)
+      end_use_cat_types = OpenStudio::EndUseCategoryType.getValues.map do |end_use_val|
+        OpenStudio::EndUseCategoryType.new(end_use_val)
       end
 
       # list of all end use fule types in OpenStudio
-      end_use_fuel_types = []
-      OpenStudio::EndUseFuelType.getValues.each do |end_use_fuel_type_val|
-        end_use_fuel_types << OpenStudio::EndUseFuelType.new(end_use_fuel_type_val)
+      end_use_fuel_types = OpenStudio::EndUseFuelType.getValues.map do |end_use_fuel_type_val|
+        OpenStudio::EndUseFuelType.new(end_use_fuel_type_val)
       end
 
       # list of the 12 months of the year in OpenStudio
@@ -689,10 +686,7 @@ module OpenstudioStandards
           # If TOU periods were specified but this model has no district cooling, report zeroes
           if !electricity_consumption_tou_periods.empty?
             # Get the TOU ids
-            tou_ids = []
-            electricity_consumption_tou_periods.each do |tou_pd|
-              tou_ids << tou_pd['tou_id']
-            end
+            tou_ids = electricity_consumption_tou_periods.map { |tou_pd| tou_pd['tou_id'] }
           end
         end
 

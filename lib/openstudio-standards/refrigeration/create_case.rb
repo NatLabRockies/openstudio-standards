@@ -128,7 +128,7 @@ module OpenstudioStandards
           dripdown_schedule.defaultDaySchedule.setName("#{ref_case.name} Dripdown Default")
           defrost_hours.each do |defrost_hour|
             dripdown_hour = (defrost_duration + dripdown_duration) > 59 ? defrost_hour + 1 : defrost_hour
-            dripdown_hour = dripdown_hour > 23 ? dripdown_hour - 24 : dripdown_hour
+            dripdown_hour -= 24 if dripdown_hour > 23
             dripdown_end_min = (defrost_duration + dripdown_duration) > 59 ? defrost_duration + dripdown_duration - 60 : defrost_duration + dripdown_duration
             dripdown_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, defrost_hour, defrost_duration, 0), 0)
             dripdown_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, dripdown_hour, dripdown_end_min, 0), 1)

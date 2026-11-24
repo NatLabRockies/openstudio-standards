@@ -20,7 +20,7 @@ class Standard
 
     # Get the search criteria
     search_criteria = coil_dx_find_search_criteria(coil_heating_dx_single_speed, necb_ref_hp, equipment_type)
-    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type') ? true : false
+    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type')
 
     # Additional search criteria for new data format (from BESD)
     # NECB/BTAP use the old format
@@ -155,7 +155,7 @@ class Standard
     sub_category = search_criteria['subcategory']
     suppl_heating_type = search_criteria['heating_type']
     coil_efficiency_data = standards_data['heat_pumps_heating']
-    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type') ? true : false
+    equipment_type = coil_efficiency_data[0].keys.include?('equipment_type')
 
     # Get the capacity
     capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_dx_single_speed)

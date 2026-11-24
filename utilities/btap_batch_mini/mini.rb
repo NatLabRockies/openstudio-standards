@@ -7,33 +7,34 @@ require 'parallel'
 require 'securerandom'
 require 'yaml'
 
-input_folder              = File.join(__dir__, "input/")
-copied_input_folder       = File.join(__dir__, "copied-input/")
-output_folder             = File.join(__dir__, "output/")
+input_folder              = File.join(__dir__, 'input/')
+copied_input_folder       = File.join(__dir__, 'copied-input/')
+output_folder             = File.join(__dir__, 'output/')
 options                   = {}
 options[:num_cores]       = (Parallel.processor_count * 4 / 5).floor
-options[:input_file_path] = File.join(input_folder, "sample_run_options.yml")
-OptionParser.new { |opts|
-  opts.on('-f FILE', "Path of the parametric YAML input file") { |file| options[:input_file_path] = file }
-  opts.on('-r FILE', "Rerun costing using existing simulation files") { |file| options[:batch_path] = file }
-  opts.on('-c NUM_CORES', "Number of CPU cores to use") { |num_cores| options[:num_cores] = num_cores.to_i }
-  opts.on('-s NUM_SAMPLES', "Number of randomly sampled permutations (default is parametric") { |num_samples|
-    options[:num_samples] = num_samples.to_i }
-}.parse!
+options[:input_file_path] = File.join(input_folder, 'sample_run_options.yml')
+OptionParser.new do |opts|
+  opts.on('-f FILE', 'Path of the parametric YAML input file') { |file| options[:input_file_path] = file }
+  opts.on('-r FILE', 'Rerun costing using existing simulation files') { |file| options[:batch_path] = file }
+  opts.on('-c NUM_CORES', 'Number of CPU cores to use') { |num_cores| options[:num_cores] = num_cores.to_i }
+  opts.on('-s NUM_SAMPLES', 'Number of randomly sampled permutations (default is parametric') do |num_samples|
+    options[:num_samples] = num_samples.to_i
+  end
+end.parse!
 
 if options[:batch_path].nil?
-  raise ("Cannot find input file: #{options[:input_file_path]}") unless File.exist?(options[:input_file_path])
+  raise("Cannot find input file: #{options[:input_file_path]}") unless File.exist?(options[:input_file_path])
 
-  input_hash = YAML.load(File.open(options[:input_file_path]).read)
+  input_hash = YAML.load_file(options[:input_file_path])
   keys       = input_hash[:options].keys
   values     = input_hash[:options].values
-  headers    = input_hash.reject { |k ,v| k == :options }
+  headers    = input_hash.except(:options)
   analysis_output_folder       = File.join(output_folder, input_hash[:analysis_name])
   analysis_copied_input_folder = File.join(copied_input_folder, input_hash[:analysis_name])
 
   # Use Latin Hypercube Sampling to sample a subset of the permutations.
   if options[:num_samples]
-    max_num_samples = values.map { |i| i.length }.reduce(:*)
+    max_num_samples = values.map(&:length).reduce(:*)
     if max_num_samples < options[:num_samples]
       puts("Clamped number of samples to maximum product value of #{max_num_samples}")
       num_samples = max_num_samples
@@ -42,15 +43,16 @@ if options[:batch_path].nil?
     end
     dims         = values.length
     permutations = Array.new(dims) { |d| (0...num_samples).map { |i| i % values[d].size }.shuffle }
-    combinations = (0...num_samples).map { |i|
-      (0...dims).map { |j|
+    combinations_list = (0...num_samples).map do |i|
+      (0...dims).map do |j|
         values[j][permutations[j][i]]
-      }
-    }.map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+      end
+    end
+    combinations = combinations_list.map { |combination| headers.merge(keys.zip(combination).to_h) }
 
   # Get the product of all YAML values if no number of samples is provided.
   else
-    combinations = values[0].product(*values[1..-1]).map { |combination| headers.merge(Hash[keys.zip(combination)]) }
+    combinations = values[0].product(*values[1..]).map { |combination| headers.merge(keys.zip(combination).to_h) }
   end
 
   FileUtils.rm_rf(Dir.glob("#{analysis_output_folder}/*"))       if File.exist?(analysis_output_folder)
@@ -60,35 +62,40 @@ if options[:batch_path].nil?
     combination[:datapoint_id] = SecureRandom.uuid
     combination[:datapoint_output_folder] = File.join(analysis_output_folder, combination[:datapoint_id])
     combination[:datapoint_copied_input_folder] = File.join(analysis_copied_input_folder, combination[:datapoint_id])
-    run_options_file = File.join(combination[:datapoint_copied_input_folder], "run_options.yml")
+    run_options_file = File.join(combination[:datapoint_copied_input_folder], 'run_options.yml')
     FileUtils.mkdir_p(combination[:datapoint_copied_input_folder])
     File.write(run_options_file, YAML.dump(combination))
   end
 else
-  raise ("Cannot find existing batch directory: #{options[:batch_path]}") unless File.exist?(options[:batch_path])
+  raise("Cannot find existing batch directory: #{options[:batch_path]}") unless File.exist?(options[:batch_path])
 
-  combinations = Dir.each_child(options[:batch_path]).map { |path|
-    YAML.load(File.open(options[:batch_path] + "/" + path + "/run_options.yml").read) }
+  combinations = Dir.each_child(options[:batch_path]).map do |path|
+    YAML.load_file("#{options[:batch_path]}/#{path}/run_options.yml")
+  end
 end
 
-puts((options[:batch_path].nil? ?
-     "Parametric Input File: #{options[:input_file_path]}\n" :
-     "Batch Path:            #{options[:batch_path]}\n") +
+puts((if options[:batch_path].nil?
+        "Parametric Input File: #{options[:input_file_path]}\n"
+      else
+        "Batch Path:            #{options[:batch_path]}\n"
+      end) +
      "# Combinations:        #{combinations.length}\n" \
      "# CPU Cores:           #{options[:num_cores]}")
 
-Parallel.each(combinations, in_threads: options[:num_cores], progress: "Progress :") do |combination|
+Parallel.each(combinations, in_threads: options[:num_cores], progress: 'Progress :') do |combination|
   if options[:batch_path].nil?
     stdout_and_stderr, status = Open3.capture2e(
-      "bundle", "exec", "--gemfile=#{__dir__}/../../Gemfile", "ruby", File.join(__dir__, '../btap_cli/btap_cli.rb'),
-      "--input_path", combination[:datapoint_copied_input_folder], "--output_path", analysis_output_folder)
+      'bundle', 'exec', "--gemfile=#{__dir__}/../../Gemfile", 'ruby', File.join(__dir__, '../btap_cli/btap_cli.rb'),
+      '--input_path', combination[:datapoint_copied_input_folder], '--output_path', analysis_output_folder
+    )
   else
     stdout_and_stderr, status = Open3.capture2e(
-      "bundle", "exec", "--gemfile=#{__dir__}/../../Gemfile", "ruby", File.join(__dir__, './post.rb'),
-      "--output_path", combination[:datapoint_output_folder])
+      'bundle', 'exec', "--gemfile=#{__dir__}/../../Gemfile", 'ruby', File.join(__dir__, './post.rb'),
+      '--output_path', combination[:datapoint_output_folder]
+    )
   end
 
   puts("Datapoint #{combination[:datapoint_id].partition('-')[0]}... #{status.success? ? 'succeeded' : 'failed'}")
   FileUtils.mkdir_p(combination[:datapoint_output_folder])
-  File.write(File.join(combination[:datapoint_output_folder], "log.txt"), stdout_and_stderr)
+  File.write(File.join(combination[:datapoint_output_folder], 'log.txt'), stdout_and_stderr)
 end

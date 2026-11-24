@@ -143,10 +143,7 @@ module OpenstudioStandards
         # Report out the final grouping
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "Final system type group: occ = #{group['type']}, area = #{group['area_ft2'].round} ft2, num stories = #{group['stories']}, zones:")
         group['zones'].sort.each_slice(5) do |zone_list|
-          zone_names = []
-          zone_list.each do |zone|
-            zone_names << zone.name.get.to_s
-          end
+          zone_names = zone_list.map { |zone| zone.name.get.to_s }
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "--- #{zone_names.join(', ')}")
         end
       end
@@ -242,10 +239,7 @@ module OpenstudioStandards
         # Report out the final grouping
         OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "Final system type group: bldg_type = #{group['type']}, area = #{group['area_ft2'].round} ft2, num stories = #{group['stories']}, zones:")
         group['zones'].sort.each_slice(5) do |zone_list|
-          zone_names = []
-          zone_list.each do |zone|
-            zone_names << zone.name.get.to_s
-          end
+          zone_names = zone_list.map { |zone| zone.name.get.to_s }
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "--- #{zone_names.join(', ')}")
         end
       end

@@ -25,4 +25,31 @@ class TestEquipmentCreate < Minitest::Test
     gas_equip_def = space_type.gasEquipment[0].to_GasEquipment.get.gasEquipmentDefinition
     assert_in_delta(OpenStudio.convert(453.7, 'Btu/hr*ft^2', 'W/m^2').get, gas_equip_def.wattsperSpaceFloorArea.get, 0.01)
   end
+
+  def test_create_typical_equipment_uses_median_when_building_type_is_unmatched
+    model = OpenStudio::Model::Model.new
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName('Custom Space Type')
+    space_type.setStandardsBuildingType('CustomBuilding')
+    space_type.additionalProperties.setFeature('electric_equipment_space_type', 'sales_electric_equipment')
+    space_type.additionalProperties.setFeature('natural_gas_equipment_space_type', 'kitchen')
+
+    assert(@equip.create_typical_equipment(model, building_type_fallback: true))
+
+    electric_definition = space_type.electricEquipment.first.to_ElectricEquipment.get.electricEquipmentDefinition
+    gas_definition = space_type.gasEquipment.first.to_GasEquipment.get.gasEquipmentDefinition
+    assert_in_delta(OpenStudio.convert(0.356656563, 'W/ft^2', 'W/m^2').get, electric_definition.wattsperSpaceFloorArea.get, 0.01)
+    assert_in_delta(OpenStudio.convert(205.81, 'Btu/hr*ft^2', 'W/m^2').get, gas_definition.wattsperSpaceFloorArea.get, 0.01)
+  end
+
+  def test_create_typical_equipment_does_not_fallback_by_default
+    model = OpenStudio::Model::Model.new
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName('Custom Space Type')
+    space_type.setStandardsBuildingType('CustomBuilding')
+    space_type.additionalProperties.setFeature('electric_equipment_space_type', 'sales_electric_equipment')
+
+    assert(@equip.create_typical_equipment(model))
+    assert_empty(space_type.electricEquipment)
+  end
 end

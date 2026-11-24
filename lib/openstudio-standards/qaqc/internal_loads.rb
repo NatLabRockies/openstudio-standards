@@ -29,11 +29,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -353,11 +349,7 @@ module OpenstudioStandards
 
       # stop here if only name is requested this is used to populate display name for arguments
       if name_only == true
-        results = []
-        check_elems.each do |elem|
-          results << elem.valueAsString
-        end
-        return results
+        return check_elems.map(&:valueAsString)
       end
 
       std = Standard.build(target_standard)
@@ -534,9 +526,9 @@ module OpenstudioStandards
       end
 
       # get schedule
-      if (space_load_instance.class.to_s == 'OpenStudio::Model::People') && space_load_instance.numberofPeopleSchedule.is_initialized
+      if space_load_instance.instance_of?(OpenStudio::Model::People) && space_load_instance.numberofPeopleSchedule.is_initialized
         schedule_inst = space_load_instance.numberofPeopleSchedule.get
-      elsif (space_load_instance.class.to_s == 'OpenStudio::Model::DesignSpecificationOutdoorAir') && space_load_instance.outdoorAirFlowRateFractionSchedule.is_initialized
+      elsif space_load_instance.instance_of?(OpenStudio::Model::DesignSpecificationOutdoorAir) && space_load_instance.outdoorAirFlowRateFractionSchedule.is_initialized
         schedule_inst = space_load_instance.outdoorAirFlowRateFractionSchedule.get
       elsif space_load_instance.schedule.is_initialized
         schedule_inst = space_load_instance.schedule.get

@@ -21,6 +21,8 @@ class Standard
           OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.Prototypes', "No mapping found for standards building type '#{standards_building_type}' and standards space type '#{standards_space_type}'")
         else
           new_standards_space_type_name = mapping[:new_standards_space_type]
+          space_type.additionalProperties.setFeature('prototype_standards_building_type', standards_building_type)
+          space_type.additionalProperties.setFeature('prototype_standards_space_type', standards_space_type)
           space_type.additionalProperties.setFeature('standards_space_type', new_standards_space_type_name)
           if reset_standards_space_type
             space_type.setStandardsSpaceType(new_standards_space_type_name)

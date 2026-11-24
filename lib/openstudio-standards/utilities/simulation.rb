@@ -160,11 +160,12 @@ Standard.class_eval do
     # Check that the run completed successfully
     end_file_stringpath = "#{run_dir}/run/eplusout.end"
     end_file_path = OpenStudio::Path.new(end_file_stringpath)
+    endstring = nil
     if OpenStudio.exists(end_file_path)
       endstring = File.read(end_file_stringpath)
     end
 
-    if !endstring.include?('EnergyPlus Completed Successfully')
+    if endstring.nil? || !endstring.include?('EnergyPlus Completed Successfully')
       OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "The run did not finish and had following errors: #{errs.join('\n')}")
       return false
     end

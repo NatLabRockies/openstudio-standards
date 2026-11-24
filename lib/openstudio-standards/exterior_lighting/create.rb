@@ -62,8 +62,8 @@ module OpenstudioStandards
     # @param onsite_parking_fraction [Double] onsite parking fraction, 0-1
     # @param add_base_site_allowance [Boolean] whether to include the base site allowance
     # @param use_model_for_entries_and_canopies [Boolean] use building geometry for number of entries and canopy size
-    # @param control_option [String] Options are 'ScheduleNameOnly' and 'AstronomicalClock'.
-    #   'ScheduleNameOnly' will follow the schedule. 'AstronomicalClock' will follow the schedule, but turn off lights when the sun is up.
+    # @param control_option [String, nil] Options are 'ScheduleNameOnly' and 'AstronomicalClock'.
+    #   If nil, uses the value in the exterior lighting properties or defaults to 'AstronomicalClock'.
     # @return [Array<OpenStudio::Model::ExteriorLights>] Array of OpenStudio ExteriorLights object
     def self.create_typical_exterior_lighting(model,
                                               standard: nil,
@@ -72,7 +72,7 @@ module OpenstudioStandards
                                               onsite_parking_fraction: 1.0,
                                               add_base_site_allowance: false,
                                               use_model_for_entries_and_canopies: false,
-                                              control_option: 'AstronomicalClock')
+                                              control_option: nil)
       exterior_lights = []
       installed_power = 0.0
       # get the exterior lighting properties from standard or the lighting_generation
@@ -96,6 +96,8 @@ module OpenstudioStandards
         OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ExteriorLighting', "Exterior lighting properties not found for #{lookup_key}, ext lighting zone #{lighting_zone}, none will be added to model.")
         return exterior_lights
       end
+
+      control_option ||= exterior_lighting_properties['control_option'] || 'AstronomicalClock'
 
       # get model specific areas to for exterior lighting
       area_length_count_hash = OpenstudioStandards::ExteriorLighting.model_get_exterior_lighting_sizes(model)
@@ -190,7 +192,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft^2 of lighting for #{multiplier} ft^2 of parking area.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for parking area, as power is 0 W/ft^2.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for parking area, as power is 0 W/ft^2.')
         end
       end
 
@@ -288,7 +290,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of main entry length.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for main entries, as power is 0 W/ft.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for main entries, as power is 0 W/ft.')
         end
       end
 
@@ -332,7 +334,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power.round(2)} W/ft of lighting for #{multiplier} ft of other doors.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for other doors, as power is 0 W/ft.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for other doors, as power is 0 W/ft.')
         end
       end
 
@@ -376,7 +378,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building entry canopies.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for entry canopies, as power is 0 W/ft^2.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for entry canopies, as power is 0 W/ft^2.')
         end
       end
 
@@ -411,7 +413,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/ft^2 of lighting for #{multiplier} ft^2 of building emergency canopies.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for emergency canopies, as power is 0 W/ft^2.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for emergency canopies, as power is 0 W/ft^2.')
         end
       end
 
@@ -446,7 +448,7 @@ module OpenstudioStandards
           installed_power += power * multiplier
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W/drive through window of lighting for #{multiplier} drive through windows.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No lighting added for drive through windows, as power is 0 W/ft^2.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No lighting added for drive through windows, as power is 0 W/ft^2.')
         end
       end
 
@@ -494,7 +496,7 @@ module OpenstudioStandards
           exterior_lights << ext_lights
           OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "Added #{power} W of non landscape tradable exterior lighting. Will follow occupancy setback reduction.")
         else
-          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', "No base site allowance lighting added, as power is 0 W.")
+          OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.ExteriorLighting', 'No base site allowance lighting added, as power is 0 W.')
         end
       end
 

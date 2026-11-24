@@ -29,7 +29,6 @@ module OpenstudioStandards
                                                         number_of_stories: nil,
                                                         pipe_length: 6.1,
                                                         air_temperature: 21.1)
-
       # Estimate pipe length
       if circulating
         # For circulating systems, get pipe length based on the size of the building.

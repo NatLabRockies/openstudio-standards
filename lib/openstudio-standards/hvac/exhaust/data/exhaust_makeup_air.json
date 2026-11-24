@@ -1,0 +1,81 @@
+{
+  "notes": [
+    "Where an exhausted space draws its makeup air from, when makeup_source is 'Adjacent'.",
+    "makeup_air keys on the all-level space type taxonomy, which is what create_typical builds from. makeup_space_types is an ordered preference list: the first name with an adjacent space wins, so a school kitchen prefers its own cafeteria and falls back to a general dining space.",
+    "legacy_makeup_air is the DOE prototype (building_type, space_type) table this replaces, kept because prototype models set standardsSpaceType to prototype names.",
+    "Only kitchens appear. Supermarket bakery and deli hoods do draw makeup from the sales floor in practice, but the prototype table never modeled that and adding it here would be a new assumption rather than a crosswalk of an existing one."
+  ],
+  "makeup_air": [
+    {
+      "exhaust_space_type": "food preparation",
+      "makeup_space_types": [
+        "dining",
+        "dining - cafeteria/fast food"
+      ],
+      "makeup_air_fraction": 0.5,
+      "source": "FullServiceRestaurant, QuickServiceRestaurant and Hospital Kitchen -> Dining; LargeHotel Kitchen -> Cafe"
+    },
+    {
+      "exhaust_space_type": "food preparation - primary school",
+      "makeup_space_types": [
+        "dining - primary school",
+        "dining"
+      ],
+      "makeup_air_fraction": 0.5,
+      "source": "PrimarySchool Kitchen -> Cafeteria"
+    },
+    {
+      "exhaust_space_type": "food preparation - secondary school",
+      "makeup_space_types": [
+        "dining - secondary school",
+        "dining"
+      ],
+      "makeup_air_fraction": 0.5,
+      "source": "SecondarySchool Kitchen -> Cafeteria"
+    }
+  ],
+  "legacy_makeup_air": [
+    {
+      "exhaust_building_type": "FullServiceRestaurant",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "FullServiceRestaurant",
+      "makeup_space_type": "Dining",
+      "makeup_air_fraction": 0.5
+    },
+    {
+      "exhaust_building_type": "QuickServiceRestaurant",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "QuickServiceRestaurant",
+      "makeup_space_type": "Dining",
+      "makeup_air_fraction": 0.5
+    },
+    {
+      "exhaust_building_type": "Hospital",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "Hospital",
+      "makeup_space_type": "Dining",
+      "makeup_air_fraction": 0.5
+    },
+    {
+      "exhaust_building_type": "SecondarySchool",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "SecondarySchool",
+      "makeup_space_type": "Cafeteria",
+      "makeup_air_fraction": 0.5
+    },
+    {
+      "exhaust_building_type": "PrimarySchool",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "PrimarySchool",
+      "makeup_space_type": "Cafeteria",
+      "makeup_air_fraction": 0.5
+    },
+    {
+      "exhaust_building_type": "LargeHotel",
+      "exhaust_space_type": "Kitchen",
+      "makeup_building_type": "LargeHotel",
+      "makeup_space_type": "Cafe",
+      "makeup_air_fraction": 0.5
+    }
+  ]
+}

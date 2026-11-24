@@ -30,7 +30,6 @@ module OpenstudioStandards
                                                   thermal_absorptance: nil,
                                                   solar_absorptance: nil,
                                                   visible_absorptance: nil)
-
       # make new material
       new_material = OpenStudio::Model::StandardOpaqueMaterial.new(construction.model)
       if name.nil?
@@ -279,7 +278,6 @@ module OpenstudioStandards
                                                  thermal_absorptance: nil,
                                                  solar_absorptance: nil,
                                                  visible_absorptance: nil)
-
       surface_material = construction.to_LayeredConstruction.get.getLayer(0)
       new_material = OpenstudioStandards::Constructions::Materials.opaque_material_set_surface_properties(surface_material,
                                                                                                           roughness: roughness,
