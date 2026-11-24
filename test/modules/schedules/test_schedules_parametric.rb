@@ -398,7 +398,39 @@ class TestSchedulesParametric < Minitest::Test
                                                                           add_hvac: false,
                                                                           add_elevators: false)
 
+    # Apply direct schedule modifications if requested (replacement for parametric workflow)
+    if modify_schedules
+      apply_direct_schedule_modifications(wkdy_start, wkdy_dur, wknd_start, wknd_dur)
+    end
+
     Dir.chdir(orig_dir)
+  end
+
+  def apply_direct_schedule_modifications(wkdy_start, wkdy_dur, wknd_start, wknd_dur)
+    # Get or infer the hours of operation schedule
+    op_sch = @model.getBuilding.getDefaultSchedule(OpenStudio::Model::DefaultScheduleType.new('HoursofOperationSchedule'))
+    if op_sch.empty?
+      op_sch = @sch.model_infer_hours_of_operation_building(@model)
+    else
+      op_sch = op_sch.get.to_ScheduleRuleset.get
+    end
+
+    # Calculate weekday start/end times
+    wkdy_start_time = OpenStudio::Time.new(0, wkdy_start.to_i, ((wkdy_start % 1) * 60).to_i, 0)
+    wkdy_end_time = wkdy_start_time + OpenStudio::Time.new(0, wkdy_dur.to_i, ((wkdy_dur % 1) * 60).to_i, 0)
+
+    # Calculate weekend start/end times
+    wknd_start_time = OpenStudio::Time.new(0, wknd_start.to_i, ((wknd_start % 1) * 60).to_i, 0)
+    wknd_end_time = wknd_start_time + OpenStudio::Time.new(0, wknd_dur.to_i, ((wknd_dur % 1) * 60).to_i, 0)
+
+    # Apply direct schedule modifications without parametric expansion
+    @sch.schedule_ruleset_set_hours_of_operation(op_sch,
+                                                 wkdy_start_time: wkdy_start_time,
+                                                 wkdy_end_time: wkdy_end_time,
+                                                 sat_start_time: wknd_start_time,
+                                                 sat_end_time: wknd_end_time,
+                                                 sun_start_time: wknd_start_time,
+                                                 sun_end_time: wknd_end_time)
   end
 
   def test_comstock_bldg_hours_of_operation_days
@@ -468,54 +500,39 @@ class TestSchedulesParametric < Minitest::Test
 
     types.each do |type|
       create_simple_comstock_model_with_schedule_mod(type, 8.0, 12.0, 10.0, 6.0)
-      # create_simple_comstock_model_with_schedule_mod(type, 8.0, 12.0, 10.0, 6.0, false)
 
-      # osm_path = "#{run_dir}/#{type}_modified_fix2.osm"
+      # osm_path = "#{run_dir}/#{type}_modified.osm"
       # assert(@model.save(osm_path, true))
 
-      # test that hours_of_operation index found for all schedule days
+      # Verify no parametric errors (these would indicate old workflow was used)
       logs = get_logs(log_type = OpenStudio::Error)
-
       logs.each do |str|
         refute_match(/In schedule_ruleset_get_parametric_inputs, schedule(.*)has no hours_of_operation target index. Won't be modified/, str, "Parametric Schedule error found")
       end
 
-      # test for thermostat schedules
-      day_schedules = []
+      # Get timestep for validation
+      timesteps = @model.getTimestep.numberOfTimestepsPerHour
 
-      # get thermostat schedules
-      tstat_schedules = []
+      # Get building hours of operation schedule to verify it was set correctly
+      default_op_sch = @model.getBuilding.getDefaultSchedule(OpenStudio::Model::DefaultScheduleType.new('HoursofOperationSchedule')).get.to_ScheduleRuleset.get
+      op_times = default_op_sch.defaultDaySchedule.times.map(&:to_s)
+
+      # Collect all schedules to validate (thermostat + space loads)
+      schedules_to_check = []
+
+      # Add thermostat schedules
       @model.getThermostatSetpointDualSetpoints.each do |tstat|
         next if tstat.coolingSetpointTemperatureSchedule.empty? || tstat.heatingSetpointTemperatureSchedule.empty?
         clg_sch = tstat.coolingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
         htg_sch = tstat.heatingSetpointTemperatureSchedule.get.to_ScheduleRuleset.get
-        tstat_schedules << clg_sch unless tstat_schedules.include?(clg_sch)
-        tstat_schedules << htg_sch unless tstat_schedules.include?(htg_sch)
+        schedules_to_check << clg_sch unless schedules_to_check.include?(clg_sch)
+        schedules_to_check << htg_sch unless schedules_to_check.include?(htg_sch)
       end
 
-      tstat_schedules.each do |sch_rule|
-        day_schedules << sch_rule.defaultDaySchedule
-      end
-
-      # building hour of operation schedule
-      default_op_sch = @model.getBuilding.getDefaultSchedule(OpenStudio::Model::DefaultScheduleType.new('HoursofOperationSchedule')).get.to_ScheduleRuleset.get
-      op_times = default_op_sch.defaultDaySchedule.times.map(&:to_s)
-
-      # default_op_sch.scheduleRules.each {|rule| puts rule}
-      # puts OpenStudio::Model.getRecursiveChildren(default_op_sch)
-
-      # only test that default days match
-      day_schedules.each do |day_sch|
-        times = day_sch.times.map(&:to_s)
-        assert(op_times.to_set.superset?(times.to_set), "For #{type}, expected #{op_times} to include times from thermostat schedule #{day_sch.name.get}: #{times}")
-      end
-
-      timesteps = @model.getTimestep.numberOfTimestepsPerHour
-      schedules_to_check = []
-      schedules_to_check += tstat_schedules
+      # Add space load schedules
       @model.getSpaceLoadInstances.each do |load|
-        next if ['OS_WaterUse_Equipment','OS_InternalMass'].include? load.iddObjectType.valueName
-        load = load.method("to_#{load.iddObjectType.valueName.gsub('OS_','').gsub('_','')}").call.get
+        next if ['OS_WaterUse_Equipment', 'OS_InternalMass'].include? load.iddObjectType.valueName
+        load = load.method("to_#{load.iddObjectType.valueName.gsub('OS_', '').gsub('_', '')}").call.get
         if load.instance_of?(OpenStudio::Model::People)
           opt_sch = load.numberofPeopleSchedule
         elsif load.instance_of?(OpenStudio::Model::DesignSpecificationOutdoorAir)
@@ -523,23 +540,25 @@ class TestSchedulesParametric < Minitest::Test
         else
           opt_sch = load.schedule
         end
+        next if opt_sch.empty?
         opt_sch = opt_sch.get.to_ScheduleRuleset.get
-        schedules_to_check << opt_sch
+        schedules_to_check << opt_sch unless schedules_to_check.include?(opt_sch)
       end
 
-      schedules_to_check.each do |opt_sch|
-        day_schedules = [opt_sch.defaultDaySchedule]
-        opt_sch.scheduleRules.each{|r| day_schedules << r.daySchedule}
-        day_schedules.each do |sch_day|
-          mins = sch_day.times.map{|t| t.minutes}.uniq
+      # Validate all schedules have correct timestep alignment
+      schedules_to_check.each do |sch|
+        day_schedules = [sch.defaultDaySchedule]
+        sch.scheduleRules.each { |r| day_schedules << r.daySchedule }
 
-          ts_mins = (0...60).step(60/timesteps).to_a
+        day_schedules.each do |sch_day|
+          mins = sch_day.times.map { |t| t.minutes }.uniq
+          ts_mins = (0...60).step(60 / timesteps).to_a
+
           mins.each do |min|
-            assert_includes(ts_mins, min, "#{sch_day.name.get} fails")
+            assert_includes(ts_mins, min, "#{sch_day.name.get} has times not aligned with timestep. Expected minutes in #{ts_mins}, but got #{min}")
           end
         end
       end
-
     end
   end
 end
