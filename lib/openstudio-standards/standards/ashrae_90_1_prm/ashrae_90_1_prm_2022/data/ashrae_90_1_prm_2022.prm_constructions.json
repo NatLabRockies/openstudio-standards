@@ -1,0 +1,685 @@
+{
+  "prm_constructions": [
+    {
+      "name": "PRM Below Grade Wall",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GroundContactWall",
+      "standards_construction_type": "Mass",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "8 in. Concrete Block Basement Wall",
+        "Typical Insulation",
+        "1/2 in. Gypsum Board"
+      ]
+    },
+    {
+      "name": "PRM IEAD Roof",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorRoof",
+      "standards_construction_type": "IEAD",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "Roof Membrane",
+        "Typical Insulation",
+        "Metal Roof Surface"
+      ]
+    },
+    {
+      "name": "PRM Slab on Grade Floor",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GroundContactFloor",
+      "standards_construction_type": "Mass",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "6 in. Normalweight Concrete Floor"
+      ]
+    },
+    {
+      "name": "PRM Steel Framed Exterior Floor",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorFloor",
+      "standards_construction_type": "SteelFramed",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "Metal Decking",
+        "4 in. Normalweight Concrete Floor",
+        "Typical Carpet Pad"
+      ]
+    },
+    {
+      "name": "PRM Steel Framed Exterior Wall",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWall",
+      "standards_construction_type": "SteelFramed",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "Stucco - 3/8 in.",
+        "5/8 in. Gypsum Board",
+        "Typical Insulation",
+        "5/8 in. Gypsum Board"
+      ]
+    },
+    {
+      "name": "PRM Typical Insulated Metal Door",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorDoor",
+      "standards_construction_type": "Swinging",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "F08 Metal surface",
+        "Typical Insulation"
+      ]
+    },
+    {
+      "name": "PRM Typical Overhead Door",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorDoor",
+      "standards_construction_type": "NonSwinging",
+      "insulation_layer": "Typical Insulation",
+      "skylight_framing": null,
+      "materials": [
+        "Typical Insulation"
+      ]
+    },
+    {
+      "name": "U 0.46 SHGC 0.4 VT 0.44 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.46 SHGC 0.4 VT 0.44 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.46 SHGC 0.4 VT 0.44 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.46 SHGC 0.4 VT 0.44 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.25 VT 0.28 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.25 VT 0.28 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.25 VT 0.28 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.25 VT 0.28 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.57 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.57 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.58 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.58 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.49 VT 0.54 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.49 VT 0.54 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.64 VT 0.7 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.64 VT 0.7 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.64 VT 0.7 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.64 VT 0.7 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.68 VT 0.75 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.68 VT 0.75 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.69 SHGC 0.68 VT 0.75 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.69 SHGC 0.68 VT 0.75 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.81 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.81 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 0.81 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 0.81 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.25 VT 0.28 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.25 VT 0.28 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.25 VT 0.28 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.25 VT 0.28 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.34 VT 0.37 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.34 VT 0.37 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.34 VT 0.37 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.34 VT 0.37 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.4 VT 0.44 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.4 VT 0.44 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.4 VT 0.44 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.4 VT 0.44 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.61 VT 0.67 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.61 VT 0.67 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.22 SHGC 0.61 VT 0.67 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.22 SHGC 0.61 VT 0.67 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.19 VT 0.21 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.19 VT 0.21 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.36 VT 0.4 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.36 VT 0.4 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.39 VT 0.43 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.39 VT 0.43 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.49 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.49 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.49 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.49 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.55 VT 0.61 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.55 VT 0.61 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.61 VT 0.67 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "GlassDoor",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.61 VT 0.67 Simple Glazing"
+      ]
+    },
+    {
+      "name": "U 1.36 SHGC 0.61 VT 0.67 Simple Glazing",
+      "template": "90.1-PRM-2022",
+      "intended_surface_type": "ExteriorWindow",
+      "standards_construction_type": "Any Vertical Glazing",
+      "insulation_layer": null,
+      "skylight_framing": null,
+      "materials": [
+        "U 1.36 SHGC 0.61 VT 0.67 Simple Glazing"
+      ]
+    }
+  ]
+}
