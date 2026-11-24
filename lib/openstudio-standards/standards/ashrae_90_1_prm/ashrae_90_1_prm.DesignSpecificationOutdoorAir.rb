@@ -1,4 +1,4 @@
-class ASHRAE901PRM2019 < ASHRAE901PRM
+class ASHRAE901PRM < Standard
   # @!group DesignSpecification:OutdoorAir
   # Sets the rules on outdoor air specifications on spaces / spaceType
 

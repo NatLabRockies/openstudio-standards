@@ -34,6 +34,10 @@ module References
   # @see https://www.techstreet.com/ashrae/standards/ashrae-90-1-2019-i-p?product_id=2088527 Purchase in the ASHRAE Bookstore
   class ASHRAE901PRM2019; end
 
+  # ASHRAE 90.1-2022 Appendix G PRM
+  # @see https://www.techstreet.com/ashrae/standards/ashrae-90-1-2022-i-p Purchase in the ASHRAE Bookstore
+  class ASHRAE901PRM2022; end
+
   # ASHRAE 90.1-2019
   # @see https://www.techstreet.com/ashrae/standards/ashrae-90-1-2019-i-p?product_id=2088527 Purchase in the ASHRAE Bookstore
   class ASHRAE9012019; end

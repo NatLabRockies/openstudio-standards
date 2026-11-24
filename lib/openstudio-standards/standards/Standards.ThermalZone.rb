@@ -283,7 +283,7 @@ class Standard
 
     # Cooling limit is climate-independent
     case template
-    when '90.1-2016', '90.1-PRM-2019'
+    when '90.1-2016', '90.1-PRM-2019', '90.1-PRM-2022'
       clg_lim_btu_per_ft2 = 3.4
     else
       clg_lim_btu_per_ft2 = 5
