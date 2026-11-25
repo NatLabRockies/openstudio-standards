@@ -621,6 +621,8 @@ class AppendixGPRMTests < Minitest::Test
       elsif building_type == 'LargeOffice' || building_type == 'MediumOffice'
         # Check that the datacenter basement is assigned to system 11, PSZ-VAV
         check_cmp_dtctr_system_type(model)
+        # Check the fan power allowance of system 11 (if any)
+        check_sz_vav_allowable_fan_bhp(model)
       end
     end
   end

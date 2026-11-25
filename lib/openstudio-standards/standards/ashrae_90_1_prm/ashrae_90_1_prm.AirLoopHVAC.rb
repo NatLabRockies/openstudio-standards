@@ -420,8 +420,10 @@ class ASHRAE901PRM < Standard
     case system_type
       when 'PSZ_HP', 'PSZ_AC', 'SZ_CV' # 3, 4, 12, 13
         allowable_fan_bhp = (dsn_air_flow_cfm * 0.00094) + fan_pwr_adjustment_bhp
-      when 'PVAV_Reheat', 'PVAV_PFP_Boxes', 'VAV_Reheat', 'VAV_PFP_Boxes', 'SZ_VAV' # 5, 6, 7, 8, 11
+      when 'PVAV_Reheat', 'PVAV_PFP_Boxes', 'VAV_Reheat', 'VAV_PFP_Boxes' # 5, 6, 7, 8
         allowable_fan_bhp = (dsn_air_flow_cfm * 0.0013) + fan_pwr_adjustment_bhp
+      when 'SZ_VAV' # 11
+        allowable_fan_bhp = (dsn_air_flow_cfm * 0.00062) + fan_pwr_adjustment_bhp
       else
         OpenStudio.logFree(OpenStudio::Error, 'openstudio.ashrae_90_1_prm.AirLoopHVAC', "Air loop #{air_loop_hvac.name} is not associated with a baseline system.")
     end
