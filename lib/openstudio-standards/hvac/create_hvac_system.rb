@@ -4166,6 +4166,8 @@ module OpenstudioStandards
                                                                               supplemental_htg_coil)
         pthp_system.setName("#{zone.name} PTHP")
         pthp_system.setFanPlacement('DrawThrough')
+        # supplemental (electric) heat is only allowed when outdoor air is below 40F
+        pthp_system.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(OpenStudio.convert(40.0, 'F', 'C').get)
         pthp_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
         if fan_type == 'ConstantVolume'
           pthp_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOnDiscreteSchedule)
