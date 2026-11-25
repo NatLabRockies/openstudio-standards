@@ -218,19 +218,25 @@ class NECB2011
       space.resetDesignSpecificationOutdoorAir
       oa = OpenStudio::Model::DesignSpecificationOutdoorAir.new(space.model)
       oa.setName("#{space.nameString} OA Design Specs")
-      oa.setOutdoorAirFlowperFloorArea(qOA / space.floorArea)
+      oa.setOutdoorAirFlowRate(qOA/1000) # m3/s
       space.setDesignSpecificationOutdoorAir(oa)
 
-      # Add fan exhaust flows as OA AdditionalProperties.
+      # Add supplyfan exhaust flows as OA AdditionalProperties. Ensure IP units.
+      ft2    = OpenStudio.convert(space.floorArea, 'm^2', 'ft^2').get
+      qOA    = OpenStudio.convert(qOA, "L/s", "cfm").get
+      qHOOD  = OpenStudio.convert(qHOOD, "L/s", "cfm").get
+      qDRYER = OpenStudio.convert(qDRYER, "L/s", "cfm").get
+
       notes = oa.additionalProperties
-      notes.setFeature("Ref OA per area", qOA / space.floorArea)
-      notes.setFeature("Ref OA per person", 0)
-      notes.setFeature("Ref OA ach", 0)
-      notes.setFeature("Ref occupancy per 1000ft2", 0)
+      notes.setFeature("Ref OA cfm", qOA)
+      notes.setFeature("Ref OA per area", 0.0)
+      notes.setFeature("Ref OA per person", 0.0)
+      notes.setFeature("Ref OA ach", 0.0)
+      notes.setFeature("Ref occupancy per 1000ft2", 0.0)
       notes.setFeature("Ref standard", ref)
       notes.setFeature("Ref space type", "Dwelling unit")
-      notes.setFeature("HOOD EXH", qHOOD.round(3))
-      notes.setFeature("DRYER EXH", qDRYER.round(3))
+      notes.setFeature("HOOD EXH cfm", qHOOD)
+      notes.setFeature("DRYER EXH cfm", qDRYER)
     end
 
     true
@@ -546,9 +552,12 @@ class NECB2011
 
       # Add information about the source to an additional properties object. Used in unit testing but could be useful elsewhere.
       notes = ventilation.additionalProperties
+      notes.setFeature("Ref OA cfm", 0.0)
       notes.setFeature("Ref OA per area", space_type_properties['ventilation_per_area'].to_f)
       notes.setFeature("Ref OA per person", space_type_properties['ventilation_per_person'].to_f)
       notes.setFeature("Ref OA ach", space_type_properties['ventilation_air_changes'].to_f)
+      notes.setFeature("HOOD EXH cfm", 0.0)
+      notes.setFeature("DRYER EXH cfm", 0.0)
       notes.setFeature("Ref occupancy per 1000ft2", space_type_properties['ventilation_occupancy_rate_people_per_1000ft2'].to_f)
       notes.setFeature("Ref standard", space_type_properties['ventilation_occupancy_standard'].to_s)
       notes.setFeature("Ref space type", space_type_properties['ventilation_standard_space_type'].to_s)
