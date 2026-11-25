@@ -628,6 +628,28 @@ class AppendixGPRMTests < Minitest::Test
     end
   end
 
+  # Check that the allowable fan system brake horsepower of the baseline single-zone VAV systems (system 11)
+  # uses the system 11 coefficient of Table G3.1.2.9 (90.1-2019) / Table G3.2.2.8 (90.1-2022): CFMs x 0.00062 + A.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio model object
+  # @return [Integer] number of system 11 air loops checked
+  def check_sz_vav_allowable_fan_bhp(model)
+    standard = Standard.build('90.1-PRM-2019')
+    air_loops_checked = 0
+    model.getAirLoopHVACs.sort.each do |air_loop|
+      next unless air_loop.additionalProperties.getFeatureAsString('baseline_system_type').to_s == 'SZ_VAV'
+
+      design_flow_m3_per_s = air_loop.autosizedDesignSupplyAirFlowRate.is_initialized ? air_loop.autosizedDesignSupplyAirFlowRate.get : air_loop.designSupplyAirFlowRate.get
+      design_flow_cfm = OpenStudio.convert(design_flow_m3_per_s, 'm^3/s', 'cfm').get
+      pressure_drop_adjustment_bhp = standard.air_loop_hvac_fan_power_limitation_pressure_drop_adjustment_brake_horsepower(air_loop)
+      allowable_bhp = standard.air_loop_hvac_allowable_system_brake_horsepower(air_loop)
+      assert_in_delta(design_flow_cfm * 0.00062, allowable_bhp - pressure_drop_adjustment_bhp, 0.001,
+                      "The allowable fan brake horsepower of system 11 air loop #{air_loop.name} should be CFMs x 0.00062 + A.")
+      air_loops_checked += 1
+    end
+    return air_loops_checked
+  end
+
   def check_if_sz_vav(model, zone)
     zone_system_check = false
     model.getAirLoopHVACUnitarySystems.each do |unit_system|
