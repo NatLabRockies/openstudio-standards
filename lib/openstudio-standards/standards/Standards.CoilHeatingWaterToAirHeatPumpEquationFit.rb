@@ -1,24 +1,25 @@
 class Standard
   # @!group CoilHeatingWaterToAirHeatPumpEquationFit
 
-  # Finds lookup object in standards and return efficiency
+  # Finds lookup object in standards and return efficiency.
+  # The requirement is found with {#water_to_air_heat_pump_find_efficiency_object} using the capacity of the paired cooling coil.
+  # If the capacity is larger than the largest capacity in the data, the requirement for the
+  # largest capacity range is used and a warning is logged.
   #
   # @param coil_heating_water_to_air_heat_pump [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit] coil heating object
   # @param rename [Boolean] if true, object will be renamed to include capacity and efficiency level
-  # @return [Double] full load efficiency (COP)
+  # @return [Double, Boolean] heating coefficient of performance (COP), false if no efficiency requirement is found
   def coil_heating_water_to_air_heat_pump_standard_minimum_cop(coil_heating_water_to_air_heat_pump, rename = false)
-    search_criteria = {}
-    search_criteria['template'] = template
     capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_water_to_air_heat_pump)
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
     capacity_kbtu_per_hr = OpenStudio.convert(capacity_w, 'W', 'kBtu/hr').get
 
     # Look up the efficiency characteristics
-    coil_props = model_find_object(standards_data['water_source_heat_pumps_heating'], search_criteria, capacity_btu_per_hr, Date.today)
+    coil_props = water_to_air_heat_pump_find_efficiency_object('heat_pumps_heating', capacity_btu_per_hr, coil_heating_water_to_air_heat_pump.name.to_s)
 
     # Check to make sure properties were found
     if coil_props.nil?
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name}, cannot find efficiency info using #{search_criteria} and capacity #{capacity_btu_per_hr} btu/hr, cannot apply efficiency standard.")
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name}, cannot find efficiency info for a water source heat pump with capacity #{capacity_btu_per_hr} btu/hr, cannot apply efficiency standard.")
       successfully_set_all_properties = false
       return successfully_set_all_properties
     end
@@ -42,6 +43,7 @@ class Standard
   end
 
   # Applies the standard efficiency ratings and typical performance curves to this object.
+  # The efficiency is found with {#coil_heating_water_to_air_heat_pump_standard_minimum_cop}.
   #
   # @param coil_heating_water_to_air_heat_pump [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit] coil heating object
   # @param sql_db_vars_map [Hash] hash map
@@ -50,17 +52,15 @@ class Standard
     successfully_set_all_properties = true
 
     # Get the search criteria
-    search_criteria = {}
-    search_criteria['template'] = template
     capacity_w = OpenstudioStandards::HVAC.coil_heating_get_paired_coil_cooling_capacity(coil_heating_water_to_air_heat_pump)
     capacity_btu_per_hr = OpenStudio.convert(capacity_w, 'W', 'Btu/hr').get
 
     # Look up the efficiency characteristics
-    coil_props = model_find_object(standards_data['water_source_heat_pumps_heating'], search_criteria, capacity_btu_per_hr, Date.today)
+    coil_props = water_to_air_heat_pump_find_efficiency_object('heat_pumps_heating', capacity_btu_per_hr, coil_heating_water_to_air_heat_pump.name.to_s)
 
     # Check to make sure properties were found
     if coil_props.nil?
-      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name}, cannot find efficiency info using #{search_criteria} and capacity #{capacity_btu_per_hr} btu/hr, cannot apply efficiency standard.")
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.CoilHeatingWaterToAirHeatPumpEquationFit', "For #{coil_heating_water_to_air_heat_pump.name}, cannot find efficiency info for a water source heat pump with capacity #{capacity_btu_per_hr} btu/hr, cannot apply efficiency standard.")
       successfully_set_all_properties = false
       return sql_db_vars_map
     end
