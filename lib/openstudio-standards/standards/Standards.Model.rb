@@ -638,11 +638,8 @@ class Standard
       end
     end
 
-    # If needed, remove all non-adiabatic pipes of SWH loops
+    # If needed, remove all non-adiabatic pipes of the plant loops
     proposed_model.getPlantLoops.sort.each do |plant_loop|
-      # Skip non service water heating loops
-      next unless OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
-
       plant_loop_adiabatic_pipes_only(plant_loop)
     end
 

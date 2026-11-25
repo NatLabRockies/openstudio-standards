@@ -117,11 +117,44 @@ class AppendixGPRMTests < Minitest::Test
     return model
   end
 
-  # Add piping insulation to service heating water systems
+  # Add piping insulation to service water heating systems and
+  # indoor and outdoor pipes to all the other plant loops (hot water, steam, chilled water and condenser water loops)
   def add_piping_insulation(model, arguments)
+    # Construction used by the indoor and outdoor pipes
+    copper_pipe = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+    copper_pipe.setName('Copper pipe 0.75in type L')
+    copper_pipe.setRoughness('Smooth')
+    copper_pipe.setThickness(OpenStudio.convert(0.045, 'in', 'm').get)
+    copper_pipe.setThermalConductivity(386.0)
+    copper_pipe.setDensity(OpenStudio.convert(556, 'lb/ft^3', 'kg/m^3').get)
+    copper_pipe.setSpecificHeat(OpenStudio.convert(0.092, 'Btu/lb*R', 'J/kg*K').get)
+    pipe_construction = OpenStudio::Model::Construction.new(model)
+    pipe_construction.setName('Uninsulated copper pipe 0.75in type L')
+    pipe_construction.setLayers([copper_pipe])
+
+    # Constant ambient conditions for the indoor pipes
+    ambient_temperature_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    ambient_temperature_sch.setName('Pipe ambient temperature')
+    ambient_temperature_sch.setValue(21.0)
+    ambient_velocity_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    ambient_velocity_sch.setName('Pipe ambient air velocity')
+    ambient_velocity_sch.setValue(0.2)
+
     model.getPlantLoops.each do |plant_loop|
       if OpenstudioStandards::HVAC.plant_loop_swh_loop?(plant_loop)
         OpenstudioStandards::ServiceWaterHeating.create_service_water_heating_piping_losses(model, plant_loop)
+      else
+        pipe_indoor = OpenStudio::Model::PipeIndoor.new(model)
+        pipe_indoor.setName("#{plant_loop.name} Indoor Pipe")
+        pipe_indoor.setEnvironmentType('Schedule')
+        pipe_indoor.setAmbientTemperatureSchedule(ambient_temperature_sch)
+        pipe_indoor.setAmbientAirVelocitySchedule(ambient_velocity_sch)
+        pipe_indoor.setConstruction(pipe_construction)
+        pipe_indoor.addToNode(plant_loop.supplyOutletNode)
+        pipe_outdoor = OpenStudio::Model::PipeOutdoor.new(model)
+        pipe_outdoor.setName("#{plant_loop.name} Outdoor Pipe")
+        pipe_outdoor.setConstruction(pipe_construction)
+        pipe_outdoor.addToNode(plant_loop.demandInletNode)
       end
     end
 
