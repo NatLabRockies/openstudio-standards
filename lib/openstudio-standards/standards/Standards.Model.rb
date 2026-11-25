@@ -226,6 +226,11 @@ class Standard
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Removing External Shading Devices ***')
       model_remove_external_shading_devices(model)
 
+      # The baseline should not shade itself, so disable self-shading
+      shadow_calculation = model.getShadowCalculation
+      shadow_calculation.setDisableSelfShadingWithinShadingZoneGroups(true)
+      shadow_calculation.setDisableSelfShadingFromShadingZoneGroupstoOtherZones(true)
+
       # Reduce the WWR and SRR, if necessary
       OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', '*** Adjusting Window and Skylight Ratios ***')
       success, wwr_info = model_apply_prm_baseline_window_to_wall_ratio(model, climate_zone, wwr_building_type: wwr_building_type)

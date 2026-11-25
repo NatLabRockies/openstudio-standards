@@ -1868,6 +1868,19 @@ class AppendixGPRMTests < Minitest::Test
     end
   end
 
+  # Check that self-shading is disabled in the baseline models
+  #
+  # @param prototypes_base [Hash] Baseline prototypes
+  def check_self_shading(prototypes_base)
+    prototypes_base.each do |prototype, model_baseline|
+      building_type, template, climate_zone, user_data_dir, mod = prototype
+
+      shadow_calculation = model_baseline.getShadowCalculation
+      assert(shadow_calculation.disableSelfShadingWithinShadingZoneGroups, "Self-shading within shading zone groups should be disabled in the #{building_type}, #{template}, #{climate_zone} baseline model.")
+      assert(shadow_calculation.disableSelfShadingFromShadingZoneGroupstoOtherZones, "Self-shading from shading zone groups to other zones should be disabled in the #{building_type}, #{template}, #{climate_zone} baseline model.")
+    end
+  end
+
   def check_unenclosed_spaces(baseline_base)
     baseline_base.each do |baseline, baseline_model|
       building_type, template, climate_zone, user_data_dir, mod = baseline
