@@ -259,7 +259,7 @@ class NECB2011
   # method skips unoccupied spaces like plenums.
   #
   # @author btap (original author?)
-  # @author denis@rd2.ca (dwelling ventilation edits)
+  # @author denis@rd2.ca (2026 dwelling ventilation edits)
   #
   # @param space_type [OpenStudio::Model::SpaceType] a spacetype
   # @param set_people [Boolean] whether to set people

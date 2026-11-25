@@ -76,10 +76,9 @@ class MURB_OA_Tests < Minitest::Test
               refute_empty(stOA, "#{cas}: spacetype OA empty?")
               stOA  = stOA.get
               stOAp = stOA.additionalProperties
+              units = type.spaces.select { |sp| st.activity.act(sp) == "units" }
 
-              type.spaces.each do |space|
-                next unless st.activity.act(space) == "units" # dwellings
-
+              units.each do |space|
                 id    = space.nameString
                 spOA  = space.designSpecificationOutdoorAir
                 refute_empty(spOA, "#{cas}: #{id} OA empty?")

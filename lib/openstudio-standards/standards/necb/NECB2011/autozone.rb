@@ -290,37 +290,68 @@ class NECB2011
     return total
   end
 
-  # Dwelling unit spaces need to have their own HVAC system. Thankfully NECB defines what spacetypes are considering
-  # dwelling units and have been defined as spaces that are
-  # openstudio-standards/standards/necb/NECB2011/data/necb_hvac_system_selection_type.json as spaces that are Residential/Accomodation and Sleeping area'
-  # this is determine by the is_a_necb_dwelling_unit? method. The thermostat is set by the space-type schedule. This will return an array of TZ.
+  ##
+  # Returns collection of dwelling unit thermal zones, once initialized
+  #
+  # @author btap (original author?)
+  # @author denis@rd2.ca (2026 edits)
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Array] collection of dwelling unit thermal zones
   def auto_zone_dwelling_units(model)
-    dwelling_tz_array = []
-    # ----Dwelling units----------- will always have their own system per unit, so they should have their own thermal zone.
-    model.getSpaces.select { |space| is_a_necb_dwelling_unit?(space) }.each do |space|
+    zones = []
+    units = model.getSpaces.select { |space| @activity.act(space) == "units" }
+
+    # DEPRECATED COMMENTARY.
+    # Dwelling unit spaces need to have their own HVAC system. Thankfully NECB
+    # defines what spacetypes are considering dwelling units and have been
+    # defined as spaces that are:
+    #   openstudio-standards/standards/necb/NECB2011/data/necb_hvac_system_selection_type.json
+    # Thermostat is set by the space-type schedule.
+
+    units.each do |unit|
+      id   = unit.nameString
+      bTy  = unit.spaceType.get.standardsBuildingType.get
+      sTy  = unit.spaceType.get.standardsSpaceType.get
+      bID  = unit.buildingStory.get.name
+      sch  = @activity.schedule(unit).upcase
+      # sch  = determine_dominant_schedule(unit)
       zone = OpenStudio::Model::ThermalZone.new(model)
-      zone.setName("DU_BT=#{space.spaceType.get.standardsBuildingType.get}_ST=#{space.spaceType.get.standardsSpaceType.get}_FL=#{space.buildingStory.get.name}_SCH#{determine_dominant_schedule([space])}")
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      zone.setName("DU_BT=#{bTy}_ST=#{sTy}_FL=#{bID}_SCH#{sch}")
+
+      unless space_multiplier_map[id].nil? || (space_multiplier_map[id] == 1)
+        zone.setMultiplier(space_multiplier_map[id])
       end
-      space.setThermalZone(zone)
+
+      unit.setThermalZone(zone)
 
       # Add a thermostat based on the space type.
-      space_type_name = space.spaceType.get.name.get
-      thermostat_name = space_type_name + ' Thermostat'
-      thermostat = model.getThermostatSetpointDualSetpointByName(thermostat_name)
+      stID = unit.spaceType.get.nameString
+      tID  = stID + ' Thermostat'
+      thermostat = model.getThermostatSetpointDualSetpointByName(tID)
+
+      # Thermostat ID for the spacetype should exist.
       if thermostat.empty?
-        # The thermostat name for the spacetype should exist.
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Thermostat #{thermostat_name} not found for space name: #{space.name}")
+        emsg = "Space '#{id}' thermostat #{tID} not found."
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', emsg)
       else
-        thermostat_clone = thermostat.get.clone(model).to_ThermostatSetpointDualSetpoint.get
-        zone.setThermostatSetpointDualSetpoint(thermostat_clone)
-        # Set Ideal loads to thermal zone for sizing for NECB needs. We need this for sizing.
-        OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model).addToThermalZone(zone)
+        tstat = thermostat.get.clone(model)
+        tstat = tstat.to_ThermostatSetpointDualSetpoint.get
+        tstat.setName(id + ' Thermostat')
+        zone.setThermostatSetpointDualSetpoint(tstat)
+
+        # Ideal Loads Air System for sizing, per NECB requirements.
+        ideal = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
+        ideal.addToThermalZone(zone)
       end
-      dwelling_tz_array << zone
+
+      # Add zone exhaust rates (@todo).
+
+      zones << zone
     end
-    return dwelling_tz_array
+
+    zones
   end
 
   # Something that the code is silent on are smelly humid areas that should not be on the same system as the rest of the
