@@ -244,8 +244,8 @@ class NECB2011 < Standard
 
   # This method is a wrapper to create the 16 archetypes easily. # 55 args
   def model_create_prototype_model(template:,
-                                   building_type:,
-                                   construction_opt: '',
+                                   building_type: "",
+                                   construction_opt: 'structure',
                                    epw_file:,
                                    custom_weather_folder: nil,
                                    debug: false,
@@ -287,7 +287,7 @@ class NECB2011 < Standard
                                    rotation_degrees: nil,
                                    fdwr_set: -1.0,
                                    srr_set: -1.0,
-                                   srr_opt: '',
+                                   srr_opt: 'osut',
                                    nv_type: nil,
                                    nv_opening_fraction: nil,
                                    nv_temp_out_min: nil,
@@ -318,7 +318,9 @@ class NECB2011 < Standard
                                    boiler_cap_ratio: nil,
                                    airloop_fancoils_heating: nil,
                                    oerd_utility_pricing: nil)
+
     model = load_building_type_from_library(building_type: building_type)
+
     return model_apply_standard(model: model,
                                 construction_opt: construction_opt,
                                 tbd_option: tbd_option,
@@ -391,18 +393,27 @@ class NECB2011 < Standard
                                 boiler_fuel: boiler_fuel,
                                 boiler_cap_ratio: boiler_cap_ratio,
                                 airloop_fancoils_heating: airloop_fancoils_heating,
-                                oerd_utility_pricing: oerd_utility_pricing
-                                )
+                                oerd_utility_pricing: oerd_utility_pricing)
   end
 
-  def load_building_type_from_library(building_type:)
-    osm_model_path = File.absolute_path(File.join(__FILE__, '..', '..', '..', "necb/NECB2011/data/geometry/#{building_type}.osm"))
-    model = false
-    if File.file?(osm_model_path)
-      model = BTAP::FileIO.load_osm(osm_model_path)
-      model.getBuilding.setName(building_type)
-    end
-    return model
+  ##
+  # Grabs BTAP/NECB prototype model, from standards/necb/NECB2011/data/geometry.
+  #
+  # @param building_type [String] a prototype identifier, e.g. "Hospital"
+  #
+  # @return [OpenStudio::Model::Model] matching model (false if mismatch)
+  def load_building_type_from_library(building_type: "")
+    return false unless building_type.respond_to?(:to_sym)
+
+    type = building_type.to_s
+    osm  = "necb/NECB2011/data/geometry/#{type}.osm"
+    path = File.absolute_path(File.join(__FILE__, '..', '..', '..', osm))
+    return false unless File.file?(path)
+
+    model = BTAP::FileIO.load_osm(path)
+    model.getBuilding.setName(type)
+
+    model
   end
 
   # Created this method so that additional methods can be addded for bulding the prototype model in later
@@ -453,7 +464,7 @@ class NECB2011 < Standard
                            skylight_solar_trans: nil,
                            fdwr_set: nil,
                            srr_set: nil,
-                           srr_opt: '',
+                           srr_opt: 'osut',
                            rotation_degrees: nil,
                            scale_x: nil,
                            scale_y: nil,
@@ -484,20 +495,24 @@ class NECB2011 < Standard
                            airloop_fancoils_heating: nil,
                            oerd_utility_pricing: nil)
 
+    # ... why maintain this variable? @todo
     oerd_utility_pricing = false
+
     apply_weather_data(model: model,
                        epw_file: epw_file,
                        custom_weather_folder: custom_weather_folder,
                        btap_weather: btap_weather)
+
     primary_heating_fuel = validate_primary_heating_fuel(primary_heating_fuel: primary_heating_fuel, model: model)
     self.fuel_type_set = SystemFuels.new()
     self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: primary_heating_fuel)
+
     clean_and_scale_model(model: model,
-                rotation_degrees: rotation_degrees,
-                scale_x: scale_x,
-                scale_y: scale_y,
-                scale_z: scale_z,
-                footprint_aspect_ratio: footprint_aspect_ratio)
+                          rotation_degrees: rotation_degrees,
+                          scale_x: scale_x,
+                          scale_y: scale_y,
+                          scale_z: scale_z,
+                          footprint_aspect_ratio: footprint_aspect_ratio)
 
     ext_floor_cond           = convert_arg_to_f(variable: ext_floor_cond, default: nil)
     ext_roof_cond            = convert_arg_to_f(variable: ext_roof_cond, default: nil)
@@ -512,7 +527,7 @@ class NECB2011 < Standard
     glass_door_solar_trans   = convert_arg_to_f(variable: glass_door_solar_trans, default: nil)
     fdwr_set                 = convert_arg_to_f(variable: fdwr_set, default: -1)
     srr_set                  = convert_arg_to_f(variable: srr_set, default: -1)
-    srr_opt                  = convert_arg_to_string(variable: srr_opt, default: '')
+    srr_opt                  = convert_arg_to_string(variable: srr_opt, default: 'osut')
     construction_opt         = convert_arg_to_string(variable: construction_opt, default: 'structure')
     tbd_option               = convert_arg_to_string(variable: tbd_option, default: 'none')
     tbd_interpolate          = convert_arg_to_bool(variable: tbd_interpolate, default: true)
@@ -521,6 +536,11 @@ class NECB2011 < Standard
     boiler_cap_ratio         = convert_arg_to_string(variable: boiler_cap_ratio, default: nil)
     swh_fuel                 = convert_arg_to_string(variable: swh_fuel, default: nil)
     airloop_fancoils_heating = convert_arg_to_bool(variable: airloop_fancoils_heating, default: false)
+    # oerd_utility_pricing   = convert_arg_to_bool(variable: oerd_utility_pricing, default: false)
+    #
+    # if oerd_utility_pricing
+    #   output_meters = check_output_meters(output_meters: output_meters)
+    # end
 
     massive = construction_opt == 'structure'
 
@@ -531,19 +551,14 @@ class NECB2011 < Standard
                                                                                                                                  hvac_system_corridor: hvac_system_corridor,
                                                                                                                                  hvac_system_storage: hvac_system_storage,
                                                                                                                                  hvac_system_washrooms: hvac_system_washrooms)
-    oerd_utility_pricing = convert_arg_to_bool(variable: oerd_utility_pricing, default: false)
 
     boiler_cap_ratios = set_boiler_cap_ratios(boiler_cap_ratio: boiler_cap_ratio, boiler_fuel: boiler_fuel) unless boiler_cap_ratio.nil? && boiler_fuel.nil?
     self.fuel_type_set.set_boiler_fuel(standards_data: @standards_data, boiler_fuel: boiler_fuel, boiler_cap_ratios: boiler_cap_ratios) unless boiler_fuel.nil?
     self.fuel_type_set.set_swh_fuel(swh_fuel: swh_fuel) unless swh_fuel.nil? || swh_fuel.to_s.downcase == 'defaultfuel'
     self.fuel_type_set.set_airloop_fancoils_heating() if airloop_fancoils_heating
 
-    # Ensure the volume calculation in all spaces is done automatically
-    model.getSpaces.sort.each do |space|
-      space.autocalculateVolume
-    end
-
-    output_meters = check_output_meters(output_meters: output_meters) if oerd_utility_pricing
+    # Ensure the volume calculation in all spaces is done automatically.
+    model.getSpaces.sort.each { |space| space.autocalculateVolume }
 
     assign_building_activity(model: model, option: construction_opt)
     assign_building_structure(model: model, activity: @activity, massive: massive)
@@ -573,7 +588,7 @@ class NECB2011 < Standard
                    skylight_solar_trans: skylight_solar_trans,
                    infiltration_scale: infiltration_scale,
                    necb_hdd: necb_hdd)
-    model_create_thermal_zones(model, @space_multiplier_map)
+    model_create_thermal_zones(model)
     apply_fdwr_srr_daylighting(model: model,
                                fdwr_set: fdwr_set,
                                srr_set: srr_set,
@@ -629,12 +644,32 @@ class NECB2011 < Standard
     return model
   end
 
-  # This method cleans the model of any existing HVAC systems and applies any desired ratation or scaling to the model.
-  def clean_and_scale_model(model:, rotation_degrees: nil, scale_x: nil, scale_y: nil, scale_z: nil, footprint_aspect_ratio: nil)
-    # clean model..
+  ##
+  # Purges model of most objects, e.g. HVAC systems. Rotates or scales model.
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  # @param rotation_degrees [Float] desired rotation
+  # @param scale_x [Float] X-axis scaling factor
+  # @param scale_y [Float] Y-axis scaling factor
+  # @param scale_z [Float] Z-axis scaling factor
+  # @param footprint_aspect_ratio [Float] footprint aspect ratio
+  #
+  # @return [OpenStudio::Model::Model] pruned model (nil if fail)
+  def clean_and_scale_model(model: nil,
+                            rotation_degrees: nil,
+                            scale_x: nil,
+                            scale_y: nil,
+                            scale_z: nil,
+                            footprint_aspect_ratio: nil)
+
+    return nil unless model.is_a?(OpenStudio::Model::Model)
+
+    # Purge unused spacetypes.
+    model.getSpaceTypes.select { |type| type.spaces.empty? }.each(&:remove)
+
     BTAP::Resources::Envelope::remove_all_envelope_information(model)
     model = OpenstudioStandards::HVAC.remove_all_hvac(model)
-    model.getThermalZones.sort.each { |zone| zone.setUseIdealAirLoads(true) }
+
     model.getZoneHVACPackagedTerminalAirConditioners.each(&:remove)
     model.getCoilCoolingDXSingleSpeeds.each(&:remove)
     model.getZoneHVACBaseboardConvectiveWaters.each(&:remove)
@@ -650,22 +685,32 @@ class NECB2011 < Standard
     model.getBoilerSteams.each(&:remove)
     model.getPlantLoops.each(&:remove)
     model.getSchedules.each(&:remove)
-    model.getThermalZones.sort.each { |zone| zone.thermostat(&:remove) }
-    model.getSpaces.sort.each { |space| space.designSpecificationOutdoorAir(&:remove) }
+    model.getSpaces.each { |s| s.designSpecificationOutdoorAir(&:remove) }
+    model.getThermalZones.each { |z| z.setUseIdealAirLoads(true) }
+    model.getThermalZones.each { |z| z.thermostat(&:remove) }
     model.getThermostatSetpointDualSetpoints.each(&:remove)
 
-    # Rotate to model if requested
-    rotation_degrees = convert_arg_to_f(variable: rotation_degrees, default: 0.0)
-    BTAP::Geometry.rotate_building(model: model, degrees: rotation_degrees) unless rotation_degrees == 0.0
+    # Validate rotation/scale inputs.
+    rotation = convert_arg_to_f(variable: rotation_degrees, default: 0.0)
+    scale_x  = convert_arg_to_f(variable: scale_x, default: 1.0)
+    scale_y  = convert_arg_to_f(variable: scale_y, default: 1.0)
+    scale_z  = convert_arg_to_f(variable: scale_z, default: 1.0)
+    ratio    = convert_arg_to_f(variable: footprint_aspect_ratio, default: nil)
 
-    # Scale model if requested
-    scale_x = convert_arg_to_f(variable: scale_x, default: 1.0)
-    scale_y = convert_arg_to_f(variable: scale_y, default: 1.0)
-    scale_z = convert_arg_to_f(variable: scale_z, default: 1.0)
-    BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z) if scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
+    # Rotate model if requested.
+    unless rotation.round(1) == 0.0
+      BTAP::Geometry.rotate_building(model: model, degrees: rotation)
+    end
 
-    footprint_aspect_ratio = convert_arg_to_f(variable: footprint_aspect_ratio, default: nil)
-    BTAP::Geometry.set_footprint_aspect_ratio(model, footprint_aspect_ratio) unless footprint_aspect_ratio.nil?
+    # Scale model if requested.
+    if scale_x != 1.0 || scale_y != 1.0 || scale_z != 1.0
+      BTAP::Geometry.scale_model(model, scale_x, scale_y, scale_z)
+    end
+
+    # Adjust footprint aspect ratio.
+    BTAP::Geometry.set_footprint_aspect_ratio(model, ratio) unless ratio.nil?
+
+    model
   end
 
   def apply_systems_and_efficiencies(model:,
@@ -803,13 +848,17 @@ class NECB2011 < Standard
                   murb_oa: "",
                   ventless: false,
                   oa_scale: nil)
+
     # Create ECM object.
     ecm = ECMS.new
     lights_scale = convert_arg_to_f(variable: lights_scale, default: 1.0)
+
+    # Validate model; populate Standard attributes e.g. space_multiplier_map.
     if validate
       raise('validation of model failed.') unless validate_initial_model(model)
       raise('validation of spacetypes failed.') unless validate_and_upate_space_types(model)
     end
+
     # this sets/stores the template version loads that the model uses.
     model.getBuilding.setStandardsTemplate(self.class.name)
     set_occ_sensor_spacetypes(model, @space_type_map)
@@ -840,8 +889,31 @@ class NECB2011 < Standard
     OpenstudioStandards::Weather.model_set_building_location(model, weather_file_path: weather_file_path)
   end
 
-  def apply_envelope(model:,
-                     construction_opt: '',
+  ##
+  # Applies envelope-related properties.
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  # @param construction_opt [String] construction option, e.g. 'structure'
+  # @param ext_wall_cond [Float] exterior wall U-factor
+  # @param ext_floor_cond [Float] exterior floor U-factor
+  # @param ext_roof_cond [Float] exterior roof U-factor
+  # @param ground_wall_cond [Float] ground wall U-factor
+  # @param ground_floor_cond [Float] ground floor U-factor
+  # @param ground_roof_cond [Float] ground roof U-factor
+  # @param door_construction_cond [Float] exterior door U-factor
+  # @param fixed_window_cond [Float] exterior fixed window U-factor
+  # @param glass_door_cond [Float] exterior glass door U-factor
+  # @param overhead_door_cond [Float] exterior overhead door U-factor
+  # @param skylight_cond [Float] exterior skylight U-factor
+  # @param glass_door_solar_trans [Float] exterior glass door SHGC
+  # @param fixed_wind_solar_trans [Float] exterior fixed window SHGC
+  # @param skylight_solar_trans [Float] exterior skylight SHGC
+  # @param infiltration_scale [Float] infiltration scale
+  # @param necb_hdd [Bool] whether to rely on NECB HDD parameters
+  #
+  # @return [Boolean] true if successful
+  def apply_envelope(model: nil,
+                     construction_opt: 'structure',
                      ext_wall_cond: nil,
                      ext_floor_cond: nil,
                      ext_roof_cond: nil,
@@ -858,7 +930,8 @@ class NECB2011 < Standard
                      skylight_solar_trans: nil,
                      infiltration_scale: nil,
                      necb_hdd: true)
-    raise('validation of model failed.') unless validate_initial_model(model)
+
+    return false unless model.is_a?(OpenStudio::Model::Model)
 
     model_apply_infiltration_standard(model)
     ecm = ECMS.new
@@ -979,6 +1052,8 @@ class NECB2011 < Standard
                                              skylight_solar_trans: skylight_solar_trans,
                                              necb_hdd: necb_hdd)
     end
+
+    true
   end
 
   ##
@@ -1431,7 +1506,7 @@ class NECB2011 < Standard
   #
   # By default, :srr_opt is an empty string (" "). If set to "osut", SRR is
   # instead met using OSut's 'addSkylights' (:srr_set numeric values may apply).
-  def apply_fdwr_srr_daylighting(model:, fdwr_set: -1.0, srr_set: -1.0, necb_hdd: true, srr_opt: '')
+  def apply_fdwr_srr_daylighting(model:, fdwr_set: -1.0, srr_set: -1.0, necb_hdd: true, srr_opt: 'osut')
     fdwr_set = -1.0 if (fdwr_set == 'NECB_default') || fdwr_set.nil?
     srr_set = -1.0 if (srr_set == 'NECB_default') || srr_set.nil?
     fdwr_set = fdwr_set.to_f
@@ -1447,7 +1522,7 @@ class NECB2011 < Standard
   # @param option ["", "structure"] construction option
   #
   # @return [BTAP::Activity] a BTAP building ACTIVITY (see logs if failed)
-  def assign_building_activity(model: nil, option: "")
+  def assign_building_activity(model: nil, option: "structure")
     @activity = BTAP::Activity.new(model, option)
   end
 
@@ -3143,7 +3218,7 @@ class NECB2011 < Standard
   # model (OpenStudio::Model::Model): The model to run the sizing run on.
   # sizing_run_dir (String): The directory where the sizing run files will be saved.
   def try_sizing_run(model:, sizing_run_dir:, sizing_run_subdir:, retry: 0)
-    raise('validation of model failed.') unless validate_initial_model(model)
+    # raise('validation of model failed.') unless validate_initial_model(model)
 
     # Do a sizing run to determine the system capacities.  If a sizing run fails, hard size any failing DX heating coils
     # to 1.0 kW and rerun the sizing run until it succeeds.  If no DX heating coils are found, or none had a small

@@ -437,7 +437,7 @@ module BTAP
     #
     # @param model [OpenStudio::Model::Model] a model
     # @param option ["", "structure"] construction option
-    def initialize(model = nil, option = "")
+    def initialize(model = nil, option = "structure")
       mth         = "BTAP::Activity::#{__callee__}"
       @feedback   = {logs: []}
       lgs         = @feedback[:logs]

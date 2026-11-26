@@ -1,45 +1,66 @@
 class NECB2011
-  # Creates thermal zones to contain each space, as defined for each building in the
-  # system_to_space_map inside the Prototype.building_name
+  ##
+  # Creates thermal zones to contain each space, as defined for each building
+  # in the system_to_space_map inside the Prototype.building_name
   # e.g. (Prototype.secondary_school.rb) file.
   #
-  # @param (see #add_constructions)
-  # @return [Boolean] returns true if successful, false if not
-  def model_create_thermal_zones(model, space_multiplier_map = nil)
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Started creating thermal zones')
-    space_multiplier_map = {} if space_multiplier_map.nil?
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Boolean] returns true if successful
+  def model_create_thermal_zones(model)
+    mdl = 'openstudio.model.Model'
+    OpenStudio.logFree(OpenStudio::Info, mdl, 'Started creating thermal zones')
 
-    # Remove any Thermal zones assigned
+    # All archived prototype models hold thermal zones, which are eventually
+    # pruned away (a few lines below). Standard's @space_multiplier_map Hash
+    # tracks any thermal zones multipliers before removal. It is populated when
+    # necb_2011.rb's 'apply_loads' calls Standards.Model.rb's
+    # 'validate_initial_model'.
+    @space_multiplier_map = {}     if @space_multiplier_map.nil?
+    @space_multiplier_map = {} unless @space_multiplier_map.is_a?(Hash)
+
+    # Remove all thermal zones.
     model.getThermalZones.each(&:remove)
 
-    # Create a thermal zone for each space in the self
+    # Create a thermal zone for each space.
     model.getSpaces.sort.each do |space|
+      id   = space.nameString
+      zID  = id + " ZN"
+      type = space.spaceType
       zone = OpenStudio::Model::ThermalZone.new(model)
-      zone.setName("#{space.name} ZN")
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      zone.setName(zID)
+
+      if @space_multiplier_map.key?(id)
+        zone.setMultiplier(@space_multiplier_map[id])
       end
+
       space.setThermalZone(zone)
 
-      # Skip thermostat for spaces with no space type
-      next if space.spaceType.empty?
+      # Skip thermostat for spaces without spacetype.
+      next if type.empty?
 
-      # Add a thermostat
-      space_type_name = space.spaceType.get.name.get
-      thermostat_name = space_type_name + ' Thermostat'
-      thermostat = model.getThermostatSetpointDualSetpointByName(thermostat_name)
+      # Add a thermostat.
+      type = type.get
+      tyID = type.nameString
+      thID = tyID + " Thermostat"
+      thermostat = model.getThermostatSetpointDualSetpointByName(thID)
+
       if thermostat.empty?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Thermostat #{thermostat_name} not found for space name: #{space.name}")
+        emsg = "Thermostat #{thID} not found for #{id}"
+        OpenStudio.logFree(OpenStudio::Error, mdl, emsg)
       else
-        thermostat_clone = thermostat.get.clone(model).to_ThermostatSetpointDualSetpoint.get
-        zone.setThermostatSetpointDualSetpoint(thermostat_clone)
-        # Set Ideal loads to thermal zone for sizing for NECB needs. We need this for sizing.
+        tstat = thermostat.get.clone(model)
+        tstat = tstat.to_ThermostatSetpointDualSetpoint.get
+        tstat.setName(zID + " Thermostat")
+        zone.setThermostatSetpointDualSetpoint(tstat)
+
+        # Ideal loads for NECB sizing needs.
         ideal_loads = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
         ideal_loads.addToThermalZone(zone)
       end
     end
 
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished creating thermal zones')
+    OpenStudio.logFree(OpenStudio::Info, mdl, 'Finished creating thermal zones')
   end
 
   # Top level method that merges spaces into zones where possible. This requires a sizing run. This follows the spirit of
@@ -52,11 +73,12 @@ class NECB2011
   # building.
 
   def apply_auto_zoning(model:, sizing_run_dir: Dir.pwd, lights_type: 'NECB_Default', lights_scale: 1.0)
-    raise('validation of model failed.') unless validate_initial_model(model)
+    # raise('validation of model failed.') unless validate_initial_model(model)
 
     # Check to see if model is using another vintage of spacetypes. If so overwrite the @standards for the object with the
     # other spacetype data. This is required for correct system mapping.
     template = determine_spacetype_vintage(model)
+
     unless template == self.class.name
       # Frankenstein the standards data wrt spacetype data.
       @standards_data['space_types'] = Standard.build(template).standards_data['space_types']
@@ -69,7 +91,7 @@ class NECB2011
     # Remove any Thermal zones assigned before
     model.getThermalZones.each(&:remove)
     # create new thermal zones one to one with spaces.
-    model_create_thermal_zones(model, space_multiplier_map)
+    model_create_thermal_zones(model)
     # do a sizing run.
     try_sizing_run(model: model, sizing_run_dir: sizing_run_dir, sizing_run_subdir: 'autozone')
 
@@ -89,9 +111,23 @@ class NECB2011
     model.getSpaceTypes.sort.each { |item| item.setRenderingColor(set_random_rendering_color(item, random)) }
   end
 
-  # Organizes Zones and assigns them to appropriate systems according to NECB 2011-17 systems spacetype rules in Sec 8.
-  # requires requires fuel type to be assigned for each system aspect. Defaults to gas hydronic.
-  def apply_systems(model:,
+  ##
+  # Organizes zones and assigns them to appropriate systems according to NECB
+  # 2011-17 Part 8 ruleset. Requires fuel type to be assigned for each system.
+  # Defaults to gas hydronic.
+  #
+  # @param [OpenStudio::Model::Model] a model
+  # @param [@todo] HVAC system primary
+  # @param [@todo] HVAC system dwelling units
+  # @param [@todo] hvac system washrooms
+  # @param [@todo] hvac system corridor
+  # @param [@todo] hvac system storage
+  # @param [@todo] sizing run directory
+  # @param [@todo] SHW scale
+  # @param [@todo] baseline system zones map option
+  #
+  # @return [Boolean] true if successful
+  def apply_systems(model: nil,
                     hvac_system_primary:,
                     hvac_system_dwelling_units:,
                     hvac_system_washrooms:,
@@ -100,32 +136,37 @@ class NECB2011
                     sizing_run_dir:,
                     shw_scale:,
                     baseline_system_zones_map_option:)
-    raise('validation of model failed.') unless validate_initial_model(model)
 
-    # Initialize fuel_type_set if not already set
+    return false unless model.is_a?(OpenStudio::Model::Model)
+
+    # Initialize fuel_type_set if not already set.
     if self.fuel_type_set.nil?
       self.fuel_type_set = SystemFuels.new()
       self.fuel_type_set.set_defaults(standards_data: @standards_data, primary_heating_fuel: 'NaturalGas')
     end
 
-    # Store fuel type information in case hvac_system_primary requires a reset
+    # Store fuel type information in case hvac_system_primary requires a reset.
     init_fuel_type = get_fuel_type_information()
-    # Check to see if model is using another vintage of spacetypes. If so overwrite the @standards for the object with the
-    # other spacetype data. This is required for correct system mapping.
+
+    # Check to see if model is using another vintage of spacetypes. If so,
+    # overwrite the @standards for the object with the other spacetype data.
+    # This is required for correct system mapping.
     template = determine_spacetype_vintage(model)
+
     unless template == self.class.name
       # Frankenstein the standards data wrt spacetype data.
       @standards_data['space_types'] = Standard.build(template).standards_data['space_types']
     end
 
-    # do a sizing run.
+    # Do a sizing run.
     try_sizing_run(model: model, sizing_run_dir: sizing_run_dir, sizing_run_subdir: 'autozone_systems')
 
-    # collect sizing information on each space.
+    # Collect sizing information on each space.
     store_space_sizing_loads(model)
 
-    # remove idealair from zones if any.
+    # Remove idealair from zones if any.
     model.getZoneHVACIdealLoadsAirSystems.each(&:remove)
+
     @hw_loop = create_hw_loop_if_required(baseboard_type: self.fuel_type_set.baseboard_type,
                                           boiler_fueltype: self.fuel_type_set.boiler_fueltype,
                                           backup_boiler_fueltype: self.fuel_type_set.backup_boiler_fueltype,
@@ -141,8 +182,10 @@ class NECB2011
                                           hvac_system_corridor: hvac_system_corridor,
                                           hvac_system_storage: hvac_system_storage
                                           )
-    # Determine if dwelling units, wet spaces, storage spaces, and wild spaces should have their own space or be part of common spaces
+    # Determine if dwelling units, wet spaces, storage spaces, and wild spaces
+    # should have their own space or be part of common spaces.
     common_system_spaces = spaces_to_add_to_common_system(model: model, hvac_system_dwelling_units: hvac_system_dwelling_units, hvac_system_washrooms: hvac_system_washrooms, hvac_system_corridor: hvac_system_corridor, hvac_system_storage: hvac_system_storage)
+
     # Rule that all dwelling units have their own zone and system.
     auto_system_dwelling_units(model: model,
                                hvac_system_dwelling_units: hvac_system_dwelling_units,
@@ -162,7 +205,8 @@ class NECB2011
                                baseline_system_zones_map_option: baseline_system_zones_map_option,
                                init_fuel_type: init_fuel_type)
 
-    # Assign a single system 4 for all wet spaces.. and assign the control zone to the one with the largest load.
+    # Assign a single system 4 for all wet spaces. and assign the control zone
+    # to the one with the largest load.
     auto_system_wet_spaces(hvac_system_washrooms: hvac_system_washrooms,
                            baseboard_type: self.fuel_type_set.baseboard_type,
                            necb_reference_hp: self.fuel_type_set.necb_reference_hp,
@@ -172,7 +216,8 @@ class NECB2011
                            model: model,
                            init_fuel_type: init_fuel_type)
 
-    # Assign a single system 4 for all storage spaces.. and assign the control zone to the one with the largest load.
+    # Assign a single system 4 for all storage spaces.. and assign the control
+    # zone to the one with the largest load.
     auto_system_storage_spaces(hvac_system_storage: hvac_system_storage,
                                baseboard_type: self.fuel_type_set.baseboard_type,
                                necb_reference_hp: self.fuel_type_set.necb_reference_hp,
@@ -182,7 +227,8 @@ class NECB2011
                                model: model,
                                init_fuel_type: init_fuel_type)
 
-    # Assign the wild spaces to a single system 4 system with a control zone with the largest load.
+    # Assign the wild spaces to a single system 4 system with a control zone
+    # with the largest load.
     auto_system_wild_spaces(hvac_system_corridor: hvac_system_corridor,
                             baseboard_type: self.fuel_type_set.baseboard_type,
                             necb_reference_hp: self.fuel_type_set.necb_reference_hp,
@@ -190,7 +236,8 @@ class NECB2011
                             heating_coil_type_sys4: self.fuel_type_set.heating_coil_type_sys4,
                             model: model,
                             init_fuel_type: init_fuel_type)
-    # do the regular assignment for the rest and group where possible.
+
+    # Do the regular assignment for the rest and group where possible.
     auto_system_all_other_spaces(model: model,
                                  hvac_system_primary: hvac_system_primary,
                                  necb_reference_hp: self.fuel_type_set.necb_reference_hp,
@@ -208,14 +255,16 @@ class NECB2011
                                  mau_heating_coil_type: self.fuel_type_set.mau_heating_coil_type,
                                  mau_type: self.fuel_type_set.mau_type,
                                  common_system_spaces: common_system_spaces,
-                                 init_fuel_type: init_fuel_type
-    )
-    model_add_swh(model: model,
-                  shw_scale: shw_scale)
+                                 init_fuel_type: init_fuel_type)
+
+    model_add_swh(model: model, shw_scale: shw_scale)
     model_apply_sizing_parameters(model)
-    # set a larger tolerance for unmet hours from default 0.2 to 1.0C
+
+    # Set a larger tolerance for unmet hours from default 0.2 to 1.0C
     model.getOutputControlReportingTolerances.setToleranceforTimeHeatingSetpointNotMet(1.0)
     model.getOutputControlReportingTolerances.setToleranceforTimeCoolingSetpointNotMet(1.0)
+
+    true
   end
 
   # Method to store space sizing loads. This is needed because later when the zones are destroyed this information will be lost.
@@ -291,54 +340,55 @@ class NECB2011
   end
 
   ##
-  # Returns collection of dwelling unit thermal zones, once initialized
+  # Returns collection of dwelling unit thermal zones, once initialized.
   #
   # @author btap (original author?)
   # @author denis@rd2.ca (2026 edits)
   #
   # @param model [OpenStudio::Model::Model] a model
   #
-  # @return [Array] collection of dwelling unit thermal zones
+  # @return [Array] collection of (initialized) dwelling unit thermal zones
   def auto_zone_dwelling_units(model)
+    return [] unless model.is_a?(OpenStudio::Model::Model)
+
     zones = []
-    units = model.getSpaces.select { |space| @activity.act(space) == "units" }
+    units = model.getSpaces.select { |s| @activity.act(s).downcase == "units" }
 
-    # DEPRECATED COMMENTARY.
-    # Dwelling unit spaces need to have their own HVAC system. Thankfully NECB
-    # defines what spacetypes are considering dwelling units and have been
-    # defined as spaces that are:
-    #   openstudio-standards/standards/necb/NECB2011/data/necb_hvac_system_selection_type.json
-    # Thermostat is set by the space-type schedule.
+    units.each do |u|
+      id    = u.nameString
+      story = u.buildingStory
+      type  = u.spaceType
+      next if type.empty?
 
-    units.each do |unit|
-      id   = unit.nameString
-      bTy  = unit.spaceType.get.standardsBuildingType.get
-      sTy  = unit.spaceType.get.standardsSpaceType.get
-      bID  = unit.buildingStory.get.name
-      sch  = @activity.schedule(unit).upcase
-      # sch  = determine_dominant_schedule(unit)
+      type = type.get
+      tyID = type.nameString
+      bTy  = type.standardsBuildingType
+      sTy  = type.standardsSpaceType
+      bTy  = bTy.empty? ? "" : bTy.get
+      sTy  = sTy.empty? ? "" : sTy.get
+      bID  = story.empty? ? "" : story.get.nameString
+      sch  = @activity.schedule(u).upcase
       zone = OpenStudio::Model::ThermalZone.new(model)
       zone.setName("DU_BT=#{bTy}_ST=#{sTy}_FL=#{bID}_SCH#{sch}")
 
-      unless space_multiplier_map[id].nil? || (space_multiplier_map[id] == 1)
-        zone.setMultiplier(space_multiplier_map[id])
+      if @space_multiplier_map.key?(id)
+        zone.setMultiplier(@space_multiplier_map[id])
       end
 
-      unit.setThermalZone(zone)
+      u.setThermalZone(zone)
 
-      # Add a thermostat based on the space type.
-      stID = unit.spaceType.get.nameString
-      tID  = stID + ' Thermostat'
+      # Add a thermostat based on spacetype.
+      tID = tyID + ' Thermostat'
       thermostat = model.getThermostatSetpointDualSetpointByName(tID)
 
       # Thermostat ID for the spacetype should exist.
       if thermostat.empty?
         emsg = "Space '#{id}' thermostat #{tID} not found."
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', emsg)
+        OpenStudio.logFree(OpenStudio::Error, mdl, emsg)
       else
         tstat = thermostat.get.clone(model)
         tstat = tstat.to_ThermostatSetpointDualSetpoint.get
-        tstat.setName(id + ' Thermostat')
+        tstat.setName(id + " Thermostat")
         zone.setThermostatSetpointDualSetpoint(tstat)
 
         # Ideal Loads Air System for sizing, per NECB requirements.
@@ -371,14 +421,15 @@ class NECB2011
       space.setThermalZone(zone)
       tz_name = "WET_ST=#{space.spaceType.get.standardsSpaceType.get}_FL=#{space.buildingStory.get.name}_SCH#{dominant_schedule}"
       zone.setName(tz_name)
+
       # Set multiplier from the original tz multiplier.
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      unless @space_multiplier_map[space.name.to_s].nil? || (@space_multiplier_map[space.name.to_s] == 1)
+        zone.setMultiplier(@space_multiplier_map[space.name.to_s])
       end
 
       # this method will determine if the right schedule was used for this wet & wild space if not.. it will reset the space
       # to use the correct schedule version of the wet and wild space type.
-      adjust_wildcard_spacetype_schedule(space: space, schedule: dominant_schedule, lights_type: lights_type, lights_scale: lights_scale)
+      # adjust_wildcard_spacetype_schedule(space: space, schedule: dominant_schedule, lights_type: lights_type, lights_scale: lights_scale)
 
       # Find spacetype thermostat and assign it to the zone.
       thermostat_name = space.spaceType.get.name.get + ' Thermostat'
@@ -398,12 +449,23 @@ class NECB2011
     return wet_zone_array
   end
 
-  # This method will find all the spaces that are not wet, wild or dwelling units and zone them. It will try to determine
-  # if the spaces are similar based on exposure and load and blend those spaces into the same zone.  It will not merge spaces
-  # from different floors, since this will impact Chris Kirneys costing algorithms.
+  ##
+  # Returns collection of spaces that aren't 'wet', 'wild' or considered
+  # dwelling units. The method 'zones' such spaces if needed.
+  #
+  # @author btap (original author?)
+  # @author denis@rd2.ca (2026 edits)
+  #
+  # @param model [OpenStudio::Model::Model] a model
+  #
+  # @return [Array] a collection of 'other' zones
   def auto_zone_all_other_spaces(model)
-    other_tz_array = []
-    # iterate through all non wildcard spaces.
+    others = []
+    return others unless model.is_a?(OpenStudio::Model::Model)
+
+    # Iterate through all non wildcard spaces.
+    spaces = model.getSpaces
+
     model.getSpaces.select { |space| !is_a_necb_dwelling_unit?(space) && !is_an_necb_wildcard_space?(space) }.each do |space|
       # skip if already assigned to a thermal zone.
       next unless space.thermalZone.empty?
@@ -412,9 +474,10 @@ class NECB2011
       zone = OpenStudio::Model::ThermalZone.new(model)
       tz_name = "ALL_ST=#{space.spaceType.get.standardsSpaceType.get}_FL=#{space.buildingStory.get.name}_SCH=#{determine_dominant_schedule([space])}"
       zone.setName(tz_name)
+
       # sets space mulitplier unless it is nil or 1.
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      unless @space_multiplier_map[space.name.to_s].nil? || (@space_multiplier_map[space.name.to_s] == 1)
+        zone.setMultiplier(@space_multiplier_map[space.name.to_s])
       end
       # Assign space to the new zone.
       space.setThermalZone(zone)
@@ -433,9 +496,10 @@ class NECB2011
         ideal_loads = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
         ideal_loads.addToThermalZone(zone)
       end
-      other_tz_array << zone
+      others << zone
     end
-    return other_tz_array
+
+    return others
   end
 
   # This will take all the wildcard spaces and merge them to be supported by a system 4. The control zone will be the
@@ -451,20 +515,21 @@ class NECB2011
       zone = OpenStudio::Model::ThermalZone.new(model)
       tz_name = "WILD_ST=#{space.spaceType.get.standardsSpaceType.get}_FL=#{space.buildingStory.get.name}_SCH=#{determine_dominant_schedule(space.model.getSpaces)}"
       zone.setName(tz_name)
+
       # sets space mulitplier unless it is nil or 1.
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      unless @space_multiplier_map[space.name.to_s].nil? || (@space_multiplier_map[space.name.to_s] == 1)
+        zone.setMultiplier(@space_multiplier_map[space.name.to_s])
       end
       # Assign space to the new zone.
       space.setThermalZone(zone)
 
       # lets keep the wild schedules to be the same as what dominate the floor.
-      dominant_floor_schedule = determine_dominant_schedule(space.model.getSpaces)
+      # dominant_floor_schedule = determine_dominant_schedule(space.model.getSpaces)
 
-      adjust_wildcard_spacetype_schedule(space: space,
-                                         schedule: dominant_floor_schedule,
-                                         lights_type: lights_type,
-                                         lights_scale: lights_scale)
+      # adjust_wildcard_spacetype_schedule(space: space,
+      #                                    schedule: dominant_floor_schedule,
+      #                                    lights_type: lights_type,
+      #                                    lights_scale: lights_scale)
 
       # Add a thermostat
       space_type_name = space.spaceType.get.name.get
@@ -500,7 +565,7 @@ class NECB2011
         is_an_necb_wildcard_space?(adj_space) &&
           !is_an_necb_wet_space?(adj_space) &&
           adj_space.thermalZone.empty? &&
-          (space_multiplier_map[space.name.to_s] == space_multiplier_map[adj_space.name.to_s])
+          (@space_multiplier_map[space.name.to_s] == @space_multiplier_map[adj_space.name.to_s])
       end
       # put them all together.
       wild_adjacent_spaces << space
@@ -510,7 +575,7 @@ class NECB2011
       other_adjacent_spaces = adj_spaces.select do |adj_space|
         (is_an_necb_wildcard_space?(adj_space) == false) &&
           (adj_space.thermalZone.get.spaces.size == 1) &&
-          (space_multiplier_map[space.name.to_s] == space_multiplier_map[adj_space.name.to_s])
+          (@space_multiplier_map[space.name.to_s] == @space_multiplier_map[adj_space.name.to_s])
       end
 
       # If there are adjacent spaces that fit the above criteria.
@@ -521,7 +586,7 @@ class NECB2011
         schedule_type = determine_dominant_schedule(space.buildingStory.get.spaces)
         zone = other_adjacent_spaces.first.thermalZone.get
         wild_adjacent_spaces.each do |curr_space|
-          adjust_wildcard_spacetype_schedule(curr_space, schedule_type, @lights_type, @lights_scale, @space_height)
+          # adjust_wildcard_spacetype_schedule(curr_space, schedule_type, @lights_type, @lights_scale, @space_height)
           curr_space.setThermalZone(zone)
         end
       end
@@ -531,16 +596,16 @@ class NECB2011
       space.setThermalZone(zone)
       zone.setName("Wild-ZN:BT=#{space.spaceType.get.standardsBuildingType.get}:ST=#{space.spaceType.get.standardsSpaceType.get}:FL=#{space.buildingStory.get.name}:")
       # Set multiplier from the original tz multiplier.
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
+      unless @space_multiplier_map[space.name.to_s].nil? || (@space_multiplier_map[space.name.to_s] == 1)
+        zone.setMultiplier(@space_multiplier_map[space.name.to_s])
       end
 
       # Set space to dominant
 
-      dominant_floor_schedule = determine_dominant_schedule(space.buildingStory.get.spaces)
+      # dominant_floor_schedule = determine_dominant_schedule(space.buildingStory.get.spaces)
       # this method will determine if the right schedule was used for this wet & wild space if not.. it will reset the space
       # to use the correct schedule version of the wet and wild space type.
-      adjust_wildcard_spacetype_schedule(space: space, schedule: dominant_floor_schedule, lights_type: @lights_type, lights_scale: @lights_scale)
+      # adjust_wildcard_spacetype_schedule(space: space, schedule: dominant_floor_schedule, lights_type: @lights_type, lights_scale: @lights_scale)
       # Find spacetype thermostat and assign it to the zone.
       thermostat_name = space.spaceType.get.name.get + ' Thermostat'
       thermostat = model.getThermostatSetpointDualSetpointByName(thermostat_name)
@@ -766,46 +831,50 @@ class NECB2011
   end
 
   # Set wildcard spactype schedule to NECB letter index.
-  def adjust_wildcard_spacetype_schedule(space:, schedule:, lights_type: 'NECB_Default', lights_scale: 1.0)
-    if space.spaceType.empty?
-      OpenStudio.logFree(OpenStudio::Error, "Error: No spacetype assigned for #{space.name.get}. This must be assigned. Aborting.")
-    end
-    # Get current spacetype name
-    space_type_name = space.spaceType.get.standardsSpaceType.get.to_s
-    # Determine new spacetype name.
-    regex = /^(.*sch-)(\S)$/
-    new_spacetype_name = "#{space_type_name.match(regex).captures.first}#{schedule}"
-    new_spacetype = nil
+  # def adjust_wildcard_spacetype_schedule(space:, schedule:, lights_type: 'NECB_Default', lights_scale: 1.0)
+  #   if space.spaceType.empty?
+  #     OpenStudio.logFree(OpenStudio::Error, "Error: No spacetype assigned for #{space.name.get}. This must be assigned. Aborting.")
+  #   end
+  #   # Get current spacetype name
+  #   space_type_name = space.spaceType.get.standardsSpaceType.get.to_s
+  #   # Determine new spacetype name.
+  #   regex = /^(.*sch-)(\S)$/
+  #   new_spacetype_name = "#{space_type_name.match(regex).captures.first}#{schedule}"
+  #   new_spacetype = nil
+  #
+  #   # if the new spacetype does not match the old space type. we gotta update the space with the new spacetype.
+  #   if space_type_name != new_spacetype_name
+  #     new_spacetype = space.model.getSpaceTypes.detect do |spacetype|
+  #       !spacetype.standardsBuildingType.empty? && # need to do this to prevent an exception.
+  #         (spacetype.standardsBuildingType.get == space.spaceType.get.standardsBuildingType.get) &&
+  #         !spacetype.standardsSpaceType.empty? && # need to do this to prevent an exception.
+  #         (spacetype.standardsSpaceType.get == new_spacetype_name)
+  #     end
+  #     if new_spacetype.nil?
+  #       # Space type is not in model. need to create from scratch.
+  #       new_spacetype = OpenStudio::Model::SpaceType.new(space.model)
+  #       new_spacetype.setStandardsBuildingType(space.spaceType.get.standardsBuildingType.get)
+  #       new_spacetype.setStandardsSpaceType(new_spacetype_name)
+  #       new_spacetype.setName("#{space.spaceType.get.standardsBuildingType.get} #{new_spacetype_name}")
+  #       space_type_apply_internal_loads(space_type: new_spacetype, lights_type: lights_type, lights_scale: lights_scale)
+  #       space_type_apply_internal_load_schedules(new_spacetype)
+  #       space_type_apply_thermostat_schedules(new_spacetype)
+  #     end
+  #     space.setSpaceType(new_spacetype)
+  #     # sanity check.
+  #     raise 'could not reassign space type schedule.' if schedule != space.spaceType.get.name.get.match(regex)[2]
+  #   end
+  #   return space
+  # end
 
-    # if the new spacetype does not match the old space type. we gotta update the space with the new spacetype.
-    if space_type_name != new_spacetype_name
-      new_spacetype = space.model.getSpaceTypes.detect do |spacetype|
-        !spacetype.standardsBuildingType.empty? && # need to do this to prevent an exception.
-          (spacetype.standardsBuildingType.get == space.spaceType.get.standardsBuildingType.get) &&
-          !spacetype.standardsSpaceType.empty? && # need to do this to prevent an exception.
-          (spacetype.standardsSpaceType.get == new_spacetype_name)
-      end
-      if new_spacetype.nil?
-        # Space type is not in model. need to create from scratch.
-        new_spacetype = OpenStudio::Model::SpaceType.new(space.model)
-        new_spacetype.setStandardsBuildingType(space.spaceType.get.standardsBuildingType.get)
-        new_spacetype.setStandardsSpaceType(new_spacetype_name)
-        new_spacetype.setName("#{space.spaceType.get.standardsBuildingType.get} #{new_spacetype_name}")
-        space_type_apply_internal_loads(space_type: new_spacetype, lights_type: lights_type, lights_scale: lights_scale)
-        space_type_apply_internal_load_schedules(new_spacetype)
-        space_type_apply_thermostat_schedules(new_spacetype)
-      end
-      space.setSpaceType(new_spacetype)
-      # sanity check.
-      raise 'could not reassign space type schedule.' if schedule != space.spaceType.get.name.get.match(regex)[2]
-    end
-    return space
-  end
+  # def set_wildcard_schedules_to_dominant_building_schedule(model, runner = nil)
+  #   # Get rid of.
+  # end
 
-  def set_wildcard_schedules_to_dominant_building_schedule(model, runner = nil)
-    # Get rid of.
-  end
-
+  ##
+  # Returns
+  # @author btap (original author?)
+  # @author denis@rd2.ca (2026 edits)
   def determine_dominant_schedule(spaces)
     # lookup necb space type properties
     space_type_properties = @standards_data['space_types']
@@ -844,7 +913,9 @@ class NECB2011
     return schedule_hash.max_by(&:last).first
   end
 
-  # This model determines the dominant NECB schedule type
+  ##
+  # Returns the dominant NECB schedule type.
+  #
   # @param model [OpenStudio::Model::Model] A model object
   # return s.each [String]
   def determine_dominant_necb_schedule_type(model)
