@@ -588,7 +588,7 @@ class NECB2011 < Standard
                    skylight_solar_trans: skylight_solar_trans,
                    infiltration_scale: infiltration_scale,
                    necb_hdd: necb_hdd)
-    model_create_thermal_zones(model)
+    # model_create_thermal_zones(model)
     apply_fdwr_srr_daylighting(model: model,
                                fdwr_set: fdwr_set,
                                srr_set: srr_set,

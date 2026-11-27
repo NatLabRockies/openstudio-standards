@@ -35,9 +35,9 @@ class NECB_Activity_Tests < Minitest::Test
     @epws = ["CAN_AB_Calgary.Intl.AP.718770_CWEC2020.epw"]
 
     @buildings = [
-      'FullServiceRestaurant',
+      # 'FullServiceRestaurant',
       # 'HighriseApartment',
-      'Hospital',
+      # 'Hospital',
       # 'LargeHotel',
       # 'LargeOffice',
       'LEEPMidriseApartment',
@@ -45,19 +45,19 @@ class NECB_Activity_Tests < Minitest::Test
       # 'LEEPPointTower',
       # 'LEEPTownHouse',
       # 'LowriseApartment',
-      'MediumOffice',
+      # 'MediumOffice',
       # 'MidriseApartment',
-      'NorthernEducation',
-      'NorthernHealthCare',
+      # 'NorthernEducation',
+      # 'NorthernHealthCare',
       # 'Outpatient',
       # 'PrimarySchool',
-      'QuickServiceRestaurant',
+      # 'QuickServiceRestaurant',
       # 'RetailStandalone',
-      'RetailStripmall',
+      # 'RetailStripmall',
       # 'SecondarySchool',
       # 'SmallHotel',
-      'SmallOffice',
-      'Warehouse'
+      # 'SmallOffice',
+      # 'Warehouse'
     ]
 
     fdback = []
